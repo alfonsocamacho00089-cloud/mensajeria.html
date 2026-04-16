@@ -9,187 +9,117 @@
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-messaging-compat.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/protobufjs@7.2.4/dist/protobuf.min.js"></script>
 
-    
     <style>
-
-        /* --- VALORES ACTUALIZADOS --- */
-
-        body { font-family: sans-serif; background: #000000; color: white; margin: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
-
+        /* --- DISEÑO UNIFICADO DROPIS --- */
+        body { font-family: sans-serif; background: #000; color: white; margin: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
         
-
-        #chat-box { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 8px; box-sizing: border-box; }
-
-        
-
-        .msg-burbuja { max-width: 80%; padding: 10px 15px; border-radius: 18px; font-size: 14px; line-height: 1.4; position: relative; word-wrap: break-word; box-shadow: 0 1px 2px rgba(0,0,0,0.5); margin: 2px 0; }
-
-        
-
-        .msg-izquierda { background-color: #202c33; align-self: flex-start; border-bottom-left-radius: 2px; color: white; }
-
-        
-
-        .msg-derecha { background-color: #005c4b; align-self: flex-end; border-bottom-right-radius: 2px; color: white; }
-
-        
-
-        .input-area { background: #1a1a1a; padding: 15px; display: flex; gap: 10px; border-top: 1px solid #333; }
-
-        
-
-        input { flex: 1; padding: 12px; border-radius: 25px; border: none; outline: none; background: #2a2a2a; color: white; }
-
-        
-
-        button { background: #ffd700; border: none; padding: 10px 20px; border-radius: 20px; font-weight: bold; cursor: pointer; color: black; }
-
-        
-
         .header { background: #1a1a1a; padding: 15px; text-align: center; font-weight: bold; border-bottom: 2px solid #ffd700; }
-
-        
-
         #mi-id-display { font-size: 11px; color: #ffd700; margin-top: 5px; font-family: monospace; }
 
+        #chat-box { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 8px; }
 
+        /* Estilo del Bloque 2 para Mensajes Recibidos */
+        .msg-izquierda { 
+            background: #005c4b !important; 
+            color: white; 
+            align-self: flex-start; 
+            padding: 12px; 
+            border-radius: 15px; 
+            margin: 8px; 
+            border-left: 5px solid #25d366; 
+            max-width: 80%;
+            word-wrap: break-word;
+        }
 
-        /* --- INDICADORES DE ESTADO --- */
+        .msg-derecha { background-color: #2a2a2a; align-self: flex-end; border-bottom-right-radius: 2px; padding: 10px 15px; border-radius: 18px; max-width: 80%; color: white; }
 
-        .msg-burbuja[data-enviado="0"]::after { content: " 🕒"; font-size: 10px; opacity: 0.6; }
+        .input-area { background: #1a1a1a; padding: 10px; display: flex; gap: 8px; border-top: 1px solid #333; position: sticky; bottom: 0; }
+        input#msg-text { flex: 1; padding: 12px; border-radius: 25px; border: none; background: #2a2a2a; color: white; outline: none; }
+        input#target-id { width: 60px; background: #000; color: #ffd700; border: 1px solid #333; border-radius: 8px; text-align: center; }
+        button#btn-enviar { background: #ffd700; border: none; padding: 10px 15px; border-radius: 10px; font-weight: bold; cursor: pointer; color: black; }
 
-        .msg-burbuja[data-enviado="1"]::after { content: " ✓"; font-size: 10px; color: #b9b9b9; }
-
-        .msg-burbuja[data-enviado="2"]::after { content: " ✓✓"; font-size: 10px; color: #b9b9b9; }
-
-        .msg-burbuja[data-enviado="3"]::after { content: " ✓✓"; font-size: 10px; color: #34b7f1; }
-
+        /* Checks de estado */
+        .msg-derecha::after { content: " ✓✓"; font-size: 10px; color: #34b7f1; margin-left: 5px; }
     </style>
-
-
-
-    <script src="https://cdn.jsdelivr.net/npm/eruda"></script>
-
-    <script>eruda.init();</script>
-
 </head>
-
 <body>
 
-
-
-    <div class="header">
-
-        DROPSIS CHAT LITE 🛰️
-
+    <div class="header" onclick="manejarBotonIdentidad()">
+        DROPIS CHAT LITE 🛰️
         <div id="mi-id-display">Cargando identidad...</div>
-
     </div>
 
-
-
-    <div id="chat" class="calc-section" style="display: flex; flex-direction: column; height: 80vh; width: 100%; background: #000;">
-
-        <div id="chat-box">
-
-            <p style="color: #888; text-align: center;">Conectando a DropisChat...</p>
-
-        </div>
-
+    <div id="chat-box">
+        <p style="color: #888; text-align: center;">Conectando a Antena Dropis...</p>
     </div>
-
-
 
     <div id="modal-qr" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 9999; justify-content: center; align-items: center; flex-direction: column;">
-
         <div style="background: #fff; padding: 20px; border-radius: 20px; width: 85%; max-width: 350px; text-align: center; position: relative;">
-
             <button onclick="cerrarModalQR()" style="position: absolute; top: 10px; right: 10px; background: none; border: none; font-size: 20px; cursor: pointer; color: #333;">&times;</button>
-
             <h3 style="color: #333; margin-bottom: 15px;">Mi Identidad Dropis</h3>
-
             <div id="contenedor-qr">
-
                 <p style="color: #666;">Generando tu código...</p>
-
             </div>
-
             <button onclick="cerrarModalQR()" style="margin-top: 20px; width: 100%; padding: 10px; background: #6b8e23; color: white; border: none; border-radius: 10px; font-weight: bold;">CERRAR</button>
-
         </div>
-
     </div>
 
-
-
-    <div style="display: flex; gap: 8px; background: #1a1a1a; padding: 10px; border-radius: 15px; position: sticky; bottom: 10px; margin: 0 10px; z-index: 999; border-top: 1px solid #333;">
-
-        <input type="text" id="target-id" placeholder="ID" style="width: 60px; background: #000; color: #ffd700; border: 1px solid #333; border-radius: 8px; text-align: center;">
-
-        <input type="text" id="msg-text" placeholder="Escribe un mensaje..." style="flex-grow: 1; background: #2a2a2a; color: white; border: none; border-radius: 25px; padding: 12px; outline: none;">
-
-        <button onclick="enviarMensajeSatelital()" style="background: #ffd700; color: black; border: none; border-radius: 5px; padding: 0 15px;">
-
-            ENVIAR
-
-        </button>
-
+    <div class="input-area">
+        <input type="text" id="target-id" placeholder="ID">
+        <input type="text" id="msg-text" placeholder="Escribe un mensaje...">
+        <button id="btn-enviar" onclick="enviarMensajeSatelital()">ENVIAR</button>
     </div>
-
 
     <script>
-        // 1. CONFIGURACIÓN FIREBASE
         const firebaseConfig = {
             apiKey: "AIzaSyCaUyhX2iBMl4A5xeKeu_4SeE6HClp4V1s",
             authDomain: "real-market-elite-2025.firebaseapp.com",
             projectId: "real-market-elite-2025",
             databaseURL: "https://real-market-elite-2025-default-rtdb.firebaseio.com",
-            storageBucket: "real-market-elite-2025.appspot.com",
             messagingSenderId: "226489002778",
             appId: "1:226489002778:web:6722d21a9e78b33b5b1aa3"
         };
 
         firebase.initializeApp(firebaseConfig);
-        const db = firebase.database();
         const messaging = firebase.messaging();
         const miVapidKey = 'BIrsA9YbBXfIuo4PTMrKRtuktRsK2RbK0XevupuofGGOUDy9w5VZ9yaXbZXsenXppmFsR62-2B7jBOG0Z8RdxvU';
 
-        // 2. LÓGICA DE IDENTIDAD
+        // --- LÓGICA DE IDENTIDAD (BLOQUEO DE SEGURIDAD DEL BLOQUE 2) ---
         async function manejarBotonIdentidad() {
             const idGuardado = localStorage.getItem('mi_dropis_id');
             if (idGuardado) {
-                if(typeof mostrarMiQR === 'function') mostrarMiQR(idGuardado); 
+                console.log("Acceso directo: ID ya existente.");
+                if(window.mostrarMiQR) mostrarMiQR(idGuardado); 
                 document.getElementById('modal-qr').style.display = 'flex';
-                alert("Esta es tu identidad guardada.");
             } else {
-                const modalReg = document.getElementById('modal-registro');
-                if(modalReg) modalReg.style.display = 'flex';
+                if(document.getElementById('modal-registro')) {
+                    document.getElementById('modal-registro').style.display = 'flex';
+                } else {
+                    alert("No se encontró ID. Registra tu cuenta en la App principal.");
+                }
             }
         }
 
         function cerrarModalQR() {
-            const modal = document.getElementById('modal-qr');
-            if (modal) modal.style.display = 'none';
-            const contenedor = document.getElementById('contenedor-qr');
-            if (contenedor) contenedor.innerHTML = '<p style="color: #666;">Generando tu código...</p>';
+            document.getElementById('modal-qr').style.display = 'none';
+            document.getElementById('contenedor-qr').innerHTML = '<p style="color: #666;">Generando tu código...</p>';
         }
 
-        const miID = localStorage.getItem('usuarioID') || localStorage.getItem('mi_dropis_id') || "Sin ID";
+        const miID = localStorage.getItem('mi_dropis_id') || "Invitado";
         document.getElementById('mi-id-display').innerText = "Tu ID: " + miID;
 
-        // 3. REGISTRO DE ANTENA
+        // --- ANTENA V7 (SISTEMA RECUPERADO DEL BLOQUE 2) ---
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('./firebase-messaging-sw.js?v=7')
                     .then(reg => {
-                        console.log("🚀 Antena Dropis Lite Operativa");
+                        console.log("🚀 Antena V7 Operativa");
+                        // Solo pide token si hay permiso
                         if (Notification.permission === 'granted') {
-                            obtenerToken(reg);
+                            solicitarTokenFCM(reg);
                         }
-                    })
-                    .catch(err => console.error("❌ Error Antena:", err));
+                    });
             });
 
             navigator.serviceWorker.addEventListener('message', event => {
@@ -199,46 +129,42 @@
             });
         }
 
-        function obtenerToken(registration) {
+        function solicitarTokenFCM(registration) {
             messaging.getToken({ vapidKey: miVapidKey, serviceWorkerRegistration: registration })
                 .then(token => {
-                    if (token) {
-                        localStorage.setItem('fcm_token', token);
-                    }
+                    if (token) localStorage.setItem('fcm_token', token);
                 });
         }
 
-        // 4. LÓGICA DE INTERFAZ
         function renderizarMensajeEnPantalla(texto, remitente) {
             const box = document.getElementById('chat-box');
-            if (box) {
-                const div = document.createElement('div');
-                div.className = 'msg-burbuja msg-izquierda';
-                div.innerHTML = `<small style="color:#25d366; font-weight:bold;">${remitente}</small><br>${texto}`;
-                box.appendChild(div);
-                box.scrollTop = box.scrollHeight;
-            }
+            const div = document.createElement('div');
+            div.className = 'msg-izquierda'; // Aplica el diseño verde con borde del Bloque 2
+            div.innerHTML = `<small style="color:#25d366; font-weight:bold;">${remitente}</small><br>${texto}`;
+            box.appendChild(div);
+            box.scrollTop = box.scrollHeight;
         }
 
         function enviarMensajeSatelital() {
             const input = document.getElementById('msg-text');
             const texto = input.value.trim();
-            if (texto === "") return;
+            if (!texto) return;
 
+            // Render local (derecha)
             const box = document.getElementById('chat-box');
             const div = document.createElement('div');
-            div.className = 'msg-burbuja msg-derecha';
+            div.className = 'msg-derecha';
             div.innerText = texto;
             box.appendChild(div);
             box.scrollTop = box.scrollHeight;
 
             if (typeof window.enviarMensajeUI === 'function') {
                 window.enviarMensajeUI();
-            } else {
-                input.value = "";
             }
+            input.value = "";
         }
 
+        // Permisos al iniciar
         if ('Notification' in window && Notification.permission !== 'granted') {
             Notification.requestPermission();
         }
