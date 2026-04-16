@@ -206,45 +206,35 @@ async function ejecutarRegistroCompleto() {
 
         function activarAntena() {
     const miID = localStorage.getItem('mi_dropis_id') || 'Pedro Peres';
-    if (listenerActivo) listenerActivo.off(); 
+    // Definimos la variable globalmente si no existe
+    if (window.listenerActivo) window.listenerActivo.off(); 
 
     console.log("📡 Antena sintonizada en:", miID);
-    listenerActivo = firebase.database().ref('cola_satelital/' + miID);
+    window.listenerActivo = firebase.database().ref('cola_satelital/' + miID);
     
-    listenerActivo.on('child_added', async (snapshot) => {
-    const data = snapshot.val();
-    console.log("📩 Nuevo dato en cola:", data);
-    
-    try {
-        const root = await cargarProto();
-        const SuperAppPayload = root.lookupType("SuperAppPayload");
+    window.listenerActivo.on('child_added', async (snapshot) => {
+        const data = snapshot.val();
+        console.log("📩 Nuevo dato en cola:", data);
         
-        // 1. Decodificar el mensaje que viene de la nube (Base64 -> Buffer -> Objeto)
-        const buffer = Uint8Array.from(atob(data.p), c => c.charCodeAt(0));
-        const decoded = SuperAppPayload.decode(buffer);
+        try {
+            const root = await cargarProto();
+            const SuperAppPayload = root.lookupType("SuperAppPayload");
+            
+            const buffer = Uint8Array.from(atob(data.p), c => c.charCodeAt(0));
+            const decoded = SuperAppPayload.decode(buffer);
 
-        // 2. Guardar en IndexedDB del receptor
-        // 2. Guardar en IndexedDB del receptor
-        const msgParaGuardar = {
-            id: snapshot.key, // Usamos la llave de Firebase como ID
-            texto: decoded.chat_text,
-            destino: miID,
-            remitente: decoded.sender_name,
-            ts: decoded.timestamp,
-            enviado: 3 // Estado Recibido
-        };
+            // Pintar el mensaje real que llegó de la nube
+            pintarMensaje(decoded.chat_text, 'msg-izquierda');
+            
+            // Borrar de la nube para no recibirlo mil veces
+            snapshot.ref.remove();
 
-        // Pintar en pantalla inmediatamente
-        pintarMensaje(msgParaGuardar.texto, 'msg-izquierda');
-        
-        // Borrar de la nube para que no se repita (Consumo Satelital)
-        snapshot.ref.remove();
-
-    } catch (e) {
-        console.error("Error decodificando satélite:", e);
-    }
+        } catch (e) {
+            console.error("Error decodificando satélite:", e);
+        }
     });
 }
+
 function pintarMensaje(texto, clase) {
     const box = document.getElementById('chat-box');
     const div = document.createElement('div');
@@ -252,14 +242,15 @@ function pintarMensaje(texto, clase) {
     div.innerText = texto;
     box.appendChild(div);
     box.scrollTop = box.scrollHeight;
-                      }
-// 3. INICIO AUTOMÁTICO AL CARGAR LA PÁGINA
+}
+
+// 3. INICIO AUTOMÁTICO (ESTO VA AFUERA)
 window.onload = () => {
     const id = localStorage.getItem('mi_dropis_id');
     if (!id) {
         document.getElementById('modal-registro').style.display = 'flex';
     } else {
         document.getElementById('mi-id-display').innerText = "Tu ID: " + id;
-        activarAntena(); // Sintoniza apenas abre si ya tiene ID
+        activarAntena(); // Sintoniza apenas abre
     }
 };
