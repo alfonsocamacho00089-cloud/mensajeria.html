@@ -224,20 +224,42 @@ async function ejecutarRegistroCompleto() {
         const decoded = SuperAppPayload.decode(buffer);
 
         // 2. Guardar en IndexedDB del receptor
+        // 2. Guardar en IndexedDB del receptor
         const msgParaGuardar = {
-            id: data.msg_id,
+            id: snapshot.key, // Usamos la llave de Firebase como ID
             texto: decoded.chat_text,
-            destino: localStorage.getItem('mi_dropis_id'),
-            remitente: data.from,
-            ts: data.ts,
-            enviado: E_RECIBIDO // Marcamos como recibido
+            destino: miID,
+            remitente: decoded.sender_name,
+            ts: decoded.timestamp,
+            enviado: 3 // Estado Recibido
         };
 
-        window.onload = () => {
-            const id = localStorage.getItem('mi_dropis_id');
-            if (!id) document.getElementById('modal-registro').style.display = 'flex';
-            else document.getElementById('mi-id-display').innerText = "Tu ID: " + id;
-        };
-    </script>
-</body>
-</html>
+        // Pintar en pantalla inmediatamente
+        pintarMensaje(msgParaGuardar.texto, 'msg-izquierda');
+        
+        // Borrar de la nube para que no se repita (Consumo Satelital)
+        snapshot.ref.remove();
+
+    } catch (e) {
+        console.error("Error decodificando satélite:", e);
+    }
+    });
+}
+function pintarMensaje(texto, clase) {
+    const box = document.getElementById('chat-box');
+    const div = document.createElement('div');
+    div.className = 'msg-burbuja ' + clase;
+    div.innerText = texto;
+    box.appendChild(div);
+    box.scrollTop = box.scrollHeight;
+                      }
+// 3. INICIO AUTOMÁTICO AL CARGAR LA PÁGINA
+window.onload = () => {
+    const id = localStorage.getItem('mi_dropis_id');
+    if (!id) {
+        document.getElementById('modal-registro').style.display = 'flex';
+    } else {
+        document.getElementById('mi-id-display').innerText = "Tu ID: " + id;
+        activarAntena(); // Sintoniza apenas abre si ya tiene ID
+    }
+};
