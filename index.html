@@ -227,10 +227,21 @@ async function ejecutarRegistroCompleto() {
     const apellido = document.getElementById('reg-apellido').value.trim();
     if (!nombre || !apellido) return alert("Completa los datos");
 
-    const idUnico = Math.random().toString(36).substring(2, 14); 
-    const datosUsuario = { id: 'perfil_propietario', dropis_id: idUnico, nombre, apellido, fecha: Date.now() };
+    // --- NUEVA LÓGICA DE ID SUB_12 ---
+    const hashUnico = Math.random().toString(36).substring(2, 8).toUpperCase();
+    const idUnico = "TU_ID_DROPIS_SUB_12_" + hashUnico; 
+    // ---------------------------------
 
-    // Guardar Local
+    const datosUsuario = { 
+        id: 'perfil_propietario', 
+        dropis_id: idUnico, 
+        nombre: nombre, 
+        apellido: apellido, 
+        fecha: Date.now(),
+        tipo: "SUB_12" // Etiqueta para saber que es de esta versión
+    };
+
+    // Guardar Localmente para persistencia
     localStorage.setItem('mi_dropis_id', idUnico);
     await guardarLocal('usuario', datosUsuario);
     
@@ -249,15 +260,24 @@ async function ejecutarRegistroCompleto() {
         
         if (token) {
             localStorage.setItem('fcm_token', token);
-            // Guardar en la nube para futura recuperación
-            await firebase.database().ref('usuarios/' + idUnico).set({ ...datosUsuario, fcm_token: token });
+            // --- GUARDADO EN LA NUBE CON ESTRUCTURA SUB_12 ---
+            // Esto es lo que permite que luego uses "Recuperar Cuenta"
+            await firebase.database().ref('usuarios/' + idUnico).set({
+                nombre: nombre,
+                apellido: apellido,
+                fcm_token: token,
+                dropis_id: idUnico,
+                tipo: "SUB_12",
+                registro_fecha: firebase.database.ServerValue.TIMESTAMP
+            });
+            console.log("✅ Perfil SUB_12 sincronizado en la nube");
         }
         setTimeout(() => { if(modalHuella) modalHuella.style.display = 'none'; }, 3000);
     } catch (e) { 
+        console.error("Error en registro nube:", e);
         setTimeout(() => { if(modalHuella) modalHuella.style.display = 'none'; }, 2000);
     }
-                }
-
+    }
 // --- 4. ANTENA SATELITAL ---
 function activarAntena() {
     const miID = localStorage.getItem('mi_dropis_id');
