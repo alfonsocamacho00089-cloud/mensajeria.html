@@ -284,7 +284,14 @@ async function sincronizarTokenDispositivo() {
         }
     } catch (e) { console.warn("Token no disponible"); }
 }
-
+    
+const reqInit = indexedDB.open('DropisDB', DB_VERSION);
+reqInit.onupgradeneeded = (e) => {
+    const db = e.target.result;
+    if (!db.objectStoreNames.contains('mensajes')) {
+        db.createObjectStore('mensajes', { keyPath: 'id' });
+    }
+};
 window.onload = () => {
     activarAntena();
     activarRastreoEstados();
