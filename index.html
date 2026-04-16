@@ -9,19 +9,38 @@
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-messaging-compat.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    
+    <script src="https://cdn.jsdelivr.net/npm/eruda"></script>
+    <script>eruda.init();</script>
 
     <style>
-        /* --- DISEÑO UNIFICADO DROPIS --- */
         body { font-family: sans-serif; background: #000; color: white; margin: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
         
-        .header { background: #1a1a1a; padding: 15px; text-align: center; font-weight: bold; border-bottom: 2px solid #ffd700; }
-        #mi-id-display { font-size: 11px; color: #ffd700; margin-top: 5px; font-family: monospace; }
+        /* Header con diseño Bloque 2 */
+        .header { background: #1a1a1a; padding: 15px; text-align: center; border-bottom: 2px solid #ffd700; position: relative; }
+        
+        /* BOTÓN QR FLOTANTE */
+        .btn-qr-flotante {
+            position: absolute;
+            right: 15px;
+            top: 15px;
+            background: #ffd700;
+            border: none;
+            border-radius: 50%;
+            width: 35px;
+            height: 35px;
+            font-size: 18px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
 
         #chat-box { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 8px; }
 
-        /* Estilo del Bloque 2 para Mensajes Recibidos */
+        /* Mensajes - Diseño exacto Bloque 2 */
         .msg-izquierda { 
-            background: #005c4b !important; 
+            background: #005c4b; 
             color: white; 
             align-self: flex-start; 
             padding: 12px; 
@@ -29,49 +48,55 @@
             margin: 8px; 
             border-left: 5px solid #25d366; 
             max-width: 80%;
-            word-wrap: break-word;
         }
 
-        .msg-derecha { background-color: #2a2a2a; align-self: flex-end; border-bottom-right-radius: 2px; padding: 10px 15px; border-radius: 18px; max-width: 80%; color: white; }
+        .msg-derecha { background-color: #2a2a2a; align-self: flex-end; padding: 10px 15px; border-radius: 18px; max-width: 80%; border-bottom-right-radius: 2px; }
 
-        .input-area { background: #1a1a1a; padding: 10px; display: flex; gap: 8px; border-top: 1px solid #333; position: sticky; bottom: 0; }
+        .input-area { background: #1a1a1a; padding: 10px; display: flex; gap: 8px; border-top: 1px solid #333; }
+        
         input#msg-text { flex: 1; padding: 12px; border-radius: 25px; border: none; background: #2a2a2a; color: white; outline: none; }
-        input#target-id { width: 60px; background: #000; color: #ffd700; border: 1px solid #333; border-radius: 8px; text-align: center; }
-        button#btn-enviar { background: #ffd700; border: none; padding: 10px 15px; border-radius: 10px; font-weight: bold; cursor: pointer; color: black; }
-
-        /* Checks de estado */
-        .msg-derecha::after { content: " ✓✓"; font-size: 10px; color: #34b7f1; margin-left: 5px; }
+        
+        /* Modales */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 10000; justify-content: center; align-items: center; flex-direction: column; }
+        .modal-content { background: #fff; padding: 25px; border-radius: 20px; width: 85%; max-width: 320px; text-align: center; color: #333; }
     </style>
 </head>
 <body>
 
-    <div class="header" onclick="manejarBotonIdentidad()">
-        DROPIS CHAT LITE 🛰️
-        <div id="mi-id-display">Cargando identidad...</div>
+    <div class="header">
+        DROPSIS CHAT LITE 🛰️
+        <div id="mi-id-display" style="font-size: 10px; color: #ffd700;">Cargando...</div>
+        <button class="btn-qr-flotante" onclick="manejarBotonIdentidad()">🪪</button>
     </div>
 
     <div id="chat-box">
-        <p style="color: #888; text-align: center;">Conectando a Antena Dropis...</p>
+        <p style="color: #444; text-align: center; font-size: 12px;">Antena Dropis Conectada</p>
     </div>
 
-    <div id="modal-qr" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 9999; justify-content: center; align-items: center; flex-direction: column;">
-        <div style="background: #fff; padding: 20px; border-radius: 20px; width: 85%; max-width: 350px; text-align: center; position: relative;">
-            <button onclick="cerrarModalQR()" style="position: absolute; top: 10px; right: 10px; background: none; border: none; font-size: 20px; cursor: pointer; color: #333;">&times;</button>
-            <h3 style="color: #333; margin-bottom: 15px;">Mi Identidad Dropis</h3>
-            <div id="contenedor-qr">
-                <p style="color: #666;">Generando tu código...</p>
-            </div>
-            <button onclick="cerrarModalQR()" style="margin-top: 20px; width: 100%; padding: 10px; background: #6b8e23; color: white; border: none; border-radius: 10px; font-weight: bold;">CERRAR</button>
+    <div id="modal-registro" class="modal">
+        <div class="modal-content">
+            <h3>Bienvenido a Dropis</h3>
+            <p>No tienes una identidad vinculada.</p>
+            <input type="text" id="nuevo-id" placeholder="Crea tu ID de usuario" style="width: 90%; padding: 10px; margin: 10px 0; border: 1px solid #ccc; border-radius: 8px;">
+            <button onclick="registrarID()" style="width: 100%; padding: 12px; background: #ffd700; border: none; border-radius: 10px; font-weight: bold;">VINCULAR AHORA</button>
+        </div>
+    </div>
+
+    <div id="modal-qr" class="modal">
+        <div class="modal-content">
+            <h3 style="margin-bottom: 15px;">Mi Identidad Dropis</h3>
+            <div id="contenedor-qr"></div>
+            <button onclick="cerrarModalQR()" style="margin-top: 20px; width: 100%; padding: 10px; background: #333; color: white; border: none; border-radius: 10px;">CERRAR</button>
         </div>
     </div>
 
     <div class="input-area">
-        <input type="text" id="target-id" placeholder="ID">
-        <input type="text" id="msg-text" placeholder="Escribe un mensaje...">
-        <button id="btn-enviar" onclick="enviarMensajeSatelital()">ENVIAR</button>
+        <input type="text" id="msg-text" placeholder="Mensaje satelital...">
+        <button onclick="enviarMensajeSatelital()" style="background: #ffd700; border: none; padding: 10px 15px; border-radius: 10px; font-weight: bold;">ENVIAR</button>
     </div>
 
     <script>
+        // Configuración Firebase (Tu Data)
         const firebaseConfig = {
             apiKey: "AIzaSyCaUyhX2iBMl4A5xeKeu_4SeE6HClp4V1s",
             authDomain: "real-market-elite-2025.firebaseapp.com",
@@ -80,66 +105,44 @@
             messagingSenderId: "226489002778",
             appId: "1:226489002778:web:6722d21a9e78b33b5b1aa3"
         };
-
         firebase.initializeApp(firebaseConfig);
-        const messaging = firebase.messaging();
-        const miVapidKey = 'BIrsA9YbBXfIuo4PTMrKRtuktRsK2RbK0XevupuofGGOUDy9w5VZ9yaXbZXsenXppmFsR62-2B7jBOG0Z8RdxvU';
 
-        // --- LÓGICA DE IDENTIDAD (BLOQUEO DE SEGURIDAD DEL BLOQUE 2) ---
-        async function manejarBotonIdentidad() {
-            const idGuardado = localStorage.getItem('mi_dropis_id');
-            if (idGuardado) {
-                console.log("Acceso directo: ID ya existente.");
-                if(window.mostrarMiQR) mostrarMiQR(idGuardado); 
-                document.getElementById('modal-qr').style.display = 'flex';
+        // Lógica de inicio (Chequeo de Registro)
+        window.onload = () => {
+            const id = localStorage.getItem('mi_dropis_id');
+            if (!id) {
+                document.getElementById('modal-registro').style.display = 'flex';
             } else {
-                if(document.getElementById('modal-registro')) {
-                    document.getElementById('modal-registro').style.display = 'flex';
-                } else {
-                    alert("No se encontró ID. Registra tu cuenta en la App principal.");
-                }
+                document.getElementById('mi-id-display').innerText = "ID Activo: " + id;
+            }
+        };
+
+        function registrarID() {
+            const idInput = document.getElementById('nuevo-id').value.trim();
+            if(idInput) {
+                localStorage.setItem('mi_dropis_id', idInput);
+                location.reload(); // Recarga para activar todo con el nuevo ID
+            }
+        }
+
+        function manejarBotonIdentidad() {
+            const id = localStorage.getItem('mi_dropis_id');
+            if (id) {
+                document.getElementById('modal-qr').style.display = 'flex';
+                const cont = document.getElementById('contenedor-qr');
+                cont.innerHTML = ""; // Limpiar
+                new QRCode(cont, { text: id, width: 200, height: 200 });
             }
         }
 
         function cerrarModalQR() {
             document.getElementById('modal-qr').style.display = 'none';
-            document.getElementById('contenedor-qr').innerHTML = '<p style="color: #666;">Generando tu código...</p>';
-        }
-
-        const miID = localStorage.getItem('mi_dropis_id') || "Invitado";
-        document.getElementById('mi-id-display').innerText = "Tu ID: " + miID;
-
-        // --- ANTENA V7 (SISTEMA RECUPERADO DEL BLOQUE 2) ---
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./firebase-messaging-sw.js?v=7')
-                    .then(reg => {
-                        console.log("🚀 Antena V7 Operativa");
-                        // Solo pide token si hay permiso
-                        if (Notification.permission === 'granted') {
-                            solicitarTokenFCM(reg);
-                        }
-                    });
-            });
-
-            navigator.serviceWorker.addEventListener('message', event => {
-                if (event.data.type === 'NUEVO_MENSAJE_SATELITAL' || event.data.type === 'RESPUESTA_NUBE') {
-                    renderizarMensajeEnPantalla(event.data.texto, event.data.nombre || '🛰️ Satélite');
-                }
-            });
-        }
-
-        function solicitarTokenFCM(registration) {
-            messaging.getToken({ vapidKey: miVapidKey, serviceWorkerRegistration: registration })
-                .then(token => {
-                    if (token) localStorage.setItem('fcm_token', token);
-                });
         }
 
         function renderizarMensajeEnPantalla(texto, remitente) {
             const box = document.getElementById('chat-box');
             const div = document.createElement('div');
-            div.className = 'msg-izquierda'; // Aplica el diseño verde con borde del Bloque 2
+            div.className = 'msg-izquierda';
             div.innerHTML = `<small style="color:#25d366; font-weight:bold;">${remitente}</small><br>${texto}`;
             box.appendChild(div);
             box.scrollTop = box.scrollHeight;
@@ -147,31 +150,16 @@
 
         function enviarMensajeSatelital() {
             const input = document.getElementById('msg-text');
-            const texto = input.value.trim();
-            if (!texto) return;
-
-            // Render local (derecha)
+            if(!input.value.trim()) return;
+            
             const box = document.getElementById('chat-box');
             const div = document.createElement('div');
             div.className = 'msg-derecha';
-            div.innerText = texto;
+            div.innerText = input.value;
             box.appendChild(div);
             box.scrollTop = box.scrollHeight;
-
-            if (typeof window.enviarMensajeUI === 'function') {
-                window.enviarMensajeUI();
-            }
             input.value = "";
         }
-
-        // Permisos al iniciar
-        if ('Notification' in window && Notification.permission !== 'granted') {
-            Notification.requestPermission();
-        }
-
-        messaging.onMessage((payload) => {
-            renderizarMensajeEnPantalla(payload.notification.body, payload.notification.title || "Dropis");
-        });
     </script>
 </body>
 </html>
