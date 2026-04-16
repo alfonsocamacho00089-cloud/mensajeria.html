@@ -1,1 +1,52 @@
-.
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dropis Message Lite</title>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-messaging-compat.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/protobufjs@7.2.4/dist/protobuf.min.js"></script>
+
+    <style>
+        body { font-family: sans-serif; background: #121212; color: white; margin: 0; display: flex; flex-direction: column; height: 100vh; }
+        #chat-box { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 10px; }
+        .msg-burbuja { padding: 10px; border-radius: 15px; max-width: 80%; word-wrap: break-word; }
+        .msg-izquierda { background: #333; align-self: flex-start; border-bottom-left-radius: 2px; }
+        .msg-derecha { background: #075e54; align-self: flex-end; border-bottom-right-radius: 2px; }
+        .input-area { background: #1e1e1e; padding: 15px; display: flex; gap: 10px; }
+        input { flex: 1; padding: 10px; border-radius: 20px; border: none; outline: none; }
+        button { background: #ffeb3b; border: none; padding: 10px 20px; border-radius: 20px; font-weight: bold; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+    <div style="background:#1e1e1e; padding:15px; text-align:center; font-weight:bold; border-bottom: 2px solid #ffeb3b;">
+        DROPSIS CHAT LITE 🛰️
+        <div id="mi-id-display" style="font-size: 10px; color: #aaa;">Cargando ID...</div>
+    </div>
+
+    <div id="chat-box">
+        </div>
+
+    <div class="input-area">
+        <input type="hidden" id="target-id" value="global"> <input type="text" id="msg-text" placeholder="Escribe un mensaje satelital...">
+        <button onclick="enviarMensajeSatelital()">ENVIAR</button>
+    </div>
+
+    <script src="tu-logica-de-chat.js"></script>
+
+    <script>
+        // Mostrar el ID actual para saber quién soy
+        document.getElementById('mi-id-display').innerText = "Tu ID: " + (localStorage.getItem('usuarioID') || "Sin ID");
+        
+        // Registrar el Service Worker para las notificaciones Push
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/sw.js')
+            .then(() => console.log("SW de Mensajería Activo"))
+            .catch(err => console.log("Fallo SW:", err));
+        }
+    </script>
+</body>
+</html>
