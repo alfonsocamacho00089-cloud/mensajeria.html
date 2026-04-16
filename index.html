@@ -48,10 +48,12 @@
 
     /* --- CONTENEDOR DE SECCIONES --- */
     .calc-section {
-        flex: 1;
-        display: none;
-        flex-direction: column;
-        overflow: hidden;
+    flex: 1;
+    display: none;
+    flex-direction: column;
+    overflow: hidden;
+    /* --- AJUSTA AQUÍ --- */
+    margin-bottom: 10px; /* Esto empuja el área de escritura hacia arriba */
     }
 
     .active {
@@ -60,12 +62,18 @@
 
     /* --- ÁREA DE ENTRADA --- */
     .input-area {
-        background: var(--surface);
-        padding: 12px;
-        display: flex;
-        gap: 8px;
-        align-items: center;
-        border-top: 1px solid #333;
+    .input-area {
+    background: var(--surface);
+    padding: 12px;
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    border-top: 1px solid #333;
+    /* --- AÑADE ESTO --- */
+    margin-bottom: 20px; /* Sube la barra 20 píxeles */
+    border-radius: 15px; /* Opcional: para que se vea flotando */
+    margin-left: 10px;   /* Opcional: para que no toque los lados */
+    margin-right: 10px;  /* Opcional: para que no toque los lados */
     }
 
     #target-id {
