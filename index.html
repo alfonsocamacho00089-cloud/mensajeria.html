@@ -183,7 +183,7 @@ async function guardarLocal(tabla, datos) {
     const db = await abrirDB();
     const tx = db.transaction(tabla, 'readwrite');
     tx.objectStore(tabla).put(datos);
-
+}
 // --- 3. REGISTRO Y RECUPERACIÓN ---
 async function ejecutarRegistroCompleto() {
     const nombre = document.getElementById('reg-nombre').value.trim();
