@@ -24,7 +24,7 @@
         #mi-id-display { font-size: 10px; color: #aaa; margin-top: 5px; }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/eruda"></script>
-<script>eruda.init();</script>
+    <script>eruda.init();</script>
 </head>
 <body>
 
@@ -34,60 +34,29 @@
     </div>
 
     <div id="chat" class="calc-section" style="margin-bottom: 80px;">
-    <div id="chat-box" style="min-height: 300px; padding: 10px;">
-        <p style="color: #888; text-align: center;">Conectando a DropisChat...</p>
-    </div>
-</div>
-
-<div style="display: flex; gap: 8px; background: #1a1a1a; padding: 10px; border-radius: 15px; position: sticky; bottom: 10px; margin: 0 10px; z-index: 999;">
-    <input type="text" id="target-id" placeholder="ID" style="width: 60px; background: #000; color: #ffd700; border: 1px solid #333; border-radius: 8px; text-align: center;">
-    
-    <input type="text" id="msg-text" placeholder="Escribe un mensaje..." style="flex-grow: 1; background: #000; color: white; border: 1px solid #333; border-radius: 8px; padding: 10px;">
-    
-    <button onclick="enviarMensajeSatelital()" style="background: #ffd700; color: black; border: none; border-radius: 5px; padding: 0 15px;">
-        <i class="fas fa-paper-plane"></i> ENVIAR
-    </button>
-</div>
-    
-   
-   async function manejarBotonIdentidad() {
-    const idGuardado = localStorage.getItem('mi_dropis_id');
-
-    if (idGuardado) {
-        // --- AQUÍ ESTÁ EL BLOQUEO ---
-        // Ya no pide nada a Firebase, solo muestra lo que ya tienes en el TLF
-        console.log("Acceso directo: ID ya existente.");
-        mostrarMiQR(idGuardado); 
-        alert("Esta es tu identidad guardada.");
-    } else {
-        // Si el TLF está vacío, entonces sí abre el registro
-        document.getElementById('modal-registro').style.display = 'flex';
-    }
-    }
-
-    function cerrarModalQR() {
-        const modal = document.getElementById('modal-qr');
-        if (modal) modal.style.display = 'none';
-        
-        // Sugerencia: Limpia el QR al cerrar para que no se vea el anterior al abrir
-        const contenedor = document.getElementById('contenedor-qr');
-        if (contenedor) contenedor.innerHTML = '<p style="color: #666;">Generando tu código...</p>';
-    }
-
-<div id="modal-qr" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 9999; justify-content: center; align-items: center; flex-direction: column;">
-    <div style="background: #fff; padding: 20px; border-radius: 20px; width: 85%; max-width: 350px; text-align: center; position: relative;">
-        
-        <button onclick="cerrarModalQR()" style="position: absolute; top: 10px; right: 10px; background: none; border: none; font-size: 20px; cursor: pointer;">&times;</button>
-        
-        <h3 style="color: #333; margin-bottom: 15px;">Mi Identidad Dropis</h3>
-        
-        <div id="contenedor-qr">
-            <p style="color: #666;">Generando tu código...</p>
+        <div id="chat-box" style="min-height: 300px; padding: 10px;">
+            <p style="color: #888; text-align: center;">Conectando a DropisChat...</p>
         </div>
-
-        <button onclick="cerrarModalQR()" style="margin-top: 20px; width: 100%; padding: 10px; background: #6b8e23; color: white; border: none; border-radius: 10px; font-weight: bold;">CERRAR</button>
     </div>
-</div>
+
+    <div id="modal-qr" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 9999; justify-content: center; align-items: center; flex-direction: column;">
+        <div style="background: #fff; padding: 20px; border-radius: 20px; width: 85%; max-width: 350px; text-align: center; position: relative;">
+            <button onclick="cerrarModalQR()" style="position: absolute; top: 10px; right: 10px; background: none; border: none; font-size: 20px; cursor: pointer; color: #333;">&times;</button>
+            <h3 style="color: #333; margin-bottom: 15px;">Mi Identidad Dropis</h3>
+            <div id="contenedor-qr">
+                <p style="color: #666;">Generando tu código...</p>
+            </div>
+            <button onclick="cerrarModalQR()" style="margin-top: 20px; width: 100%; padding: 10px; background: #6b8e23; color: white; border: none; border-radius: 10px; font-weight: bold;">CERRAR</button>
+        </div>
+    </div>
+
+    <div style="display: flex; gap: 8px; background: #1a1a1a; padding: 10px; border-radius: 15px; position: sticky; bottom: 10px; margin: 0 10px; z-index: 999;">
+        <input type="text" id="target-id" placeholder="ID" style="width: 60px; background: #000; color: #ffd700; border: 1px solid #333; border-radius: 8px; text-align: center;">
+        <input type="text" id="msg-text" placeholder="Escribe un mensaje..." style="flex-grow: 1; background: #000; color: white; border: 1px solid #333; border-radius: 8px; padding: 10px;">
+        <button onclick="enviarMensajeSatelital()" style="background: #ffd700; color: black; border: none; border-radius: 5px; padding: 0 15px;">
+            <i class="fas fa-paper-plane"></i> ENVIAR
+        </button>
+    </div>
 
     <script>
         // 1. CONFIGURACIÓN FIREBASE
@@ -106,23 +75,37 @@
         const messaging = firebase.messaging();
         const miVapidKey = 'BIrsA9YbBXfIuo4PTMrKRtuktRsK2RbK0XevupuofGGOUDy9w5VZ9yaXbZXsenXppmFsR62-2B7jBOG0Z8RdxvU';
 
-        // 2. IDENTIDAD Y QR
+        // 2. LÓGICA DE IDENTIDAD (Arreglada sintaxis de funciones sueltas)
+        async function manejarBotonIdentidad() {
+            const idGuardado = localStorage.getItem('mi_dropis_id');
+            if (idGuardado) {
+                console.log("Acceso directo: ID ya existente.");
+                // Asumiendo que mostrarMiQR está definida en tu app.js
+                if(typeof mostrarMiQR === 'function') mostrarMiQR(idGuardado); 
+                document.getElementById('modal-qr').style.display = 'flex';
+                alert("Esta es tu identidad guardada.");
+            } else {
+                const modalReg = document.getElementById('modal-registro');
+                if(modalReg) modalReg.style.display = 'flex';
+            }
+        }
+
+        function cerrarModalQR() {
+            const modal = document.getElementById('modal-qr');
+            if (modal) modal.style.display = 'none';
+            const contenedor = document.getElementById('contenedor-qr');
+            if (contenedor) contenedor.innerHTML = '<p style="color: #666;">Generando tu código...</p>';
+        }
+
         const miID = localStorage.getItem('usuarioID') || localStorage.getItem('mi_dropis_id') || "Sin ID";
         document.getElementById('mi-id-display').innerText = "Tu ID: " + miID;
 
-        function cerrarModalQR() {
-            document.getElementById('modal-qr').style.display = 'none';
-        }
-
-        // 3. REGISTRO DE ANTENA (SERVICE WORKER)
+        // 3. REGISTRO DE ANTENA
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                // Usamos la v7 que mencionaste para limpiar caché
                 navigator.serviceWorker.register('./firebase-messaging-sw.js?v=7')
                     .then(reg => {
                         console.log("🚀 Antena Dropis Lite Operativa");
-                        
-                        // Pedir Token una vez que el SW esté listo
                         if (Notification.permission === 'granted') {
                             obtenerToken(reg);
                         }
@@ -130,7 +113,6 @@
                     .catch(err => console.error("❌ Error Antena:", err));
             });
 
-            // ESCUCHADOR: El Service Worker le habla a la pantalla
             navigator.serviceWorker.addEventListener('message', event => {
                 if (event.data.type === 'NUEVO_MENSAJE_SATELITAL' || event.data.type === 'RESPUESTA_NUBE') {
                     renderizarMensajeEnPantalla(event.data.texto, event.data.nombre || '🛰️ Satélite');
@@ -163,10 +145,8 @@
         function enviarMensajeSatelital() {
             const input = document.getElementById('msg-text');
             const texto = input.value.trim();
-            
             if (texto === "") return;
 
-            // Pintamos nuestro mensaje en la derecha
             const box = document.getElementById('chat-box');
             const div = document.createElement('div');
             div.className = 'msg-burbuja msg-derecha';
@@ -174,12 +154,10 @@
             box.appendChild(div);
             box.scrollTop = box.scrollHeight;
 
-            // Aquí llamarías a tu función window.enviarMensajeUI() de app.js
             if (typeof window.enviarMensajeUI === 'function') {
                 window.enviarMensajeUI();
             } else {
                 console.log("📡 Mensaje listo para enviar a la nube...");
-                // Simulación de envío si no está cargado app.js
                 input.value = "";
             }
         }
