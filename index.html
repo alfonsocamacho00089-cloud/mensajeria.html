@@ -33,14 +33,21 @@
         <div id="mi-id-display">Cargando identidad...</div>
     </div>
 
-    <div id="chat-box">
-        </div>
-
-    <div class="input-area">
-        <input type="hidden" id="target-id" value="global"> 
-        <input type="text" id="msg-text" placeholder="Escribe un mensaje satelital...">
-        <button onclick="enviarMensajeSatelital()">ENVIAR</button>
+    <div id="chat" class="calc-section" style="margin-bottom: 80px;">
+    <div id="chat-box" style="min-height: 300px; padding: 10px;">
+        <p style="color: #888; text-align: center;">Conectando a DropisChat...</p>
     </div>
+</div>
+
+<div style="display: flex; gap: 8px; background: #1a1a1a; padding: 10px; border-radius: 15px; position: sticky; bottom: 10px; margin: 0 10px; z-index: 999;">
+    <input type="text" id="target-id" placeholder="ID" style="width: 60px; background: #000; color: #ffd700; border: 1px solid #333; border-radius: 8px; text-align: center;">
+    
+    <input type="text" id="msg-text" placeholder="Escribe un mensaje..." style="flex-grow: 1; background: #000; color: white; border: 1px solid #333; border-radius: 8px; padding: 10px;">
+    
+    <button onclick="enviarMensajeSatelital()" style="background: #ffd700; color: black; border: none; border-radius: 5px; padding: 0 15px;">
+        <i class="fas fa-paper-plane"></i> ENVIAR
+    </button>
+</div>
 
     <div id="modal-qr" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 9999; justify-content: center; align-items: center; flex-direction: column;">
         <div style="background: #fff; padding: 20px; border-radius: 20px; width: 85%; max-width: 350px; text-align: center; position: relative;">
