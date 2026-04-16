@@ -93,7 +93,41 @@ async function validarHuellaChacalaca() {
     console.log("Validando biometría...");
     return true; 
 }
+async function recuperarCuentaConID() {
+    const idParaRecuperar = prompt("Escribe tu ID Dropis:");
+    if (!idParaRecuperar) return;
 
+    try {
+        // Buscamos directamente en la carpeta de usuarios del satélite
+        const snapshot = await firebase.database().ref('usuarios/' + idParaRecuperar).once('value');
+
+        if (snapshot.exists()) {
+            const datos = snapshot.val();
+
+            // 1. Lo grabamos en el LocalStorage
+            localStorage.setItem('mi_dropis_id', idParaRecuperar);
+
+            // 2. Lo grabamos en la "Caja Negra" (IndexedDB) para que sea permanente
+            await guardarLocal('usuario', { 
+                id: 'perfil_propietario', 
+                dropis_id: idParaRecuperar,
+                nombre: datos.nombre,
+                apellido: datos.apellido,
+                fcm_token: datos.fcm_token || '' 
+            });
+
+            alert(`🚀 ¡Identidad recuperada! Bienvenido de nuevo, ${datos.nombre}.`);
+            
+            // Recargamos para que la antena sintonice el ID viejo de una vez
+            location.reload(); 
+        } else {
+            alert("❌ Ese ID no existe en la red Dropis. Verifica que esté bien escrito.");
+        }
+    } catch (e) {
+        console.error("Error recuperación:", e);
+        alert("Hubo un fallo en la conexión con el satélite.");
+    }
+}
 // --- 3. MOTOR DE MENSAJERÍA SATELITAL ---
 function activarAntena() {
     const miID = localStorage.getItem('mi_dropis_id') || 'Pedro Peres';
