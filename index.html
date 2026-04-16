@@ -48,17 +48,46 @@
         <i class="fas fa-paper-plane"></i> ENVIAR
     </button>
 </div>
+    
+   
+   async function manejarBotonIdentidad() {
+    const idGuardado = localStorage.getItem('mi_dropis_id');
 
-    <div id="modal-qr" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 9999; justify-content: center; align-items: center; flex-direction: column;">
-        <div style="background: #fff; padding: 20px; border-radius: 20px; width: 85%; max-width: 350px; text-align: center; position: relative;">
-            <button onclick="cerrarModalQR()" style="position: absolute; top: 10px; right: 10px; background: none; border: none; font-size: 25px; cursor: pointer;">&times;</button>
-            <h3 style="color: #333; margin-bottom: 15px;">Mi Identidad Dropis</h3>
-            <div id="contenedor-qr">
-                <p style="color: #666;">Generando tu código...</p>
-            </div>
-            <button onclick="cerrarModalQR()" style="margin-top: 20px; width: 100%; padding: 10px; background: #6b8e23; color: white; border: none; border-radius: 10px; font-weight: bold;">CERRAR</button>
+    if (idGuardado) {
+        // --- AQUÍ ESTÁ EL BLOQUEO ---
+        // Ya no pide nada a Firebase, solo muestra lo que ya tienes en el TLF
+        console.log("Acceso directo: ID ya existente.");
+        mostrarMiQR(idGuardado); 
+        alert("Esta es tu identidad guardada.");
+    } else {
+        // Si el TLF está vacío, entonces sí abre el registro
+        document.getElementById('modal-registro').style.display = 'flex';
+    }
+    }
+
+    function cerrarModalQR() {
+        const modal = document.getElementById('modal-qr');
+        if (modal) modal.style.display = 'none';
+        
+        // Sugerencia: Limpia el QR al cerrar para que no se vea el anterior al abrir
+        const contenedor = document.getElementById('contenedor-qr');
+        if (contenedor) contenedor.innerHTML = '<p style="color: #666;">Generando tu código...</p>';
+    }
+
+<div id="modal-qr" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 9999; justify-content: center; align-items: center; flex-direction: column;">
+    <div style="background: #fff; padding: 20px; border-radius: 20px; width: 85%; max-width: 350px; text-align: center; position: relative;">
+        
+        <button onclick="cerrarModalQR()" style="position: absolute; top: 10px; right: 10px; background: none; border: none; font-size: 20px; cursor: pointer;">&times;</button>
+        
+        <h3 style="color: #333; margin-bottom: 15px;">Mi Identidad Dropis</h3>
+        
+        <div id="contenedor-qr">
+            <p style="color: #666;">Generando tu código...</p>
         </div>
+
+        <button onclick="cerrarModalQR()" style="margin-top: 20px; width: 100%; padding: 10px; background: #6b8e23; color: white; border: none; border-radius: 10px; font-weight: bold;">CERRAR</button>
     </div>
+</div>
 
     <script>
         // 1. CONFIGURACIÓN FIREBASE
