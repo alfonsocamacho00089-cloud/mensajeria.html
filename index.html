@@ -14,38 +14,46 @@
     <script>eruda.init();</script>
 
     <style>
-        /* --- ESTRUCTURA CORREGIDA PARA SCROLL --- */
-        body { 
-            font-family: sans-serif; 
-            background: #000000; 
-            color: white; 
-            margin: 0; 
-            display: flex; 
-            flex-direction: column; 
-            height: 100vh; /* Altura total de la pantalla */
-            overflow: hidden; 
-        }
+        /* Contenedor Rígido */
+body { 
+    font-family: sans-serif; 
+    background: #000000; 
+    margin: 0; 
+    display: flex; 
+    flex-direction: column; 
+    height: 100dvh; /* Altura dinámica para móviles */
+    overflow: hidden; /* Evita el scroll de toda la pantalla */
+}
 
-        .header { 
-            background: #1a1a1a; 
-            padding: 15px; 
-            text-align: center; 
-            font-weight: bold; 
-            border-bottom: 2px solid #ffd700; 
-            position: relative;
-            flex-shrink: 0; /* Que no se encoja */
-        }
+/* Cabecera Intocable */
+.header { 
+    background: #1a1a1a; 
+    padding: 15px; 
+    border-bottom: 2px solid #ffd700; 
+    flex-shrink: 0; /* NO se aplasta */
+}
 
-        #chat-box { 
-            flex: 1; /* Esto permite que el chat use todo el espacio medio */
-            overflow-y: auto; /* Habilita el deslizamiento hacia arriba/abajo */
-            padding: 15px; 
-            display: flex; 
-            flex-direction: column; 
-            gap: 8px; 
-            box-sizing: border-box; 
-            background: #000;
-        }
+/* El Chat es el único que crece y desliza */
+#chat-box { 
+    flex: 1; 
+    overflow-y: auto; 
+    padding: 15px; 
+    display: flex; 
+    flex-direction: column; 
+    gap: 10px; 
+    background: #000;
+}
+
+/* Área de Entrada Intocable al fondo */
+.input-area { 
+    background: #1a1a1a; 
+    padding: 15px; 
+    display: flex; 
+    gap: 10px; 
+    border-top: 1px solid #333; 
+    flex-shrink: 0; /* NO se aplasta ni desaparece */
+    padding-bottom: max(15px, env(safe-area-inset-bottom)); /* Soporte para Notch de móviles */
+}
 
         /* DISEÑO DE SEGURIDAD (BLOQUE 2) - SIN CAMBIOS */
         .msg-burbuja { max-width: 80%; padding: 10px 15px; border-radius: 18px; font-size: 14px; line-height: 1.4; position: relative; word-wrap: break-word; box-shadow: 0 1px 2px rgba(0,0,0,0.5); margin: 2px 0; }
