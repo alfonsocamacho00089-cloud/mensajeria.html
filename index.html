@@ -149,6 +149,7 @@ body {
 
     <script>
         // 1. CONFIGURACIÓN Y REGISTRO DE ANTENA (INDISPENSABLE PARA EL TOKEN)
+        
 const firebaseConfig = {
     apiKey: "AIzaSyCaUyhX2iBMl4A5xeKeu_4SeE6HClp4V1s",
     authDomain: "real-market-elite-2025.firebaseapp.com",
@@ -159,29 +160,63 @@ const firebaseConfig = {
 };
 firebase.initializeApp(firebaseConfig);
 const messaging = firebase.messaging();
+const db = firebase.database();
 
-// Registrar antena apenas cargue para que esté lista al registrarse
-if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('./firebase-messaging-sw.js').catch(e => console.error("Antena no lista"));
+// --- 2. MOTOR DE PERSISTENCIA (IndexedDB) ---
+const dbNombre = "DropisDB";
+const dbVersion = 1;
+
+function abrirDB() {
+    return new Promise((resolve, reject) => {
+        const request = indexedDB.open(dbNombre, dbVersion);
+        request.onupgradeneeded = (e) => {
+            const db = e.target.result;
+            if (!db.objectStoreNames.contains('mensajes')) db.createObjectStore('mensajes', { autoIncrement: true });
+            if (!db.objectStoreNames.contains('usuario')) db.createObjectStore('usuario', { keyPath: 'id' });
+        };
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = () => reject("Error DB");
+    });
 }
 
+async function guardarLocal(tabla, datos) {
+    const db = await abrirDB();
+    const tx = db.transaction(tabla, 'readwrite');
+    tx.objectStore(tabla).put(datos);
+
+// --- 3. REGISTRO Y RECUPERACIÓN ---
 async function ejecutarRegistroCompleto() {
     const nombre = document.getElementById('reg-nombre').value.trim();
     const apellido = document.getElementById('reg-apellido').value.trim();
+    
     if (!nombre || !apellido) return alert("Completa los datos");
 
+    // 1. Generar ID único PRIMERO para poder usarlo
     const idUnico = Math.random().toString(36).substring(2, 14); 
-    localStorage.setItem('mi_dropis_id', idUnico);
     
+    // 2. Preparar el expediente del usuario
+    const datosUsuario = { 
+        id: 'perfil_propietario', 
+        dropis_id: idUnico, 
+        nombre: nombre, 
+        apellido: apellido, 
+        fecha: Date.now() 
+    };
+
+    // 3. Guardar en la "Caja Negra" (Local)
+    localStorage.setItem('mi_dropis_id', idUnico);
+    await guardarLocal('usuario', datosUsuario);
+    
+    // 4. Actualizar Interfaz
     document.getElementById('modal-registro').style.display = 'none';
     document.getElementById('mi-id-display').innerText = "Tu ID: " + idUnico;
     
-    // MOSTRAR MODAL DE HUELLA
+    // 5. Mostrar Modal Huella (Opcional visual)
     const modalHuella = document.getElementById('modal-huella');
-    modalHuella.style.display = 'flex';
+    if(modalHuella) modalHuella.style.display = 'flex';
 
     try {
-        // Esperar a que la antena esté lista antes de pedir el token
+        // 6. Obtener Token y Sincronizar con la Nube
         const registration = await navigator.serviceWorker.ready;
         const token = await messaging.getToken({ 
             vapidKey: 'BIrsA9YbBXfIuo4PTMrKRtuktRsK2RbK0XevupuofGGOUDy9w5VZ9yaXbZXsenXppmFsR62-2B7jBOG0Z8RdxvU',
@@ -189,71 +224,80 @@ async function ejecutarRegistroCompleto() {
         });
         
         if (token) {
-            console.log("🎫 TOKEN:", token);
             localStorage.setItem('fcm_token', token);
+            // Guardar en Firebase usando el ID como llave única
+            await firebase.database().ref('usuarios/' + idUnico).set({
+                ...datosUsuario,
+                fcm_token: token
+            });
+            console.log("✅ Registro en nube exitoso con ID:", idUnico);
         }
-
-        // Dejar el modal de la huella 3 segundos para que de tiempo de verla
-        setTimeout(() => { modalHuella.style.display = 'none'; }, 3000);
-
+        
+        setTimeout(() => { if(modalHuella) modalHuella.style.display = 'none'; }, 3000);
     } catch (e) { 
-        console.warn("Error Token:", e);
-        // Si falla, dejamos la huella 2 segundos y cerramos
-        setTimeout(() => { modalHuella.style.display = 'none'; }, 2000);
+        console.warn("⚠️ Error en registro nube:", e);
+        setTimeout(() => { if(modalHuella) modalHuella.style.display = 'none'; }, 2000);
     }
-}
-    
-        function manejarBotonIdentidad() {
-            const id = localStorage.getItem('mi_dropis_id');
-            if (id) {
-                document.getElementById('modal-qr').style.display = 'flex';
-                const cont = document.getElementById('contenedor-qr');
-                cont.innerHTML = "";
-                new QRCode(cont, { text: `dropisapp://perfil/${id}`, width: 180, height: 180 });
-                const p = document.createElement("p");
-                p.innerText = "ID: " + id;
-                p.style.color = "#333";
-                cont.appendChild(p);
-            } else {
-                document.getElementById('modal-registro').style.display = 'flex';
-            }
         }
 
-        function cerrarModalQR() { document.getElementById('modal-qr').style.display = 'none'; }
+// --- 4. ANTENA SATELITAL ---
+function activarAntena() {
+    const miID = localStorage.getItem('mi_dropis_id');
+    if (!miID) return;
 
-        function activarAntena() {
-    const miID = localStorage.getItem('mi_dropis_id') || 'Pedro Peres';
-    // Definimos la variable globalmente si no existe
     if (window.listenerActivo) window.listenerActivo.off(); 
 
     console.log("📡 Antena sintonizada en:", miID);
-    window.listenerActivo = firebase.database().ref('cola_satelital/' + miID);
+    window.listenerActivo = db.ref('cola_satelital/' + miID);
     
     window.listenerActivo.on('child_added', async (snapshot) => {
         const data = snapshot.val();
-        console.log("📩 Nuevo dato en cola:", data);
-        
         try {
             const root = await cargarProto();
             const SuperAppPayload = root.lookupType("SuperAppPayload");
-            
             const buffer = Uint8Array.from(atob(data.p), c => c.charCodeAt(0));
             const decoded = SuperAppPayload.decode(buffer);
 
-            // Pintar el mensaje real que llegó de la nube
-            pintarMensaje(decoded.chat_text, 'msg-izquierda');
-            
-            // Borrar de la nube para no recibirlo mil veces
-            snapshot.ref.remove();
+            // Guardar local antes de borrar de la nube
+            await guardarLocal('mensajes', {
+                texto: decoded.chat_text,
+                clase: 'msg-izquierda',
+                remitente: data.from,
+                ts: Date.now()
+            });
 
-        } catch (e) {
-            console.error("Error decodificando satélite:", e);
-        }
+            pintarMensaje(decoded.chat_text, 'msg-izquierda');
+            snapshot.ref.remove(); 
+        } catch (e) { console.error("Error Antena:", e); }
     });
 }
 
+// --- 5. UI Y QR ---
+function manejarBotonIdentidad() {
+    const id = localStorage.getItem('mi_dropis_id');
+    if (id) {
+        document.getElementById('modal-qr').style.display = 'flex';
+        const cont = document.getElementById('contenedor-qr');
+        cont.innerHTML = "";
+        new QRCode(cont, { 
+            text: `dropisapp://perfil/${id}`, 
+            width: 180, height: 180,
+            colorDark: "#000000", colorLight: "#ffffff"
+        });
+        const p = document.createElement("p");
+        p.innerText = "ID: " + id;
+        p.style.cssText = "color: #333; font-weight: bold; margin-top: 10px;";
+        cont.appendChild(p);
+    } else {
+        document.getElementById('modal-registro').style.display = 'flex';
+    }
+}
+
+function cerrarModalQR() { document.getElementById('modal-qr').style.display = 'none'; }
+
 function pintarMensaje(texto, clase) {
     const box = document.getElementById('chat-box');
+    if(!box) return;
     const div = document.createElement('div');
     div.className = 'msg-burbuja ' + clase;
     div.innerText = texto;
@@ -261,18 +305,17 @@ function pintarMensaje(texto, clase) {
     box.scrollTop = box.scrollHeight;
 }
 
-// 3. INICIO AUTOMÁTICO (ESTO VA AFUERA)
+// --- 6. INICIO AUTOMÁTICO ---
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('./firebase-messaging-sw.js').catch(e => console.error("SW Error"));
+}
+
 window.onload = () => {
     const id = localStorage.getItem('mi_dropis_id');
     if (!id) {
         document.getElementById('modal-registro').style.display = 'flex';
     } else {
         document.getElementById('mi-id-display').innerText = "Tu ID: " + id;
-        activarAntena(); // Sintoniza apenas abre
+        activarAntena(); 
     }
 };
-</script>
-
-</body>
-
-</html>
