@@ -11,52 +11,133 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/protobufjs@7.2.4/dist/protobuf.min.js"></script>
 
+    
     <style>
-        body { font-family: sans-serif; background: #121212; color: white; margin: 0; display: flex; flex-direction: column; height: 100vh; }
-        #chat-box { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 10px; }
-        .msg-burbuja { padding: 12px; border-radius: 15px; max-width: 80%; word-wrap: break-word; margin: 5px 0; }
-        .msg-izquierda { background: #005c4b; align-self: flex-start; border-bottom-left-radius: 2px; border-left: 5px solid #25d366; }
-        .msg-derecha { background: #075e54; align-self: flex-end; border-bottom-right-radius: 2px; }
-        .input-area { background: #1e1e1e; padding: 15px; display: flex; gap: 10px; border-top: 1px solid #333; }
-        input { flex: 1; padding: 12px; border-radius: 20px; border: none; outline: none; background: #333; color: white; }
-        button { background: #ffeb3b; border: none; padding: 10px 20px; border-radius: 20px; font-weight: bold; cursor: pointer; color: black; }
-        .header { background:#1e1e1e; padding:15px; text-align:center; font-weight:bold; border-bottom: 2px solid #ffeb3b; }
-        #mi-id-display { font-size: 10px; color: #aaa; margin-top: 5px; }
+
+        /* --- VALORES ACTUALIZADOS --- */
+
+        body { font-family: sans-serif; background: #000000; color: white; margin: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+
+        
+
+        #chat-box { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 8px; box-sizing: border-box; }
+
+        
+
+        .msg-burbuja { max-width: 80%; padding: 10px 15px; border-radius: 18px; font-size: 14px; line-height: 1.4; position: relative; word-wrap: break-word; box-shadow: 0 1px 2px rgba(0,0,0,0.5); margin: 2px 0; }
+
+        
+
+        .msg-izquierda { background-color: #202c33; align-self: flex-start; border-bottom-left-radius: 2px; color: white; }
+
+        
+
+        .msg-derecha { background-color: #005c4b; align-self: flex-end; border-bottom-right-radius: 2px; color: white; }
+
+        
+
+        .input-area { background: #1a1a1a; padding: 15px; display: flex; gap: 10px; border-top: 1px solid #333; }
+
+        
+
+        input { flex: 1; padding: 12px; border-radius: 25px; border: none; outline: none; background: #2a2a2a; color: white; }
+
+        
+
+        button { background: #ffd700; border: none; padding: 10px 20px; border-radius: 20px; font-weight: bold; cursor: pointer; color: black; }
+
+        
+
+        .header { background: #1a1a1a; padding: 15px; text-align: center; font-weight: bold; border-bottom: 2px solid #ffd700; }
+
+        
+
+        #mi-id-display { font-size: 11px; color: #ffd700; margin-top: 5px; font-family: monospace; }
+
+
+
+        /* --- INDICADORES DE ESTADO --- */
+
+        .msg-burbuja[data-enviado="0"]::after { content: " 🕒"; font-size: 10px; opacity: 0.6; }
+
+        .msg-burbuja[data-enviado="1"]::after { content: " ✓"; font-size: 10px; color: #b9b9b9; }
+
+        .msg-burbuja[data-enviado="2"]::after { content: " ✓✓"; font-size: 10px; color: #b9b9b9; }
+
+        .msg-burbuja[data-enviado="3"]::after { content: " ✓✓"; font-size: 10px; color: #34b7f1; }
+
     </style>
+
+
+
     <script src="https://cdn.jsdelivr.net/npm/eruda"></script>
+
     <script>eruda.init();</script>
+
 </head>
+
 <body>
 
+
+
     <div class="header">
+
         DROPSIS CHAT LITE 🛰️
+
         <div id="mi-id-display">Cargando identidad...</div>
+
     </div>
 
-    <div id="chat" class="calc-section" style="margin-bottom: 80px;">
-        <div id="chat-box" style="min-height: 300px; padding: 10px;">
+
+
+    <div id="chat" class="calc-section" style="display: flex; flex-direction: column; height: 80vh; width: 100%; background: #000;">
+
+        <div id="chat-box">
+
             <p style="color: #888; text-align: center;">Conectando a DropisChat...</p>
+
         </div>
+
     </div>
+
+
 
     <div id="modal-qr" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 9999; justify-content: center; align-items: center; flex-direction: column;">
+
         <div style="background: #fff; padding: 20px; border-radius: 20px; width: 85%; max-width: 350px; text-align: center; position: relative;">
+
             <button onclick="cerrarModalQR()" style="position: absolute; top: 10px; right: 10px; background: none; border: none; font-size: 20px; cursor: pointer; color: #333;">&times;</button>
+
             <h3 style="color: #333; margin-bottom: 15px;">Mi Identidad Dropis</h3>
+
             <div id="contenedor-qr">
+
                 <p style="color: #666;">Generando tu código...</p>
+
             </div>
+
             <button onclick="cerrarModalQR()" style="margin-top: 20px; width: 100%; padding: 10px; background: #6b8e23; color: white; border: none; border-radius: 10px; font-weight: bold;">CERRAR</button>
+
         </div>
+
     </div>
 
-    <div style="display: flex; gap: 8px; background: #1a1a1a; padding: 10px; border-radius: 15px; position: sticky; bottom: 10px; margin: 0 10px; z-index: 999;">
+
+
+    <div style="display: flex; gap: 8px; background: #1a1a1a; padding: 10px; border-radius: 15px; position: sticky; bottom: 10px; margin: 0 10px; z-index: 999; border-top: 1px solid #333;">
+
         <input type="text" id="target-id" placeholder="ID" style="width: 60px; background: #000; color: #ffd700; border: 1px solid #333; border-radius: 8px; text-align: center;">
-        <input type="text" id="msg-text" placeholder="Escribe un mensaje..." style="flex-grow: 1; background: #000; color: white; border: 1px solid #333; border-radius: 8px; padding: 10px;">
+
+        <input type="text" id="msg-text" placeholder="Escribe un mensaje..." style="flex-grow: 1; background: #2a2a2a; color: white; border: none; border-radius: 25px; padding: 12px; outline: none;">
+
         <button onclick="enviarMensajeSatelital()" style="background: #ffd700; color: black; border: none; border-radius: 5px; padding: 0 15px;">
-            <i class="fas fa-paper-plane"></i> ENVIAR
+
+            ENVIAR
+
         </button>
+
     </div>
+
 
     <script>
         // 1. CONFIGURACIÓN FIREBASE
