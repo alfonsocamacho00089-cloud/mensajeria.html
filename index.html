@@ -221,30 +221,31 @@ async function recuperarCuentaConID() {
         alert("Error de conexión satelital.");
     }
 }
-
 async function ejecutarRegistroCompleto() {
     const nombre = document.getElementById('reg-nombre').value.trim();
     const apellido = document.getElementById('reg-apellido').value.trim();
+    
     if (!nombre || !apellido) return alert("Completa los datos");
 
-    // --- NUEVA LÓGICA DE ID SUB_12 ---
-    const hashUnico = Math.random().toString(36).substring(2, 8).toUpperCase();
-    const idUnico = "TU_ID_DROPIS_SUB_12_" + hashUnico; 
-    // ---------------------------------
+    // 1. GENERACIÓN DEL ID CON LA LÓGICA SUB_12
+    // Genera algo como: TU_ID_DROPIS_SUB_12_X8J2K
+    const hash = Math.random().toString(36).substring(2, 7).toUpperCase();
+    const idUnico = "TU_ID_DROPIS_SUB_12_" + hash; 
 
+    // 2. PREPARAR DATOS PARA LOCAL (IndexedDB)
     const datosUsuario = { 
         id: 'perfil_propietario', 
         dropis_id: idUnico, 
         nombre: nombre, 
         apellido: apellido, 
-        fecha: Date.now(),
-        tipo: "SUB_12" // Etiqueta para saber que es de esta versión
+        fecha: Date.now() 
     };
 
-    // Guardar Localmente para persistencia
+    // Guardar en el teléfono (Local)
     localStorage.setItem('mi_dropis_id', idUnico);
     await guardarLocal('usuario', datosUsuario);
     
+    // Actualizar interfaz
     document.getElementById('modal-registro').style.display = 'none';
     document.getElementById('mi-id-display').innerText = "Tu ID: " + idUnico;
     
@@ -252,6 +253,7 @@ async function ejecutarRegistroCompleto() {
     if(modalHuella) modalHuella.style.display = 'flex';
 
     try {
+        // 3. OBTENER TOKEN SATELITAL (FCM)
         const registration = await navigator.serviceWorker.ready;
         const token = await messaging.getToken({ 
             vapidKey: 'BIrsA9YbBXfIuo4PTMrKRtuktRsK2RbK0XevupuofGGOUDy9w5VZ9yaXbZXsenXppmFsR62-2B7jBOG0Z8RdxvU',
@@ -260,24 +262,30 @@ async function ejecutarRegistroCompleto() {
         
         if (token) {
             localStorage.setItem('fcm_token', token);
-            // --- GUARDADO EN LA NUBE CON ESTRUCTURA SUB_12 ---
-            // Esto es lo que permite que luego uses "Recuperar Cuenta"
-            await firebase.database().ref('usuarios/' + idUnico).set({
+
+            // 4. LÓGICA DE GUARDADO EN LA NUBE (LA QUE NECESITAS)
+            // Esto crea una ruta: usuarios/TU_ID_DROPIS_SUB_12_XXXXX/
+            await db.ref('usuarios/' + idUnico).set({
+                id_sistema: idUnico,
                 nombre: nombre,
                 apellido: apellido,
                 fcm_token: token,
-                dropis_id: idUnico,
-                tipo: "SUB_12",
-                registro_fecha: firebase.database.ServerValue.TIMESTAMP
+                estado: "activo",
+                version: "LITE_SUB_12",
+                timestamp: firebase.database.ServerValue.TIMESTAMP
             });
-            console.log("✅ Perfil SUB_12 sincronizado en la nube");
+
+            console.log("✅ Sincronizado con éxito en la nube bajo: " + idUnico);
         }
+        
         setTimeout(() => { if(modalHuella) modalHuella.style.display = 'none'; }, 3000);
     } catch (e) { 
-        console.error("Error en registro nube:", e);
+        console.error("⚠️ Error en vinculación satelital:", e);
+        // Aunque falle el token, el usuario ya se creó localmente
         setTimeout(() => { if(modalHuella) modalHuella.style.display = 'none'; }, 2000);
     }
-    }
+}
+
 // --- 4. ANTENA SATELITAL ---
 function activarAntena() {
     const miID = localStorage.getItem('mi_dropis_id');
