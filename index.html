@@ -111,9 +111,14 @@
 /* --- CHAT ENGINE (DISEÑO DE BURBUJAS) --- */
 
 #chat-box {
-    flex: 1; /* Esto obliga al chat a ocupar todo el espacio sobrante */
+    flex: 1;
     overflow-y: auto;
-    /* ... resto de tu estilo ... */
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    background: #000;
+    -webkit-overflow-scrolling: touch;
 }
 
 .msg-burbuja {
