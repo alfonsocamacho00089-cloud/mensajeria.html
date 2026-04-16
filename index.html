@@ -122,9 +122,17 @@ body {
             <h3>Registro Maestro</h3>
             <input type="text" id="reg-nombre" placeholder="Nombre" style="width:100%; padding:10px; margin:5px 0; color:#000;">
             <input type="text" id="reg-apellido" placeholder="Apellido" style="width:100%; padding:10px; margin:5px 0; color:#000;">
-            <button onclick="ejecutarRegistroCompleto()" style="width: 100%; padding: 12px; background: #ffd700; border: none; border-radius: 10px; font-weight: bold; margin-top: 10px;">VALIDAR HUELLA Y CREAR</button>
+         <button onclick="ejecutarRegistroCompleto()" style="width: 100%; padding: 12px; background: #ffd700; border: none; border-radius: 10px; font-weight: bold; margin-top: 10px;">VALIDAR HUELLA Y CREAR</button>
+        
+        <p style="margin-top: 20px; font-size: 13px; color: #ffd700; cursor: pointer; text-decoration: underline;" 
+   onclick="recuperarCuentaConID()">
+   ¿Ya tienes un ID Dropis? Toca aquí para recuperar
+        </p>
+        
         </div>
     </div>
+    
+    
 
     <div id="modal-huella" class="modal">
     <div class="modal-content" style="background: #000; color: #ffd700; border: 2px solid #ffd700;">
