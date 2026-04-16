@@ -192,39 +192,55 @@ async function guardarLocal(tabla, datos) {
     const tx = db.transaction(tabla, 'readwrite');
     tx.objectStore(tabla).put(datos);
 }
-// --- 3. REGISTRO Y RECUPERACIÓN ---
+
+// --- 3. SOLO REGISTRO Y RECUPERACIÓN ---
+
+async function recuperarCuentaConID() {
+    const idParaRecuperar = prompt("Escribe tu ID Dropis:");
+    if (!idParaRecuperar) return;
+
+    try {
+        const snapshot = await firebase.database().ref('usuarios/' + idParaRecuperar).once('value');
+        if (snapshot.exists()) {
+            const datos = snapshot.val();
+            // Restaurar en el teléfono
+            localStorage.setItem('mi_dropis_id', idParaRecuperar);
+            await guardarLocal('usuario', { 
+                id: 'perfil_propietario', 
+                dropis_id: idParaRecuperar,
+                nombre: datos.nombre,
+                apellido: datos.apellido,
+                fcm_token: datos.fcm_token || '' 
+            });
+            alert(`🚀 ¡Identidad recuperada! Bienvenido ${datos.nombre}.`);
+            location.reload(); 
+        } else {
+            alert("❌ ID no encontrado en el satélite.");
+        }
+    } catch (e) {
+        alert("Error de conexión satelital.");
+    }
+}
+
 async function ejecutarRegistroCompleto() {
     const nombre = document.getElementById('reg-nombre').value.trim();
     const apellido = document.getElementById('reg-apellido').value.trim();
-    
     if (!nombre || !apellido) return alert("Completa los datos");
 
-    // 1. Generar ID único PRIMERO para poder usarlo
     const idUnico = Math.random().toString(36).substring(2, 14); 
-    
-    // 2. Preparar el expediente del usuario
-    const datosUsuario = { 
-        id: 'perfil_propietario', 
-        dropis_id: idUnico, 
-        nombre: nombre, 
-        apellido: apellido, 
-        fecha: Date.now() 
-    };
+    const datosUsuario = { id: 'perfil_propietario', dropis_id: idUnico, nombre, apellido, fecha: Date.now() };
 
-    // 3. Guardar en la "Caja Negra" (Local)
+    // Guardar Local
     localStorage.setItem('mi_dropis_id', idUnico);
     await guardarLocal('usuario', datosUsuario);
     
-    // 4. Actualizar Interfaz
     document.getElementById('modal-registro').style.display = 'none';
     document.getElementById('mi-id-display').innerText = "Tu ID: " + idUnico;
     
-    // 5. Mostrar Modal Huella (Opcional visual)
     const modalHuella = document.getElementById('modal-huella');
     if(modalHuella) modalHuella.style.display = 'flex';
 
     try {
-        // 6. Obtener Token y Sincronizar con la Nube
         const registration = await navigator.serviceWorker.ready;
         const token = await messaging.getToken({ 
             vapidKey: 'BIrsA9YbBXfIuo4PTMrKRtuktRsK2RbK0XevupuofGGOUDy9w5VZ9yaXbZXsenXppmFsR62-2B7jBOG0Z8RdxvU',
@@ -233,20 +249,14 @@ async function ejecutarRegistroCompleto() {
         
         if (token) {
             localStorage.setItem('fcm_token', token);
-            // Guardar en Firebase usando el ID como llave única
-            await firebase.database().ref('usuarios/' + idUnico).set({
-                ...datosUsuario,
-                fcm_token: token
-            });
-            console.log("✅ Registro en nube exitoso con ID:", idUnico);
+            // Guardar en la nube para futura recuperación
+            await firebase.database().ref('usuarios/' + idUnico).set({ ...datosUsuario, fcm_token: token });
         }
-        
         setTimeout(() => { if(modalHuella) modalHuella.style.display = 'none'; }, 3000);
     } catch (e) { 
-        console.warn("⚠️ Error en registro nube:", e);
         setTimeout(() => { if(modalHuella) modalHuella.style.display = 'none'; }, 2000);
     }
-        }
+                }
 
 // --- 4. ANTENA SATELITAL ---
 function activarAntena() {
