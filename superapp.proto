@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+message ShopAction {
+  enum ActionType {
+    ORDER_PLACED = 0;
+    PAYMENT_CONFIRMED = 1;
+    DELIVERY_UPDATE = 2;
+  }
+  
+  ActionType type = 1;
+  uint32 order_id = 2;      
+  uint32 amount_cents = 3;  
+  string currency = 4;      
+  uint32 merchant_id = 5;
+}
+
+message SuperAppPayload {
+  string msg_id = 1;        // Mantengo string para compatibilidad con Date.now()
+  uint64 timestamp = 2;
+  oneof content {
+    string chat_text = 3;   
+    ShopAction shop_data = 4; 
+  }
+  bool is_satellite_priority = 5;
+}
