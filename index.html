@@ -290,7 +290,44 @@ function activarAntena() {
     });
 }
 
-// --- 5. UI Y QR ---
+// --- 4. GESTIÓN DE TOKENS Y SERVICE WORKER ---
+
+// Registrar el Service Worker al cargar la página
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('firebase-messaging-sw.js')
+        .then(registration => {
+            console.log("🛰️ Antena (SW) lista para recibir señales");
+            // Intentar obtener el token automáticamente si ya está registrado
+            obtenerToken(registration);
+        })
+        .catch(err => console.error("❌ Fallo en registro de antena:", err));
+}
+
+async function obtenerToken(registration) {
+    try {
+        const miVapidKey = 'BIrsA9YbBXfIuo4PTMrKRtuktRsK2RbK0XevupuofGGOUDy9w5VZ9yaXbZXsenXppmFsR62-2B7jBOG0Z8RdxvU';
+        const token = await messaging.getToken({ 
+            vapidKey: miVapidKey, 
+            serviceWorkerRegistration: registration 
+        });
+
+        if (token) {
+            console.log("🎫 TU TOKEN DROPIS:", token);
+            localStorage.setItem('fcm_token', token);
+            
+            // Si el usuario ya tiene ID, actualizamos el token en la nube silenciosamente
+            const miID = localStorage.getItem('mi_dropis_id');
+            if (miID) {
+                firebase.database().ref('usuarios/' + miID).update({ fcm_token: token });
+            }
+        }
+    } catch (err) {
+        console.warn("⚠️ No se pudo obtener el token:", err);
+    }
+}
+
+// --- 5. LÓGICA DE INTERFAZ Y QR ---
+
 function manejarBotonIdentidad() {
     const id = localStorage.getItem('mi_dropis_id');
     if (id) {
@@ -311,38 +348,39 @@ function manejarBotonIdentidad() {
     }
 }
 
-function cerrarModalQR() { document.getElementById('modal-qr').style.display = 'none'; }
+function cerrarModalQR() {
+    document.getElementById('modal-qr').style.display = 'none';
+}
+
+// Arrancar la app
+window.onload = () => {
+    const id = localStorage.getItem('mi_dropis_id');
+    if (id) {
+        document.getElementById('mi-id-display').innerText = "Tu ID: " + id;
+        // Aquí llamarías a activarAntena() cuando la tengas lista
+    } else {
+        document.getElementById('modal-registro').style.display = 'flex';
+    }
+};
+
+async function cargarProto() {
+    const root = await protobuf.load("superapp.proto");
+    return root;
+}
 
 function pintarMensaje(texto, clase) {
     const box = document.getElementById('chat-box');
-    if(!box) return;
     const div = document.createElement('div');
     div.className = 'msg-burbuja ' + clase;
     div.innerText = texto;
     box.appendChild(div);
     box.scrollTop = box.scrollHeight;
 }
-
-// --- 6. INICIO AUTOMÁTICO ---
-if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('./firebase-messaging-sw.js').catch(e => console.error("SW Error"));
-}
-
-window.onload = () => {
-    const id = localStorage.getItem('mi_dropis_id');
-    if (!id) {
-        document.getElementById('modal-registro').style.display = 'flex';
-    } else {
-        document.getElementById('mi-id-display').innerText = "Tu ID: " + id;
-        activarAntena(); 
-    }
-};
 </script>
-
-
-
 </body>
-
-
-
 </html>
+
+
+
+
+
