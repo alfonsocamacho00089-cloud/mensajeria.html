@@ -15,20 +15,7 @@
 
     <style>
 
-        <script>
-    // 1. Esta función quita el error de "Not Defined"
-    function enviarMensajeSatelital() {
-        const id = document.getElementById('target-id').value;
-        const msg = document.getElementById('msg-text').value;
         
-        if(msg === "") {
-            alert("Escribe algo para enviar");
-            return;
-        }
-        
-        console.log("Mensaje enviado a: " + id);
-        document.getElementById('msg-text').value = ""; // Limpia el cuadro
-        }
         /* Contenedor Rígido */
 body { 
     font-family: sans-serif; 
@@ -104,6 +91,21 @@ body {
     </style>
 
 </head>
+<script>
+    // 1. Esta función quita el error de "Not Defined"
+    function enviarMensajeSatelital() {
+        const id = document.getElementById('target-id').value;
+        const msg = document.getElementById('msg-text').value;
+        
+        if(msg === "") {
+            alert("Escribe algo para enviar");
+            return;
+        }
+        
+        console.log("Mensaje enviado a: " + id);
+        document.getElementById('msg-text').value = ""; // Limpia el cuadro
+        }
+    
 <body>
 
     <div class="header">
