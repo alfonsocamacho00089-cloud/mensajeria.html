@@ -103,18 +103,48 @@ function activarAntena() {
     listenerActivo = firebase.database().ref('cola_satelital/' + miID);
     
     listenerActivo.on('child_added', async (snapshot) => {
-        const data = snapshot.val();
-        console.log("📩 Nuevo dato en cola:", data);
+    const data = snapshot.val();
+    console.log("📩 Nuevo dato en cola:", data);
+    
+    try {
+        const root = await cargarProto();
+        const SuperAppPayload = root.lookupType("SuperAppPayload");
         
-        try {
-            // Aquí iría tu lógica de Proto si la necesitas
-            snapshot.ref.remove(); 
-            cargarMensajes();      
-        } catch (e) {
-            console.error("Error en recepción:", e);
-        }
-    });
-}
+        // 1. Decodificar el mensaje que viene de la nube (Base64 -> Buffer -> Objeto)
+        const buffer = Uint8Array.from(atob(data.p), c => c.charCodeAt(0));
+        const decoded = SuperAppPayload.decode(buffer);
+
+        // 2. Guardar en IndexedDB del receptor
+        const msgParaGuardar = {
+            id: data.msg_id,
+            texto: decoded.chat_text,
+            destino: localStorage.getItem('mi_dropis_id'),
+            remitente: data.from,
+            ts: data.ts,
+            enviado: E_RECIBIDO // Marcamos como recibido
+        };
+
+        const reqDB = indexedDB.open('DropisDB', DB_VERSION);
+        reqDB.onsuccess = (e) => {
+            const db = e.target.result;
+            const tx = db.transaction('mensajes', 'readwrite');
+            tx.objectStore('mensajes').put(msgParaGuardar);
+            tx.oncomplete = () => {
+                db.close();
+                cargarMensajes(); // Refrescar pantalla
+                
+                // 3. Notificar a la nube que ya lo recibimos para que el emisor vea el doble check
+                notificarEstadoAlEmisor(data.from, data.msg_id, E_RECIBIDO);
+            };
+        };
+
+        // 4. Limpiar la nube (Consumir el mensaje)
+        snapshot.ref.remove(); 
+        
+    } catch (e) {
+        console.error("Error en recepción:", e);
+    }
+});
 
 window.enviarMensajeSatelital = async function() {
     const msgInput = document.getElementById('msg-text');
