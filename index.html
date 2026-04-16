@@ -18,15 +18,13 @@
         --text: #FFFFFF;
     }
 
+
     body {
-        background-color: var(--bg);
-        color: var(--text);
-        font-family: sans-serif;
-        margin: 0;
-        display: flex;
-        flex-direction: column;
-        height: 100vh;
-        overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    height: 100vh; /* Ocupa el 100% de la pantalla visible */
+    margin: 0;
+    overflow: hidden; /* Evita que la página rebote */
     }
 
     /* --- HEADER --- */
@@ -62,20 +60,20 @@
 
     /* --- ÁREA DE ENTRADA --- */
     .input-area {
-    .input-area {
     background: var(--surface);
     padding: 12px;
     display: flex;
     gap: 8px;
     align-items: center;
     border-top: 1px solid #333;
-    /* --- AÑADE ESTO --- */
-    margin-bottom: 20px; /* Sube la barra 20 píxeles */
-    border-radius: 15px; /* Opcional: para que se vea flotando */
-    margin-left: 10px;   /* Opcional: para que no toque los lados */
-    margin-right: 10px;  /* Opcional: para que no toque los lados */
+    
+    /* Esto asegura que siempre esté al fondo del contenedor padre */
+    margin-top: auto; 
+    
+    /* Para que no se vea pegada al borde físico del cel, puedes darle un pequeño padding extra */
+    padding-bottom: env(safe-area-inset-bottom, 12px); 
     }
-
+    
     #target-id {
         width: 65px;
         background: #000;
@@ -111,15 +109,11 @@
         font-size: 18px;
     }
 /* --- CHAT ENGINE (DISEÑO DE BURBUJAS) --- */
+
 #chat-box {
-    flex: 1;
+    flex: 1; /* Esto obliga al chat a ocupar todo el espacio sobrante */
     overflow-y: auto;
-    padding: 15px;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    background: #000;
-    -webkit-overflow-scrolling: touch;
+    /* ... resto de tu estilo ... */
 }
 
 .msg-burbuja {
