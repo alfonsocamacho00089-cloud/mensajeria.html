@@ -33,19 +33,27 @@ async function ejecutarRegistroCompleto() {
     const llaveHuella = "HUELLA_" + btoa(nombreCompleto).substring(0, 10);
     const idExistente = await buscarCuentaPorHuella(llaveHuella);
 
+    let idFinal = idExistente;
+
     if (idExistente) {
         localStorage.setItem('mi_dropis_id', idExistente);
         mostrarMiQR(idExistente);
         alert(`¡Bienvenido de nuevo ${nombre}!`);
     } else {
-        const nuevoID = await crearCuentaMaestra(nombreCompleto);
-        if (nuevoID) {
-            mostrarMiQR(nuevoID);
+        idFinal = await crearCuentaMaestra(nombreCompleto);
+        if (idFinal) {
+            mostrarMiQR(idFinal);
             alert(`¡Bienvenido ${nombre}! ID creado.`);
         }
     }
 
-    
+    if (idFinal) {
+        localStorage.setItem('mi_dropis_id', idFinal);
+        mostrarMiQR(idFinal);
+        document.getElementById('modal-registro').style.display = 'none';
+        alert("¡Registro completado y bloqueado!");
+    }
+} // <--- AQUÍ FALTABA ESTA LLAVE
 
 async function crearCuentaMaestra(nombreUsuario) {
     const idUnico = await generarDropisID(nombreUsuario);
@@ -85,16 +93,6 @@ async function validarHuellaChacalaca() {
     console.log("Validando biometría...");
     return true; 
 }
-// ... al final de tu función de registro actual
-    if (nuevoID || idExistente) {
-        const idFinal = idExistente || nuevoID;
-        localStorage.setItem('mi_dropis_id', idFinal); // Se guarda el candado local
-        mostrarMiQR(idFinal); // Lo pintas en pantalla
-        
-        // Cerramos el modal
-        document.getElementById('modal-registro').style.display = 'none';
-        alert("¡Registro completado y bloqueado!");
-    }
 
 // --- 3. MOTOR DE MENSAJERÍA SATELITAL ---
 function activarAntena() {
@@ -104,17 +102,14 @@ function activarAntena() {
     console.log("📡 Antena sintonizada en:", miID);
     listenerActivo = firebase.database().ref('cola_satelital/' + miID);
     
-    // El .on debe estar pegado a la variable que definiste arriba
     listenerActivo.on('child_added', async (snapshot) => {
         const data = snapshot.val();
         console.log("📩 Nuevo dato en cola:", data);
         
         try {
-            // ... (Tu lógica de carga de Proto) ...
-            
-            // Después de guardar en IndexedDB y mostrarlo:
-            snapshot.ref.remove(); // Borra de la nube para no duplicar
-            cargarMensajes();      // Refresca la UI
+            // Aquí iría tu lógica de Proto si la necesitas
+            snapshot.ref.remove(); 
+            cargarMensajes();      
         } catch (e) {
             console.error("Error en recepción:", e);
         }
@@ -122,12 +117,12 @@ function activarAntena() {
 }
 
 window.enviarMensajeSatelital = async function() {
-    const msgInput = document.getElementById('msg-text').value;
-    const targetInput = document.getElementById('target-id').value;
+    const msgInput = document.getElementById('msg-text');
+    const targetInput = document.getElementById('target-id');
     if (!msgInput || !msgInput.value.trim()) return;
 
     const texto = msgInput.value;
-    const targetID = targetInput ? targetInput.value : 'global';
+    const targetID = targetInput.value || 'global';
     const miID = localStorage.getItem('mi_dropis_id') || 'Pedro Peres';
     const msgID = "SAT-" + Date.now();
 
@@ -259,11 +254,7 @@ async function sincronizarTokenDispositivo() {
         }
     } catch (e) { console.warn("Token no disponible"); }
 }
-const modal = document.getElementById('modal-registro');
-    if (modal) modal.style.display = 'none';
-    
-    
-}
+
 window.onload = () => {
     activarAntena();
     activarRastreoEstados();
