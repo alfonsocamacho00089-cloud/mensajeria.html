@@ -348,7 +348,7 @@ async function enviarMensajeSatelital() {
         // 1. Preparamos el Payload (ProtoBuf)
         const root = await cargarProto();
         const SuperAppPayload = root.lookupType("SuperAppPayload");
-        const payload = SuperAppPayload.create({ chatText: msg });
+        const payload = SuperAppPayload.create({ chatext: msg });
         const buffer = SuperAppPayload.encode(payload).finish();
         
         // 2. Convertimos a Base64 para el viaje satelital
