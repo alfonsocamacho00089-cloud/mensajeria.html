@@ -159,7 +159,7 @@ body {
 
     <div class="input-area">
         <input type="text" id="target-id" placeholder="ID">
-        <input type="text" id="msg-text" placeholder="Escribe un mensaje...">
+        <input type="text" id="msgText" placeholder="Escribe un mensaje...">
         <button id="btn-enviar" onclick="enviarMensajeSatelital()">ENVIAR</button>
     </div>
 
@@ -453,7 +453,6 @@ async function cargarProto() {
     return root;
 }
 
-function pintarMensaje(texto, clase, estado = null) {
 
 function pintarMensaje(texto, clase) {
 
