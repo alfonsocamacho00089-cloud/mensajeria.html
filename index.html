@@ -465,7 +465,7 @@ function cerrarModalQR() {
 window.onload = () => {
     const id = localStorage.getItem('mi_dropis_id');
     if (id) {
-        document.getElementById('mi-id-display').innertext = "Tu ID: " + id;
+        document.getElementById('mi-id-display').innerText = "Tu ID: " + id;
         activarAntena(); // <--- Aquí es donde el radar empieza a trabajar
     } else {
         document.getElementById('modal-registro').style.display = 'flex';
