@@ -332,8 +332,8 @@ async function activarAntena() {
 }
        
         
+
 async function enviarMensajeSatelital() {
-            
     const targetID = document.getElementById('target-id').value.trim();
     const msg = document.getElementById('msg-text').value.trim();
     const miID = localStorage.getItem('mi_dropis_id');
@@ -344,13 +344,12 @@ async function enviarMensajeSatelital() {
         // 1. Preparamos el Payload (ProtoBuf)
         const root = await cargarProto();
         const SuperAppPayload = root.lookupType("SuperAppPayload");
-        // Cambia chat_text por chatText
-        // Usamos el objeto directo sin el .create() para que no haya errores de nombres
-        const payload = SuperAppPayload.create({ chatText: msg });
+        const payload = SuperAppPayload.create({ chat_text: msg });
         const buffer = SuperAppPayload.encode(payload).finish();
+        
         // 2. Convertimos a Base64 para el viaje satelital
-        const arrayNormal = Array.from(buffer);
-        const base64 = btoa(arrayNormal.map(b => String.fromCharCode(b)).join(''));
+        const base64 = btoa(String.fromCharCode(...buffer));
+
         // 3. Lo lanzamos a la cola del destinatario
         await db.ref('cola_satelital/' + targetID).push({
             p: base64,         // El paquete cifrado/empaquetado
@@ -368,7 +367,7 @@ async function enviarMensajeSatelital() {
         console.error("❌ Fallo en el lanzamiento:", e);
         alert("Error al enviar el mensaje.");
     }
-    }
+}
 // --- 4. GESTIÓN DE TOKENS Y SERVICE WORKER ---
 
 // Registrar el Service Worker al cargar la página
