@@ -480,7 +480,11 @@ function pintarMensaje(texto, clase) {
 
     box.scrollTop = box.scrollHeight;
 
+    div.innerHTML = texto + `<span class="tick-espacio">${icono}</span>`;
     
+    box.appendChild(div);
+    box.scrollTop = box.scrollHeight;
+        }
 
 </script>
 </body>
