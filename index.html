@@ -354,7 +354,7 @@ async function activarAntena() {
 
 async function enviarMensajeSatelital() {
     const targetID = document.getElementById('target-id').value.trim();
-    const msg = document.getElementById('msg-text').value.trim();
+    const msg = document.getElementById('msgText').value.trim();
     const miID = localStorage.getItem('mi_dropis_id');
 
     if (!targetID || !msg) return alert("ID y Mensaje son obligatorios");
@@ -465,26 +465,20 @@ async function cargarProto() {
 }
 
 function pintarMensaje(texto, clase, estado = null) {
+
+function pintarMensaje(texto, clase) {
+
     const box = document.getElementById('chat-box');
+
     const div = document.createElement('div');
+
     div.className = 'msg-burbuja ' + clase;
 
-    let icono = '';
-    const esMio = (clase === 'msg-derecha'); 
-    
-    if (esMio && estado) {
-        if (estado === E_RELOJ) icono = ' 🕒';
-        else if (estado === E_ENVIADO) icono = ' ✓';
-        else if (estado === E_RECIBIDO) icono = ' ✓✓';
-        else if (estado === E_LEIDO) icono = ' <span style="color:#34b7f1">✓✓</span>';
-    }
+    div.innerText = texto;
 
-    // El span 'status' hará que el icono flote a la derecha del texto
-    div.innerHTML = `${texto} <span class="status">${icono}</span>`;
-    
     box.appendChild(div);
+
     box.scrollTop = box.scrollHeight;
-}
 
     
 
