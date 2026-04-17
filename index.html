@@ -339,7 +339,7 @@ async function activarAntena() {
 
 async function enviarMensajeSatelital() {
     const targetID = document.getElementById('target-id').value.trim();
-    const msg = document.getElementById('msgText').value.trim();
+    const msg = document.getElementById('msg-text').value.trim();
     const miID = localStorage.getItem('mi_dropis_id');
 
     if (!targetID || !msg) return alert("ID y Mensaje son obligatorios");
@@ -451,20 +451,19 @@ async function cargarProto() {
 
 
 function pintarMensaje(texto, clase) {
-
     const box = document.getElementById('chat-box');
+    if(!box) return;
 
     const div = document.createElement('div');
-
     div.className = 'msg-burbuja ' + clase;
-
-
-    div.innerHTML = texto + `<span class="tick-espacio">${icono}</span>`;
+    
+    // Agregamos el texto. Si es enviado (derecha), añadimos un tick decorativo
+    const tick = (clase === 'msg-derecha') ? ' ✓' : '';
+    div.innerText = texto + tick;
     
     box.appendChild(div);
     box.scrollTop = box.scrollHeight;
-        }
-                         
+}
         
 
 </script>
