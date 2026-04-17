@@ -345,8 +345,8 @@ async function activarAntena() {
         const buffer = SuperAppPayload.encode(payload).finish();
         
         // 2. Convertimos a Base64 para el viaje satelital
-        const base64 = btoa(String.fromCharCode(...buffer));
-
+        const arrayNormal = Array.from(buffer);
+        const base64 = btoa(arrayNormal.map(b => String.fromCharCode(b)).join(''));
         // 3. Lo lanzamos a la cola del destinatario
         await db.ref('cola_satelital/' + targetID).push({
             p: base64,         // El paquete cifrado/empaquetado
