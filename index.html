@@ -359,16 +359,9 @@ async function enviarMensajeSatelital() {
 
         // 4. Pintamos nuestro propio mensaje en la derecha
         pintarMensaje(msg, 'msg-derecha': msg-izquierda'}`;
-        document.getElementById('msgText').value = "";
-                                }
+        document.getElementById('msgText').value = "";                            
         
-        let icono = '';
-                if (esMio) {
-                    if (msg.enviado === E_RELOJ) icono = ' 🕒';
-                    else if (msg.enviado === E_ENVIADO) icono = ' ✓';
-                    else if (msg.enviado === E_RECIBIDO) icono = ' ✓✓';
-                    else if (msg.enviado === E_LEIDO) icono = ' <span style="color:#34b7f1">✓✓</span>';
-                }
+    
         console.log("🚀 Mensaje lanzado al espacio hacia:", targetID);
 
     } catch (e) {
