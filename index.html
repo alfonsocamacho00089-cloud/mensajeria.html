@@ -354,7 +354,7 @@ async function activarAntena() {
 
 async function enviarMensajeSatelital() {
     const targetID = document.getElementById('target-id').value.trim();
-    const msg = document.getElementById('msgText').value.trim();
+    const msg = document.getElementById('msg-text').value.trim();
     const miID = localStorage.getItem('mi_dropis_id');
 
     if (!targetID || !msg) return alert("ID y Mensaje son obligatorios");
