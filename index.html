@@ -358,7 +358,7 @@ async function enviarMensajeSatelital() {
         });
 
         // 4. Pintamos nuestro propio mensaje en la derecha
-        pintarMensaje(msg, 'msg-derecha'}`;
+        pintarMensaje(msg, 'msg-derecha');
         document.getElementById('msgText').value = "";                            
         
     
@@ -445,13 +445,28 @@ async function cargarProto() {
     return root;
 }
 
-function pintarMensaje(texto, clase) {
+function pintarMensaje(texto, clase, estado = null) {
     const box = document.getElementById('chat-box');
     const div = document.createElement('div');
     div.className = 'msg-burbuja ' + clase;
-    div.innerText = texto;
+
+    // 1. Lógica de los iconos
+    let icono = '';
+    const esMio = clase === 'msg-derecha'; 
+    
+    if (esMio && estado) {
+        if (estado === E_RELOJ) icono = ' 🕒';
+        else if (estado === E_ENVIADO) icono = ' ✓';
+        else if (estado === E_RECIBIDO) icono = ' ✓✓';
+        else if (estado === E_LEIDO) icono = ' <span style="color:#34b7f1">✓✓</span>';
+    }
+
+    // 2. Usar innerHTML para que el icono y el color se procesen
+    div.innerHTML = texto + `<span class="tick-espacio">${icono}</span>`;
+    
     box.appendChild(div);
     box.scrollTop = box.scrollHeight;
+    }
 }
 </script>
 </body>
