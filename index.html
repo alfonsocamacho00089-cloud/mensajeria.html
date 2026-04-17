@@ -335,7 +335,7 @@ async function activarAntena() {
 
 async function enviarMensajeSatelital() {
     const targetID = document.getElementById('target-id').value.trim();
-    const msg = document.getElementById('msg-text').value.trim();
+    const msg = document.getElementById('msgText').value.trim();
     const miID = localStorage.getItem('mi_dropis_id');
 
     if (!targetID || !msg) return alert("ID y Mensaje son obligatorios");
@@ -344,7 +344,7 @@ async function enviarMensajeSatelital() {
         // 1. Preparamos el Payload (ProtoBuf)
         const root = await cargarProto();
         const SuperAppPayload = root.lookupType("SuperAppPayload");
-        const payload = SuperAppPayload.create({ chat_text: msg });
+        const payload = SuperAppPayload.create({ chatText: msg });
         const buffer = SuperAppPayload.encode(payload).finish();
         
         // 2. Convertimos a Base64 para el viaje satelital
@@ -359,7 +359,7 @@ async function enviarMensajeSatelital() {
 
         // 4. Pintamos nuestro propio mensaje en la derecha
         pintarMensaje(msg, 'msg-derecha');
-        document.getElementById('msg-text').value = "";
+        document.getElementById('msgText').value = "";
         
         console.log("🚀 Mensaje lanzado al espacio hacia:", targetID);
 
