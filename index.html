@@ -287,7 +287,7 @@ async function ejecutarRegistroCompleto() {
 }
 
 // --- 4. ANTENA SATELITAL ---
-function activarAntena() {
+async function activarAntena() {
     const miID = localStorage.getItem('mi_dropis_id');
     if (!miID) return;
 
@@ -298,26 +298,73 @@ function activarAntena() {
     
     window.listenerActivo.on('child_added', async (snapshot) => {
         const data = snapshot.val();
+        if (!data || !data.p) return; // Si el paquete viene vacío, ignorar
+
         try {
+            // 1. Cargar la estructura del mensaje
             const root = await cargarProto();
             const SuperAppPayload = root.lookupType("SuperAppPayload");
+            
+            // 2. Decodificar Base64 a binario y luego a Objeto
             const buffer = Uint8Array.from(atob(data.p), c => c.charCodeAt(0));
             const decoded = SuperAppPayload.decode(buffer);
 
-            // Guardar local antes de borrar de la nube
+            // 3. Guardar en historial local (IndexedDB)
             await guardarLocal('mensajes', {
                 texto: decoded.chat_text,
                 clase: 'msg-izquierda',
-                remitente: data.from,
+                remitente: data.from || "Desconocido",
                 ts: Date.now()
             });
 
+            // 4. Mostrar en pantalla
             pintarMensaje(decoded.chat_text, 'msg-izquierda');
+            
+            // 5. Borrar de la nube (limpieza satelital) para no procesarlo dos veces
             snapshot.ref.remove(); 
-        } catch (e) { console.error("Error Antena:", e); }
+            
+        } catch (e) { 
+            console.error("❌ Error en la recepción del paquete:", e);
+            // Si falla el proto, intentamos mostrar el texto plano si existe
+            if(data.texto_plano) pintarMensaje(data.texto_plano, 'msg-izquierda');
+        }
     });
 }
+        async function enviarMensajeSatelital() {
+    const targetID = document.getElementById('target-id').value.trim();
+    const msg = document.getElementById('msg-text').value.trim();
+    const miID = localStorage.getItem('mi_dropis_id');
 
+    if (!targetID || !msg) return alert("ID y Mensaje son obligatorios");
+
+    try {
+        // 1. Preparamos el Payload (ProtoBuf)
+        const root = await cargarProto();
+        const SuperAppPayload = root.lookupType("SuperAppPayload");
+        const payload = SuperAppPayload.create({ chat_text: msg });
+        const buffer = SuperAppPayload.encode(payload).finish();
+        
+        // 2. Convertimos a Base64 para el viaje satelital
+        const base64 = btoa(String.fromCharCode(...buffer));
+
+        // 3. Lo lanzamos a la cola del destinatario
+        await db.ref('cola_satelital/' + targetID).push({
+            p: base64,         // El paquete cifrado/empaquetado
+            from: miID,        // Quién lo envía
+            ts: Date.now()     // Marca de tiempo
+        });
+
+        // 4. Pintamos nuestro propio mensaje en la derecha
+        pintarMensaje(msg, 'msg-derecha');
+        document.getElementById('msg-text').value = "";
+        
+        console.log("🚀 Mensaje lanzado al espacio hacia:", targetID);
+
+    } catch (e) {
+        console.error("❌ Fallo en el lanzamiento:", e);
+        alert("Error al enviar el mensaje.");
+    }
+    }
 // --- 4. GESTIÓN DE TOKENS Y SERVICE WORKER ---
 
 // Registrar el Service Worker al cargar la página
