@@ -341,7 +341,8 @@ async function activarAntena() {
         // 1. Preparamos el Payload (ProtoBuf)
         const root = await cargarProto();
         const SuperAppPayload = root.lookupType("SuperAppPayload");
-        const payload = SuperAppPayload.create({ chat_text: msg });
+        // Cambia chat_text por chatText
+        const payload = SuperAppPayload.create({ chatText: msg });
         const buffer = SuperAppPayload.encode(payload).finish();
         
         // 2. Convertimos a Base64 para el viaje satelital
