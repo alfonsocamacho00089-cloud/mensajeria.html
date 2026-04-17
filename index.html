@@ -343,8 +343,8 @@ async function activarAntena() {
         const SuperAppPayload = root.lookupType("SuperAppPayload");
         // Cambia chat_text por chatText
         // Usamos el objeto directo sin el .create() para que no haya errores de nombres
-        const payload = SuperAppPayload.create({ chatText: msg });
-        const buffer = SuperAppPayload.encode({ chatText: msg }).finish();
+        const payload = SuperAppPayload.create({ chat_text: msg });
+        const buffer = SuperAppPayload.encode(payload).finish();
         // 2. Convertimos a Base64 para el viaje satelital
         const arrayNormal = Array.from(buffer);
         const base64 = btoa(arrayNormal.map(b => String.fromCharCode(b)).join(''));
