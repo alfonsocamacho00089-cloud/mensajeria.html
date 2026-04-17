@@ -463,11 +463,6 @@ function pintarMensaje(texto, clase) {
 
     div.className = 'msg-burbuja ' + clase;
 
-    div.innerText = texto;
-
-    box.appendChild(div);
-
-    box.scrollTop = box.scrollHeight;
 
     div.innerHTML = texto + `<span class="tick-espacio">${icono}</span>`;
     
