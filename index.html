@@ -311,14 +311,14 @@ async function activarAntena() {
 
             // 3. Guardar en historial local (IndexedDB)
             await guardarLocal('mensajes', {
-                texto: decoded.chat_text,
+                texto: decoded.chatText,
                 clase: 'msg-izquierda',
                 remitente: data.from || "Desconocido",
                 ts: Date.now()
             });
 
             // 4. Mostrar en pantalla
-            pintarMensaje(decoded.chat_text, 'msg-izquierda');
+            pintarMensaje(decoded.chatText, 'msg-izquierda');
             
             // 5. Borrar de la nube (limpieza satelital) para no procesarlo dos veces
             snapshot.ref.remove(); 
@@ -331,6 +331,7 @@ async function activarAntena() {
     });
 }
         async function enviarMensajeSatelital() {
+            
     const targetID = document.getElementById('target-id').value.trim();
     const msg = document.getElementById('msg-text').value.trim();
     const miID = localStorage.getItem('mi_dropis_id');
@@ -343,7 +344,7 @@ async function activarAntena() {
         const SuperAppPayload = root.lookupType("SuperAppPayload");
         // Cambia chat_text por chatText
         // Usamos el objeto directo sin el .create() para que no haya errores de nombres
-        const payload = SuperAppPayload.create({ chat_text: msg });
+        const payload = SuperAppPayload.create({ chatText: msg });
         const buffer = SuperAppPayload.encode(payload).finish();
         // 2. Convertimos a Base64 para el viaje satelital
         const arrayNormal = Array.from(buffer);
