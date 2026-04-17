@@ -40,7 +40,7 @@ body {
         /* INPUT AREA CORREGIDA (Siempre visible al fondo) */
         .input-area { 
             background: #1a1a1a; 
-            padding: 10px 15px; 
+            padding: 10px; 
             display: flex; 
             gap: 10px; 
             border-top: 1px solid #333; 
@@ -337,7 +337,7 @@ async function activarAntena() {
             });
 
             // 4. Mostrar en pantalla
-            pintarMensaje(decoded.chatText, 'msg-izquierda',1);
+            pintarMensaje(decoded.chatText, 'msg-izquierda');
             
             // 5. Borrar de la nube (limpieza satelital) para no procesarlo dos veces
             snapshot.ref.remove(); 
@@ -377,7 +377,7 @@ async function enviarMensajeSatelital() {
         });
 
         // 4. Pintamos nuestro propio mensaje en la derecha
-        pintarMensaje(msg, 'msg-derecha', 1);
+        pintarMensaje(msg, 'msg-derecha');
         document.getElementById('msgText').value = "";                            
         
     
