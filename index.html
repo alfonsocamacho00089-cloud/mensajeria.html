@@ -330,7 +330,9 @@ async function activarAntena() {
         }
     });
 }
-        async function enviarMensajeSatelital() {
+       
+        
+async function enviarMensajeSatelital() {
             
     const targetID = document.getElementById('target-id').value.trim();
     const msg = document.getElementById('msg-text').value.trim();
@@ -374,12 +376,10 @@ if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('firebase-messaging-sw.js')
         .then(registration => {
             console.log("🛰️ Antena (SW) lista para recibir señales");
-            // Intentar obtener el token automáticamente si ya está registrado
-            obtenerToken(registration);
+            // Aquí llamarías a obtenerToken(registration) si ya tienes esa función lista
         })
         .catch(err => console.error("❌ Fallo en registro de antena:", err));
 }
-
 async function obtenerToken(registration) {
     try {
         const miVapidKey = 'BIrsA9YbBXfIuo4PTMrKRtuktRsK2RbK0XevupuofGGOUDy9w5VZ9yaXbZXsenXppmFsR62-2B7jBOG0Z8RdxvU';
