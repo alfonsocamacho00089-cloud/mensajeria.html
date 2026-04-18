@@ -474,7 +474,14 @@ window.onload = () => {
 };
 
 async function cargarProto() {
-    const root = await protobuf.load("superapp.proto");
+    const schema = `
+        package superapp;
+        syntax = "proto3";
+        message SuperAppPayload {
+            string chatText = 1;
+        }
+    `;
+    const root = protobuf.parse(schema).root;
     return root;
 }
 
