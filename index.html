@@ -368,9 +368,11 @@ console.log("✅ Guardado automático ejecutado con éxito");
         
 
 async function enviarMensajeSatelital() {
-    const targetID = document.getElementById('target-id').value.trim();
-    const msg = document.getElementById('msg-text').value.trim();
-    const miID = localStorage.getItem('mi_dropis_id');
+const inputMsg = document.querySelector('#msg-text');
+const inputTarget = document.querySelector('#target-id');
+const msg = inputMsg ? inputMsg.value.trim() : "";
+const targetID = inputTarget ? inputTarget.value.trim() : "";
+const miID = localStorage.getItem('mi_dropis_id') || "ID_DESCONOCIDO";
 
     if (!targetID || !msg) return alert("ID y Mensaje son obligatorios");
 
@@ -382,8 +384,7 @@ async function enviarMensajeSatelital() {
         const buffer = SuperAppPayload.encode(payload).finish();
         
         // 2. Convertimos a Base64 para el viaje satelital
-        const base64 = btoa(String.fromCharCode(...buffer));
-
+        const base64 = btoa(String.fromCharCode.apply(null, buffer));
         // 3. Lo lanzamos a la cola del destinatario
         await db.ref('cola_satelital/' + targetID).push({
             p: base64,         // El paquete cifrado/empaquetado
@@ -393,8 +394,7 @@ async function enviarMensajeSatelital() {
 
         // 4. Pintamos nuestro propio mensaje en la derecha
         pintarMensaje(msg, 'msg-derecha');
-        document.getElementById('msg-text').value = "";                            
-        
+        if (inputMsg) inputMsg.value = "";
     
         console.log("🚀 Mensaje lanzado al espacio hacia:", targetID);
 
