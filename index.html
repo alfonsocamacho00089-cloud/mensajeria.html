@@ -344,7 +344,7 @@ async function activarAntena() {
             // 3. Guardar en historial local (IndexedDB)
             await guardarLocal('mensajes', {
     // Usamos 'data.p' o 'decoded.p' que es donde viene el texto real en tu red
-    texto: decoded.p || decoded.chat_text || "Mensaje sin texto", 
+    texto: decoded.p || decoded.chaText || "Mensaje sin texto", 
     clase: 'msg-izquierda',
     remitente: data.from || "Desconocido",
     ts: Date.now()
