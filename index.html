@@ -343,14 +343,14 @@ async function activarAntena() {
 
             // 3. Guardar en historial local (IndexedDB)
             await guardarLocal('mensajes', {
-                texto: decoded.chat-text,
+                texto: decoded.chatText,
                 clase: 'msg-izquierda',
                 remitente: data.from || "Desconocido",
                 ts: Date.now()
             });
 
             // 4. Mostrar en pantalla
-            pintarMensaje(decoded.chat-text, 'msg-izquierda');
+            pintarMensaje(decoded.chatText, 'msg-izquierda');
             
             // 5. Borrar de la nube (limpieza satelital) para no procesarlo dos veces
             snapshot.ref.remove(); 
