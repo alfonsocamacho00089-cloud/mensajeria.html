@@ -356,10 +356,11 @@ console.log("✅ Guardado automático ejecutado con éxito");
             // 5. Borrar de la nube (limpieza satelital) para no procesarlo dos veces
             snapshot.ref.remove(); 
             
-        } catch (e) { 
-            console.error("❌ Error en la recepción del paquete:", e);
-            // Si falla el proto, intentamos mostrar el texto plano si existe
-            if(data.texto_plano) pintarMensaje(data.texto_plano, 'msg-izquierda');
+        // Dentro de activarAntena...
+} catch (e) { 
+    console.error("❌ Error decodificando:", e);
+    // Si falla el proto, intentamos mostrar que llegó algo crudo
+    pintarMensaje("Error al decodificar paquete: " + data.p.substring(0,10) + "...", 'msg-izquierda');
         }
     });
 }
