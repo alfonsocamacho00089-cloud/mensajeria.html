@@ -343,14 +343,14 @@ async function activarAntena() {
 
             // 3. Guardar en historial local (IndexedDB)
             await guardarLocal('mensajes', {
-                texto: decoded.chat-text,
+                texto: decoded.chat_text,
                 clase: 'msg-izquierda',
                 remitente: data.from || "Desconocido",
                 ts: Date.now()
             });
 
             // 4. Mostrar en pantalla
-            pintarMensaje(decoded.chat-text, 'msg-izquierda');
+            pintarMensaje(decoded.chat_text, 'msg-izquierda');
             
             // 5. Borrar de la nube (limpieza satelital) para no procesarlo dos veces
             snapshot.ref.remove(); 
@@ -376,7 +376,7 @@ async function enviarMensajeSatelital() {
         // 1. Preparamos el Payload (ProtoBuf)
         const root = await cargarProto();
         const SuperAppPayload = root.lookupType("SuperAppPayload");
-        const payload = SuperAppPayload.create({ chatText: msg });
+        const payload = SuperAppPayload.create({ chat_text: msg });
         const buffer = SuperAppPayload.encode(payload).finish();
         
         // 2. Convertimos a Base64 para el viaje satelital
