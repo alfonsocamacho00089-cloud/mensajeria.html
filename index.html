@@ -14,130 +14,23 @@
     <script>eruda.init();</script>
 
     <style>
-
-   
-body { 
-    font-family: sans-serif; 
-    background: #000000; 
-    margin: 0; 
-    display: flex; 
-    flex-direction: column; 
-    height: 100dvh; /* Altura dinámica para móviles */
-    overflow: hidden; /* Evita el scroll de toda la pantalla */
-}
-
-/* Cabecera Intocable */
-.header { 
-    background: #1a1a1a; 
-    padding: 15px; 
-    border-bottom: 2px solid #ffd700; 
-    flex-shrink: 0; /* NO se aplasta */
-}
-
-/* El Chat es el único que crece y desliza */
-
-        /* INPUT AREA CORREGIDA (Siempre visible al fondo) */
-        .input-area { 
-            background: #1a1a1a; 
-            padding: 10px; 
-            display: flex; 
-            gap: 10px; 
-            border-top: 1px solid #333; 
-            flex-shrink: 0; /* Evita que se vaya muy abajo */
-            padding-bottom: 20px; /* Espacio para botones de navegación del móvil */
-        }
-
+        body { font-family: sans-serif; background: #000000; margin: 0; display: flex; flex-direction: column; height: 100dvh; overflow: hidden; }
+        .header { background: #1a1a1a; padding: 15px; border-bottom: 2px solid #ffd700; flex-shrink: 0; position: relative; }
+        #chat-box { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 10px; background: #000; }
+        .input-area { background: #1a1a1a; padding: 10px; display: flex; gap: 10px; border-top: 1px solid #333; flex-shrink: 0; padding-bottom: 25px; }
         input#msg-text { flex: 1; padding: 12px; border-radius: 25px; border: none; outline: none; background: #2a2a2a; color: white; }
-        input#target-id { width: 60px; background: #000; color: #ffd700; border: 1px solid #333; border-radius: 8px; text-align: center; }
-        
+        input#target-id { width: 70px; background: #000; color: #ffd700; border: 1px solid #333; border-radius: 8px; text-align: center; }
         button#btn-enviar { background: #ffd700; border: none; padding: 10px 20px; border-radius: 20px; font-weight: bold; cursor: pointer; color: black; }
-        
-     #chat-box { 
-    flex: 1; 
-    overflow-y: auto; 
-    padding: 15px; 
-    display: flex; 
-    flex-direction: column; 
-    gap: 10px; 
-    background: #000; /* Fondo negro como lo tienes */
-}
-
-.msg-burbuja { 
-    max-width: 80%; 
-    padding: 8px 12px; 
-    border-radius: 12px; 
-    font-size: 15px; 
-    line-height: 1.4; 
-    position: relative; 
-    word-wrap: break-word; 
-    margin: 2px 0; 
-}
-
-/* MENSAJE ENVIADO (DERECHA - VERDE) */
-.msg-derecha { 
-    align-self: flex-end; 
-    background-color: #005c4b; /* Verde oscuro estilo WhatsApp */
-    color: white; 
-    border-bottom-right-radius: 2px; /* La punta distintiva */
-}
-
-/* MENSAJE RECIBIDO (IZQUIERDA - GRIS) */
-.msg-izquierda { 
-    align-self: flex-start; 
-    background-color: #202c33; /* Gris oscuro para recibidos */
-    color: white; 
-    border-bottom-left-radius: 2px; /* La punta en el otro lado */
-}
-
-/* Contenedor del icono dentro de la burbuja */
-.status {
-    font-size: 0.75em;
-    float: right;
-    margin: 4px 0 -4px 8px;
-    opacity: 0.7;
-}
-        #mi-id-display { font-size: 11px; color: #ffd700; margin-top: 5px; font-family: monospace; }
-        .btn-qr-dropis { position: absolute; right: 15px; top: 50%; transform: translateY(-50%); background: #ffd700; border: none; border-radius: 50%; width: 35px; height: 35px; cursor: pointer; font-size: 18px; }
-
+        .msg-burbuja { max-width: 80%; padding: 8px 12px; border-radius: 12px; font-size: 15px; line-height: 1.4; position: relative; word-wrap: break-word; margin: 2px 0; color: white; }
+        .msg-derecha { align-self: flex-end; background-color: #005c4b; border-bottom-right-radius: 2px; }
+        .msg-izquierda { align-self: flex-start; background-color: #202c33; border-bottom-left-radius: 2px; }
         .msg-burbuja[data-enviado="3"]::after { content: " ✓✓"; font-size: 10px; color: #34b7f1; }
-
-        /* MODALES */
+        #mi-id-display { font-size: 11px; color: #ffd700; margin-top: 5px; font-family: monospace; }
+        .btn-qr-dropis { position: absolute; right: 15px; top: 50%; transform: translateY(-50%); background: #ffd700; border: none; border-radius: 50%; width: 35px; height: 35px; cursor: pointer; }
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 10000; justify-content: center; align-items: center; }
         .modal-content { background: #fff; padding: 25px; border-radius: 20px; width: 85%; max-width: 320px; text-align: center; color: #333; }
-
-    
     </style>
-
 </head>
-<script>
-
-    // 1. Esta función quita el error de "Not Defined"
-
-    function enviarMensajeSatelital() {
-
-        const id = document.getElementById('target-id').value;
-
-        const msg = document.getElementById('msg-text').value;
-
-        
-
-        if(msg === "") {
-
-            alert("Escribe algo para enviar");
-
-            return;
-
-        }
-
-        
-
-        console.log("Mensaje enviado a: " + id);
-
-        document.getElementById('msg-text').value = ""; // Limpia el cuadro
-
-        }
-
-</script>
 <body>
 
     <div class="header">
@@ -146,37 +39,29 @@ body {
         <button class="btn-qr-dropis" onclick="manejarBotonIdentidad()">🪪</button>
     </div>
 
-    <div id="chat-box">
-        </div>
+    <div id="chat-box"></div>
 
     <div id="modal-registro" class="modal">
         <div class="modal-content">
             <h3>Registro Maestro</h3>
-            <input type="text" id="reg-nombre" placeholder="Nombre" style="width:100%; padding:10px; margin:5px 0; color:#000;">
-            <input type="text" id="reg-apellido" placeholder="Apellido" style="width:100%; padding:10px; margin:5px 0; color:#000;">
-         <button onclick="ejecutarRegistroCompleto()" style="width: 100%; padding: 12px; background: #ffd700; border: none; border-radius: 10px; font-weight: bold; margin-top: 10px;">VALIDAR HUELLA Y CREAR</button>
-        
-        <p style="margin-top: 20px; font-size: 13px; color: #ffd700; cursor: pointer; text-decoration: underline;" 
-   onclick="recuperarCuentaConID()">
-   ¿Ya tienes un ID Dropis? Toca aquí para recuperar
-        </p>
-        
+            <input type="text" id="reg-nombre" placeholder="Nombre" style="width:90%; padding:10px; margin:5px 0;">
+            <input type="text" id="reg-apellido" placeholder="Apellido" style="width:90%; padding:10px; margin:5px 0;">
+            <button onclick="ejecutarRegistroCompleto()" style="width: 100%; padding: 12px; background: #ffd700; border: none; border-radius: 10px; font-weight: bold; margin-top: 10px;">VALIDAR Y CREAR</button>
+            <p style="margin-top: 20px; font-size: 13px; color: #666; cursor: pointer; text-decoration: underline;" onclick="recuperarCuentaConID()">¿Ya tienes un ID? Toca aquí</p>
         </div>
     </div>
-    
-    
 
     <div id="modal-huella" class="modal">
-    <div class="modal-content" style="background: #000; color: #ffd700; border: 2px solid #ffd700;">
-        <div style="font-size: 60px; margin-bottom: 15px;">🫆</div>
-        <h3 style="color: #fff;">Validando Huella...</h3>
-        <p style="color: #ffd700; font-family: monospace; font-size: 12px;">Vinculando Token Satelital</p>
+        <div class="modal-content" style="background: #000; color: #ffd700; border: 2px solid #ffd700;">
+            <div style="font-size: 60px; margin-bottom: 15px;">🫆</div>
+            <h3>Sincronizando...</h3>
+        </div>
     </div>
-    </div>
+
     <div id="modal-qr" class="modal">
         <div class="modal-content">
-            <h3 style="margin-bottom: 15px;">Mi Identidad Dropis</h3>
-            <div id="contenedor-qr" style="display: flex; flex-direction: column; align-items: center;"></div>
+            <h3>Mi Identidad</h3>
+            <div id="contenedor-qr"></div>
             <button onclick="cerrarModalQR()" style="margin-top: 20px; width: 100%; padding: 10px; background: #333; color: white; border: none; border-radius: 10px;">CERRAR</button>
         </div>
     </div>
@@ -188,345 +73,165 @@ body {
     </div>
 
     <script>
-        // 1. CONFIGURACIÓN Y REGISTRO DE ANTENA (INDISPENSABLE PARA EL TOKEN)
-        
-const firebaseConfig = {
-    apiKey: "AIzaSyCaUyhX2iBMl4A5xeKeu_4SeE6HClp4V1s",
-    authDomain: "real-market-elite-2025.firebaseapp.com",
-    projectId: "real-market-elite-2025",
-    databaseURL: "https://real-market-elite-2025-default-rtdb.firebaseio.com",
-    messagingSenderId: "226489002778",
-    appId: "1:226489002778:web:6722d21a9e78b33b5b1aa3"
-};
-firebase.initializeApp(firebaseConfig);
-const messaging = firebase.messaging();
-const db = firebase.database();
-
-// --- 2. MOTOR DE PERSISTENCIA (IndexedDB) ---
-const dbNombre = "DropisDB";
-const dbVersion = 1;
-
-function abrirDB() {
-    return new Promise((resolve, reject) => {
-        const request = indexedDB.open(dbNombre, dbVersion);
-        request.onupgradeneeded = (e) => {
-            const db = e.target.result;
-            if (!db.objectStoreNames.contains('mensajes')) db.createObjectStore('mensajes', { autoIncrement: true });
-            if (!db.objectStoreNames.contains('usuario')) db.createObjectStore('usuario', { keyPath: 'id' });
+        // CONFIGURACIÓN FIREBASE
+        const firebaseConfig = {
+            apiKey: "AIzaSyCaUyhX2iBMl4A5xeKeu4SeE6HClp4V1s",
+            authDomain: "real-market-elite-2025.firebaseapp.com",
+            projectId: "real-market-elite-2025",
+            databaseURL: "https://real-market-elite-2025-default-rtdb.firebaseio.com",
+            messagingSenderId: "226489002778",
+            appId: "1:226489002778:web:6722d21a9e78b33b5b1aa3"
         };
-        request.onsuccess = () => resolve(request.result);
-        request.onerror = () => reject("Error DB");
-    });
-}
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+        const messaging = firebase.messaging();
 
-async function guardarLocal(tabla, datos) {
-    const db = await abrirDB();
-    const tx = db.transaction(tabla, 'readwrite');
-    tx.objectStore(tabla).put(datos);
-}
-
-// --- 3. SOLO REGISTRO Y RECUPERACIÓN ---
-
-async function recuperarCuentaConID() {
-    const idParaRecuperar = prompt("Escribe tu ID Dropis:");
-    if (!idParaRecuperar) return;
-
-    try {
-        const snapshot = await firebase.database().ref('usuarios/' + idParaRecuperar).once('value');
-        if (snapshot.exists()) {
-            const datos = snapshot.val();
-            // Restaurar en el teléfono
-            localStorage.setItem('mi_dropis_id', idParaRecuperar);
-            await guardarLocal('usuario', { 
-                id: 'perfil_propietario', 
-                dropis_id: idParaRecuperar,
-                nombre: datos.nombre,
-                apellido: datos.apellido,
-                fcm_token: datos.fcm_token || '' 
+        // MOTOR DE BASE DE DATOS LOCAL
+        async function abrirDB() {
+            return new Promise((resolve) => {
+                const request = indexedDB.open("DropisDB", 1);
+                request.onupgradeneeded = (e) => {
+                    const db = e.target.result;
+                    if (!db.objectStoreNames.contains('mensajes')) db.createObjectStore('mensajes', { autoIncrement: true });
+                    if (!db.objectStoreNames.contains('usuario')) db.createObjectStore('usuario', { keyPath: 'id' });
+                };
+                request.onsuccess = () => resolve(request.result);
             });
-            alert(`🚀 ¡Identidad recuperada! Bienvenido ${datos.nombre}.`);
-            location.reload(); 
-        } else {
-            alert("❌ ID no encontrado en el satélite.");
         }
-    } catch (e) {
-        alert("Error de conexión satelital.");
-    }
-}
-async function ejecutarRegistroCompleto() {
-    const nombre = document.getElementById('reg-nombre').value.trim();
-    const apellido = document.getElementById('reg-apellido').value.trim();
-    
-    if (!nombre || !apellido) return alert("Completa los datos");
 
-    // 1. GENERACIÓN DEL ID CON LA LÓGICA SUB_12
-    // Genera algo como: TU_ID_DROPIS_SUB_12_X8J2K
-    const hash = Math.random().toString(36).substring(2, 7).toUpperCase();
-    const idUnico = Math.random().toString(36).substring(2, 14); + hash; 
-
-    // 2. PREPARAR DATOS PARA LOCAL (IndexedDB)
-    const datosUsuario = { 
-        id: 'perfil_propietario', 
-        dropis_id: idUnico, 
-        nombre: nombre, 
-        apellido: apellido, 
-        fecha: Date.now() 
-    };
-
-    // Guardar en el teléfono (Local)
-    localStorage.setItem('mi_dropis_id', idUnico);
-    await guardarLocal('usuario', datosUsuario);
-    
-    // Actualizar interfaz
-    document.getElementById('modal-registro').style.display = 'none';
-    document.getElementById('mi-id-display').innertext = "Tu ID: " + idUnico;
-    
-    const modalHuella = document.getElementById('modal-huella');
-    if(modalHuella) modalHuella.style.display = 'flex';
-
-    try {
-        // 3. OBTENER TOKEN SATELITAL (FCM)
-        const registration = await navigator.serviceWorker.ready;
-        const token = await messaging.getToken({ 
-            vapidKey: 'BIrsA9YbBXfIuo4PTMrKRtuktRsK2RbK0XevupuofGGOUDy9w5VZ9yaXbZXsenXppmFsR62-2B7jBOG0Z8RdxvU',
-            serviceWorkerRegistration: registration 
-        });
-        
-        if (token) {
-            localStorage.setItem('fcm_token', token);
-
-            // 4. LÓGICA DE GUARDADO EN LA NUBE (LA QUE NECESITAS)
-            // Esto crea una ruta: usuarios/TU_ID_DROPIS_SUB_12_XXXXX/
-            await db.ref('usuarios/' + idUnico).set({
-                id_sistema: idUnico,
-                nombre: nombre,
-                apellido: apellido,
-                fcm_token: token,
-                estado: "activo",
-                version: "LITE_SUB_12",
-                timestamp: firebase.database.ServerValue.TIMESTAMP
-            });
-
-            console.log("✅ Sincronizado con éxito en la nube bajo: " + idUnico);
+        async function guardarLocal(tabla, datos) {
+            const dbL = await abrirDB();
+            const tx = dbL.transaction(tabla, 'readwrite');
+            tx.objectStore(tabla).put(datos);
         }
-        
-        setTimeout(() => { if(modalHuella) modalHuella.style.display = 'none'; }, 3000);
-    } catch (e) { 
-        console.error("⚠️ Error en vinculación satelital:", e);
-        // Aunque falle el token, el usuario ya se creó localmente
-        setTimeout(() => { if(modalHuella) modalHuella.style.display = 'none'; }, 2000);
-    }
-}
 
-// --- 4. ANTENA SATELITAL ---
-async function activarAntena() {
-    const miID = localStorage.getItem('mi_dropis_id');
-    if (!miID) return;
-
-    if (window.listenerActivo) window.listenerActivo.off(); 
-
-    console.log("📡 Antena sintonizada en:", miID);
-    window.listenerActivo = db.ref('cola_satelital/' + miID);
-    
-    window.listenerActivo.on('child_added', async (snapshot) => {
-        const data = snapshot.val();
-        if (!data || !data.p) return; // Si el paquete viene vacío, ignorar
-
-        try {
-            // 1. Cargar la estructura del mensaje
-            const root = await cargarProto();
-            const SuperAppPayload = root.lookupType("SuperAppPayload");
-            
-            // 2. Decodificar Base64 a binario y luego a Objeto
-            const buffer = Uint8Array.from(atob(data.p), c => c.charCodeAt(0));
-            const decoded = SuperAppPayload.decode(buffer);
-
-            // 3. Guardar en historial local (IndexedDB)
-            await guardarLocal('mensajes', {
-    // Usamos 'data.p' o 'decoded.p' que es donde viene el texto real en tu red
-    texto: decoded.chatText || "Mensaje sin texto",
-    remitente: data.from || "Desconocido",
-    ts: Date.now()
-});
-console.log("✅ Guardado automático ejecutado con éxito");
-
-            // 4. Mostrar en pantalla
-            pintarMensaje(decoded.chatText, 'msg-izquierda');
-            
-            // 5. Borrar de la nube (limpieza satelital) para no procesarlo dos veces
-            snapshot.ref.remove(); 
-            
-        // Dentro de activarAntena...
-} catch (e) { 
-    console.error("❌ Error decodificando:", e);
-    // Si falla el proto, intentamos mostrar que llegó algo crudo
-    pintarMensaje("Error al decodificar paquete: " + data.p.substring(0,10) + "...", 'msg-izquierda');
+        // ESQUEMA PROTOBUF INTEGRADO
+        async function cargarProto() {
+            const schema = `
+                package superapp;
+                syntax = "proto3";
+                message SuperAppPayload {
+                    string chatText = 1;
+                }
+            `;
+            return protobuf.parse(schema).root;
         }
-    });
-}
-       
-        
 
-async function enviarMensajeSatelital() {
-    const targetID = document.getElementById('target-id').value.trim();
-    const msg = document.getElementById('msg-text').value.trim();
-    const miID = localStorage.getItem('mi_dropis_id');
-
-    if (!targetID || !msg) return alert("ID y Mensaje son obligatorios");
-
-    try {
-        // 1. Preparamos el Payload (ProtoBuf)
-        const root = await cargarProto();
-        const SuperAppPayload = root.lookupType("SuperAppPayload");
-        const payload = SuperAppPayload.create({ chatText: msg });
-        const buffer = SuperAppPayload.encode(payload).finish();
-        
-        // 2. Convertimos a Base64 para el viaje satelital
-        const base64 = btoa(String.fromCharCode(...buffer));
-
-        // 3. Lo lanzamos a la cola del destinatario
-        await db.ref('cola_satelital/' + targetID).push({
-            p: base64,         // El paquete cifrado/empaquetado
-            from: miID,        // Quién lo envía
-            ts: Date.now()     // Marca de tiempo
-        });
-
-        // 4. Pintamos nuestro propio mensaje en la derecha
-        pintarMensaje(msg, 'msg-derecha');
-        document.getElementById('msg-text').value = "";                            
-        
-    
-        console.log("🚀 Mensaje lanzado al espacio hacia:", targetID);
-
-    } catch (e) {
-        console.error("❌ Fallo en el lanzamiento:", e);
-        alert("Error al enviar el mensaje.");
-    }
-}
-// --- 4. GESTIÓN DE TOKENS Y SERVICE WORKER ---
-
-// Registrar el Service Worker al cargar la página
-if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('firebase-messaging-sw.js')
-        .then(registration => {
-            console.log("🛰️ Antena (SW) lista para recibir señales");
-            // Aquí llamarías a obtenerToken(registration) si ya tienes esa función lista
-        })
-        .catch(err => console.error("❌ Fallo en registro de antena:", err));
-}
-async function obtenerToken(registration) {
-    try {
-        const miVapidKey = 'BIrsA9YbBXfIuo4PTMrKRtuktRsK2RbK0XevupuofGGOUDy9w5VZ9yaXbZXsenXppmFsR62-2B7jBOG0Z8RdxvU';
-        const token = await messaging.getToken({ 
-            vapidKey: miVapidKey, 
-            serviceWorkerRegistration: registration 
-        });
-
-        if (token) {
-            console.log("🎫 TU TOKEN DROPIS:", token);
-            localStorage.setItem('fcm_token', token);
-            
-            // Si el usuario ya tiene ID, actualizamos el token en la nube silenciosamente
+        // ANTENA: RECIBIR MENSAJES
+        async function activarAntena() {
             const miID = localStorage.getItem('mi_dropis_id');
-            if (miID) {
-                firebase.database().ref('usuarios/' + miID).update({ fcm_token: token });
+            if (!miID) return;
+
+            console.log("📡 Antena activa en:", miID);
+            const ref = db.ref('cola_satelital/' + miID);
+            
+            ref.on('child_added', async (snapshot) => {
+                const data = snapshot.val();
+                if (!data || !data.p) return;
+
+                try {
+                    const root = await cargarProto();
+                    const SuperAppPayload = root.lookupType("SuperAppPayload");
+                    const buffer = Uint8Array.from(atob(data.p), c => c.charCodeAt(0));
+                    const decoded = SuperAppPayload.decode(buffer);
+
+                    pintarMensaje(decoded.chatText, 'msg-izquierda');
+                    guardarLocal('mensajes', { texto: decoded.chatText, from: data.from, ts: Date.now() });
+                    snapshot.ref.remove(); 
+                } catch (e) {
+                    console.error("Error decodificando:", e);
+                }
+            });
+        }
+
+        // EMISOR: ENVIAR MENSAJES
+        async function enviarMensajeSatelital() {
+            const targetID = document.getElementById('target-id').value.trim();
+            const msgInput = document.getElementById('msg-text');
+            const msg = msgInput.value.trim();
+            const miID = localStorage.getItem('mi_dropis_id');
+
+            if (!targetID || !msg) return;
+
+            try {
+                const root = await cargarProto();
+                const SuperAppPayload = root.lookupType("SuperAppPayload");
+                const payload = SuperAppPayload.create({ chatText: msg });
+                const buffer = SuperAppPayload.encode(payload).finish();
+                const base64 = btoa(String.fromCharCode(...buffer));
+
+                await db.ref('cola_satelital/' + targetID).push({
+                    p: base64,
+                    from: miID,
+                    ts: Date.now()
+                });
+
+                pintarMensaje(msg, 'msg-derecha');
+                msgInput.value = "";
+            } catch (e) {
+                console.error("Error al enviar:", e);
             }
         }
-    } catch (err) {
-        console.warn("⚠️ No se pudo obtener el token:", err);
-    }
-}
 
-// --- 5. LÓGICA DE INTERFAZ Y QR ---
-
-function manejarBotonIdentidad() {
-    const id = localStorage.getItem('mi_dropis_id');
-    if (id) {
-        document.getElementById('modal-qr').style.display = 'flex';
-        const cont = document.getElementById('contenedor-qr');
-        cont.innerHTML = "";
-        new QRCode(cont, { 
-            text: `dropisapp://perfil/${id}`, 
-            width: 180, height: 180,
-            colorDark: "#000000", colorLight: "#ffffff"
-        });
-        const p = document.createElement("p");
-        p.innerText = "ID: " + id;
-        p.style.cssText = "color: #333; font-weight: bold; margin-top: 10px;";
-        cont.appendChild(p);
-    } else {
-        document.getElementById('modal-registro').style.display = 'flex';
-    }
-}
-
-function cerrarModalQR() {
-    document.getElementById('modal-qr').style.display = 'none';
-}
-
-// Arrancar la app
-window.onload = () => {
-    const id = localStorage.getItem('mi_dropis_id');
-    if (id) {
-        document.getElementById('mi-id-display').innerText = "Tu ID: " + id;
-        activarAntena(); // <--- Aquí es donde el radar empieza a trabajar
-    } else {
-        document.getElementById('modal-registro').style.display = 'flex';
-    }
-};
-
-async function cargarProto() {
-    const schema = `
-        package superapp;
-        syntax = "proto3";
-        message SuperAppPayload {
-            string chatText = 1;
+        function pintarMensaje(texto, clase) {
+            const box = document.getElementById('chat-box');
+            if (!box) return;
+            const div = document.createElement('div');
+            div.className = 'msg-burbuja ' + clase;
+            div.innerText = texto;
+            if (clase === 'msg-derecha') div.setAttribute('data-enviado', '3');
+            box.appendChild(div);
+            box.scrollTop = box.scrollHeight;
         }
-    `;
-    const root = protobuf.parse(schema).root;
-    return root;
-}
 
+        // REGISTRO Y LOGIN
+        async function ejecutarRegistroCompleto() {
+            const nombre = document.getElementById('reg-nombre').value.trim();
+            const apellido = document.getElementById('reg-apellido').value.trim();
+            if (!nombre || !apellido) return alert("Faltan datos");
 
-// --- 5. LÓGICA DE INTERFAZ CORREGIDA ---
-
-/**
- * Pinta una burbuja de mensaje en el chat box.
- * @param {string} texto - El contenido del mensaje.
- * @param {string} clase - La clase CSS ('msg-izquierda' o 'msg-derecha').
- */
-function pintarMensaje(texto, clase) {
-    const box = document.getElementById('chat-box');
-    if (!box) {
-        console.error("❌ No se encontró el elemento 'chat-box'");
-        return;
-    }
-
-    // Crear la burbuja del mensaje
-    const div = document.createElement('div');
-    div.className = 'msg-burbuja ' + clase;
-    
-    // Asignar el texto. Si no hay texto, poner un mensaje por defecto.
-    div.innerText = texto || "Mensaje sin contenido";
-
-    // --- ACTIVACIÓN DEL DOBLE CHECK (NUEVO) ---
-    // Si el mensaje es enviado (derecha), activamos el double tick azul
-    if (clase === 'msg-derecha') {
-        // Esto activa la regla CSS: .msg-burbuja[data-enviado="3"]::after
-        div.setAttribute('data-enviado', '3');
-    }
-
-    // Asegurar que el mensaje no se rompa visualmente
-    div.style.wordWrap = 'break-word';
-
-    // Añadir al chat box y hacer scroll hacia abajo
-    box.appendChild(div);
-    box.scrollTop = box.scrollHeight;
-    
-    console.log(`✅ Mensaje pintado en la ${clase === 'msg-derecha' ? 'derecha' : 'izquierda'}`);
+            const idUnico = Math.random().toString(36).substring(2, 10);
+            localStorage.setItem('mi_dropis_id', idUnico);
+            
+            await db.ref('usuarios/' + idUnico).set({ nombre, apellido, id_sistema: idUnico });
+            document.getElementById('modal-registro').style.display = 'none';
+            location.reload();
         }
-        
 
-</script>
+        async function recuperarCuentaConID() {
+            const id = prompt("Ingresa tu ID:");
+            if (!id) return;
+            const snap = await db.ref('usuarios/' + id).once('value');
+            if (snap.exists()) {
+                localStorage.setItem('mi_dropis_id', id);
+                location.reload();
+            } else {
+                alert("ID no encontrado");
+            }
+        }
+
+        function manejarBotonIdentidad() {
+            const id = localStorage.getItem('mi_dropis_id');
+            if (!id) return document.getElementById('modal-registro').style.display = 'flex';
+            
+            document.getElementById('modal-qr').style.display = 'flex';
+            const cont = document.getElementById('contenedor-qr');
+            cont.innerHTML = "";
+            new QRCode(cont, { text: id, width: 150, height: 150 });
+        }
+
+        function cerrarModalQR() { document.getElementById('modal-qr').style.display = 'none'; }
+
+        window.onload = () => {
+            const id = localStorage.getItem('mi_dropis_id');
+            if (id) {
+                document.getElementById('mi-id-display').innerText = "Tu ID: " + id;
+                activarAntena();
+            } else {
+                document.getElementById('modal-registro').style.display = 'flex';
+            }
+        };
+    </script>
 </body>
 </html>
 
