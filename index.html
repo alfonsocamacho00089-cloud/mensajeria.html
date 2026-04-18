@@ -343,7 +343,7 @@ async function activarAntena() {
 
             // 3. Guardar en historial local (IndexedDB)
             await guardarLocal('mensajes', {
-                texto: decoded.chatText,
+                texto: decoded.chat-text,
                 clase: 'msg-izquierda',
                 remitente: data.from || "Desconocido",
                 ts: Date.now()
