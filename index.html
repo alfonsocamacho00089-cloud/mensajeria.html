@@ -479,20 +479,43 @@ async function cargarProto() {
 }
 
 
+// --- 5. LÓGICA DE INTERFAZ CORREGIDA ---
+
+/**
+ * Pinta una burbuja de mensaje en el chat box.
+ * @param {string} texto - El contenido del mensaje.
+ * @param {string} clase - La clase CSS ('msg-izquierda' o 'msg-derecha').
+ */
 function pintarMensaje(texto, clase) {
     const box = document.getElementById('chat-box');
-    if(!box) return;
+    if (!box) {
+        console.error("❌ No se encontró el elemento 'chat-box'");
+        return;
+    }
 
+    // Crear la burbuja del mensaje
     const div = document.createElement('div');
     div.className = 'msg-burbuja ' + clase;
     
-    // Agregamos el texto. Si es enviado (derecha), añadimos un tick decorativo
-    const tick = (clase === 'msg-derecha') ? ' ✓' : '';
-    div.innerText = texto + tick;
-    
+    // Asignar el texto. Si no hay texto, poner un mensaje por defecto.
+    div.innerText = texto || "Mensaje sin contenido";
+
+    // --- ACTIVACIÓN DEL DOBLE CHECK (NUEVO) ---
+    // Si el mensaje es enviado (derecha), activamos el double tick azul
+    if (clase === 'msg-derecha') {
+        // Esto activa la regla CSS: .msg-burbuja[data-enviado="3"]::after
+        div.setAttribute('data-enviado', '3');
+    }
+
+    // Asegurar que el mensaje no se rompa visualmente
+    div.style.wordWrap = 'break-word';
+
+    // Añadir al chat box y hacer scroll hacia abajo
     box.appendChild(div);
     box.scrollTop = box.scrollHeight;
-}
+    
+    console.log(`✅ Mensaje pintado en la ${clase === 'msg-derecha' ? 'derecha' : 'izquierda'}`);
+        }
         
 
 </script>
