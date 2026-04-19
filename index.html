@@ -473,7 +473,7 @@ let paquete = `[CITADO:${mensajeEnRespuesta}] ${msg}`;
         // 1. Preparamos el Payload (ProtoBuf)
         const root = await cargarProto();
         const SuperAppPayload = root.lookupType("SuperAppPayload");
-        const payload = SuperAppPayload.create({ chatText: msg });
+        const payload = SuperAppPayload.create({ chatText: paquete});
         const buffer = SuperAppPayload.encode(payload).finish();
         
         // 2. Convertimos a Base64 para el viaje satelital
@@ -486,19 +486,16 @@ let paquete = `[CITADO:${mensajeEnRespuesta}] ${msg}`;
         });
 
         // 4. Pintamos nuestro propio mensaje en la derecha
-        pintarMensaje(msg, 'msg-derecha');
+        pintarMensaje(paquete, 'msg-derecha')
         // ... dentro de enviarMensajeSatelital, después de pintarMensaje(msg, 'msg-derecha');
-
-
 // --- AÑADE ESTO PARA GUARDAR LO QUE ENVÍAS ---
 let historialEnv = JSON.parse(localStorage.getItem('mis_mensajes')) || [];
-historialEnv.push({ texto: msg, clase: 'msg-derecha' });
+historialEnv.push({ texto: paquete, clase: 'msg-derecha' });
 localStorage.setItem('mis_mensajes', JSON.stringify(historialEnv));
 // ----------------------------------------------
 
 if (inputMsg) inputMsg.value = "";
         
-    
         console.log("🚀 Mensaje lanzado al espacio hacia:", targetID);
 
     } catch (e) {
@@ -506,9 +503,7 @@ if (inputMsg) inputMsg.value = "";
         alert("Error al enviar el mensaje.");
     }
 }
-// --- 4. GESTIÓN DE TOKENS Y SERVICE WORKER ---
-
-// Registrar el Service Worker al cargar la página
+// --- 4. GESTIÓN DE TOKENS Y SERVICE WORKER --/ Registrar el Service Worker al cargar la página
 if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('firebase-messaging-sw.js')
         .then(registration => {
