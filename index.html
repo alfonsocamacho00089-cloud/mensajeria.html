@@ -529,6 +529,7 @@ window.onload = () => {
     }
 };
 
+    
 async function cargarProto() {
     const schema = `
         package superapp;
@@ -580,7 +581,21 @@ function pintarMensaje(texto, clase) {
     console.log(`✅ Mensaje pintado en la ${clase === 'msg-derecha' ? 'derecha' : 'izquierda'}`);
         }
         
+function cargarMensajesLocales() {
+    // Buscamos los mensajes en el almacén local
+    const datos = localStorage.getItem('mis_mensajes');
+    if (!datos) return; // Si no hay nada, no hacemos nada
 
+    const mensajesGuardados = JSON.parse(datos);
+
+    mensajesGuardados.forEach(msg => {
+        // IMPORTANTE: Cambia 'mostrarMensajeEnPantalla' por el nombre 
+        // de la función que tú usas para dibujar las burbujas de texto
+        if (typeof mostrarMensajeEnPantalla === "function") {
+            mostrarMensajeEnPantalla(msg.texto, msg.tipo); 
+        }
+    });
+}
 </script>
 </body>
 </html>
