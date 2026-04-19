@@ -51,51 +51,77 @@ body {
         input#target-id { width: 60px; background: #000; color: #ffd700; border: 1px solid #333; border-radius: 8px; text-align: center; }
         
         button#btn-enviar { background: #ffd700; border: none; padding: 10px 20px; border-radius: 20px; font-weight: bold; cursor: pointer; color: black; }
-        
-     #chat-box { 
-    flex: 1; 
-    overflow-y: auto; 
-    padding: 15px; 
-    display: flex; 
-    flex-direction: column; 
-    gap: 10px; 
-    background: #000; /* Fondo negro como lo tienes */
-}
-
+        #chat-box {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    
+    background-color: #0b141a;
+    /* Usamos el filtro de 0.6 para que se vea un poquito más la imagen pero sin tapar el texto */
+    background-image: linear-gradient(rgba(11, 20, 26, 0.6), rgba(11, 20, 26, 0.6)), 
+                      url('https://w.wallhaven.cc/full/8o/wallhaven-8ox8jy.jpg');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    background-repeat: no-repeat;
+        }
+    
+/* Contenedor general de la burbuja */
 .msg-burbuja { 
-    max-width: 80%; 
-    padding: 8px 12px; 
-    border-radius: 12px; 
+    max-width: 85%; 
+    padding: 10px 14px; 
+    border-radius: 18px; /* Bordes más circulares y modernos */
     font-size: 15px; 
-    line-height: 1.4; 
+    line-height: 1.5; 
     position: relative; 
     word-wrap: break-word; 
-    margin: 2px 0; 
+    margin: 4px 0; 
+    box-shadow: 0 1px 2px rgba(0,0,0,0.3); /* Sombra sutil para profundidad */
+    white-space: pre-wrap; /* Mantiene tus saltos de línea */
 }
 
-/* MENSAJE ENVIADO (DERECHA - VERDE) */
+/* MENSAJE ENVIADO (DERECHA) */
 .msg-derecha { 
     align-self: flex-end; 
-    background-color: #005c4b; /* Verde oscuro estilo WhatsApp */
-    color: white; 
-    border-bottom-right-radius: 2px; /* La punta distintiva */
+    background: linear-gradient(135deg, #005c4b 0%, #004d40 100%); /* Degradado elegante */
+    color: #e9edef; 
+    border-bottom-right-radius: 4px; /* Punta suavizada */
 }
 
-/* MENSAJE RECIBIDO (IZQUIERDA - GRIS) */
+/* MENSAJE RECIBIDO (IZQUIERDA) */
 .msg-izquierda { 
     align-self: flex-start; 
-    background-color: #202c33; /* Gris oscuro para recibidos */
-    color: white; 
-    border-bottom-left-radius: 2px; /* La punta en el otro lado */
+    background: #202c33; 
+    color: #e9edef; 
+    border-bottom-left-radius: 4px; /* Punta suavizada */
 }
 
-/* Contenedor del icono dentro de la burbuja */
+/* Hora y Checks (El estatus) */
 .status {
-    font-size: 0.75em;
+    font-size: 11px;
     float: right;
-    margin: 4px 0 -4px 8px;
-    opacity: 0.7;
+    margin: 8px -4px -4px 12px;
+    opacity: 0.6;
+    font-weight: 300;
 }
+        #msg-text {
+    flex: 1;               /* Que ocupe todo el espacio central */
+    background: #2a2a2a;    /* Color de fondo gris oscuro, como tus burbujas */
+    color: white;          /* Letra blanca */
+    border-radius: 20px;   /* Bordes redondeados y suaves */
+    padding: 10px 15px;    /* Espacio interno para que el texto no esté pegado */
+    border: none;          /* Sin el borde cuadrado y feo */
+    outline: none;         /* Que no se ponga azul al hacer clic */
+    font-family: inherit;  /* Misma fuente que el resto del chat */
+    resize: none;          /* Quita la esquina para agrandar que traen los textarea */
+    min-height: 40px;      /* Altura inicial bajita */
+    max-height: 120px;     /* Que no crezca hasta tapar todo */
+    overflow-y: auto;      /* Si el mensaje es muy largo, sale scroll interno */
+    margin: 0 5px;         /* Un pelín de separación con el ID y el botón */
+        }
         #mi-id-display { font-size: 11px; color: #ffd700; margin-top: 5px; font-family: monospace; }
         .btn-qr-dropis { position: absolute; right: 15px; top: 50%; transform: translateY(-50%); background: #ffd700; border: none; border-radius: 50%; width: 35px; height: 35px; cursor: pointer; font-size: 18px; }
 
