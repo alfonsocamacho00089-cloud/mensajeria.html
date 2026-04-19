@@ -216,17 +216,37 @@ body {
     </div>
     </div>
     <div id="modal-qr" class="modal">
-        <div class="modal-content">
-            <h3 style="margin-bottom: 15px;">Mi Identidad Dropis</h3>
-            <div id="contenedor-qr" style="display: flex; flex-direction: column; align-items: center;"></div>
-            <button onclick="cerrarModalQR()" style="margin-top: 20px; width: 100%; padding: 10px; background: #333; color: white; border: none; border-radius: 10px;">CERRAR</button>
+    <div class="modal-content" style="padding: 0; overflow: hidden; background: #202c33; border: 1px solid #ffd700;">
+        
+        <div id="nombre-dueño-header" style="background: #ffd700; color: #000; padding: 15px; font-weight: bold; cursor: pointer;">
+            Cargando nombre...
         </div>
+
+        <div style="padding: 20px; display: flex; flex-direction: column; align-items: center; background: white;">
+            <div id="contenedor-qr"></div>
+        </div>
+
+        <div style="background: #2a3942; padding: 10px; border-top: 1px solid #3b4a54;">
+            <h4 style="color: #ffd700; margin: 5px 0 10px 0; font-size: 14px;">AGENDA DROPIS 🛰️</h4>
+            <div id="lista-contactos" style="max-height: 150px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px;">
+                <p style="color: #8696a0; font-size: 12px;">No tienes contactos aún</p>
+            </div>
+        </div>
+
+        <button onclick="cerrarModalQR()" style="width: 100%; padding: 15px; background: #333; color: white; border: none; font-weight: bold;">CERRAR</button>
+    </div>
     </div>
 
     <div class="input-area">
         <input type="text" id="target-id" placeholder="ID">
         <textarea id="msg-text" placeholder="Escribe un mensaje..." rows="1"></textarea>
         <button id="btn-enviar" onclick="enviarMensajeSatelital()">ENVIAR</button>
+    </div>
+    <div style="display: flex; gap: 5px; margin-bottom: 10px;">
+    <input type="text" id="target-id" placeholder="Pegar ID aquí..." style="flex: 1; padding: 10px; border-radius: 10px; border: 1px solid #ccc;">
+    <button onclick="guardarNuevoContacto()" style="background: #ffd700; border: none; border-radius: 10px; padding: 0 15px; font-weight: bold; cursor: pointer;">
+        + 👤
+    </button>
     </div>
 
     <script>
@@ -495,27 +515,83 @@ async function obtenerToken(registration) {
 
 function manejarBotonIdentidad() {
     const id = localStorage.getItem('mi_dropis_id');
+    const nombre = localStorage.getItem('mi_nombre') || "Pedro Peres"; // Ajusta según tu variable
+
     if (id) {
         document.getElementById('modal-qr').style.display = 'flex';
+        
+        // 1. Ponemos tu nombre arriba
+        document.getElementById('nombre-dueño-header').innerText = "👤 " + nombre;
+
+        // 2. Generamos el QR (como ya lo tenías)
         const cont = document.getElementById('contenedor-qr');
         cont.innerHTML = "";
         new QRCode(cont, { 
             text: `dropisapp://perfil/${id}`, 
-            width: 180, height: 180,
-            colorDark: "#000000", colorLight: "#ffffff"
+            width: 160, height: 160
         });
-        const p = document.createElement("p");
-        p.innerText = "ID: " + id;
-        p.style.cssText = "color: #333; font-weight: bold; margin-top: 10px;";
-        cont.appendChild(p);
+
+        // 3. Pintamos la Agenda (La pestaña de abajo)
+        pintarAgendaContactos();
+
     } else {
         document.getElementById('modal-registro').style.display = 'flex';
     }
 }
 
+function pintarAgendaContactos() {
+    const lista = document.getElementById('lista-contactos');
+    // Supongamos que guardas tus contactos como un array de objetos
+    const contactos = JSON.parse(localStorage.getItem('mis_contactos')) || [
+        { nombre: "Ejemplo Hijo", id: "12345abc" }, // Datos de prueba
+        { nombre: "Soporte Dropis", id: "admin777" }
+    ];
+
+    lista.innerHTML = ""; // Limpiar antes de pintar
+
+    contactos.forEach(contacto => {
+        const btn = document.createElement('div');
+        btn.style.cssText = "background: #3b4a54; color: white; padding: 10px; border-radius: 8px; cursor: pointer; text-align: left; font-size: 13px; border-left: 3px solid #ffd700;";
+        btn.innerHTML = `<strong>${contacto.nombre}</strong><br><span style="font-size: 10px; color: #8696a0;">ID: ${contacto.id}</span>`;
+        
+        // LA MAGIA: Al darle clic, rellena el ID del chat automáticamente
+        btn.onclick = () => {
+            const inputTarget = document.querySelector('#target-id');
+            if(inputTarget) {
+                inputTarget.value = contacto.id;
+                cerrarModalQR();
+                console.log("✅ Contacto seleccionado: " + contacto.nombre);
+            }
+        };
+        lista.appendChild(btn);
+    });
+}
 function cerrarModalQR() {
     document.getElementById('modal-qr').style.display = 'none';
 }
+        function guardarNuevoContacto() {
+    const inputID = document.querySelector('#target-id');
+    const idAGuardar = inputID ? inputID.value.trim() : "";
+
+    if (!idAGuardar) return alert("Primero escribe un ID para guardarlo");
+
+    // Pedimos el nombre al usuario
+    const nombre = prompt("¿Cómo quieres llamar a este contacto?");
+    
+    if (nombre) {
+        let agenda = JSON.parse(localStorage.getItem('mis_contactos')) || [];
+        
+        // Evitar duplicados
+        const existe = agenda.find(c => c.id === idAGuardar);
+        if (existe) return alert("Este ID ya está en tu agenda como: " + existe.nombre);
+
+        // Guardamos el nuevo objeto
+        agenda.push({ nombre: nombre, id: idAGuardar });
+        localStorage.setItem('mis_contactos', JSON.stringify(agenda));
+        
+        alert("✅ Contacto guardado: " + nombre);
+    }
+        }
 
 // Arrancar la app
 // ... (todo tu código anterior de funciones y variables)
