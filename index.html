@@ -690,11 +690,26 @@ function pintarMensaje(texto, clase) {
         div.style.border = "1px solid rgba(255,215,0,0.3)"; // Un toque dorado opaco
 
         div.innerHTML = `
-            <div style="font-size: 11px; opacity: 0.8; border-bottom: 1px solid rgba(255,255,255,0.2); padding-bottom: 2px; margin-bottom: 4px; font-style: italic;">
-                ${cabezalCita}
-            </div>
-            <div>${mensajeReal}</div>
-        `;
+    <div style="
+        font-size: 10px; 
+        opacity: 0.7; 
+        border-bottom: 1px solid rgba(255,255,255,0.2); 
+        padding-bottom: 0px; 
+        margin-bottom: 2px; 
+        line-height: 1; 
+        display: inline-block; 
+        width: 100%;
+        font-style: italic;">
+        ${cabezalCita}
+    </div>
+    <div style="
+        margin-top: 0px; 
+        padding-top: 0px; 
+        line-height: 1; 
+        display: block;">
+        ${mensajeReal}
+    </div>
+`;
     
     } else {
         div.innerText = texto || "";
