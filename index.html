@@ -408,7 +408,8 @@ async function ejecutarRegistroCompleto() {
     }
 }
 
-// --- 4. ANTENA SATELITAL ---
+let mensajeSeleccionado = null;
+let mensajeEnRespuesta = null; // <-- AGREGA ESTA LÍNEA// --- 4. ANTENA SATELITAL ---
 async function activarAntena() {
     const miID = localStorage.getItem('mi_dropis_id');
     if (!miID) return;
@@ -458,7 +459,8 @@ localStorage.setItem('mis_mensajes', JSON.stringify(historial));
 }
        
         
-
+let mensajeSeleccionado = null;
+let mensajeEnRespuesta = null; // <-- AGREGA ESTA LÍNEA
 async function enviarMensajeSatelital() {
 const inputMsg = document.querySelector('#msg-text');
 const inputTarget = document.querySelector('#target-id');
@@ -669,55 +671,50 @@ async function cargarProto() {
 // Variable necesaria para que el menú sepa a qué mensaje le diste clic
 
 let mensajeSeleccionado = null;
+let mensajeEnRespuesta = null; // <-- AGREGA ESTA LÍNEA
 
 
 
 function pintarMensaje(texto, clase) {
-
     const box = document.getElementById('chat-box');
-
     if (!box) return;
 
-
-
     const div = document.createElement('div');
+    div.className = 'msg-burbuja ' + clase; // Asegúrate de que herede la clase
 
-    
+    // --- EL DIBUJO DE LA CITA ---
+    if (texto && texto.includes("[CITADO:")) {
+        const partes = texto.split("] ");
+        const citado = partes[0].replace("[CITADO:", "");
+        const real = partes[1] || "";
 
-    div.innerText = texto || "Mensaje sin contenido";
-
-    
-
-    // --- EL CEREBRO DEL MENÚ (NUEVO) ---
-
-    div.onclick = (e) => {
-
-        mensajeSeleccionado = div; 
-
-        const menu = document.getElementById('menu-acciones');
-
-        if(menu) {
-
-            menu.style.display = 'block';
-
-            menu.style.top = e.pageY + "px";
-
-            menu.style.left = (e.pageX > 200 ? e.pageX - 150 : e.pageX) + "px";
-
-        }
-
-        e.stopPropagation(); 
-
-    };
-
-
-
-    if (clase === 'msg-derecha') {
-
-        div.setAttribute('data-enviado', '3');
-
+        div.innerHTML = `
+            <div style="background: rgba(0,0,0,0.3); border-left: 3px solid #ffd700; padding: 5px; margin-bottom: 5px; font-size: 11px; border-radius: 4px; color: #ddd;">
+                ${citado}
+            </div>
+            <div>${real}</div>
+        `;
+    } else {
+        div.innerText = texto || "Mensaje sin contenido";
     }
 
+    // El resto de tu código del menú (onclick)...
+    div.onclick = (e) => {
+        mensajeSeleccionado = div; 
+        const menu = document.getElementById('menu-acciones');
+        if(menu) {
+            menu.style.display = 'block';
+            menu.style.top = e.pageY + "px";
+            menu.style.left = (e.pageX > 200 ? e.pageX - 150 : e.pageX) + "px";
+        }
+        e.stopPropagation(); 
+    };
+
+    if (clase === 'msg-derecha') div.setAttribute('data-enviado', '3');
+    div.style.wordWrap = 'break-word';
+    box.appendChild(div);
+    box.scrollTop = box.scrollHeight;
+}
 
 
     div.style.wordWrap = 'break-word';
