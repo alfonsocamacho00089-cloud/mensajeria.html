@@ -692,22 +692,21 @@ async function cargarProto() {
 // Variable necesaria para que el menú sepa a qué mensaje le diste clic
 let mensajeSeleccionado = null;
  
-
-
+ 
+ 
     // Tu código del menú (onclick) se queda igualito abajo...
     function pintarMensaje(texto, clase, hora = null, estado = 'enviado') {
     const box = document.getElementById('chat-box');
     if (!box) return;
-
+ 
     const div = document.createElement('div');
     div.className = 'msg-burbuja ' + clase;
-
+ 
     // 1. Calcular hora si no viene (Formato 12h)
     const tiempo = hora || new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
-
+ 
     // 2. Definir los checks
     const checkIcon = (estado === 'leido') ? '✓✓' : '✓';
-
     // 3. Preparar el contenido (Cita o Texto normal)
     let contenidoHTML = "";
     if (texto && texto.includes("Resp >")) {
@@ -717,7 +716,7 @@ let mensajeSeleccionado = null;
         
         div.style.backgroundColor = "#2a2a2a"; 
         div.style.border = "1px solid rgba(255,215,0,0.3)";
-
+ 
         contenidoHTML = `
             <div style="font-size: 11px; opacity: 0.5; border-bottom: 1px solid rgba(255,255,255,0.2); padding: 0; margin: 0; line-height: 1; font-style: italic;">
                 ${cabezalCita}
@@ -735,7 +734,7 @@ let mensajeSeleccionado = null;
             ${tiempo} <span class="checks">${checkIcon}</span>
         </div>
     `;
-
+ 
     // Tu lógica de menú se mantiene igual
     div.onclick = (e) => {
         mensajeSeleccionado = div; 
@@ -747,7 +746,7 @@ let mensajeSeleccionado = null;
         }
         e.stopPropagation(); 
     };
-
+ 
     box.appendChild(div);
     box.scrollTop = box.scrollHeight;
     }
