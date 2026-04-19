@@ -465,7 +465,8 @@ const inputTarget = document.querySelector('#target-id');
 const msg = inputMsg ? inputMsg.value.trim() : "";
 const targetID = inputTarget ? inputTarget.value.trim() : "";
 const miID = localStorage.getItem('mi_dropis_id') || "ID_DESCONOCIDO";
-
+// Así debe viajar el mensaje para que el "Traductor" lo entienda
+let paquete = `[CITADO:${mensajeEnRespuesta}] ${msg}`;
     if (!targetID || !msg) return alert("ID y Mensaje son obligatorios");
 
     try {
@@ -686,19 +687,7 @@ function pintarMensaje(texto, clase) {
 
     const div = document.createElement('div');
 
-    div.className = 'msg-burbuja ' + clase;
-    (texto.includes("[CITADO:")) {
-        const partes = texto.split("] ");
-        const citado = partes[0].replace("[CITADO:", "");
-        const real = partes[1] || ""; // Lo que escribiste nuevo
-
-        div.innerHTML = `
-            <div style="background: rgba(0,0,0,0.3); border-left: 3px solid #ffd700; padding: 5px; margin-bottom: 5px; font-size: 11px; border-radius: 4px; color: #ddd; font-style: italic;">
-                ${citado}
-            </div>
-            <div>${real}</div>
-        `;
-    } else {
+    
 
     div.innerText = texto || "Mensaje sin contenido";
 
@@ -753,15 +742,17 @@ function accionMensaje(tipo) {
     const inputMsg = document.querySelector('#msg-text');
     const inputTarget = document.querySelector('#target-id');
 
-    if (mensajeEnRespuesta) {
-        // Empaquetamos: [CITADO:mensaje viejo] mensaje nuevo
-        msg = `[CITADO:${mensajeEnRespuesta}] ${msg}`;
-        
-        // Limpiamos la cita para el próximo mensaje
-        mensajeEnRespuesta = null; 
-        inputMsg.placeholder = "Escribe un mensaje...";
-        inputMsg.style.borderLeft = "none";
+    if (tipo === 'responder') {
+    // Guardamos el texto original en la variable para usarlo al dar clic en ENVIAR
+    mensajeEnRespuesta = textoOriginal;
+    
+    // Cambiamos el estilo del input para que sepas que estás citando a alguien
+    inputMsg.placeholder = "Respondiendo a: " + textoOriginal.substring(0, 20) + "...";
+    inputMsg.style.borderLeft = "4px solid #ffd700"; // Borde dorado de Dropis
+    inputMsg.style.paddingLeft = "10px";
+    inputMsg.focus();
     }
+        
     else if (tipo === 'editar') {
         inputMsg.value = textoOriginal;
         // Al editar, borramos el viejo para sobreescribir
