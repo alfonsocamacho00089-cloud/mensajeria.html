@@ -87,6 +87,25 @@ body {
     /* ESTO ES CLAVE: El efecto de vidrio empañado */
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
+
+    /* ... (todo tu código anterior se queda igual) ... */
+    display: flex;
+    flex-direction: column; /* Texto arriba, info abajo */
+}
+
+.msg-info {
+    align-self: flex-end; /* Empuja la hora y checks a la derecha */
+    font-size: 10px;
+    opacity: 0.7;
+    margin-top: 2px;
+    margin-left: 10px; /* Separación mínima del texto */
+    display: flex;
+    align-items: center;
+    gap: 3px; /* Espacio entre hora y checks */
+}
+
+.checks {
+    color: #4fc3f7; /* Color azulito claro para el visto */
 }
 
 /* MENSAJE ENVIADO (DERECHA) */
@@ -671,50 +690,51 @@ async function cargarProto() {
 // Variable necesaria para que el menú sepa a qué mensaje le diste clic
 let mensajeSeleccionado = null;
  
-function pintarMensaje(texto, clase) {
+
+
+    // Tu código del menú (onclick) se queda igualito abajo...
+    function pintarMensaje(texto, clase, hora = null, estado = 'enviado') {
     const box = document.getElementById('chat-box');
     if (!box) return;
 
     const div = document.createElement('div');
     div.className = 'msg-burbuja ' + clase;
 
-    // --- EL CEREBRO PARA SUBIR LA CITA (Donde pusiste la flecha) ---
+    // 1. Calcular hora si no viene (Formato 12h)
+    const tiempo = hora || new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
+
+    // 2. Definir los checks
+    const checkIcon = (estado === 'leido') ? '✓✓' : '✓';
+
+    // 3. Preparar el contenido (Cita o Texto normal)
+    let contenidoHTML = "";
     if (texto && texto.includes("Resp >")) {
         const partes = texto.split("\n— ");
         const cabezalCita = partes[0];
         const mensajeReal = partes[1] || "";
-
-        // --- CAMBIO DE COLOR AQUÍ ---
-        // Si quieres un verde más oscuro para respuestas: #128c7e o el color que gustes
+        
         div.style.backgroundColor = "#2a2a2a"; 
-        div.style.border = "1px solid rgba(255,215,0,0.3)"; // Un toque dorado opaco
+        div.style.border = "1px solid rgba(255,215,0,0.3)";
 
-        // Dentro del if (texto.includes("Resp >"))
-div.innerHTML = `
-    <div style="
-        font-size: 14px; 
-        opacity: 0.10; 
-        border-bottom: 1px solid rgba(255,255,255,0.2); 
-        padding: 0; 
-        margin: 0; 
-        line-height: 1; 
-        font-style: italic;">
-        ${cabezalCita}
-    </div>
-    <div style="
-        margin: 0; 
-        padding: 2px 0 0 0; 
-        line-height: 1; 
-        display: block;">
-        ${mensajeReal}
-    </div>
-`;
-    
+        contenidoHTML = `
+            <div style="font-size: 11px; opacity: 0.5; border-bottom: 1px solid rgba(255,255,255,0.2); padding: 0; margin: 0; line-height: 1; font-style: italic;">
+                ${cabezalCita}
+            </div>
+            <div style="margin: 0; padding: 2px 0 0 0; line-height: 1.1;">${mensajeReal}</div>
+        `;
     } else {
-        div.innerText = texto || "";
+        contenidoHTML = `<div>${texto}</div>`;
     }
 
-    // Tu código del menú (onclick) se queda igualito abajo...
+    // 4. Inyectar todo incluyendo la INFO (Hora + Checks)
+    div.innerHTML = `
+        ${contenidoHTML}
+        <div class="msg-info">
+            ${tiempo} <span class="checks">${checkIcon}</span>
+        </div>
+    `;
+
+    // Tu lógica de menú se mantiene igual
     div.onclick = (e) => {
         mensajeSeleccionado = div; 
         const menu = document.getElementById('menu-acciones');
@@ -728,7 +748,7 @@ div.innerHTML = `
 
     box.appendChild(div);
     box.scrollTop = box.scrollHeight;
-}
+    }
  
 // Función para ejecutar las acciones del menú
 function accionMensaje(tipo) {
