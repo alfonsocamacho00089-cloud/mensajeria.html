@@ -674,12 +674,28 @@ let mensajeSeleccionado = null;
 function pintarMensaje(texto, clase) {
     const box = document.getElementById('chat-box');
     if (!box) return;
- 
+
     const div = document.createElement('div');
     div.className = 'msg-burbuja ' + clase;
-    div.innerText = texto || "Mensaje sin contenido";
- 
-    // --- EL CEREBRO DEL MENÚ (NUEVO) ---
+
+    // --- EL CEREBRO PARA SUBIR LA CITA (Donde pusiste la flecha) ---
+    if (texto && texto.includes("Resp >")) {
+        // Separamos la cita del mensaje real usando el guion largo "—"
+        const partes = texto.split("\n— ");
+        const cabezalCita = partes[0]; // Lo que va arriba (la flecha)
+        const mensajeReal = partes[1] || ""; // Tu respuesta abajo
+
+        div.innerHTML = `
+            <div style="font-size: 11px; opacity: 0.8; border-bottom: 1px solid rgba(255,255,255,0.2); padding-bottom: 4px; margin-bottom: 4px; font-style: italic;">
+                ${cabezalCita}
+            </div>
+            <div>${mensajeReal}</div>
+        `;
+    } else {
+        div.innerText = texto || "";
+    }
+
+    // Tu código del menú (onclick) se queda igualito abajo...
     div.onclick = (e) => {
         mensajeSeleccionado = div; 
         const menu = document.getElementById('menu-acciones');
@@ -690,12 +706,7 @@ function pintarMensaje(texto, clase) {
         }
         e.stopPropagation(); 
     };
- 
-    if (clase === 'msg-derecha') {
-        div.setAttribute('data-enviado', '3');
-    }
- 
-    div.style.wordWrap = 'break-word';
+
     box.appendChild(div);
     box.scrollTop = box.scrollHeight;
 }
