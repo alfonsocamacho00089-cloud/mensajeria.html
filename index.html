@@ -74,10 +74,10 @@ body {
 /* Contenedor general de la burbuja */
 .msg-burbuja { 
     max-width: 85%; 
-    padding: 10px 14px; 
+    padding: 6px 10px; 
     border-radius: 18px; 
     font-size: 15px; 
-    line-height: 1.5; 
+    min-height: auto
     position: relative; 
     word-wrap: break-word; 
     margin: 4px 0; 
@@ -689,23 +689,22 @@ function pintarMensaje(texto, clase) {
         div.style.backgroundColor = "##2d2d2d"; 
         div.style.border = "1px solid rgba(255,215,0,0.3)"; // Un toque dorado opaco
 
-        div.innerHTML = `
+        // Dentro del if (texto.includes("Resp >"))
+div.innerHTML = `
     <div style="
-        font-size: 12px; 
-        opacity: 0.2; 
+        font-size: 10px; 
+        opacity: 0.6; 
         border-bottom: 1px solid rgba(255,255,255,0.2); 
-        padding-bottom: 0px; 
-        margin-bottom: 1px; 
+        padding: 0; 
+        margin: 0; 
         line-height: 1; 
-        display: inline-block; 
-        width: 100%;
         font-style: italic;">
         ${cabezalCita}
     </div>
     <div style="
-        margin-top: 0px; 
-        padding-top: 0px; 
-        line-height: 1; 
+        margin: 0; 
+        padding: 2px 0 0 0; 
+        line-height: 1.1; 
         display: block;">
         ${mensajeReal}
     </div>
