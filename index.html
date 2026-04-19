@@ -709,14 +709,14 @@ function accionMensaje(tipo) {
     const inputTarget = document.querySelector('#target-id');
  
     if (tipo === 'responder') {
-    // 1. Limpiamos el texto original (por si trae saltos de línea o espacios)
-    const citaLimpia = textoOriginal.trim();
-    
-    // 2. Metemos TODO en el cuadro de texto de una vez
-    // Esto funciona igual para mensajes de la derecha o la izquierda
-    inputMsg.value = `Resp: > ${citaLimpia}\n— `;
-    
-    // 3. Ponemos el cursor al final para que empieces a escribir
+    // 1. Agarramos el texto del mensaje que quieres citar
+    const cita = mensajeSeleccionado.innerText;
+
+    // 2. EFECTO WHATSAPP: Borramos TODO lo que el usuario estaba escribiendo
+    // y colocamos la cita nueva limpia
+    inputMsg.value = `Resp > ${cita}\n— `;
+
+    // 3. Bajamos el foco al editor para escribir la respuesta
     inputMsg.focus();
     }
     else if (tipo === 'editar') {
