@@ -500,7 +500,7 @@ const miID = localStorage.getItem('mi_dropis_id') || "ID_DESCONOCIDO";
 // Ofuscamos el mensaje para que no sea legible en la consola de Firebase
 const msgProtegido = btoa(unescape(encodeURIComponent(msg))); 
 const payload = SuperAppPayload.create({ chatText: msgProtegido });
-        const payload = SuperAppPayload.create({ chatText: msg })
+        
         const buffer = SuperAppPayload.encode(payload).finish();
         
         // 2. Convertimos a Base64 para el viaje satelital
