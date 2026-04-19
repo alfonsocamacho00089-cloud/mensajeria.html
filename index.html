@@ -710,8 +710,14 @@ function accionMensaje(tipo) {
     const inputTarget = document.querySelector('#target-id');
 
     if (tipo === 'responder') {
-        inputMsg.value = `Rep: "${textoOriginal}" -> `;
-        inputMsg.focus();
+    // Guardamos el texto original en la variable para usarlo al dar clic en ENVIAR
+    mensajeEnRespuesta = textoOriginal;
+    
+    // Cambiamos el estilo del input para que sepas que estás citando a alguien
+    inputMsg.placeholder = "Respondiendo a: " + textoOriginal.substring(0, 20) + "...";
+    inputMsg.style.borderLeft = "4px solid #ffd700"; // Borde dorado de Dropis
+    inputMsg.style.paddingLeft = "10px";
+    inputMsg.focus();
     } 
     else if (tipo === 'editar') {
         inputMsg.value = textoOriginal;
