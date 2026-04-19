@@ -138,10 +138,44 @@ body {
         .msg-burbuja[data-enviado="3"]::after { content: " ✓✓"; font-size: 10px; color: #34b7f1; }
 
         /* MODALES */
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 10000; justify-content: center; align-items: center; }
-        .modal-content { background: #fff; padding: 25px; border-radius: 20px; width: 85%; max-width: 320px; text-align: center; color: #333; }
+        .modal { 
+    display: none; 
+    position: fixed; 
+    top: 0; 
+    left: 0; 
+    width: 100%; 
+    height: 100%; 
+    background: rgba(0,0,0,0.9); 
+    z-index: 10000; 
+    justify-content: center; 
+    align-items: center; 
+    /* Añadimos esto para la suavidad */
+    transition: all 0.5s ease;
+    animation: fadeIn 0.5s; 
+}
 
-    
+.modal-content { 
+    background: #fff; 
+    padding: 25px; 
+    border-radius: 20px; 
+    width: 85%; 
+    max-width: 320px; 
+    text-align: center; 
+    color: #333; 
+    /* Opcional: que el cuadrito también suba un poquito al aparecer */
+    animation: slideUp 0.5s;
+}
+
+/* Las reglas de las animaciones (van afuera de las llaves) */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideUp {
+    from { transform: translateY(20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
     </style>
 
 </head>
@@ -472,13 +506,26 @@ function cerrarModalQR() {
 }
 
 // Arrancar la app
+// ... (todo tu código anterior de funciones y variables)
+
+// Reemplaza el bloque final por este:
 window.onload = () => {
     const id = localStorage.getItem('mi_dropis_id');
+    
     if (id) {
-        document.getElementById('mi-id-display').innerText = "Tu ID: " + id;
-        activarAntena(); // <--- Aquí es donde el radar empieza a trabajar
+        const display = document.getElementById('mi-id-display');
+        if(display) display.innerText = "Tu ID: " + id;
+        
+        // Verificamos si la función existe antes de llamarla
+        if (typeof activarAntena === "function") {
+            activarAntena(); 
+        }
     } else {
-        document.getElementById('modal-registro').style.display = 'flex';
+        // El truco para que Goku impacte primero
+        setTimeout(() => {
+            const modal = document.getElementById('modal-registro');
+            if(modal) modal.style.display = 'flex';
+        }, 1200); 
     }
 };
 
