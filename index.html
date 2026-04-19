@@ -451,20 +451,23 @@ async function activarAntena() {
             // 2. Decodificar Base64 a binario y luego a Objeto
             const buffer = Uint8Array.from(atob(data.p), c => c.charCodeAt(0));
             const decoded = SuperAppPayload.decode(buffer);
-
+// Después de: const decoded = SuperAppPayload.decode(buffer);
+// Traducimos el mensaje protegido a texto real
+const textoReal = decodeURIComponent(escape(atob(decoded.chatText)));
+pintarMensaje(textoReal, 'msg-izquierda');
             // 3. Guardar en historial local (IndexedDB)
             await guardarLocal('mensajes', {
     // Usamos 'data.p' o 'decoded.p' que es donde viene el texto real en tu red
-    texto: decoded.chatText || "Mensaje sin texto",
+    texto: textoReal|| "Mensaje sin texto",
     remitente: data.from || "Desconocido",
     ts: Date.now()
 });
 console.log("✅ Guardado automático ejecutado con éxito");
 let historial = JSON.parse(localStorage.getItem('mis_mensajes')) || [];
-historial.push({ texto: decoded.chatText, clase: 'msg-izquierda' });
+historial.push({ texto: textoReal, clase: 'msg-izquierda' });
 localStorage.setItem('mis_mensajes', JSON.stringify(historial));
             // 4. Mostrar en pantalla
-            pintarMensaje(decoded.chatText, 'msg-izquierda');
+            
             
             // 5. Borrar de la nube (limpieza satelital) para no procesarlo dos veces
             snapshot.ref.remove(); 
@@ -493,7 +496,11 @@ const miID = localStorage.getItem('mi_dropis_id') || "ID_DESCONOCIDO";
         // 1. Preparamos el Payload (ProtoBuf)
         const root = await cargarProto();
         const SuperAppPayload = root.lookupType("SuperAppPayload");
-        const payload = SuperAppPayload.create({ chatText: msg });
+        // Antes de: const payload = SuperAppPayload.create({ chatText: msg });
+// Ofuscamos el mensaje para que no sea legible en la consola de Firebase
+const msgProtegido = btoa(unescape(encodeURIComponent(msg))); 
+const payload = SuperAppPayload.create({ chatText: msgProtegido });
+        const payload = SuperAppPayload.create({ chatText: msg })
         const buffer = SuperAppPayload.encode(payload).finish();
         
         // 2. Convertimos a Base64 para el viaje satelital
@@ -698,45 +705,39 @@ let mensajeSeleccionado = null;
     function pintarMensaje(texto, clase, hora = null, estado = 'enviado') {
     const box = document.getElementById('chat-box');
     if (!box) return;
- 
+
     const div = document.createElement('div');
     div.className = 'msg-burbuja ' + clase;
- 
-    // 1. Calcular hora si no viene (Formato 12h)
+
     const tiempo = hora || new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
- 
-    // 2. Definir los checks
     const checkIcon = (estado === 'leido') ? '✓✓' : '✓';
-    // 3. Preparar el contenido (Cita o Texto normal)
+
     let contenidoHTML = "";
     if (texto && texto.includes("Resp >")) {
         const partes = texto.split("\n— ");
-        const cabezalCita = partes[0];
+        const cabezalCita = partes[0].replace("Resp >", "").trim(); // Limpiamos el texto
         const mensajeReal = partes[1] || "";
         
         div.style.backgroundColor = "#2a2a2a"; 
-        div.style.border = "1px solid rgba(255,215,0,0.3)";
+        div.style.border = "1px solid rgba(255,215,0,0.2)";
  
         contenidoHTML = `
-            <div style="font-size: 11px; opacity: 0.5; border-bottom: 1px solid rgba(255,255,255,0.2); padding: 0; margin: 0; line-height: 1; font-style: italic;">
-                ${cabezalCita}
+            <div style="font-size: 11px; opacity: 0.5; border-bottom: 1px solid rgba(255,255,255,0.1); padding: 0; margin: 0 0 2px 0; line-height: 1; font-style: italic;">
+                Resp: ${cabezalCita}
             </div>
-            <div style="margin: 0; padding: 2px 0 0 0; line-height: 1.1;">${mensajeReal}</div>
+            <div style="margin: 0; padding: 0; line-height: 1.1;">${mensajeReal}</div>
         `;
-    // Dentro de pintarMensaje, en la parte del 'else' (mensaje normal):
-} else {
-    contenidoHTML = `<div class="cuerpo-msg">${texto}</div>`;
+    } else {
+        contenidoHTML = `<div style="line-height: 1.2;">${texto}</div>`;
     }
 
-    // 4. Inyectar todo incluyendo la INFO (Hora + Checks)
     div.innerHTML = `
         ${contenidoHTML}
-        <div class="msg-info">
-            ${tiempo} <span class="checks">${checkIcon}</span>
+        <div class="msg-info" style="align-self: flex-end; font-size: 9px; opacity: 0.6; margin-top: 2px; display: flex; gap: 3px;">
+            ${tiempo} <span class="checks" style="color: #4fc3f7;">${checkIcon}</span>
         </div>
     `;
- 
-    // Tu lógica de menú se mantiene igual
+
     div.onclick = (e) => {
         mensajeSeleccionado = div; 
         const menu = document.getElementById('menu-acciones');
@@ -747,10 +748,10 @@ let mensajeSeleccionado = null;
         }
         e.stopPropagation(); 
     };
- 
+
     box.appendChild(div);
     box.scrollTop = box.scrollHeight;
-    }
+        }
  
 // Función para ejecutar las acciones del menú
 function accionMensaje(tipo) {
@@ -762,14 +763,14 @@ function accionMensaje(tipo) {
  
     // --- EL CEREBRO PARA SUBIR LA CITA ---
     if (tipo === 'responder') {
-    // 1. Agarramos el texto del mensaje que quieres citar
-    const cita = mensajeSeleccionado.innerText;
+    // Buscamos solo el div del mensaje, ignorando el de la hora (msg-info)
+    const corpo = mensajeSeleccionado.querySelector('div:first-child');
+    let cita = corpo ? corpo.innerText : mensajeSeleccionado.innerText;
+    
+    // Limpiamos si la cita es muy larga para que no haga la burbuja gigante
+    if(cita.length > 50) cita = cita.substring(0, 50) + "...";
 
-    // 2. EFECTO WHATSAPP: Borramos TODO lo que el usuario estaba escribiendo
-    // y colocamos la cita nueva limpia
-    inputMsg.value = ` Resp >${cita}\n— `;
-
-    // 3. Bajamos el foco al editor para escribir la respuesta
+    inputMsg.value = `Resp > ${cita.trim()}\n— `;
     inputMsg.focus();
     }
         
