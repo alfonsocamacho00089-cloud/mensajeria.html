@@ -670,18 +670,24 @@ async function cargarProto() {
  * @param {string} clase - La clase CSS ('msg-izquierda' o 'msg-derecha').
  */
 // Variable necesaria para que el menú sepa a qué mensaje le diste clic
+// Variable necesaria para que el menú sepa a qué mensaje le diste clic
+
 let mensajeSeleccionado = null;
 
+
+
 function pintarMensaje(texto, clase) {
+
     const box = document.getElementById('chat-box');
+
     if (!box) return;
 
-    // 1. PRIMERO creamos el elemento
-    const div = document.createElement('div');
-    div.className = 'msg-burbuja ' + clase;
 
-    // 2. SEGUNDO: Decidimos qué diseño ponerle (Cita o Texto normal)
-    if (texto.includes("[CITADO:")) {
+
+    const div = document.createElement('div');
+
+    div.className = 'msg-burbuja ' + clase;
+    (texto.includes("[CITADO:")) {
         const partes = texto.split("] ");
         const citado = partes[0].replace("[CITADO:", "");
         const real = partes[1] || ""; // Lo que escribiste nuevo
@@ -693,30 +699,51 @@ function pintarMensaje(texto, clase) {
             <div>${real}</div>
         `;
     } else {
-        // Si no es cita, texto normal
-        div.innerText = texto || "Mensaje sin contenido";
+
+    div.innerText = texto || "Mensaje sin contenido";
+
     }
 
-    // 3. TERCERO: El resto de la lógica (Menú, Checks, etc.)
+    // --- EL CEREBRO DEL MENÚ (NUEVO) ---
+
     div.onclick = (e) => {
+
         mensajeSeleccionado = div; 
+
         const menu = document.getElementById('menu-acciones');
+
         if(menu) {
+
             menu.style.display = 'block';
+
             menu.style.top = e.pageY + "px";
+
             menu.style.left = (e.pageX > 200 ? e.pageX - 150 : e.pageX) + "px";
+
         }
+
         e.stopPropagation(); 
+
     };
 
+
+
     if (clase === 'msg-derecha') {
+
         div.setAttribute('data-enviado', '3');
+
     }
 
+
+
     div.style.wordWrap = 'break-word';
+
     box.appendChild(div);
+
     box.scrollTop = box.scrollHeight;
+
 }
+        
 
 // Función para ejecutar las acciones del menú
 function accionMensaje(tipo) {
