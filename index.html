@@ -408,8 +408,7 @@ async function ejecutarRegistroCompleto() {
     }
 }
 
-let mensajeSeleccionado = null;
-let mensajeEnRespuesta = null; // <-- AGREGA ESTA LÍNEA// --- 4. ANTENA SATELITAL ---
+// --- 4. ANTENA SATELITAL ---
 async function activarAntena() {
     const miID = localStorage.getItem('mi_dropis_id');
     if (!miID) return;
@@ -459,23 +458,21 @@ localStorage.setItem('mis_mensajes', JSON.stringify(historial));
 }
        
         
-let mensajeSeleccionado = null;
-let mensajeEnRespuesta = null; // <-- AGREGA ESTA LÍNEA
+
 async function enviarMensajeSatelital() {
 const inputMsg = document.querySelector('#msg-text');
 const inputTarget = document.querySelector('#target-id');
 const msg = inputMsg ? inputMsg.value.trim() : "";
 const targetID = inputTarget ? inputTarget.value.trim() : "";
 const miID = localStorage.getItem('mi_dropis_id') || "ID_DESCONOCIDO";
-// Así debe viajar el mensaje para que el "Traductor" lo entienda
-let paquete = `[CITADO:${mensajeEnRespuesta}] ${msg}`;
+
     if (!targetID || !msg) return alert("ID y Mensaje son obligatorios");
 
     try {
         // 1. Preparamos el Payload (ProtoBuf)
         const root = await cargarProto();
         const SuperAppPayload = root.lookupType("SuperAppPayload");
-        const payload = SuperAppPayload.create({ chatText: paquete});
+        const payload = SuperAppPayload.create({ chatText: msg });
         const buffer = SuperAppPayload.encode(payload).finish();
         
         // 2. Convertimos a Base64 para el viaje satelital
@@ -488,16 +485,19 @@ let paquete = `[CITADO:${mensajeEnRespuesta}] ${msg}`;
         });
 
         // 4. Pintamos nuestro propio mensaje en la derecha
-        pintarMensaje(paquete, 'msg-derecha')
+        pintarMensaje(msg, 'msg-derecha');
         // ... dentro de enviarMensajeSatelital, después de pintarMensaje(msg, 'msg-derecha');
+
+
 // --- AÑADE ESTO PARA GUARDAR LO QUE ENVÍAS ---
 let historialEnv = JSON.parse(localStorage.getItem('mis_mensajes')) || [];
-historialEnv.push({ texto: paquete, clase: 'msg-derecha' });
+historialEnv.push({ texto: msg, clase: 'msg-derecha' });
 localStorage.setItem('mis_mensajes', JSON.stringify(historialEnv));
 // ----------------------------------------------
 
 if (inputMsg) inputMsg.value = "";
         
+    
         console.log("🚀 Mensaje lanzado al espacio hacia:", targetID);
 
     } catch (e) {
@@ -505,7 +505,9 @@ if (inputMsg) inputMsg.value = "";
         alert("Error al enviar el mensaje.");
     }
 }
-// --- 4. GESTIÓN DE TOKENS Y SERVICE WORKER --/ Registrar el Service Worker al cargar la página
+// --- 4. GESTIÓN DE TOKENS Y SERVICE WORKER ---
+
+// Registrar el Service Worker al cargar la página
 if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('firebase-messaging-sw.js')
         .then(registration => {
@@ -519,292 +521,4 @@ async function obtenerToken(registration) {
         const miVapidKey = 'BIrsA9YbBXfIuo4PTMrKRtuktRsK2RbK0XevupuofGGOUDy9w5VZ9yaXbZXsenXppmFsR62-2B7jBOG0Z8RdxvU';
         const token = await messaging.getToken({ 
             vapidKey: miVapidKey, 
-            serviceWorkerRegistration: registration 
-        });
-
-        if (token) {
-            console.log("🎫 TU TOKEN DROPIS:", token);
-            localStorage.setItem('fcm_token', token);
-            
-            // Si el usuario ya tiene ID, actualizamos el token en la nube silenciosamente
-            const miID = localStorage.getItem('mi_dropis_id');
-            if (miID) {
-                firebase.database().ref('usuarios/' + miID).update({ fcm_token: token });
-            }
-        }
-    } catch (err) {
-        console.warn("⚠️ No se pudo obtener el token:", err);
-    }
-}
-
-// --- 5. LÓGICA DE INTERFAZ Y QR ---
-
-function manejarBotonIdentidad() {
-    const id = localStorage.getItem('mi_dropis_id');
-    const nombre = localStorage.getItem('mi_nombre') || "Pedro Peres"; // Ajusta según tu variable
-
-    if (id) {
-        document.getElementById('modal-qr').style.display = 'flex';
-        
-        // 1. Ponemos tu nombre arriba
-        document.getElementById('nombre-dueño-header').innerText = "👤 " + nombre;
-
-        // 2. Generamos el QR (como ya lo tenías)
-        const cont = document.getElementById('contenedor-qr');
-        cont.innerHTML = "";
-        new QRCode(cont, { 
-            text: `dropisapp://perfil/${id}`, 
-            width: 160, height: 160
-        });
-
-        // 3. Pintamos la Agenda (La pestaña de abajo)
-        pintarAgendaContactos();
-
-    } else {
-        document.getElementById('modal-registro').style.display = 'flex';
-    }
-}
-
-function pintarAgendaContactos() {
-    const lista = document.getElementById('lista-contactos');
-    // Supongamos que guardas tus contactos como un array de objetos
-    const contactos = JSON.parse(localStorage.getItem('mis_contactos')) || [
-        { nombre: "Ejemplo Hijo", id: "12345abc" }, // Datos de prueba
-        { nombre: "Soporte Dropis", id: "admin777" }
-    ];
-
-    lista.innerHTML = ""; // Limpiar antes de pintar
-
-    contactos.forEach(contacto => {
-        const btn = document.createElement('div');
-        btn.style.cssText = "background: #3b4a54; color: white; padding: 10px; border-radius: 8px; cursor: pointer; text-align: left; font-size: 13px; border-left: 3px solid #ffd700;";
-        btn.innerHTML = `<strong>${contacto.nombre}</strong><br><span style="font-size: 10px; color: #8696a0;">ID: ${contacto.id}</span>`;
-        
-        // LA MAGIA: Al darle clic, rellena el ID del chat automáticamente
-        btn.onclick = () => {
-            const inputTarget = document.querySelector('#target-id');
-            if(inputTarget) {
-                inputTarget.value = contacto.id;
-                cerrarModalQR();
-                console.log("✅ Contacto seleccionado: " + contacto.nombre);
-            }
-        };
-        lista.appendChild(btn);
-    });
-}
-function cerrarModalQR() {
-    document.getElementById('modal-qr').style.display = 'none';
-}
-        function guardarNuevoContacto() {
-    const inputID = document.querySelector('#target-id');
-    const idAGuardar = inputID ? inputID.value.trim() : "";
-
-    if (!idAGuardar) return alert("Primero escribe un ID para guardarlo");
-
-    // Pedimos el nombre al usuario
-    const nombre = prompt("¿Cómo quieres llamar a este contacto?");
-    
-    if (nombre) {
-        let agenda = JSON.parse(localStorage.getItem('mis_contactos')) || [];
-        
-        // Evitar duplicados
-        const existe = agenda.find(c => c.id === idAGuardar);
-        if (existe) return alert("Este ID ya está en tu agenda como: " + existe.nombre);
-
-        // Guardamos el nuevo objeto
-        agenda.push({ nombre: nombre, id: idAGuardar });
-        localStorage.setItem('mis_contactos', JSON.stringify(agenda));
-        
-        alert("✅ Contacto guardado: " + nombre);
-    }
-        }
-
-// Arrancar la app
-// ... (todo tu código anterior de funciones y variables)
-
-// Reemplaza el bloque final por este:
-window.onload = () => {
-    const id = localStorage.getItem('mi_dropis_id');
-    
-    if (id) {
-        const display = document.getElementById('mi-id-display');
-        if(display) display.innerText = "Tu ID: " + id;
-        
-        if (typeof activarAntena === "function") {
-            activarAntena(); 
-        }
-
-        // --- AGREGAR ESTA LÍNEA AQUÍ ---
-        cargarMensajesLocales(); 
-        // ------------------------------
-
-    } else {
-        setTimeout(() => {
-            const modal = document.getElementById('modal-registro');
-            if(modal) modal.style.display = 'flex';
-        }, 1200); 
-    }
-};
-
-    
-async function cargarProto() {
-    const schema = `
-        package superapp;
-        syntax = "proto3";
-        message SuperAppPayload {
-            string chatText = 1;
-        }
-    `;
-    const root = protobuf.parse(schema).root;
-    return root;
-}
-
-
-// --- 5. LÓGICA DE INTERFAZ CORREGIDA ---
-
-/**
- * Pinta una burbuja de mensaje en el chat box.
- * @param {string} texto - El contenido del mensaje.
- * @param {string} clase - La clase CSS ('msg-izquierda' o 'msg-derecha').
- */
-// Variable necesaria para que el menú sepa a qué mensaje le diste clic
-// Variable necesaria para que el menú sepa a qué mensaje le diste clic
-
-let mensajeSeleccionado = null;
-let mensajeEnRespuesta = null; // <-- AGREGA ESTA LÍNEA
-
-
-
-function pintarMensaje(texto, clase) {
-    const box = document.getElementById('chat-box');
-    if (!box) return;
-
-    const div = document.createElement('div');
-    div.className = 'msg-burbuja ' + clase; // Asegúrate de que herede la clase
-
-    // --- EL DIBUJO DE LA CITA ---
-    if (texto && texto.includes("[CITADO:")) {
-        const partes = texto.split("] ");
-        const citado = partes[0].replace("[CITADO:", "");
-        const real = partes[1] || "";
-
-        div.innerHTML = `
-            <div style="background: rgba(0,0,0,0.3); border-left: 3px solid #ffd700; padding: 5px; margin-bottom: 5px; font-size: 11px; border-radius: 4px; color: #ddd;">
-                ${citado}
-            </div>
-            <div>${real}</div>
-        `;
-    } else {
-        div.innerText = texto || "Mensaje sin contenido";
-    }
-
-    // El resto de tu código del menú (onclick)...
-    div.onclick = (e) => {
-        mensajeSeleccionado = div; 
-        const menu = document.getElementById('menu-acciones');
-        if(menu) {
-            menu.style.display = 'block';
-            menu.style.top = e.pageY + "px";
-            menu.style.left = (e.pageX > 200 ? e.pageX - 150 : e.pageX) + "px";
-        }
-        e.stopPropagation(); 
-    };
-
-    if (clase === 'msg-derecha') div.setAttribute('data-enviado', '3');
-    div.style.wordWrap = 'break-word';
-    box.appendChild(div);
-    box.scrollTop = box.scrollHeight;
-}
-
-
-    div.style.wordWrap = 'break-word';
-
-    box.appendChild(div);
-
-    box.scrollTop = box.scrollHeight;
-
-}
-        
-
-// Función para ejecutar las acciones del menú
-function accionMensaje(tipo) {
-    if (!mensajeSeleccionado) return;
-    
-    const textoOriginal = mensajeSeleccionado.innerText;
-    const inputMsg = document.querySelector('#msg-text');
-    const inputTarget = document.querySelector('#target-id');
-
-    if (tipo === 'responder') {
-    // Guardamos el texto original en la variable para usarlo al dar clic en ENVIAR
-    mensajeEnRespuesta = textoOriginal;
-    
-    // Cambiamos el estilo del input para que sepas que estás citando a alguien
-    inputMsg.placeholder = "Respondiendo a: " + textoOriginal.substring(0, 20) + "...";
-    inputMsg.style.borderLeft = "4px solid #ffd700"; // Borde dorado de Dropis
-    inputMsg.style.paddingLeft = "10px";
-    inputMsg.focus();
-    }
-        
-    else if (tipo === 'editar') {
-        inputMsg.value = textoOriginal;
-        // Al editar, borramos el viejo para sobreescribir
-        borrarMensajeDeMemoria(textoOriginal);
-        mensajeSeleccionado.remove();
-        inputMsg.focus();
-    } 
-    else if (tipo === 'copiar-id') {
-        if(inputTarget) {
-            inputTarget.value = textoOriginal.trim();
-            inputTarget.style.boxShadow = "0 0 10px #ffd700";
-            setTimeout(() => inputTarget.style.boxShadow = "none", 1000);
-        }
-    } 
-    else if (tipo === 'borrar') {
-        if(confirm("¿Borrar mensaje para siempre?")) {
-            borrarMensajeDeMemoria(textoOriginal);
-            mensajeSeleccionado.remove();
-        }
-    }
-
-    document.getElementById('menu-acciones').style.display = 'none';
-}
-
-// Esta función es para que el borrado sea REAL y no vuelvan al recargar
-function borrarMensajeDeMemoria(texto) {
-    let mensajes = JSON.parse(localStorage.getItem('mis_mensajes')) || [];
-    // Filtramos para quitar el mensaje que coincida con el texto
-    mensajes = mensajes.filter(m => m.texto !== texto);
-    localStorage.setItem('mis_mensajes', JSON.stringify(mensajes));
-}
-
-// Cerrar el menú si tocas fuera
-document.addEventListener('click', () => {
-    const menu = document.getElementById('menu-acciones');
-    if(menu) menu.style.display = 'none';
-});
-        
-function cargarMensajesLocales() {
-    const datos = localStorage.getItem('mis_mensajes');
-    if (!datos) return; 
-
-    try {
-        const mensajesGuardados = JSON.parse(datos);
-        mensajesGuardados.forEach(msg => {
-            // Usamos tu función real 'pintarMensaje'
-            if (typeof pintarMensaje === "function") {
-                pintarMensaje(msg.texto, msg.clase); 
-            }
-        });
-    } catch (e) {
-        console.error("Error al cargar memoria local", e);
-    }
-}
-</script>
-</body>
-</html>
-
-
-
-
-
-                
+  
