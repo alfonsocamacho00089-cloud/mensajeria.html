@@ -686,14 +686,14 @@ function pintarMensaje(texto, clase) {
 
         // --- CAMBIO DE COLOR AQUÍ ---
         // Si quieres un verde más oscuro para respuestas: #128c7e o el color que gustes
-        div.style.backgroundColor = "##2d2d2d"; 
+        div.style.backgroundColor = "#0b141a"; 
         div.style.border = "1px solid rgba(255,215,0,0.3)"; // Un toque dorado opaco
 
         // Dentro del if (texto.includes("Resp >"))
 div.innerHTML = `
     <div style="
-        font-size: 10px; 
-        opacity: 0.6; 
+        font-size: 14px; 
+        opacity: 0.10; 
         border-bottom: 1px solid rgba(255,255,255,0.2); 
         padding: 0; 
         margin: 0; 
@@ -704,8 +704,8 @@ div.innerHTML = `
     <div style="
         margin: 0; 
         padding: 2px 0 0 0; 
-        line-height: 1.1; 
-        display: block;">
+        line-height: 1; 
+        display: flex;">
         ${mensajeReal}
     </div>
 `;
