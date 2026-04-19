@@ -680,17 +680,22 @@ function pintarMensaje(texto, clase) {
 
     // --- EL CEREBRO PARA SUBIR LA CITA (Donde pusiste la flecha) ---
     if (texto && texto.includes("Resp >")) {
-        // Separamos la cita del mensaje real usando el guion largo "—"
         const partes = texto.split("\n— ");
-        const cabezalCita = partes[0]; // Lo que va arriba (la flecha)
-        const mensajeReal = partes[1] || ""; // Tu respuesta abajo
+        const cabezalCita = partes[0];
+        const mensajeReal = partes[1] || "";
+
+        // --- CAMBIO DE COLOR AQUÍ ---
+        // Si quieres un verde más oscuro para respuestas: #128c7e o el color que gustes
+        div.style.backgroundColor = "##2d2d2d"; 
+        div.style.border = "1px solid rgba(255,215,0,0.3)"; // Un toque dorado opaco
 
         div.innerHTML = `
-            <div style="font-size: 11px; opacity: 0.8; border-bottom: 1px solid rgba(255,255,255,0.2); padding-bottom: 4px; margin-bottom: 4px; font-style: italic;">
+            <div style="font-size: 11px; opacity: 0.8; border-bottom: 1px solid rgba(255,255,255,0.2); padding-bottom: 2px; margin-bottom: 4px; font-style: italic;">
                 ${cabezalCita}
             </div>
             <div>${mensajeReal}</div>
         `;
+    }
     } else {
         div.innerText = texto || "";
     }
@@ -720,23 +725,18 @@ function accionMensaje(tipo) {
     const inputTarget = document.querySelector('#target-id');
  
     // --- EL CEREBRO PARA SUBIR LA CITA ---
-    if (texto && texto.includes("Resp >")) {
-        const partes = texto.split("\n— ");
-        const cabezalCita = partes[0];
-        const mensajeReal = partes[1] || "";
+    if (tipo === 'responder') {
+    // 1. Agarramos el texto del mensaje que quieres citar
+    const cita = mensajeSeleccionado.innerText;
 
-        // --- CAMBIO DE COLOR AQUÍ ---
-        // Si quieres un verde más oscuro para respuestas: #128c7e o el color que gustes
-        div.style.backgroundColor = "##2d2d2d"; 
-        div.style.border = "1px solid rgba(255,215,0,0.3)"; // Un toque dorado opaco
+    // 2. EFECTO WHATSAPP: Borramos TODO lo que el usuario estaba escribiendo
+    // y colocamos la cita nueva limpia
+    inputMsg.value = `Resp > ${cita}\n— `;
 
-        div.innerHTML = `
-            <div style="font-size: 11px; opacity: 0.8; border-bottom: 1px solid rgba(255,255,255,0.2); padding-bottom: 2px; margin-bottom: 4px; font-style: italic;">
-                ${cabezalCita}
-            </div>
-            <div>${mensajeReal}</div>
-        `;
+    // 3. Bajamos el foco al editor para escribir la respuesta
+    inputMsg.focus();
     }
+        
     else if (tipo === 'editar') {
         inputMsg.value = textoOriginal;
         // Al editar, borramos el viejo para sobreescribir
