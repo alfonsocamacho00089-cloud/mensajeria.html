@@ -391,7 +391,9 @@ async function activarAntena() {
     ts: Date.now()
 });
 console.log("✅ Guardado automático ejecutado con éxito");
-
+let historial = JSON.parse(localStorage.getItem('mis_mensajes')) || [];
+historial.push({ texto: decoded.chatText, clase: 'msg-izquierda' });
+localStorage.setItem('mis_mensajes', JSON.stringify(historial));
             // 4. Mostrar en pantalla
             pintarMensaje(decoded.chatText, 'msg-izquierda');
             
@@ -436,7 +438,17 @@ const miID = localStorage.getItem('mi_dropis_id') || "ID_DESCONOCIDO";
 
         // 4. Pintamos nuestro propio mensaje en la derecha
         pintarMensaje(msg, 'msg-derecha');
-        if (inputMsg) inputMsg.value = "";
+        // ... dentro de enviarMensajeSatelital, después de pintarMensaje(msg, 'msg-derecha');
+
+
+// --- AÑADE ESTO PARA GUARDAR LO QUE ENVÍAS ---
+let historialEnv = JSON.parse(localStorage.getItem('mis_mensajes')) || [];
+historialEnv.push({ texto: msg, clase: 'msg-derecha' });
+localStorage.setItem('mis_mensajes', JSON.stringify(historialEnv));
+// ----------------------------------------------
+
+if (inputMsg) inputMsg.value = "";
+        
     
         console.log("🚀 Mensaje lanzado al espacio hacia:", targetID);
 
@@ -516,12 +528,15 @@ window.onload = () => {
         const display = document.getElementById('mi-id-display');
         if(display) display.innerText = "Tu ID: " + id;
         
-        // Verificamos si la función existe antes de llamarla
         if (typeof activarAntena === "function") {
             activarAntena(); 
         }
+
+        // --- AGREGAR ESTA LÍNEA AQUÍ ---
+        cargarMensajesLocales(); 
+        // ------------------------------
+
     } else {
-        // El truco para que Goku impacte primero
         setTimeout(() => {
             const modal = document.getElementById('modal-registro');
             if(modal) modal.style.display = 'flex';
@@ -582,19 +597,20 @@ function pintarMensaje(texto, clase) {
         }
         
 function cargarMensajesLocales() {
-    // Buscamos los mensajes en el almacén local
     const datos = localStorage.getItem('mis_mensajes');
-    if (!datos) return; // Si no hay nada, no hacemos nada
+    if (!datos) return; 
 
-    const mensajesGuardados = JSON.parse(datos);
-
-    mensajesGuardados.forEach(msg => {
-        // IMPORTANTE: Cambia 'mostrarMensajeEnPantalla' por el nombre 
-        // de la función que tú usas para dibujar las burbujas de texto
-        if (typeof mostrarMensajeEnPantalla === "function") {
-            mostrarMensajeEnPantalla(msg.texto, msg.tipo); 
-        }
-    });
+    try {
+        const mensajesGuardados = JSON.parse(datos);
+        mensajesGuardados.forEach(msg => {
+            // Usamos tu función real 'pintarMensaje'
+            if (typeof pintarMensaje === "function") {
+                pintarMensaje(msg.texto, msg.clase); 
+            }
+        });
+    } catch (e) {
+        console.error("Error al cargar memoria local", e);
+    }
 }
 </script>
 </body>
