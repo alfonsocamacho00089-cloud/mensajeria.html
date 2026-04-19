@@ -132,6 +132,28 @@ body {
     overflow-y: auto;      /* Si el mensaje es muy largo, sale scroll interno */
     margin: 0 5px;         /* Un pelín de separación con el ID y el botón */
         }
+        .menu-mensaje {
+    position: absolute;
+    background: #2a3942;
+    border: 1px solid #ffd700;
+    border-radius: 10px;
+    padding: 5px 0;
+    z-index: 20000;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+    display: none; /* Se activa con JS */
+}
+
+.menu-mensaje div {
+    padding: 10px 20px;
+    color: white;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.menu-mensaje div:hover {
+    background: #3b4a54;
+}
+        
         #mi-id-display { font-size: 11px; color: #ffd700; margin-top: 5px; font-family: monospace; }
         .btn-qr-dropis { position: absolute; right: 15px; top: 50%; transform: translateY(-50%); background: #ffd700; border: none; border-radius: 50%; width: 35px; height: 35px; cursor: pointer; font-size: 18px; }
 
@@ -249,6 +271,12 @@ body {
     </button>
     </div>
 
+    <div id="menu-acciones" class="menu-mensaje">
+    <div onclick="accionMensaje('responder')">↩️ Responder</div>
+    <div onclick="accionMensaje('editar')">✏️ Editar</div>
+    <div onclick="accionMensaje('copiar-id')">👤 Usar como ID</div>
+    <div onclick="accionMensaje('borrar')" style="color: #ff5c5c;">🗑️ Borrar</div>
+    </div>
     <script>
         // 1. CONFIGURACIÓN Y REGISTRO DE ANTENA (INDISPENSABLE PARA EL TOKEN)
         
@@ -641,36 +669,87 @@ async function cargarProto() {
  * @param {string} texto - El contenido del mensaje.
  * @param {string} clase - La clase CSS ('msg-izquierda' o 'msg-derecha').
  */
+// Variable necesaria para que el menú sepa a qué mensaje le diste clic
+let mensajeSeleccionado = null;
+
 function pintarMensaje(texto, clase) {
     const box = document.getElementById('chat-box');
-    if (!box) {
-        console.error("❌ No se encontró el elemento 'chat-box'");
-        return;
-    }
+    if (!box) return;
 
-    // Crear la burbuja del mensaje
     const div = document.createElement('div');
     div.className = 'msg-burbuja ' + clase;
-    
-    // Asignar el texto. Si no hay texto, poner un mensaje por defecto.
     div.innerText = texto || "Mensaje sin contenido";
 
-    // --- ACTIVACIÓN DEL DOBLE CHECK (NUEVO) ---
-    // Si el mensaje es enviado (derecha), activamos el double tick azul
+    // --- EL CEREBRO DEL MENÚ (NUEVO) ---
+    div.onclick = (e) => {
+        mensajeSeleccionado = div; 
+        const menu = document.getElementById('menu-acciones');
+        if(menu) {
+            menu.style.display = 'block';
+            menu.style.top = e.pageY + "px";
+            menu.style.left = (e.pageX > 200 ? e.pageX - 150 : e.pageX) + "px";
+        }
+        e.stopPropagation(); 
+    };
+
     if (clase === 'msg-derecha') {
-        // Esto activa la regla CSS: .msg-burbuja[data-enviado="3"]::after
         div.setAttribute('data-enviado', '3');
     }
 
-    // Asegurar que el mensaje no se rompa visualmente
     div.style.wordWrap = 'break-word';
-
-    // Añadir al chat box y hacer scroll hacia abajo
     box.appendChild(div);
     box.scrollTop = box.scrollHeight;
+}
+
+// Función para ejecutar las acciones del menú
+function accionMensaje(tipo) {
+    if (!mensajeSeleccionado) return;
     
-    console.log(`✅ Mensaje pintado en la ${clase === 'msg-derecha' ? 'derecha' : 'izquierda'}`);
+    const textoOriginal = mensajeSeleccionado.innerText;
+    const inputMsg = document.querySelector('#msg-text');
+    const inputTarget = document.querySelector('#target-id');
+
+    if (tipo === 'responder') {
+        inputMsg.value = `Rep: "${textoOriginal}" -> `;
+        inputMsg.focus();
+    } 
+    else if (tipo === 'editar') {
+        inputMsg.value = textoOriginal;
+        // Al editar, borramos el viejo para sobreescribir
+        borrarMensajeDeMemoria(textoOriginal);
+        mensajeSeleccionado.remove();
+        inputMsg.focus();
+    } 
+    else if (tipo === 'copiar-id') {
+        if(inputTarget) {
+            inputTarget.value = textoOriginal.trim();
+            inputTarget.style.boxShadow = "0 0 10px #ffd700";
+            setTimeout(() => inputTarget.style.boxShadow = "none", 1000);
         }
+    } 
+    else if (tipo === 'borrar') {
+        if(confirm("¿Borrar mensaje para siempre?")) {
+            borrarMensajeDeMemoria(textoOriginal);
+            mensajeSeleccionado.remove();
+        }
+    }
+
+    document.getElementById('menu-acciones').style.display = 'none';
+}
+
+// Esta función es para que el borrado sea REAL y no vuelvan al recargar
+function borrarMensajeDeMemoria(texto) {
+    let mensajes = JSON.parse(localStorage.getItem('mis_mensajes')) || [];
+    // Filtramos para quitar el mensaje que coincida con el texto
+    mensajes = mensajes.filter(m => m.texto !== texto);
+    localStorage.setItem('mis_mensajes', JSON.stringify(mensajes));
+}
+
+// Cerrar el menú si tocas fuera
+document.addEventListener('click', () => {
+    const menu = document.getElementById('menu-acciones');
+    if(menu) menu.style.display = 'none';
+});
         
 function cargarMensajesLocales() {
     const datos = localStorage.getItem('mis_mensajes');
