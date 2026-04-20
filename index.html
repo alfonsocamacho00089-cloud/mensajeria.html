@@ -717,32 +717,33 @@ function cerrarModalQR() {
     lista.innerHTML = ""; 
  
     contactos.forEach(contacto => {
-        // Dentro del forEach en tu función pintarAgendaContactos:
-const btn = document.createElement('div');
-btn.className = 'fila-contacto'; // <--- ESTO ACTIVA EL CSS DE ARRIBA
+        const btn = document.createElement('div');
+        btn.className = 'fila-contacto'; 
 
-btn.innerHTML = `
-    <div style="width: 50px; height: 50px; background: #ffd700; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: black; font-weight: bold; font-size: 20px; flex-shrink: 0;">
-        ${contacto.nombre.charAt(0).toUpperCase()}
-    </div>
-    <div style="text-align: left;">
-        <div style="font-weight: bold; font-size: 16px; color: #ffffff;">${contacto.nombre}</div>
-        <div style="font-size: 12px; color: #8696a0;">ID: ${contacto.id}</div>
-    </div>
-`;
-
+        btn.innerHTML = `
+            <div style="width: 50px; height: 50px; background: #ffd700; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: black; font-weight: bold; font-size: 20px; flex-shrink: 0;">
+                ${contacto.nombre.charAt(0).toUpperCase()}
+            </div>
+            <div style="text-align: left;">
+                <div style="font-weight: bold; font-size: 16px; color: #ffffff;">${contacto.nombre}</div>
+                <div style="font-size: 12px; color: #8696a0;">ID: ${contacto.id}</div>
+            </div>
+        `;
         
         btn.onclick = () => {
             // Cuando tocas al contacto, cargamos su chat específico
             cargarConversacionCon(contacto.id, contacto.nombre);
             
-            // También lo agregamos a "Conversaciones Recientes"
-            actualizarListaConversaciones(contacto.id, contacto.nombre);
+            // Si tienes esta función, la llamas; si no, la comentas
+            if (typeof actualizarListaConversaciones === "function") {
+                actualizarListaConversaciones(contacto.id, contacto.nombre);
+            }
         };
         
         lista.appendChild(btn);
-    });
- } del onclick
+    }); // <--- AQUÍ SE CIERRA EL FOREACH
+} // <--- AQUÍ SE CIERRA LA FUNCIÓN
+ 
         
          // Metemos el botón en la lista
      // <--- ¡ESTA LLAVE FALTA EN TU CÓDIGO! (Cierre del forEach)
