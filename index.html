@@ -1,10 +1,56 @@
-<!DOCTYPE html>
+
+    <!DOCTYPE html>
 <html lang="es">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>ChatSpace</title>
-<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#556b2f">
     
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #121212; /* Fondo oscuro tipo chat */
+            font-family: sans-serif;
+        }
+
+        .app-header {
+            background-color: #556b2f; /* Tu color verde */
+            color: white;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            padding: 0 15px;
+            position: fixed; /* Esto hace que no se mueva al hacer scroll */
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        .app-header h1 {
+            font-size: 20px;
+            margin: 0;
+            text-transform: uppercase;
+        }
+
+        /* Espacio para que el chat no se tape con el título */
+        .contenido-chat {
+            padding-top: 70px; 
+        }
+    </style>
+</head>
+<body>
+
+    <header class="app-header">
+        <h1>CHATSPACE</h1>
+    </header>
+
+    <main class="contenido-chat">
+        </main>
+
+</body>
+
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-messaging-compat.js"></script>
@@ -14,6 +60,20 @@
     <script>eruda.init();</script>
 
     <style>
+.app-header {
+    background-color: #556b2f; /* El color verde que elegiste */
+    color: white;              /* Letras blancas */
+    height: 60px;
+    display: flex;
+    align-items: center;       /* Centra verticalmente */
+    padding: 0 20px;
+    position: sticky;          /* Se queda arriba mientras haces scroll */
+    top: 0;
+    z-index: 1000;
+    font-family: Arial, sans-serif;
+}
+
+ /* Para que salga todo en mayúsculas como pediste */
 
    
 body { 
