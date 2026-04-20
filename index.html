@@ -764,28 +764,32 @@ function cerrarModalQR() {
 
 window.onload = () => {
     const id = localStorage.getItem('mi_dropis_id');
+    const modalRegistro = document.getElementById('modal-registro');
     
     if (id) {
+        // --- CASO 1: YA ESTÁ REGISTRADO ---
         const display = document.getElementById('mi-id-display');
         if(display) display.innerText = "Tu ID: " + id;
         
-        // La antena siempre debe estar encendida para no perder mensajes
+        // Encendemos la antena rápido
         if (typeof activarAntena === "function") {
             activarAntena(); 
         }
- 
-        // CAMBIO AQUÍ: En vez de cargar mensajes viejos al azar,
-        // abrimos tu Agenda/Lista de una vez.
-        manejarBotonIdentidad(); 
- 
+
+        // CARGA DIRECTA: Aquí tú decides qué quieres que vea primero.
+        // Si quieres que vea sus mensajes con él mismo (su espacio):
+        cargarConversacionCon(id, "Mi Espacio"); 
+        
+        // O si prefieres que vea la agenda, dejas el que tenías:
+        // manejarBotonIdentidad(); 
+
     } else {
-        setTimeout(() => {
-            const modal = document.getElementById('modal-registro');
-            if(modal) modal.style.display = 'flex';
-        }, 1200); 
+        // --- CASO 2: NO HAY REGISTRO ---
+        // Quitamos el setTimeout de 1.2 segundos para que no asome el chat antes.
+        // El modal sale de inmediato.
+        if(modalRegistro) modalRegistro.style.display = 'flex';
     }
 };
- 
     
 async function cargarProto() {
     const schema = `
