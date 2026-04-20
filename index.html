@@ -36,60 +36,70 @@ body {
 
 /* El Chat es el único que crece y desliza */
 
-        /* INPUT AREA CORREGIDA (Siempre visible al fondo) */
         .input-area { 
     background: #1a1a1a; 
     padding: 8px 10px; 
     display: flex; 
-    align-items: center; /* Centra todos los botones y cuadros */
+    align-items: center; 
     gap: 8px; 
     border-top: 1px solid #333; 
-    padding-bottom: 15px; 
+    padding-bottom: 20px; /* Espacio para el móvil */
+    box-sizing: border-box;
 }
 
-/* Estilo para el icono de + Usuario */
-.input-area i.fa-user-plus {
-    transition: 0.3s;
-}
-
-.input-area i.fa-user-plus:hover {
-    color: white;
-    transform: scale(1.1);
-}
-
-input#msg-text { 
-    flex: 1; 
-    padding: 8px 15px; /* Menos padding interno para que no sea tan gordo */
-    border-radius: 20px; 
-    border: none; 
-    outline: none; 
-    background: #2a2a2a; 
-    color: white; 
-    height: 38px; /* Forzamos una altura limpia */
+/* El botón del + */
+.btn-agenda {
+    background: none;
+    border: none;
+    color: #ffd700;
+    font-size: 20px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0; /* Para que no se aplaste */
 }
 
 input#target-id { 
-    width: 55px; /* Un pelín más flaco */
-    height: 38px; /* Misma altura que el mensaje para que se vean parejos */
+    width: 50px; 
+    height: 38px; 
     background: #000; 
     color: #ffd700; 
     border: 1px solid #333; 
     border-radius: 8px; 
     text-align: center;
-    font-size: 12px;
+    font-size: 11px;
 }
 
+/* Cambiamos el input por textarea si es que usas textarea en el HTML */
+textarea#msg-text, input#msg-text { 
+    flex: 1; 
+    padding: 10px 15px; 
+    border-radius: 20px; 
+    border: none; 
+    outline: none; 
+    background: #2a2a2a; 
+    color: white; 
+    height: 38px; 
+    resize: none;
+    font-family: inherit;
+}
+
+/* BOTÓN DE ENVIAR: Circular y centrado */
 button#btn-enviar { 
     background: #ffd700; 
     border: none; 
-    padding: 0 15px; /* Ajustamos el padding horizontal */
-    height: 38px; /* Misma altura que el resto */
-    border-radius: 20px; 
-    font-weight: bold; 
+    width: 40px;      /* ANCHO FIJO PARA QUE SEA CIRCULAR */
+    height: 40px;     /* ALTO FIJO */
+    border-radius: 50%; 
+    display: flex;
+    align-items: center;
+    justify-content: center;
     cursor: pointer; 
     color: black; 
-    font-size: 13px;
-}
+    flex-shrink: 0;   /* IMPORTANTE: Evita que se deforme */
+    font-size: 16px;
+    }
         
         #chat-box {
     flex: 1;
@@ -321,7 +331,7 @@ button#btn-enviar {
     </div>
 
     <div class="input-area">
-    <button onclick="guardarNuevoContacto()" style="background: none; border: none; color: #ffd700; font-size: 20px; cursor: pointer; padding: 0 5px;">
+    <button class="btn-agenda" onclick="guardarNuevoContacto()">
         <i class="fas fa-user-plus"></i>
     </button>
 
