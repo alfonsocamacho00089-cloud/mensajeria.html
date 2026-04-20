@@ -33,17 +33,26 @@ body {
 
 
 /* Cabecera Intocable */
- .header { 
+.header { 
             background: #1a1a1a; /* Gris oscuro como el área de abajo */
             padding: 15px; 
             display: flex;
-            
+            align-items: center;
             justify-content: flex-start; /* El nombre a la izquierda */
             position: relative;
             flex-shrink: 0; 
             height: 60px;
             /* Eliminé el border-bottom amarillo */
- }
+        }
+
+        .header h1 {
+            color: white;
+            font-size: 20px;
+            margin: 0;
+            text-transform: uppercase;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
 
 
 /* El Chat es el único que crece y desliza */
