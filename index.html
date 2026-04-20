@@ -7,7 +7,7 @@
     <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <h1>ChatSpace</h1>
+    <title>ChatSpace</title>
     
 
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
@@ -34,25 +34,27 @@ body {
 
 /* Cabecera Intocable */
 .header { 
-            background: #1a1a1a; /* Gris oscuro como el área de abajo */
-            padding: 15px; 
-            display: flex;
-            align-items: center;
-            justify-content: flex-start; /* El nombre a la izquierda */
-            position: relative;
-            flex-shrink: 0; 
-            height: 60px;
-            /* Eliminé el border-bottom amarillo */
-        }
+    background: #1a1a1a; /* Gris oscuro sólido */
+    padding: 0 15px;    /* Ajusté el padding para controlar mejor la altura */
+    display: flex;
+    align-items: center;
+    justify-content: flex-start; 
+    position: relative;
+    flex-shrink: 0; 
+    height: 60px;
+    border-bottom: 1px solid #333; /* Una línea gris muy sutil para separar del chat */
+}
 
-        .header h1 {
-            color: white;
-            font-size: 20px;
-            margin: 0;
-            text-transform: uppercase;
-            font-weight: bold;
-            letter-spacing: 1px;
-        }
+.header h1 {
+    color: #ffffff;      /* Blanco puro */
+    opacity: 1;          /* Fuerza a que NO sea transparente */
+    font-size: 20px;
+    margin: 0;
+    text-transform: uppercase;
+    font-weight: 900;    /* El grosor máximo para líneas bien gruesas */
+    letter-spacing: 1.5px; /* Un poco más de espacio para que se vea premium */
+    font-family: sans-serif;
+}
 
 
 /* El Chat es el único que crece y desliza */
@@ -247,7 +249,7 @@ body {
 <body>
 
     <div class="header">
-        ChatSpace
+        <h1>ChatSpace</h1>
         
         <button class="btn-qr-dropis" onclick="manejarBotonIdentidad()">🪪</button>
     </div>
