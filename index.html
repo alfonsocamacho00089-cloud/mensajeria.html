@@ -594,33 +594,7 @@ function manejarBotonIdentidad() {
     }
 }
 
-        function pintarAgendaContactos() {
-    const lista = document.getElementById('lista-contactos');
-    // Supongamos que guardas tus contactos como un array de objetos
-    const contactos = JSON.parse(localStorage.getItem('mis_contactos')) || [
-        { nombre: "Ejemplo Hijo", id: "12345abc" }, // Datos de prueba
-        { nombre: "Soporte Dropis", id: "admin777" }
-    ];
- 
-    lista.innerHTML = ""; // Limpiar antes de pintar
- 
-    contactos.forEach(contacto => {
-        const btn = document.createElement('div');
-        btn.style.cssText = "background: #3b4a54; color: white; padding: 10px; border-radius: 8px; cursor: pointer; text-align: left; font-size: 13px; border-left: 3px solid #ffd700;";
-        btn.innerHTML = `<strong>${contacto.nombre}</strong><br><span style="font-size: 10px; color: #8696a0;">ID: ${contacto.id}</span>`;
         
-        // LA MAGIA: Al darle clic, rellena el ID del chat automáticamente
-        btn.onclick = () => {
-            const inputTarget = document.querySelector('#target-id');
-            if(inputTarget) {
-                inputTarget.value = contacto.id;
-                cerrarModalQR();
-                console.log("✅ Contacto seleccionado: " + contacto.nombre);
-            }
-        };
-        lista.appendChild(btn);
-    });
-}
 function cerrarModalQR() {
     document.getElementById('modal-qr').style.display = 'none';
 }
@@ -647,7 +621,51 @@ function cerrarModalQR() {
         alert("✅ Contacto guardado: " + nombre);
     }
         }
+ function pintarAgendaContactos() {
+    const lista = document.getElementById('lista-contactos');
+    // Traemos los contactos guardados o usamos los de prueba
+    const contactos = JSON.parse(localStorage.getItem('mis_contactos')) || [
+        { nombre: "Hijo 1", id: "ID_AQUI_1" }, 
+        { nombre: "Hijo 2", id: "ID_AQUI_2" }
+    ];
  
+    lista.innerHTML = ""; // Limpiamos la lista antes de dibujar
+ 
+    contactos.forEach(contacto => {
+        const btn = document.createElement('div');
+        // Estilo para que parezca un botón elegante
+        btn.style.cssText = "background: #3b4a54; color: white; padding: 12px; border-radius: 8px; cursor: pointer; text-align: left; margin-bottom: 5px; border-left: 4px solid #ffd700;";
+        
+        btn.innerHTML = `
+            <strong style="display: block;">${contacto.nombre}</strong>
+            <span style="font-size: 11px; color: #8696a0;">ID: ${contacto.id}</span>
+        `;
+        
+        // LA MAGIA: Al tocar el contacto
+        btn.onclick = () => {
+            const inputTarget = document.getElementById('target-id'); 
+            if (inputTarget) {
+                inputTarget.value = contacto.id; 
+                
+                inputTarget.style.backgroundColor = "#ffd700";
+                inputTarget.style.color = "#000";
+                setTimeout(() => {
+                    inputTarget.style.backgroundColor = "";
+                    inputTarget.style.color = "";
+                }, 500);
+
+                cerrarModalQR(); 
+
+                // AQUÍ ES EL SITIO IDEAL:
+                const inputMsg = document.getElementById('msg-text');
+                if(inputMsg) {
+                    inputMsg.focus(); 
+                }
+
+                console.log("✅ ID de " + contacto.nombre + " listo y cursor posicionado.");
+            }
+        }; // Cierre del onclick
+ }
 // Arrancar la app
 // ... (todo tu código anterior de funciones y variables)
  
