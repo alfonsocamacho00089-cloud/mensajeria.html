@@ -10,8 +10,6 @@
     <title>ChatSpace</title>
     
 
-
-    
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-messaging-compat.js"></script>
@@ -35,16 +33,18 @@ body {
 
 
 /* Cabecera Intocable */
-.header { 
-    background: #1a1a1a; /* Gris igual al de abajo */
-    padding: 15px; 
-    border-bottom: 2px solid #333; /* Línea gris sutil, ya no es amarilla */
-    flex-shrink: 0; 
-    position: relative; /* Importante para el botón QR */
-    color: white;
-    font-weight: bold;
-    
-}
+ .header { 
+            background: #1a1a1a; /* Gris oscuro como el área de abajo */
+            padding: 15px; 
+            display: flex;
+            align-items: center;
+            justify-content: flex-start; /* El nombre a la izquierda */
+            position: relative;
+            flex-shrink: 0; 
+            height: 60px;
+            /* Eliminé el border-bottom amarillo */
+ }
+
 
 /* El Chat es el único que crece y desliza */
 
