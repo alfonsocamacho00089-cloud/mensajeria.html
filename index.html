@@ -25,31 +25,36 @@ body {
     display: flex; 
     flex-direction: column; 
     height: 100dvh; /* Altura dinámica para móviles */
-    overflow: hidden; /* Evita el scroll de toda la pantalla */
+    overflow: hidden;
+            overscroll-behavior-y: none; 
+    
+    /* Para Safari/iOS que es más rebelde */
+    -webkit-overflow-scrolling: touch;/* Evita el scroll de toda la pantalla */
 }
+                
 
 
 /* Cabecera Intocable */
 .header { 
-    background: #1a1a1a; /* Gris oscuro sólido */
-    padding: 0 15px;    /* Ajusté el padding para controlar mejor la altura */
+    background: #1a1a1a; 
+    padding: 0 15px;    
     display: flex;
     align-items: center;
-    justify-content: flex-start; 
-    position: relative;
-    flex-shrink: 0; 
+    justify-content: space-between; /* Esto manda el título a la izquierda y el carnet a la derecha */
+    position: sticky; /* Cambia relative por sticky para que siempre se vea arriba */
+    top: 0;
+    z-index: 1000;
     height: 60px;
-    border-bottom: 1px solid #333; /* Una línea gris muy sutil para separar del chat */
+    border-bottom: 1px solid #333;
 }
 
 .header h1 {
-    color: #ffffff;      /* Blanco puro */
-    opacity: 1;          /* Fuerza a que NO sea transparente */
+    color: #ffffff;
     font-size: 20px;
     margin: 0;
     text-transform: uppercase;
-    font-weight: 900;    /* El grosor máximo para líneas bien gruesas */
-    letter-spacing: 1.5px; /* Un poco más de espacio para que se vea premium */
+    font-weight: 900;
+    letter-spacing: 1.5px;
     font-family: sans-serif;
 }
 
@@ -78,6 +83,10 @@ body {
     display: flex;
     flex-direction: column;
     gap: 10px;
+    overscroll-behavior-y: none; 
+    
+    /* Para Safari/iOS que es más rebelde */
+    -webkit-overflow-scrolling: touch;
     
     background-color: #0b141a;
     /* Usamos el filtro de 0.6 para que se vea un poquito más la imagen pero sin tapar el texto */
