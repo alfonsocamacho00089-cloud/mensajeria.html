@@ -4,10 +4,11 @@
             <!DOCTYPE html>
 <html lang="es">
 
-    <head>
+
+<head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <h1>ChatSpace</h1>
+    <title>ChatSpace</title> </head>
     
 
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
@@ -49,7 +50,9 @@ body {
     z-index: 1000;
     height: 60px;
     border-bottom: 1px solid #333;
+    box-sizing: border-box; /* Esto evita que el padding lo ensanche más de la cuenta */
 }
+
 
 .header h1 {
     color: #ffffff;
@@ -285,9 +288,16 @@ body {
 
 </head>
 
-<body>
 
+
+    <body>
+    <div class="header">
+        <h1>ChatSpace</h1> <button class="btn-qr-dropis" onclick="manejarBotonIdentidad()">🪪</button>
+    </div>
+
+    <div id="chat-box"></div>
     
+    </body>
 
     <div id="modal-registro" class="modal">
         <div class="modal-content">
