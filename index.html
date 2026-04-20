@@ -1,11 +1,13 @@
- <!DOCTYPE html>
+            
+    
+        
+            <!DOCTYPE html>
 <html lang="es">
 
-
-<head>
+    <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>ChatSpace</title> 
+    <h1>ChatSpace</h1>
     
 
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
@@ -47,9 +49,7 @@ body {
     z-index: 1000;
     height: 60px;
     border-bottom: 1px solid #333;
-    box-sizing: border-box; /* Esto evita que el padding lo ensanche más de la cuenta */
 }
-
 
 .header h1 {
     color: #ffffff;
@@ -110,7 +110,7 @@ body {
     padding: 6px 10px; 
     border-radius: 18px; 
     font-size: 15px; 
-    min-height: auto;
+    min-height: auto
     position: relative; 
     word-wrap: break-word; 
     margin: 4px 0; 
@@ -120,8 +120,10 @@ body {
     /* ESTO ES CLAVE: El efecto de vidrio empañado */
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
+ 
+    /* ... (todo tu código anterior se queda igual) ... */
     display: flex;
-    flex-direction: column; 
+    flex-direction: column; /* Texto arriba, info abajo */
 }
         
 
@@ -210,7 +212,7 @@ body {
 
         .msg-burbuja[data-enviado="3"]::after { content: " ✓✓"; font-size: 10px; color: #34b7f1; }
 
-                   /* MODALES */
+        /* MODALES */
         /* 1. EL CONTENEDOR (Ocupa toda la pantalla) */
 .modal { 
     display: none; 
@@ -283,19 +285,18 @@ body {
 
 </head>
 
+<body>
 
-
-    <body>
     <div class="header">
-     <h1>ChatSpace</h1>
-<div id="mi-id-display" style="display:none;"></div>
         
-<button class="btn-qr-dropis" onclick="manejarBotonIdentidad()">🪪</button>
+        
+      
+    <button class="btn-qr-dropis" onclick="manejarBotonIdentidad()">🪪</button>
+    
     </div>
 
-    <div id="chat-box"></div>
-    
-    
+    <div id="chat-box">
+    </div>
 
     <div id="modal-registro" class="modal">
         <div class="modal-content">
