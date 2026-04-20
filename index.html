@@ -132,10 +132,24 @@
     </div>
 
     <div id="modal-qr" class="modal">
-        <div class="modal-content" style="padding: 0; overflow: hidden; background: #202c33; border: 1px solid #ffd700;">
-            <div id="nombre-dueño-header" style="background: #ffd700; color: #000; padding: 15px; font-weight: bold;">Cargando...</div>
-            <div style="padding: 20px; background: white;"><div id="contenedor-qr"></div></div>
-            <button onclick="cerrarModalQR()" style="width: 100%; padding: 15px; background: #333; color: white; border: none; font-weight: bold;">CERRAR</button>
+        <div class="modal-content" style="padding: 0; overflow: hidden; background: #202c33; border: 1px solid #ffd700; max-width: 350px;">
+            
+            <div id="nombre-dueño-header" style="background: #ffd700; color: #000; padding: 15px; font-weight: bold; cursor: pointer;">
+                Cargando nombre...
+            </div>
+
+            <div style="padding: 20px; display: flex; flex-direction: center; align-items: center; background: white; justify-content: center;">
+                <div id="contenedor-qr"></div>
+            </div>
+
+            <div style="background: #2a3942; padding: 10px; border-top: 1px solid #3b4a54; text-align: left;">
+                <h4 style="color: #ffd700; margin: 5px 0 10px 0; font-size: 14px; font-family: sans-serif;">AGENDA DROPIS 🛰️</h4>
+                <div id="lista-contactos" style="max-height: 150px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px;">
+                    <p style="color: #8696a0; font-size: 12px;">No tienes contactos aún</p>
+                    </div>
+            </div>
+
+            <button onclick="cerrarModalQR()" style="width: 100%; padding: 15px; background: #333; color: white; border: none; font-weight: bold; cursor: pointer;">CERRAR</button>
         </div>
     </div>
 
