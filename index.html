@@ -35,71 +35,51 @@ body {
 }
 
 /* El Chat es el único que crece y desliza */
-
-        .input-area { 
+.input-area { 
     background: #1a1a1a; 
     padding: 8px 10px; 
     display: flex; 
-    align-items: center; 
     gap: 8px; 
     border-top: 1px solid #333; 
-    padding-bottom: 20px; /* Espacio para el móvil */
-    box-sizing: border-box;
-}
-
-/* El botón del + */
-.btn-agenda {
-    background: none;
-    border: none;
-    color: #ffd700;
-    font-size: 20px;
-    cursor: pointer;
-    display: flex;
     align-items: center;
-    justify-content: center;
-    flex-shrink: 0; /* Para que no se aplaste */
+    padding-bottom: 12px; /* Aquí es donde baja la altura */
 }
 
-input#target-id { 
-    width: 50px; 
-    height: 38px; 
+#msg-text { 
+    flex: 1; 
+    padding: 10px 15px; 
+    border-radius: 25px; 
+    border: none; 
+    background: #2a2a2a; 
+    color: white; 
+    height: 38px;
+    resize: none;
+}
+
+#target-id { 
+    width: 60px; 
+    height: 38px;
     background: #000; 
     color: #ffd700; 
     border: 1px solid #333; 
     border-radius: 8px; 
-    text-align: center;
-    font-size: 11px;
+    text-align: center; 
 }
 
-/* Cambiamos el input por textarea si es que usas textarea en el HTML */
-textarea#msg-text, input#msg-text { 
-    flex: 1; 
-    padding: 10px 15px; 
-    border-radius: 20px; 
-    border: none; 
-    outline: none; 
-    background: #2a2a2a; 
-    color: white; 
-    height: 38px; 
-    resize: none;
-    font-family: inherit;
-}
-
-/* BOTÓN DE ENVIAR: Circular y centrado */
 button#btn-enviar { 
     background: #ffd700; 
     border: none; 
-    width: 40px;      /* ANCHO FIJO PARA QUE SEA CIRCULAR */
-    height: 40px;     /* ALTO FIJO */
+    width: 40px; 
+    height: 40px; 
     border-radius: 50%; 
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer; 
     color: black; 
-    flex-shrink: 0;   /* IMPORTANTE: Evita que se deforme */
-    font-size: 16px;
-    }
+    flex-shrink: 0;
+    padding: 0;
+}
         
         #chat-box {
     flex: 1;
@@ -331,18 +311,18 @@ button#btn-enviar {
     </div>
 
     <div class="input-area">
-    <button class="btn-agenda" onclick="guardarNuevoContacto()">
-        <i class="fas fa-user-plus"></i>
-    </button>
-
     <input type="text" id="target-id" placeholder="ID">
-    
     <textarea id="msg-text" placeholder="Escribe un mensaje..." rows="1"></textarea>
-    
     <button id="btn-enviar" onclick="enviarMensajeSatelital()">
         <i class="fas fa-paper-plane"></i>
     </button>
-    </div>
+</div>
+
+<div style="display: flex; gap: 5px; margin-bottom: 10px;">
+    <button onclick="guardarNuevoContacto()" style="background: #ffd700; border: none; border-radius: 10px; padding: 10px 15px; font-weight: bold; cursor: pointer;">
+        + 👤
+    </button>
+</div>
 
     <div id="menu-acciones" class="menu-mensaje">
     <div onclick="accionMensaje('responder')">↩️ Responder</div>
