@@ -1,56 +1,10 @@
-
-    <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>ChatSpace</title>
     
-    <style>
-        body {
-            margin: 0;
-            padding: 0;
-            background-color: #121212; /* Fondo oscuro tipo chat */
-            font-family: sans-serif;
-        }
-
-        .app-header {
-            background-color: #556b2f; /* Tu color verde */
-            color: white;
-            height: 60px;
-            display: flex;
-            align-items: center;
-            padding: 0 15px;
-            position: fixed; /* Esto hace que no se mueva al hacer scroll */
-            top: 0;
-            width: 100%;
-            z-index: 1000;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-        }
-
-        .app-header h1 {
-            font-size: 20px;
-            margin: 0;
-            text-transform: uppercase;
-        }
-
-        /* Espacio para que el chat no se tape con el título */
-        .contenido-chat {
-            padding-top: 70px; 
-        }
-    </style>
-</head>
-<body>
-
-    <header class="app-header">
-        <h1>CHATSPACE</h1>
-    </header>
-
-    <main class="contenido-chat">
-        </main>
-
-</body>
-
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-messaging-compat.js"></script>
@@ -60,62 +14,160 @@
     <script>eruda.init();</script>
 
     <style>
-.app-header {
-    background-color: #556b2f; /* El color verde que elegiste */
-    color: white;              /* Letras blancas */
-    height: 60px;
-    display: flex;
-    align-items: center;       /* Centra verticalmente */
-    padding: 0 20px;
-    position: sticky;          /* Se queda arriba mientras haces scroll */
-    top: 0;
-    z-index: 1000;
-    font-family: Arial, sans-serif;
-}
+        /* RESET GENERAL */
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
- /* Para que salga todo en mayúsculas como pediste */
+        body { 
+            font-family: sans-serif; 
+            background: #000000; 
+            display: flex; 
+            flex-direction: column; 
+            height: 100dvh; 
+            overflow: hidden; 
+        }
 
-   
-body { 
-    font-family: sans-serif; 
-    background: #000000; 
-    margin: 0; 
-    display: flex; 
-    flex-direction: column; 
-    height: 100dvh; /* Altura dinámica para móviles */
-    overflow: hidden; /* Evita el scroll de toda la pantalla */
-}
+        /* LA BARRA GRIS (Sustituye a la verde) */
+        .header { 
+            background: #1a1a1a; /* Gris oscuro como el área de abajo */
+            padding: 15px; 
+            display: flex;
+            align-items: center;
+            justify-content: flex-start; /* El nombre a la izquierda */
+            position: relative;
+            flex-shrink: 0; 
+            height: 60px;
+            /* Eliminé el border-bottom amarillo */
+        }
 
-/* Cabecera Intocable */
-.header { 
-    background: #1a1a1a; 
-    padding: 15px; 
-    border-bottom: 2px solid #ffd700; 
-    flex-shrink: 0; /* NO se aplasta */
-}
+        .header h1 {
+            color: white;
+            font-size: 20px;
+            margin: 0;
+            text-transform: uppercase;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
 
-/* El Chat es el único que crece y desliza */
+        /* BOTÓN QR (Encima de la barra gris) */
+        .btn-qr-dropis { 
+            position: absolute; 
+            right: 15px; 
+            top: 50%; 
+            transform: translateY(-50%); 
+            background: #ffd700; 
+            border: none; 
+            border-radius: 50%; 
+            width: 38px; 
+            height: 38px; 
+            cursor: pointer; 
+            font-size: 18px; 
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+        }
 
-.input-area { 
-    background: #1a1a1a; 
-    padding: 8px 10px; 
-    display: flex; 
-    gap: 8px; 
-    border-top: 1px solid #333; 
-    align-items: center; 
-    padding-bottom: 5px; /* <--- ESTO ES LO QUE BAJA LA BARRA AL BORDE */
-}
+        /* CHAT BOX (Con la imagen de Goku completa) */
+        #chat-box {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            background-color: #0b141a;
+            /* Imagen de fondo con filtro para que los mensajes se lean */
+            background-image: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), 
+                          url('./assets/logo.webp');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
 
- 
+        /* ÁREA DE INPUT ABAJO (Mismo gris que el header) */
+        .input-area { 
+            background: #1a1a1a; 
+            padding: 10px; 
+            display: flex; 
+            gap: 8px; 
+            border-top: 1px solid #333; 
+            align-items: center; 
+        }
 
-        input#msg-text { flex: 1; padding: 12px; border-radius: 25px; border: none; outline: none; background: #2a2a2a; color: white; }
+        #msg-text {
+            flex: 1;
+            background: #2a2a2a;
+            color: white;
+            border-radius: 20px;
+            padding: 10px 15px;
+            border: none;
+            outline: none;
+            resize: none;
+            min-height: 40px;
+            max-height: 120px;
+        }
 
-        input#target-id { width: 60px; background: #000; color: #ffd700; border: 1px solid #333; border-radius: 8px; text-align: center; }
+        #target-id { 
+            width: 50px; 
+            background: #000; 
+            color: #ffd700; 
+            border: 1px solid #333; 
+            border-radius: 8px; 
+            padding: 8px 0;
+            text-align: center; 
+        }
 
+        button#btn-enviar { 
+            background: #ffd700; 
+            border: none; 
+            padding: 10px 18px; 
+            border-radius: 20px; 
+            font-weight: bold; 
+            color: black; 
+        }
+
+        /* BURBUJAS ESTILO VIDRIO (Backdrop-filter) */
+        .msg-burbuja { 
+            max-width: 85%; 
+            padding: 8px 15px; 
+            border-radius: 18px; 
+            font-size: 15px; 
+            position: relative; 
+            word-wrap: break-word; 
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .msg-derecha { align-self: flex-end; background: rgba(0, 92, 75, 0.6); color: white; }
+        .msg-izquierda { align-self: flex-start; background: rgba(32, 44, 51, 0.7); color: white; }
         
+        #mi-id-display { display: none; } /* Oculto arriba por estética */
 
-        button#btn-enviar { background: #ffd700; border: none; padding: 10px 20px; border-radius: 20px; font-weight: bold; cursor: pointer; color: black; }
-        
+    </style>
+</head>
+<body>
+
+    <header class="header">
+        <h1>CHATSPACE</h1>
+        <div id="mi-id-display"></div>
+        <button class="btn-qr-dropis" onclick="manejarBotonIdentidad()">🪪</button>
+    </header>
+
+    <div id="chat-box">
+        </div>
+
+    <div class="input-area">
+        <div class="user-controls" style="display: flex; flex-direction: column; gap: 4px;">
+            <button style="background: #ffd700; border:none; border-radius:4px; font-size:10px; padding:2px;">+👤</button>
+            <input type="text" id="target-id" placeholder="ID">
+        </div>
+        <textarea id="msg-text" placeholder="Escribe un mensaje..."></textarea>
+        <button id="btn-enviar">Enviar</button>
+    </div>
+
+</body>
+</html>
         #chat-box {
     flex: 1;
     overflow-y: auto;
