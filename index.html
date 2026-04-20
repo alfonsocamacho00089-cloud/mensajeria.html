@@ -37,22 +37,17 @@ body {
 /* El Chat es el único que crece y desliza */
 
 .input-area { 
-
-            background: #1a1a1a; 
-
-            padding: 10px; 
-
-            display: flex; 
-
-            gap: 10px; 
-
-            border-top: 1px solid #333; 
-
-            flex-shrink: 0; /* Evita que se vaya muy abajo */
-
-            padding-bottom: 20px; /* Espacio para botones de navegación del móvil */
-
-        }
+    background: #1a1a1a; 
+    padding: 10px; 
+    display: flex; 
+    gap: 10px; 
+    border-top: 1px solid #333; 
+    flex-shrink: 0;
+    /* CAMBIO 1: Baja este número para que la barra caiga al borde */
+    padding-bottom: 5px; 
+    /* CAMBIO 2: Asegura que todo esté alineado al centro */
+    align-items: center; 
+}
 
  
 
@@ -295,26 +290,15 @@ body {
 
     
 <div class="input-area">
+    <input type="text" id="target-id" placeholder="ID">
+    <textarea id="msg-text" placeholder="Escribe un mensaje..." rows="1"></textarea>
+    
+    <button id="btn-enviar" onclick="enviarMensajeSatelital()">ENVIAR</button>
 
-        <input type="text" id="target-id" placeholder="ID">
-
-        <textarea id="msg-text" placeholder="Escribe un mensaje..." rows="1"></textarea>
-
-        <button id="btn-enviar" onclick="enviarMensajeSatelital()">ENVIAR</button>
-
-    </div>
-
-    <div style="display: flex; gap: 5px; margin-bottom: 10px;">
-
-    <
-
-    <button onclick="guardarNuevoContacto()" style="background: #ffd700; border: none; border-radius: 10px; padding: 0 15px; font-weight: bold; cursor: pointer;">
-
+    <button onclick="guardarNuevoContacto()" style="background: #ffd700; border: none; border-radius: 10px; height: 40px; padding: 0 15px; font-weight: bold; cursor: pointer; flex-shrink: 0;">
         + 👤
-
     </button>
-
-    </div>
+</div>
 
     <div id="menu-acciones" class="menu-mensaje">
     <div onclick="accionMensaje('responder')">↩️ Responder</div>
