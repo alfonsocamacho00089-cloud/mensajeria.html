@@ -38,19 +38,50 @@ body {
 
         /* INPUT AREA CORREGIDA (Siempre visible al fondo) */
         .input-area { 
-            background: #1a1a1a; 
-            padding: 10px; 
-            display: flex; 
-            gap: 10px; 
-            border-top: 1px solid #333; 
-            flex-shrink: 0; /* Evita que se vaya muy abajo */
-            padding-bottom: 20px; /* Espacio para botones de navegación del móvil */
-        }
+    background: #1a1a1a; 
+    padding: 6px 10px; /* Bajamos el padding general */
+    display: flex; 
+    gap: 8px; 
+    border-top: 1px solid #333; 
+    flex-shrink: 0;
+    padding-bottom: 10px; /* Reducimos este a la mitad para que no suba tanto */
+    align-items: center; /* Esto es CLAVE para que todo se alinee al centro */
+}
 
-        input#msg-text { flex: 1; padding: 12px; border-radius: 25px; border: none; outline: none; background: #2a2a2a; color: white; }
-        input#target-id { width: 60px; background: #000; color: #ffd700; border: 1px solid #333; border-radius: 8px; text-align: center; }
+input#msg-text { 
+    flex: 1; 
+    padding: 8px 15px; /* Menos padding interno para que no sea tan gordo */
+    border-radius: 20px; 
+    border: none; 
+    outline: none; 
+    background: #2a2a2a; 
+    color: white; 
+    height: 38px; /* Forzamos una altura limpia */
+}
+
+input#target-id { 
+    width: 55px; /* Un pelín más flaco */
+    height: 38px; /* Misma altura que el mensaje para que se vean parejos */
+    background: #000; 
+    color: #ffd700; 
+    border: 1px solid #333; 
+    border-radius: 8px; 
+    text-align: center;
+    font-size: 12px;
+}
+
+button#btn-enviar { 
+    background: #ffd700; 
+    border: none; 
+    padding: 0 15px; /* Ajustamos el padding horizontal */
+    height: 38px; /* Misma altura que el resto */
+    border-radius: 20px; 
+    font-weight: bold; 
+    cursor: pointer; 
+    color: black; 
+    font-size: 13px;
+}
         
-        button#btn-enviar { background: #ffd700; border: none; padding: 10px 20px; border-radius: 20px; font-weight: bold; cursor: pointer; color: black; }
         #chat-box {
     flex: 1;
     overflow-y: auto;
