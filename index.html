@@ -39,13 +39,22 @@ body {
         /* INPUT AREA CORREGIDA (Siempre visible al fondo) */
         .input-area { 
     background: #1a1a1a; 
-    padding: 6px 10px; /* Bajamos el padding general */
+    padding: 8px 10px; 
     display: flex; 
+    align-items: center; /* Centra todos los botones y cuadros */
     gap: 8px; 
     border-top: 1px solid #333; 
-    flex-shrink: 0;
-    padding-bottom: 10px; /* Reducimos este a la mitad para que no suba tanto */
-    align-items: center; /* Esto es CLAVE para que todo se alinee al centro */
+    padding-bottom: 15px; 
+}
+
+/* Estilo para el icono de + Usuario */
+.input-area i.fa-user-plus {
+    transition: 0.3s;
+}
+
+.input-area i.fa-user-plus:hover {
+    color: white;
+    transform: scale(1.1);
 }
 
 input#msg-text { 
@@ -312,14 +321,16 @@ button#btn-enviar {
     </div>
 
     <div class="input-area">
-        <input type="text" id="target-id" placeholder="ID">
-        <textarea id="msg-text" placeholder="Escribe un mensaje..." rows="1"></textarea>
-        <button id="btn-enviar" onclick="enviarMensajeSatelital()">ENVIAR</button>
-    </div>
-    <div style="display: flex; gap: 5px; margin-bottom: 10px;">
-    <
-    <button onclick="guardarNuevoContacto()" style="background: #ffd700; border: none; border-radius: 10px; padding: 0 15px; font-weight: bold; cursor: pointer;">
-        + 👤
+    <button onclick="guardarNuevoContacto()" style="background: none; border: none; color: #ffd700; font-size: 20px; cursor: pointer; padding: 0 5px;">
+        <i class="fas fa-user-plus"></i>
+    </button>
+
+    <input type="text" id="target-id" placeholder="ID">
+    
+    <textarea id="msg-text" placeholder="Escribe un mensaje..." rows="1"></textarea>
+    
+    <button id="btn-enviar" onclick="enviarMensajeSatelital()">
+        <i class="fas fa-paper-plane"></i>
     </button>
     </div>
 
