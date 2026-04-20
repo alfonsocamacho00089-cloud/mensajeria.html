@@ -204,32 +204,62 @@ body {
         .msg-burbuja[data-enviado="3"]::after { content: " ✓✓"; font-size: 10px; color: #34b7f1; }
 
         /* MODALES */
-        .modal { 
+        /* 1. EL CONTENEDOR (Ocupa toda la pantalla) */
+.modal { 
     display: none; 
     position: fixed; 
     top: 0; 
     left: 0; 
     width: 100%; 
     height: 100%; 
-    background: rgba(0,0,0,0.9); 
+    background: #000000; 
     z-index: 10000; 
     justify-content: center; 
     align-items: center; 
-    /* Añadimos esto para la suavidad */
     transition: all 0.5s ease;
     animation: fadeIn 0.5s; 
 }
 
+/* 2. EL CONTENIDO (Fondo de Goku/Chat y Pantalla Completa) */
 .modal-content { 
-    background: #fff; 
-    padding: 25px; 
-    border-radius: 20px; 
-    width: 85%; 
-    max-width: 320px; 
+    background-color: #0b141a;
+    background-image: linear-gradient(rgba(11, 20, 26, 0.85), rgba(11, 20, 26, 0.85)), 
+                      url('./assets/logo.webp');
+    background-size: cover;
+    background-position: center;
+    
+    padding: 0; 
+    width: 100%; 
+    height: 100%; 
+    max-width: 100%; 
+    border-radius: 0; 
     text-align: center; 
-    color: #333; 
-    /* Opcional: que el cuadrito también suba un poquito al aparecer */
-    animation: slideUp 0.5s;
+    color: white; 
+    display: flex;
+    flex-direction: column;
+    animation: fadeIn 0.4s ease; 
+}
+
+/* 3. LAS FILAS DE CONTACTOS (Efecto visual tipo WhatsApp) */
+.fila-contacto {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 15px;
+    cursor: pointer;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    transition: background 0.3s ease;
+}
+
+/* El efecto dorado suave cuando pasas el dedo o el mouse */
+.fila-contacto:hover {
+    background: rgba(255, 215, 0, 0.1) !important;
+}
+
+/* Animaciones */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
 }
 
 /* Las reglas de las animaciones (van afuera de las llaves) */
@@ -595,30 +625,29 @@ async function obtenerToken(registration) {
  
 function manejarBotonIdentidad() {
     const id = localStorage.getItem('mi_dropis_id');
-    const nombre = localStorage.getItem('mi_nombre') || "Pedro Peres"; // Ajusta según tu variable
+    const nombre = localStorage.getItem('mi_nombre') || "Usuario"; 
  
     if (id) {
-        document.getElementById('modal-qr').style.display = 'flex';
+        const modal = document.getElementById('modal-qr');
+        modal.style.display = 'flex'; // Aquí lo abrimos
         
-        // 1. Ponemos tu nombre arriba
-        document.getElementById('nombre-dueño-header').innerText = "👤 " + nombre;
+        // Ponemos tu nombre en el header del modal
+        document.getElementById('nombre-dueño-header').innerText = "MIS CONTACTOS";
  
-        // 2. Generamos el QR (como ya lo tenías)
+        // Generamos el QR (por si quieres mostrarlo abajo o en un rinconcito)
         const cont = document.getElementById('contenedor-qr');
-        cont.innerHTML = "";
-        new QRCode(cont, { 
-            text: `dropisapp://perfil/${id}`, 
-            width: 160, height: 160
-        });
+        if(cont) {
+            cont.innerHTML = "";
+            new QRCode(cont, { text: `dropisapp://perfil/${id}`, width: 120, height: 120 });
+        }
  
-        // 3. Pintamos la Agenda (La pestaña de abajo)
-        pintarAgendaContactos();
+        // Pintamos la lista de la gente con la que hablas
+        pintarAgendaContactos(); 
  
     } else {
         document.getElementById('modal-registro').style.display = 'flex';
     }
 }
-
         
 function cerrarModalQR() {
     document.getElementById('modal-qr').style.display = 'none';
@@ -646,8 +675,40 @@ function cerrarModalQR() {
         alert("✅ Contacto guardado: " + nombre);
     }
         }
+
+                function cargarConversacionCon(idDestino, nombreDestino) {
+    const box = document.getElementById('chat-box');
+    if (!box) return;
+
+    // 1. Limpiamos el chat visualmente
+    box.innerHTML = ""; 
+
+    // 2. Actualizamos la interfaz (ID y Nombre arriba)
+    document.querySelector('#target-id').value = idDestino;
+    const headerNombre = document.getElementById('nombre-dueño-header');
+    if(headerNombre) headerNombre.innerText = "Chateando con: " + nombreDestino;
+
+    // 3. Buscamos los mensajes de ESE contacto en LocalStorage
+    const claveChat = "chat_" + idDestino;
+    const mensajes = JSON.parse(localStorage.getItem(claveChat)) || [];
+
+    // 4. Los pintamos uno por uno
+    mensajes.forEach(m => {
+        pintarMensaje(m.texto, m.clase);
+    });
+
+    console.log("📂 Historial cargado con: " + nombreDestino);
+    
+    // 5. Cerramos el modal de contactos para empezar a escribir
+    cerrarModalQR();
+    
+    const inputMsg = document.getElementById('msg-text');
+    if(inputMsg) inputMsg.focus();
+                }
  function pintarAgendaContactos() {
     const lista = document.getElementById('lista-contactos');
+    if (!lista) return;
+
     const contactos = JSON.parse(localStorage.getItem('mis_contactos')) || [
         { nombre: "Hijo 1", id: "ID_AQUI_1" }, 
         { nombre: "Hijo 2", id: "ID_AQUI_2" }
@@ -656,41 +717,41 @@ function cerrarModalQR() {
     lista.innerHTML = ""; 
  
     contactos.forEach(contacto => {
-        const btn = document.createElement('div');
-        btn.style.cssText = "background: #3b4a54; color: white; padding: 12px; border-radius: 8px; cursor: pointer; text-align: left; margin-bottom: 5px; border-left: 4px solid #ffd700;";
-        
-        btn.innerHTML = `
-            <strong style="display: block;">${contacto.nombre}</strong>
-            <span style="font-size: 11px; color: #8696a0;">ID: ${contacto.id}</span>
-        `;
+        // Dentro del forEach en tu función pintarAgendaContactos:
+const btn = document.createElement('div');
+btn.className = 'fila-contacto'; // <--- ESTO ACTIVA EL CSS DE ARRIBA
+
+btn.innerHTML = `
+    <div style="width: 50px; height: 50px; background: #ffd700; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: black; font-weight: bold; font-size: 20px; flex-shrink: 0;">
+        ${contacto.nombre.charAt(0).toUpperCase()}
+    </div>
+    <div style="text-align: left;">
+        <div style="font-weight: bold; font-size: 16px; color: #ffffff;">${contacto.nombre}</div>
+        <div style="font-size: 12px; color: #8696a0;">ID: ${contacto.id}</div>
+    </div>
+`;
+
         
         btn.onclick = () => {
-            const inputTarget = document.getElementById('target-id'); 
-            if (inputTarget) {
-                inputTarget.value = contacto.id; 
-                inputTarget.style.backgroundColor = "#ffd700";
-                inputTarget.style.color = "#000";
-                setTimeout(() => {
-                    inputTarget.style.backgroundColor = "";
-                    inputTarget.style.color = "";
-                }, 500);
-
-                cerrarModalQR(); 
-
-                const inputMsg = document.getElementById('msg-text');
-                if(inputMsg) {
-                    inputMsg.focus(); 
-                }
-            }
-        }; // Cierre del onclick
+            // Cuando tocas al contacto, cargamos su chat específico
+            cargarConversacionCon(contacto.id, contacto.nombre);
+            
+            // También lo agregamos a "Conversaciones Recientes"
+            actualizarListaConversaciones(contacto.id, contacto.nombre);
+        };
         
-        lista.appendChild(btn); // Metemos el botón en la lista
-    }); // <--- ¡ESTA LLAVE FALTA EN TU CÓDIGO! (Cierre del forEach)
- } // <--- ¡Y ESTA TAMBIÉN! (Cierre de la función)
+        lista.appendChild(btn);
+    });
+ } del onclick
+        
+         // Metemos el botón en la lista
+     // <--- ¡ESTA LLAVE FALTA EN TU CÓDIGO! (Cierre del forEach)
+ // <--- ¡Y ESTA TAMBIÉN! (Cierre de la función)
 // Arrancar la app
 // ... (todo tu código anterior de funciones y variables)
  
 // Reemplaza el bloque final por este:
+
 window.onload = () => {
     const id = localStorage.getItem('mi_dropis_id');
     
@@ -698,13 +759,14 @@ window.onload = () => {
         const display = document.getElementById('mi-id-display');
         if(display) display.innerText = "Tu ID: " + id;
         
+        // La antena siempre debe estar encendida para no perder mensajes
         if (typeof activarAntena === "function") {
             activarAntena(); 
         }
  
-        // --- AGREGAR ESTA LÍNEA AQUÍ ---
-        cargarMensajesLocales(); 
-        // ------------------------------
+        // CAMBIO AQUÍ: En vez de cargar mensajes viejos al azar,
+        // abrimos tu Agenda/Lista de una vez.
+        manejarBotonIdentidad(); 
  
     } else {
         setTimeout(() => {
