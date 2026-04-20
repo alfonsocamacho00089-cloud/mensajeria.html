@@ -623,17 +623,15 @@ function cerrarModalQR() {
         }
  function pintarAgendaContactos() {
     const lista = document.getElementById('lista-contactos');
-    // Traemos los contactos guardados o usamos los de prueba
     const contactos = JSON.parse(localStorage.getItem('mis_contactos')) || [
         { nombre: "Hijo 1", id: "ID_AQUI_1" }, 
         { nombre: "Hijo 2", id: "ID_AQUI_2" }
     ];
  
-    lista.innerHTML = ""; // Limpiamos la lista antes de dibujar
+    lista.innerHTML = ""; 
  
     contactos.forEach(contacto => {
         const btn = document.createElement('div');
-        // Estilo para que parezca un botón elegante
         btn.style.cssText = "background: #3b4a54; color: white; padding: 12px; border-radius: 8px; cursor: pointer; text-align: left; margin-bottom: 5px; border-left: 4px solid #ffd700;";
         
         btn.innerHTML = `
@@ -641,12 +639,10 @@ function cerrarModalQR() {
             <span style="font-size: 11px; color: #8696a0;">ID: ${contacto.id}</span>
         `;
         
-        // LA MAGIA: Al tocar el contacto
         btn.onclick = () => {
             const inputTarget = document.getElementById('target-id'); 
             if (inputTarget) {
                 inputTarget.value = contacto.id; 
-                
                 inputTarget.style.backgroundColor = "#ffd700";
                 inputTarget.style.color = "#000";
                 setTimeout(() => {
@@ -656,16 +652,16 @@ function cerrarModalQR() {
 
                 cerrarModalQR(); 
 
-                // AQUÍ ES EL SITIO IDEAL:
                 const inputMsg = document.getElementById('msg-text');
                 if(inputMsg) {
                     inputMsg.focus(); 
                 }
-
-                console.log("✅ ID de " + contacto.nombre + " listo y cursor posicionado.");
             }
         }; // Cierre del onclick
- }
+        
+        lista.appendChild(btn); // Metemos el botón en la lista
+    }); // <--- ¡ESTA LLAVE FALTA EN TU CÓDIGO! (Cierre del forEach)
+ } // <--- ¡Y ESTA TAMBIÉN! (Cierre de la función)
 // Arrancar la app
 // ... (todo tu código anterior de funciones y variables)
  
