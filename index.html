@@ -1,7 +1,4 @@
-            
-    
-        
-            <!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="es">
 
 
@@ -215,7 +212,7 @@ body {
 
         .msg-burbuja[data-enviado="3"]::after { content: " ✓✓"; font-size: 10px; color: #34b7f1; }
 
-        /* MODALES */
+                   /* MODALES */
         /* 1. EL CONTENEDOR (Ocupa toda la pantalla) */
 .modal { 
     display: none; 
@@ -269,7 +266,10 @@ body {
 }
 
 /* Animaciones */
-
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
 
 /* Las reglas de las animaciones (van afuera de las llaves) */
 @keyframes fadeIn {
@@ -289,7 +289,9 @@ body {
 
     <body>
     <div class="header">
-        <h1>ChatSpace</h1> <button class="btn-qr-dropis" onclick="manejarBotonIdentidad()">🪪</button>
+        <h1>ChatSpace</h1>:
+<div id="mi-id-display" style="display:none;"></div>
+<button class="btn-qr-dropis" onclick="manejarBotonIdentidad()">🪪</button>
     </div>
 
     <div id="chat-box"></div>
