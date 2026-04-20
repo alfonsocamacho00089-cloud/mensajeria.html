@@ -310,19 +310,20 @@ button#btn-enviar {
     </div>
     </div>
 
-    <div class="input-area">
-    <input type="text" id="target-id" placeholder="ID">
-    <textarea id="msg-text" placeholder="Escribe un mensaje..." rows="1"></textarea>
-    <button id="btn-enviar" onclick="enviarMensajeSatelital()">
+    <div style="display: flex; gap: 5px; background: #1a1a1a; padding: 10px; border-radius: 15px; position: sticky; bottom: 10px; margin: 0 10px; z-index: 999; align-items: center; border: 1px solid #333;">
+    
+    <input type="text" id="target-id" placeholder="ID" style="width: 50px; height: 40px; background: #000; color: #ffd700; border: 1px solid #333; border-radius: 8px; text-align: center; font-size: 12px;">
+    
+    <input type="text" id="msg-text" placeholder="Mensaje..." style="flex-grow: 1; height: 40px; background: #000; color: white; border: 1px solid #333; border-radius: 8px; padding: 0 10px; outline: none; font-size: 14px;">
+    
+    <button id="btn-enviar" onclick="enviarMensajeSatelital()" style="background: #ffd700; color: black; border: none; border-radius: 8px; height: 40px; width: 42px; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
         <i class="fas fa-paper-plane"></i>
     </button>
-</div>
 
-<div style="display: flex; gap: 5px; margin-bottom: 10px;">
-    <button onclick="guardarNuevoContacto()" style="background: #ffd700; border: none; border-radius: 10px; padding: 10px 15px; font-weight: bold; cursor: pointer;">
-        + 👤
+    <button onclick="guardarNuevoContacto()" style="background: #2a2a2a; color: #ffd700; border: 1px solid #444; border-radius: 8px; height: 40px; width: 42px; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+        <i class="fas fa-plus"></i>
     </button>
-</div>
+    </div>
 
     <div id="menu-acciones" class="menu-mensaje">
     <div onclick="accionMensaje('responder')">↩️ Responder</div>
