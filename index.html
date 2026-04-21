@@ -942,10 +942,14 @@ function accionMensaje(tipo) {
  
 // Esta función es para que el borrado sea REAL y no vuelvan al recargar
 function borrarMensajeDeMemoria(texto) {
-    let mensajes = JSON.parse(localStorage.getItem('mis_mensajes')) || [];
-    // Filtramos para quitar el mensaje que coincida con el texto
+    const idDestino = document.querySelector('#target-id').value;
+    if(!idDestino) return;
+
+    const claveChat = "chat_" + idDestino;
+    let mensajes = JSON.parse(localStorage.getItem(claveChat)) || [];
+    
     mensajes = mensajes.filter(m => m.texto !== texto);
-    localStorage.setItem('mis_mensajes', JSON.stringify(mensajes));
+    localStorage.setItem(claveChat, JSON.stringify(mensajes));
 }
  
 // Cerrar el menú si tocas fuera
