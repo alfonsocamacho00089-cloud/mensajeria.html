@@ -584,7 +584,7 @@ localStorage.setItem('chat_' + idDestino, JSON.stringify(historial));
 }
        
         
-function enviarMensajeSatelital() {
+async function enviarMensajeSatelital() {
 const inputMsg = document.querySelector('#msg-text');
 const inputTarget = document.querySelector('#target-id');
 const msg = inputMsg ? inputMsg.value.trim() : "";
