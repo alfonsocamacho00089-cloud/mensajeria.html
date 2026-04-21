@@ -1,1 +1,553 @@
+            
+    
+        
+            <!DOCTYPE html>
+<html lang="es">
+
+    <head>
+    
+
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-messaging-compat.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/protobufjs@7.2.4/dist/protobuf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/eruda"></script>
+    <script>eruda.init();</script>
+
+    <style>
+
+   
+body { 
+    font-family: sans-serif; 
+    background: #000000; 
+    margin: 0; 
+    display: flex; 
+    flex-direction: column; 
+    height: 100dvh; /* Altura dinámica para móviles */
+    overflow: hidden; /* Evita el scroll de toda la pantalla */
+}
+
+
+/* Cabecera Intocable */
+.header { 
+    background: #1a1a1a; /* Gris oscuro sólido */
+    padding: 0 15px;    /* Ajusté el padding para controlar mejor la altura */
+    display: flex;
+    align-items: center;
+    justify-content: flex-start; 
+    position: relative;
+    flex-shrink: 0; 
+    height: 60px;
+    border-bottom: 1px solid #333; /* Una línea gris muy sutil para separar del chat */
+}
+
+.header h1 {
+    color: #ffffff;      /* Blanco puro */
+    opacity: 1;          /* Fuerza a que NO sea transparente */
+    font-size: 20px;
+    margin: 0;
+    text-transform: uppercase;
+    font-weight: 900;    /* El grosor máximo para líneas bien gruesas */
+    letter-spacing: 1.5px; /* Un poco más de espacio para que se vea premium */
+    font-family: sans-serif;
+}
+
+
+/* El Chat es el único que crece y desliza */
+
+        /* INPUT AREA CORREGIDA (Siempre visible al fondo) */
+        .input-area { 
+            background: #1a1a1a; 
+            padding: 10px; 
+            display: flex; 
+            gap: 10px; 
+            border-top: 1px solid #333; 
+            flex-shrink: 0; /* Evita que se vaya muy abajo */
+            padding-bottom: 20px; /* Espacio para botones de navegación del móvil */
+        }
+
+        input#msg-text { flex: 1; padding: 12px; border-radius: 25px; border: none; outline: none; background: #2a2a2a; color: white; }
+        input#target-id { width: 60px; background: #000; color: #ffd700; border: 1px solid #333; border-radius: 8px; text-align: center; }
+        
+        button#btn-enviar { background: #ffd700; border: none; padding: 10px 20px; border-radius: 20px; font-weight: bold; cursor: pointer; color: black; }
+        #chat-box {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    
+    background-color: #0b141a;
+    /* Usamos el filtro de 0.6 para que se vea un poquito más la imagen pero sin tapar el texto */
+    background-image: linear-gradient(rgba(11, 20, 26, 0.7), rgba(11, 20, 26, 0.7)), 
+                  url('./assets/logo.webp');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    background-repeat: no-repeat;
+        }
+    
+/* Contenedor general de la burbuja */
+/* MENSAJE ENVIADO (DERECHA) - Verde Transparente */
+/* Contenedor general de la burbuja */
+
+    .msg-burbuja { 
+    max-width: 85%; 
+    padding: 6px 10px; 
+    border-radius: 18px; 
+    font-size: 15px; 
+    min-height: auto
+    position: relative; 
+    word-wrap: break-word; 
+    margin: 4px 0; 
+    /* Bajamos la sombra para que no ensucie la transparencia */
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2); 
+    white-space: pre-wrap;
+    /* ESTO ES CLAVE: El efecto de vidrio empañado */
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+ 
+    /* ... (todo tu código anterior se queda igual) ... */
+    display: flex;
+    flex-direction: column; /* Texto arriba, info abajo */
+}
+        
+
+.msg-info {
+    align-self: flex-end; /* Empuja la hora y checks a la derecha */
+    font-size: 10px;
+    opacity: 0.7;
+    margin-top: 2px;
+    margin-left: 10px; /* Separación mínima del texto */
+    display: flex;
+    align-items: center;
+    gap: 3px; /* Espacio entre hora y checks */
+}
+ 
+.checks {
+    color: #4fc3f7; /* Color azulito claro para el visto */
+        }
+
+/* MENSAJE ENVIADO (DERECHA) */
+.msg-derecha { 
+    align-self: flex-end; 
+    /* Cambiamos a RGBA: el 0.5 es 50% transparente */
+    background: linear-gradient(135deg, rgba(0, 92, 75, 0.5) 0%, rgba(0, 77, 64, 0.5) 100%); 
+    color: #ffffff; 
+    border-bottom-right-radius: 4px; 
+    border: 1px solid rgba(255, 255, 255, 0.1); /* Un borde finito para que se note el corte */
+}
+
+/* MENSAJE RECIBIDO (IZQUIERDA) */
+.msg-izquierda { 
+    align-self: flex-start; 
+    /* Gris oscuro al 50% de transparencia */
+    background: rgba(32, 44, 51, 0.5); 
+    color: #ffffff; 
+    border-bottom-left-radius: 4px; 
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Hora y Checks */
+.status {
+    font-size: 11px;
+    float: right;
+    margin: 8px -4px -4px 12px;
+    opacity: 0.8; /* Le subí un poco la opacidad para que se lea sobre Goku */
+    font-weight: 300;
+}
+        #msg-text {
+    flex: 1;               /* Que ocupe todo el espacio central */
+    background: #2a2a2a;    /* Color de fondo gris oscuro, como tus burbujas */
+    color: white;          /* Letra blanca */
+    border-radius: 20px;   /* Bordes redondeados y suaves */
+    padding: 10px 15px;    /* Espacio interno para que el texto no esté pegado */
+    border: none;          /* Sin el borde cuadrado y feo */
+    outline: none;         /* Que no se ponga azul al hacer clic */
+    font-family: inherit;  /* Misma fuente que el resto del chat */
+    resize: none;          /* Quita la esquina para agrandar que traen los textarea */
+    min-height: 40px;      /* Altura inicial bajita */
+    max-height: 120px;     /* Que no crezca hasta tapar todo */
+    overflow-y: auto;      /* Si el mensaje es muy largo, sale scroll interno */
+    margin: 0 5px;         /* Un pelín de separación con el ID y el botón */
+        }
+        .menu-mensaje {
+    position: absolute;
+    background: #2a3942;
+    border: 1px solid #ffd700;
+    border-radius: 10px;
+    padding: 5px 0;
+    z-index: 20000;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+    display: none; /* Se activa con JS */
+}
+
+.menu-mensaje div {
+    padding: 10px 20px;
+    color: white;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.menu-mensaje div:hover {
+    background: #3b4a54;
+}
+        
+        #mi-id-display { font-size: 11px; color: #ffd700; margin-top: 5px; font-family: monospace; }
+        .btn-qr-dropis { position: absolute; right: 15px; top: 50%; transform: translateY(-50%); background: #ffd700; border: none; border-radius: 50%; width: 35px; height: 35px; cursor: pointer; font-size: 18px; }
+
+        .msg-burbuja[data-enviado="3"]::after { content: " ✓✓"; font-size: 10px; color: #34b7f1; }
+
+        /* MODALES */
+        /* 1. EL CONTENEDOR (Ocupa toda la pantalla) */
+.modal { 
+    display: none; 
+    position: fixed; 
+    top: 0; 
+    left: 0; 
+    width: 100%; 
+    height: 100%; 
+    background: #000000; 
+    z-index: 10000; 
+    justify-content: center; 
+    align-items: center; 
+    transition: all 0.5s ease;
+    animation: fadeIn 0.5s; 
+}
+
+/* 2. EL CONTENIDO (Fondo de Goku/Chat y Pantalla Completa) */
+.modal-content { 
+    background-color: #0b141a;
+    background-image: linear-gradient(rgba(11, 20, 26, 0.85), rgba(11, 20, 26, 0.85)), 
+                      url('./assets/logo.webp');
+    background-size: cover;
+    background-position: center;
+    
+    padding: 0; 
+    width: 100%; 
+    height: 100%; 
+    max-width: 100%; 
+    border-radius: 0; 
+    text-align: center; 
+    color: white; 
+    display: flex;
+    flex-direction: column;
+    animation: fadeIn 0.4s ease; 
+}
+
+/* 3. LAS FILAS DE CONTACTOS (Efecto visual tipo WhatsApp) */
+.fila-contacto {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 15px;
+    cursor: pointer;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    transition: background 0.3s ease;
+}
+
+/* El efecto dorado suave cuando pasas el dedo o el mouse */
+.fila-contacto:hover {
+    background: rgba(255, 215, 0, 0.1) !important;
+}
+
+/* Animaciones */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* Las reglas de las animaciones (van afuera de las llaves) */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideUp {
+    from { transform: translateY(20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+    </style>
+
+</head>
+
+<body>
+
+    <div class="header">
+        
+        
+        <button class="btn-qr-dropis" onclick="manejarBotonIdentidad()">🪪</button>
+    </div>
+
+    <div id="chat-box">
+        </div>
+
+    <div id="modal-registro" class="modal">
+        <div class="modal-content">
+            <h3>Registro Maestro</h3>
+            <input type="text" id="reg-nombre" placeholder="Nombre" style="width:100%; padding:10px; margin:5px 0; color:#000;">
+            <input type="text" id="reg-apellido" placeholder="Apellido" style="width:100%; padding:10px; margin:5px 0; color:#000;">
+         <button onclick="ejecutarRegistroCompleto()" style="width: 100%; padding: 12px; background: #ffd700; border: none; border-radius: 10px; font-weight: bold; margin-top: 10px;">VALIDAR HUELLA Y CREAR</button>
+        
+        <p style="margin-top: 20px; font-size: 13px; color: #ffd700; cursor: pointer; text-decoration: underline;" 
+   onclick="recuperarCuentaConID()">
+   ¿Ya tienes un ID Dropis? Toca aquí para recuperar
+        </p>
+        
+        </div>
+    </div>
+    
+    
+
+    <div id="modal-huella" class="modal">
+    <div class="modal-content" style="background: #000; color: #ffd700; border: 2px solid #ffd700;">
+        <div style="font-size: 60px; margin-bottom: 15px;">🫆</div>
+        <h3 style="color: #fff;">Validando Huella...</h3>
+        <p style="color: #ffd700; font-family: monospace; font-size: 12px;">Vinculando Token Satelital</p>
+    </div>
+    </div>
+    <div id="modal-qr" class="modal">
+    <div class="modal-content" style="padding: 0; overflow: hidden; background: #202c33; border: 1px solid #ffd700;">
+        
+        <div id="nombre-dueño-header" style="background: #ffd700; color: #000; padding: 15px; font-weight: bold; cursor: pointer;">
+            Cargando nombre...
+        </div>
+
+        <div style="padding: 20px; display: flex; flex-direction: column; align-items: center; background: white;">
+            <div id="contenedor-qr"></div>
+        </div>
+
+        <div style="background: #2a3942; padding: 10px; border-top: 1px solid #3b4a54;">
+            <h4 style="color: #ffd700; margin: 5px 0 10px 0; font-size: 14px;">AGENDA DROPIS 🛰️</h4>
+            <div id="lista-contactos" style="max-height: 150px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px;">
+                <p style="color: #8696a0; font-size: 12px;">No tienes contactos aún</p>
+            </div>
+        </div>
+
+        <button onclick="cerrarModalQR()" style="width: 100%; padding: 15px; background: #333; color: white; border: none; font-weight: bold;">CERRAR</button>
+    </div>
+    </div>
+
+    <div class="input-area">
+        <input type="text" id="target-id" placeholder="ID"><div style="display: flex; gap: 5px; margin-bottom: 10px;">
+    
+    <button onclick="guardarNuevoContacto()" style="background: #ffd700; border: none; border-radius: 10px; padding: 0 15px; font-weight: bold; cursor: pointer;">
+        + 👤
+    </button>
+        </div>
+        <textarea id="msg-text" placeholder="Escribe un mensaje..." rows="1"></textarea>
+        <button id="btn-enviar" onclick="enviarMensajeSatelital()">ENVIAR</button>
+    </div>
+    
+
+    <div id="menu-acciones" class="menu-mensaje">
+    <div onclick="accionMensaje('responder')">↩️ Responder</div>
+    <div onclick="accionMensaje('editar')">✏️ Editar</div>
+    <div onclick="accionMensaje('copiar-id')">👤 Usar como ID</div>
+    <div onclick="accionMensaje('borrar')" style="color: #ff5c5c;">🗑️ Borrar</div>
+    </div>
+    <script>
+                
+
+        // 1. CONFIGURACIÓN Y REGISTRO DE ANTENA (INDISPENSABLE PARA EL TOKEN)
+        
+const firebaseConfig = {
+    apiKey: "AIzaSyCaUyhX2iBMl4A5xeKeu4SeE6HClp4V1s",
+    authDomain: "real-market-elite-2025.firebaseapp.com",
+    projectId: "real-market-elite-2025",
+    databaseURL: "https://real-market-elite-2025-default-rtdb.firebaseio.com",
+    messagingSenderId: "226489002778",
+    appId: "1:226489002778:web:6722d21a9e78b33b5b1aa3"
+};
+firebase.initializeApp(firebaseConfig);
+const messaging = firebase.messaging();
+const db = firebase.database();
+
+// --- 2. MOTOR DE PERSISTENCIA (IndexedDB) ---
+const dbNombre = "DropisDB";
+const dbVersion = 1;
+
+function abrirDB() {
+    return new Promise((resolve, reject) => {
+        const request = indexedDB.open(dbNombre, dbVersion);
+        request.onupgradeneeded = (e) => {
+            const db = e.target.result;
+            if (!db.objectStoreNames.contains('mensajes')) db.createObjectStore('mensajes', { autoIncrement: true });
+            if (!db.objectStoreNames.contains('usuario')) db.createObjectStore('usuario', { keyPath: 'id' });
+        };
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = () => reject("Error DB");
+    });
+}
+
+async function guardarLocal(tabla, datos) {
+    const db = await abrirDB();
+    const tx = db.transaction(tabla, 'readwrite');
+    tx.objectStore(tabla).put(datos);
+}
+
+// --- 3. SOLO REGISTRO Y RECUPERACIÓN ---
+
+async function recuperarCuentaConID() {
+    const idParaRecuperar = prompt("Escribe tu ID Dropis:");
+    if (!idParaRecuperar) return;
+
+    try {
+        const snapshot = await firebase.database().ref('usuarios/' + idParaRecuperar).once('value');
+        if (snapshot.exists()) {
+            const datos = snapshot.val();
+            // Restaurar en el teléfono
+            localStorage.setItem('mi_dropis_id', idParaRecuperar);
+            await guardarLocal('usuario', { 
+                id: 'perfil_propietario', 
+                dropis_id: idParaRecuperar,
+                nombre: datos.nombre,
+                apellido: datos.apellido,
+                fcm_token: datos.fcm_token || '' 
+            });
+            alert(`🚀 ¡Identidad recuperada! Bienvenido ${datos.nombre}.`);
+            location.reload(); 
+        } else {
+            alert("❌ ID no encontrado en el satélite.");
+        }
+    } catch (e) {
+        alert("Error de conexión satelital.");
+    }
+}
+async function ejecutarRegistroCompleto() {
+    const nombre = document.getElementById('reg-nombre').value.trim();
+    const apellido = document.getElementById('reg-apellido').value.trim();
+    
+    if (!nombre || !apellido) return alert("Completa los datos");
+
+    // 1. GENERACIÓN DEL ID CON LA LÓGICA SUB12
+    // Genera algo como: TU_ID_DROPIS_SUB12_X8J2K
+    const hash = Math.random().toString(36).substring(2, 7).toUpperCase();
+    const idUnico = Math.random().toString(36).substring(2, 14); + hash; 
+
+    // 2. PREPARAR DATOS PARA LOCAL (IndexedDB)
+    const datosUsuario = { 
+        id: 'perfil_propietario', 
+        dropis_id: idUnico, 
+        nombre: nombre, 
+        apellido: apellido, 
+        fecha: Date.now() 
+    };
+
+    // Guardar en el teléfono (Local)
+    localStorage.setItem('mi_dropis_id', idUnico);
+    await guardarLocal('usuario', datosUsuario);
+    
+    // Actualizar interfaz
+    document.getElementById('modal-registro').style.display = 'none';
+    document.getElementById('mi-id-display').innertext = "Tu ID: " + idUnico;
+    
+    const modalHuella = document.getElementById('modal-huella');
+    if(modalHuella) modalHuella.style.display = 'flex';
+
+    try {
+        // 3. OBTENER TOKEN SATELITAL (FCM)
+        const registration = await navigator.serviceWorker.ready;
+        const token = await messaging.getToken({ 
+            vapidKey: 'BIrsA9YbBXfIuo4PTMrKRtuktRsK2RbK0XevupuofGGOUDy9w5VZ9yaXbZXsenXppmFsR62-2B7jBOG0Z8RdxvU',
+            serviceWorkerRegistration: registration 
+        });
+        
+        if (token) {
+            localStorage.setItem('fcm_token', token);
+
+            // 4. LÓGICA DE GUARDADO EN LA NUBE (LA QUE NECESITAS)
+            // Esto crea una ruta: usuarios/TU_ID_DROPIS_SUB12_XXXXX/
+            await db.ref('usuarios/' + idUnico).set({
+                id_sistema: idUnico,
+                nombre: nombre,
+                apellido: apellido,
+                fcm_token: token,
+                estado: "activo",
+                version: "LITE_SUB12",
+                timestamp: firebase.database.ServerValue.TIMESTAMP
+            });
+
+            console.log("✅ Sincronizado con éxito en la nube bajo: " + idUnico);
+        }
+        
+        setTimeout(() => { if(modalHuella) modalHuella.style.display = 'none'; }, 3000);
+    } catch (e) { 
+        console.error("⚠️ Error en vinculación satelital:", e);
+        // Aunque falle el token, el usuario ya se creó localmente
+        setTimeout(() => { if(modalHuella) modalHuella.style.display = 'none'; }, 2000);
+    }
+}
+
+// --- 4. ANTENA SATELITAL ---
+async function activarAntena() {
+    const miID = localStorage.getItem('mi_dropis_id');
+    if (!miID) return;
+
+    if (window.listenerActivo) window.listenerActivo.off(); 
+
+    console.log("📡 Antena sintonizada en:", miID);
+    window.listenerActivo = db.ref('cola_satelital/' + miID);
+    
+    window.listenerActivo.on('child_added', async (snapshot) => {
+        const data = snapshot.val();
+        if (!data || !data.p) return; // Si el paquete viene vacío, ignorar
+
+        try {
+            // 1. Cargar la estructura del mensaje
+            const root = await cargarProto();
+            const SuperAppPayload = root.lookupType("SuperAppPayload");
+            
+            // 2. Decodificar Base64 a binario y luego a Objeto
+            const buffer = Uint8Array.from(atob(data.p), c => c.charCodeAt(0));
+            const decoded = SuperAppPayload.decode(buffer);
+// Después de: const decoded = SuperAppPayload.decode(buffer);
+// Traducimos el mensaje protegido a texto real
+const textoReal = decodeURIComponent(escape(atob(decoded.chatText)));
+pintarMensaje(textoReal, 'msg-izquierda');
+            // 3. Guardar en historial local (IndexedDB)
+            await guardarLocal('mensajes', {
+    // Usamos 'data.p' o 'decoded.p' que es donde viene el texto real en tu red
+    texto: textoReal|| "Mensaje sin texto",
+    remitente: data.from || "Desconocido",
+    ts: Date.now()
+});
+console.log("✅ Guardado automático ejecutado con éxito");
+let historial = JSON.parse(localStorage.getItem('mis_mensajes')) || [];
+historial.push({ texto: textoReal, clase: 'msg-izquierda' });
+localStorage.setItem('mis_mensajes', JSON.stringify(historial));
+            // 4. Mostrar en pantalla
+            
+            
+            // 5. Borrar de la nube (limpieza satelital) para no procesarlo dos veces
+            snapshot.ref.remove(); 
+            
+        // Dentro de activarAntena...
+} catch (e) { 
+    console.error("❌ Error decodificando:", e);
+    // Si falla el proto, intentamos mostrar que llegó algo crudo
+    pintarMensaje("Error al decodificar paquete: " + data.p.substring(0,10) + "...", 'msg-izquierda');
+        }
+    });
+}
+       
+        
+
+async function enviarMensajeSatelital() {
+const inputMsg = document.querySelector('#msg-text');
+const inputTarget = document.querySelector('#target-id');
+const msg = inputMsg ? inputMsg.value.trim() : "";
+const targetID = inputTarget ? inputTarget.value.trim() : "";
+const miID = localStorage.getItem('mi_dropis_id') || "ID_DESCONOCIDO";
+
+    if (!targetID || !msg) return alert("ID y Mensaje son obligatorios");
+
+    try {
+        // 1. Preparamos el Payload (ProtoBuf)
+        const root = await cargarProto();
+        const SuperAppPayload = root.lookupType("SuperAppPayload");
+        // Antes de: const payload = SuperAppPayload.create({ chatText: msg });
+// Ofuscamos el mensaje para que no sea legible en la consola de Firebase
 
