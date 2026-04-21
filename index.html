@@ -815,50 +815,40 @@ function cerrarModalQR() {
  
 // Reemplaza el bloque final por este:
 
-window.onload = () => {
+ window.onload = () => {
     const id = localStorage.getItem('mi_dropis_id');
     const modalRegistro = document.getElementById('modal-registro');
+    const splash = document.getElementById('pantalla-carga'); // <--- Llamamos al splash aquí
     
     if (id) {
         // --- CASO 1: YA ESTÁ REGISTRADO ---
         const display = document.getElementById('mi-id-display');
         if(display) display.innerText = "Tu ID: " + id;
         
-        // Encendemos la antena rápido
         if (typeof activarAntena === "function") {
             activarAntena(); 
         }
 
-        // CARGA DIRECTA: Aquí tú decides qué quieres que vea primero.
-        // Si quieres que vea sus mensajes con él mismo (su espacio):
         manejarBotonIdentidad();
-        // O si prefieres que vea la agenda, dejas el que tenías:
-        // manejarBotonIdentidad(); 
 
     } else {
         // --- CASO 2: NO HAY REGISTRO ---
-        // Quitamos el setTimeout de 1.2 segundos para que no asome el chat antes.
-        // El modal sale de inmediato.
         if(modalRegistro) modalRegistro.style.display = 'flex';
     }
-};
- // =============================================
-// LÓGICA PARA DESVANECER EL SPLASH SCREEN
-// (Pon esto al final de tu window.onload)
-// =============================================
-const splash = document.getElementById('pantalla-carga');
-if (splash) {
-    // 1. Iniciamos el desvanecido (cambiando la opacidad)
-    splash.style.opacity = '0';
-    
-    // 2. Esperamos a que termine la transición CSS (0.5s) y lo eliminamos
-    setTimeout(() => {
-        splash.style.display = 'none';
-        
-        // Opcional: Eliminarlo del DOM por completo para ahorrar memoria
-        // splash.remove(); 
-    }, 500); // Este tiempo debe coincidir con el 'transition' del CSS (0.5s)
-}
+
+    // =============================================
+    // ¡ESTO VA AQUÍ ADENTRO! Justo antes de cerrar el onload
+    // =============================================
+    if (splash) {
+        // Le damos un mini respiro de 300ms para que todo se acomode atrás
+        setTimeout(() => {
+            splash.style.opacity = '0';
+            setTimeout(() => {
+                splash.style.display = 'none';
+            }, 500); 
+        }, 300);
+    }
+}; // <--- Aquí termina el window.onload
     
 async function cargarProto() {
     const schema = `
