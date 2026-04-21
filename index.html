@@ -550,4 +550,384 @@ const miID = localStorage.getItem('mi_dropis_id') || "ID_DESCONOCIDO";
         const SuperAppPayload = root.lookupType("SuperAppPayload");
         // Antes de: const payload = SuperAppPayload.create({ chatText: msg });
 // Ofuscamos el mensaje para que no sea legible en la consola de Firebase
+const msgProtegido = btoa(unescape(encodeURIComponent(msg))); 
+const payload = SuperAppPayload.create({ chatText: msgProtegido });
+        
+        const buffer = SuperAppPayload.encode(payload).finish();
+        
+        // 2. Convertimos a Base64 para el viaje satelital
+        const base64 = btoa(String.fromCharCode.apply(null, buffer));
+        // 3. Lo lanzamos a la cola del destinatario
+        await db.ref('cola_satelital/' + targetID).push({
+            p: base64,         // El paquete cifrado/empaquetado
+            from: miID,        // Quién lo envía
+            ts: Date.now()     // Marca de tiempo
+        });
 
+        // 4. Pintamos nuestro propio mensaje en la derecha
+        pintarMensaje(msg, 'msg-derecha');
+        // ... dentro de enviarMensajeSatelital, después de pintarMensaje(msg, 'msg-derecha');
+
+
+// --- AÑADE ESTO PARA GUARDAR LO QUE ENVÍAS ---
+let historialEnv = JSON.parse(localStorage.getItem('mis_mensajes')) || [];
+historialEnv.push({ texto: msg, clase: 'msg-derecha' });
+localStorage.setItem('mis_mensajes', JSON.stringify(historialEnv));
+// ----------------------------------------------
+
+if (inputMsg) inputMsg.value = "";
+        
+    
+        console.log("🚀 Mensaje lanzado al espacio hacia:", targetID);
+
+    } catch (e) {
+        console.error("❌ Fallo en el lanzamiento:", e);
+        alert("Error al enviar el mensaje.");
+    }
+}
+// --- 4. GESTIÓN DE TOKENS Y SERVICE WORKER ---
+
+// Registrar el Service Worker al cargar la página
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('firebase-messaging-sw.js')
+        .then(registration => {
+            console.log("🛰️ Antena (SW) lista para recibir señales");
+            // Aquí llamarías a obtenerToken(registration) si ya tienes esa función lista
+        })
+        .catch(err => console.error("❌ Fallo en registro de antena:", err));
+}
+async function obtenerToken(registration) {
+    try {
+        const miVapidKey = 'BIrsA9YbBXfIuo4PTMrKRtuktRsK2RbK0XevupuofGGOUDy9w5VZ9yaXbZXsenXppmFsR62-2B7jBOG0Z8RdxvU';
+        const token = await messaging.getToken({ 
+            vapidKey: miVapidKey, 
+            serviceWorkerRegistration: registration 
+        });
+ 
+        if (token) {
+            console.log("🎫 TU TOKEN DROPIS:", token);
+            localStorage.setItem('fcm_token', token);
+            
+            // Si el usuario ya tiene ID, actualizamos el token en la nube silenciosamente
+            const miID = localStorage.getItem('mi_dropis_id');
+            if (miID) {
+                firebase.database().ref('usuarios/' + miID).update({ fcm_token: token });
+            }
+        }
+    } catch (err) {
+        console.warn("⚠️ No se pudo obtener el token:", err);
+    }
+        }
+// --- 5. LÓGICA DE INTERFAZ Y QR ---
+ 
+function manejarBotonIdentidad() {
+    const id = localStorage.getItem('mi_dropis_id');
+    const nombre = localStorage.getItem('mi_nombre') || "Usuario"; 
+ 
+    if (id) {
+        const modal = document.getElementById('modal-qr');
+        modal.style.display = 'flex'; // Aquí lo abrimos
+        
+        // Ponemos tu nombre en el header del modal
+        document.getElementById('nombre-dueño-header').innerText = "MIS CONTACTOS";
+ 
+        // Generamos el QR (por si quieres mostrarlo abajo o en un rinconcito)
+        const cont = document.getElementById('contenedor-qr');
+        if(cont) {
+            cont.innerHTML = "";
+            new QRCode(cont, { text: `dropisapp://perfil/${id}`, width: 120, height: 120 });
+        }
+ 
+        // Pintamos la lista de la gente con la que hablas
+        pintarAgendaContactos(); 
+ 
+    } else {
+        document.getElementById('modal-registro').style.display = 'flex';
+    }
+}
+        
+function cerrarModalQR() {
+    document.getElementById('modal-qr').style.display = 'none';
+}
+        function guardarNuevoContacto() {
+    const inputID = document.querySelector('#target-id');
+    const idAGuardar = inputID ? inputID.value.trim() : "";
+ 
+    if (!idAGuardar) return alert("Primero escribe un ID para guardarlo");
+ 
+    // Pedimos el nombre al usuario
+    const nombre = prompt("¿Cómo quieres llamar a este contacto?");
+    
+    if (nombre) {
+        let agenda = JSON.parse(localStorage.getItem('mis_contactos')) || [];
+        
+        // Evitar duplicados
+        const existe = agenda.find(c => c.id === idAGuardar);
+        if (existe) return alert("Este ID ya está en tu agenda como: " + existe.nombre);
+ 
+        // Guardamos el nuevo objeto
+        agenda.push({ nombre: nombre, id: idAGuardar });
+        localStorage.setItem('mis_contactos', JSON.stringify(agenda));
+        
+        alert("✅ Contacto guardado: " + nombre);
+    }
+        }
+
+                function cargarConversacionCon(idDestino, nombreDestino) {
+    const box = document.getElementById('chat-box');
+    if (!box) return;
+
+    // 1. Limpiamos el chat visualmente
+    box.innerHTML = ""; 
+
+    // 2. Actualizamos la interfaz (ID y Nombre arriba)
+    document.querySelector('#target-id').value = idDestino;
+    const headerNombre = document.getElementById('nombre-dueño-header');
+    if(headerNombre) headerNombre.innerText = "Chateando con: " + nombreDestino;
+
+    // 3. Buscamos los mensajes de ESE contacto en LocalStorage
+    const claveChat = "chat_" + idDestino;
+    const mensajes = JSON.parse(localStorage.getItem(claveChat)) || [];
+
+    // 4. Los pintamos uno por uno
+    mensajes.forEach(m => {
+        pintarMensaje(m.texto, m.clase);
+    });
+
+    console.log("📂 Historial cargado con: " + nombreDestino);
+    
+    // 5. Cerramos el modal de contactos para empezar a escribir
+    cerrarModalQR();
+    
+    const inputMsg = document.getElementById('msg-text');
+    if(inputMsg) inputMsg.focus();
+                }
+ function pintarAgendaContactos() {
+    const lista = document.getElementById('lista-contactos');
+    if (!lista) return;
+
+    const contactos = JSON.parse(localStorage.getItem('mis_contactos')) || [
+        { nombre: "Hijo 1", id: "ID_AQUI_1" }, 
+        { nombre: "Hijo 2", id: "ID_AQUI_2" }
+    ];
+ 
+    lista.innerHTML = ""; 
+ 
+    contactos.forEach(contacto => {
+        const btn = document.createElement('div');
+        btn.className = 'fila-contacto'; 
+
+        btn.innerHTML = `
+            <div style="width: 50px; height: 50px; background: #ffd700; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: black; font-weight: bold; font-size: 20px; flex-shrink: 0;">
+                ${contacto.nombre.charAt(0).toUpperCase()}
+            </div>
+            <div style="text-align: left;">
+                <div style="font-weight: bold; font-size: 16px; color: #ffffff;">${contacto.nombre}</div>
+                <div style="font-size: 12px; color: #8696a0;">ID: ${contacto.id}</div>
+            </div>
+        `;
+        
+        btn.onclick = () => {
+            // Cuando tocas al contacto, cargamos su chat específico
+            cargarConversacionCon(contacto.id, contacto.nombre);
+            
+            // Si tienes esta función, la llamas; si no, la comentas
+            if (typeof actualizarListaConversaciones === "function") {
+                actualizarListaConversaciones(contacto.id, contacto.nombre);
+            }
+        };
+        
+        lista.appendChild(btn);
+    }); // <--- AQUÍ SE CIERRA EL FOREACH
+} // <--- AQUÍ SE CIERRA LA FUNCIÓN
+ 
+        
+         // Metemos el botón en la lista
+     // <--- ¡ESTA LLAVE FALTA EN TU CÓDIGO! (Cierre del forEach)
+ // <--- ¡Y ESTA TAMBIÉN! (Cierre de la función)
+// Arrancar la app
+// ... (todo tu código anterior de funciones y variables)
+ 
+// Reemplaza el bloque final por este:
+
+window.onload = () => {
+    const id = localStorage.getItem('mi_dropis_id');
+    
+    if (id) {
+        const display = document.getElementById('mi-id-display');
+        if(display) display.innerText = "Tu ID: " + id;
+        
+        // La antena siempre debe estar encendida para no perder mensajes
+        if (typeof activarAntena === "function") {
+            activarAntena(); 
+        }
+ 
+        // CAMBIO AQUÍ: En vez de cargar mensajes viejos al azar,
+        // abrimos tu Agenda/Lista de una vez.
+        manejarBotonIdentidad(); 
+ 
+    } else {
+        setTimeout(() => {
+            const modal = document.getElementById('modal-registro');
+            if(modal) modal.style.display = 'flex';
+        }, 1200); 
+    }
+};
+ 
+    
+async function cargarProto() {
+    const schema = `
+        package superapp;
+        syntax = "proto3";
+        message SuperAppPayload {
+            string chatText = 1;
+        }
+    `;
+    const root = protobuf.parse(schema).root;
+    return root;
+}
+ 
+ 
+// --- 5. LÓGICA DE INTERFAZ CORREGIDA ---
+ 
+/**
+ * Pinta una burbuja de mensaje en el chat box.
+ * @param {string} texto - El contenido del mensaje.
+ * @param {string} clase - La clase CSS ('msg-izquierda' o 'msg-derecha').
+ */
+// Variable necesaria para que el menú sepa a qué mensaje le diste clic
+let mensajeSeleccionado = null;
+ 
+ 
+ 
+    // Tu código del menú (onclick) se queda igualito abajo...
+    function pintarMensaje(texto, clase, hora = null, estado = 'enviado') {
+    const box = document.getElementById('chat-box');
+    if (!box) return;
+
+    const div = document.createElement('div');
+    div.className = 'msg-burbuja ' + clase;
+
+    const tiempo = hora || new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
+    const checkIcon = (estado === 'leido') ? '✓✓' : '✓';
+
+    let contenidoHTML = "";
+    if (texto && texto.includes("Resp >")) {
+        const partes = texto.split("\n— ");
+        const cabezalCita = partes[0].replace("Resp >", "").trim(); // Limpiamos el texto
+        const mensajeReal = partes[1] || "";
+        
+        div.style.backgroundColor = "#2a2a2a"; 
+        div.style.border = "1px solid rgba(255,215,0,0.2)";
+ 
+        contenidoHTML = `
+            <div style="font-size: 11px; opacity: 0.5; border-bottom: 1px solid rgba(255,255,255,0.1); padding: 0; margin: 0 0 2px 0; line-height: 1; font-style: italic;">
+                Resp: ${cabezalCita}
+            </div>
+            <div style="margin: 0; padding: 0; line-height: 1.1;">${mensajeReal}</div>
+        `;
+    } else {
+        contenidoHTML = `<div style="line-height: 1.2;">${texto}</div>`;
+    }
+
+    div.innerHTML = `
+        ${contenidoHTML}
+        <div class="msg-info" style="align-self: flex-end; font-size: 9px; opacity: 0.6; margin-top: 2px; display: flex; gap: 3px;">
+            ${tiempo} <span class="checks" style="color: #4fc3f7;">${checkIcon}</span>
+        </div>
+    `;
+
+    div.onclick = (e) => {
+        mensajeSeleccionado = div; 
+        const menu = document.getElementById('menu-acciones');
+        if(menu) {
+            menu.style.display = 'block';
+            menu.style.top = e.pageY + "px";
+            menu.style.left = (e.pageX > 200 ? e.pageX - 150 : e.pageX) + "px";
+        }
+        e.stopPropagation(); 
+    };
+
+    box.appendChild(div);
+    box.scrollTop = box.scrollHeight;
+        }
+ 
+// Función para ejecutar las acciones del menú
+function accionMensaje(tipo) {
+    if (!mensajeSeleccionado) return;
+    
+    const textoOriginal = mensajeSeleccionado.innerText;
+    const inputMsg = document.querySelector('#msg-text');
+    const inputTarget = document.querySelector('#target-id');
+ 
+    // --- EL CEREBRO PARA SUBIR LA CITA ---
+    if (tipo === 'responder') {
+    // Buscamos solo el div del mensaje, ignorando el de la hora (msg-info)
+    const corpo = mensajeSeleccionado.querySelector('div:first-child');
+    let cita = corpo ? corpo.innerText : mensajeSeleccionado.innerText;
+    
+    // Limpiamos si la cita es muy larga para que no haga la burbuja gigante
+    if(cita.length > 50) cita = cita.substring(0, 50) + "...";
+
+    inputMsg.value = `Resp > ${cita.trim()}\n— `;
+    inputMsg.focus();
+    }
+        
+    else if (tipo === 'editar') {
+        inputMsg.value = textoOriginal;
+        // Al editar, borramos el viejo para sobreescribir
+        borrarMensajeDeMemoria(textoOriginal);
+        mensajeSeleccionado.remove();
+        inputMsg.focus();
+    } 
+    else if (tipo === 'copiar-id') {
+        if(inputTarget) {
+            inputTarget.value = textoOriginal.trim();
+            inputTarget.style.boxShadow = "0 0 10px #ffd700";
+            setTimeout(() => inputTarget.style.boxShadow = "none", 1000);
+        }
+    } 
+    else if (tipo === 'borrar') {
+        if(confirm("¿Borrar mensaje para siempre?")) {
+            borrarMensajeDeMemoria(textoOriginal);
+            mensajeSeleccionado.remove();
+        }
+    }
+ 
+    document.getElementById('menu-acciones').style.display = 'none';
+}
+ 
+// Esta función es para que el borrado sea REAL y no vuelvan al recargar
+function borrarMensajeDeMemoria(texto) {
+    let mensajes = JSON.parse(localStorage.getItem('mis_mensajes')) || [];
+    // Filtramos para quitar el mensaje que coincida con el texto
+    mensajes = mensajes.filter(m => m.texto !== texto);
+    localStorage.setItem('mis_mensajes', JSON.stringify(mensajes));
+}
+ 
+// Cerrar el menú si tocas fuera
+document.addEventListener('click', () => {
+    const menu = document.getElementById('menu-acciones');
+    if(menu) menu.style.display = 'none';
+});
+        
+function cargarMensajesLocales() {
+    const datos = localStorage.getItem('mis_mensajes');
+    if (!datos) return; 
+ 
+    try {
+        const mensajesGuardados = JSON.parse(datos);
+        mensajesGuardados.forEach(msg => {
+            // Usamos tu función real 'pintarMensaje'
+            if (typeof pintarMensaje === "function") {
+                pintarMensaje(msg.texto, msg.clase); 
+            }
+        });
+    } catch (e) {
+        console.error("Error al cargar memoria local", e);
+    }
+}
+</script>
+</body>
+</html>
+ 
