@@ -537,42 +537,38 @@ async function activarAntena() {
     
     window.listenerActivo.on('child_added', async (snapshot) => {
         const data = snapshot.val();
-        if (!data || !data.p) return; // Si el paquete viene vacío, ignorar
+        if (!data || !data.p) return; 
 
         try {
-            // 1. Cargar la estructura del mensaje
             const root = await cargarProto();
             const SuperAppPayload = root.lookupType("SuperAppPayload");
-            
-            // 2. Decodificar Base64 a binario y luego a Objeto
             const buffer = Uint8Array.from(atob(data.p), c => c.charCodeAt(0));
             const decoded = SuperAppPayload.decode(buffer);
-// Después de: const decoded = SuperAppPayload.decode(buffer);
-// Traducimos el mensaje protegido a texto real
-const textoReal = decodeURIComponent(escape(atob(decoded.chatText)));
-pintarMensaje(textoReal, 'msg-izquierda');
-            // 3. Guardar en historial local (IndexedDB)
-            await guardarLocal('mensajes', {
-    // Usamos 'data.p' o 'decoded.p' que es donde viene el texto real en tu red
-    texto: textoReal|| "Mensaje sin texto",
-    remitente: data.from || "Desconocido",
-    ts: Date.now()
-});
+            const textoReal = decodeURIComponent(escape(atob(decoded.chatText)));
 
-  console.log("✅ Guardado automático ejecutado con éxito");
-let historial = JSON.parse(localStorage.getItem('chat_' + targetID)) || [];
-historial.push({ texto: textoReal, clase: 'msg-izquierda' });
-localStorage.setItem('chat_' + targetID, JSON.stringify(historial));          // 4. Mostrar en pantalla
+            // --- ESTO ES LO QUE ARREGLA TODO ---
+            const quienMeEscribio = data.from; // El ID real del que envió
+            const chatAbiertoActualmente = document.querySelector('#target-id').value;
+
+            // 1. Guardamos SIEMPRE en la carpeta del que envió
+            let clave = 'chat_' + quienMeEscribio;
+            let historial = JSON.parse(localStorage.getItem(clave)) || [];
+            historial.push({ texto: textoReal, clase: 'msg-izquierda' });
+            localStorage.setItem(clave, JSON.stringify(historial));
             
-            
-            // 5. Borrar de la nube (limpieza satelital) para no procesarlo dos veces
+            console.log("📥 Mensaje guardado en la carpeta: " + clave);
+
+            // 2. SOLO lo pintamos si estoy viendo esa conversación
+            if (quienMeEscribio === chatAbiertoActualmente) {
+                pintarMensaje(textoReal, 'msg-izquierda');
+            } else {
+                console.log("🔔 Tienes un mensaje nuevo de " + quienMeEscribio + " en otra carpeta.");
+            }
+            // ------------------------------------
+
             snapshot.ref.remove(); 
-            
-        // Dentro de activarAntena...
-} catch (e) { 
-    console.error("❌ Error decodificando:", e);
-    // Si falla el proto, intentamos mostrar que llegó algo crudo
-    pintarMensaje("Error al decodificar paquete: " + data.p.substring(0,10) + "...", 'msg-izquierda');
+        } catch (e) { 
+            console.error("❌ Error en recepción:", e);
         }
     });
 }
