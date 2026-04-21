@@ -560,9 +560,9 @@ pintarMensaje(textoReal, 'msg-izquierda');
 });
 
   console.log("✅ Guardado automático ejecutado con éxito");
-let historial = JSON.parse(localStorage.getItem('chat_' + idDestino)) || [];
+let historial = JSON.parse(localStorage.getItem('chat_' + targetID)) || [];
 historial.push({ texto: textoReal, clase: 'msg-izquierda' });
-localStorage.setItem('chat_' + idDestino, JSON.stringify(historial));          // 4. Mostrar en pantalla
+localStorage.setItem('chat_' + targetID, JSON.stringify(historial));          // 4. Mostrar en pantalla
             
             
             // 5. Borrar de la nube (limpieza satelital) para no procesarlo dos veces
