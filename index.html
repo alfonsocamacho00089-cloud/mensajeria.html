@@ -290,13 +290,11 @@ body {
     <div class="header">
         
         
-      
-    <button class="btn-qr-dropis" onclick="manejarBotonIdentidad()">🪪</button>
-    
+        <button class="btn-qr-dropis" onclick="manejarBotonIdentidad()">🪪</button>
     </div>
 
     <div id="chat-box">
-    </div>
+        </div>
 
     <div id="modal-registro" class="modal">
         <div class="modal-content">
@@ -560,7 +558,8 @@ const miID = localStorage.getItem('mi_dropis_id') || "ID_DESCONOCIDO";
 
     try {
         // 1. Preparamos el Payload (ProtoBuf)
-        const root = await cargarProto();
+        
+const root = await cargarProto();
         const SuperAppPayload = root.lookupType("SuperAppPayload");
         // Antes de: const payload = SuperAppPayload.create({ chatText: msg });
 // Ofuscamos el mensaje para que no sea legible en la consola de Firebase
@@ -578,29 +577,30 @@ const payload = SuperAppPayload.create({ chatText: msgProtegido });
             ts: Date.now()     // Marca de tiempo
         });
 
-        // 4. Pintamos nuestro propio mensaje en la derecha
+                // 4. Pintamos nuestro propio mensaje en la derecha
         pintarMensaje(msg, 'msg-derecha');
         // ... dentro de enviarMensajeSatelital, después de pintarMensaje(msg, 'msg-derecha');
-
-
+ 
+ 
 // --- AÑADE ESTO PARA GUARDAR LO QUE ENVÍAS ---
 let historialEnv = JSON.parse(localStorage.getItem('mis_mensajes')) || [];
 historialEnv.push({ texto: msg, clase: 'msg-derecha' });
 localStorage.setItem('mis_mensajes', JSON.stringify(historialEnv));
 // ----------------------------------------------
-
+ 
 if (inputMsg) inputMsg.value = "";
         
     
         console.log("🚀 Mensaje lanzado al espacio hacia:", targetID);
-
+ 
     } catch (e) {
         console.error("❌ Fallo en el lanzamiento:", e);
         alert("Error al enviar el mensaje.");
     }
 }
-// --- 4. GESTIÓN DE TOKENS Y SERVICE WORKER ---
 
+            // --- 4. GESTIÓN DE TOKENS Y SERVICE WORKER ---
+ 
 // Registrar el Service Worker al cargar la página
 if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('firebase-messaging-sw.js')
@@ -617,8 +617,7 @@ async function obtenerToken(registration) {
             vapidKey: miVapidKey, 
             serviceWorkerRegistration: registration 
         });
- 
-        if (token) {
+                if (token) {
             console.log("🎫 TU TOKEN DROPIS:", token);
             localStorage.setItem('fcm_token', token);
             
@@ -631,8 +630,8 @@ async function obtenerToken(registration) {
     } catch (err) {
         console.warn("⚠️ No se pudo obtener el token:", err);
     }
-        }
-// --- 5. LÓGICA DE INTERFAZ Y QR ---
+
+            // --- 5. LÓGICA DE INTERFAZ Y QR ---
  
 function manejarBotonIdentidad() {
     const id = localStorage.getItem('mi_dropis_id');
@@ -653,10 +652,10 @@ function manejarBotonIdentidad() {
         }
  
         // Pintamos la lista de la gente con la que hablas
-        cargarConversacionCon(idDestino, nombreDestino) {
+        pintarAgendaContactos(); 
  
     } else {
-        document.getElementById('modal-registro').style.display = 'flex';
+                document.getElementById('modal-registro').style.display = 'flex';
     }
 }
         
@@ -674,8 +673,8 @@ function cerrarModalQR() {
     
     if (nombre) {
         let agenda = JSON.parse(localStorage.getItem('mis_contactos')) || [];
-        
-        // Evitar duplicados
+
+                // Evitar duplicados
         const existe = agenda.find(c => c.id === idAGuardar);
         if (existe) return alert("Este ID ya está en tu agenda como: " + existe.nombre);
  
@@ -686,28 +685,27 @@ function cerrarModalQR() {
         alert("✅ Contacto guardado: " + nombre);
     }
         }
-
+ 
                 function cargarConversacionCon(idDestino, nombreDestino) {
     const box = document.getElementById('chat-box');
     if (!box) return;
-
+ 
     // 1. Limpiamos el chat visualmente
     box.innerHTML = ""; 
-
-    // 2. Actualizamos la interfaz (ID y Nombre arriba)
+                            // 2. Actualizamos la interfaz (ID y Nombre arriba)
     document.querySelector('#target-id').value = idDestino;
     const headerNombre = document.getElementById('nombre-dueño-header');
     if(headerNombre) headerNombre.innerText = "Chateando con: " + nombreDestino;
-
+ 
     // 3. Buscamos los mensajes de ESE contacto en LocalStorage
     const claveChat = "chat_" + idDestino;
     const mensajes = JSON.parse(localStorage.getItem(claveChat)) || [];
-
+ 
     // 4. Los pintamos uno por uno
     mensajes.forEach(m => {
         pintarMensaje(m.texto, m.clase);
     });
-
+ 
     console.log("📂 Historial cargado con: " + nombreDestino);
     
     // 5. Cerramos el modal de contactos para empezar a escribir
@@ -716,10 +714,11 @@ function cerrarModalQR() {
     const inputMsg = document.getElementById('msg-text');
     if(inputMsg) inputMsg.focus();
                 }
- function pintarAgendaContactos() {
+            
+function pintarAgendaContactos() {
     const lista = document.getElementById('lista-contactos');
     if (!lista) return;
-
+ 
     const contactos = JSON.parse(localStorage.getItem('mis_contactos')) || [
         { nombre: "Hijo 1", id: "ID_AQUI_1" }, 
         { nombre: "Hijo 2", id: "ID_AQUI_2" }
@@ -730,7 +729,7 @@ function cerrarModalQR() {
     contactos.forEach(contacto => {
         const btn = document.createElement('div');
         btn.className = 'fila-contacto'; 
-
+ 
         btn.innerHTML = `
             <div style="width: 50px; height: 50px; background: #ffd700; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: black; font-weight: bold; font-size: 20px; flex-shrink: 0;">
                 ${contacto.nombre.charAt(0).toUpperCase()}
@@ -740,8 +739,8 @@ function cerrarModalQR() {
                 <div style="font-size: 12px; color: #8696a0;">ID: ${contacto.id}</div>
             </div>
         `;
-        
-        btn.onclick = () => {
+
+                btn.onclick = () => {
             // Cuando tocas al contacto, cargamos su chat específico
             cargarConversacionCon(contacto.id, contacto.nombre);
             
@@ -764,34 +763,32 @@ function cerrarModalQR() {
  
 // Reemplaza el bloque final por este:
 
-window.onload = () => {
+            window.onload = () => {
     const id = localStorage.getItem('mi_dropis_id');
-    const modalRegistro = document.getElementById('modal-registro');
     
     if (id) {
-        // --- CASO 1: YA ESTÁ REGISTRADO ---
         const display = document.getElementById('mi-id-display');
         if(display) display.innerText = "Tu ID: " + id;
         
-        // Encendemos la antena rápido
+        // La antena siempre debe estar encendida para no perder mensajes
         if (typeof activarAntena === "function") {
             activarAntena(); 
         }
-
-        // CARGA DIRECTA: Aquí tú decides qué quieres que vea primero.
-        // Si quieres que vea sus mensajes con él mismo (su espacio):
-        cargarConversacionCon(id, "Mi Espacio"); 
-        
-        // O si prefieres que vea la agenda, dejas el que tenías:
-        // manejarBotonIdentidad(); 
-
+ 
+        // CAMBIO AQUÍ: En vez de cargar mensajes viejos al azar,
+        // abrimos tu Agenda/Lista de una vez.
+        manejarBotonIdentidad(); 
+ 
     } else {
-        // --- CASO 2: NO HAY REGISTRO ---
-        // Quitamos el setTimeout de 1.2 segundos para que no asome el chat antes.
-        // El modal sale de inmediato.
-        if(modalRegistro) modalRegistro.style.display = 'flex';
+        setTimeout(() => {
+            const modal = document.getElementById('modal-registro');
+            if(modal) modal.style.display = 'flex';
+        }, 1200); 
     }
 };
+
+
+             
 async function cargarProto() {
     const schema = `
         package superapp;
