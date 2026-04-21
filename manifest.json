@@ -1,33 +1,25 @@
 {
-  "short_name": "DropisApp",
-  "name": "Dropis Super App: Shop & Chat",
-  "description": "La primera Super App con tecnología satelital para Venezuela.",
+  "short_name": "ChatSpace",
+  "name": "ChatSpace: Super App Satelital",
+  "description": "Mensajería y comercio con tecnología satelital para Venezuela.",
   "icons": [
     {
-      "src": "img/icon-192.png",
+      "src": "assets/logo.png",
       "type": "image/png",
       "sizes": "192x192"
     },
     {
-      "src": "img/icon-512.png",
+      "src": "assets/logo.png",
       "type": "image/png",
       "sizes": "512x512",
       "purpose": "any maskable"
     }
   ],
-  "start_url": "/index.html",
+  "start_url": "./index.html",
   "background_color": "#000000",
   "theme_color": "#FFD700",
   "display": "standalone",
   "orientation": "portrait",
   "scope": "/",
-  "categories": ["finance", "productivity", "social"],
-  "screenshots": [
-    {
-      "src": "img/screenshot-chat.png",
-      "sizes": "1080x1920",
-      "type": "image/png",
-      "label": "DropisChat con tecnología satelital"
-    }
-  ]
+  "categories": ["finance", "productivity", "social"]
 }
