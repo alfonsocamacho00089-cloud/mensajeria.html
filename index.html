@@ -293,44 +293,22 @@ body {
     height: 100%; 
     background-color: #000000; /* Fondo negro puro */
     display: flex; 
-    flex-direction: column; 
     align-items: center; 
     justify-content: center; 
     z-index: 99999; /* Por encima de TODO */
-    transition: opacity 0.5s ease; /* Para el desvanecido final */
+    transition: opacity 0.5s ease; /* Desvanecido suave al final */
 ">
     
-    <div style="
-        width: 150px; 
-        height: 150px; 
-        background: #000; 
-        border: 2px solid #ffd700; /* Borde dorado Chatspace */
-        border-radius: 50%; /* Circular */
-        display: flex; 
-        align-items: center; 
-        justify-content: center; 
-        box-shadow: 0 0 20px rgba(255, 215, 0, 0.2); /* Resplandor suave */
-        margin-bottom: 20px;
+    <img src="assets/logo-blanco.png" alt="Logo ChatSpace" style="
+        width: 120px; /* Tamaño del logo en pantalla */
+        height: auto;
+        /* Opcional: un ligero resplandor blanco para que resalte más */
+        filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.3)); 
     ">
-        <img src="logo-chatspace.png" alt="Chatspace Logo" style="
-            width: 70%; /* Tamaño del logo dentro del círculo */
-            height: auto;
-        ">
-    </div>
-
-    <h1 style="
-        color: #ffd700; /* Dorado Chatspace */
-        font-family: 'Arial', sans-serif; /* O tu fuente preferida */
-        font-size: 24px; 
-        letter-spacing: 3px; /* Espaciado profesional */
-        text-transform: uppercase; 
-        margin: 0; 
-        text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
-    ">
-        CHATSPACE
-    </h1>
 
             </div>
+
+    
 
     <div class="header">
         <h1>ChatSpace</h1>
