@@ -970,7 +970,31 @@ function cargarMensajesLocales() {
         console.error("Error al cargar memoria local", e);
     }
 }
+         
+function renderizarMensajes(listaDeMensajes) {
+    const chatBox = document.getElementById('chat-box');
+    chatBox.innerHTML = ''; // Limpiamos para no duplicar
 
+    listaDeMensajes.forEach(msg => {
+        const div = document.createElement('div');
+        
+        // Aquí usamos la "clase" que vimos en tu consola (msg-izquierda o msg-derecha)
+        div.className = `msg-burbuja ${msg.clase}`; 
+        
+        div.innerHTML = `
+            ${msg.texto}
+            <div class="msg-info">
+                <span class="tiempo">17:33</span>
+            </div>
+        `;
+        
+        chatBox.appendChild(div);
+    });
+    
+    // Auto-scroll al último mensaje
+    chatBox.scrollTop = chatBox.scrollHeight;
+}
+         
                 function gestionarQR() {
     const seccion = document.getElementById('seccion-mi-qr');
     
