@@ -723,7 +723,7 @@ function cerrarModalQR() {
     }
         }
 
-                function cargarConversacionCon(idDestino, nombreDestino) {
+  function cargarConversacionCon(idDestino, nombreDestino) {
     const box = document.getElementById('chat-box');
     if (!box) return;
 
@@ -791,15 +791,9 @@ function cerrarModalQR() {
     }); // <--- AQUÍ SE CIERRA EL FOREACH
 } // <--- AQUÍ SE CIERRA LA FUNCIÓN
  
-        
-         // Metemos el botón en la lista
-     // <--- ¡ESTA LLAVE FALTA EN TU CÓDIGO! (Cierre del forEach)
- // <--- ¡Y ESTA TAMBIÉN! (Cierre de la función)
-// Arrancar la app
-// ... (todo tu código anterior de funciones y variables)
+
  
 // Reemplaza el bloque final por este:
-
  window.onload = () => {
     const id = localStorage.getItem('mi_dropis_id');
     const modalRegistro = document.getElementById('modal-registro');
@@ -820,7 +814,6 @@ function cerrarModalQR() {
         // --- CASO 2: NO HAY REGISTRO ---
         if(modalRegistro) modalRegistro.style.display = 'flex';
     }
-
     // =============================================
     // ¡ESTO VA AQUÍ ADENTRO! Justo antes de cerrar el onload
     // =============================================
@@ -833,8 +826,7 @@ function cerrarModalQR() {
             }, 500); 
         }, 300);
     }
-}; // <--- Aquí termina el window.onload
-    
+}; // <--- Aquí termina el window.onload  
 async function cargarProto() {
     const schema = `
         package superapp;
@@ -847,18 +839,9 @@ async function cargarProto() {
     return root;
 }
  
- 
 // --- 5. LÓGICA DE INTERFAZ CORREGIDA ---
- 
-/**
- * Pinta una burbuja de mensaje en el chat box.
- * @param {string} texto - El contenido del mensaje.
- * @param {string} clase - La clase CSS ('msg-izquierda' o 'msg-derecha').
- */
 // Variable necesaria para que el menú sepa a qué mensaje le diste clic
 let mensajeSeleccionado = null;
- 
- 
  
     // Tu código del menú (onclick) se queda igualito abajo...
     function pintarMensaje(texto, clase, hora = null, estado = 'enviado') {
