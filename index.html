@@ -559,13 +559,9 @@ pintarMensaje(textoReal, 'msg-izquierda');
     ts: Date.now()
 });
 console.log("✅ Guardado automático ejecutado con éxito");
-
+let historial = JSON.parse(localStorage.getItem("chat_' + idDestino)) || [];
 historial.push({ texto: textoReal, clase: 'msg-izquierda' });
-const idRemitente = data.from; // El ID real que viene en el paquete
-let historial = JSON.parse(localStorage.getItem('chat_' + data.from)) || [];
-// ...
-localStorage.setItem('chat_' + data.from, JSON.stringify(historial));
-
+localStorage.setItem("chat_' + idDestino, JSON.stringify(historial));
             // 4. Mostrar en pantalla
             
             
