@@ -274,10 +274,23 @@ body {
 
                 /* Estilo para el botón dentro de la barra amarilla */
 
-.btn-invocar-qr:active {
-    transform: scale(0.95); /* Efecto de pulsado */
-    background: #333;
-}
+   .btn-invocar-qr:active {      
+    position: fixed;      /* Se vuelve flotante, ignora a los contactos */
+    top: 75px;            /* 60px de la barra + 15px de separación */
+    right: 20px;          /* Pegado a la derecha */
+    background: #ffd700; 
+    border: none; 
+    border-radius: 50%; 
+    width: 50px;          /* Lo hice un poco más grande para que sea fácil de tocar */
+    height: 50px; 
+    cursor: pointer; 
+    font-size: 24px; 
+    z-index: 99999;       /* Para que siempre esté POR ENCIMA de los contactos */
+    box-shadow: 0 4px 15px rgba(0,0,0,0.5); /* Sombra para que resalte sobre Goku */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+            }
 
                 
     </style>
@@ -296,8 +309,7 @@ body {
     <div class="header">
         <h1>SpaceChat</h1>
         
-        <button class="btn-qr-dropis" onclick="manejarBotonIdentidad()">🪪</button>
-    </div>
+        
 <button class="btn-invocar-qr" onclick="gestionarQR()">QR</button>
 </div>
     <div id="chat-box">
@@ -330,8 +342,8 @@ body {
     <div id="modal-qr" class="modal">
     <div class="modal-content">
         
-        <div id="nombre-dueño-header" style="background: #ffd700; color: #000; padding: 15px; font-weight: bold; flex-shrink: 0; display: flex; align-items: center; justify-content: center;">
-            CHATSPACE 
+        <div id="nombre-dueño-header" style="background: #1a1a1a; color: #ffffff; padding: 15px; font-weight: 900; text-transform: uppercase; text-align: left; border-bottom: 1px solid #333; opacity: 1;">
+    CHATSPACE
         </div>
 
 
@@ -366,7 +378,8 @@ body {
         <textarea id="msg-text" placeholder="Escribe un mensaje..." rows="1"></textarea>
         <button id="btn-enviar" onclick="enviarMensajeSatelital()">ENVIAR</button>
     </div>
-    
+    <button class="btn-qr-dropis" onclick="manejarBotonIdentidad()">🪪</button>
+</div>
 
     <div id="menu-acciones" class="menu-mensaje">
     <div onclick="accionMensaje('responder')">↩️ Responder</div>
