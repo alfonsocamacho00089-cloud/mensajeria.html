@@ -9,7 +9,7 @@
 
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>ChatSpace</title> </head>
+    <title>SpaceChat</title> </head>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-messaging-compat.js"></script>
@@ -294,7 +294,7 @@ body {
     
 
     <div class="header">
-        <h1>ChatSpace</h1>
+        <h1>SpaceChat</h1>
         
         <button class="btn-qr-dropis" onclick="manejarBotonIdentidad()">🪪</button>
     </div>
@@ -305,14 +305,14 @@ body {
 
     <div id="modal-registro" class="modal">
         <div class="modal-content">
-            <h3>Registro Maestro</h3>
+            <h3>CREA TU ID SPACE</h3>
             <input type="text" id="reg-nombre" placeholder="Nombre" style="width:100%; padding:10px; margin:5px 0; color:#000;">
             <input type="text" id="reg-apellido" placeholder="Apellido" style="width:100%; padding:10px; margin:5px 0; color:#000;">
          <button onclick="ejecutarRegistroCompleto()" style="width: 100%; padding: 12px; background: #ffd700; border: none; border-radius: 10px; font-weight: bold; margin-top: 10px;">VALIDAR HUELLA Y CREAR</button>
         
         <p style="margin-top: 20px; font-size: 13px; color: #ffd700; cursor: pointer; text-decoration: underline;" 
    onclick="recuperarCuentaConID()">
-   ¿Ya tienes un ID Dropis? Toca aquí para recuperar
+   ¿Ya tienes un ID Space? Toca aquí para ingresar o recuperar
         </p>
         
         </div>
@@ -342,7 +342,7 @@ body {
         <button onclick="document.getElementById('seccion-mi-qr').style.display='none'" style="margin-top: 10px; color: #ffd700; background: transparent; border: none; cursor: pointer;">[ Cerrar QR ]</button>
     </div>
 
-    <h4 style="color: #ffd700; margin: 10px 0; font-size: 14px; text-shadow: 1px 1px 2px black;">AGENDA DROPIS 🛰️</h4>
+    <h4 style="color: #ffd700; margin: 10px 0; font-size: 14px; text-shadow: 1px 1px 2px black;">Contactos</h4>
     
     <div id="lista-contactos">
         <p style="color: #8696a0; font-size: 12px;">Cargando contactos...</p>
@@ -350,7 +350,7 @@ body {
         </div>
 
         <button onclick="cerrarModalQR()" style="width: 100%; padding: 20px; background: #111; color: #ffd700; border: none; border-top: 1px solid #ffd700; font-weight: bold; cursor: pointer; flex-shrink: 0;">
-            VOLVER AL CHAT
+            CHAT
         </button>
 
     </div>
@@ -371,7 +371,7 @@ body {
     <div id="menu-acciones" class="menu-mensaje">
     <div onclick="accionMensaje('responder')">↩️ Responder</div>
     <div onclick="accionMensaje('editar')">✏️ Editar</div>
-    <div onclick="accionMensaje('copiar-id')">👤 Usar como ID</div>
+    <div onclick="accionMensaje('copiar-id')">👤 Guardar ID</div>
     <div onclick="accionMensaje('borrar')" style="color: #ff5c5c;">🗑️ Borrar</div>
     </div>
     <script>
