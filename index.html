@@ -86,7 +86,7 @@ body {
     /* Usamos el filtro de 0.6 para que se vea un poquito más la imagen pero sin tapar el texto */
     background-image: linear-gradient(rgba(11, 20, 26, 0.7), rgba(11, 20, 26, 0.7)), 
                   url('./assets/logo.webp');
-    background-size: contain;
+    background-size: cover;
     background-position: center;
     background-attachment: fixed;
     background-repeat: no-repeat;
@@ -274,23 +274,23 @@ body {
 
                 /* Estilo para el botón dentro de la barra amarilla */
 
-   .btn-invocar-qr:active {      
-    position: fixed;      /* Se vuelve flotante, ignora a los contactos */
-    top: 75px;            /* 60px de la barra + 15px de separación */
-    right: 20px;          /* Pegado a la derecha */
+   .btn-qr-dropis { 
+    position: absolute;   /* Se ancla al modal, no a la pantalla */
+    top: 70px;            /* Justo debajo de la barra CHATSPACE del modal */
+    right: 20px;          /* En la esquina derecha */
     background: #ffd700; 
     border: none; 
     border-radius: 50%; 
-    width: 50px;          /* Lo hice un poco más grande para que sea fácil de tocar */
-    height: 50px; 
+    width: 45px; 
+    height: 45px; 
     cursor: pointer; 
-    font-size: 24px; 
-    z-index: 99999;       /* Para que siempre esté POR ENCIMA de los contactos */
-    box-shadow: 0 4px 15px rgba(0,0,0,0.5); /* Sombra para que resalte sobre Goku */
+    font-size: 20px; 
+    z-index: 10;          /* Para que esté sobre la lista, pero dentro del modal */
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
     display: flex;
     align-items: center;
     justify-content: center;
-            }
+   }
 
                 
     </style>
@@ -340,29 +340,31 @@ body {
     </div>
     </div>
     <div id="modal-qr" class="modal">
-    <div class="modal-content">
+    <div class="modal-content" style="display: flex; flex-direction: column; height: 90vh; position: relative;">
         
-        <div id="nombre-dueño-header" style="background: #1a1a1a; color: #ffffff; padding: 15px; font-weight: 900; text-transform: uppercase; text-align: left; border-bottom: 1px solid #333; opacity: 1;">
-    CHATSPACE
+        <div id="nombre-dueño-header" style="background: #1a1a1a; color: #ffffff; padding: 15px; font-weight: 900; text-transform: uppercase; text-align: left; border-bottom: 1px solid #333; position: relative;">
+            CHATSPACE
+            <button class="btn-qr-dropis" onclick="gestionarQR()" style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); background: #ffd700; border: none; border-radius: 50%; width: 35px; height: 35px; cursor: pointer;">
+                🪪
+            </button>
         </div>
 
-
-        <div id="cuerpo-modal-lista" style="flex-grow: 1; overflow-y: auto; padding-bottom: 20px;">
+        <div id="cuerpo-modal-lista" style="flex-grow: 1; overflow-y: auto; padding: 0 15px 20px 15px;">
     
-    <div id="seccion-mi-qr" style="display: none; padding: 20px; flex-direction: column; align-items: center; border-bottom: 1px solid #444;">
-        <div id="contenedor-qr" style="background: white; padding: 10px; border-radius: 10px;"></div>
-        <button onclick="document.getElementById('seccion-mi-qr').style.display='none'" style="margin-top: 10px; color: #ffd700; background: transparent; border: none; cursor: pointer;">[ Cerrar QR ]</button>
-    </div>
+            <div id="seccion-mi-qr" style="display: none; padding: 20px; flex-direction: column; align-items: center; border-bottom: 1px solid #444;">
+                <div id="contenedor-qr" style="background: white; padding: 10px; border-radius: 10px;"></div>
+                <button onclick="document.getElementById('seccion-mi-qr').style.display='none'" style="margin-top: 10px; color: #ffd700; background: transparent; border: none; cursor: pointer;">[ Ocultar mi QR ]</button>
+            </div>
 
-    <h4 style="color: #ffd700; margin: 10px 0; font-size: 14px; text-shadow: 1px 1px 2px black;">CONTACTOS</h4>
-    
-    <div id="lista-contactos">
-        <p style="color: #8696a0; font-size: 12px;">Cargando contactos...</p>
-    </div>
+            <h4 style="color: #ffd700; margin: 20px 0 10px 0; font-size: 14px; text-shadow: 1px 1px 2px black;">CONTACTOS</h4>
+            
+            <div id="lista-contactos">
+                <p style="color: #8696a0; font-size: 12px;">Cargando contactos...</p>
+            </div>
         </div>
 
         <button onclick="cerrarModalQR()" style="width: 100%; padding: 20px; background: #111; color: #ffd700; border: none; border-top: 1px solid #ffd700; font-weight: bold; cursor: pointer; flex-shrink: 0;">
-            CHAT
+            VOLVER AL CHAT
         </button>
 
     </div>
@@ -979,10 +981,15 @@ function cargarMensajesLocales() {
 
                 function gestionarQR() {
     const seccion = document.getElementById('seccion-mi-qr');
+    
     if (seccion) {
-        // Si está oculto, lo muestra. Si está visible, lo oculta.
-        if (seccion.style.display === 'none' || seccion.style.display === '') {
+        // Obtenemos el estilo real que tiene en ese momento
+        const estaVisible = window.getComputedStyle(seccion).display;
+
+        if (estaVisible === 'none') {
             seccion.style.display = 'flex';
+            // Aquí puedes añadir una animación o scroll automático si quieres
+            seccion.scrollIntoView({ behavior: 'smooth' });
         } else {
             seccion.style.display = 'none';
         }
