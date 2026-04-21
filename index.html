@@ -565,9 +565,9 @@ pintarMensaje(textoReal, 'msg-izquierda');
     ts: Date.now()
 });
 console.log("✅ Guardado automático ejecutado con éxito");
-let historial = JSON.parse(localStorage.getItem('chat_' + idDestino)) || [];
+let historial = JSON.parse(localStorage.getItem('chat_' + idRemitente)) || [];
 historial.push({ texto: textoReal, clase: 'msg-izquierda' });
-localStorage.setItem('chat_' + idDestino, JSON.stringify(historial));
+localStorage.setItem('chat_' + idRemitente, JSON.stringify(historial));
             // 4. Mostrar en pantalla
             
             
@@ -619,9 +619,9 @@ const payload = SuperAppPayload.create({ chatText: msgProtegido });
 
 
 // --- AÑADE ESTO PARA GUARDAR LO QUE ENVÍAS ---
-let historialEnv = JSON.parse(localStorage.getItem('chat_' + idDestino)) || [];
+let historialEnv = JSON.parse(localStorage.getItem('chat_' + targetID)) || [];
 historialEnv.push({ texto: msg, clase: 'msg-derecha' });
-localStorage.setItem('chat_' + idDestino, JSON.stringify(historialEnv));
+localStorage.setItem('chat_' + targetID, JSON.stringify(historialEnv));
 // ----------------------------------------------
 
 if (inputMsg) inputMsg.value = "";
@@ -735,7 +735,7 @@ function cerrarModalQR() {
     if(headerNombre) headerNombre.innerText = "Chateando con: " + nombreDestino;
 
     // 3. Buscamos los mensajes de ESE contacto en LocalStorage
-    const claveChat = "chat_' + idDestino;
+    const claveChat = 'chat_' + idDestino;
     const mensajes = JSON.parse(localStorage.getItem(claveChat)) || [];
 
     // 4. Los pintamos uno por uno
@@ -944,7 +944,7 @@ function borrarMensajeDeMemoria(texto) {
     const idDestino = document.querySelector('#target-id').value;
     if(!idDestino) return;
 
-    const claveChat = "chat_' + idDestino;
+    const claveChat = 'chat_' + idDestino;
     let mensajes = JSON.parse(localStorage.getItem(claveChat)) || [];
     
     mensajes = mensajes.filter(m => m.texto !== texto);
