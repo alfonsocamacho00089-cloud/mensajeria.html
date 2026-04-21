@@ -271,6 +271,26 @@ body {
     from { transform: translateY(20px); opacity: 0; }
     to { transform: translateY(0); opacity: 1; }
 }
+
+                /* Estilo para el botón dentro de la barra amarilla */
+.btn-invocar-qr {
+    background: #000;      /* Negro para que resalte en el amarillo */
+    color: #ffd700;        /* Letras amarillas */
+    border: none;
+    border-radius: 4px;
+    padding: 4px 10px;
+    font-size: 12px;
+    font-weight: bold;
+    cursor: pointer;
+    margin-left: 10px;     /* Separación del texto "MIS CONTACTOS" */
+    text-transform: uppercase;
+}
+
+.btn-invocar-qr:active {
+    transform: scale(0.95); /* Efecto de pulsado */
+    background: #333;
+}
+                
     </style>
 
 </head>
@@ -317,6 +337,13 @@ body {
             MIS CONTACTOS
         </div>
 
+
+
+    <button class="btn-invocar-qr" onclick="gestionarQR()">QR</button>
+</div>
+
+
+                
         <div id="cuerpo-modal-lista" style="flex-grow: 1; overflow-y: auto; padding-bottom: 20px;">
     
     <div id="seccion-mi-qr" style="display: none; padding: 20px; flex-direction: column; align-items: center; border-bottom: 1px solid #444;">
