@@ -565,9 +565,9 @@ pintarMensaje(textoReal, 'msg-izquierda');
     ts: Date.now()
 });
 console.log("✅ Guardado automático ejecutado con éxito");
-let historial = JSON.parse(localStorage.getItem('mis_mensajes')) || [];
+let historial = JSON.parse(localStorage.getItem('chat_ + idDestino')) || [];
 historial.push({ texto: textoReal, clase: 'msg-izquierda' });
-localStorage.setItem('mis_mensajes', JSON.stringify(historial));
+localStorage.setItem('chat_ + idDestino', JSON.stringify(historial));
             // 4. Mostrar en pantalla
             
             
@@ -620,9 +620,9 @@ const payload = SuperAppPayload.create({ chatText: msgProtegido });
 
 
 // --- AÑADE ESTO PARA GUARDAR LO QUE ENVÍAS ---
-let historialEnv = JSON.parse(localStorage.getItem('mis_mensajes')) || [];
+let historialEnv = JSON.parse(localStorage.getItem('chat_ + idDestino')) || [];
 historialEnv.push({ texto: msg, clase: 'msg-derecha' });
-localStorage.setItem('mis_mensajes', JSON.stringify(historialEnv));
+localStorage.setItem('chat_ + idDestino', JSON.stringify(historialEnv));
 // ----------------------------------------------
 
 if (inputMsg) inputMsg.value = "";
@@ -955,7 +955,7 @@ document.addEventListener('click', () => {
 });
         
 function cargarMensajesLocales() {
-    const datos = localStorage.getItem('mis_mensajes');
+    const datos = localStorage.getItem('chat_ + idDestino');
     if (!datos) return; 
  
     try {
