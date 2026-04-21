@@ -558,11 +558,11 @@ pintarMensaje(textoReal, 'msg-izquierda');
     remitente: data.from || "Desconocido",
     ts: Date.now()
 });
-console.log("✅ Guardado automático ejecutado con éxito");
-let historial = JSON.parse(localStorage.getItem("chat_' + idDestino)) || [];
+
+  console.log("✅ Guardado automático ejecutado con éxito");
+let historial = JSON.parse(localStorage.getItem('chat_' + idDestino)) || [];
 historial.push({ texto: textoReal, clase: 'msg-izquierda' });
-localStorage.setItem("chat_' + idDestino, JSON.stringify(historial));
-            // 4. Mostrar en pantalla
+localStorage.setItem('chat_' + idDestino, JSON.stringify(historial));          // 4. Mostrar en pantalla
             
             
             // 5. Borrar de la nube (limpieza satelital) para no procesarlo dos veces
