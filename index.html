@@ -1,5 +1,5 @@
           
-.
+
         
             <!DOCTYPE html>
 <html lang="es">
@@ -565,9 +565,9 @@ pintarMensaje(textoReal, 'msg-izquierda');
     ts: Date.now()
 });
 console.log("✅ Guardado automático ejecutado con éxito");
-let historial = JSON.parse(localStorage.getItem('chat_ + idDestino')) || [];
+let historial = JSON.parse(localStorage.getItem('chat_' + idDestino)) || [];
 historial.push({ texto: textoReal, clase: 'msg-izquierda' });
-localStorage.setItem('chat_ + idDestino', JSON.stringify(historial));
+localStorage.setItem('chat_' + idDestino, JSON.stringify(historial));
             // 4. Mostrar en pantalla
             
             
@@ -584,8 +584,7 @@ localStorage.setItem('chat_ + idDestino', JSON.stringify(historial));
 }
        
         
-
-async function enviarMensajeSatelital() {
+function enviarMensajeSatelital() {
 const inputMsg = document.querySelector('#msg-text');
 const inputTarget = document.querySelector('#target-id');
 const msg = inputMsg ? inputMsg.value.trim() : "";
@@ -736,7 +735,7 @@ function cerrarModalQR() {
     if(headerNombre) headerNombre.innerText = "Chateando con: " + nombreDestino;
 
     // 3. Buscamos los mensajes de ESE contacto en LocalStorage
-    const claveChat = "chat_" + idDestino;
+    const claveChat = "chat_' + idDestino;
     const mensajes = JSON.parse(localStorage.getItem(claveChat)) || [];
 
     // 4. Los pintamos uno por uno
@@ -945,7 +944,7 @@ function borrarMensajeDeMemoria(texto) {
     const idDestino = document.querySelector('#target-id').value;
     if(!idDestino) return;
 
-    const claveChat = "chat_" + idDestino;
+    const claveChat = "chat_' + idDestino;
     let mensajes = JSON.parse(localStorage.getItem(claveChat)) || [];
     
     mensajes = mensajes.filter(m => m.texto !== texto);
