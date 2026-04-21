@@ -318,16 +318,17 @@ body {
         </div>
 
         <div id="cuerpo-modal-lista" style="flex-grow: 1; overflow-y: auto; padding-bottom: 20px;">
-            
-            <div style="padding: 20px; display: flex; flex-direction: column; align-items: center;">
-                <div id="contenedor-qr" style="background: white; padding: 10px; border-radius: 10px;"></div>
-            </div>
+    
+    <div id="seccion-mi-qr" style="display: none; padding: 20px; flex-direction: column; align-items: center; border-bottom: 1px solid #444;">
+        <div id="contenedor-qr" style="background: white; padding: 10px; border-radius: 10px;"></div>
+        <button onclick="document.getElementById('seccion-mi-qr').style.display='none'" style="margin-top: 10px; color: #ffd700; background: transparent; border: none; cursor: pointer;">[ Cerrar QR ]</button>
+    </div>
 
-            <h4 style="color: #ffd700; margin: 10px 0; font-size: 14px; text-shadow: 1px 1px 2px black;">AGENDA DROPIS 🛰️</h4>
-            
-            <div id="lista-contactos">
-                <p style="color: #8696a0; font-size: 12px;">Cargando contactos...</p>
-            </div>
+    <h4 style="color: #ffd700; margin: 10px 0; font-size: 14px; text-shadow: 1px 1px 2px black;">AGENDA DROPIS 🛰️</h4>
+    
+    <div id="lista-contactos">
+        <p style="color: #8696a0; font-size: 12px;">Cargando contactos...</p>
+    </div>
         </div>
 
         <button onclick="cerrarModalQR()" style="width: 100%; padding: 20px; background: #111; color: #ffd700; border: none; border-top: 1px solid #ffd700; font-weight: bold; cursor: pointer; flex-shrink: 0;">
@@ -938,6 +939,18 @@ function cargarMensajesLocales() {
         console.error("Error al cargar memoria local", e);
     }
 }
+
+                function gestionarQR() {
+    const seccion = document.getElementById('seccion-mi-qr');
+    if (seccion) {
+        // Si está oculto, lo muestra. Si está visible, lo oculta.
+        if (seccion.style.display === 'none' || seccion.style.display === '') {
+            seccion.style.display = 'flex';
+        } else {
+            seccion.style.display = 'none';
+        }
+    }
+                }
 </script>
 </body>
 </html>
