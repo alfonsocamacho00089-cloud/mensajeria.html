@@ -1037,6 +1037,20 @@ function renderizarMensajes(listaDeMensajes) {
         }
     }
                 }
+
+     function mostrarNotificacionNativa(titulo, cuerpo) {
+    if (Notification.permission === "granted") {
+        // Opción A: Notificación simple
+        new Notification(titulo, { body: cuerpo });
+
+        // Opción B: Si prefieres usar el Service Worker (más pro)
+        
+        navigator.serviceWorker.ready.then(reg => {
+            reg.showNotification(titulo, { body: cuerpo });
+        });
+        
+    }
+     }
 </script>
 </body>
 </html>
