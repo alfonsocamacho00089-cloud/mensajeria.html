@@ -834,17 +834,13 @@ function cargarConversacionCon(idDestino, nombreDestino) {
     box.innerHTML = ""; 
 
     // 2. Actualizamos la interfaz (ID y Nombre arriba)
-    
+    document.querySelector('#target-id').value = idDestino;
     if (document.getElementById('nombre-dueño-header')) {
         document.getElementById('nombre-dueño-header').innerText = nombreDestino;
     }
 
     // 2. NUEVO: Actualizamos la FOTO de perfil
-    const visorFoto = document.getElementById('foto-perfil-header');
-    if (visorFoto) {
-        // Si recibimos una foto, la usamos; si no, una por defecto
-        visorFoto.src = urlFotoPerfil || "https://via.placeholder.com/40?text=U"; 
-    }
+    
     
  
     // 3. Buscamos los mensajes de ESE contacto en LocalStorage
