@@ -316,10 +316,7 @@ body {
     
 
     <div class="header">
-    <div style="display: flex; flex-direction: column;">
-        
-        <small id="contacto-seleccionado" style="color: #ffd700; font-weight: bold; font-size: 0.9em;"></small>
-    </div>
+    <h1 id="nombre-dueño-header">SpaceChat</h1>
     
     <button class="btn-qr-dropis" onclick="manejarBotonIdentidad()">🪪</button>
     </div>
@@ -788,9 +785,8 @@ function cargarConversacionCon(idDestino, nombreDestino) {
 
     box.innerHTML = ""; 
 
-    const headerNombre = document.getElementById('nombre-dueño-header');
-    if (headerNombre) {
-        headerNombre.innerText = nombreDestino; 
+    if (document.getElementById('nombre-dueño-header')) {
+        document.getElementById('nombre-dueño-header').innerText = nombreDestino;
     }
 
     // 2. Actualizamos la interfaz (ID y Nombre arriba)
