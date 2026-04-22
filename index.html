@@ -857,9 +857,8 @@ function cargarConversacionCon(idDestino, nombreDestino, fotoDestino) {
     
     const visorFoto = document.getElementById('foto-perfil-header');
     if (visorFoto) {
-        // Si recibimos una foto, la usamos; si no, una por defecto
-       
-    visorFoto.src = fotoDestino ? fotoDestino : "https://via.placeholder.com/40?text=U";
+        // Usamos fotoDestino si existe, si no, el placeholder
+        visorFoto.src = fotoDestino ? fotoDestino : "https://via.placeholder.com/40?text=U"; 
     }
  
     // 3. Buscamos los mensajes de ESE contacto en LocalStorage
