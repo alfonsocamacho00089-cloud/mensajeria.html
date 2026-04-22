@@ -1143,18 +1143,28 @@ function renderizarMensajes(listaDeMensajes) {
 function abrirModalNuevoContacto() {
     const modal = document.getElementById('modal-nuevocontacto');
     if (modal) {
+        // Aseguramos que se vea por encima de TODO
+        modal.style.zIndex = "20000"; 
         modal.style.display = 'flex';
-        console.log("Abriendo: Nuevo Contacto");
-    } else {
-        console.error("Error: No se encontró el ID 'modal-nuevocontacto'");
+        
+        // OPCIONAL: Si quieres asegurar que la lista de contactos esté abierta atrás
+        const modalLista = document.getElementById('modal-contactos'); // o el ID de tu lista
+        if (modalLista) modalLista.style.display = 'block';
+
+        console.log("Abriendo: Nuevo Contacto sobre la agenda");
     }
 }
 
-// 2. Función para cerrar el modal
 function cerrarModalNuevo() {
     const modal = document.getElementById('modal-nuevocontacto');
     if (modal) {
         modal.style.display = 'none';
+        
+        // IMPORTANTE: Al cerrar, refrescamos la agenda para que 
+        // el usuario vea sus contactos actualizados inmediatamente
+        if (typeof pintarAgendaContactos === "function") {
+            pintarAgendaContactos();
+        }
     }
 }
 
