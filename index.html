@@ -1075,32 +1075,7 @@ function cerrarModalNuevo() {
 }
 
 // 3. Función para guardar (Estructura básica)
-function guardarNuevoContacto() {
-    const nombre = document.getElementById('nuevo-nombre').value;
-    const idSatelital = document.getElementById('target-id').value; // Usando el ID que tienes en tu captura
 
-    if (nombre.trim() === "") return;
-
-    // 1. Lógica de guardado (Asegúrate de que tu array de contactos reciba el push)
-    // contactos.push({ nombre: nombre, id: idSatelital });
-
-    alert("✅ Contacto " + nombre + " guardado con éxito.");
-
-    // 2. CIERRE SEGURO: Usamos un try/catch para que si falla la limpieza, 
-    // el modal se cierre de todos modos.
-    try {
-        if(document.getElementById('nuevo-nombre')) document.getElementById('nuevo-nombre').value = "";
-        if(document.getElementById('target-id')) document.getElementById('target-id').value = "";
-    } catch(e) { console.log("Error al limpiar, pero seguimos..."); }
-
-    // 3. CERRAR EL MODAL (Asegúrate que la 'e' de nuevocontacto esté ahí)
-    document.getElementById('modal-nuevocontacto').style.display = 'none';
-
-    // 4. REFRESCAR LA LISTA (Vital para que aparezca en la agenda)
-    if (typeof mostrarContactos === "function") {
-        mostrarContactos(); 
-    }
-}
 </script>
 </body>
 </html>
