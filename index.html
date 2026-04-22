@@ -780,14 +780,7 @@ function cargarConversacionCon(idDestino, nombreDestino) {
 
     // 1. Limpiamos el chat visualmente
     box.innerHTML = ""; 
-    window.usuarioChatActual = idDestino; 
 
-    // Buscamos el elemento del header (asegúrate que el ID coincida con tu HTML)
-    const visorNombre = document.getElementById('nombre-dueño-header') || document.getElementById('contacto-seleccionado');
-    
-    if (visorNombre) {
-        visorNombre.innerText = "Chateando con: " + nombreDestino;
-    }
     // 2. Actualizamos la interfaz (ID y Nombre arriba)
     document.querySelector('#target-id').value = idDestino;
     const headerNombre = document.getElementById('nombre-dueño-header');
@@ -813,8 +806,6 @@ function cargarConversacionCon(idDestino, nombreDestino) {
     const inputMsg = document.getElementById('msg-text');
     if(inputMsg) inputMsg.focus();
 }
-
-
      
      
  function pintarAgendaContactos() {
