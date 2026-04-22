@@ -774,68 +774,44 @@ function cerrarModalQR() {
     }
 
 function cargarConversacionCon(idDestino, nombreDestino) {
-
     const box = document.getElementById('chat-box');
-
     if (!box) return;
 
-
-
     // 1. Limpiamos el chat visualmente
-
     box.innerHTML = ""; 
+    window.usuarioChatActual = idDestino; 
 
+    // Buscamos el elemento del header (asegúrate que el ID coincida con tu HTML)
+    const visorNombre = document.getElementById('nombre-dueño-header') || document.getElementById('contacto-seleccionado');
     
+    if (visorNombre) {
+        visorNombre.innerText = "Chateando con: " + nombreDestino;
+    }
     // 2. Actualizamos la interfaz (ID y Nombre arriba)
-
     document.querySelector('#target-id').value = idDestino;
-
     const headerNombre = document.getElementById('nombre-dueño-header');
-
     if(headerNombre) headerNombre.innerText = "Chateando con: " + nombreDestino;
 
-
-
     // 3. Buscamos los mensajes de ESE contacto en LocalStorage
-
     const claveChat = 'chat_' + idDestino;
-
     const mensajes = JSON.parse(localStorage.getItem(claveChat)) || [];
 
-
-
     // 4. Los pintamos uno por uno
-
     mensajes.forEach(m => {
-
         pintarMensaje(m.texto, m.clase);
-
     });
-
     localStorage.setItem('unread_' + idDestino, 0);
-
     
-
     // Refrescar la agenda para que se borre el círculo verde/rojo
-
     pintarAgendaContactos();
-
     console.log("📂 Historial cargado con: " + nombreDestino);
-
     
-
     // 5. Cerramos el modal de contactos para empezar a escribir
-
     cerrarModalQR();
-
     
-
     const inputMsg = document.getElementById('msg-text');
-
     if(inputMsg) inputMsg.focus();
-
-                }
-
+}
 
 
      
