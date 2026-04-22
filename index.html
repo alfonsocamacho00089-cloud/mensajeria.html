@@ -734,26 +734,42 @@ function cerrarModalQR() {
     document.getElementById('modal-qr').style.display = 'none';
 }
         function guardarNuevoContacto() {
-    const inputID = document.querySelector('#target-id');
-    const idAGuardar = inputID ? inputID.value.trim() : "";
- 
-    if (!idAGuardar) return alert("Primero escribe un ID para guardarlo");
- 
-    // Pedimos el nombre al usuario
-    const nombre = prompt("¿Cómo quieres llamar a este contacto?");
+    // 1. Capturamos los datos del modal
+    const nombre = document.getElementById('nuevo-nombre').value.trim();
+    const idAGuardar = document.getElementById('target-id').value.trim();
+
+    if (!idAGuardar || !nombre) {
+        alert("⚠️ Pedro, escribe el nombre e ID para guardar.");
+        return;
+    }
+
+    // 2. Traemos la agenda vieja del teléfono (localStorage)
+    let agenda = JSON.parse(localStorage.getItem('mis_contactos')) || [];
     
-    if (nombre) {
-        let agenda = JSON.parse(localStorage.getItem('mis_contactos')) || [];
-        
-        // Evitar duplicados
-        const existe = agenda.find(c => c.id === idAGuardar);
-        if (existe) return alert("Este ID ya está en tu agenda como: " + existe.nombre);
- 
-        // Guardamos el nuevo objeto
-        agenda.push({ nombre: nombre, id: idAGuardar });
-        localStorage.setItem('mis_contactos', JSON.stringify(agenda));
-        
-        alert("✅ Contacto guardado: " + nombre);
+    // 3. Evitar duplicados
+    const existe = agenda.find(c => c.id === idAGuardar);
+    if (existe) {
+        alert("Este ID ya está en tu agenda como: " + existe.nombre);
+        return;
+    }
+
+    // 4. Guardamos el nuevo contacto en la lista
+    agenda.push({ nombre: nombre, id: idAGuardar });
+    localStorage.setItem('mis_contactos', JSON.stringify(agenda));
+    
+    alert("✅ Contacto " + nombre + " guardado con éxito.");
+
+    // 5. Limpiamos y cerramos el modal
+    document.getElementById('nuevo-nombre').value = "";
+    document.getElementById('target-id').value = "";
+    document.getElementById('modal-nuevocontacto').style.display = 'none';
+
+    // 6. ¡MUY IMPORTANTE! Refrescar la lista del modal QR
+    // Si tu función para cargar la lista se llama diferente, cámbiala aquí
+    if (typeof cargarContactos === "function") {
+        cargarContactos(); 
+    } else if (typeof mostrarContactos === "function") {
+        mostrarContactos();
     }
         }
 
