@@ -393,6 +393,10 @@ body {
                 <p style="color: #8696a0; font-size: 12px;">Cargando contactos...</p>
             </div>
         </div>
+     <button onclick="guardarNuevoContacto()" style="background: #ffd700; border: none; border-radius: 10px; padding: 0 15px; font-weight: bold; cursor: pointer;">
+        + 👤
+    </button>
+    </div>
 
         <button onclick="cerrarModalQR()" style="width: 100%; padding: 20px; background: #111; color: #ffd700; border: none; border-top: 1px solid #ffd700; font-weight: bold; cursor: pointer; flex-shrink: 0;">
             VOLVER AL CHAT
@@ -404,10 +408,7 @@ body {
     <div class="input-area">
         <input type="text" id="target-id" placeholder="ID"><div style="display: flex; gap: 5px; margin-bottom: 10px;">
     
-    <button onclick="guardarNuevoContacto()" style="background: #ffd700; border: none; border-radius: 10px; padding: 0 15px; font-weight: bold; cursor: pointer;">
-        + 👤
-    </button>
-        </div>
+    
         <textarea id="msg-text" placeholder="Escribe un mensaje..." rows="1"></textarea>
         <button id="btn-enviar" onclick="enviarMensajeSatelital()">ENVIAR</button>
     </div>
