@@ -840,7 +840,7 @@ function cerrarModalQR() {
     }
      }
 
-function cargarConversacionCon(idDestino, nombreDestino) {
+function cargarConversacionCon(idDestino, nombreDestino, fotoDestino)
     const box = document.getElementById('chat-box');
     if (!box) return;
 
@@ -858,8 +858,9 @@ function cargarConversacionCon(idDestino, nombreDestino) {
     const visorFoto = document.getElementById('foto-perfil-header');
     if (visorFoto) {
         // Si recibimos una foto, la usamos; si no, una por defecto
-        visorFoto.src = urlFotoPerfil || "https://via.placeholder.com/40?text=U"; 
- }
+       
+    visorFoto.src = fotoDestino ? fotoDestino : "https://via.placeholder.com/40?text=U";
+    }
  
     // 3. Buscamos los mensajes de ESE contacto en LocalStorage
     const claveChat = 'chat_' + idDestino;
