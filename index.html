@@ -38,15 +38,59 @@ body {
     border-bottom: 1px solid #333; /* Una línea gris muy sutil para separar del chat */
 }
 
-.header h1 {
-    color: #ffffff;      /* Blanco puro */
-    opacity: 1;          /* Fuerza a que NO sea transparente */
-    font-size: 20px;
-    margin: 0;
-    text-transform: uppercase;
-    font-weight: 900;    /* El grosor máximo para líneas bien gruesas */
-    letter-spacing: 1.5px; /* Un poco más de espacio para que se vea premium */
-    font-family: sans-serif;
+/* --- NUEVO DISEÑO DEL HEADER ESTILO WHATSAPP --- */
+.header {
+    background: #202c33; /* Color de fondo oscuro de WhatsApp */
+    color: white; /* Texto blanco */
+    padding: 10px 16px; /* Espaciado interno */
+    position: sticky; /* Se queda arriba al hacer scroll */
+    top: 0;
+    z-index: 1000;
+    height: 60px; /* Altura fija para el header */
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid #303e46; /* Pequeña línea divisoria */
+    width: 100%; /* Ocupa todo el ancho */
+    box-sizing: border-box;
+}
+
+/* Contenedor que alinea la foto y el texto */
+.header-content {
+    display: flex;
+    align-items: center;
+    gap: 12px; /* Espacio entre foto y texto */
+    flex: 1; /* Ocupa el espacio disponible */
+}
+
+/* Estilo para la FOTO DE PERFIL circular */
+.foto-perfil {
+    width: 40px; /* Tamaño de la foto */
+    height: 40px;
+    border-radius: 50%; /* Hace la foto circular */
+    object-fit: cover; /* Recorta la imagen para que encaje */
+    background-color: #555; /* Color de fondo por si no carga la imagen */
+}
+
+/* Contenedor del nombre y estado */
+.user-info {
+    display: flex;
+    flex-direction: column; /* Apila el nombre y el estado */
+}
+
+/* Estilo para el NOMBRE del contacto */
+#nombre-dueño-header {
+    font-size: 16px; /* TAMAÑO NORMAL (estilo WhatsApp) */
+    font-weight: 500; /* Grosor medio */
+    margin: 0; /* Elimina márgenes por defecto */
+    color: white; /* Letras blancas */
+    line-height: 1.2;
+}
+
+/* Estilo para el estado (En línea) debajo del nombre */
+.user-status {
+    font-size: 12px;
+    color: #8696a0; /* Color gris claro */
+    margin-top: 2px;
 }
 
 
@@ -319,10 +363,17 @@ body {
     
     
     
-<div class="header">
-    <h1 id="nombre-dueño-header">SpaceChat</h1>
+<div class="header" id="chat-header">
+    <div class="header-content">
+        <img src="https://via.placeholder.com/40" alt="Perfil" id="foto-perfil-header" class="foto-perfil">
+        
+        <div class="user-info">
+            <h1 id="nombre-dueño-header">SpaceChat</h1>
+            <small class="user-status">En línea</small>
+        </div>
+    </div>
     
-    <button class="btn-qr-dropis" onclick="manejarBotonIdentidad()">🪪</button>
+    <button class="btn-qr-dropis" onclick="manejarBotonIdentidad()" style="position: absolute; right: 15px; top: 15px;">🪪</button>
 </div>
 
     <div id="chat-box">
@@ -786,6 +837,13 @@ function cargarConversacionCon(idDestino, nombreDestino) {
     document.querySelector('#target-id').value = idDestino;
     if (document.getElementById('nombre-dueño-header')) {
         document.getElementById('nombre-dueño-header').innerText = nombreDestino;
+    }
+
+    // 2. NUEVO: Actualizamos la FOTO de perfil
+    const visorFoto = document.getElementById('foto-perfil-header');
+    if (visorFoto) {
+        // Si recibimos una foto, la usamos; si no, una por defecto
+        visorFoto.src = urlFotoPerfil || "https://via.placeholder.com/40?text=U"; 
     }
     
  
