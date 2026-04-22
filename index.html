@@ -64,7 +64,6 @@ body {
         }
 
         input#msg-text { flex: 1; padding: 12px; border-radius: 25px; border: none; outline: none; background: #2a2a2a; color: white; }
-        input#target-id { width: 60px; background: #000; color: #ffd700; border: 1px solid #333; border-radius: 8px; text-align: center; }
         
         button#btn-enviar { background: #ffd700; border: none; padding: 10px 20px; border-radius: 20px; font-weight: bold; cursor: pointer; color: black; }
         #chat-box {
@@ -207,10 +206,13 @@ body {
     width: 100%; 
     height: 100%; 
     background: #000000; 
-    z-index: 10000; 
+    
+    z-index: 1000; 
     transition: all 0.5s ease;
 }
 
+
+     
 /* 2. EL CONTENIDO (Pantalla Completa con Fondo) */
 .modal-content { 
     background-color: #0b141a;
@@ -379,12 +381,19 @@ body {
     </div>
 </div>
 
-<div id="modal-nuevocontacto" class="modal" style="display:none; z-index: 200;">
+<div id="modal-nuevocontacto" class="modal" style="display:none; z-index: 15000;">
     <div class="modal-cover">
         <h3>NUEVO CONTACTO</h3>
-        <input type="text" id="nuevo-nombre" placeholder="Nombre..." style="width:100%; padding:10px; margin:5px 0; color:#000;">
-        <button onclick="guardarNuevoContacto()" style="width: 100%; padding: 12px; background: #ffd700; border: none; border-radius: 10px; font-weight: bold; margin-top: 10px;">GUARDAR CONTACTO</button>
-        <button onclick="document.getElementById('modal-nuvocontacto').style.display='none'" style="background:none; border:none; color:white; margin-top:10px; cursor:pointer;">Cancelar</button>
+        
+        <input type="text" id="nuevo-nombre" placeholder="Nombre y Apellido..." style="width:100%; padding:10px; margin:5px 0; color:#000; border-radius: 8px;">
+        
+        <input type="text" id="nuevo-id-contacto" placeholder="ID Satelital (Ej: 12345)" style="width:100%; padding:10px; margin:5px 0; color:#000; border-radius: 8px;">
+
+        <div style="display: flex; flex-direction: column; gap: 5px; margin-top: 10px;">
+            <button onclick="guardarNuevoContacto()" style="width: 100%; padding: 12px; background: #ffd700; border: none; border-radius: 10px; font-weight: bold; color: #000; cursor: pointer;">GUARDAR CONTACTO</button>
+            
+            <button onclick="document.getElementById('modal-nuevocontacto').style.display='none'" style="background:none; border:none; color:white; margin-top:10px; cursor:pointer;">Cancelar</button>
+        </div>
     </div>
 </div>
  
@@ -1066,35 +1075,24 @@ function cerrarModalNuevo() {
 
 // 3. Función para guardar (Estructura básica)
 function guardarNuevoContacto() {
-    // Si cambiaste el ID como te sugerí arriba:
-    const nombre = document.getElementById('nuevo-nombre-contacto').value;
-    
-    if (nombre.trim() === "") {
-        alert("¡Escribe un nombre primero!");
+    const nombre = document.getElementById('nuevo-nombre').value;
+    const idSatelital = document.getElementById('nuevo-id-contacto').value;
+
+    if (nombre.trim() === "" || idSatelital.trim() === "") {
+        alert("⚠️ Pedro, completa el nombre y el ID para poder guardar.");
         return;
     }
 
-    console.log("Guardando contacto: " + nombre);
-    
-    // Aquí iría tu lógica para guardarlo en Firebase o LocalStorage
-    
-    alert("Contacto guardado con éxito");
-    cerrarModalNuevo(); // Cerramos al terminar
-                                          }
+    // Aquí va tu lógica para guardar (Firebase o LocalStorage)
+    console.log("Guardando en SpaceChat:", nombre, idSatelital);
 
-     function mostrarNotificacionNativa(titulo, cuerpo) {
-    if (Notification.permission === "granted") {
-        // Opción A: Notificación simple
-        new Notification(titulo, { body: cuerpo });
-
-        // Opción B: Si prefieres usar el Service Worker (más pro)
-        
-        navigator.serviceWorker.ready.then(reg => {
-            reg.showNotification(titulo, { body: cuerpo });
-        });
-        
-    }
-     }
+    alert("✅ Contacto " + nombre + " guardado con éxito.");
+    
+    // Limpiamos los campos y cerramos
+    document.getElementById('nuevo-nombre').value = "";
+    document.getElementById('nuevo-id-contacto').value = "";
+    document.getElementById('modal-nuevocontacto').style.display = 'none';
+}
 </script>
 </body>
 </html>
