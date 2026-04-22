@@ -358,7 +358,10 @@ body {
             </div>
 
     <div class="header" id="chat-header">
-    <div class="header-content">
+    <div class="header-content" style="display: flex; align-items: center; gap: 10px;">
+        
+        <button class="btn-qr-dropis" onclick="manejarBotonIdentidad()" style="background: none; border: none; cursor: pointer; padding: 0;">🪪</button>
+
         <img src="https://via.placeholder.com/40" alt="Perfil" id="foto-perfil-header" class="foto-perfil">
         
         <div class="user-info">
@@ -366,8 +369,6 @@ body {
             <small class="user-status">En línea</small>
         </div>
     </div>
-    
-    <button class="btn-qr-dropis" onclick="manejarBotonIdentidad()" style="position: absolute; left: 15px; top: 15px;">🪪</button>
 </div>
 
 <div id="chat-box">
