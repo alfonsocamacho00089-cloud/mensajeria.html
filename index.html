@@ -316,13 +316,13 @@ body {
     
 
     <div class="header">
-        <h1>SpaceChat</h1>
+    <div style="display: flex; flex-direction: column;">
         
-     <button class="btn-qr-dropis" onclick="manejarBotonIdentidad()">🪪</button>
-    </div>   
-
-    <div id="chat-box">
-        </div>
+        <small id="contacto-seleccionado" style="color: #ffd700; font-weight: bold; font-size: 0.9em;"></small>
+    </div>
+    
+    <button class="btn-qr-dropis" onclick="manejarBotonIdentidad()">🪪</button>
+    </div>
 
     <div id="modal-registro" class="modal">
         <div class="modal-cover">
@@ -782,7 +782,14 @@ function cerrarModalQR() {
 
     // 1. Limpiamos el chat visualmente
     box.innerHTML = ""; 
+    window.usuarioChatActual = idDestino; 
 
+    // Buscamos el elemento del header (asegúrate que el ID coincida con tu HTML)
+    const visorNombre = document.getElementById('nombre-dueño-header') || document.getElementById('contacto-seleccionado');
+    
+    if (visorNombre) {
+        visorNombre.innerText = "Chateando con: " + nombreDestino;
+    }
     // 2. Actualizamos la interfaz (ID y Nombre arriba)
     document.querySelector('#target-id').value = idDestino;
     const headerNombre = document.getElementById('nombre-dueño-header');
