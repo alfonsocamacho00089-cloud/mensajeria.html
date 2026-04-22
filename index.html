@@ -363,16 +363,16 @@ body {
     
     
     
-<div class="header"> <div class="header-content" style="display: flex; align-items: center; gap: 10px;">
-        <img src="https://via.placeholder.com/40" alt="Perfil" id="foto-perfil-header" class="foto-perfil" style="width:40px; height:40px; border-radius:50%;">
+<div class="header" id="chat-header"> <div class="header-content" style="display: flex; align-items: center; gap: 10px;">
+        <img src="https://via.placeholder.com/40" alt="Perfil" id="foto-perfil-header" class="foto-perfil" style="width:40px; height:40px; border-radius:50%; object-fit: cover;">
         
         <div class="user-info">
-            <h1 id="nombre-dueño-header" style="margin:0; font-size: 18px;">SpaceChat</h1>
-            <small class="user-status" style="color: #8696a0; display: block;">En línea</small>
+            <h1 id="nombre-dueño-header" style="margin:0; font-size: 18px; color: white;">SpaceChat</h1>
+            <small class="user-status" style="color: #8696a0; display: block; font-size: 12px;">En línea</small>
         </div>
     </div>
     
-    <button class="btn-qr-dropis" onclick="manejarBotonIdentidad()">🪪</button>
+    <button class="btn-qr-dropis" onclick="manejarBotonIdentidad()" style="position: absolute; right: 15px; top: 15px;">🪪</button>
 </div>
 
     <div id="chat-box">
