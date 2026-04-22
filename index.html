@@ -363,7 +363,7 @@ body {
     
     
     
-<div class="header" id="chat-header">
+<div class="header">
     <div class="header-content">
         <img src="https://via.placeholder.com/40" alt="Perfil" id="foto-perfil-header" class="foto-perfil">
         
@@ -841,7 +841,11 @@ function cargarConversacionCon(idDestino, nombreDestino) {
 
     // 2. NUEVO: Actualizamos la FOTO de perfil
     
-    
+    const visorFoto = document.getElementById('foto-perfil-header');
+    if (visorFoto) {
+        // Si recibimos una foto, la usamos; si no, una por defecto
+        visorFoto.src = urlFotoPerfil || "https://via.placeholder.com/40?text=U"; 
+ }
  
     // 3. Buscamos los mensajes de ESE contacto en LocalStorage
     const claveChat = 'chat_' + idDestino;
