@@ -286,7 +286,17 @@ body {
     align-items: center;
     justify-content: center;
 }
-
+.contador-nube {
+    background:  #ffd700; /* Verde tipo WhatsApp */
+    color: white;
+    border-radius: 50%;
+    padding: 2px 7px;
+    font-size: 12px;
+    font-weight: bold;
+    min-width: 15px;
+    text-align: center;
+    margin-left: auto; /* Lo empuja a la derecha */
+}
                 
     </style>
 
@@ -526,13 +536,13 @@ async function ejecutarRegistroCompleto() {
 }
 
 // --- 4. ANTENA SATELITAL ---
-async function activarAntena() {
+
+            async function activarAntena() {
     const miID = localStorage.getItem('mi_dropis_id');
     if (!miID) return;
 
     if (window.listenerActivo) window.listenerActivo.off(); 
 
-    console.log("📡 Antena sintonizada en:", miID);
     window.listenerActivo = db.ref('cola_satelital/' + miID);
     
     window.listenerActivo.on('child_added', async (snapshot) => {
@@ -546,32 +556,46 @@ async function activarAntena() {
             const decoded = SuperAppPayload.decode(buffer);
             const textoReal = decodeURIComponent(escape(atob(decoded.chatText)));
 
-            // --- ESTO ES LO QUE ARREGLA TODO ---
-            const quienMeEscribio = data.from; // El ID real del que envió
+            const emisorID = data.from; 
             const chatAbiertoActualmente = document.querySelector('#target-id').value;
 
-            // 1. Guardamos SIEMPRE en la carpeta del que envió
-            let clave = 'chat_' + quienMeEscribio;
+            // 1. Guardar mensaje en el historial
+            let clave = 'chat_' + emisorID;
             let historial = JSON.parse(localStorage.getItem(clave)) || [];
             historial.push({ texto: textoReal, clase: 'msg-izquierda' });
             localStorage.setItem(clave, JSON.stringify(historial));
-            
-            console.log("📥 Mensaje guardado en la carpeta: " + clave);
 
-            // 2. SOLO lo pintamos si estoy viendo esa conversación
-            if (quienMeEscribio === chatAbiertoActualmente) {
+            // 2. Lógica de Notificaciones y Contadores
+            if (emisorID === chatAbiertoActualmente) {
                 pintarMensaje(textoReal, 'msg-izquierda');
             } else {
-                console.log("🔔 Tienes un mensaje nuevo de " + quienMeEscribio + " en otra carpeta.");
+                // Aumentar contador de mensajes no leídos
+                let noLeidos = parseInt(localStorage.getItem('unread_' + emisorID)) || 0;
+                localStorage.setItem('unread_' + emisorID, noLeidos + 1);
+                
+                // Actualizar la lista de contactos visualmente
+                pintarAgendaContactos();
+
+                // Notificación del teléfono (Arriba)
+                mostrarNotificacionNativa("Nuevo mensaje de SpaceChat", textoReal);
             }
-            // ------------------------------------
 
             snapshot.ref.remove(); 
-        } catch (e) { 
-            console.error("❌ Error en recepción:", e);
-        }
+        } catch (e) { console.error(e); }
     });
 }
+
+// Función para las notificaciones que salen arriba en el cel
+function mostrarNotificacionNativa(titulo, cuerpo) {
+    if (Notification.permission === "granted") {
+        new Notification(titulo, {
+            body: cuerpo,
+            icon: 'icono_de_tu_app.png' // Si tienes uno
+        });
+    } else if (Notification.permission !== "denied") {
+        Notification.requestPermission();
+    }
+        }
        
         
 async function enviarMensajeSatelital() {
@@ -732,7 +756,10 @@ function cerrarModalQR() {
     mensajes.forEach(m => {
         pintarMensaje(m.texto, m.clase);
     });
-
+    localStorage.setItem('unread_' + idDestino, 0);
+    
+    // Refrescar la agenda para que se borre el círculo verde/rojo
+    pintarAgendaContactos();
     console.log("📂 Historial cargado con: " + nombreDestino);
     
     // 5. Cerramos el modal de contactos para empezar a escribir
@@ -753,18 +780,21 @@ function cerrarModalQR() {
     lista.innerHTML = ""; 
  
     contactos.forEach(contacto => {
-        const btn = document.createElement('div');
-        btn.className = 'fila-contacto'; 
+    const numNoLeidos = localStorage.getItem('unread_' + contacto.id) || 0;
+    const badgeHTML = numNoLeidos > 0 ? `<div class="contador-nube">${numNoLeidos}</div>` : '';
 
-        btn.innerHTML = `
-            <div style="width: 50px; height: 50px; background: #ffd700; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: black; font-weight: bold; font-size: 20px; flex-shrink: 0;">
-                ${contacto.nombre.charAt(0).toUpperCase()}
-            </div>
-            <div style="text-align: left;">
-                <div style="font-weight: bold; font-size: 16px; color: #ffffff;">${contacto.nombre}</div>
-                <div style="font-size: 12px; color: #8696a0;">ID: ${contacto.id}</div>
-            </div>
-        `;
+    const btn = document.createElement('div');
+    btn.className = 'fila-contacto'; 
+    btn.innerHTML = `
+        <div class="avatar">${contacto.nombre.charAt(0).toUpperCase()}</div>
+        <div style="flex-grow: 1; margin-left: 10px;">
+            <div style="font-weight: bold; color: white;">${contacto.nombre}</div>
+            <div style="font-size: 12px; color: #8696a0;">ID: ${contacto.id}</div>
+        </div>
+        ${badgeHTML} 
+    `;
+    // ... resto del btn.onclick ...
+});
         
         btn.onclick = () => {
             // Cuando tocas al contacto, cargamos su chat específico
