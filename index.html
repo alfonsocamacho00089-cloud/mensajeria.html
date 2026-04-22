@@ -363,23 +363,22 @@ body {
     
     
     
-<div class="header" id="chat-header" style="position: relative; z-index: 100; background: #202c33;">
+<div class="header" id="chat-header" style="position: sticky; top: 0; z-index: 100; background: #202c33; width: 100%;">
     <div class="header-content" style="display: flex; align-items: center; gap: 12px; padding: 10px;">
         
-        <button class="btn-qr-dropis" onclick="manejarBotonIdentidad()" style="background: none; border: none; font-size: 20px; cursor: pointer; padding: 5px; order: 1;">🪪</button>
+        <button onclick="manejarBotonIdentidad()" style="background:none; border:none; color:white; font-size:22px; cursor:pointer;">←</button>
 
-        <img src="https://via.placeholder.com/40" alt="Perfil" id="foto-perfil-header" style="width:40px; height:40px; border-radius:50%; object-fit: cover; order: 2;">
+        <img src="https://via.placeholder.com/40" id="foto-perfil-header" style="width:40px; height:40px; border-radius:50%; object-fit: cover;">
         
-        <div class="user-info" style="flex: 1; order: 3;">
-            <h1 id="nombre-dueño-header" style="margin:0; font-size: 18px; color: white;">SpaceChat</h1>
-            <small class="user-status" style="color: #8696a0; display: block; font-size: 12px;">En línea</small>
+        <div style="flex: 1;">
+            <h1 id="nombre-dueño-header" style="margin:0; font-size: 17px; color: white;">SpaceChat</h1>
+            <small style="color: #8696a0; display: block; font-size: 12px;">En línea</small>
         </div>
-
     </div>
 </div>
 
-    <div id="chat-box">
-        </div>
+<div id="chat-box" style="padding: 15px; overflow-y: auto; height: calc(100vh - 120px); background: #0b141a;">
+</div>
 
     <div id="modal-registro" class="modal">
         <div class="modal-cover">
