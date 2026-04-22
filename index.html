@@ -585,16 +585,21 @@ async function ejecutarRegistroCompleto() {
 }
 
 // Función para las notificaciones que salen arriba en el cel
-function mostrarNotificacionNativa(titulo, cuerpo) {
-    if (Notification.permission === "granted") {
-        new Notification(titulo, {
-            body: cuerpo,
-            icon: 'icono_de_tu_app.png' // Si tienes uno
+// En lugar de: mostrarNotificacionNativa(...)
+// Usa esto que despierta al Service Worker:
+
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.ready.then(registration => {
+        registration.showNotification("SpaceChat: " + emisorID, {
+            body: textoReal,
+            icon: 'https://cdn-icons-png.flaticon.com/512/733/733585.png',
+            badge: 'https://cdn-icons-png.flaticon.com/512/733/733585.png', // Icono chiquito para la barra
+            vibrate: [200, 100, 200], // ¡Haz que el cel vibre!
+            tag: 'nuevo-mensaje-' + emisorID, // Evita que se amontonen mil avisos
+            renotify: true
         });
-    } else if (Notification.permission !== "denied") {
-        Notification.requestPermission();
-    }
-        }
+    });
+         }
        
         
 async function enviarMensajeSatelital() {
