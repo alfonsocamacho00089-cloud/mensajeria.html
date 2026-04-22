@@ -785,7 +785,10 @@ function cargarConversacionCon(idDestino, nombreDestino) {
     box.innerHTML = ""; 
 
     // 2. Actualizamos la interfaz (ID y Nombre arriba)
+    document.querySelector('#target-id').value = idDestino;
     
+    if(headerNombre) headerNombre.innerText = "Chateando con: " + nombreDestino;
+ 
     // 3. Buscamos los mensajes de ESE contacto en LocalStorage
     const claveChat = 'chat_' + idDestino;
     const mensajes = JSON.parse(localStorage.getItem(claveChat)) || [];
