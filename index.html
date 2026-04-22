@@ -319,13 +319,11 @@ body {
     
     
     
-
-    "text" id="target-id" placeholder="ID Satelital (Ej: 12345)" style="width:100%; padding:10px; margin:5px 0; color:#000; border-radius: 8px;">
 <div class="header">
-        <h1>SpaceChat</h1>
-        
-     <button class="btn-qr-dropis" onclick="manejarBotonIdentidad()">🪪</button>
-    </div>   
+    <h1 id="nombre-dueño-header">SpaceChat</h1>
+    
+    <button class="btn-qr-dropis" onclick="manejarBotonIdentidad()">🪪</button>
+</div>
 
     <div id="chat-box">
         </div>
@@ -786,7 +784,9 @@ function cargarConversacionCon(idDestino, nombreDestino) {
 
     // 2. Actualizamos la interfaz (ID y Nombre arriba)
     document.querySelector('#target-id').value = idDestino;
-    
+    if (document.getElementById('nombre-dueño-header')) {
+        document.getElementById('nombre-dueño-header').innerText = nombreDestino;
+    }
     
  
     // 3. Buscamos los mensajes de ESE contacto en LocalStorage
