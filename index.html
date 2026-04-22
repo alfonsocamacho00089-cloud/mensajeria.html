@@ -388,7 +388,7 @@ body {
         
         <input type="text" id="nuevo-nombre" placeholder="Nombre y Apellido..." style="width:100%; padding:10px; margin:5px 0; color:#000; border-radius: 8px;">
         
-        <input type="text" id="nuevo-id-contacto" placeholder="ID Satelital (Ej: 12345)" style="width:100%; padding:10px; margin:5px 0; color:#000; border-radius: 8px;">
+        <input type="text" id="target-id" placeholder="ID Satelital (Ej: 12345)" style="width:100%; padding:10px; margin:5px 0; color:#000; border-radius: 8px;">
 
         <div style="display: flex; flex-direction: column; gap: 5px; margin-top: 10px;">
             <button onclick="guardarNuevoContacto()" style="width: 100%; padding: 12px; background: #ffd700; border: none; border-radius: 10px; font-weight: bold; color: #000; cursor: pointer;">GUARDAR CONTACTO</button>
@@ -1077,7 +1077,7 @@ function cerrarModalNuevo() {
 // 3. Función para guardar (Estructura básica)
 function guardarNuevoContacto() {
     const nombre = document.getElementById('nuevo-nombre').value;
-    const idSatelital = document.getElementById('nuevo-id-contacto').value;
+    const idSatelital = document.getElementById('target-id').value;
 
     if (nombre.trim() === "" || idSatelital.trim() === "") {
         alert("⚠️ Pedro, completa el nombre y el ID para poder guardar.");
