@@ -27,6 +27,7 @@
     height: 100svh; 
     overflow: hidden; 
     width: 100%;
+    touch-action: none;
          }
 
 /* --- HEADER ESTILO WHATSAPP --- */
@@ -84,7 +85,8 @@
     display: flex;
     flex-direction: column; 
     gap: 10px;
-    
+    touch-action: pan-y; /* Permite scroll solo de arriba a abajo */
+    -webkit-overflow-scrolling: touch;
     background-color: #0b141a;
     background-image: linear-gradient(rgba(11, 20, 26, 0.7), rgba(11, 20, 26, 0.7)), 
                   url('./assets/logo.webp');
