@@ -1161,17 +1161,7 @@ function cerrarModalNuevo() {
     }
 }
 // Detecta cuando el teclado sube (cambio de tamaño visual)
-if (window.visualViewport) {
-    window.visualViewport.addEventListener('resize', () => {
-        document.body.style.height = window.visualViewport.height + 'px';
-        
-        // Esta línea es la que quita el espacio blanco/negro al deslizar
-        window.scrollTo(0, 0); 
-        
-        const chatBox = document.getElementById('chat-box');
-        if(chatBox) chatBox.scrollTop = chatBox.scrollHeight;
-    });
-}
+
 
 </script>
 </body>
