@@ -145,47 +145,43 @@ button#btn-enviar {
 }
     
 
-.msg-burbuja { 
+
+    .msg-burbuja { 
     max-width: 85%; 
     padding: 6px 10px; 
     border-radius: 14px; 
     font-size: 15px; 
+    min-height: auto
+    position: relative; 
+    word-wrap: break-word; 
     margin: 2px 0; 
+    /* Bajamos la sombra para que no ensucie la transparencia */
     box-shadow: 0 4px 15px rgba(0,0,0,0.2); 
+    white-space: pre-wrap;
+    /* ESTO ES CLAVE: El efecto de vidrio empañado */
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
-    
-    /* ESTO ES LO QUE BUSCAS */
+ 
+    /* ... (todo tu código anterior se queda igual) ... */
     display: flex;
-    flex-direction: row;        /* En línea, no en columna */
-    align-items: flex-end;      /* La hora se queda abajo a la derecha */
-    justify-content: space-between; 
-    gap: 10px;                  /* Espacio mínimo entre texto y hora */
-    width: fit-content;
+    flex-direction: column; /* Texto arriba, info abajo */
 }
+        
 
 .msg-info {
-    display: flex;
-    align-items: center;
-    gap: 3px;
+    align-self: flex-end; /* Empuja la hora y checks a la derecha */
     font-size: 10px;
     opacity: 0.7;
-    white-space: nowrap;        /* Evita que la hora se rompa en dos líneas */
-    flex-shrink: 0;             /* Obliga a la burbuja a estirarse para que la hora quepa */
+    margin-top: 2px;
+    margin-left: 10px; /* Separación mínima del texto */
+    display: flex;
+    align-items: center;
+    gap: 5px; /* Espacio entre hora y checks */
 }
-
-/* El texto debe poder romperse si es muy largo */
-.msg-texto-puro {
-    word-wrap: break-word;
-    word-break: break-word;
-}
-/* Limpiamos el float para que la burbuja mantenga su tamaño */
-
-
+ 
 .checks {
-    color: #4fc3f7;
-    font-size: 12px;
-}
+    color: #4fc3f7; /* Color azulito claro para el visto */
+        }
 
 /* MENSAJE ENVIADO (DERECHA) */
 .msg-derecha { 
@@ -257,7 +253,7 @@ button#btn-enviar {
 
         .msg-burbuja[data-enviado="3"]::after { content: " ✓✓"; font-size: 10px; color: #34b7f1; }
 
-        /* MODALES */
+ /* MODALES */
         /* 1. EL CONTENEDOR (Ocupa toda la pantalla) */
 /* 1. EL FONDO NEGRO DETRÁS DEL MODAL */
 .modal {
