@@ -150,38 +150,35 @@ button#btn-enviar {
     padding: 6px 10px; 
     border-radius: 14px; 
     font-size: 15px; 
-    position: relative; 
-    word-wrap: break-word; 
     margin: 2px 0; 
     box-shadow: 0 4px 15px rgba(0,0,0,0.2); 
-    white-space: pre-wrap;
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
-
-    /* CAMBIO: Eliminamos flex y usamos block */
-    display: block; 
+    
+    /* ESTO ES LO QUE BUSCAS */
+    display: flex;
+    flex-direction: row;        /* En línea, no en columna */
+    align-items: flex-end;      /* La hora se queda abajo a la derecha */
+    justify-content: space-between; 
+    gap: 10px;                  /* Espacio mínimo entre texto y hora */
     width: fit-content;
 }
 
 .msg-info {
-    /* CAMBIO: En lugar de flex-end, usamos float */
-    float: right; 
-    font-size: 10px;
-    opacity: 0.7;
-    margin-top: 5px;   /* Para que baje al nivel del texto */
-    margin-left: 10px; /* Separación para que el texto no la toque */
     display: flex;
     align-items: center;
     gap: 3px;
-    line-height: 1;
+    font-size: 10px;
+    opacity: 0.7;
+    white-space: nowrap;        /* Evita que la hora se rompa en dos líneas */
+    flex-shrink: 0;             /* Obliga a la burbuja a estirarse para que la hora quepa */
 }
 
-/* IMPORTANTE: Esto evita que la burbuja se deforme por el float */
-.msg-burbuja::after {
-    content: "";
-    display: table;
-    clear: both;
-     }
+/* El texto debe poder romperse si es muy largo */
+.msg-texto-puro {
+    word-wrap: break-word;
+    word-break: break-word;
+}
 /* Limpiamos el float para que la burbuja mantenga su tamaño */
 
 
@@ -373,10 +370,9 @@ button#btn-enviar {
 <body>
 
 <div class="msg-burbuja msg-derecha">
-    Hola, este es un mensaje de prueba que debe empujar la hora si es muy largo.
+    <div class="msg-texto-puro">Vhj</div>
     <div class="msg-info">
-        <span class="hora">12:45</span>
-        <span class="checks">✓✓</span>
+        07:01 a.m. <span class="checks">✓</span>
     </div>
 </div>
 
