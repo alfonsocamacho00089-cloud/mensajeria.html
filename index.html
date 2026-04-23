@@ -157,7 +157,8 @@ html, body {
     display: flex;
     flex-direction: column; 
     gap: 10px;
-    
+    touch-action: pan-y;
+    -webkit-overflow-scrolling: touch;
     background-color: #0b141a;
     /* Usamos el filtro de 0.6 para que se vea un poquito más la imagen pero sin tapar el texto */
     background-image: linear-gradient(rgba(11, 20, 26, 0.7), rgba(11, 20, 26, 0.7)), 
@@ -166,7 +167,7 @@ html, body {
     background-position: center;
     background-attachment: fixed;
     background-repeat: no-repeat;
-        touch-action: pan-y;
+        
          }
 /* El Chat es el único que crece y desliza */
 
