@@ -425,36 +425,18 @@ body {
 
             </div>
 
-<div class="header" id="chat-header" style="position: sticky; top: 0; z-index: 100; background: #202c33; width: 100%;">
-
-    <div class="header-content" style="display: flex; align-items: center; gap: 12px; padding: 10px;">
-
-        
-
-        <button onclick="manejarBotonIdentidad()" style="background:none; border:none; color:white; font-size:22px; cursor:pointer;">←</button>
-
-
-
-        <img src="https://via.placeholder.com/40" id="foto-perfil-header" style="width:40px; height:40px; border-radius:50%; object-fit: cover;">
-
-        
-
-        <div style="flex: 1;">
-
-            <h1 id="nombre-dueño-header" style="margin:0; font-size: 17px; color: white;">SpaceChat</h1>
-
-            <small style="color: #8696a0; display: block; font-size: 12px;">En línea</small>
-
+<div class="header" id="chat-header">
+    <div class="header-content">
+        <button onclick="manejarBotonIdentidad()" class="btn-back">←</button>
+        <img src="https://via.placeholder.com/40" id="foto-perfil-header" class="foto-perfil">
+        <div class="user-info">
+            <h1 id="nombre-dueño-header">SpaceChat</h1>
+            <small class="user-status">En línea</small>
         </div>
-
     </div>
-
 </div>
 
-
-
-<div id="chat-box" style="padding: 15px; overflow-y: auto; height: calc(100vh - 120px); background: #0b141a;">
-
+<div id="chat-box">
 </div>
     
     
