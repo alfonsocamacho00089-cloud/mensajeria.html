@@ -20,12 +20,11 @@ body {
     margin: 0; 
     display: flex; 
     flex-direction: column; 
-    height: 100dvh; 
-    overflow: hidden; 
-
-    /* AÑADE ESTO: */
-    position: fixed; 
-    width: 100%;
+    /* Cambia height por min-height para evitar saltos */
+    height: 100vh; 
+    height: 100svh; /* Usa svh (Small Viewport Height) para mejor compatibilidad */
+    overflow: hidden;
+    /* ELIMINA position: fixed de aquí */
 }
 /* --- NUEVO DISEÑO DEL HEADER ESTILO WHATSAPP --- */
 
