@@ -147,36 +147,42 @@ button#btn-enviar {
 
 
     .msg-burbuja { 
+    .msg-burbuja { 
     max-width: 85%; 
-    padding: 6px 10px; 
+    padding: 8px 12px; /* Un poco más de aire */
     border-radius: 14px; 
     font-size: 15px; 
-    min-height: auto
     position: relative; 
     word-wrap: break-word; 
     margin: 2px 0; 
-    /* Bajamos la sombra para que no ensucie la transparencia */
     box-shadow: 0 4px 15px rgba(0,0,0,0.2); 
     white-space: pre-wrap;
-    /* ESTO ES CLAVE: El efecto de vidrio empañado */
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
- 
-    /* ... (todo tu código anterior se queda igual) ... */
-    display: flex;
-    flex-direction: column; /* Texto arriba, info abajo */
+    
+    /* VOLVEMOS AL DISPLAY BLOCK PARA QUE EL TEXTO SEA FLUIDO */
+    display: block; 
+    width: fit-content;
 }
-        
 
 .msg-info {
-    align-self: flex-end; /* Empuja la hora y checks a la derecha */
+    /* FLOTAR A LA DERECHA ES LA CLAVE */
+    float: right; 
+    margin-top: 8px;   /* Para que baje al nivel de la última línea */
+    margin-left: 10px; /* Separación para que el texto no la toque */
     font-size: 10px;
     opacity: 0.7;
-    margin-top: 2px;
-    margin-left: 10px; /* Separación mínima del texto */
     display: flex;
     align-items: center;
-    gap: 5px; /* Espacio entre hora y checks */
+    gap: 3px;
+    line-height: 1;
+}
+
+/* LIMPIEZA DE FLOTADO: Para que la burbuja no se "encoja" */
+.msg-burbuja::after {
+    content: "";
+    display: table;
+    clear: both;
 }
  
 .checks {
@@ -363,15 +369,12 @@ button#btn-enviar {
 
 </head>
 
-<body>
-
 <div class="msg-burbuja msg-derecha">
     <div class="msg-texto-puro">Vhj</div>
     <div class="msg-info">
         07:01 a.m. <span class="checks">✓</span>
     </div>
 </div>
-
  
             <div id="pantalla-carga" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; display: flex; align-items: center; justify-content: center; z-index: 999999; transition: opacity 0.5s ease;">
     
