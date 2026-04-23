@@ -1199,23 +1199,24 @@ function cerrarModalNuevo() {
     }
 }
 // Detecta cuando el teclado sube (cambio de tamaño visual)
-const vh = window.visualViewport;
+if (window.visualViewport) {
 
-const refrescarPantalla = () => {
-    // 1. Forzamos la altura al tamaño real del visor (sin teclado)
-    document.body.style.height = vh.height + 'px';
-    
-    // 2. OBLIGAMOS al navegador a no desplazarse hacia arriba
-    window.scrollTo(0, 0); 
-    
-    // 3. Bajamos al último mensaje
-    const chat = document.getElementById('chat-box');
-    if (chat) chat.scrollTop = chat.scrollHeight;
-};
+    window.visualViewport.addEventListener('resize', () => {
 
-if (vh) {
-    vh.addEventListener('resize', refrescarPantalla);
-    vh.addEventListener('scroll', refrescarPantalla);
+        // Ajusta la altura del body a la altura visible real
+
+        document.body.style.height = window.visualViewport.height + 'px';
+
+        
+
+        // Hace scroll automático al final del chat para ver el último mensaje
+
+        const chatBox = document.getElementById('chat-box');
+
+        chatBox.scrollTop = chatBox.scrollHeight;
+
+    });
+
 }
 // 3. Función para guardar (Estructura básica)
 
