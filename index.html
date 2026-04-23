@@ -820,7 +820,8 @@ function cerrarModalQR() {
     document.getElementById('nuevo-nombre').value = "";
     document.getElementById('target-id').value = "";
     document.getElementById('modal-nuevocontacto').style.display = 'none';
-
+// Agrega esta línea al final para refrescar la lista sin salir
+    pintarAgendaContactos();
     // 6. ¡MUY IMPORTANTE! Refrescar la lista del modal QR
     // Si tu función para cargar la lista se llama diferente, cámbiala aquí
     if (typeof cargarContactos === "function") {
