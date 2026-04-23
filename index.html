@@ -14,20 +14,15 @@
     <script>eruda.init();</script>
     <style>
    
-body { 
-    font-family: sans-serif; 
-    background: #000000; 
-    margin: 0; 
-    padding: 0;
-    width: 100vw;
-    /* IMPORTANTE: Altura dinámica en sVH (Small Viewport Height) para mayor estabilidad */
-    height: 100vh;
-    height: 100svh;
-    
-    /* El body ya NO hace scroll */
-    overflow: hidden; 
-    
-    /* Para que el header/chat/input se apilen */
+html, body {
+    /* Esto evita que el navegador desplace la "hoja" entera hacia arriba */
+    position: fixed; 
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    overflow: hidden; /* Nadie hace scroll aquí, solo el chat-box */
     display: flex;
     flex-direction: column;
 }
@@ -1207,14 +1202,18 @@ function cerrarModalNuevo() {
 // Detecta cuando el teclado sube (cambio de tamaño visual)
 if (window.visualViewport) {
     window.visualViewport.addEventListener('resize', () => {
-        // Ajusta la altura del body a la altura visible real
+        // 1. Ajusta la altura (Lo que ya tenías)
         document.body.style.height = window.visualViewport.height + 'px';
         
-        // Hace scroll automático al final del chat para ver el último mensaje
+        // 2. ¡ESTA ES LA CLAVE! Fuerza al navegador a volver al tope
+        // Evita que el "fantasma" del scroll del sistema suba el header
+        window.scrollTo(0, 0); 
+        
+        // 3. Scroll al último mensaje (Lo que ya tenías)
         const chatBox = document.getElementById('chat-box');
-        chatBox.scrollTop = chatBox.scrollHeight;
+        if(chatBox) chatBox.scrollTop = chatBox.scrollHeight;
     });
-     }
+}
 // 3. Función para guardar (Estructura básica)
 
 </script>
