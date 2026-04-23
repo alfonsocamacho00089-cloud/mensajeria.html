@@ -1163,7 +1163,34 @@ function cerrarModalNuevo() {
     }
 }
 // Detecta cuando el teclado sube (cambio de tamaño visual)
+if (window.visualViewport) {
+    const viewport = window.visualViewport;
 
+    const ajustarTotal = () => {
+        // 1. Ajusta la altura (Lo que ya tienes y te funciona)
+        document.body.style.height = viewport.height + 'px';
+
+        // 2. LA MAGIA: Bloquea el desplazamiento fantasma hacia arriba
+        // Esto elimina el espacio blanco que ves en tu captura
+        window.scrollTo(0, 0);
+
+        // 3. Scroll al final del chat
+        const chatBox = document.getElementById('chat-box');
+        if (chatBox) chatBox.scrollTop = chatBox.scrollHeight;
+    };
+
+    // Escuchamos el cambio de tamaño Y el intento de scroll del navegador
+    viewport.addEventListener('resize', ajustarTotal);
+    viewport.addEventListener('scroll', ajustarTotal);
+}
+
+// Bloqueo extra por si intentas "arrastrar" el dedo en el input
+document.addEventListener('touchmove', (e) => {
+    // Si el usuario intenta arrastrar algo que NO sea el chat-box, lo bloqueamos
+    if (!e.target.closest('#chat-box')) {
+        e.preventDefault();
+    }
+}, { passive: false });
 
 </script>
 </body>
