@@ -17,19 +17,18 @@
 
 
 
-         .body { 
+         body { 
     font-family: sans-serif; 
     background: #000000; 
     margin: 0; 
     display: flex; 
     flex-direction: column; 
-    /* Cambiamos esto para que el JS controle la altura real */
+    /* Usamos 100% para que el script de JS controle la altura real */
     height: 100%; 
     width: 100%;
     overflow: hidden; 
-    position: fixed; /* Evita que el body rebote */
-}
-
+    position: fixed; /* Evita que el navegador desplace la página entera */
+         }
 /* Asegúrate de que el html también ocupe todo */
 html {
     height: 100%;
@@ -1172,37 +1171,24 @@ function cerrarModalNuevo() {
 if (window.visualViewport) {
     const viewport = window.visualViewport;
 
-    const ajustarTotal = () => {
-        // Ajustamos la altura del body exactamente a lo que se ve
+    const ajustarInterfaz = () => {
+        // Ajustamos la altura del body al tamaño visible real
         document.body.style.height = `${viewport.height}px`;
         
-        // Forzamos el scroll a 0 para que el header no se pierda arriba
+        // ESTA ES LA CLAVE: Forzamos el scroll del navegador a 0
+        // Esto evita que el sistema "empuje" el header hacia arriba
         window.scrollTo(0, 0);
 
-        // Scroll al último mensaje
+        // Si el teclado se abre, llevamos el chat al final
         const chatBox = document.getElementById('chat-box');
         if (chatBox) {
             chatBox.scrollTop = chatBox.scrollHeight;
         }
     };
 
-    // 'resize' detecta cuando sale/entra el teclado
-    viewport.addEventListener('resize', ajustarTotal);
-    // 'scroll' en el viewport detecta cuando el navegador intenta subir el header
-    viewport.addEventListener('scroll', () => {
-        if (window.scrollY !== 0) {
-            window.scrollTo(0, 0);
-        }
-    });
+    viewport.addEventListener('resize', ajustarInterfaz);
+    viewport.addEventListener('scroll', ajustarInterfaz);
 }
-
-// Corregimos el touchmove: Solo permitir scroll en el chat-box
-document.addEventListener('touchmove', (e) => {
-    const isChatBox = e.target.closest('#chat-box');
-    if (!isChatBox) {
-        e.preventDefault();
-    }
-}, { passive: false });
 
 </script>
 </body>
