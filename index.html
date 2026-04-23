@@ -160,22 +160,25 @@ button#btn-enviar {
     -webkit-backdrop-filter: blur(10px);
  
     /* ... (todo tu código anterior se queda igual) ... */
-    display: flex;
+    display: block;
     flex-direction: column; /* Texto arriba, info abajo */
 }
         
 
 .msg-info {
-    align-self: flex-end; /* Empuja la hora y checks a la derecha */
-    font-size: 10px;
-    opacity: 0.7;
-    margin-top: 2px;
-    margin-left: 10px; /* Separación mínima del texto */
-    display: flex;
+    float: right;            /* Flota a la derecha del texto */
+    margin: 8px -2px -2px 8px; /* Lo pega a la esquina inferior derecha */
+    position: relative;      /* Evita que se solape con el texto */
+    display: inline-flex;    /* Mantiene hora y checks en una sola línea */
     align-items: center;
-    gap: 5px; /* Espacio entre hora y checks */
 }
- 
+
+     /* Esto obliga a la burbuja a estirarse para envolver la hora que flota */
+.msg-burbuja::after {
+    content: "";
+    display: table;
+    clear: both;
+}
 .checks {
     color: #4fc3f7; /* Color azulito claro para el visto */
         }
