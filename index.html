@@ -138,11 +138,13 @@ body {
     gap: 10px; 
     border-top: 1px solid #333; 
     
-    /* ESTO ES IMPORTANTE: */
-    flex-shrink: 0; 
-    position: relative; /* O fixed si ves que se mueve mucho */
-    z-index: 10;
-    padding-bottom: env(safe-area-inset-bottom, 15px); /* Para el espacio de la barrita de iPhone/Android */
+    /* CAMBIO CLAVE AQUÍ: */
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    box-sizing: border-box;
+    z-index: 1000;
         }
 
         input#target-id { width: 60px; background: #000; color: #ffd700; border: 1px solid #333; border-radius: 8px; text-align: center; }
