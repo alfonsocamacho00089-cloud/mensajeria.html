@@ -179,15 +179,17 @@ button#btn-enviar {
 
     /* ... (todo tu código anterior se queda igual) ... */
 
-    display: flex;
+    
 
     flex-direction: column; /* Texto arriba, info abajo */
-
+    display: inline-block;  /* 1. Evita que la burbuja ocupe todo el ancho */
+    width: auto;            /* 2. Se ajusta al contenido */
+    min-width: 60px;        /* 3. Espacio mínimo para que quepa la hora */
+    vertical-align: top;    /* 4. Alineación correcta */
 }
 
-        
 
-
+   
 
 .msg-info {
 
@@ -196,17 +198,18 @@ button#btn-enviar {
     font-size: 10px;
 
     opacity: 0.7;
-
-    margin-top: 2px;
+    float: right;         /* CAMBIO: Empuja la hora a la derecha del texto */
+    margin: 8px -2px -2px 10px;
+    
 
     margin-left: 10px; /* Separación mínima del texto */
 
     display: flex;
-
     align-items: center;
 
     gap: 5px; /* Espacio entre hora y checks */
 
+    
 }
 
 
