@@ -23,12 +23,18 @@
     margin: 0; 
     display: flex; 
     flex-direction: column; 
-    height: 100vh; 
-    height: 100svh; 
-    overflow: hidden; 
+    /* Cambiamos esto para que el JS controle la altura real */
+    height: 100%; 
     width: 100%;
-    touch-action: none;
-         }
+    overflow: hidden; 
+    position: fixed; /* Evita que el body rebote */
+}
+
+/* Asegúrate de que el html también ocupe todo */
+html {
+    height: 100%;
+    overflow: hidden;
+}
 
 /* --- HEADER ESTILO WHATSAPP --- */
 .header { 
@@ -1167,27 +1173,33 @@ if (window.visualViewport) {
     const viewport = window.visualViewport;
 
     const ajustarTotal = () => {
-        // 1. Ajusta la altura (Lo que ya tienes y te funciona)
-        document.body.style.height = viewport.height + 'px';
-
-        // 2. LA MAGIA: Bloquea el desplazamiento fantasma hacia arriba
-        // Esto elimina el espacio blanco que ves en tu captura
+        // Ajustamos la altura del body exactamente a lo que se ve
+        document.body.style.height = `${viewport.height}px`;
+        
+        // Forzamos el scroll a 0 para que el header no se pierda arriba
         window.scrollTo(0, 0);
 
-        // 3. Scroll al final del chat
+        // Scroll al último mensaje
         const chatBox = document.getElementById('chat-box');
-        if (chatBox) chatBox.scrollTop = chatBox.scrollHeight;
+        if (chatBox) {
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
     };
 
-    // Escuchamos el cambio de tamaño Y el intento de scroll del navegador
+    // 'resize' detecta cuando sale/entra el teclado
     viewport.addEventListener('resize', ajustarTotal);
-    viewport.addEventListener('scroll', ajustarTotal);
+    // 'scroll' en el viewport detecta cuando el navegador intenta subir el header
+    viewport.addEventListener('scroll', () => {
+        if (window.scrollY !== 0) {
+            window.scrollTo(0, 0);
+        }
+    });
 }
 
-// Bloqueo extra por si intentas "arrastrar" el dedo en el input
+// Corregimos el touchmove: Solo permitir scroll en el chat-box
 document.addEventListener('touchmove', (e) => {
-    // Si el usuario intenta arrastrar algo que NO sea el chat-box, lo bloqueamos
-    if (!e.target.closest('#chat-box')) {
+    const isChatBox = e.target.closest('#chat-box');
+    if (!isChatBox) {
         e.preventDefault();
     }
 }, { passive: false });
