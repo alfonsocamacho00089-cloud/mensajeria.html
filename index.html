@@ -146,76 +146,47 @@ button#btn-enviar {
     
 
 .msg-burbuja { 
-
     max-width: 85%; 
-
     padding: 6px 10px; 
-
     border-radius: 14px; 
-
     font-size: 15px; 
-
-    min-height: auto;
-
     position: relative; 
-
     word-wrap: break-word; 
-
     margin: 2px 0; 
-
-    /* Bajamos la sombra para que no ensucie la transparencia */
-
     box-shadow: 0 4px 15px rgba(0,0,0,0.2); 
-
     white-space: pre-wrap;
-
-    /* ESTO ES CLAVE: El efecto de vidrio empañado */
-
     backdrop-filter: blur(10px);
-
     -webkit-backdrop-filter: blur(10px);
-
- 
-
-    /* ... (todo tu código anterior se queda igual) ... */
-
-    
-
-    
-    display: inline-block;  /* 1. Evita que la burbuja ocupe todo el ancho */
-    width: auto;            /* 2. Se ajusta al contenido */
-    min-width: 60px;        /* 3. Espacio mínimo para que quepa la hora */
-    vertical-align: top;    /* 4. Alineación correcta */
+    /* ELIMINAMOS FLEXBOX AQUÍ PARA QUE EL TEXTO FLUYA */
+    display: block; 
 }
 
-
-   
-
+/* Esta es la clave: la info flota a la derecha */
 .msg-info {
-
-    float: right;/* Empuja la hora y checks a la derecha */
-
+    float: right; 
     font-size: 10px;
-
     opacity: 0.7;
-    float: right;         
-    margin: 8px -2px -2px 10px;
-    
-
-    margin-left: 10px; /* Separación mínima del texto */
-
+    margin-top: 5px;   /* Ajuste para que baje un poco */
+    margin-left: 8px;  /* Espacio entre el texto y la hora */
     display: flex;
     align-items: center;
-
-    gap: 5px; /* Espacio entre hora y checks */
-
-    
+    gap: 3px;
+    line-height: 1;    /* Para que no estire la línea hacia arriba */
+    position: relative;
+    bottom: -2px;      /* Alineación fina con la base del texto */
 }
 
+/* Limpiamos el float para que la burbuja mantenga su tamaño */
+.msg-burbuja::after {
+    content: "";
+    display: table;
+    clear: both;
+}
 
 .checks {
-    color: #4fc3f7; /* Color azulito claro para el visto */
-        }
+    color: #4fc3f7;
+    font-size: 12px;
+}
 
 /* MENSAJE ENVIADO (DERECHA) */
 .msg-derecha { 
@@ -398,6 +369,16 @@ button#btn-enviar {
 </head>
 
 <body>
+
+<div class="msg-burbuja msg-derecha">
+    Hola, este es un mensaje de prueba que debe empujar la hora si es muy largo.
+    <div class="msg-info">
+        <span class="hora">12:45</span>
+        <span class="checks">✓✓</span>
+    </div>
+</div>
+
+ 
             <div id="pantalla-carga" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; display: flex; align-items: center; justify-content: center; z-index: 999999; transition: opacity 0.5s ease;">
     
     <img src="assets/logo-final.png" alt="Logo ChatSpace" style="width: 150px; height: auto; display: block;">
