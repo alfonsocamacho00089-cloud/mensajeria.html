@@ -123,17 +123,24 @@ body {
         /* INPUT AREA CORREGIDA (Siempre visible al fondo) */
 
           .input-area { 
-            background: #1a1a1a; 
-            padding: 10px; 
-            display: flex; 
-            gap: 10px; 
-            border-top: 1px solid #333; 
-            flex-shrink: 0; /* Evita que se vaya muy abajo */
-            padding-bottom: 20px; /* Espacio para botones de navegación del móvil */
-            position: sticky;
-            bottom: 0;
-            background: #1a1a1a;
-          
+    background: #1a1a1a; 
+    padding: 10px; 
+    display: flex; 
+    gap: 10px; 
+    border-top: 1px solid #333; 
+    width: 100%;
+    box-sizing: border-box;
+
+    /* --- ESTO ES LO MÁS IMPORTANTE --- */
+    /* Borramos: position: fixed; */
+    /* Borramos: bottom: 0; */
+    /* Borramos: left: 0; */
+    
+    /* El input-area se queda como el último elemento del flex-container */
+    z-index: 1000;
+
+    /* Para móviles con barra de gestos inferior (como iPhone o Android modernos) */
+    padding-bottom: max(10px, env(safe-area-inset-bottom));
           }
      
         input#target-id { width: 60px; background: #000; color: #ffd700; border: 1px solid #333; border-radius: 8px; text-align: center; }
