@@ -24,6 +24,7 @@ html, body {
     overflow: hidden;
     display: flex;
     flex-direction: column;
+    touch-action: none;
 }
 /* --- NUEVO DISEÑO DEL HEADER ESTILO WHATSAPP --- */
 
@@ -38,6 +39,7 @@ html, body {
     flex-shrink: 0; 
     height: 60px;
     border-bottom: 1px solid #333; /* Una línea gris muy sutil para separar del chat */
+    touch-action: none;
 }
 
 .header-content {
@@ -135,6 +137,7 @@ html, body {
 
     /* Para móviles con barra de gestos inferior (como iPhone o Android modernos) */
     padding-bottom: max(10px, env(safe-area-inset-bottom));
+         touch-action: none;
           }
      
         input#target-id { width: 60px; background: #000; color: #ffd700; border: 1px solid #333; border-radius: 8px; text-align: center; }
@@ -163,6 +166,7 @@ html, body {
     background-position: center;
     background-attachment: fixed;
     background-repeat: no-repeat;
+        touch-action: pan-y;
          }
 /* El Chat es el único que crece y desliza */
 
