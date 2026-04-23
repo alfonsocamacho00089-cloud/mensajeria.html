@@ -15,21 +15,16 @@
     <style>
    
 body { 
-
     font-family: sans-serif; 
-
     background: #000000; 
-
     margin: 0; 
-
     display: flex; 
-
     flex-direction: column; 
-
-    height: 100dvh; /* Altura dinámica para móviles */
-
-    overflow: hidden; /* Evita el scroll de toda la pantalla */
-
+    height: 100dvh;
+    overflow: hidden;
+    /* AÑADE ESTO: */
+    position: fixed;
+    width: 100%;
 }
 
 
@@ -46,31 +41,21 @@ body {
 
 
 .header {
-
-    background: #202c33; /* Color de fondo oscuro de WhatsApp */
-
-    color: white; /* Texto blanco */
-
-    padding: 10px 16px; /* Espaciado interno */
-
-    position: sticky; /* Se queda arriba al hacer scroll */
-
+    background: #202c33;
+    color: white;
+    padding: 10px 16px;
+    /* CAMBIO AQUÍ: */
+    position: fixed; 
     top: 0;
-
+    left: 0;
+    /* ------------ */
     z-index: 1000;
-
-    height: 60px; /* Altura fija para el header */
-
+    height: 60px;
     display: flex;
-
     align-items: center;
-
-    border-bottom: 1px solid #303e46; /* Pequeña línea divisoria */
-
-    width: 100%; /* Ocupa todo el ancho */
-
+    border-bottom: 1px solid #303e46;
+    width: 100%;
     box-sizing: border-box;
-
 }
 
 
@@ -175,7 +160,7 @@ body {
 
             flex-shrink: 0; /* Evita que se vaya muy abajo */
 
-            padding-bottom: 20px; /* Espacio para botones de navegación del móvil */
+            padding-bottom: 10px; /* Espacio para botones de navegación del móvil */
 
         }
 
@@ -190,39 +175,24 @@ body {
         button#btn-enviar { background: #ffd700; border: none; padding: 10px 20px; border-radius: 20px; font-weight: bold; cursor: pointer; color: black; }
 
         #chat-box {
-
     flex: 1;
-
     overflow-y: auto;
-
     padding: 20px;
-
     display: flex;
-
     flex-direction: column; 
-
     gap: 10px;
-
     
-
-    
+    /* CAMBIO AQUÍ: */
+    margin-top: 60px; /* La altura de tu header */
+    /* ------------- */
 
     background-color: #0b141a;
-
-    /* Usamos el filtro de 0.6 para que se vea un poquito más la imagen pero sin tapar el texto */
-
     background-image: linear-gradient(rgba(11, 20, 26, 0.7), rgba(11, 20, 26, 0.7)), 
-
                   url('./assets/logo.webp');
-
     background-size: cover;
-
     background-position: center;
-
     background-attachment: fixed;
-
     background-repeat: no-repeat;
-
         }
 /* El Chat es el único que crece y desliza */
 
