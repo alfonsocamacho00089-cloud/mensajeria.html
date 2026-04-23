@@ -157,25 +157,31 @@ button#btn-enviar {
     white-space: pre-wrap;
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
-    /* ELIMINAMOS FLEXBOX AQUÍ PARA QUE EL TEXTO FLUYA */
+
+    /* CAMBIO: Eliminamos flex y usamos block */
     display: block; 
+    width: fit-content;
 }
 
-/* Esta es la clave: la info flota a la derecha */
 .msg-info {
+    /* CAMBIO: En lugar de flex-end, usamos float */
     float: right; 
     font-size: 10px;
     opacity: 0.7;
-    margin-top: 5px;   /* Ajuste para que baje un poco */
-    margin-left: 8px;  /* Espacio entre el texto y la hora */
+    margin-top: 5px;   /* Para que baje al nivel del texto */
+    margin-left: 10px; /* Separación para que el texto no la toque */
     display: flex;
     align-items: center;
     gap: 3px;
-    line-height: 1;    /* Para que no estire la línea hacia arriba */
-    position: relative;
-    bottom: -2px;      /* Alineación fina con la base del texto */
+    line-height: 1;
 }
 
+/* IMPORTANTE: Esto evita que la burbuja se deforme por el float */
+.msg-burbuja::after {
+    content: "";
+    display: table;
+    clear: both;
+     }
 /* Limpiamos el float para que la burbuja mantenga su tamaño */
 
 
