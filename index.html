@@ -21,7 +21,7 @@
     -webkit-tap-highlight-color: transparent;
 }
 
-         .body { 
+         body { 
     font-family: sans-serif; 
     background: #000000; 
     margin: 0; 
@@ -1172,29 +1172,30 @@ function cerrarModalNuevo() {
 }
 // Detecta cuando el teclado sube (cambio de tamaño visual)
 if (window.visualViewport) {
-    const viewport = window.visualViewport;
+    const vv = window.visualViewport;
 
     const ajustarInterfaz = () => {
-    const vv = window.visualViewport;
-    
-    // 1. Forzamos la altura exacta
-    document.body.style.height = `${vv.height}px`;
+        // 1. Forzamos la altura exacta
+        document.body.style.height = `${vv.height}px`;
 
-    // 2. IMPORTANTE: Si el offsetTop es mayor a 0, significa que 
-    // el navegador desplazó la página. Lo corregimos moviendo el body.
-    document.body.style.top = `${vv.offsetTop}px`;
+        // 2. Corregimos el desplazamiento del body
+        document.body.style.top = `${vv.offsetTop}px`;
 
-    window.scrollTo(0, 0);
+        window.scrollTo(0, 0);
 
-    const chatBox = document.getElementById('chat-box');
-    if (chatBox) {
-        // Usamos requestAnimationFrame para asegurar que el DOM ya cambió de tamaño
-        requestAnimationFrame(() => {
-            chatBox.scrollTop = chatBox.scrollHeight;
-        });
-    }
-};
+        const chatBox = document.getElementById('chat-box');
+        if (chatBox) {
+            requestAnimationFrame(() => {
+                chatBox.scrollTop = chatBox.scrollHeight;
+            });
+        }
+    };
 
+    // Faltaban estas líneas y cerrar las llaves:
+    vv.addEventListener('resize', ajustarInterfaz);
+    vv.addEventListener('scroll', ajustarInterfaz);
+    ajustarInterfaz(); // Ejecución inicial
+} // <--- Aquí se cierra el IF
 </script>
 </body>
 </html>
