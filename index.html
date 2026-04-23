@@ -24,8 +24,12 @@
     display: flex; 
     flex-direction: column; 
     /* Usamos 100% para que el script de JS controle la altura real */
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
     height: 100%; 
-    width: 100%;
+    
     overflow: hidden; 
     position: fixed; /* Evita que el navegador desplace la página entera */
          }
@@ -85,6 +89,7 @@ html {
 /* --- ÁREA DE CHAT --- */
 #chat-box {
     flex: 1;
+    flex-shrink: 1;
     overflow-y: auto;
     padding: 20px;
     display: flex;
@@ -110,6 +115,7 @@ html {
     border-top: 1px solid #333; 
     flex-shrink: 0; 
     padding-bottom: max(10px, env(safe-area-inset-bottom)); 
+    box-sizing: border-box;
 }
 
 input#target-id { 
