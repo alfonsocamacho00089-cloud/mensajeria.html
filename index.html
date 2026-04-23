@@ -17,20 +17,17 @@
 
 
 
-         html, body {
-    /* Evita el rebote elástico en iOS y scrolls fantasmas */
-    height: 100%;
-    overflow: hidden; 
-    position: fixed; /* Truco para "congelar" la pantalla externa */
-    width: 100%;
-}
-
-.body { 
+         .body { 
+    font-family: sans-serif; 
+    background: #000000; 
+    margin: 0; 
     display: flex; 
     flex-direction: column; 
-    height: 100svh; /* Usa siempre svh para evitar saltos */
-    width: 100vw;
-}
+    height: 100vh; 
+    height: 100svh; 
+    overflow: hidden; 
+    width: 100%;
+         }
 
 /* --- HEADER ESTILO WHATSAPP --- */
 .header { 
