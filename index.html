@@ -1,6 +1,7 @@
  <!DOCTYPE html>
 <html lang="es">
 <head>
+ 
  <link rel="manifest" href="manifest.json">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
@@ -15,7 +16,10 @@
     <style>
    
 
-
+* {
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+}
 
          body { 
     font-family: sans-serif; 
@@ -23,21 +27,14 @@
     margin: 0; 
     display: flex; 
     flex-direction: column; 
-    /* Usamos 100% para que el script de JS controle la altura real */
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    height: 100%; 
-    
+    /* Eliminamos top, left, right, bottom y height fijo */
+    width: 100vw;
     overflow: hidden; 
-    position: fixed; /* Evita que el navegador desplace la página entera */
+    position: fixed; 
+    /* Esto es vital para que el inicio sea siempre arriba */
+    top: 0; 
+    left: 0;
          }
-/* Asegúrate de que el html también ocupe todo */
-html {
-    height: 100%;
-    overflow: hidden;
-}
 
 /* --- HEADER ESTILO WHATSAPP --- */
 .header { 
@@ -1178,23 +1175,25 @@ if (window.visualViewport) {
     const viewport = window.visualViewport;
 
     const ajustarInterfaz = () => {
-        // Ajustamos la altura del body al tamaño visible real
-        document.body.style.height = `${viewport.height}px`;
-        
-        // ESTA ES LA CLAVE: Forzamos el scroll del navegador a 0
-        // Esto evita que el sistema "empuje" el header hacia arriba
-        window.scrollTo(0, 0);
+    const vv = window.visualViewport;
+    
+    // 1. Forzamos la altura exacta
+    document.body.style.height = `${vv.height}px`;
 
-        // Si el teclado se abre, llevamos el chat al final
-        const chatBox = document.getElementById('chat-box');
-        if (chatBox) {
+    // 2. IMPORTANTE: Si el offsetTop es mayor a 0, significa que 
+    // el navegador desplazó la página. Lo corregimos moviendo el body.
+    document.body.style.top = `${vv.offsetTop}px`;
+
+    window.scrollTo(0, 0);
+
+    const chatBox = document.getElementById('chat-box');
+    if (chatBox) {
+        // Usamos requestAnimationFrame para asegurar que el DOM ya cambió de tamaño
+        requestAnimationFrame(() => {
             chatBox.scrollTop = chatBox.scrollHeight;
-        }
-    };
-
-    viewport.addEventListener('resize', ajustarInterfaz);
-    viewport.addEventListener('scroll', ajustarInterfaz);
-}
+        });
+    }
+};
 
 </script>
 </body>
