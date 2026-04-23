@@ -15,14 +15,13 @@
     <style>
    
 html, body {
-    /* Esto evita que el navegador desplace la "hoja" entera hacia arriba */
-    position: fixed; 
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
+    margin: 0;
+    padding: 0;
     width: 100%;
-    overflow: hidden; /* Nadie hace scroll aquí, solo el chat-box */
+    height: 100%;
+    /* ESTO EVITA QUE LA PANTALLA "SUBA" COMO UNA PERSIANA */
+    position: fixed; 
+    overflow: hidden;
     display: flex;
     flex-direction: column;
 }
@@ -1200,19 +1199,23 @@ function cerrarModalNuevo() {
     }
 }
 // Detecta cuando el teclado sube (cambio de tamaño visual)
-if (window.visualViewport) {
-    window.visualViewport.addEventListener('resize', () => {
-        // 1. Ajusta la altura (Lo que ya tenías)
-        document.body.style.height = window.visualViewport.height + 'px';
-        
-        // 2. ¡ESTA ES LA CLAVE! Fuerza al navegador a volver al tope
-        // Evita que el "fantasma" del scroll del sistema suba el header
-        window.scrollTo(0, 0); 
-        
-        // 3. Scroll al último mensaje (Lo que ya tenías)
-        const chatBox = document.getElementById('chat-box');
-        if(chatBox) chatBox.scrollTop = chatBox.scrollHeight;
-    });
+const vh = window.visualViewport;
+
+const refrescarPantalla = () => {
+    // 1. Forzamos la altura al tamaño real del visor (sin teclado)
+    document.body.style.height = vh.height + 'px';
+    
+    // 2. OBLIGAMOS al navegador a no desplazarse hacia arriba
+    window.scrollTo(0, 0); 
+    
+    // 3. Bajamos al último mensaje
+    const chat = document.getElementById('chat-box');
+    if (chat) chat.scrollTop = chat.scrollHeight;
+};
+
+if (vh) {
+    vh.addEventListener('resize', refrescarPantalla);
+    vh.addEventListener('scroll', refrescarPantalla);
 }
 // 3. Función para guardar (Estructura básica)
 
