@@ -17,16 +17,19 @@
 
 
 
-         .body { 
-    font-family: sans-serif; 
-    background: #000000; 
-    margin: 0; 
+         html, body {
+    /* Evita el rebote elástico en iOS y scrolls fantasmas */
+    height: 100%;
+    overflow: hidden; 
+    position: fixed; /* Truco para "congelar" la pantalla externa */
+    width: 100%;
+}
+
+.body { 
     display: flex; 
     flex-direction: column; 
-    height: 100vh; 
-    height: 100svh; 
-    overflow: hidden; 
-    width: 100%;
+    height: 100svh; /* Usa siempre svh para evitar saltos */
+    width: 100vw;
 }
 
 /* --- HEADER ESTILO WHATSAPP --- */
@@ -84,6 +87,7 @@
     display: flex;
     flex-direction: column; 
     gap: 10px;
+    -webkit-overflow-scrolling: touch;
     background-color: #0b141a;
     background-image: linear-gradient(rgba(11, 20, 26, 0.7), rgba(11, 20, 26, 0.7)), 
                   url('./assets/logo.webp');
