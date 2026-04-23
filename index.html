@@ -18,13 +18,18 @@ body {
     font-family: sans-serif; 
     background: #000000; 
     margin: 0; 
-    display: flex; 
-    flex-direction: column; 
-    /* Cambia height por min-height para evitar saltos */
-    height: 100vh; 
-    height: 100svh; /* Usa svh (Small Viewport Height) para mejor compatibilidad */
-    overflow: hidden;
-    /* ELIMINA position: fixed de aquí */
+    padding: 0;
+    width: 100vw;
+    /* IMPORTANTE: Altura dinámica en sVH (Small Viewport Height) para mayor estabilidad */
+    height: 100vh;
+    height: 100svh;
+    
+    /* El body ya NO hace scroll */
+    overflow: hidden; 
+    
+    /* Para que el header/chat/input se apilen */
+    display: flex;
+    flex-direction: column;
 }
 /* --- NUEVO DISEÑO DEL HEADER ESTILO WHATSAPP --- */
 
