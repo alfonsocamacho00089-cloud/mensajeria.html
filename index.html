@@ -1187,30 +1187,17 @@ function cerrarModalNuevo() {
     }
 }
 // Detecta cuando el teclado sube (cambio de tamaño visual)
-const v = window.visualViewport;
-
-function ajustar() {
-    // Forzamos el tamaño al viewport visible
-    document.body.style.height = v.height + 'px';
-    
-    // Si el navegador intentó subir (dejando el espacio blanco), lo bajamos a la fuerza
-    if (window.scrollY !== 0) {
-        window.scrollTo(0, 0);
-    }
-
-    const chat = document.getElementById('chat-box');
-    if (chat) chat.scrollTop = chat.scrollHeight;
-}
-
-if (v) {
-    v.addEventListener('resize', ajustar);
-    v.addEventListener('scroll', ajustar);
-}
-
-// Bloqueo total de cualquier intento de scroll en el documento
-document.addEventListener('scroll', (e) => {
-    window.scrollTo(0, 0);
-}, { passive: false });
+if (window.visualViewport) {
+    window.visualViewport.addEventListener('resize', () => {
+        document.body.style.height = window.visualViewport.height + 'px';
+        
+        // Esta línea es la que quita el espacio blanco/negro al deslizar
+        window.scrollTo(0, 0); 
+        
+        const chatBox = document.getElementById('chat-box');
+        if(chatBox) chatBox.scrollTop = chatBox.scrollHeight;
+    });
+}passive: false });
 
 </script>
 </body>
