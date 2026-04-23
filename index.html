@@ -143,32 +143,75 @@ button#btn-enviar {
     cursor: pointer; 
     color: black; 
 }
-    .msg-burbuja { 
-    width: fit-content;      /* IMPORTANTE: Hace que la burbuja sea del tamaño del texto */
+    
+
+.msg-burbuja { 
+
     max-width: 85%; 
-    padding: 8px 10px; 
+
+    padding: 6px 10px; 
+
     border-radius: 14px; 
+
     font-size: 15px; 
-    position: relative;      /* Asegúrate de que tenga el ; al final */
+
+    min-height: auto
+
+    position: relative; 
+
     word-wrap: break-word; 
-    margin: 4px 0; 
+
+    margin: 2px 0; 
+
+    /* Bajamos la sombra para que no ensucie la transparencia */
+
     box-shadow: 0 4px 15px rgba(0,0,0,0.2); 
+
     white-space: pre-wrap;
+
+    /* ESTO ES CLAVE: El efecto de vidrio empañado */
+
     backdrop-filter: blur(10px);
+
     -webkit-backdrop-filter: blur(10px);
-    display: block;          /* Mantiene el flujo para que la hora flote */
+
+ 
+
+    /* ... (todo tu código anterior se queda igual) ... */
+
+    display: flex;
+
+    flex-direction: column; /* Texto arriba, info abajo */
+
 }
 
+        
+
+
+
 .msg-info {
-    float: right; 
-    margin: 10px 0 -2px 15px; /* Más margen a la izquierda para que no toque las letras */
+
+    align-self: flex-end; /* Empuja la hora y checks a la derecha */
+
     font-size: 10px;
+
     opacity: 0.7;
+
+    margin-top: 2px;
+
+    margin-left: 10px; /* Separación mínima del texto */
+
     display: flex;
+
     align-items: center;
-    gap: 4px;
-    line-height: 1;
+
+    gap: 5px; /* Espacio entre hora y checks */
+
 }
+
+ 
+
+     
 
 /* El limpiador de floats (mantenlo igual) */
 .msg-burbuja::after {
