@@ -1204,7 +1204,17 @@ function cerrarModalNuevo() {
         }
     }
 }
-
+// Detecta cuando el teclado sube (cambio de tamaño visual)
+if (window.visualViewport) {
+    window.visualViewport.addEventListener('resize', () => {
+        // Ajusta la altura del body a la altura visible real
+        document.body.style.height = window.visualViewport.height + 'px';
+        
+        // Hace scroll automático al final del chat para ver el último mensaje
+        const chatBox = document.getElementById('chat-box');
+        chatBox.scrollTop = chatBox.scrollHeight;
+    });
+     }
 // 3. Función para guardar (Estructura básica)
 
 </script>
