@@ -1203,35 +1203,30 @@ function cerrarModalNuevo() {
     }
 }
 // Detecta cuando el teclado sube (cambio de tamaño visual)
-if (window.visualViewport) {
-    const viewport = window.visualViewport;
+const v = window.visualViewport;
 
-    const ajustarTotal = () => {
-        // 1. Ajusta la altura (Lo que ya tienes y te funciona)
-        document.body.style.height = viewport.height + 'px';
-
-        // 2. LA MAGIA: Bloquea el desplazamiento fantasma hacia arriba
-        // Esto elimina el espacio blanco que ves en tu captura
+function ajustar() {
+    // Forzamos el tamaño al viewport visible
+    document.body.style.height = v.height + 'px';
+    
+    // Si el navegador intentó subir (dejando el espacio blanco), lo bajamos a la fuerza
+    if (window.scrollY !== 0) {
         window.scrollTo(0, 0);
+    }
 
-        // 3. Scroll al final del chat
-        const chatBox = document.getElementById('chat-box');
-        if (chatBox) chatBox.scrollTop = chatBox.scrollHeight;
-    };
-
-    // Escuchamos el cambio de tamaño Y el intento de scroll del navegador
-    viewport.addEventListener('resize', ajustarTotal);
-    viewport.addEventListener('scroll', ajustarTotal);
+    const chat = document.getElementById('chat-box');
+    if (chat) chat.scrollTop = chat.scrollHeight;
 }
 
-// Bloqueo extra por si intentas "arrastrar" el dedo en el input
-document.addEventListener('touchmove', (e) => {
-    // Si el usuario intenta arrastrar algo que NO sea el chat-box, lo bloqueamos
-    if (!e.target.closest('#chat-box')) {
-        e.preventDefault();
-    }
+if (v) {
+    v.addEventListener('resize', ajustar);
+    v.addEventListener('scroll', ajustar);
+}
+
+// Bloqueo total de cualquier intento de scroll en el documento
+document.addEventListener('scroll', (e) => {
+    window.scrollTo(0, 0);
 }, { passive: false });
-// 3. Función para guardar (Estructura básica)
 
 </script>
 </body>
