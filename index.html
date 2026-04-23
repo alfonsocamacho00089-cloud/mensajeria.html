@@ -14,32 +14,29 @@
     <script>eruda.init();</script>
     <style>
    
-html, body {
-    margin: 0;
-    padding: 0;
+body { 
+    font-family: sans-serif; 
+    background: #000000; 
+    margin: 0; 
+    display: flex; 
+    flex-direction: column; 
+    height: 100vh; /* Cambiamos a vh para estabilidad */
+    height: 100svh; /* Altura real sin barras de navegador */
+    overflow: hidden; 
+    position: fixed; /* OBLIGATORIO: Evita que el navegador desplace la hoja */
     width: 100%;
-    height: 100%;
-    /* ESTO EVITA QUE LA PANTALLA "SUBA" COMO UNA PERSIANA */
-    position: fixed; 
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-    touch-action: none;
 }
 /* --- NUEVO DISEÑO DEL HEADER ESTILO WHATSAPP --- */
 
-
 .header { 
-    background: #1a1a1a; /* Gris oscuro sólido */
-    padding: 0 15px;    /* Ajusté el padding para controlar mejor la altura */
+    background: #1a1a1a; 
+    padding: 0 15px;    
     display: flex;
     align-items: center;
-    justify-content: flex-start; 
-    position: relative;
     flex-shrink: 0; 
     height: 60px;
-    border-bottom: 1px solid #333; /* Una línea gris muy sutil para separar del chat */
-    touch-action: none;
+    border-bottom: 1px solid #333;
+    z-index: 10;
 }
 
 .header-content {
@@ -124,20 +121,9 @@ html, body {
     display: flex; 
     gap: 10px; 
     border-top: 1px solid #333; 
-    width: 100%;
-    box-sizing: border-box;
-
-    /* --- ESTO ES LO MÁS IMPORTANTE --- */
-    /* Borramos: position: fixed; */
-    /* Borramos: bottom: 0; */
-    /* Borramos: left: 0; */
-    
-    /* El input-area se queda como el último elemento del flex-container */
-    z-index: 1000;
-
-    /* Para móviles con barra de gestos inferior (como iPhone o Android modernos) */
-    padding-bottom: max(10px, env(safe-area-inset-bottom));
-         touch-action: none;
+    flex-shrink: 0; 
+    /* Ajuste para móviles modernos */
+    padding-bottom: max(10px, env(safe-area-inset-bottom)); 
           }
      
         input#target-id { width: 60px; background: #000; color: #ffd700; border: 1px solid #333; border-radius: 8px; text-align: center; }
@@ -157,18 +143,14 @@ html, body {
     display: flex;
     flex-direction: column; 
     gap: 10px;
-    
-    
     background-color: #0b141a;
-    /* Usamos el filtro de 0.6 para que se vea un poquito más la imagen pero sin tapar el texto */
     background-image: linear-gradient(rgba(11, 20, 26, 0.7), rgba(11, 20, 26, 0.7)), 
                   url('./assets/logo.webp');
     background-size: cover;
     background-position: center;
-    background-attachment: fixed;
+    /* CAMBIO CLAVE: Usa 'scroll', NO use 'fixed' en móviles */
+    background-attachment: scroll; 
     background-repeat: no-repeat;
-        touch-action: pan-y;
-          
          }
 /* El Chat es el único que crece y desliza */
 
