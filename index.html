@@ -998,7 +998,13 @@ let mensajeSeleccionado = null;
     div.className = 'msg-burbuja ' + clase;
 
     const tiempo = hora || new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
-    const checkIcon = (estado === 'leido') ? '✓✓' : '✓';
+
+     let iconName = (estado === 'enviado') ? 'fa-solid fa-check' : 'fa-solid fa-check-double';
+
+// Generamos el HTML usando la CLASE de tu CSS (enviado, recibido o leido)
+// Cambia la línea de checkHTML por esta:
+let checkHTML = (clase.includes('derecha')) ? (estado === 'leido' ? ' ✓✓' : ' ✓') : '';
+
 
     let contenidoHTML = "";
     if (texto && texto.includes("Resp >")) {
@@ -1016,15 +1022,11 @@ let mensajeSeleccionado = null;
             <div style="margin: 0; padding: 0; line-height: 1.1;">${mensajeReal}</div>
         `;
     } else {
-        contenidoHTML = `<div style="line-height: 1.2;">${texto}</div>`;
+        contenidoHTML = `<span>${texto}</span>`;
     }
+div.innerHTML = `${texto} <span class="msg-info">${tiempo}${checkHTML}</span>`;
 
-    div.innerHTML = `
-        ${contenidoHTML}
-        <div class="msg-info" style="align-self: flex-end; font-size: 9px; opacity: 0.6; margin-top: 2px; display: flex; gap: 3px;">
-            ${tiempo} <span class="checks" style="color: #4fc3f7;">${checkIcon}</span>
-        </div>
-    `;
+         
 
     div.onclick = (e) => {
         mensajeSeleccionado = div; 
