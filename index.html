@@ -103,44 +103,53 @@
 }
 
 /* --- INPUT AREA --- */
+
 .input-area { 
     background: #1a1a1a; 
-    padding: 10px; 
+    padding: 8px 10px; 
     display: flex; 
     gap: 10px; 
-    border-top: 1px solid #333; 
-    flex-shrink: 0; 
-    padding-bottom: max(10px, env(safe-area-inset-bottom)); 
-    box-sizing: border-box;
+    align-items: flex-end; /* Para que crezca hacia arriba */
+    min-height: 50px; 
+    height: auto; /* IMPORTANTE: Deja que crezca si el texto crece */
 }
 
-input#target-id { 
-    width: 60px; 
-    background: #000; 
-    color: #ffd700; 
-    border: 1px solid #333; 
-    border-radius: 8px; 
-    text-align: center; 
-}
-
-input#msg-text { 
+#msg-text { 
     flex: 1; 
-    padding: 12px; 
-    border-radius: 25px; 
+    padding: 8px 15px; /* Padding pequeño para que sea finito al inicio */
+    border-radius: 20px; 
     border: none; 
     outline: none; 
     background: #2a2a2a; 
     color: white; 
+    font-size: 16px;
+    line-height: 20px;
+    height: 36px; /* Altura inicial finita para una sola línea */
+    max-height: 120px; 
+    resize: none; 
+    overflow-y: hidden;
+    box-sizing: border-box; 
+    
+    /* ... tus otros estilos ... */
+    
+  
+    box-shadow: none;          /* Elimina sombras internas o externas */
+    -webkit-appearance: none;  /* Elimina estilos predeterminados de iOS/Safari */
 }
+
+
+
 
 button#btn-enviar { 
     background: #ffd700; 
     border: none; 
-    padding: 10px 20px; 
+    padding: 05px 10px; 
     border-radius: 20px; 
     font-weight: bold; 
     cursor: pointer; 
     color: black; 
+    align-self: flex-end; /* Mantiene el botón abajo */
+    margin-bottom: 5px;    /* Separa un poquito del borde */
 }    
 .msg-burbuja { 
     max-width: 85%; 
@@ -476,12 +485,29 @@ button#btn-enviar {
 
 
 
+    
     <div class="input-area">
    
-        <textarea id="msg-text" placeholder="Escribe un mensaje..." rows="1"></textarea>
-        <button id="btn-enviar" onclick="enviarMensajeSatelital()">ENVIAR</button>
-    </div>
-    </div> 
+<textarea 
+    id="msg-text" 
+    rows="1" 
+    placeholder="Escribe un mensaje..."
+    style="height: 36px;" 
+    oninput="
+        this.style.height = 'auto'; 
+        this.style.height = this.scrollHeight + 'px';
+        
+        // Esto sube el chat automáticamente
+        const chat = document.getElementById('chat-box');
+        chat.scrollTop = chat.scrollHeight;
+    "
+></textarea>
+
+
+<button id="btn-enviar" onclick="enviarMensajeSatelital()">
+    <span style="display: inline-block; transform: rotate(-45deg); font-size: 20px;">➤</span>
+</button>
+     
  
 
 
