@@ -758,9 +758,14 @@ historialEnv.push({ texto: msg, clase: 'msg-derecha' });
 localStorage.setItem('chat_' + targetID, JSON.stringify(historialEnv));
 // ----------------------------------------------
 
-if (inputMsg) inputMsg.value = "";
-        
+if (inputMsg) {
+    inputMsg.value = "";
+    inputMsg.style.height = '36px'; // Vuelve a ser pequeña
     
+    // Mantiene el cursor activo y el teclado abierto
+    inputMsg.focus(); 
+         }
+     
         console.log("🚀 Mensaje lanzado al espacio hacia:", targetID);
 
     } catch (e) {
