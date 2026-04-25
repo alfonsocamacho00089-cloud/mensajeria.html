@@ -153,11 +153,14 @@ body {
 }
 
 #nombre-dueño-header {
+ background: rgba(26, 26, 26, 0.7); 
     font-size: 16px;
     font-weight: 500;
     margin: 0;
     color: white;
     line-height: 1.2;
+ backdrop-filter: blur(10px); 
+    -webkit-backdrop-filter: blur(10px);
 }
     
 .user-status {
@@ -532,7 +535,22 @@ margin: 0;
     </div>
 <div id="modal-qr" class="modal">
     <div class="modal-content" style="display: flex; flex-direction: column; height: 100dvh; position: relative; background: transparente;">
-        
+        <div class="barra-flotante-premium">
+    <div class="btn-nav" onclick="irAContactos()">
+        <span>👥</span>
+        <span>Contactos</span>
+    </div>
+
+    <div class="btn-nav active" onclick="cerrarModalQR()">
+        <span>💬</span>
+        <span>Chat</span>
+    </div>
+
+    <div class="btn-nav" onclick="abrirAjustes()">
+        <span>⚙️</span>
+        <span>Ajustes</span>
+    </div>
+        </div>
         <div id="nombre-dueño-header-lista" style="background: #1a1a1a; color: #ffffff; padding: 15px; font-weight: 900; text-transform: uppercase; text-align: left; border-bottom: 1px solid #333; display: flex; justify-content: space-between; align-items: center;">
             <span>SPACECHAT</span>
             <div onclick="alternarVistaPerfil()" style="cursor: pointer; color: #ffd700; font-size: 22px; padding: 0 10px;">⋮</div>
@@ -577,22 +595,7 @@ margin: 0;
             </div>
         </div>
     
-        <div class="barra-flotante-premium">
-    <div class="btn-nav" onclick="irAContactos()">
-        <span>👥</span>
-        <span>Contactos</span>
-    </div>
-
-    <div class="btn-nav active" onclick="cerrarModalQR()">
-        <span>💬</span>
-        <span>Chat</span>
-    </div>
-
-    <div class="btn-nav" onclick="abrirAjustes()">
-        <span>⚙️</span>
-        <span>Ajustes</span>
-    </div>
-        </div>
+        
 <div id="modal-nuevocontacto" class="modal" style="display:none; z-index: 15000;">
     <div class="modal-cover">
         <h3>NUEVO CONTACTO</h3>
