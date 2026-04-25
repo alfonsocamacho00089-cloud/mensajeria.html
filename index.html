@@ -109,17 +109,23 @@ body {
 
     
      
-    background-image: linear-gradient(rgba(11, 20, 26, 0.7), rgba(11, 20, 26, 0.7)), 
-                  url('./assets/logo.webp');
-    background-size: cover;
-    background-position: center;
-
-    background-attachment: local; /* El logo se mueve con los mensajes, no con la pantalla */ 
-
-    background-repeat: no-repeat;
     
 }
-/* --- INPUT AREA --- */
+
+     
+body::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-image: url('./assets/tu-foto-de-goku.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    z-index: -1; /* Esto lo manda al fondo de todo */
+}
 
 
 
