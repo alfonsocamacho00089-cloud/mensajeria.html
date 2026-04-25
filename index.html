@@ -355,9 +355,12 @@ margin: 0;
 }
 
 #cuerpo-modal-lista {
-    flex-grow: 1; /* Estira este div para llenar el vacío */
-    overflow-y: auto; /* Permite scroll si hay muchos contactos */
-    background: transparent; 
+    flex-grow: 1; 
+    overflow-y: auto; 
+    padding: 0 15px 20px 15px; /* Tus paddings normales */
+    
+    /* ESTA ES LA QUE TIENES QUE AGREGAR O CAMBIAR: */
+    padding-bottom: 100px !important; 
 }
 
 /* Animaciones */
@@ -596,7 +599,7 @@ margin: 0;
                 <p style="color: #8696a0; font-size: 12px;">Cargando contactos...</p>
             </div>
         </div>
-    
+
         
 <div id="modal-nuevocontacto" class="modal" style="display:none; z-index: 15000;">
     <div class="modal-cover">
