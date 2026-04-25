@@ -26,11 +26,7 @@ body {
     font-family: sans-serif;
     background-color: #000000;
     /* Usamos la imagen aquí para que sea global */
-    background-image: url('./assets/tu-foto-de-goku.jpg'); 
-    background-attachment: fixed; /* LA CLAVE: El fondo no se mueve con el scroll */
-    background-position: center;
-    background-size: cover;
-    background-repeat: no-repeat;
+    
     margin: 0;
     width: 100%;
     display: flex;
@@ -111,7 +107,8 @@ background-image: linear-gradient(rgba(11, 20, 26, 0.7), rgba(11, 20, 26, 0.7)),
     background-size: cover;
     background-position: center;
 
-    background-attachment: fixed; 
+    background-attachment: local; /* El logo se mueve con los mensajes, no con la pantalla */ 
+ 
 
     background-repeat: no-repeat;
     
