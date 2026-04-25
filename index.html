@@ -20,7 +20,7 @@
     -webkit-tap-highlight-color: transparent;
 }
 
-         body { 
+      body { 
     font-family: sans-serif; 
     background: #000000; 
     margin: 0; 
@@ -91,66 +91,70 @@
     display: flex;
     flex-direction: column; 
     gap: 4px;
-    touch-action: pan-y; /* Permite scroll solo de arriba a abajo */
+    touch-action: pan-y;
     -webkit-overflow-scrolling: touch;
     background-color: #0b141a;
     background-image: linear-gradient(rgba(11, 20, 26, 0.7), rgba(11, 20, 26, 0.7)), 
                   url('./assets/logo.webp');
     background-size: cover;
     background-position: center;
-    background-attachment: scroll; 
+    
+    /* CAMBIA ESTO: De 'scroll' a 'fixed' */
+    background-attachment: fixed; 
+    
     background-repeat: no-repeat;
 }
 
 /* --- INPUT AREA --- */
 
-.input-area { 
-    background: #1a1a1a; 
-    padding: 8px 10px; 
-    display: flex; 
-    gap: 10px; 
-    align-items: flex-end; /* Para que crezca hacia arriba */
-    min-height: 50px; 
-    height: auto; /* IMPORTANTE: Deja que crezca si el texto crece */
+
+.contenedor-flotante {
+    position: fixed;   /* Se queda fijo abajo */
+    bottom: 20px;      /* Despegado del borde para que "flote" */
+    left: 0;
+    width: 100%;
+    display: flex;
+    align-items: flex-end;
+    padding: 0 10px;
+    gap: 8px;
+    background: transparent; /* CLAVE: Aquí se ve la foto de Goku */
+    z-index: 100;
+    pointer-events: none;    /* Para que el clic pase al chat si tocas fuera */
 }
 
-#msg-text { 
-    flex: 1; 
-    padding: 8px 15px; /* Padding pequeño para que sea finito al inicio */
-    border-radius: 20px; 
-    border: none; 
-    outline: none; 
-    background: #2a2a2a; 
-    color: white; 
-    font-size: 16px;
-    line-height: 20px;
-    height: 36px; /* Altura inicial finita para una sola línea */
-    max-height: 120px; 
-    resize: none; 
-    overflow-y: hidden;
-    box-sizing: border-box; 
-    
-    /* ... tus otros estilos ... */
-    
-  
-    box-shadow: none;          /* Elimina sombras internas o externas */
-    -webkit-appearance: none;  /* Elimina estilos predeterminados de iOS/Safari */
+#msg-text, #btn-enviar {
+    pointer-events: auto;    /* Para que el botón y el texto sí funcionen */
 }
 
+#msg-text {
+    flex: 1;
+    background: rgba(32, 44, 51, 0.9); /* Un gris oscuro con transparencia */
+    backdrop-filter: blur(10px);        /* Efecto cristal */
+    border-radius: 25px;
+    padding: 12px 15px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: white;
+    height: 48px;
+    max-height: 150px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3); /* Sombrita para que flote */
+}
 
+#btn-enviar {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: #ffd700; /* Dorado sólido o con glass */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+}
 
-
-button#btn-enviar { 
-    background: #ffd700; 
-    border: none; 
-    padding: 05px 10px; 
-    border-radius: 20px; 
-    font-weight: bold; 
-    cursor: pointer; 
-    color: black; 
-    align-self: flex-end; /* Mantiene el botón abajo */
-    margin-bottom: 5px;    /* Separa un poquito del borde */
-}    
+/* Efecto cuando pasas el dedo o el mouse */
+button#btn-enviar:active {
+    background: rgba(255, 215, 0, 0.6); /* Se oscurece un poco al tocarlo */
+    transform: scale(0.9);
+}
 .msg-burbuja { 
     max-width: 85%; 
     width: fit-content; 
@@ -195,7 +199,6 @@ button#btn-enviar {
 
 }
 
-
 .msg-derecha { 
     align-self: flex-end; 
     background: linear-gradient(135deg, rgba(0, 92, 75, 0.8) 0%, rgba(0, 77, 64, 0.8) 100%); 
@@ -229,31 +232,6 @@ button#btn-enviar {
 .status-icon.enviado { color: #8696a0; }
 
 
-        #msg-text {
-    flex: 1;               /* Que ocupe todo el espacio central */
-    background: #2a2a2a;    /* Color de fondo gris oscuro, como tus burbujas */
-    color: white;          /* Letra blanca */
-    border-radius: 20px;   /* Bordes redondeados y suaves */
-    padding: 10px 15px;    /* Espacio interno para que el texto no esté pegado */
-    border: none;          /* Sin el borde cuadrado y feo */
-    outline: none;         /* Que no se ponga azul al hacer clic */
-    font-family: inherit;  /* Misma fuente que el resto del chat */
-    resize: none;          /* Quita la esquina para agrandar que traen los textarea */
-    min-height: 40px;      /* Altura inicial bajita */
-    max-height: 120px;     /* Que no crezca hasta tapar todo */
-    overflow-y: auto;      /* Si el mensaje es muy largo, sale scroll interno */
-    margin: 0 5px;         /* Un pelín de separación con el ID y el botón */
-        }
-        .menu-mensaje {
-    position: absolute;
-    background: #2a3942;
-    border: 1px solid #ffd700;
-    border-radius: 10px;
-    padding: 5px 0;
-    z-index: 20000;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-    display: none; /* Se activa con JS */
-}
 
 .menu-mensaje div {
     padding: 10px 20px;
@@ -264,17 +242,15 @@ button#btn-enviar {
 
 .menu-mensaje div:hover {
     background: #3b4a54;
- }
-
+}
         
         #mi-id-display { font-size: 11px; color: #ffd700; margin-top: 5px; font-family: monospace; }
         .btn-qr-dropis { position: absolute; right: 15px; top: 50%; transform: translateY(-50%); background: #ffd700; border: none; border-radius: 50%; width: 35px; height: 35px; cursor: pointer; font-size: 18px; }
-
         
-
- /* MODALES */
+        /* MODALES */
         /* 1. EL CONTENEDOR (Ocupa toda la pantalla) */
 /* 1. EL FONDO NEGRO DETRÁS DEL MODAL */
+/* EL MODAL: Usa 'dvh' para que ignore el teclado y no se encoja */
 .modal {
     display: none; 
     position: fixed; 
@@ -301,13 +277,20 @@ button#btn-enviar {
     background-attachment: fixed;
     
     width: 100%; 
-    height: 100%; 
+    
     display: flex;
+    
     flex-direction: column; /* Esto permite que el header esté arriba y el botón abajo */
     color: white; 
     animation: fadeIn 0.4s ease; 
+    
+    height: 100dvh; /* Usa el alto dinámico para móviles */
+margin: 0;
+    
+    /* Agrega estas dos líneas: */
+    overflow: hidden;
+    justify-content: space-between;
 }
-
 /* 3. LAS FILAS DE CONTACTOS (Estilo WhatsApp) */
 .fila-contacto {
     display: flex;
@@ -325,6 +308,12 @@ button#btn-enviar {
 /* El efecto dorado suave cuando pasas el dedo o el mouse */
 .fila-contacto:hover {
     background: rgba(255, 215, 0, 0.1) !important;
+}
+
+#cuerpo-modal-lista {
+    flex-grow: 1; /* Estira este div para llenar el vacío */
+    overflow-y: auto; /* Permite scroll si hay muchos contactos */
+    background: transparent; 
 }
 
 /* Animaciones */
@@ -348,7 +337,7 @@ button#btn-enviar {
 
    /* Cambiamos el nombre a .btn-modal-contacto para que no choque con el otro */
 .btn-modal-contacto { 
-    position: absolute;   
+    position:absolute;
     top: 70px;            
     right: 20px;          
     background: #ffd700; 
@@ -375,14 +364,31 @@ button#btn-enviar {
     text-align: center;
     margin-left: auto; /* Lo empuja a la derecha */
 }
+.btn-back-clean {
+    background: transparent; /* Quita el color de fondo */
+    border: none;            /* Quita el borde */
+    outline: none;           /* Quita el borde de enfoque al hacer clic */
+    color: white;            /* Color de la flechita */
+    font-size: 20px;         /* Tamaño de la flecha */
+    padding: 5px;           /* Espacio para que sea fácil de tocar con el dedo */
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
 
+/* Efecto opcional al tocarlo */
+.btn-back-clean:active {
+    opacity: 0.6;            /* Se pone un poco transparente al presionarlo */
+}
      
-                
+           <script src="https://fontawesome.com" crossorigin="anonymous"></script>
+     
     </style>
 
 </head>
 
-
+<body>
  
             <div id="pantalla-carga" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; display: flex; align-items: center; justify-content: center; z-index: 999999; transition: opacity 0.5s ease;">
     
@@ -391,9 +397,13 @@ button#btn-enviar {
             </div>
 
 <div class="header" id="chat-header">
-    <div class="header-content">
-        <button onclick="manejarBotonIdentidad()" class="btn-back">←</button>
+    <div class="header-content" onclick="abrirPerfilContacto()" style="cursor: pointer;">
+        <!-- StopPropagation evita que al darle atrás se abra el perfil -->
+        <button onclick="manejarBotonIdentidad(); event.stopPropagation();" class="btn-back-clean">
+    <span style="display: inline-block; transform: scaleX(-1);">➔</span>
+</button>
         <img src="https://via.placeholder.com/40" id="foto-perfil-header" class="foto-perfil">
+        
         <div class="user-info">
             <h1 id="nombre-dueño-header">SpaceChat</h1>
             <small class="user-status">En línea</small>
@@ -401,10 +411,9 @@ button#btn-enviar {
     </div>
 </div>
 
-<div id="chat-box">
+    
+    <div id="chat-box">
 </div>
-    
-    
     
 
 
@@ -432,29 +441,48 @@ button#btn-enviar {
         <p style="color: #ffd700; font-family: monospace; font-size: 12px;">Vinculando Token Satelital</p>
     </div>
     </div>
-    <div id="modal-qr" class="modal">
-    <div class="modal-content" style="display: flex; flex-direction: column; height: 90vh; position: relative;">
+<div id="modal-qr" class="modal">
+    <div class="modal-content" style="display: flex; flex-direction: column; height: 100dvh; position: relative; background: #000;">
         
-        <div id="nombre-dueño-header" style="background: #1a1a1a; color: #ffffff; padding: 15px; font-weight: 900; text-transform: uppercase; text-align: left; border-bottom: 1px solid #333; position: relative;">
-            SPACECHAT
+        <div id="nombre-dueño-header-lista" style="background: #1a1a1a; color: #ffffff; padding: 15px; font-weight: 900; text-transform: uppercase; text-align: left; border-bottom: 1px solid #333; display: flex; justify-content: space-between; align-items: center;">
+            <span>SPACECHAT</span>
+            <div onclick="alternarVistaPerfil()" style="cursor: pointer; color: #ffd700; font-size: 22px; padding: 0 10px;">⋮</div>
         </div> 
 
-        <button class="btn-modal-contacto" onclick="gestionarQR()" style="position: absolute; right: 15px; top: 50px; background: #ffd700; color: #000; border: none; border-radius: 0 0 8px 8px; padding: 5px 15px; font-weight: 900; font-size: 12px; z-index: 100; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.5); text-transform: uppercase;">
-            QR
-        </button>
+        <div id="seccion-mi-perfil" style="display: none; padding: 15px; background: #0a0a0a; border-bottom: 1px solid #ffd700;">
+            <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 15px;">
+                <div onclick="document.getElementById('input-mi-foto').click()" style="width: 70px; height: 70px; border-radius: 50%; border: 2px solid #ffd700; overflow: hidden; background: #222; display: flex; align-items: center; justify-content: center; cursor: pointer;">
+                    <img id="mi-foto-previa" src="" style="width: 100%; height: 100%; object-fit: cover; display: none;">
+                    <span id="mi-placeholder-foto" style="font-size: 20px;">📷</span>
+                </div>
+                <input type="file" id="input-mi-foto" accept="image/*" style="display: none;" onchange="previsualizarMiFoto(this)">
+                <button onclick="gestionarQR()" style="background: #ffd700; color: #000; border: none; border-radius: 8px; padding: 8px 12px; font-weight: 900; font-size: 14px; cursor: pointer;">QR</button>
+            </div>
+            <input type="text" id="mi-nuevo-nombre" placeholder="Editar mi nombre..." style="width:100%; padding:10px; margin-bottom:8px; background:#1a1a1a; color:white; border:1px solid #333; border-radius:8px;">
+            <input type="text" id="mi-nuevo-estado" placeholder="Estado (Ej: Disponible)" style="width:100%; padding:10px; margin-bottom:8px; background:#1a1a1a; color:white; border:1px solid #333; border-radius:8px;">
+            <button onclick="guardarCambiosPerfil()" style="width: 100%; padding: 10px; background: #ffd700; border: none; border-radius: 8px; font-weight: bold; color: #000;">GUARDAR CAMBIOS</button>
+        </div>
 
-        <button onclick="abrirModalNuevoContacto()" style="position: absolute; right: 15px; bottom: 80px; background: #ffd700; border: none; border-radius: 50%; width: 50px; height: 50px; font-weight: bold; cursor: pointer; z-index: 100; box-shadow: 0 4px 10px rgba(0,0,0,0.5);">
-            + 👤
-        </button>
+<button onclick="abrirModalNuevoContacto()" 
+    style="position: absolute; right: 15px; bottom: 90px; 
+           background: rgba(255, 215, 0, 0.25); /* Dorado transparente */
+           backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); 
+           border: 1px solid rgba(255, 215, 0, 0.4); 
+           border-radius: 50%; width: 55px; height: 55px; 
+           color: #ffd700; /* El icono en dorado brillante */
+           cursor: pointer; z-index: 100; 
+           box-shadow: 0 4px 15px rgba(0,0,0,0.0); 
+           font-size: 20px; display: flex; 
+           align-items: center; justify-content: center;">
+    + 
+</button>
 
         <div id="cuerpo-modal-lista" style="flex-grow: 1; overflow-y: auto; padding: 0 15px 20px 15px;">
             <div id="seccion-mi-qr" style="display: none; padding: 20px; flex-direction: column; align-items: center; border-bottom: 1px solid #444;">
                 <div id="contenedor-qr" style="background: white; padding: 10px; border-radius: 10px;"></div>
-                <button onclick="document.getElementById('seccion-mi-qr').style.display='none'" style="margin-top: 10px; color: #ffd700; background: transparent; border: none; cursor: pointer;">[ Ocultar mi QR ]</button>
+                <button onclick="document.getElementById('seccion-mi-qr').style.display='none'" style="margin-top: 10px; color: #ffd700; background: transparent; border: none; cursor: pointer;">[ Ocultar QR ]</button>
             </div>
-
             <h4 style="color: #ffd700; margin: 20px 0 10px 0; font-size: 14px; text-shadow: 1px 1px 2px black;">CONTACTOS</h4>
-            
             <div id="lista-contactos">
                 <p style="color: #8696a0; font-size: 12px;">Cargando contactos...</p>
             </div>
@@ -465,7 +493,6 @@ button#btn-enviar {
         </button>
     </div>
 </div>
-
 <div id="modal-nuevocontacto" class="modal" style="display:none; z-index: 15000;">
     <div class="modal-cover">
         <h3>NUEVO CONTACTO</h3>
@@ -478,38 +505,75 @@ button#btn-enviar {
             <button onclick="guardarNuevoContacto()" style="width: 100%; padding: 12px; background: #ffd700; border: none; border-radius: 10px; font-weight: bold; color: #000; cursor: pointer;">GUARDAR CONTACTO</button>
             
             <button onclick="document.getElementById('modal-nuevocontacto').style.display='none'" style="background:none; border:none; color:white; margin-top:10px; cursor:pointer;">Cancelar</button>
+            
         </div>
     </div>
 </div>
- 
 
 
 
-    
-    <div class="input-area">
-   
-<textarea 
-    id="msg-text" 
-    rows="1" 
-    placeholder="Escribe un mensaje..."
-    style="height: 36px;" 
-    oninput="
-        this.style.height = 'auto'; 
-        this.style.height = this.scrollHeight + 'px';
-        
-        // Esto sube el chat automáticamente
-        const chat = document.getElementById('chat-box');
-        chat.scrollTop = chat.scrollHeight;
-    "
-></textarea>
 
 
-<button id="btn-enviar" onclick="enviarMensajeSatelital()">
-    <span style="display: inline-block; transform: rotate(-45deg); font-size: 20px;">➤</span>
+
+
+<div id="modal-perfil" class="modal" style="display:none; z-index: 25000;">
+    <div class="modal-cover" style="text-align: center;">
+        <img id="perfil-foto-grande" src="" style="width: 150px; height: 150px; border-radius: 50%; border: 1px solid #ffd700; margin-bottom: 15px; object-fit: cover;">
+        <h2 id="perfil-nombre" style="color: white; margin-bottom: 5px;"></h2>
+        <p style="color: #8696a0; font-size: 14px;">👤</p>
+    <button onclick="eliminarChatEspecifico(); event.stopPropagation();" 
+        style="width: 100%; padding: 10px; background: rgba(255, 77, 77, 0.1); border: 1px solid #ff4d4d; border-radius: 8px; color: #ff4d4d; font-size: 13px; font-weight: 600; cursor: pointer; margin-top: 10px;">
+    🗑️ BORRAR CONVERSACIÓN
 </button>
-     
- 
 
+<button onclick="eliminarContactoDeAgenda(); event.stopPropagation();" 
+        style="width: 100%; padding: 8px; background: transparent; border: 1px solid #555; border-radius: 8px; color: #8696a0; font-size: 12px; font-weight: 500; cursor: pointer; margin-top: 8px;">
+    👤 ELIMINAR CONTACTO
+</button>
+    
+    
+    
+        <button onclick="document.getElementById('modal-perfil').style.display='none'; event.stopPropagation();" 
+        style="margin-top: 20px; width: 100%; padding: 12px; background: transparent; border: none; color: white; font-size: 24px; font-weight: 300;">
+    ✕
+</button>
+    </div>
+</div>
+
+<div id="modal-mi-perfil" class="modal" style="display:none; z-index: 30000;">
+    <div class="modal-cover" style="text-align: center; background: #000; border: 1px solid #ffd700; padding: 20px; border-radius: 15px;">
+        <h3 style="color: #ffd700; margin-bottom: 15px;">MI CUENTA</h3>
+
+        <div onclick="document.getElementById('input-mi-foto').click()" style="width: 100px; height: 100px; border-radius: 50%; border: 2px dashed #ffd700; margin: 0 auto 15px; display: flex; align-items: center; justify-content: center; cursor: pointer; overflow: hidden;">
+            <img id="mi-foto-previa" src="" style="display:none; width: 100%; height: 100%; object-fit: cover;">
+            <span id="txt-foto-placeholder" style="font-size: 30px;">📷</span>
+        </div>
+        <input type="file" id="input-mi-foto" accept="image/*" style="display: none;" onchange="previsualizarMiFoto(this)">
+
+        <input type="text" id="mi-nuevo-nombre" placeholder="Nuevo nombre..." style="width:100%; padding:12px; margin-bottom: 10px; border-radius: 8px; border: none;">
+        <input type="text" id="mi-nuevo-estado" placeholder="Estado (Ej: En la luna 🚀)" style="width:100%; padding:12px; margin-bottom: 20px; border-radius: 8px; border: none;">
+
+        <button onclick="guardarCambiosPerfil()" style="width: 100%; padding: 12px; background: #ffd700; color: #000; border: none; border-radius: 8px; font-weight: bold; cursor: pointer;">
+            GUARDAR CAMBIOS
+        </button>
+        
+        <p onclick="document.getElementById('modal-mi-perfil').style.display='none'" style="color: white; margin-top: 15px; cursor: pointer; font-size: 13px;">Cancelar</p>
+    </div>
+</div>
+
+<div class="contenedor-flotante">
+    <textarea 
+        id="msg-text" 
+        placeholder="Escribe un mensaje..."
+        oninput="this.style.height='45px'; this.style.height=this.scrollHeight+'px';"
+    ></textarea>
+    
+    <button id="btn-enviar" onclick="enviarMensajeSatelital()">
+        <span>➤</span>
+    </button>
+</div>
+ 
+    
 
     <div id="menu-acciones" class="menu-mensaje">
     <div onclick="accionMensaje('responder')">↩️ Responder</div>
@@ -652,7 +716,7 @@ async function ejecutarRegistroCompleto() {
 
 // --- 4. ANTENA SATELITAL ---
 
-            async function activarAntena() {
+  async function activarAntena() {
     const miID = localStorage.getItem('mi_dropis_id');
     if (!miID) return;
 
@@ -758,17 +822,22 @@ historialEnv.push({ texto: msg, clase: 'msg-derecha' });
 localStorage.setItem('chat_' + targetID, JSON.stringify(historialEnv));
 // ----------------------------------------------
 
+// ... (resto de tu código anterior)
 if (inputMsg) {
     inputMsg.value = "";
     inputMsg.style.height = '36px'; // Vuelve a ser pequeña
     
     // Mantiene el cursor activo y el teclado abierto
     inputMsg.focus(); 
-         }
-     
+}
+
+        
+        
         console.log("🚀 Mensaje lanzado al espacio hacia:", targetID);
 
     } catch (e) {
+// ... (resto de tu código)
+
         console.error("❌ Fallo en el lanzamiento:", e);
         alert("Error al enviar el mensaje.");
     }
@@ -877,6 +946,7 @@ function cerrarModalQR() {
         mostrarContactos();
     }
      }
+     
 
 function cargarConversacionCon(idDestino, nombreDestino, fotoDestino) {
     const box = document.getElementById('chat-box');
@@ -892,13 +962,17 @@ function cargarConversacionCon(idDestino, nombreDestino, fotoDestino) {
     }
 
     // 2. NUEVO: Actualizamos la FOTO de perfil
-    
-    const visorFoto = document.getElementById('foto-perfil-header');
-    if (visorFoto) {
-        // Usamos fotoDestino si existe, si no, el placeholder
-        visorFoto.src = fotoDestino ? fotoDestino : "https://via.placeholder.com/40?text=U"; 
+  
+    // SOLO AGREGA ESTO:
+        // ... (tu código de limpieza de box y targetID)
+
+    const imgHeader = document.getElementById('foto-perfil-header');
+    if (imgHeader) {
+        // Usamos fotoDestino que viene del clic en la agenda
+        imgHeader.src = fotoDestino || 'https://via.placeholder.com/40';
     }
- 
+    
+
     // 3. Buscamos los mensajes de ESE contacto en LocalStorage
     const claveChat = 'chat_' + idDestino;
     const mensajes = JSON.parse(localStorage.getItem(claveChat)) || [];
@@ -925,6 +999,7 @@ function cargarConversacionCon(idDestino, nombreDestino, fotoDestino) {
     const lista = document.getElementById('lista-contactos');
     if (!lista) return;
 
+    // 1. Cargamos contactos (reales o de prueba)
     const contactos = JSON.parse(localStorage.getItem('mis_contactos')) || [
         { nombre: "Hijo 1", id: "ID_AQUI_1" }, 
         { nombre: "Hijo 2", id: "ID_AQUI_2" }
@@ -933,36 +1008,37 @@ function cargarConversacionCon(idDestino, nombreDestino, fotoDestino) {
     lista.innerHTML = ""; 
  
     contactos.forEach(contacto => {
-    const numNoLeidos = localStorage.getItem('unread_' + contacto.id) || 0;
-    const badgeHTML = numNoLeidos > 0 ? `<div class="contador-nube">${numNoLeidos}</div>` : '';
+        const numNoLeidos = localStorage.getItem('unread_' + contacto.id) || 0;
+        const badgeHTML = numNoLeidos > 0 ? `<div class="contador-nube">${numNoLeidos}</div>` : '';
 
-    const btn = document.createElement('div');
-    btn.className = 'fila-contacto'; 
-    btn.innerHTML = `
-        <div class="avatar">${contacto.nombre.charAt(0).toUpperCase()}</div>
-        <div style="flex-grow: 1; margin-left: 10px;">
-            <div style="font-weight: bold; color: white;">${contacto.nombre}</div>
-            <div style="font-size: 12px; color: #8696a0;">ID: ${contacto.id}</div>
-        </div>
-        ${badgeHTML} 
-    `;
-    // ... resto del btn.onclick ...
+        // Definimos la foto una sola vez
+        const fotoURL = contacto.foto || 'https://via.placeholder.com/45';
 
-        
+        const btn = document.createElement('div');
+        btn.className = 'fila-contacto'; 
+
+        // 2. Pintamos el contenido (Solo una vez)
+        btn.innerHTML = `
+            <img src="${fotoURL}" class="foto-perfil" style="width:45px; height:45px; border-radius:50%; object-fit:cover;">
+            <div style="flex-grow: 1; margin-left: 10px;">
+                <div style="font-weight: bold; color: white;">${contacto.nombre}</div>
+                <div style="font-size: 12px; color: #8696a0;">ID: ${contacto.id}</div>
+            </div>
+            ${badgeHTML} 
+        `;
+
+        // 3. El evento click corregido
         btn.onclick = () => {
-            // Cuando tocas al contacto, cargamos su chat específico
-            cargarConversacionCon(contacto.id, contacto.nombre);
+            cargarConversacionCon(contacto.id, contacto.nombre, fotoURL); 
             
-            // Si tienes esta función, la llamas; si no, la comentas
             if (typeof actualizarListaConversaciones === "function") {
                 actualizarListaConversaciones(contacto.id, contacto.nombre);
             }
-        };
+        }; // Aquí se cierra el onclick correctamente
         
         lista.appendChild(btn);
-    }); // <--- AQUÍ SE CIERRA EL FOREACH
-} // <--- AQUÍ SE CIERRA LA FUNCIÓN
- 
+    }); // Aquí se cierra el forEach
+} // Aquí se cierra la función
 
  
 // Reemplaza el bloque final por este:
@@ -1024,8 +1100,10 @@ let mensajeSeleccionado = null;
     div.className = 'msg-burbuja ' + clase;
 
     const tiempo = hora || new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
-
-     let iconName = (estado === 'enviado') ? 'fa-solid fa-check' : 'fa-solid fa-check-double';
+    
+    // Decidimos qué icono y qué color poner
+// Elegimos el dibujo (1 palomita o 2)
+let iconName = (estado === 'enviado') ? 'fa-solid fa-check' : 'fa-solid fa-check-double';
 
 // Generamos el HTML usando la CLASE de tu CSS (enviado, recibido o leido)
 // Cambia la línea de checkHTML por esta:
@@ -1052,7 +1130,7 @@ let checkHTML = (clase.includes('derecha')) ? (estado === 'leido' ? ' ✓✓' : 
     }
 div.innerHTML = `${texto} <span class="msg-info">${tiempo}${checkHTML}</span>`;
 
-         
+
 
     div.onclick = (e) => {
         mensajeSeleccionado = div; 
@@ -1162,7 +1240,8 @@ function renderizarMensajes(listaDeMensajes) {
         div.innerHTML = `
             ${msg.texto}
             <div class="msg-info">
-                <span class="tiempo">17:33</span>
+                <span class="tiempo">17:33</span><span class="checks" style="color: #4fc3f7;">${checkIcon}</span>
+        
             </div>
         `;
         
@@ -1173,7 +1252,7 @@ function renderizarMensajes(listaDeMensajes) {
     chatBox.scrollTop = chatBox.scrollHeight;
 }
          
-                function gestionarQR() {
+function gestionarQR() {
     const seccion = document.getElementById('seccion-mi-qr');
     
     if (seccion) {
@@ -1189,6 +1268,8 @@ function renderizarMensajes(listaDeMensajes) {
         }
     }
                 }
+                
+       
      // 1. Función para abrir el modal
 function abrirModalNuevoContacto() {
     const modal = document.getElementById('modal-nuevocontacto');
@@ -1215,6 +1296,154 @@ function cerrarModalNuevo() {
         if (typeof pintarAgendaContactos === "function") {
             pintarAgendaContactos();
         }
+    }
+}
+
+// Variable para la foto nueva
+let miFotoBase64 = ""; 
+
+function alternarVistaPerfil() {
+    const seccion = document.getElementById('seccion-mi-perfil');
+    if (seccion.style.display === "none") {
+        seccion.style.display = "block";
+        // Rellenar con datos actuales
+        document.getElementById('mi-nuevo-nombre').value = localStorage.getItem('mi_nombre') || "";
+        document.getElementById('mi-nuevo-estado').value = localStorage.getItem('mi_estado') || "";
+        const foto = localStorage.getItem('mi_foto');
+        if(foto) {
+            document.getElementById('mi-foto-previa').src = foto;
+            document.getElementById('mi-foto-previa').style.display = "block";
+            document.getElementById('mi-placeholder-foto').style.display = "none";
+        }
+    } else {
+        seccion.style.display = "none";
+    }
+}
+
+function previsualizarMiFoto(input) {
+    if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            miFotoBase64 = e.target.result;
+            document.getElementById('mi-foto-previa').src = miFotoBase64;
+            document.getElementById('mi-foto-previa').style.display = "block";
+            document.getElementById('mi-placeholder-foto').style.display = "none";
+        };
+        reader.readAsDataURL(input.files[0]);
+    }
+}
+
+async function guardarCambiosPerfil() {
+    const miID = localStorage.getItem('mi_dropis_id');
+    const nom = document.getElementById('mi-nuevo-nombre').value.trim();
+    const est = document.getElementById('mi-nuevo-estado').value.trim();
+    const fotoParaGuardar = miFotoBase64 || localStorage.getItem('mi_foto') || "";
+
+    if (!nom) return alert("¡El nombre no puede estar vacío!");
+
+    try {
+        // 1. Guardar en Firebase
+        await db.ref('usuarios/' + miID).update({
+            nombre: nom,
+            estado: est,
+            foto: fotoParaGuardar
+        });
+
+        // 2. Actualizar LocalStorage
+        localStorage.setItem('mi_nombre', nom);
+        localStorage.setItem('mi_estado', est);
+        localStorage.setItem('mi_foto', fotoParaGuardar);
+
+        alert("✅ Perfil actualizado");
+        alternarVistaPerfil(); // Cerramos la edición
+    } catch(e) {
+        console.error(e);
+        alert("Error al guardar cambios");
+    }
+}
+
+function abrirPerfilContacto() {
+    // 1. Sacamos los datos de TU header
+    const nombreActual = document.getElementById('nombre-dueño-header').innerText;
+    const fotoActual = document.getElementById('foto-perfil-header').src;
+    
+    // 2. Los ponemos en el modal de perfil (el que creamos en el paso anterior)
+    const modalNombre = document.getElementById('perfil-nombre');
+    const modalFoto = document.getElementById('perfil-foto-grande');
+    
+    if(modalNombre) modalNombre.innerText = nombreActual;
+    if(modalFoto) modalFoto.src = fotoActual;
+
+    // 3. Mostramos el modal
+    document.getElementById('modal-perfil').style.display = 'flex';
+}
+
+
+async function eliminarChatEspecifico() {
+    // 1. Obtenemos el ID del contacto que está cargado actualmente en tu input oculto
+    const idDestino = document.querySelector('#target-id').value;
+    const nombreDestino = document.getElementById('nombre-dueño-header')?.innerText || "este contacto";
+
+    if (!idDestino) return alert("No hay un chat seleccionado para eliminar");
+
+    if (confirm(`¿Eliminar todos los mensajes con ${nombreDestino}?`)) {
+        
+        // 2. ELIMINACIÓN EN LOCALSTORAGE (Donde lo guardas actualmente)
+        const claveChat = 'chat_' + idDestino;
+        localStorage.removeItem(claveChat);
+
+        // 3. ELIMINACIÓN EN INDEXEDDB (Para tu nueva estructura DropisDB)
+        // Usamos la lógica de borrar que definimos antes
+        const db = await abrirDB();
+        const tx = db.transaction('mensajes', 'readwrite');
+        const store = tx.objectStore('mensajes');
+        
+        // Borramos usando el prefijo y el ID único
+        store.delete('msg_' + idDestino);
+
+        // 4. LIMPIEZA VISUAL
+        const box = document.getElementById('chat-box');
+        if (box) box.innerHTML = ""; 
+
+        // 5. REFRESCAR AGENDA
+        // Esto quita contadores de mensajes no leídos si los hubiera
+        localStorage.setItem('unread_' + idDestino, 0);
+        pintarAgendaContactos();
+
+        // 6. CERRAR MODAL (Si el botón estaba dentro del perfil)
+        const modalPerfil = document.getElementById('modal-perfil');
+        if (modalPerfil) modalPerfil.style.display = 'none';
+
+        console.log("✅ Chat borrado con éxito para ID: " + idDestino);
+    }
+}
+
+async function eliminarContactoDeAgenda() {
+    // 1. Obtenemos el ID del contacto que está cargado en el input oculto
+    const idABorrar = document.querySelector('#target-id').value;
+    const nombreABorrar = document.getElementById('perfil-nombre')?.innerText || "este contacto";
+
+    if (!idABorrar) return;
+
+    if (confirm(`¿Eliminar a ${nombreABorrar} de tu agenda? (Los mensajes se conservarán)`)) {
+        
+        // 2. Traemos la lista actual
+        let contactos = JSON.parse(localStorage.getItem('mis_contactos')) || [];
+
+        // 3. Filtramos la lista para quitar a ese ID
+        contactos = contactos.filter(c => c.id !== idABorrar);
+
+        // 4. Guardamos la nueva lista limpia
+        localStorage.setItem('mis_contactos', JSON.stringify(contactos));
+
+        // 5. Refrescamos la lista visual en el modal de la agenda
+        pintarAgendaContactos();
+
+        // 6. Cerramos los modales
+        document.getElementById('modal-perfil').style.display = 'none';
+        cerrarModalQR(); // Para volver al chat principal
+
+        alert(`${nombreABorrar} ha sido eliminado de tu agenda.`);
     }
 }
 // Detecta cuando el teclado sube (cambio de tamaño visual)
@@ -1244,6 +1473,8 @@ if (window.visualViewport) {
     ajustarInterfaz(); // Ejecución inicial
 } // <--- Aquí se cierra el IF
 </script>
+</script>
 </body>
 </html>
  
+     
