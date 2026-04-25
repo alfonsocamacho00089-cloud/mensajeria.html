@@ -44,6 +44,7 @@ body {
 }
 
 #chat-box {
+   background: transparent !important;
     flex: 1;
     flex-shrink: 1;
     overflow-y: auto;
@@ -67,34 +68,28 @@ body {
     
 } 
     
-     
-/* El fondo ahora es una capa independiente que NO crece */
-#chat-box::before {
-    content: "";
-    position: absolute;
+     .fondo-estatico {
+    position: fixed;
     top: 0;
     left: 0;
-    width: 100%;
-    height: 100%;
-    /* Tu logo aquí */
+    width: 100vw;
+    height: 100vh;
+    /* Tu imagen aquí */
     background-image: linear-gradient(rgba(11, 20, 26, 0.7), rgba(11, 20, 26, 0.7)), 
                       url('./assets/logo.webp');
-    background-size: cover; /* Tamaño fijo del logo, no se agrandará */
-    background-position: center;
     background-repeat: no-repeat;
-    background-attachment: local; /* Se queda quieto respecto a la pantalla */
+    background-position: center;
     
-    z-index: 0;
-    pointer-events: none; /* Los clics pasan a través hacia los mensajes */
+    /* USA PX AQUÍ PARA QUE SEA IMPOSIBLE QUE CREZCA */
+    background-size: 200px !important; 
+    
+    /* Esto lo manda al fondo de todo */
+    z-index: -1; 
+    pointer-events: none;
 }
 
-/* Asegúrate de que los mensajes se vean por encima del fondo */
-#chat-box > * {
-    position: relative;
-    z-index: 1;
-     }
 
-     
+
 
 
 /* --- INPUT AREA --- */
