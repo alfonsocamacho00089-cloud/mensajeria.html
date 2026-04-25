@@ -22,18 +22,7 @@
     -webkit-tap-highlight-color: transparent;
 }
 /* CAPA DE GOKU: Independiente de todo */
-.fondo-estatico {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    background-image: url('./assets/tu-foto-de-goku.jpg');
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-    z-index: -1; 
-}
+
 body {
     font-family: sans-serif;
     background-color: #000000;
@@ -444,18 +433,7 @@ margin: 0;
     
     <div id="chat-box">
 </div>
-    <div class="fondo-estatico"></div> ```
-
----
-
-### ¿Por qué esto sí va a funcionar?
-Al sacar la imagen del `body` y ponerla en `.fondo-estatico`, la imagen **ya no es parte del flujo de la app**. 
-1.  El `body` ahora tiene `overflow: hidden`, lo que significa: "Si algo dentro de mí quiere ser más grande que la pantalla, no lo dejo".
-2.  El `#chat-box` tiene `height: 0` y `flex: 1`, lo que significa: "Toma todo el espacio que sobra, pero no empujes las paredes".
-
-**Pruébalo así.** Al quitarle la carga de la imagen al `body`, el navegador procesa mucho más rápido el tamaño real de la pantalla. ¡Ese es el ajuste final!
-  
-
+    
 
     <div id="modal-registro" class="modal">
         <div class="modal-cover">
