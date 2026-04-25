@@ -20,57 +20,36 @@
     -webkit-tap-highlight-color: transparent;
 }
 
+
+    /* 1. Bloquea el cuerpo para que no rebote */
 body {
-    font-family: sans-serif;
-    background-color: #000000;
-    background-image: url('./assets/tu-foto-de-goku.jpg'); 
-    background-attachment: fixed; 
-    background-position: center;
-    background-size: cover;
-    background-repeat: no-repeat;
     margin: 0;
-    height: 100dvh; /* Mantenemos el alto dinámico */
-    width: 100vw;
+    height: 100vh; /* Usa vh estándar para máxima compatibilidad */
+    height: -webkit-fill-available;
     display: flex;
     flex-direction: column;
-    overflow: hidden; /* IMPORTANTE: No pongas position: fixed aquí */
+    overflow: hidden;
+    position: fixed; /* Esto es lo que evita que el teclado empuje el fondo */
+    width: 100%;
 }
 
+/* 2. El chat se ajusta solito al espacio que quede */
 #chat-box {
     flex: 1;
     overflow-y: auto;
-    padding: 20px;
-    padding-bottom: 100px !important; /* Ajustado para que no sobre tanto espacio */
-    display: flex;
-    flex-direction: column; 
-    gap: 4px;
+    padding-bottom: 100px;
     -webkit-overflow-scrolling: touch;
-    
-    /* Filtro de desvanecimiento corregido para que el texto llegue más abajo */
-    mask-image: linear-gradient(to bottom, black 92%, transparent 100%);
-    -webkit-mask-image: linear-gradient(to bottom, black 92%, transparent 100%);
-    
-    /* El logo de fondo del chat */
-    background-image: linear-gradient(rgba(11, 20, 26, 0.7), rgba(11, 20, 26, 0.7)), 
-                      url('./assets/logo.webp');
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
 }
 
+/* 3. El input se clava al fondo sin importar qué */
 .contenedor-flotante {
-    position: fixed;
+    position: absolute; /* Cambia fixed por absolute dentro de un body fijo */
     bottom: 0;
-    left: 0;
     width: 100%;
-    display: flex;
-    align-items: flex-end;
+    z-index: 9999;
     padding: 10px;
-    gap: 8px;
-    z-index: 9999; /* Lo subimos al máximo */
-    background: rgba(0, 0, 0, 0.2); 
+    background: rgba(0, 0, 0, 0.5);
     backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
 }
 
 
