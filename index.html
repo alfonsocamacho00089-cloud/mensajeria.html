@@ -1494,58 +1494,7 @@ function previsualizarMiFoto(input) {
     }
 }
 
-function abrirPerfilContacto() {
-    const nomH = document.getElementById('nombre-dueño-header');
-    const fotoH = document.getElementById('foto-perfil-header');
-    const mNom = document.getElementById('perfil-nombre');
-    const mFoto = document.getElementById('perfil-foto-grande');
 
-    if (mNom && nomH) mNom.innerText = nomH.innerText;
-
-    if (mFoto && fotoH) {
-        if (fotoH.style.display !== "none") {
-            mFoto.src = fotoH.src;
-        } else {
-            mFoto.src = 'https://via.placeholder.com/150';
-        }
-    }
-    
-    if (document.getElementById('modal-perfil')) {
-        document.getElementById('modal-perfil').style.display = 'flex';
-    }
-}
-
-async function eliminarChatEspecifico() {
-    const inputId = document.querySelector('#target-id');
-    
-    if (inputId && inputId.value) {
-        const idDestino = inputId.value;
-        if (confirm("¿Eliminar mensajes de este chat?")) {
-            localStorage.removeItem('chat_' + idDestino);
-            localStorage.setItem('unread_' + idDestino, 0);
-            if (document.getElementById('chat-box')) document.getElementById('chat-box').innerHTML = "";
-            if (typeof pintarAgendaContactos === "function") pintarAgendaContactos();
-            if (document.getElementById('modal-perfil')) document.getElementById('modal-perfil').style.display = 'none';
-        }
-    } else {
-        alert("Selecciona un chat primero");
-    }
-}
-
-async function eliminarContactoDeAgenda() {
-    const inputId = document.querySelector('#target-id');
-    
-    if (inputId && inputId.value) {
-        const idABorrar = inputId.value;
-        if (confirm("¿Eliminar contacto?")) {
-            let lista = JSON.parse(localStorage.getItem('mis_contactos')) || [];
-            lista = lista.filter(c => c.id !== idABorrar);
-            localStorage.setItem('mis_contactos', JSON.stringify(lista));
-            if (typeof pintarAgendaContactos === "function") pintarAgendaContactos();
-            if (document.getElementById('modal-perfil')) document.getElementById('modal-perfil').style.display = 'none';
-        }
-    }
-     }
      
 
 
