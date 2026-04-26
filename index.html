@@ -1180,18 +1180,7 @@ const fotoURL = contacto.foto || 'https://via.placeholder.com/45';
     }); 
  }
 
-        // 3. El evento click corregido
-        btn.onclick = () => {
-            cargarConversacionCon(contacto.id, contacto.nombre, fotoURL); 
-            
-            if (typeof actualizarListaConversaciones === "function") {
-                actualizarListaConversaciones(contacto.id, contacto.nombre);
-            }
-        }; // Aquí se cierra el onclick correctamente
-        
-        lista.appendChild(btn);
-    }); // Aquí se cierra el forEach
-} // Aquí se cierra la función
+      
 
  
 // Reemplaza el bloque final por este:
