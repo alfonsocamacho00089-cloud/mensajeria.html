@@ -1090,10 +1090,31 @@ function cargarConversacionCon(idDestino, nombreDestino, fotoDestino) {
         // ... (tu código de limpieza de box y targetID)
 
     const imgHeader = document.getElementById('foto-perfil-header');
-    if (imgHeader) {
-        // Usamos fotoDestino que viene del clic en la agenda
-        imgHeader.src = fotoDestino || 'https://via.placeholder.com/40';
+const contenedorHeader = imgHeader.parentElement; // El div que contiene la foto
+
+if (imgHeader) {
+    if (fotoDestino && !fotoDestino.includes('placeholder.com')) {
+        imgHeader.src = fotoDestino;
+        imgHeader.style.display = "block";
+        // Si tenías un div de inicial ahí, lo ocultas
+        if(document.getElementById('inicial-header')) document.getElementById('inicial-header').remove();
+    } else {
+        // Ocultamos la imagen y creamos el círculo dorado para el header
+        imgHeader.style.display = "none";
+        const inicialH = nombreDestino ? nombreDestino.charAt(0).toUpperCase() : '?';
+        
+        // Creamos un div temporal para la inicial si no existe
+        let divInicial = document.getElementById('inicial-header');
+        if(!divInicial){
+            divInicial = document.createElement('div');
+            divInicial.id = 'inicial-header';
+            contenedorHeader.insertBefore(divInicial, imgHeader);
+        }
+        
+        divInicial.innerHTML = inicialH;
+        divInicial.setAttribute('style', 'width:40px; height:40px; border-radius:50%; background:#ffd700; color:#000; display:flex; align-items:center; justify-content:center; font-weight:900; margin-right:10px; border:1px solid #000;');
     }
+}
     
 
     // 3. Buscamos los mensajes de ESE contacto en LocalStorage
@@ -1135,20 +1156,26 @@ function cargarConversacionCon(idDestino, nombreDestino, fotoDestino) {
         const badgeHTML = numNoLeidos > 0 ? `<div class="contador-nube">${numNoLeidos}</div>` : '';
 
         // Definimos la foto una sola vez
-        const fotoURL = contacto.foto || 'https://via.placeholder.com/45';
+        // 1. Sacamos la inicial (La ponemos en mayúscula)
+const inicial = contacto.nombre ? contacto.nombre.charAt(0).toUpperCase() : '?';
 
-        const btn = document.createElement('div');
-        btn.className = 'fila-contacto'; 
+// 2. Pintamos el contenido
+// Si la foto es la de placeholder o no existe, mostramos el círculo dorado
+const tieneFoto = contacto.foto && !contacto.foto.includes('placeholder.com');
 
-        // 2. Pintamos el contenido (Solo una vez)
-        btn.innerHTML = `
-            <img src="${fotoURL}" class="foto-perfil" style="width:45px; height:45px; border-radius:50%; object-fit:cover;">
-            <div style="flex-grow: 1; margin-left: 10px;">
-                <div style="font-weight: bold; color: white;">${contacto.nombre}</div>
-                <div style="font-size: 12px; color: #8696a0;">ID: ${contacto.id}</div>
-            </div>
-            ${badgeHTML} 
-        `;
+btn.innerHTML = `
+    <div style="width:45px; height:45px; position: relative;">
+        ${tieneFoto ? 
+            `<img src="${contacto.foto}" class="foto-perfil" style="width:45px; height:45px; border-radius:50%; object-fit:cover;">` : 
+            `<div style="width:45px; height:45px; border-radius:50%; background:#ffd700; color:#000; display:flex; align-items:center; justify-content:center; font-weight:900; font-size:20px; border: 2px solid #000;">${inicial}</div>`
+        }
+    </div>
+    <div style="flex-grow: 1; margin-left: 10px;">
+        <div style="font-weight: bold; color: white;">${contacto.nombre}</div>
+        <div style="font-size: 12px; color: #8696a0;">ID: ${contacto.id}</div>
+    </div>
+    ${badgeHTML} 
+`;
 
         // 3. El evento click corregido
         btn.onclick = () => {
