@@ -1375,27 +1375,30 @@ function cargarMensajesLocales() {
 }
          
 function renderizarMensajes(listaDeMensajes) {
+function renderizarMensajes(listaDeMensajes) {
     const chatBox = document.getElementById('chat-box');
-    chatBox.innerHTML = ''; // Limpiamos para no duplicar
+    if (!chatBox) return;
+    chatBox.innerHTML = ''; 
 
     listaDeMensajes.forEach(msg => {
         const div = document.createElement('div');
-        
-        // Aquí usamos la "clase" que vimos en tu consola (msg-izquierda o msg-derecha)
         div.className = `msg-burbuja ${msg.clase}`; 
         
+        // Definimos el check aquí mismo para que no dé error
+        const checks = (msg.clase.includes('derecha')) ? ' ✓✓' : '';
+        const tiempo = "17:33"; // Aquí podrías usar msg.hora si la tienes
+
         div.innerHTML = `
             ${msg.texto}
             <div class="msg-info">
-                <span class="tiempo">17:33</span><span class="checks" style="color: #4fc3f7;">${checkIcon}</span>
-        
+                <span class="tiempo">${tiempo}</span>
+                <span class="checks" style="color: #4fc3f7;">${checks}</span>
             </div>
         `;
         
         chatBox.appendChild(div);
     });
     
-    // Auto-scroll al último mensaje
     chatBox.scrollTop = chatBox.scrollHeight;
 }
          
