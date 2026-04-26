@@ -1040,54 +1040,7 @@ function manejarBotonIdentidad() {
     }
 }
         
-async function guardarNuevoContacto() {
-    document.getElementById('modal-qr').style.display = 'none';
-}
-        
-    // 1. Capturamos los datos del modal
-    const nombre = document.getElementById('nuevo-nombre').value.trim();
-    const idAGuardar = document.getElementById('target-id').value.trim();
 
-    if (!idAGuardar || !nombre) {
-        alert("⚠️ Pedro, escribe el nombre e ID para guardar.");
-        return;
-    }
-
-    // 2. Traemos la agenda vieja del teléfono (localStorage)
-    let agenda = JSON.parse(localStorage.getItem('mis_contactos')) || [];
-    
-    // 3. Evitar duplicados
-    const existe = agenda.find(c => c.id === idAGuardar);
-    if (existe) {
-        alert("Este ID ya está en tu agenda como: " + existe.nombre);
-        return;
-    }
-// 3.5 Buscar foto en Firebase antes de guardar
-    const snapshot = await db.ref('usuarios/' + idAGuardar).once('value');
-    const fotoFirebase = (snapshot.val() && snapshot.val().foto) ? snapshot.val().foto : "";// 3.5 Buscar foto en Firebase antes de guardar
-    const snapshot = await db.ref('usuarios/' + idAGuardar).once('value');
-    const fotoFirebase = (snapshot.val() && snapshot.val().foto) ? snapshot.val().foto : "";
-
-         
-    // 4. Guardamos el nuevo contacto (Ahora con foto)
-    agenda.push({ nombre: nombre, id: idAGuardar, foto: fotoFirebase });
-    localStorage.setItem('mis_contactos', JSON.stringify(agenda));
-    alert("✅ Contacto " + nombre + " guardado con éxito.");
-
-    // 5. Limpiamos y cerramos el modal
-    document.getElementById('nuevo-nombre').value = "";
-    document.getElementById('target-id').value = "";
-    document.getElementById('modal-nuevocontacto').style.display = 'none';
-// Agrega esta línea al final para refrescar la lista sin salir
-    pintarAgendaContactos();
-    // 6. ¡MUY IMPORTANTE! Refrescar la lista del modal QR
-    // Si tu función para cargar la lista se llama diferente, cámbiala aquí
-    if (typeof cargarContactos === "function") {
-        cargarContactos(); 
-    } else if (typeof mostrarContactos === "function") {
-        mostrarContactos();
-    }
-     }
      
 
 function cargarConversacionCon(idDestino, nombreDestino, fotoDestino) {
