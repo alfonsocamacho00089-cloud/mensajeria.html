@@ -1093,26 +1093,31 @@ function cargarConversacionCon(idDestino, nombreDestino, fotoDestino) {
 const contenedorHeader = imgHeader.parentElement; // El div que contiene la foto
 
 if (imgHeader) {
+    // 1. Borramos cualquier inicial vieja que se haya quedado pegada
+    if(document.getElementById('inicial-header')) document.getElementById('inicial-header').remove();
+
     if (fotoDestino && !fotoDestino.includes('placeholder.com')) {
+        // --- CASO CON FOTO REAL ---
         imgHeader.src = fotoDestino;
-        imgHeader.style.display = "block";
-        // Si tenías un div de inicial ahí, lo ocultas
-        if(document.getElementById('inicial-header')) document.getElementById('inicial-header').remove();
+        imgHeader.style.display = "block"; // Aseguramos que se vea la imagen
+        imgHeader.setAttribute('style', 'width:40px; height:40px; border-radius:50%; object-fit:cover;');
     } else {
-        // Ocultamos la imagen y creamos el círculo dorado para el header
-        imgHeader.style.display = "none";
+        // --- CASO SIN FOTO (INICIAL DORADA) ---
+        imgHeader.style.display = "none"; // Ocultamos el monigote gris feo
+        
+        // Creamos el círculo dorado
         const inicialH = nombreDestino ? nombreDestino.charAt(0).toUpperCase() : '?';
+        const divInicial = document.createElement('div');
+        divInicial.id = 'inicial-header';
         
-        // Creamos un div temporal para la inicial si no existe
-        let divInicial = document.getElementById('inicial-header');
-        if(!divInicial){
-            divInicial = document.createElement('div');
-            divInicial.id = 'inicial-header';
-            contenedorHeader.insertBefore(divInicial, imgHeader);
-        }
+        // ¡IMPORTANTE! Aquí es donde le ponemos la letra:
+        divInicial.innerText = inicialH; 
         
-        divInicial.innerHTML = inicialH;
-        divInicial.setAttribute('style', 'width:40px; height:40px; border-radius:50%; background:#ffd700; color:#000; display:flex; align-items:center; justify-content:center; font-weight:900; margin-right:10px; border:1px solid #000;');
+        // Le damos el estilo dorado espectacular
+        divInicial.setAttribute('style', 'width:40px; height:40px; border-radius:50%; background:#ffd700; color:#000; display:flex; align-items:center; justify-content:center; font-weight:900; font-size:18px; margin-right:10px; border:2px solid #000; flex-shrink: 0;');
+        
+        // Lo metemos en el header, JUSTO ANTES de la imagen oculta
+        contenedorHeader.insertBefore(divInicial, imgHeader);
     }
 }
     
