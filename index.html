@@ -1377,22 +1377,28 @@ function cargarMensajesLocales() {
      
 function renderizarMensajes(listaDeMensajes) {
     const chatBox = document.getElementById('chat-box');
-    if (!chatBox) return;
+    
+    // Validación de seguridad
+    if (!chatBox || !Array.isArray(listaDeMensajes)) return;
+
     chatBox.innerHTML = ''; 
 
     listaDeMensajes.forEach(msg => {
         const div = document.createElement('div');
-        div.className = `msg-burbuja ${msg.clase}`; 
         
-        // Definimos el check aquí mismo para que no dé error
-        const checks = (msg.clase.includes('derecha')) ? ' ✓✓' : '';
-        const tiempo = "17:33"; // Aquí podrías usar msg.hora si la tienes
+        // Si no hay clase definida, le ponemos 'msg-izquierda' por defecto
+        const tipoClase = msg.clase || 'msg-izquierda';
+        div.className = `msg-burbuja ${tipoClase}`; 
+        
+        // Lógica de checks segura (sin variables externas)
+        const checkHTML = tipoClase.includes('derecha') ? ' ✓✓' : '';
+        const textoSeguro = msg.texto || "Mensaje vacío";
 
         div.innerHTML = `
-            ${msg.texto}
+            ${textoSeguro}
             <div class="msg-info">
-                <span class="tiempo">${tiempo}</span>
-                <span class="checks" style="color: #4fc3f7;">${checks}</span>
+                <span class="tiempo">17:33</span>
+                <span class="checks" style="color: #4fc3f7;">${checkHTML}</span>
             </div>
         `;
         
@@ -1400,7 +1406,7 @@ function renderizarMensajes(listaDeMensajes) {
     });
     
     chatBox.scrollTop = chatBox.scrollHeight;
-}
+     }
          
 function gestionarQR() {
     const seccion = document.getElementById('seccion-mi-qr');
