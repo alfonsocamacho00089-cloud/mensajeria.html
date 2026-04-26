@@ -1509,95 +1509,83 @@ async function guardarCambiosPerfil() {
     }
 }
 
+
 function abrirPerfilContacto() {
-    const nombreActual = document.getElementById('nombre-dueño-header').innerText;
-    const imgHeader = document.getElementById('foto-perfil-header');
-    
+    const nombreHeader = document.getElementById('nombre-dueño-header');
+    const fotoHeader = document.getElementById('foto-perfil-header');
     const modalNombre = document.getElementById('perfil-nombre');
     const modalFoto = document.getElementById('perfil-foto-grande');
-    
-    if(modalNombre) modalNombre.innerText = nombreActual;
 
-    // LÓGICA PARA LA FOTO:
-    if(imgHeader && imgHeader.style.display !== "none") {
-        // Si la imagen se está viendo, la usamos
-        modalFoto.src = imgHeader.src;
-    } else {
-        // Si la imagen está oculta (porque hay inicial dorada), 
-        // podrías poner una imagen por defecto o dejarla vacía
-        modalFoto.src = 'https://via.placeholder.com/150'; 
+    if (modalNombre && nombreHeader) {
+        modalNombre.innerText = nombreHeader.innerText;
     }
 
-    document.getElementById('modal-perfil').style.display = 'flex';
+    if (modalFoto && fotoHeader) {
+        // Si la foto del header se está viendo, la usamos
+        if (fotoHeader.style.display !== "none") {
+            modalFoto.src = fotoHeader.src;
+        } else {
+            // Si hay inicial dorada, ponemos una por defecto en el modal
+            modalFoto.src = 'https://via.placeholder.com/150';
+        }
+    }
+    
+    const modal = document.getElementById('modal-perfil');
+    if (modal) modal.style.display = 'flex';
 }
 
 async function eliminarChatEspecifico() {
-    // 1. Obtenemos el ID del contacto que está cargado actualmente en tu input oculto
-    const idDestino = document.querySelector('#target-id').value;
-    const nombreDestino = document.getElementById('nombre-dueño-header')?.innerText || "este contacto";
+    const inputTarget = document.querySelector('#target-id');
+    const nombreHeader = document.getElementById('nombre-dueño-header');
+    
+    if (!inputTarget || !inputTarget.value) {
+        alert("No hay un chat seleccionado");
+        return;
+    }
 
-    if (!idDestino) return alert("No hay un chat seleccionado para eliminar");
+    const idDestino = inputTarget.value;
+    const nombre = nombreHeader ? nombreHeader.innerText : "este contacto";
 
-    if (confirm(`¿Eliminar todos los mensajes con ${nombreDestino}?`)) {
-        
-        // 2. ELIMINACIÓN EN LOCALSTORAGE (Donde lo guardas actualmente)
-        const claveChat = 'chat_' + idDestino;
-        localStorage.removeItem(claveChat);
-
-        // 3. ELIMINACIÓN EN INDEXEDDB (Para tu nueva estructura DropisDB)
-        // Usamos la lógica de borrar que definimos antes
-        const db = await abrirDB();
-        const tx = db.transaction('mensajes', 'readwrite');
-        const store = tx.objectStore('mensajes');
-        
-        // Borramos usando el prefijo y el ID único
-        store.delete('msg_' + idDestino);
-
-        // 4. LIMPIEZA VISUAL
-        const box = document.getElementById('chat-box');
-        if (box) box.innerHTML = ""; 
-
-        // 5. REFRESCAR AGENDA
-        // Esto quita contadores de mensajes no leídos si los hubiera
+    if (confirm("¿Eliminar mensajes con " + nombre + "?")) {
+        localStorage.removeItem('chat_' + idDestino);
         localStorage.setItem('unread_' + idDestino, 0);
-        pintarAgendaContactos();
 
-        // 6. CERRAR MODAL (Si el botón estaba dentro del perfil)
-        const modalPerfil = document.getElementById('modal-perfil');
-        if (modalPerfil) modalPerfil.style.display = 'none';
+        const box = document.getElementById('chat-box');
+        if (box) box.innerHTML = "";
 
-        console.log("✅ Chat borrado con éxito para ID: " + idDestino);
-    }
-}
-     }
-async function eliminarContactoDeAgenda() {
-    // 1. Obtenemos el ID del contacto que está cargado en el input oculto
-    const idABorrar = document.querySelector('#target-id').value;
-    const nombreABorrar = document.getElementById('perfil-nombre')?.innerText || "este contacto";
+        if (typeof pintarAgendaContactos === "function") {
+            pintarAgendaContactos();
+        }
 
-    if (!idABorrar) return;
-
-    if (confirm(`¿Eliminar a ${nombreABorrar} de tu agenda? (Los mensajes se conservarán)`)) {
+        const mPerfil = document.getElementById('modal-perfil');
+        if (mPerfil) mPerfil.style.display = 'none';
         
-        // 2. Traemos la lista actual
-        let contactos = JSON.parse(localStorage.getItem('mis_contactos')) || [];
-
-        // 3. Filtramos la lista para quitar a ese ID
-        contactos = contactos.filter(c => c.id !== idABorrar);
-
-        // 4. Guardamos la nueva lista limpia
-        localStorage.setItem('mis_contactos', JSON.stringify(contactos));
-
-        // 5. Refrescamos la lista visual en el modal de la agenda
-        pintarAgendaContactos();
-
-        // 6. Cerramos los modales
-        document.getElementById('modal-perfil').style.display = 'none';
-        cerrarModalQR(); // Para volver al chat principal
-
-        alert(`${nombreABorrar} ha sido eliminado de tu agenda.`);
+        console.log("Chat borrado");
     }
 }
+
+async function eliminarContactoDeAgenda() {
+    const inputTarget = document.querySelector('#target-id');
+    if (!inputTarget || !inputTarget.value) return;
+
+    const idABorrar = inputTarget.value;
+
+    if (confirm("¿Eliminar de la agenda?")) {
+        let lista = JSON.parse(localStorage.getItem('mis_contactos')) || [];
+        lista = lista.filter(function(c) { return c.id !== idABorrar; });
+        localStorage.setItem('mis_contactos', JSON.stringify(lista));
+
+        if (typeof pintarAgendaContactos === "function") {
+            pintarAgendaContactos();
+        }
+
+        const mPerfil = document.getElementById('modal-perfil');
+        if (mPerfil) mPerfil.style.display = 'none';
+        
+        alert("Contacto eliminado");
+    }
+}
+     
 // Detecta cuando el teclado sube (cambio de tamaño visual)
 if (window.visualViewport) {
     const vv = window.visualViewport;
