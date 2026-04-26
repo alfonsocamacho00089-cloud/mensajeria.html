@@ -1040,56 +1040,55 @@ function manejarBotonIdentidad() {
     }
 }
         
+async function guardarNuevoContacto() {
+    // 1. Capturamos los datos
+    const nombreInput = document.getElementById('nuevo-nombre');
+    const idInput = document.getElementById('target-id');
+    
+    if (!nombreInput || !idInput) return;
 
-     async function guardarNuevoContacto() {
-    // 1. Capturamos los datos del modal
-    const nombre = document.getElementById('nuevo-nombre').value.trim();
-    const idAGuardar = document.getElementById('target-id').value.trim();
+    const nombre = nombreInput.value.trim();
+    const idAGuardar = idInput.value.trim();
 
     if (!idAGuardar || !nombre) {
-        alert("⚠️ Pedro, escribe el nombre e ID para guardar.");
-        return;
-    }
-
-    // 2. Traemos la agenda vieja del teléfono (localStorage)
-    let agenda = JSON.parse(localStorage.getItem('mis_contactos')) || [];
-    
-    // 3. Evitar duplicados
-    const existe = agenda.find(c => c.id === idAGuardar);
-    if (existe) {
-        alert("Este ID ya está en tu agenda como: " + existe.nombre);
-        return;
+        alert("⚠️ Pedro, escribe el nombre e ID.");
+        return; 
     }
 
     try {
-        // 3.5 Buscar foto en Firebase antes de guardar
+        // 2. Buscamos la foto en Firebase
         const snapshot = await db.ref('usuarios/' + idAGuardar).once('value');
-        const fotoFirebase = (snapshot.val() && snapshot.val().foto) ? snapshot.val().foto : "";
+        const datos = snapshot.val();
+        const fotoFirebase = (datos && datos.foto) ? datos.foto : "";
 
-        // 4. Guardamos el nuevo contacto en la lista (Ahora con su foto)
-        agenda.push({ nombre: nombre, id: idAGuardar, foto: fotoFirebase });
-        localStorage.setItem('mis_contactos', JSON.stringify(agenda));
+        // 3. Traemos la agenda y evitamos duplicados
+        let agenda = JSON.parse(localStorage.getItem('mis_contactos')) || [];
+        const existe = agenda.find(c => c.id === idAGuardar);
         
-        alert("✅ Contacto " + nombre + " guardado con éxito.");
+        if (existe) {
+            alert("Este ID ya está en tu agenda.");
+        } else {
+            // 4. Guardamos
+            agenda.push({ nombre: nombre, id: idAGuardar, foto: fotoFirebase });
+            localStorage.setItem('mis_contactos', JSON.stringify(agenda));
+            alert("✅ Contacto guardado.");
 
-        // 5. Limpiamos y cerramos los modales
-        document.getElementById('nuevo-nombre').value = "";
-        document.getElementById('target-id').value = "";
-        document.getElementById('modal-nuevocontacto').style.display = 'none';
-        
-        const modalQR = document.getElementById('modal-qr');
-        if (modalQR) modalQR.style.display = 'none';
-
-        // 6. Refrescamos la lista visual
-        if (typeof pintarAgendaContactos === "function") {
-            pintarAgendaContactos();
+            // 5. Limpiamos y cerramos
+            nombreInput.value = "";
+            idInput.value = "";
+            document.getElementById('modal-nuevocontacto').style.display = 'none';
+            
+            // 6. Refrescamos la lista
+            if (typeof pintarAgendaContactos === "function") {
+                pintarAgendaContactos();
+            }
         }
-
-    } catch (error) {
-        console.error("Error al buscar en Firebase:", error);
-        alert("Hubo un error al conectar con la base de datos.");
+    } catch (e) {
+        console.error("Error en Firebase:", e);
+        alert("Error al conectar con la base de datos.");
     }
-} // <--- ESTA ÚNICA LLAVE CIERRA TODO EL BLOQUE
+     }
+     
 
 function cargarConversacionCon(idDestino, nombreDestino, fotoDestino) {
     const box = document.getElementById('chat-box');
@@ -1464,13 +1463,6 @@ function cerrarModalNuevo() {
 // Variable para la foto nueva
 
 
-
-
-
-        
-        
-
-
 // Variable para la foto nueva
 let miFotoBase64 = ""; 
 
@@ -1533,7 +1525,7 @@ async function guardarCambiosPerfil() {
         alert("Error al guardar cambios");
     }
 }
-     }
+     
 
 function abrirPerfilContacto() {
     const nombreActual = document.getElementById('nombre-dueño-header').innerText;
@@ -1558,7 +1550,7 @@ function abrirPerfilContacto() {
 }
 
 
-
+     
 
 
 async function eliminarChatEspecifico() {
@@ -1637,7 +1629,7 @@ async function eliminarChatEspecifico() {
 
 }
 
-
+     
 
 async function eliminarContactoDeAgenda() {
 
@@ -1693,7 +1685,8 @@ async function eliminarContactoDeAgenda() {
 
     }
 
-    }
+     }
+     
 
 
    
