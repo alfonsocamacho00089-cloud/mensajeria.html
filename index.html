@@ -1080,58 +1080,41 @@ function cargarConversacionCon(idDestino, nombreDestino, fotoDestino) {
     const box = document.getElementById('chat-box');
     if (!box) return;
 
-    // 1. Limpiamos el chat visualmente
     box.innerHTML = ""; 
 
-    // 2. Actualizamos la interfaz (ID y Nombre arriba)
-    document.querySelector('#target-id').value = idDestino;
-    if (document.getElementById('nombre-dueño-header')) {
-        document.getElementById('nombre-dueño-header').innerText = nombreDestino;
-    }
+    // 1. Guardamos el ID en el input oculto
+    const inputTarget = document.querySelector('#target-id');
+    if(inputTarget) inputTarget.value = idDestino;
 
-    // 2. NUEVO: Actualizamos la FOTO de perfil
-  
-    // SOLO AGREGA ESTO:
-        // ... (tu código de limpieza de box y targetID)
+    // 2. Actualizamos nombre arriba
+    const txtNombre = document.getElementById('nombre-dueño-header');
+    if (txtNombre) txtNombre.innerText = nombreDestino;
 
+    // 3. Manejo de Foto (LA FORMA SEGURA)
     const imgHeader = document.getElementById('foto-perfil-header');
-
-if (imgHeader) {
-    // Tu lógica original intacta, solo le sumamos el "Plan B" si falla
-    imgHeader.src = fotoDestino || 'https://via.placeholder.com/40';
-
-    // Si la foto no existe o es placeholder, activamos el estilo dorado
-    if (!fotoDestino || fotoDestino.includes('placeholder.com')) {
-        const inicial = nombreDestino ? nombreDestino.charAt(0).toUpperCase() : '?';
-        
-        // Convertimos la misma imagen en el círculo dorado con este truco de CSS:
-        imgHeader.style.display = "none"; // Ocultamos la imagen rota
-        
-        // Si ya tienes un contenedor para la inicial, úsalo, si no, lo más fácil es:
-        imgHeader.outerHTML = `<div id="foto-perfil-header" class="foto-perfil" style="width:40px; height:40px; border-radius:50%; background:#ffd700; color:#000; display:flex; align-items:center; justify-content:center; font-weight:900; border:2px solid #000;">${inicial}</div>`;
+    if (imgHeader) {
+        // En lugar de borrar el elemento, solo jugamos con el SRC
+        // Si no hay foto, usamos un avatar por defecto para no romper el layout
+        imgHeader.src = fotoDestino || 'https://ui-avatars.com/api/?name=' + nombreDestino + '&background=ffd700&color=000';
+        imgHeader.style.display = "block"; 
     }
-}
 
-    // 3. Buscamos los mensajes de ESE contacto en LocalStorage
+    // 4. Cargar mensajes
     const claveChat = 'chat_' + idDestino;
     const mensajes = JSON.parse(localStorage.getItem(claveChat)) || [];
-
-    // 4. Los pintamos uno por uno
+    
+    // Usamos tu función pintarMensaje que ya sabemos que funciona
     mensajes.forEach(m => {
-        pintarMensaje(m.texto, m.clase);
+        if(typeof pintarMensaje === "function") pintarMensaje(m.texto, m.clase);
     });
+
     localStorage.setItem('unread_' + idDestino, 0);
-    
-    // Refrescar la agenda para que se borre el círculo verde/rojo
     pintarAgendaContactos();
-    console.log("📂 Historial cargado con: " + nombreDestino);
-    
-    // 5. Cerramos el modal de contactos para empezar a escribir
     cerrarModalQR();
     
     const inputMsg = document.getElementById('msg-text');
     if(inputMsg) inputMsg.focus();
-}
+     }
      
      
  function pintarAgendaContactos() {
