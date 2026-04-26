@@ -1511,80 +1511,59 @@ async function guardarCambiosPerfil() {
 
 
 function abrirPerfilContacto() {
-    const nombreHeader = document.getElementById('nombre-dueño-header');
-    const fotoHeader = document.getElementById('foto-perfil-header');
-    const modalNombre = document.getElementById('perfil-nombre');
-    const modalFoto = document.getElementById('perfil-foto-grande');
+    const nombreH = document.getElementById('nombre-dueño-header');
+    const fotoH = document.getElementById('foto-perfil-header');
+    const mNombre = document.getElementById('perfil-nombre');
+    const mFoto = document.getElementById('perfil-foto-grande');
 
-    if (modalNombre && nombreHeader) {
-        modalNombre.innerText = nombreHeader.innerText;
-    }
+    if (mNombre && nombreH) mNombre.innerText = nombreH.innerText;
 
-    if (modalFoto && fotoHeader) {
-        // Si la foto del header se está viendo, la usamos
-        if (fotoHeader.style.display !== "none") {
-            modalFoto.src = fotoHeader.src;
+    if (mFoto && fotoH) {
+        if (fotoH.style.display !== "none") {
+            mFoto.src = fotoH.src;
         } else {
-            // Si hay inicial dorada, ponemos una por defecto en el modal
-            modalFoto.src = 'https://via.placeholder.com/150';
+            mFoto.src = 'https://via.placeholder.com/150';
         }
     }
     
-    const modal = document.getElementById('modal-perfil');
-    if (modal) modal.style.display = 'flex';
+    if (document.getElementById('modal-perfil')) {
+        document.getElementById('modal-perfil').style.display = 'flex';
+    }
 }
 
 async function eliminarChatEspecifico() {
-    const inputTarget = document.querySelector('#target-id');
-    const nombreHeader = document.getElementById('nombre-dueño-header');
+    const inputId = document.querySelector('#target-id');
     
-    if (!inputTarget || !inputTarget.value) {
-        alert("No hay un chat seleccionado");
-        return;
-    }
-
-    const idDestino = inputTarget.value;
-    const nombre = nombreHeader ? nombreHeader.innerText : "este contacto";
-
-    if (confirm("¿Eliminar mensajes con " + nombre + "?")) {
-        localStorage.removeItem('chat_' + idDestino);
-        localStorage.setItem('unread_' + idDestino, 0);
-
-        const box = document.getElementById('chat-box');
-        if (box) box.innerHTML = "";
-
-        if (typeof pintarAgendaContactos === "function") {
-            pintarAgendaContactos();
+    if (inputId && inputId.value) {
+        const idDestino = inputId.value;
+        if (confirm("¿Eliminar mensajes de este chat?")) {
+            localStorage.removeItem('chat_' + idDestino);
+            localStorage.setItem('unread_' + idDestino, 0);
+            if (document.getElementById('chat-box')) document.getElementById('chat-box').innerHTML = "";
+            if (typeof pintarAgendaContactos === "function") pintarAgendaContactos();
+            if (document.getElementById('modal-perfil')) document.getElementById('modal-perfil').style.display = 'none';
         }
-
-        const mPerfil = document.getElementById('modal-perfil');
-        if (mPerfil) mPerfil.style.display = 'none';
-        
-        console.log("Chat borrado");
+    } else {
+        alert("Selecciona un chat primero");
     }
 }
 
 async function eliminarContactoDeAgenda() {
-    const inputTarget = document.querySelector('#target-id');
-    if (!inputTarget || !inputTarget.value) return;
-
-    const idABorrar = inputTarget.value;
-
-    if (confirm("¿Eliminar de la agenda?")) {
-        let lista = JSON.parse(localStorage.getItem('mis_contactos')) || [];
-        lista = lista.filter(function(c) { return c.id !== idABorrar; });
-        localStorage.setItem('mis_contactos', JSON.stringify(lista));
-
-        if (typeof pintarAgendaContactos === "function") {
-            pintarAgendaContactos();
+    const inputId = document.querySelector('#target-id');
+    
+    if (inputId && inputId.value) {
+        const idABorrar = inputId.value;
+        if (confirm("¿Eliminar contacto?")) {
+            let lista = JSON.parse(localStorage.getItem('mis_contactos')) || [];
+            lista = lista.filter(c => c.id !== idABorrar);
+            localStorage.setItem('mis_contactos', JSON.stringify(lista));
+            if (typeof pintarAgendaContactos === "function") pintarAgendaContactos();
+            if (document.getElementById('modal-perfil')) document.getElementById('modal-perfil').style.display = 'none';
         }
-
-        const mPerfil = document.getElementById('modal-perfil');
-        if (mPerfil) mPerfil.style.display = 'none';
-        
-        alert("Contacto eliminado");
     }
 }
+
+
      
 // Detecta cuando el teclado sube (cambio de tamaño visual)
 if (window.visualViewport) {
