@@ -1510,21 +1510,26 @@ async function guardarCambiosPerfil() {
 }
 
 function abrirPerfilContacto() {
-    // 1. Sacamos los datos de TU header
     const nombreActual = document.getElementById('nombre-dueño-header').innerText;
-    const fotoActual = document.getElementById('foto-perfil-header').src;
+    const imgHeader = document.getElementById('foto-perfil-header');
     
-    // 2. Los ponemos en el modal de perfil (el que creamos en el paso anterior)
     const modalNombre = document.getElementById('perfil-nombre');
     const modalFoto = document.getElementById('perfil-foto-grande');
     
     if(modalNombre) modalNombre.innerText = nombreActual;
-    if(modalFoto) modalFoto.src = fotoActual;
 
-    // 3. Mostramos el modal
+    // LÓGICA PARA LA FOTO:
+    if(imgHeader && imgHeader.style.display !== "none") {
+        // Si la imagen se está viendo, la usamos
+        modalFoto.src = imgHeader.src;
+    } else {
+        // Si la imagen está oculta (porque hay inicial dorada), 
+        // podrías poner una imagen por defecto o dejarla vacía
+        modalFoto.src = 'https://via.placeholder.com/150'; 
+    }
+
     document.getElementById('modal-perfil').style.display = 'flex';
 }
-
 
 async function eliminarChatEspecifico() {
     // 1. Obtenemos el ID del contacto que está cargado actualmente en tu input oculto
