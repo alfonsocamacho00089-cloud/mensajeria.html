@@ -1145,31 +1145,40 @@ if (imgHeader) {
         const numNoLeidos = localStorage.getItem('unread_' + contacto.id) || 0;
         const badgeHTML = numNoLeidos > 0 ? `<div class="contador-nube">${numNoLeidos}</div>` : '';
 // AÑADE ESTA LÍNEA AQUÍ:
-const btn = document.createElement('div');
-btn.className = 'fila-contacto'; 
+const fotoURL = contacto.foto || 'https://via.placeholder.com/45';
 
-// 1. Sacamos la inicial... (el resto de tu código sigue igual)
-        // Definimos la foto una sola vez
-        // 1. Sacamos la inicial (La ponemos en mayúscula)
-const inicial = contacto.nombre ? contacto.nombre.charAt(0).toUpperCase() : '?';
+        const btn = document.createElement('div');
+        btn.className = 'fila-contacto'; 
 
-// 2. Pintamos el contenido
-// Si la foto es la de placeholder o no existe, mostramos el círculo dorado
-const tieneFoto = contacto.foto && !contacto.foto.includes('placeholder.com');
+        // 1. Sacamos la inicial de tu variable contacto.nombre
+        const inicial = contacto.nombre ? contacto.nombre.charAt(0).toUpperCase() : '?';
 
-btn.innerHTML = `
-    <div style="width:45px; height:45px; position: relative;">
-        ${tieneFoto ? 
-            `<img src="${contacto.foto}" class="foto-perfil" style="width:45px; height:45px; border-radius:50%; object-fit:cover;">` : 
-            `<div style="width:45px; height:45px; border-radius:50%; background:#ffd700; color:#000; display:flex; align-items:center; justify-content:center; font-weight:900; font-size:20px; border: 2px solid #000;">${inicial}</div>`
-        }
-    </div>
-    <div style="flex-grow: 1; margin-left: 10px;">
-        <div style="font-weight: bold; color: white;">${contacto.nombre}</div>
-        <div style="font-size: 12px; color: #8696a0;">ID: ${contacto.id}</div>
-    </div>
-    ${badgeHTML} 
-`;
+        // 2. Pintamos el contenido (Respetando tu estructura original)
+        // Solo cambiamos la parte de la <img> para que si es placeholder, use el círculo
+        btn.innerHTML = `
+            ${fotoURL.includes('placeholder.com') ? 
+                `<div class="foto-perfil" style="width:45px; height:45px; border-radius:50%; background:#ffd700; color:#000; display:flex; align-items:center; justify-content:center; font-weight:900; font-size:20px; border: 2px solid #000; flex-shrink:0;">${inicial}</div>` : 
+                `<img src="${fotoURL}" class="foto-perfil" style="width:45px; height:45px; border-radius:50%; object-fit:cover;">`
+            }
+            <div style="flex-grow: 1; margin-left: 10px;">
+                <div style="font-weight: bold; color: white;">${contacto.nombre}</div>
+                <div style="font-size: 12px; color: #8696a0;">ID: ${contacto.id}</div>
+            </div>
+            ${badgeHTML} 
+        `;
+
+        // 3. El evento click (Exactamente como tú lo tenías)
+        btn.onclick = () => {
+            cargarConversacionCon(contacto.id, contacto.nombre, fotoURL); 
+            
+            if (typeof actualizarListaConversaciones === "function") {
+                actualizarListaConversaciones(contacto.id, contacto.nombre);
+            }
+        }; 
+        
+        lista.appendChild(btn);
+    }); 
+ }
 
         // 3. El evento click corregido
         btn.onclick = () => {
