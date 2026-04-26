@@ -530,19 +530,21 @@ margin: 0;
     
 
     <div id="modal-registro" class="modal">
+        <div id="modal-registro" class="modal">
         <div class="modal-cover">
             <h3>CREA TU ID SPACE</h3>
-            <input type="text" id="reg-nombre" placeholder="Nombre" style="width:100%; padding:10px; margin:5px 0; color:#000;">
-            <input type="text" id="reg-apellido" placeholder="Apellido" style="width:100%; padding:10px; margin:5px 0; color:#000;">
-         <button onclick="ejecutarRegistroCompleto()" style="width: 100%; padding: 12px; background: #ffd700; border: none; border-radius: 10px; font-weight: bold; margin-top: 10px;">CREAR ID</button>
-        
+                       <input type="text" id="nuevo-nombre" placeholder="Nombre" style="width:80%;position: relative; left: 40px;  padding:20px; margin-bottom:30px; background:#1a1a1a; color:white; border:1px solid #999; border-radius:8px;">
+            <input type="text" id="reg-apellido" placeholder="Apellido" style="width:80%;position: relative; left: 40px;  padding:20px; margin-bottom:20px; background:#1a1a1a; color:white; border:1px solid #999; border-radius:8px;">
+         ="ejecutarRegistroCompleto()" style="width: 90%; position: absolute; left: 5%; bottom: 15px; padding: 12px; background: #ffd700;  border: none; border-radius: 20px; font-weight: bold; color: #000; cursor: pointer; font-size: 16px;">
+                CREAR ID</button>
+         <button onclic
         <p style="margin-top: 20px; font-size: 13px; color: #ffd700; cursor: pointer; text-decoration: underline;" 
    onclick="recuperarCuentaConID()">
-   ¿Ya tienes un ID Space? Toca aquí para ingresar o recuperar
+   ¿Ya tienes tu ID ? Toca aquí para ingresar o recuperar
         </p>
         
         </div>
-    </div>
+        </div>
     
     <div class="fondo-estatico"></div>
 
