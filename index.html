@@ -852,8 +852,7 @@ async function ejecutarRegistroCompleto() {
 }
 
 // --- 4. ANTENA SATELITAL ---
-
-  async function activarAntena() {
+async function activarAntena() {
     const miID = localStorage.getItem('mi_dropis_id');
     if (!miID) return;
 
@@ -875,110 +874,86 @@ async function ejecutarRegistroCompleto() {
             const emisorID = data.from; 
             const chatAbiertoActualmente = document.querySelector('#target-id').value;
 
-            // 1. Guardar mensaje en el historial
+            // 1. Guardar mensaje en el historial específico
             let clave = 'chat_' + emisorID;
             let historial = JSON.parse(localStorage.getItem(clave)) || [];
             historial.push({ texto: textoReal, clase: 'msg-izquierda' });
             localStorage.setItem(clave, JSON.stringify(historial));
 
-            // 2. Lógica de Notificaciones y Contadores
+            // 2. Lógica de Interfaz
             if (emisorID === chatAbiertoActualmente) {
                 pintarMensaje(textoReal, 'msg-izquierda');
             } else {
-                // Aumentar contador de mensajes no leídos
+                // Aumentar contador
                 let noLeidos = parseInt(localStorage.getItem('unread_' + emisorID)) || 0;
                 localStorage.setItem('unread_' + emisorID, noLeidos + 1);
                 
-                // Actualizar la lista de contactos visualmente
-                pintarAgendaContactos();
+                if (typeof pintarAgendaContactos === "function") pintarAgendaContactos();
 
-                // Notificación del teléfono (Arriba)
-                mostrarNotificacionNativa("Nuevo mensaje de SpaceChat", textoReal);
+                // NOTIFICACIÓN: Ahora sí dentro del flujo donde existen las variables
+                if ('serviceWorker' in navigator) {
+                    navigator.serviceWorker.ready.then(registration => {
+                        registration.showNotification("Nuevo mensaje de: " + emisorID, {
+                            body: textoReal,
+                            icon: 'https://cdn-icons-png.flaticon.com/512/733/733585.png',
+                            vibrate: [200, 100, 200],
+                            tag: 'nuevo-mensaje-' + emisorID,
+                            renotify: true
+                        });
+                    });
+                }
             }
 
             snapshot.ref.remove(); 
-        } catch (e) { console.error(e); }
+        } catch (e) { 
+            console.error("Error procesando mensaje:", e); 
+        }
     });
-}
+     }
 
-// Función para las notificaciones que salen arriba en el cel
-// En lugar de: mostrarNotificacionNativa(...)
-// Usa esto que despierta al Service Worker:
-
-if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.ready.then(registration => {
-        registration.showNotification("SpaceChat: " + emisorID, {
-            body: textoReal,
-            icon: 'https://cdn-icons-png.flaticon.com/512/733/733585.png',
-            badge: 'https://cdn-icons-png.flaticon.com/512/733/733585.png', // Icono chiquito para la barra
-            vibrate: [200, 100, 200], // ¡Haz que el cel vibre!
-            tag: 'nuevo-mensaje-' + emisorID, // Evita que se amontonen mil avisos
-            renotify: true
-        });
-    });
-         }
-       
-        
-async function enviarMensajeSatelital() {
-const inputMsg = document.querySelector('#msg-text');
-const inputTarget = document.querySelector('#target-id');
-const msg = inputMsg ? inputMsg.value.trim() : "";
-const targetID = inputTarget ? inputTarget.value.trim() : "";
-const miID = localStorage.getItem('mi_dropis_id') || "ID_DESCONOCIDO";
+     async function enviarMensajeSatelital() {
+    const inputMsg = document.querySelector('#msg-text');
+    const inputTarget = document.querySelector('#target-id');
+    const msg = inputMsg ? inputMsg.value.trim() : "";
+    const targetID = inputTarget ? inputTarget.value.trim() : "";
+    const miID = localStorage.getItem('mi_dropis_id') || "ID_DESCONOCIDO";
 
     if (!targetID || !msg) return alert("ID y Mensaje son obligatorios");
 
     try {
-        // 1. Preparamos el Payload (ProtoBuf)
         const root = await cargarProto();
         const SuperAppPayload = root.lookupType("SuperAppPayload");
-        // Antes de: const payload = SuperAppPayload.create({ chatText: msg });
-// Ofuscamos el mensaje para que no sea legible en la consola de Firebase
-const msgProtegido = btoa(unescape(encodeURIComponent(msg))); 
-const payload = SuperAppPayload.create({ chatText: msgProtegido });
-        
+        const msgProtegido = btoa(unescape(encodeURIComponent(msg))); 
+        const payload = SuperAppPayload.create({ chatText: msgProtegido });
         const buffer = SuperAppPayload.encode(payload).finish();
-        
-        // 2. Convertimos a Base64 para el viaje satelital
         const base64 = btoa(String.fromCharCode.apply(null, buffer));
-        // 3. Lo lanzamos a la cola del destinatario
+
         await db.ref('cola_satelital/' + targetID).push({
-            p: base64,         // El paquete cifrado/empaquetado
-            from: miID,        // Quién lo envía
-            ts: Date.now()     // Marca de tiempo
+            p: base64,
+            from: miID,
+            ts: Date.now()
         });
 
-        // 4. Pintamos nuestro propio mensaje en la derecha
         pintarMensaje(msg, 'msg-derecha');
-        // ... dentro de enviarMensajeSatelital, después de pintarMensaje(msg, 'msg-derecha');
 
+        // Guardar lo que envías en el chat correcto
+        let claveChat = 'chat_' + targetID;
+        let historialEnv = JSON.parse(localStorage.getItem(claveChat)) || [];
+        historialEnv.push({ texto: msg, clase: 'msg-derecha' });
+        localStorage.setItem(claveChat, JSON.stringify(historialEnv));
 
-// --- AÑADE ESTO PARA GUARDAR LO QUE ENVÍAS ---
-let historialEnv = JSON.parse(localStorage.getItem('chat_' + targetID)) || [];
-historialEnv.push({ texto: msg, clase: 'msg-derecha' });
-localStorage.setItem('chat_' + targetID, JSON.stringify(historialEnv));
-// ----------------------------------------------
-
-// ... (resto de tu código anterior)
-if (inputMsg) {
-    inputMsg.value = "";
-    inputMsg.style.height = '36px'; // Vuelve a ser pequeña
-    
-    // Mantiene el cursor activo y el teclado abierto
-    inputMsg.focus(); 
-}
-
+        if (inputMsg) {
+            inputMsg.value = "";
+            inputMsg.style.height = '36px'; 
+            inputMsg.focus(); 
+        }
         
-        
-        console.log("🚀 Mensaje lanzado al espacio hacia:", targetID);
-
+        console.log("🚀 Mensaje enviado a:", targetID);
     } catch (e) {
-// ... (resto de tu código)
-
-        console.error("❌ Fallo en el lanzamiento:", e);
-        alert("Error al enviar el mensaje.");
+        console.error("❌ Fallo en el envío:", e);
     }
-}
+     }
+   
 // --- 4. GESTIÓN DE TOKENS Y SERVICE WORKER ---
 
 // Registrar el Service Worker al cargar la página
