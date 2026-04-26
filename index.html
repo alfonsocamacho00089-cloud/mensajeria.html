@@ -538,45 +538,34 @@ margin: 0;
         <p style="color: #ffd700; font-family: monospace; font-size: 12px;">Vinculando Token Satelital</p>
     </div>
     </div>
+
 <div id="modal-qr" class="modal">
     <div class="modal-content" style="display: flex; flex-direction: column; height: 100dvh; position: relative; background: transparent;">
         
-        <div id="nombre-dueño-header-lista">
-    <span style="letter-spacing: 1px;">SPACECHAT</span>
-    <div onclick="alternarVistaPerfil()" style="cursor: pointer; color: #ffd700; font-size: 22px; padding: 0 10px; transition: 0.3s;" onmouseover="this.style.opacity='0.7'" onmouseout="this.style.opacity='1'">
-        ⋮
-    </div>
-        </div>
+        <div id="nombre-dueño-header-lista" style="background: #1a1a1a; color: #ffffff; padding: 15px; font-weight: 900; text-transform: uppercase; text-align: left; border-bottom: 1px solid #333; display: flex; justify-content: space-between; align-items: center;">
+            <span>SPACECHAT</span>
+            <div onclick="alternarVistaPerfil()" style="cursor: pointer; color: #ffd700; font-size: 22px; padding: 0 10px;">⋮</div>
+        </div> 
+
+        <div id="seccion-mi-perfil" style="display: none; padding: 15px; background: #0a0a0a; border-bottom: 1px solid #ffd700;">
+            </div>
+
+        <button onclick="abrirModalNuevoContacto()" style="position: absolute; right: 15px; bottom: 90px; background: rgba(255, 215, 0, 0.25); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border: 1px solid rgba(255, 215, 0, 0.4); border-radius: 50%; width: 55px; height: 55px; color: #ffd700; cursor: pointer; z-index: 100; font-size: 20px; display: flex; align-items: center; justify-content: center;"> + </button>
 
         <div id="cuerpo-modal-lista" style="flex-grow: 1; overflow-y: auto; padding: 0 15px 100px 15px;">
-            <div id="seccion-mi-qr" style="display: none; padding: 20px; flex-direction: column; align-items: center; border-bottom: 1px solid #444;">
-                <div id="contenedor-qr" style="background: white; padding: 10px; border-radius: 10px;"></div>
-                <button onclick="document.getElementById('seccion-mi-qr').style.display='none'" style="margin-top: 10px; color: #ffd700; background: transparent; border: none; cursor: pointer;">[ Ocultar QR ]</button>
             </div>
-            <h4 style="color: #ffd700; margin: 20px 0 10px 0; font-size: 14px; text-shadow: 1px 1px 2px black;">CONTACTOS</h4>
-            <div id="lista-contactos">
-                <p style="color: #8696a0; font-size: 12px;">Cargando contactos...</p>
-            </div>
-        </div>
 
         <div class="barra-flotante-premium">
-            <div class="btn-nav" onclick="irAContactos()">
-                <span>👥</span>
-                <span>Contactos</span>
-            </div>
-            <div class="btn-nav active" onclick="cerrarModalQR()">
-                <span>💬</span>
-                <span>Chat</span>
-            </div>
-            <div class="btn-nav" onclick="abrirAjustes()">
-                <span>⚙️</span>
-                <span>Ajustes</span>
-            </div>
+            <div class="btn-nav" onclick="irAContactos()"><span>👥</span><span>Contactos</span></div>
+            <div class="btn-nav active" onclick="cerrarModalQR()"><span>💬</span><span>Chat</span></div>
+            <div class="btn-nav" onclick="abrirAjustes()"><span>⚙️</span><span>Ajustes</span></div>
         </div>
 
-    </div>
-</div>p
+        <div id="modal-nuevocontacto" class="modal" style="display:none; z-index: 15000;">
+            </div>
 
+    </div>
+</div>
 
 
 
