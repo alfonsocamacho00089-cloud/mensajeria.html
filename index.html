@@ -1026,7 +1026,7 @@ function manejarBotonIdentidad() {
     }
 }
         
-function cerrarModalQR() {
+async function guardarNuevoContacto() {
     document.getElementById('modal-qr').style.display = 'none';
 }
         function guardarNuevoContacto() {
@@ -1048,11 +1048,16 @@ function cerrarModalQR() {
         alert("Este ID ya está en tu agenda como: " + existe.nombre);
         return;
     }
+// 3.5 Buscar foto en Firebase antes de guardar
+    const snapshot = await db.ref('usuarios/' + idAGuardar).once('value');
+    const fotoFirebase = (snapshot.val() && snapshot.val().foto) ? snapshot.val().foto : "";// 3.5 Buscar foto en Firebase antes de guardar
+    const snapshot = await db.ref('usuarios/' + idAGuardar).once('value');
+    const fotoFirebase = (snapshot.val() && snapshot.val().foto) ? snapshot.val().foto : "";
 
-    // 4. Guardamos el nuevo contacto en la lista
-    agenda.push({ nombre: nombre, id: idAGuardar });
+         
+    // 4. Guardamos el nuevo contacto (Ahora con foto)
+    agenda.push({ nombre: nombre, id: idAGuardar, foto: fotoFirebase });
     localStorage.setItem('mis_contactos', JSON.stringify(agenda));
-    
     alert("✅ Contacto " + nombre + " guardado con éxito.");
 
     // 5. Limpiamos y cerramos el modal
