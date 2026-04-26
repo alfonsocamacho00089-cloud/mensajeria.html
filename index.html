@@ -1508,60 +1508,167 @@ async function guardarCambiosPerfil() {
         alert("Error al guardar cambios");
     }
 }
-
+     }
 
 function abrirPerfilContacto() {
-    const nombreH = document.getElementById('nombre-dueño-header');
-    const fotoH = document.getElementById('foto-perfil-header');
-    const mNombre = document.getElementById('perfil-nombre');
-    const mFoto = document.getElementById('perfil-foto-grande');
-
-    if (mNombre && nombreH) mNombre.innerText = nombreH.innerText;
-
-    if (mFoto && fotoH) {
-        if (fotoH.style.display !== "none") {
-            mFoto.src = fotoH.src;
-        } else {
-            mFoto.src = 'https://via.placeholder.com/150';
-        }
-    }
+    const nombreActual = document.getElementById('nombre-dueño-header').innerText;
+    const imgHeader = document.getElementById('foto-perfil-header');
     
-    if (document.getElementById('modal-perfil')) {
-        document.getElementById('modal-perfil').style.display = 'flex';
+    const modalNombre = document.getElementById('perfil-nombre');
+    const modalFoto = document.getElementById('perfil-foto-grande');
+    
+    if(modalNombre) modalNombre.innerText = nombreActual;
+
+    // LÓGICA PARA LA FOTO:
+    if(imgHeader && imgHeader.style.display !== "none") {
+        // Si la imagen se está viendo, la usamos
+        modalFoto.src = imgHeader.src;
+    } else {
+        // Si la imagen está oculta (porque hay inicial dorada), 
+        // podrías poner una imagen por defecto o dejarla vacía
+        modalFoto.src = 'https://via.placeholder.com/150'; 
     }
+
+    document.getElementById('modal-perfil').style.display = 'flex';
 }
+
+
+
+
 
 async function eliminarChatEspecifico() {
-    const inputId = document.querySelector('#target-id');
-    
-    if (inputId && inputId.value) {
-        const idDestino = inputId.value;
-        if (confirm("¿Eliminar mensajes de este chat?")) {
-            localStorage.removeItem('chat_' + idDestino);
-            localStorage.setItem('unread_' + idDestino, 0);
-            if (document.getElementById('chat-box')) document.getElementById('chat-box').innerHTML = "";
-            if (typeof pintarAgendaContactos === "function") pintarAgendaContactos();
-            if (document.getElementById('modal-perfil')) document.getElementById('modal-perfil').style.display = 'none';
-        }
-    } else {
-        alert("Selecciona un chat primero");
+
+    // 1. Obtenemos el ID del contacto que está cargado actualmente en tu input oculto
+
+    const idDestino = document.querySelector('#target-id').value;
+
+    const nombreDestino = document.getElementById('nombre-dueño-header')?.innerText || "este contacto";
+
+
+
+    if (!idDestino) return alert("No hay un chat seleccionado para eliminar");
+
+
+
+    if (confirm(`¿Eliminar todos los mensajes con ${nombreDestino}?`)) {
+
+        
+
+        // 2. ELIMINACIÓN EN LOCALSTORAGE (Donde lo guardas actualmente)
+
+        const claveChat = 'chat_' + idDestino;
+
+        localStorage.removeItem(claveChat);
+
+
+
+        // 3. ELIMINACIÓN EN INDEXEDDB (Para tu nueva estructura DropisDB)
+
+        // Usamos la lógica de borrar que definimos antes
+
+        const db = await abrirDB();
+
+        const tx = db.transaction('mensajes', 'readwrite');
+
+        const store = tx.objectStore('mensajes');
+
+        
+
+        // Borramos usando el prefijo y el ID único
+
+        store.delete('msg_' + idDestino);
+
+
+
+        // 4. LIMPIEZA VISUAL
+
+        const box = document.getElementById('chat-box');
+
+        if (box) box.innerHTML = ""; 
+
+
+
+        // 5. REFRESCAR AGENDA
+
+        // Esto quita contadores de mensajes no leídos si los hubiera
+
+        localStorage.setItem('unread_' + idDestino, 0);
+
+        pintarAgendaContactos();
+
+
+
+        // 6. CERRAR MODAL (Si el botón estaba dentro del perfil)
+
+        const modalPerfil = document.getElementById('modal-perfil');
+
+        if (modalPerfil) modalPerfil.style.display = 'none';
+
+
+
+        console.log("✅ Chat borrado con éxito para ID: " + idDestino);
+
     }
+
 }
 
+
+
 async function eliminarContactoDeAgenda() {
-    const inputId = document.querySelector('#target-id');
-    
-    if (inputId && inputId.value) {
-        const idABorrar = inputId.value;
-        if (confirm("¿Eliminar contacto?")) {
-            let lista = JSON.parse(localStorage.getItem('mis_contactos')) || [];
-            lista = lista.filter(c => c.id !== idABorrar);
-            localStorage.setItem('mis_contactos', JSON.stringify(lista));
-            if (typeof pintarAgendaContactos === "function") pintarAgendaContactos();
-            if (document.getElementById('modal-perfil')) document.getElementById('modal-perfil').style.display = 'none';
-        }
+
+    // 1. Obtenemos el ID del contacto que está cargado en el input oculto
+
+    const idABorrar = document.querySelector('#target-id').value;
+
+    const nombreABorrar = document.getElementById('perfil-nombre')?.innerText || "este contacto";
+
+
+
+    if (!idABorrar) return;
+
+
+
+    if (confirm(`¿Eliminar a ${nombreABorrar} de tu agenda? (Los mensajes se conservarán)`)) {
+
+        
+
+        // 2. Traemos la lista actual
+
+        let contactos = JSON.parse(localStorage.getItem('mis_contactos')) || [];
+
+
+
+        // 3. Filtramos la lista para quitar a ese ID
+
+        contactos = contactos.filter(c => c.id !== idABorrar);
+
+
+
+        // 4. Guardamos la nueva lista limpia
+
+        localStorage.setItem('mis_contactos', JSON.stringify(contactos));
+
+
+
+        // 5. Refrescamos la lista visual en el modal de la agenda
+
+        pintarAgendaContactos();
+
+
+
+        // 6. Cerramos los modales
+
+        document.getElementById('modal-perfil').style.display = 'none';
+
+        cerrarModalQR(); // Para volver al chat principal
+
+
+
+        alert(`${nombreABorrar} ha sido eliminado de tu agenda.`);
+
     }
-}
+
+    }
 
 
      
