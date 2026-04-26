@@ -1090,32 +1090,22 @@ function cargarConversacionCon(idDestino, nombreDestino, fotoDestino) {
         // ... (tu código de limpieza de box y targetID)
 
     const imgHeader = document.getElementById('foto-perfil-header');
-const contenedorHeader = imgHeader.parentElement; // El div que contiene la foto
 
 if (imgHeader) {
-    if (fotoDestino && !fotoDestino.includes('placeholder.com')) {
-        imgHeader.src = fotoDestino;
-        imgHeader.style.display = "block";
-        // Si tenías un div de inicial ahí, lo ocultas
-        if(document.getElementById('inicial-header')) document.getElementById('inicial-header').remove();
-    } else {
-        // Ocultamos la imagen y creamos el círculo dorado para el header
-        imgHeader.style.display = "none";
-        const inicialH = nombreDestino ? nombreDestino.charAt(0).toUpperCase() : '?';
+    // Tu lógica original intacta, solo le sumamos el "Plan B" si falla
+    imgHeader.src = fotoDestino || 'https://via.placeholder.com/40';
+
+    // Si la foto no existe o es placeholder, activamos el estilo dorado
+    if (!fotoDestino || fotoDestino.includes('placeholder.com')) {
+        const inicial = nombreDestino ? nombreDestino.charAt(0).toUpperCase() : '?';
         
-        // Creamos un div temporal para la inicial si no existe
-        let divInicial = document.getElementById('inicial-header');
-        if(!divInicial){
-            divInicial = document.createElement('div');
-            divInicial.id = 'inicial-header';
-            contenedorHeader.insertBefore(divInicial, imgHeader);
-        }
+        // Convertimos la misma imagen en el círculo dorado con este truco de CSS:
+        imgHeader.style.display = "none"; // Ocultamos la imagen rota
         
-        divInicial.innerHTML = inicialH;
-        divInicial.setAttribute('style', 'width:40px; height:40px; border-radius:50%; background:#ffd700; color:#000; display:flex; align-items:center; justify-content:center; font-weight:900; margin-right:10px; border:1px solid #000;');
+        // Si ya tienes un contenedor para la inicial, úsalo, si no, lo más fácil es:
+        imgHeader.outerHTML = `<div id="foto-perfil-header" class="foto-perfil" style="width:40px; height:40px; border-radius:50%; background:#ffd700; color:#000; display:flex; align-items:center; justify-content:center; font-weight:900; border:2px solid #000;">${inicial}</div>`;
     }
 }
-    
 
     // 3. Buscamos los mensajes de ESE contacto en LocalStorage
     const claveChat = 'chat_' + idDestino;
