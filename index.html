@@ -1431,18 +1431,21 @@ function gestionarQR() {
 function abrirModalNuevoContacto() {
     const modal = document.getElementById('modal-nuevocontacto');
     if (modal) {
-        // Bloqueamos el scroll del fondo para que no se mueva el chat atrás
         document.body.style.overflow = 'hidden';
         
         modal.style.zIndex = "20000"; 
         modal.style.display = 'flex';
-        modal.style.alignItems = 'center'; // Centra el contenido
+        modal.style.alignItems = 'center'; 
         modal.style.justifyContent = 'center';
+
+        // AGREGA ESTAS DOS LÍNEAS PARA BLOQUEAR EL CHAT:
+        modal.style.width = '100vw'; 
+        modal.style.height = '100dvh';
+        modal.style.position = 'fixed'; // Asegura que no se mueva al hacer scroll
 
         console.log("Abriendo: Nuevo Contacto");
     }
-}
-
+     }
 function cerrarModalNuevo() {
     const modal = document.getElementById('modal-nuevocontacto');
     if (modal) {
