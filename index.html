@@ -645,33 +645,41 @@ margin: 0;
 
 
 <div id="modal-nuevocontacto" class="modal" style="display:none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 15000; overflow-y: auto;">
-    <div class="modal-cover" style="position: relative; min-height: 100vh;">
-        <div style="display: none;">NUEVO CONTACTO</h3> <div style="display: flex; align-items: center; position: absolute; left: 0px; top: 40px; width: 100%;">
+    
+    <div class="modal-cover" style="display: flex; flex-direction: column; min-height: 100vh; padding: 20px; box-sizing: border-box;">
         
+        <div style="display: flex; align-items: center; margin-top: 20px; margin-bottom: 40px;">
             <button onclick="document.getElementById('modal-nuevocontacto').style.display='none'"
-                style="cursor: pointer; padding: 15px; background: transparent; border: none; color: white; font-size: 24px; font-weight: 500; display: flex; align-items: center; outline: none;">
+                style="cursor: pointer; padding: 10px; background: transparent; border: none; color: white; font-size: 24px; display: flex; align-items: center; outline: none;">
                 <span style="display: inline-block; transform: scaleX(-1);">➔</span>
             </button>
-            <h4 style="color: white; font-size: 20px; margin: 0; font-weight: 400; margin-left: 5px;">
+            <h4 style="color: white; font-size: 20px; margin: 0; font-weight: 400; margin-left: 10px;">
                 Nuevo contacto
             </h4>
         </div>
 
-        
-            <input type="text" id="nuevo-nombre" placeholder="Nombre" style="width:80%; position: relative; left: 40px; padding:20px; margin-bottom:30px; background:#1a1a1a; color:white; border:1px solid #999; border-radius:8px; outline: none;">
+        <div style="display: flex; flex-direction: column; align-items: center; gap: 20px; flex-grow: 1;">
             
-            <input type="text" id="apellido" placeholder="Apellido" style="width:80%; position: relative; left: 40px; padding:20px; margin-bottom:20px; background:#1a1a1a; color:white; border:1px solid #999; border-radius:8px; outline: none;">
+            <input type="text" id="nuevo-nombre" placeholder="Nombre" 
+                style="width: 90%; padding: 18px; background: #1a1a1a; color: white; border: 1px solid #333; border-radius: 12px; font-size: 16px; outline: none; box-sizing: border-box;">
             
-            <input type="text" id="target-id" placeholder="ID (Ej: 12345)" style="width:80%; position: relative; left: 40px; padding:20px; margin-bottom:20px; background:#1a1a1a; color:white; border:1px solid #999; border-radius:8px; outline: none;">
+            <input type="text" id="apellido" placeholder="Apellido" 
+                style="width: 90%; padding: 18px; background: #1a1a1a; color: white; border: 1px solid #333; border-radius: 12px; font-size: 16px; outline: none; box-sizing: border-box;">
             
-            <input type="text" id="correo" placeholder="CORREO (@)" style="width:80%; position: relative; left: 40px; padding:20px; margin-bottom:20px; background:#1a1a1a; color:white; border:1px solid #999; border-radius:8px; outline: none;">
+            <input type="text" id="target-id" placeholder="ID (Ej: 12345)" 
+                style="width: 90%; padding: 18px; background: #1a1a1a; color: white; border: 1px solid #333; border-radius: 12px; font-size: 16px; outline: none; box-sizing: border-box;">
+            
+            <input type="email" id="correo" placeholder="CORREO (@)" 
+                style="width: 90%; padding: 18px; background: #1a1a1a; color: white; border: 1px solid #333; border-radius: 12px; font-size: 16px; outline: none; box-sizing: border-box;">
         </div>
 
-        <div style="display: flex; flex-direction: column; gap: 5px; margin-top: 10px;">
-            <button onclick="guardarNuevoContacto()" style="width: 90%; padding: 15px; background: #ffd700; border: none; border-radius: 30px; font-weight: bold; color: #000; cursor: pointer; font-size: 16px; text-transform: uppercase;">
+        <div style="padding: 20px 0; display: flex; justify-content: center;">
+            <button onclick="guardarNuevoContacto()" 
+                style="width: 90%; padding: 18px; background: #ffd700; border: none; border-radius: 30px; font-weight: bold; color: #000; cursor: pointer; font-size: 16px; text-transform: uppercase; box-shadow: 0 4px 15px rgba(255, 215, 0, 0.2);">
                 GUARDAR CONTACTO
             </button>
         </div>
+        
     </div>
 </div>
 
