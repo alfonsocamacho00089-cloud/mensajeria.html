@@ -1092,7 +1092,6 @@ document.querySelector('.contenedor-flotante').style.display = 'flex';
     }
      }
      
-
 function cargarConversacionCon(idDestino, nombreDestino, fotoDestino) {
     const box = document.getElementById('chat-box');
     if (!box) return;
@@ -1106,9 +1105,8 @@ function cargarConversacionCon(idDestino, nombreDestino, fotoDestino) {
         document.getElementById('nombre-dueño-header').innerText = nombreDestino;
     }
 
-
     // 2. NUEVO: Actualizamos la FOTO de perfil
-     
+  
     // SOLO AGREGA ESTO:
         // ... (tu código de limpieza de box y targetID)
 
@@ -1130,7 +1128,7 @@ if (imgHeader) {
     }
 }
 
-      // 3. Buscamos los mensajes de ESE contacto en LocalStorage
+    // 3. Buscamos los mensajes de ESE contacto en LocalStorage
     const claveChat = 'chat_' + idDestino;
     const mensajes = JSON.parse(localStorage.getItem(claveChat)) || [];
 
@@ -1145,10 +1143,11 @@ if (imgHeader) {
     console.log("📂 Historial cargado con: " + nombreDestino);
     
     // 5. Cerramos el modal de contactos para empezar a escribir
+    cerrarModalQR();
     
     const inputMsg = document.getElementById('msg-text');
     if(inputMsg) inputMsg.focus();
-}
+     }
      
      
  function pintarAgendaContactos() {
@@ -1438,9 +1437,7 @@ function gestionarQR() {
     }
                 }
                 
-       
-   
-         function abrirModalNuevoContacto() {
+       function abrirModalNuevoContacto() {
     const modal = document.getElementById('modal-nuevocontacto');
     if (modal) {
         // Aseguramos que se vea por encima de TODO
@@ -1467,6 +1464,8 @@ function cerrarModalNuevo() {
         }
     }
      }
+   
+         
      
 
 
