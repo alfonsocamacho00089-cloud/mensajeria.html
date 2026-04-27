@@ -583,20 +583,27 @@ margin: 0;
 
 
      
-        <div id="seccion-mi-perfil" style="display: none; padding: 15px; background: #0a0a0a; border-bottom: 1px solid #ffd700;">
-            <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 15px;">
-                <div onclick="document.getElementById('input-mi-foto').click()" style="width: 70px; height: 70px; border-radius: 50%; border: 2px solid #ffd700; overflow: hidden; background: #222; display: flex; align-items: center; justify-content: center; cursor: pointer;">
-                    <img id="mi-foto-previa" src="" style="width: 100%; height: 100%; object-fit: cover; display: none;">
-                    <span id="mi-placeholder-foto" style="font-size: 20px;">📷</span>
-                </div>
-                <input type="file" id="input-mi-foto" accept="image/*" style="display: none;" onchange="previsualizarMiFoto(this)">
-                <button onclick="gestionarQR()" style="background: #ffd700; color: #000; border: none; border-radius: 8px; padding: 8px 12px; font-weight: 900; font-size: 14px; cursor: pointer;">QR</button>
-            </div>
-            <input type="text" id="mi-nuevo-nombre" placeholder="Editar mi nombre..." style="width:100%; padding:10px; margin-bottom:8px; background:#1a1a1a; color:white; border:1px solid #333; border-radius:8px;">
-            <input type="text" id="mi-nuevo-estado" placeholder="Estado (Ej: Disponible)" style="width:100%; padding:10px; margin-bottom:8px; background:#1a1a1a; color:white; border:1px solid #333; border-radius:8px;">
-            <button onclick="guardarCambiosPerfil()" style="width: 100%; padding: 10px; background: #ffd700; border: none; border-radius: 8px; font-weight: bold; color: #000;">GUARDAR CAMBIOS</button>
-        </div>
+        
+<div id="modal-mi-perfil" class="modal" style="display:none; z-index: 30000;">
+    <div class="modal-cover" style="text-align: center; background: #000; border: 1px solid #ffd700; padding: 20px; border-radius: 15px;">
+        <h3 style="color: #ffd700; margin-bottom: 15px;">MI CUENTA</h3>
 
+        <div onclick="document.getElementById('input-mi-foto').click()" style="width: 100px; height: 100px; border-radius: 50%; border: 2px dashed #ffd700; margin: 0 auto 15px; display: flex; align-items: center; justify-content: center; cursor: pointer; overflow: hidden;">
+            <img id="mi-foto-previa" src="" style="display:none; width: 100%; height: 100%; object-fit: cover;">
+            <span id="txt-foto-placeholder" style="font-size: 30px;">📷</span>
+        </div>
+        <input type="file" id="input-mi-foto" accept="image/*" style="display: none;" onchange="previsualizarMiFoto(this)">
+
+        <input type="text" id="mi-nuevo-nombre" placeholder="Nuevo nombre..." style="width:100%; padding:12px; margin-bottom: 10px; border-radius: 8px; border: none;">
+        <input type="text" id="mi-nuevo-estado" placeholder="Estado (Ej: En la luna 🚀)" style="width:100%; padding:12px; margin-bottom: 20px; border-radius: 8px; border: none;">
+
+        <button onclick="guardarCambiosPerfil()" style="width: 100%; padding: 12px; background: #ffd700; color: #000; border: none; border-radius: 8px; font-weight: bold; cursor: pointer;">
+            GUARDAR CAMBIOS
+        </button>
+        
+        <p onclick="document.getElementById('modal-mi-perfil').style.display='none'" style="color: white; margin-top: 15px; cursor: pointer; font-size: 13px;">Cancelar</p>
+    </div>
+</div>
         <div id="cuerpo-modal-lista" style="flex-grow: 1; overflow-y: auto; padding: 0 15px 100px 15px;">
             <div id="seccion-mi-qr" style="display: none; padding: 20px; flex-direction: column; align-items: center; border-bottom: 1px solid #444;">
                 <div id="contenedor-qr" style="background: white; padding: 10px; border-radius: 10px;"></div>
@@ -1468,53 +1475,75 @@ function cerrarModalNuevo() {
         }
     }
      }
-   
-         
+
+     let miFotoBase64 = ""; 
+     
+      function alternarVistaPerfil() {
+
+    const seccion = document.getElementById('seccion-mi-perfil');
+
+    if (seccion.style.display === "none") {
+
+        seccion.style.display = "block";
+
+        // Rellenar con datos actuales
+
+        document.getElementById('mi-nuevo-nombre').value = localStorage.getItem('mi_nombre') || "";
+
+        document.getElementById('mi-nuevo-estado').value = localStorage.getItem('mi_estado') || "";
+
+        const foto = localStorage.getItem('mi_foto');
+
+        if(foto) {
+
+            document.getElementById('mi-foto-previa').src = foto;
+
+            document.getElementById('mi-foto-previa').style.display = "block";
+
+            document.getElementById('mi-placeholder-foto').style.display = "none";
+
+        }
+
+    } else {
+
+        seccion.style.display = "none";
+
+    }
+
+}
+
+
+
+function previsualizarMiFoto(input) {
+
+    if (input.files && input.files[0]) {
+
+        const reader = new FileReader();
+
+        reader.onload = (e) => {
+
+            miFotoBase64 = e.target.result;
+
+            document.getElementById('mi-foto-previa').src = miFotoBase64;
+
+            document.getElementById('mi-foto-previa').style.display = "block";
+
+            document.getElementById('mi-placeholder-foto').style.display = "none";
+
+        };
+
+        reader.readAsDataURL(input.files[0]);
+
+    }
+
+     }   
      
 
 
 // Variable para la foto nueva
-let miFotoBase64 = ""; 
 
-function alternarVistaPerfil() {
-    // Usamos el ID correcto del HTML: modal-mi-perfil
-    const modal = document.getElementById('modal-mi-perfil');
-    if (modal.style.display === "none" || modal.style.display === "") {
-        modal.style.display = "block";
-        
-        // Rellenar con datos actuales de LocalStorage
-        document.getElementById('mi-nuevo-nombre').value = localStorage.getItem('mi_nombre') || "";
-        document.getElementById('mi-nuevo-estado').value = localStorage.getItem('mi_estado') || "";
-        
-        const foto = localStorage.getItem('mi_foto');
-        const imgPrevia = document.getElementById('mi-foto-previa');
-        const txtPlaceholder = document.getElementById('txt-foto-placeholder');
 
-        if(foto) {
-            imgPrevia.src = foto;
-            imgPrevia.style.display = "block";
-            if(txtPlaceholder) txtPlaceholder.style.display = "none";
-        }
-    } else {
-        modal.style.display = "none";
-    }
-}
 
-function previsualizarMiFoto(input) {
-    if (input.files && input.files[0]) {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            miFotoBase64 = e.target.result;
-            const imgPrevia = document.getElementById('mi-foto-previa');
-            const txtPlaceholder = document.getElementById('txt-foto-placeholder');
-            
-            imgPrevia.src = miFotoBase64;
-            imgPrevia.style.display = "block";
-            if(txtPlaceholder) txtPlaceholder.style.display = "none";
-        };
-        reader.readAsDataURL(input.files[0]);
-    }
-     }
 
 
 
