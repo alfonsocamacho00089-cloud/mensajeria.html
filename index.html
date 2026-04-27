@@ -561,50 +561,6 @@ margin: 0;
     </div>
     </div>
 
-
-<div id="modal-nuevocontacto" class="modal" style="display:none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 20000; overflow-y: auto;">
-    
-    <div style="display: flex; flex-direction: column; min-height: 100vh; padding: 20px; box-sizing: border-box;">
-        
-        <div style="display: flex; align-items: center; margin-top: 20px; margin-bottom: 40px;">
-             <button onclick="document.getElementById('modal-nuevocontacto').style.display='none'"
-                style="cursor: pointer; padding: 15px; background: transparent; border: none; color: white; font-size: 24px; font-weight: 500; display: flex; align-items: center;">
-                <span style="display: inline-block; transform: scaleX(-1);">➔</span>
-             </button>
-            <h2 style="color: white; font-size: 22px; font-weight: 400; margin: 0;">Nuevo contacto</h2>
-        </div>
-
-        <div style="display: flex; flex-direction: column; gap: 15px; flex-grow: 1; width: 90%; margin: 0 auto;">
-            
-            <label style="color: #999; font-size: 14px; margin-left: 5px;">Información personal</label>
-            <input type="text" id="reg-nombre" placeholder="Nombre" 
-                style="width: 100%; padding: 18px; background: #1a1a1a; color: white; border: 1px solid #333; border-radius: 12px; font-size: 16px; outline: none;">
-            
-            <input type="text" id="reg-apellido" placeholder="Apellido" 
-                style="width: 100%; padding: 18px; background: #1a1a1a; color: white; border: 1px solid #333; border-radius: 12px; font-size: 16px; outline: none;">
-            
-            <label style="color: #999; font-size: 14px; margin-left: 5px; margin-top: 10px;">Identificación</label>
-            <input type="text" id="target-id" placeholder="ID (Ej: 12345)" 
-                style="width: 100%; padding: 18px; background: #1a1a1a; color: white; border: 1px solid #333; border-radius: 12px; font-size: 16px; outline: none;">
-            
-            <input type="email" id="reg-correo" placeholder="Correo electrónico (@)" 
-                style="width: 100%; padding: 18px; background: #1a1a1a; color: white; border: 1px solid #333; border-radius: 12px; font-size: 16px; outline: none;">
-        </div>
-
-        <div style="margin-top: 40px; padding-bottom: 20px;">
-            <button onclick="guardarNuevoContacto()" 
-                style="width: 100%; padding: 18px; background: #ffd700; border: none; border-radius: 30px; font-weight: bold; color: #000; font-size: 16px; cursor: pointer; text-transform: uppercase;">
-                GUARDAR CONTACTO
-            </button>
-        </div>
-
-    </div>
-</div>
-
- 
-
-
-     
         <div id="seccion-mi-perfil" style="display: none; padding: 15px; background: #0a0a0a; border-bottom: 1px solid #ffd700;">
             <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 15px;">
                 <div onclick="document.getElementById('input-mi-foto').click()" style="width: 70px; height: 70px; border-radius: 50%; border: 2px solid #ffd700; overflow: hidden; background: #222; display: flex; align-items: center; justify-content: center; cursor: pointer;">
@@ -703,7 +659,7 @@ margin: 0;
             
             <input type="text" id="target-id" placeholder="ID (Ej: 12345)" style="width:80%; position: relative; left: 40px; padding:20px; margin-bottom:20px; background:#1a1a1a; color:white; border:1px solid #999; border-radius:8px; outline: none;">
             
-            <input type="text" id="reg-correo" placeholder="CORREO (@)" style="width:80%; position: relative; left: 40px; padding:20px; margin-bottom:20px; background:#1a1a1a; color:white; border:1px solid #999; border-radius:8px; outline: none;">
+            <input type="text" id="correo" placeholder="CORREO (@)" style="width:80%; position: relative; left: 40px; padding:20px; margin-bottom:20px; background:#1a1a1a; color:white; border:1px solid #999; border-radius:8px; outline: none;">
         </div>
 
         <div style="position: fixed; bottom: 20px; width: 100%; display: flex; justify-content: center; z-index: 15001;">
