@@ -1148,8 +1148,8 @@ if (imgHeader) {
     // 5. Cerramos el modal de contactos para empezar a escribir
     cerrarModalQR();
     const barraChat = document.querySelector('.contenedor-flotante');
-if (barraChat) {
-    barraChat.style.display = 'flex'; // Aquí es donde le das la orden de aparecer
+    if (barraChat) {
+        barraChat.style.setProperty('display', 'flex', 'important');
      }
     const inputMsg = document.getElementById('msg-text');
     if(inputMsg) inputMsg.focus();
