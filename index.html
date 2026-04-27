@@ -621,25 +621,12 @@ margin: 0;
                    border: 1px solid rgba(255, 215, 0, 0.4); 
                    border-radius: 50%; width: 55px; height: 55px; 
                    color: #ffd700; cursor: pointer; z-index: 100; 
-                   font-size: 25px; display: flex; 
-                   align-items: center; justify-content: center;">
-            + 
-        </button>
 
-        <div class="barra-flotante-premium">
-            <div class="btn-nav" onclick="irAContactos()">
-                <span>👥</span><span>Contactos</span>
-            </div>
-            <div class="btn-nav active" onclick="cerrarModalQR()">
-                <span>💬</span><span>Chat</span>
-            </div>
-            <div class="btn-nav" onclick="abrirAjustes()">
-                <span>⚙️</span><span>Ajustes</span>
-            </div>
-        </div>
 
-        <div id="modal-nuevocontacto" class="modal" style="display: none; align-items: center; justify-content: center; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 30000;">
-    <div class="modal-cover" style="position: relative; width: 85%; max-width: 400px; padding: 25px; background: #121212; border-radius: 15px; text-align: center; border: 1px solid #ffd700; box-shadow: 0 0 20px rgba(0,0,0,0.5);">
+
+<div id="modal-nuevocontacto" class="modal" style="display: none; align-items: center; justify-content: center; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 30000;">
+         <div id="modal-nuevocontacto" class="modal" style="display: none; align-items: center; justify-content: center; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #1a1a1a; z-index: 50000;">
+    <div class="modal-cover" style="position: relative; width: 85%; max-width: 400px; padding: 25px; background: #121212; border-radius: 15px; text-align: center; border: 1px solid #333; box-shadow: 0 0 20px rgba(0,0,0,0.5);">
         
         <button onclick="cerrarModalNuevo()" style="position: absolute; top: 15px; left: 15px; background: transparent; border: none; color: white; font-size: 20px; cursor: pointer;">
              <span style="display: inline-block; transform: scaleX(-1);">➔</span>
@@ -853,7 +840,10 @@ async function ejecutarRegistroCompleto() {
 
             console.log("✅ Sincronizado con éxito en la nube bajo: " + idUnico);
         }
-        
+        document.getElementById('modal-registro').style.display = 'flex';
+setTimeout(() => {
+    document.getElementById('reg-nombre').focus();
+}, 300);
         setTimeout(() => { if(modalHuella) modalHuella.style.display = 'none'; }, 3000);
     } catch (e) { 
         console.error("⚠️ Error en vinculación satelital:", e);
@@ -1465,11 +1455,17 @@ function gestionarQR() {
         modal.style.display = 'flex';
         modal.style.alignItems = 'center';
         modal.style.justifyContent = 'center';
-        
+        document.getElementById('modal-nuevocontacto').style.display = 'flex';
+
         // 3. Bloqueamos el scroll del fondo
         document.body.style.overflow = 'hidden';
+document.getElementById('modal-nuevocontacto').style.display = 'flex';
 
         console.log("Abriendo: Nuevo Contacto (Barra de chat oculta)");
+    document.getElementById('modal-nuevocontacto').style.display = 'flex';
+setTimeout(() => {
+    document.getElementById('nuevo-nombre').focus();
+}, 300);
     }
 }
 
