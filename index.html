@@ -1155,10 +1155,10 @@ if (imgHeader) {
     if (barraChat) {
         barraChat.style.setProperty('display', 'flex', 'important');
         barraChat.style.setProperty('position', 'fixed', 'important'); // La clava a la pantalla del móvil
-        barraChat.style.setProperty('bottom', '70px', 'important'); // Súbela un poco para que no tape el menú de abajo
+        barraChat.style.setProperty('bottom', '0px', 'important'); // Súbela un poco para que no tape el menú de abajo
         barraChat.style.setProperty('left', '0', 'important');
         barraChat.style.setProperty('width', '100%', 'important');
-        barraChat.style.setProperty('z-index', '9999', 'important'); // Encima de Goku y todo lo demás
+        barraChat.style.setProperty('z-index', '40000', 'important'); // Encima de Goku y todo lo demás
     }
     const inputMsg = document.getElementById('msg-text');
     if(inputMsg) inputMsg.focus();
