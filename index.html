@@ -621,7 +621,20 @@ margin: 0;
                    border: 1px solid rgba(255, 215, 0, 0.4); 
                    border-radius: 50%; width: 55px; height: 55px; 
                    color: #ffd700; cursor: pointer; z-index: 100; 
++ 
+        </button>
 
+        <div class="barra-flotante-premium">
+            <div class="btn-nav" onclick="irAContactos()">
+                <span>👥</span><span>Contactos</span>
+            </div>
+            <div class="btn-nav active" onclick="cerrarModalQR()">
+                <span>💬</span><span>Chat</span>
+            </div>
+            <div class="btn-nav" onclick="abrirAjustes()">
+                <span>⚙️</span><span>Ajustes</span>
+            </div>
+        </div>
 
 
 <div id="modal-nuevocontacto" class="modal" style="display: none; align-items: center; justify-content: center; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.1); z-index: 30000;">
