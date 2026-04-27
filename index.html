@@ -627,7 +627,7 @@ margin: 0;
         <div id="modal-nuevocontacto"class="modal">
     <div class="modal-cover" style="position: relative; width: 90%; max-height: 90vh; padding: 20px; background: #000; border-radius: 20px; text-align: center; border: 1px solid #ffd700; overflow-y: auto; box-sizing: border-box;">
         
-        <button onclick="document.getElementById('modal-nuevocontacto').style.display='none'" 
+        <button onclick="cerrarModalNuevo()" ...>
             style="position: absolute; top: 15px; left: 15px; background: transparent; border: none; color: white; font-size: 22px; cursor: pointer;">
             <span style="display: inline-block; transform: scaleX(-1);">➔</span>
         </button>
@@ -651,9 +651,7 @@ margin: 0;
             GUARDAR CONTACTO
         </button>
         
-        <p style="margin-top: 20px; color: #555; font-size: 12px;" onclick="document.getElementById('modal-nuevocontacto').style.display='none'">CANCELAR</p>
-    </div>
-        </div>
+        <p style="..." onclick="cerrarModalNuevo()">CANCELAR</p>
 
 <div id="modal-perfil" class="modal" style="display:none; z-index: 25000;">
     <div class="modal-cover" style="text-align: center;">
@@ -1435,15 +1433,15 @@ function gestionarQR() {
 function abrirModalNuevoContacto() {
     const modal = document.getElementById('modal-nuevocontacto');
     if (modal) {
-        // Aseguramos que se vea por encima de TODO
+        // Bloqueamos el scroll del fondo para que no se mueva el chat atrás
+        document.body.style.overflow = 'hidden';
+        
         modal.style.zIndex = "20000"; 
         modal.style.display = 'flex';
-        
-        // OPCIONAL: Si quieres asegurar que la lista de contactos esté abierta atrás
-        const modalLista = document.getElementById('modal-contactos'); // o el ID de tu lista
-        if (modalLista) modalLista.style.display = 'block';
+        modal.style.alignItems = 'center'; // Centra el contenido
+        modal.style.justifyContent = 'center';
 
-        console.log("Abriendo: Nuevo Contacto sobre la agenda");
+        console.log("Abriendo: Nuevo Contacto");
     }
 }
 
@@ -1451,14 +1449,14 @@ function cerrarModalNuevo() {
     const modal = document.getElementById('modal-nuevocontacto');
     if (modal) {
         modal.style.display = 'none';
+        // Devolvemos el scroll al cuerpo de la app
+        document.body.style.overflow = 'auto';
         
-        // IMPORTANTE: Al cerrar, refrescamos la agenda para que 
-        // el usuario vea sus contactos actualizados inmediatamente
         if (typeof pintarAgendaContactos === "function") {
             pintarAgendaContactos();
         }
     }
-}
+     }
 
 // Variable para la foto nueva
 let miFotoBase64 = ""; 
