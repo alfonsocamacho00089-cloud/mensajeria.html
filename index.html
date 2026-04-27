@@ -95,6 +95,8 @@ body {
 /* --- INPUT AREA --- */
 
 .contenedor-flotante {
+ display: none !important; /* Invisible al cargar */
+
     position: absolute; /* Se queda pegado a la pantalla, no al chat */
     bottom: 0;
     left: 0;
@@ -111,7 +113,7 @@ body {
     backdrop-filter: blur(5px); /* Opcional: desenfoca un poco para legibilidad */
   -webkit-backdrop-filter: blur(5px);
    
-    display: none;   
+    
    
 }
 
@@ -1106,9 +1108,7 @@ function cargarConversacionCon(idDestino, nombreDestino, fotoDestino) {
         document.getElementById('nombre-dueño-header').innerText = nombreDestino;
     }
 
-const barraChat = document.querySelector('.contenedor-flotante');
-if (barraChat) barraChat.style.display = 'flex';
-     
+
     // 2. NUEVO: Actualizamos la FOTO de perfil
      
     // SOLO AGREGA ESTO:
@@ -1199,11 +1199,18 @@ const fotoURL = contacto.foto || 'https://via.placeholder.com/45';
             if (typeof actualizarListaConversaciones === "function") {
                 actualizarListaConversaciones(contacto.id, contacto.nombre);
             }
+            const barraChat = document.querySelector('.contenedor-flotante');
+            if (barraChat) barraChat.style.display = 'flex';
+     
         }; 
         
         lista.appendChild(btn);
     }); 
+
+ 
+ 
  }
+     
 
       
 
@@ -1439,32 +1446,52 @@ function gestionarQR() {
        
    function abrirModalNuevoContacto() {
     const modal = document.getElementById('modal-nuevocontacto');
-    // Buscamos la barra de chat para esconderla físicamente
     const barraChat = document.querySelector('.contenedor-flotante');
 
     if (modal) {
-        modal.style.display = 'flex'; // Activamos el centrado
-        document.body.style.overflow = 'hidden'; // Bloqueamos el fondo
+        // 1. Escondemos la barra de chat para que no se asome por debajo
+        if (barraChat) barraChat.style.display = 'none';
+
+        // 2. Mostramos el modal centrado
+        modal.style.display = 'flex';
+        modal.style.alignItems = 'center';
+        modal.style.justifyContent = 'center';
         
-        if (barraChat) {
-            barraChat.style.display = 'none'; // ¡Adiós al "Sigues ahí 🙄"!
-        }
+        // 3. Bloqueamos el scroll del fondo
+        document.body.style.overflow = 'hidden';
+
+        console.log("Abriendo: Nuevo Contacto (Barra de chat oculta)");
     }
 }
 
 function cerrarModalNuevo() {
     const modal = document.getElementById('modal-nuevocontacto');
     const barraChat = document.querySelector('.contenedor-flotante');
+    
+    // Revisamos si hay un chat activo mirando el nombre en el header
+    const headerElement = document.getElementById('nombre-dueño-header');
+    const nombreHeader = headerElement ? headerElement.innerText : "";
 
     if (modal) {
         modal.style.display = 'none';
         document.body.style.overflow = 'auto'; // Devolvemos el scroll
-        
+
+        // LÓGICA INTELIGENTE DE LA BARRA:
         if (barraChat) {
-            barraChat.style.display = 'flex'; // El chat vuelve cuando cerramos
+            // Si el header tiene nombre de un contacto, regresamos la barra
+            if (nombreHeader !== "" && nombreHeader !== "SPACECHAT") {
+                barraChat.style.display = 'flex';
+            } else {
+                // Si estamos en la lista general, la dejamos oculta
+                barraChat.style.display = 'none';
+            }
         }
+        
+        // Refrescamos la lista de contactos por si hubo cambios
+        if (typeof pintarAgendaContactos === "function") pintarAgendaContactos();
     }
-}
+         }
+     
 
 
 // Variable para la foto nueva
