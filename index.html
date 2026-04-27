@@ -1475,20 +1475,26 @@ function cerrarModalNuevo() {
 let miFotoBase64 = ""; 
 
 function alternarVistaPerfil() {
-    const seccion = document.getElementById('seccion-mi-perfil');
-    if (seccion.style.display === "none") {
-        seccion.style.display = "block";
-        // Rellenar con datos actuales
+    // Usamos el ID correcto del HTML: modal-mi-perfil
+    const modal = document.getElementById('modal-mi-perfil');
+    if (modal.style.display === "none" || modal.style.display === "") {
+        modal.style.display = "block";
+        
+        // Rellenar con datos actuales de LocalStorage
         document.getElementById('mi-nuevo-nombre').value = localStorage.getItem('mi_nombre') || "";
         document.getElementById('mi-nuevo-estado').value = localStorage.getItem('mi_estado') || "";
+        
         const foto = localStorage.getItem('mi_foto');
+        const imgPrevia = document.getElementById('mi-foto-previa');
+        const txtPlaceholder = document.getElementById('txt-foto-placeholder');
+
         if(foto) {
-            document.getElementById('mi-foto-previa').src = foto;
-            document.getElementById('mi-foto-previa').style.display = "block";
-            document.getElementById('mi-placeholder-foto').style.display = "none";
+            imgPrevia.src = foto;
+            imgPrevia.style.display = "block";
+            if(txtPlaceholder) txtPlaceholder.style.display = "none";
         }
     } else {
-        seccion.style.display = "none";
+        modal.style.display = "none";
     }
 }
 
@@ -1497,13 +1503,18 @@ function previsualizarMiFoto(input) {
         const reader = new FileReader();
         reader.onload = (e) => {
             miFotoBase64 = e.target.result;
-            document.getElementById('mi-foto-previa').src = miFotoBase64;
-            document.getElementById('mi-foto-previa').style.display = "block";
-            document.getElementById('mi-placeholder-foto').style.display = "none";
+            const imgPrevia = document.getElementById('mi-foto-previa');
+            const txtPlaceholder = document.getElementById('txt-foto-placeholder');
+            
+            imgPrevia.src = miFotoBase64;
+            imgPrevia.style.display = "block";
+            if(txtPlaceholder) txtPlaceholder.style.display = "none";
         };
         reader.readAsDataURL(input.files[0]);
     }
-}
+     }
+
+
 
 async function guardarCambiosPerfil() {
     const miID = localStorage.getItem('mi_dropis_id');
