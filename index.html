@@ -643,37 +643,7 @@ margin: 0;
             </div>
         </div>
 
-        <div id="modal-nuevocontacto" class="modal" style="display:none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 15000;">
-    <div class="modal-cover" style="position: relative; width: 100%; height: 100%;">
         
-        <button onclick="document.getElementById('modal-nuevocontacto').style.display='none'"
-            style="cursor: pointer; position: absolute; left: 10px; top: 10px; padding: 12px; background: transparent; border: none; color: white; font-size: 24px; z-index: 10;">
-            <span style="display: inline-block; transform: scaleX(-1);">➔</span>
-        </button>
-
-        <h4 style="position: absolute; left: 60px; top: 22px; color: white; margin: 0; font-size: 18px; font-weight: 400;">
-            Nuevo contacto
-        </h4>
-
-        <div style="padding-top: 100px;">
-            <input type="text" id="nuevo-nombre" placeholder="Nombre" style="width:80%; position: relative; left: 40px; padding:20px; margin-bottom:20px; background:#1a1a1a; color:white; border:1px solid #999; border-radius:8px; outline: none;">
-            
-            <input type="text" id="reg-apellido" placeholder="Apellido" style="width:80%; position: relative; left: 40px; padding:20px; margin-bottom:20px; background:#1a1a1a; color:white; border:1px solid #999; border-radius:8px; outline: none;">
-            
-            <input type="text" id="target-id" placeholder="ID (Ej: 12345)" style="width:80%; position: relative; left: 40px; padding:20px; margin-bottom:20px; background:#1a1a1a; color:white; border:1px solid #999; border-radius:8px; outline: none;">
-            
-            <input type="text" id="reg-correo" placeholder="CORREO (@)" style="width:80%; position: relative; left: 40px; padding:20px; margin-bottom:20px; background:#1a1a1a; color:white; border:1px solid #999; border-radius:8px; outline: none;">
-        </div>
-            
-        <div style="position: absolute; bottom: 30px; width: 100%; display: flex; justify-content: center;">
-            <button onclick="guardarNuevoContacto()" style="width: 85%; padding: 15px; background: #ffd700; border: none; border-radius: 25px; font-weight: bold; color: #000; cursor: pointer; font-size: 16px;">
-                GUARDAR CONTACTO
-            </button>
-        </div>
-
-    </div>
-        </div>
-
         
 
 
@@ -701,6 +671,36 @@ margin: 0;
     </div>
 </div>
 
+
+<div id="modal-nuevocontacto" class="modal" style="display:none; z-index: 15000;">
+    <div class="modal-cover">
+        <h3 style="display: none;">NUEVO CONTACTO</h3> <div style="display: flex; align-items: center; position: absolute; left: 0px; top: 40px; width: 100%;">
+            <button onclick="document.getElementById('modal-nuevocontacto').style.display='none'"
+                style="cursor: pointer; padding: 15px; background: transparent; border: none; color: white; font-size: 24px; font-weight: 500; display: flex; align-items: center;">
+                <span style="display: inline-block; transform: scaleX(-1);">➔</span>
+            </button>
+            
+            <h4 style="color: white; font-size: 20px; margin: 0; font-weight: 400; margin-left: 5px;">
+                Nuevo contacto
+            </h4>
+        </div>
+        <div style="margin-top: 110px;"> 
+            <input type="text" id="nombre" placeholder="Nombre" style="width:80%;position: relative; left: 40px;  padding:20px; margin-bottom:30px; background:#1a1a1a; color:white; border:1px solid #999; border-radius:8px;">
+            <input type="text" id="reg-apellido" placeholder="Apellido" style="width:80%;position: relative; left: 40px;  padding:20px; margin-bottom:20px; background:#1a1a1a; color:white; border:1px solid #999; border-radius:8px;">
+            <input type="text" id="target-id" placeholder="ID  (Ej: 12345)" style="width:80%;position: relative; left: 40px;  padding:20px; margin-bottom:20px; background:#1a1a1a; color:white; border:1px solid #999; border-radius:8px;">
+            <input type="text" placeholder="CORREO (@)" style="width:80%;position: relative; left: 40px;  padding:10px; margin-bottom:20px; background:#1a1a1a; color:white; border:1px solid #999; border-radius:8px;">
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 5px; margin-top: 10px;">
+            <button onclick="guardarNuevoContacto()" style="width: 90%; position: absolute; left: 5%; bottom: 15px; padding: 12px; background: #ffd700;  border: none; border-radius: 20px; font-weight: bold; color: #000; cursor: pointer; font-size: 16px;">
+                GUARDAR CONTACTO
+            </button>
+        </div>
+    </div>
+</div>  
+ 
+
+ 
 <div id="modal-mi-perfil" class="modal" style="display:none; z-index: 30000;">
     <div class="modal-cover" style="text-align: center; background: #000; border: 1px solid #ffd700; padding: 20px; border-radius: 15px;">
         <h3 style="color: #ffd700; margin-bottom: 15px;">MI CUENTA</h3>
