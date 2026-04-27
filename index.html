@@ -103,7 +103,7 @@ body {
     align-items: flex-end;
     padding: 10px;
     gap: 8px;
-    z-index: 500;
+    z-index: 100;
     pointer-events: auto; /* IMPORTANTE: Para que puedas hacer clic en el input */
     
     /* Efecto para que parezca que la foto sigue debajo */
@@ -557,14 +557,30 @@ margin: 0;
 
 
  
-
-
-<div id="modal-qr" class="modal">
-    <div class="modal-content" style="display: flex; flex-direction: column; height: 100dvh; position: relative; background-image: linear-gradient(rgba(11, 20, 26, 0.9), rgba(11, 20, 26, 0.9)), url('./assets/logo.webp'); background-size: cover; background-position: center; background-attachment: fixed;">      
-     <div id="nombre-dueño-header-lista" style="background: rgba(32, 44, 51, 0.7); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); color: #ffffff; padding: 15px; font-weight: 900; text-transform: uppercase; text-align: left; border-bottom: 1px solid #333; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 1001;">
-            <span>SPACECHAT</span>
-            <div onclick="alternarVistaPerfil()" style="cursor: pointer; color: #ffd700; font-size: 22px; padding: 0 10px;">⋮</div>
+<div id="modal-nuevocontacto" class="modal" style="display:none; z-index: 15000;">
+<div class="modal-cover">
+      <h3>NUEVO CONTACTO</h3>
+      <button onclick="document.getElementById('modal-nuevocontacto').style='none'"
+        style="cursor: pointer;
+        position: absolute; left: 0px;padding: 12px;margin-bottom:0px; background: transparent; border: none; color: white; font-size: 20px; font-weight: 500;">
+        <span style="display: inline-block; transform: scaleX(-1);">➔</span></button>              
+        <h4 style="margin-bottom:40px; ;position: absolute; left: 20px;color: white;line-height: 1.2;
+         0; font-size: 18px; text-shadow: 1px 1px 2px black;">Nuevo contacto</h4>
+         
+         
+        <input type="text" id="reg-nombre" placeholder="Nombre" style="width:80%;position: relative; left: 40px;  padding:20px; margin-bottom:20px; background:#1a1a1a; color:white; border:1px solid #999; border-radius:8px;">
+        <input type="text" id="reg-apellido" placeholder="Apellido" style="width:80%;position: relative; left: 40px;  padding:20px; margin-bottom:20px; background:#1a1a1a; color:white; border:1px solid #999; border-radius:8px;">
+        <input type="text" id="target-id" placeholder="ID  (Ej: 12345)" style="width:80%;position: relative; left: 40px;  padding:20px; margin-bottom:20px; background:#1a1a1a; color:white; border:1px solid #999; border-radius:8px;">
+        <input type="text"id="reg-correo" placeholder="CORREO (@)" style="width:80%;position: relative; left: 40px;  padding:20px; margin-bottom:20px; background:#1a1a1a; color:white; border:1px solid #999; border-radius:8px;">
+            
+        <div style="display: flex; flex-direction: column; gap: 5px; margin-top: 10px;">
+          
+        <button onclick="guardarNuevoContacto()" style="width: 90%; position: absolute; right:20px; bottom: 20px; padding: 12px; background: #ffd700; border: none; border-radius: 20px; font-weight: bold; color: #000; cursor: pointer;">GUARDAR CONTACTO</button>
+   
         </div>
+    </div>
+</div>
+
 
 
 
