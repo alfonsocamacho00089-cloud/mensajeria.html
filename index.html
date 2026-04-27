@@ -112,8 +112,7 @@ body {
     -webkit-backdrop-filter: blur(5px);
 }
 
-
-     
+    
 /* --- HEADER ESTILO WHATSAPP --- */
 .header { 
     background: rgba(32, 44, 51, 0.7); /* Bajamos de 0.9 a 0.7 para que sea más claro */
@@ -339,6 +338,16 @@ margin: 0;
     overflow: hidden;
     justify-content: space-between;
 }
+
+     #modal-nuevocontacto {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100dvh; /* Altura dinámica para que no se coma el fondo */
+    background: #000;
+    z-index: 25000 !important; /* Fuerza al modal a estar arriba */
+     }
 /* 3. LAS FILAS DE CONTACTOS (Estilo WhatsApp) */
 .fila-contacto {
     display: flex;
@@ -1439,31 +1448,38 @@ function gestionarQR() {
      // 1. Función para abrir el modal
 function abrirModalNuevoContacto() {
     const modal = document.getElementById('modal-nuevocontacto');
-    if (modal) {
-        // Aseguramos que se vea por encima de TODO
-        modal.style.zIndex = "20000"; 
-        modal.style.display = 'flex';
-        
-        // OPCIONAL: Si quieres asegurar que la lista de contactos esté abierta atrás
-        const modalLista = document.getElementById('modal-contactos'); // o el ID de tu lista
-        if (modalLista) modalLista.style.display = 'block';
+    
+    // Seleccionamos las dos barras que molestan
+    const barraEscribir = document.querySelector('.contenedor-flotante');
+    const barraNav = document.querySelector('.barra-flotante-premium');
 
-        console.log("Abriendo: Nuevo Contacto sobre la agenda");
+    if (modal) {
+        modal.style.display = 'block'; // O 'flex' según tu diseño
+        modal.style.zIndex = "25000"; // Por encima de cualquier otra cosa
+        
+        // Desaparecemos las barras por completo
+        if (barraEscribir) barraEscribir.style.visibility = 'hidden';
+        if (barraNav) barraNav.style.visibility = 'hidden';
     }
 }
 
 function cerrarModalNuevo() {
     const modal = document.getElementById('modal-nuevocontacto');
+    const barraEscribir = document.querySelector('.contenedor-flotante');
+    const barraNav = document.querySelector('.barra-flotante-premium');
+
     if (modal) {
         modal.style.display = 'none';
         
-        // IMPORTANTE: Al cerrar, refrescamos la agenda para que 
-        // el usuario vea sus contactos actualizados inmediatamente
+        // Hacemos que las barras vuelvan a ser visibles
+        if (barraEscribir) barraEscribir.style.visibility = 'visible';
+        if (barraNav) barraNav.style.visibility = 'visible';
+        
         if (typeof pintarAgendaContactos === "function") {
             pintarAgendaContactos();
         }
     }
-}
+     }
 
 // Variable para la foto nueva
 let miFotoBase64 = ""; 
