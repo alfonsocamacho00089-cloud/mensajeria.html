@@ -721,12 +721,14 @@ margin: 0;
 
 
      
-    <div id="menu-acciones" class="menu-mensaje">
+    <div id="menu-acciones" class="menu-mensaje" style="display: none; position: fixed; z-index: 40000;">
     <div onclick="accionMensaje('responder')">↩️ Responder</div>
     <div onclick="accionMensaje('editar')">✏️ Editar</div>
     <div onclick="accionMensaje('copiar-id')">👤 Guardar ID</div>
     <div onclick="accionMensaje('borrar')" style="color: #ff5c5c;">🗑️ Borrar</div>
     </div>
+
+     
     <script>
                 
 
@@ -1675,7 +1677,6 @@ if (window.visualViewport) {
 // Detectar cuando el teclado se abre para ajustar el tamaño manualmente
 
      
-</script>
 </script>
 </body>
 </html>
