@@ -1148,7 +1148,9 @@ if (imgHeader) {
     
     // 5. Cerramos el modal de contactos para empezar a escribir
     cerrarModalQR();
-    
+    const barraChat = document.querySelector('.contenedor-flotante');
+            if (barraChat) barraChat.style.display = 'flex';
+     
     const inputMsg = document.getElementById('msg-text');
     if(inputMsg) inputMsg.focus();
 }
@@ -1199,9 +1201,7 @@ const fotoURL = contacto.foto || 'https://via.placeholder.com/45';
             if (typeof actualizarListaConversaciones === "function") {
                 actualizarListaConversaciones(contacto.id, contacto.nombre);
             }
-            const barraChat = document.querySelector('.contenedor-flotante');
-            if (barraChat) barraChat.style.display = 'flex';
-     
+            
         }; 
         
         lista.appendChild(btn);
