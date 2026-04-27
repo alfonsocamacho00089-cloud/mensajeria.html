@@ -1104,8 +1104,11 @@ function cargarConversacionCon(idDestino, nombreDestino, fotoDestino) {
         document.getElementById('nombre-dueño-header').innerText = nombreDestino;
     }
 
+const barraChat = document.querySelector('.contenedor-flotante');
+if (barraChat) barraChat.style.display = 'flex';
+     }
     // 2. NUEVO: Actualizamos la FOTO de perfil
-  
+     
     // SOLO AGREGA ESTO:
         // ... (tu código de limpieza de box y targetID)
 
