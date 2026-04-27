@@ -1429,21 +1429,26 @@ function gestionarQR() {
        
      // 1. Función para abrir el modal
 function abrirModalNuevoContacto() {
+function abrirModalNuevoContacto() {
     const modal = document.getElementById('modal-nuevocontacto');
     if (modal) {
         document.body.style.overflow = 'hidden';
         
-        modal.style.zIndex = "20000"; 
-        modal.style.display = 'flex';
-        modal.style.alignItems = 'center'; 
-        modal.style.justifyContent = 'center';
-
-        // AGREGA ESTAS DOS LÍNEAS PARA BLOQUEAR EL CHAT:
-        modal.style.width = '100vw'; 
+        // 1. Convertimos el contenedor en una pared negra total
+        modal.style.backgroundColor = '#000'; // Negro sólido, nada de transparencias
+        modal.style.position = 'fixed';
+        modal.style.top = '0';
+        modal.style.left = '0';
+        modal.style.width = '100vw';
         modal.style.height = '100dvh';
-        modal.style.position = 'fixed'; // Asegura que no se mueva al hacer scroll
+        
+        // 2. Centramos tu cuadro dorado en esa pared negra
+        modal.style.display = 'flex';
+        modal.style.alignItems = 'center';
+        modal.style.justifyContent = 'center';
+        modal.style.zIndex = "30000"; 
 
-        console.log("Abriendo: Nuevo Contacto");
+        console.log("Chat ocultado con éxito");
     }
      }
 function cerrarModalNuevo() {
