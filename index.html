@@ -339,15 +339,7 @@ margin: 0;
     justify-content: space-between;
 }
 
-     #modal-nuevocontacto {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100dvh; /* Altura dinámica para que no se coma el fondo */
-    background: #000;
-    z-index: 25000 !important; /* Fuerza al modal a estar arriba */
-     }
+     
 /* 3. LAS FILAS DE CONTACTOS (Estilo WhatsApp) */
 .fila-contacto {
     display: flex;
@@ -653,37 +645,35 @@ margin: 0;
 </div>
 
 
-<div id="modal-nuevocontacto" class="modal" style="display:none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 15000; overflow-y: auto;">
-    <div class="modal-cover" style="position: relative; min-height: 100vh; padding-top: 1px;"> <div style="display: flex; align-items: center; justify-content: center; position: relative; margin-top: 40px; margin-bottom: 50px;">
-            <button onclick="document.getElementById('modal-nuevocontacto').style.display='none'"
-                style="cursor: pointer; padding: 10px; background: transparent; border: none; color: white; font-size: 24px; display: flex; align-items: center; outline: none; position: absolute; left: 15px;">
-                <span style="display: inline-block; transform: scaleX(-1);">➔</span>
-            </button>
-            
-            <h4 style="color: white; font-size: 20px; margin: 0; font-weight: 400; text-align: center;">
-                Nuevo contacto
-            </h4>
-        </div>
+<div id="modal-nuevocontacto" class="modal" style="display: none; align-items: center; justify-content: center; background: rgba(0,0,0,0.8); z-index: 30000;">
+    
+    <div class="modal-cover" style="position: relative; width: 90%; max-height: 90vh; padding: 20px; background: #000; border-radius: 20px; text-align: center; border: 1px solid #ffd700; overflow-y: auto; box-sizing: border-box;">
+        
+        <button onclick="document.getElementById('modal-nuevocontacto').style.display='none'" 
+            style="position: absolute; top: 15px; left: 15px; background: transparent; border: none; color: white; font-size: 22px; cursor: pointer;">
+            <span style="display: inline-block; transform: scaleX(-1);">➔</span>
+        </button>
 
+        <h3 style="color: #ffd700; margin-top: 10px; margin-bottom: 30px; font-weight: 400; font-size: 22px;">Nuevo contacto</h3>
+        
         <input type="text" id="nuevo-nombre" placeholder="Nombre" 
-            style="display: block; width: 80%; margin: 0 auto 30px; padding: 18px 20px; background: #1a1a1a; color: white; border: 1px solid #999; border-radius: 8px; font-size: 16px; outline: none; box-sizing: border-box;">
+            style="width: 100%; padding: 16px; margin-bottom: 15px; background: #1a1a1a; color: white; border: 1px solid #333; border-radius: 12px; box-sizing: border-box; outline: none; font-size: 16px;">
         
         <input type="text" id="apellido" placeholder="Apellido" 
-            style="display: block; width: 80%; margin: 0 auto 20px; padding: 18px 20px; background: #1a1a1a; color: white; border: 1px solid #999; border-radius: 8px; font-size: 16px; outline: none; box-sizing: border-box;">
-        
-        <input type="text" id="target-id" placeholder="ID (Ej: 12345)" 
-            style="display: block; width: 80%; margin: 0 auto 20px; padding: 18px 20px; background: #1a1a1a; color: white; border: 1px solid #999; border-radius: 8px; font-size: 16px; outline: none; box-sizing: border-box;">
-        
-        <input type="email" id="correo" placeholder="CORREO (@)" 
-            style="display: block; width: 80%; margin: 0 auto 20px; padding: 18px 20px; background: #1a1a1a; color: white; border: 1px solid #999; border-radius: 8px; font-size: 16px; outline: none; box-sizing: border-box;">
+            style="width: 100%; padding: 16px; margin-bottom: 15px; background: #1a1a1a; color: white; border: 1px solid #333; border-radius: 12px; box-sizing: border-box; outline: none; font-size: 16px;">
 
-        <div style="width: 100%; display: flex; justify-content: center; margin-top: 40px; padding-bottom: 30px;">
-            <button onclick="guardarNuevoContacto()" 
-                style="width: 80%; padding: 18px; background: #ffd700; border: none; border-radius: 30px; font-weight: bold; color: #000; cursor: pointer; font-size: 16px; text-transform: uppercase;">
-                GUARDAR CONTACTO
-            </button>
-        </div>
+        <input type="text" id="target-id" placeholder="ID (Ej: 12345)" 
+            style="width: 100%; padding: 16px; margin-bottom: 15px; background: #1a1a1a; color: white; border: 1px solid #333; border-radius: 12px; box-sizing: border-box; outline: none; font-size: 16px;">
+
+        <input type="email" id="correo" placeholder="Correo electrónico (@)" 
+            style="width: 100%; padding: 16px; margin-bottom: 30px; background: #1a1a1a; color: white; border: 1px solid #333; border-radius: 12px; box-sizing: border-box; outline: none; font-size: 16px;">
+
+        <button onclick="guardarNuevoContacto()" 
+            style="width: 100%; padding: 18px; background: #ffd700; border: none; border-radius: 30px; font-weight: bold; color: #000; cursor: pointer; font-size: 16px; text-transform: uppercase;">
+            GUARDAR CONTACTO
+        </button>
         
+        <p style="margin-top: 20px; color: #555; font-size: 12px;" onclick="document.getElementById('modal-nuevocontacto').style.display='none'">CANCELAR</p>
     </div>
 </div>
      
@@ -1442,38 +1432,32 @@ function gestionarQR() {
      // 1. Función para abrir el modal
 function abrirModalNuevoContacto() {
     const modal = document.getElementById('modal-nuevocontacto');
-    
-    // Seleccionamos las dos barras que molestan
-    const barraEscribir = document.querySelector('.contenedor-flotante');
-    const barraNav = document.querySelector('.barra-flotante-premium');
-
     if (modal) {
-        modal.style.display = 'block'; // O 'flex' según tu diseño
-        modal.style.zIndex = "25000"; // Por encima de cualquier otra cosa
+        // Aseguramos que se vea por encima de TODO
+        modal.style.zIndex = "20000"; 
+        modal.style.display = 'flex';
         
-        // Desaparecemos las barras por completo
-        if (barraEscribir) barraEscribir.style.visibility = 'hidden';
-        if (barraNav) barraNav.style.visibility = 'hidden';
+        // OPCIONAL: Si quieres asegurar que la lista de contactos esté abierta atrás
+        const modalLista = document.getElementById('modal-contactos'); // o el ID de tu lista
+        if (modalLista) modalLista.style.display = 'block';
+
+        console.log("Abriendo: Nuevo Contacto sobre la agenda");
     }
 }
 
 function cerrarModalNuevo() {
     const modal = document.getElementById('modal-nuevocontacto');
-    const barraEscribir = document.querySelector('.contenedor-flotante');
-    const barraNav = document.querySelector('.barra-flotante-premium');
-
     if (modal) {
         modal.style.display = 'none';
         
-        // Hacemos que las barras vuelvan a ser visibles
-        if (barraEscribir) barraEscribir.style.visibility = 'visible';
-        if (barraNav) barraNav.style.visibility = 'visible';
-        
+        // IMPORTANTE: Al cerrar, refrescamos la agenda para que 
+        // el usuario vea sus contactos actualizados inmediatamente
         if (typeof pintarAgendaContactos === "function") {
             pintarAgendaContactos();
         }
     }
-     }
+}
+
 
 // Variable para la foto nueva
 let miFotoBase64 = ""; 
