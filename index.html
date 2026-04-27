@@ -624,23 +624,36 @@ margin: 0;
             </div>
         </div>
 
-        <div id="modal-nuevocontacto" class="modal" style="display:none; z-index: 15000;">
-            <div class="modal-cover">
-                <h3>NUEVO CONTACTO</h3>
-                <input type="text" id="nuevo-nombre" placeholder="Nombre..." style="width:100%; padding:10px; margin:5px 0; color:#000; border-radius: 8px;">
-                <input type="text" id="target-id" placeholder="ID Satelital..." style="width:100%; padding:10px; margin:5px 0; color:#000; border-radius: 8px;">
-                <div style="display: flex; flex-direction: column; gap: 5px; margin-top: 10px;">
-                    <button onclick="guardarNuevoContacto()" style="width: 100%; padding: 12px; background: #ffd700; border: none; border-radius: 10px; font-weight: bold; color: #000; cursor: pointer;">GUARDAR CONTACTO</button>
-                    <button onclick="document.getElementById('modal-nuevocontacto').style.display='none'" style="background:none; border:none; color:white; margin-top:10px; cursor:pointer;">Cancelar</button>
-                </div>
-            </div>
-        </div>
-
-    </div>
-</div>
-
+        <div id="modal-nuevocontacto"class="modal">
+    <div class="modal-cover" style="position: relative; width: 90%; max-height: 90vh; padding: 20px; background: #000; border-radius: 20px; text-align: center; border: 1px solid #ffd700; overflow-y: auto; box-sizing: border-box;">
         
+        <button onclick="document.getElementById('modal-nuevocontacto').style.display='none'" 
+            style="position: absolute; top: 15px; left: 15px; background: transparent; border: none; color: white; font-size: 22px; cursor: pointer;">
+            <span style="display: inline-block; transform: scaleX(-1);">➔</span>
+        </button>
 
+        <h3 style="color: #ffd700; margin-top: 10px; margin-bottom: 30px; font-weight: 400; font-size: 22px;">Nuevo contacto</h3>
+        
+        <input type="text" id="nuevo-nombre" placeholder="Nombre" 
+            style="width: 100%; padding: 16px; margin-bottom: 15px; background: #1a1a1a; color: white; border: 1px solid #333; border-radius: 12px; box-sizing: border-box; outline: none; font-size: 16px;">
+        
+        <input type="text" id="apellido" placeholder="Apellido" 
+            style="width: 100%; padding: 16px; margin-bottom: 15px; background: #1a1a1a; color: white; border: 1px solid #333; border-radius: 12px; box-sizing: border-box; outline: none; font-size: 16px;">
+
+        <input type="text" id="target-id" placeholder="ID (Ej: 12345)" 
+            style="width: 100%; padding: 16px; margin-bottom: 15px; background: #1a1a1a; color: white; border: 1px solid #333; border-radius: 12px; box-sizing: border-box; outline: none; font-size: 16px;">
+
+        <input type="email" id="correo" placeholder="Correo electrónico (@)" 
+            style="width: 100%; padding: 16px; margin-bottom: 30px; background: #1a1a1a; color: white; border: 1px solid #333; border-radius: 12px; box-sizing: border-box; outline: none; font-size: 16px;">
+
+        <button onclick="guardarNuevoContacto()" 
+            style="width: 100%; padding: 18px; background: #ffd700; border: none; border-radius: 30px; font-weight: bold; color: #000; cursor: pointer; font-size: 16px; text-transform: uppercase;">
+            GUARDAR CONTACTO
+        </button>
+        
+        <p style="margin-top: 20px; color: #555; font-size: 12px;" onclick="document.getElementById('modal-nuevocontacto').style.display='none'">CANCELAR</p>
+    </div>
+        </div>
 
 <div id="modal-perfil" class="modal" style="display:none; z-index: 25000;">
     <div class="modal-cover" style="text-align: center;">
