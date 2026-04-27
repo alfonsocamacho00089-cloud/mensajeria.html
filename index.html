@@ -90,13 +90,12 @@ body {
 
 
 
-
+    
 
 /* --- INPUT AREA --- */
 
 .contenedor-flotante {
  display: none; /* Invisible al cargar */
-
     position: fixed; /* Se queda pegado a la pantalla, no al chat */
     bottom: 20;
     left: 0;
@@ -112,7 +111,7 @@ body {
     background: rgba(0, 0, 0, 0.1); 
     backdrop-filter: blur(5px); /* Opcional: desenfoca un poco para legibilidad */
   -webkit-backdrop-filter: blur(5px);
-   
+   box-sizing: border-box;
     
    
 }
@@ -1149,8 +1148,9 @@ if (imgHeader) {
     // 5. Cerramos el modal de contactos para empezar a escribir
     cerrarModalQR();
     const barraChat = document.querySelector('.contenedor-flotante');
-            if (barraChat) barraChat.style.display = 'flex';
-     
+if (barraChat) {
+    barraChat.style.display = 'flex'; // Aquí es donde le das la orden de aparecer
+     }
     const inputMsg = document.getElementById('msg-text');
     if(inputMsg) inputMsg.focus();
 }
