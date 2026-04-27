@@ -1108,7 +1108,7 @@ function cargarConversacionCon(idDestino, nombreDestino, fotoDestino) {
 
 const barraChat = document.querySelector('.contenedor-flotante');
 if (barraChat) barraChat.style.display = 'flex';
-     }
+     
     // 2. NUEVO: Actualizamos la FOTO de perfil
      
     // SOLO AGREGA ESTO:
@@ -1132,7 +1132,7 @@ if (imgHeader) {
     }
 }
 
-     }   // 3. Buscamos los mensajes de ESE contacto en LocalStorage
+      // 3. Buscamos los mensajes de ESE contacto en LocalStorage
     const claveChat = 'chat_' + idDestino;
     const mensajes = JSON.parse(localStorage.getItem(claveChat)) || [];
 
