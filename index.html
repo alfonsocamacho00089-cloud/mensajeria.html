@@ -505,7 +505,7 @@ margin: 0;
 
 <body>
  
-    <div class="contenedor-flotante" style="display: none;">
+    <div class="contenedor-flotante">
     <textarea 
         id="msg-text" 
         placeholder="Escribe un mensaje..."
@@ -721,13 +721,13 @@ margin: 0;
 
 
      
-    <div id="menu-acciones" class="menu-mensaje" style="display: none; position: fixed; z-index: 40000;">
+    <div id="menu-acciones" class="menu-mensaje">
     <div onclick="accionMensaje('responder')">↩️ Responder</div>
     <div onclick="accionMensaje('editar')">✏️ Editar</div>
     <div onclick="accionMensaje('copiar-id')">👤 Guardar ID</div>
     <div onclick="accionMensaje('borrar')" style="color: #ff5c5c;">🗑️ Borrar</div>
     </div>
-
+    <script>
      
     <script>
                 
@@ -1153,16 +1153,7 @@ if (imgHeader) {
     console.log("📂 Historial cargado con: " + nombreDestino);
     
     // 5. Cerramos el modal de contactos para empezar a escribir
-    cerrarModalQR();
-    const barraChat = document.querySelector('.contenedor-flotante');
-    if (barraChat) {
-        barraChat.style.setProperty('display', 'flex', 'important');
-        barraChat.style.setProperty('position', 'fixed', 'important'); // La clava a la pantalla del móvil
-        barraChat.style.setProperty('bottom', '0px', 'important'); // Súbela un poco para que no tape el menú de abajo
-        barraChat.style.setProperty('left', '0', 'important');
-        barraChat.style.setProperty('width', '100%', 'important');
-        barraChat.style.setProperty('z-index', '40000', 'important'); // Encima de Goku y todo lo demás
-    }
+    
     const inputMsg = document.getElementById('msg-text');
     if(inputMsg) inputMsg.focus();
 }
@@ -1456,59 +1447,34 @@ function gestionarQR() {
                 }
                 
        
-   function abrirModalNuevoContacto() {
+   
+         function abrirModalNuevoContacto() {
     const modal = document.getElementById('modal-nuevocontacto');
-    const barraChat = document.querySelector('.contenedor-flotante');
-
     if (modal) {
-        // 1. Escondemos la barra de chat para que no se asome por debajo
-        if (barraChat) barraChat.style.display = 'none';
-
-        // 2. Mostramos el modal centrado
+        // Aseguramos que se vea por encima de TODO
+        modal.style.zIndex = "20000"; 
         modal.style.display = 'flex';
-        modal.style.alignItems = 'center';
-        modal.style.justifyContent = 'center';
-        document.getElementById('modal-nuevocontacto').style.display = 'flex';
+        
+        // OPCIONAL: Si quieres asegurar que la lista de contactos esté abierta atrás
+        const modalLista = document.getElementById('modal-contactos'); // o el ID de tu lista
+        if (modalLista) modalLista.style.display = 'block';
 
-        // 3. Bloqueamos el scroll del fondo
-        document.body.style.overflow = 'hidden';
-document.getElementById('modal-nuevocontacto').style.display = 'flex';
-
-        console.log("Abriendo: Nuevo Contacto (Barra de chat oculta)");
-    document.getElementById('modal-nuevocontacto').style.display = 'flex';
-setTimeout(() => {
-    document.getElementById('nuevo-nombre').focus();
-}, 300);
+        console.log("Abriendo: Nuevo Contacto sobre la agenda");
     }
 }
 
 function cerrarModalNuevo() {
     const modal = document.getElementById('modal-nuevocontacto');
-    const barraChat = document.querySelector('.contenedor-flotante');
-    
-    // Revisamos si hay un chat activo mirando el nombre en el header
-    const headerElement = document.getElementById('nombre-dueño-header');
-    const nombreHeader = headerElement ? headerElement.innerText : "";
-
     if (modal) {
         modal.style.display = 'none';
-        document.body.style.overflow = 'auto'; // Devolvemos el scroll
-
-        // LÓGICA INTELIGENTE DE LA BARRA:
-        if (barraChat) {
-            // Si el header tiene nombre de un contacto, regresamos la barra
-            if (nombreHeader !== "" && nombreHeader !== "SPACECHAT") {
-                barraChat.style.display = 'flex';
-            } else {
-                // Si estamos en la lista general, la dejamos oculta
-                barraChat.style.display = 'none';
-            }
-        }
         
-        // Refrescamos la lista de contactos por si hubo cambios
-        if (typeof pintarAgendaContactos === "function") pintarAgendaContactos();
+        // IMPORTANTE: Al cerrar, refrescamos la agenda para que 
+        // el usuario vea sus contactos actualizados inmediatamente
+        if (typeof pintarAgendaContactos === "function") {
+            pintarAgendaContactos();
+        }
     }
-         }
+     }
      
 
 
