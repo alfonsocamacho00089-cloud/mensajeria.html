@@ -1072,42 +1072,41 @@ function cargarConversacionCon(idDestino, nombreDestino, fotoDestino) {
     const box = document.getElementById('chat-box');
     if (!box) return;
 
+    // 1. Limpiar pantalla
     box.innerHTML = ""; 
 
-    // 1. Guardamos el ID en el input oculto
+    // 2. Guardar el ID de a quién le escribes
     const inputTarget = document.querySelector('#target-id');
-    if(inputTarget) inputTarget.value = idDestino;
+    if (inputTarget) inputTarget.value = idDestino;
 
-    // 2. Actualizamos nombre arriba
-    const txtNombre = document.getElementById('nombre-dueño-header');
-    if (txtNombre) txtNombre.innerText = nombreDestino;
+    // 3. Poner el nombre en la parte de arriba
+    const headerNombre = document.getElementById('nombre-dueño-header');
+    if (headerNombre) headerNombre.innerText = nombreDestino;
 
-    // 3. Manejo de Foto (LA FORMA SEGURA)
-    const imgHeader = document.getElementById('foto-perfil-header');
-    if (imgHeader) {
-        // En lugar de borrar el elemento, solo jugamos con el SRC
-        // Si no hay foto, usamos un avatar por defecto para no romper el layout
-        imgHeader.src = fotoDestino || 'https://ui-avatars.com/api/?name=' + nombreDestino + '&background=ffd700&color=000';
-        imgHeader.style.display = "block"; 
-    }
-
-    // 4. Cargar mensajes
+    // 4. Cargar los mensajes guardados
     const claveChat = 'chat_' + idDestino;
     const mensajes = JSON.parse(localStorage.getItem(claveChat)) || [];
-    
-    // Usamos tu función pintarMensaje que ya sabemos que funciona
+
     mensajes.forEach(m => {
-        if(typeof pintarMensaje === "function") pintarMensaje(m.texto, m.clase);
+        if (typeof pintarMensaje === "function") {
+            pintarMensaje(m.texto, m.clase);
+        }
     });
 
-    localStorage.setItem('unread_' + idDestino, 0);
+    // 5. CERRAR EL MODAL (Esto es lo que te está fallando)
+    // Usamos el ID que tú tienes en tu HTML para el modal de contactos
+    const modal = document.getElementById('modal-qr'); 
+    if (modal) {
+        modal.style.display = 'none';
+    }
+
+    // 6. Refrescar agenda y poner el foco para escribir
     pintarAgendaContactos();
-    cerrarModalQR();
-    
     const inputMsg = document.getElementById('msg-text');
     if(inputMsg) inputMsg.focus();
+
+    console.log("Chat cargado correctamente");
      }
-     
      
  function pintarAgendaContactos() {
     const lista = document.getElementById('lista-contactos');
