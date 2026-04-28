@@ -963,65 +963,72 @@ if (emisorID !== chatAbiertoActualmente) {
        
         
 async function enviarMensajeSatelital() {
-const inputMsg = document.querySelector('#msg-text');
-const inputTarget = document.querySelector('#target-id');
-const msg = inputMsg ? inputMsg.value.trim() : "";
-const targetID = inputTarget ? inputTarget.value.trim() : "";
-const miID = localStorage.getItem('mi_dropis_id') || "ID_DESCONOCIDO";
+    const inputMsg = document.querySelector('#msg-text');
+    const inputTarget = document.querySelector('#target-id');
+    const msg = inputMsg ? inputMsg.value.trim() : "";
+    const targetID = inputTarget ? inputTarget.value.trim() : "";
+    const miID = localStorage.getItem('mi_dropis_id') || "ID_DESCONOCIDO";
 
     if (!targetID || !msg) return alert("ID y Mensaje son obligatorios");
 
+    // 1. GENERAMOS EL ID ÚNICO (La "cédula" del mensaje)
+    const msgId = "msg_" + Date.now();
+
     try {
-        // 1. Preparamos el Payload (ProtoBuf)
+        // 2. MOTOR PROTOBUF
         const root = await cargarProto();
         const SuperAppPayload = root.lookupType("SuperAppPayload");
-        // Antes de: const payload = SuperAppPayload.create({ chatText: msg });
-// Ofuscamos el mensaje para que no sea legible en la consola de Firebase
-const msgProtegido = btoa(unescape(encodeURIComponent(msg))); 
-const payload = SuperAppPayload.create({ chatText: msgProtegido });
+        
+        // Ofuscamos el mensaje (Base64 + URI Encode)
+        const msgProtegido = btoa(unescape(encodeURIComponent(msg))); 
+        
+        // Creamos el paquete incluyendo el ID único
+        const payload = SuperAppPayload.create({ 
+            chatText: msgProtegido,
+            msgId: msgId 
+        });
         
         const buffer = SuperAppPayload.encode(payload).finish();
         
-        // 2. Convertimos a Base64 para el viaje satelital
+        // 3. CONVERSIÓN Y LANZAMIENTO
         const base64 = btoa(String.fromCharCode.apply(null, buffer));
-        // 3. Lo lanzamos a la cola del destinatario
+        
         await db.ref('cola_satelital/' + targetID).push({
-            p: base64,         // El paquete cifrado/empaquetado
-            from: miID,        // Quién lo envía
-            ts: Date.now()     // Marca de tiempo
+            p: base64,         // Paquete ProtoBuf
+            from: miID,        // Remitente
+            ts: Date.now(),    // Timestamp
+            mId: msgId         // ID para rastreo de Doble Check
         });
 
-        // 4. Pintamos nuestro propio mensaje en la derecha
-        pintarMensaje(msg, 'msg-derecha');
-        // ... dentro de enviarMensajeSatelital, después de pintarMensaje(msg, 'msg-derecha');
+        // 4. INTERFAZ Y PERSISTENCIA LOCAL
+        // Pintamos el mensaje pasando el msgId para el futuro Doble Check
+        pintarMensaje(msg, 'msg-derecha', msgId); 
 
+        // Guardamos en el historial con toda la data necesaria
+        let historialEnv = JSON.parse(localStorage.getItem('chat_' + targetID)) || [];
+        historialEnv.push({ 
+            id: msgId, 
+            texto: msg, 
+            clase: 'msg-derecha', 
+            status: 'enviado',
+            ts: Date.now()
+        });
+        localStorage.setItem('chat_' + targetID, JSON.stringify(historialEnv));
 
-// --- AÑADE ESTO PARA GUARDAR LO QUE ENVÍAS ---
-let historialEnv = JSON.parse(localStorage.getItem('chat_' + targetID)) || [];
-historialEnv.push({ texto: msg, clase: 'msg-derecha' });
-localStorage.setItem('chat_' + targetID, JSON.stringify(historialEnv));
-// ----------------------------------------------
+        // 5. LIMPIEZA DE INPUT (Manteniendo el foco y reseteando altura)
+        if (inputMsg) {
+            inputMsg.value = "";
+            inputMsg.style.height = '36px'; // Mantiene tu diseño visual
+            inputMsg.focus(); 
+        }
 
-// ... (resto de tu código anterior)
-if (inputMsg) {
-    inputMsg.value = "";
-    inputMsg.style.height = '36px'; // Vuelve a ser pequeña
-    
-    // Mantiene el cursor activo y el teclado abierto
-    inputMsg.focus(); 
-}
-
-        
-        
-        console.log("🚀 Mensaje lanzado al espacio hacia:", targetID);
+        console.log("🚀 Mensaje con ID " + msgId + " lanzado al espacio hacia:", targetID);
 
     } catch (e) {
-// ... (resto de tu código)
-
         console.error("❌ Fallo en el lanzamiento:", e);
         alert("Error al enviar el mensaje.");
     }
-}
+     }
 // --- 4. GESTIÓN DE TOKENS Y SERVICE WORKER ---
 
 // Registrar el Service Worker al cargar la página
