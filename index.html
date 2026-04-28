@@ -1025,8 +1025,7 @@ async function enviarMensajeSatelital() {
 
         // 4. INTERFAZ Y PERSISTENCIA LOCAL
         // Pintamos el mensaje pasando el msgId para el futuro Doble Check
-        pintarMensaje(msg, 'msg-derecha', msgId); 
-
+        pintarMensaje(msg, 'msg-derecha', null, 'enviado', msgId);
         // Guardamos en el historial con toda la data necesaria
         let historialEnv = JSON.parse(localStorage.getItem('chat_' + targetID)) || [];
         historialEnv.push({ 
