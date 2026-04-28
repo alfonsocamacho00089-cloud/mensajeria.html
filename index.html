@@ -1103,35 +1103,77 @@ async function obtenerToken(registration) {
  
 function manejarBotonIdentidad() {
     const id = localStorage.getItem('mi_dropis_id');
-    const nombre = localStorage.getItem('mi_nombre') || "Usuario"; 
+    const nombre = localStorage.getItem('mi_nombre') || "Usuario";
+    const foto = localStorage.getItem('mi_foto') || "ruta/por/defecto.jpg"; // Tu clave de foto
  
     if (id) {
         const modal = document.getElementById('modal-qr');
-        modal.style.display = 'flex'; // Aquí lo abrimos
-        document.querySelector('.contenedor-flotante').style.display = 'none';
-        // Ponemos tu nombre en el header del modal
-        document.getElementById('nombre-dueño-header').innerText = "SPACECHAT";
- 
-        // Generamos el QR (por si quieres mostrarlo abajo o en un rinconcito)
+        modal.style.display = 'flex';
+        
         const cont = document.getElementById('contenedor-qr');
         if(cont) {
-            cont.innerHTML = "";
-            new QRCode(cont, { text: `dropisapp://perfil/${id}`, width: 120, height: 120 });
+            cont.innerHTML = `
+                <div style="text-align:center; margin-bottom: 15px;">
+                    <img src="${foto}" style="width:80px; height:80px; border-radius:50%; border: 2px solid #00ff00; object-fit: cover;">
+                    <h3 style="margin: 5px 0; color: #fff;">${nombre}</h3>
+                    <p style="font-size: 12px; color: #00ff00; opacity: 0.8;">ID: ${id}</p>
+                </div>
+                <div id="grafico-qr" style="display: flex; justify-content: center; background: white; padding: 10px; border-radius: 10px;"></div>
+                
+                <button onclick="abrirEscanner()" style="margin-top: 20px; padding: 10px; background: #00ff00; border: none; border-radius: 5px; font-weight: bold; width: 100%;">
+                    📷 ESCANEAR OTRO QR
+                </button>
+            `;
+
+            // Pintamos el QR dentro del div que acabamos de crear arriba
+            new QRCode(document.getElementById("grafico-qr"), { 
+                text: `dropisapp://perfil/${id}`, 
+                width: 140, 
+                height: 140 
+            });
         }
- 
-        // Pintamos la lista de la gente con la que hablas
+        
         pintarAgendaContactos(); 
- 
     } else {
         document.getElementById('modal-registro').style.display = 'flex';
     }
-}
+     }
         
 function cerrarModalQR() {
    
 document.getElementById('modal-qr').style.display = 'none';
 document.querySelector('.contenedor-flotante').style.display = 'flex';
 }
+
+function abrirEscanner() {
+    // Aquí abrirías tu interfaz de cámara. 
+    // Supongamos que el resultado del escaneo es: "dropisapp://perfil/12345"
+    const resultadoEscaneo = "dropisapp://perfil/12345"; // Esto vendría de la cámara
+    
+    procesarQRScanner(resultadoEscaneo);
+}
+
+function procesarQRScanner(contenido) {
+    if (contenido.startsWith("dropisapp://perfil/")) {
+        const idNuevoContacto = contenido.split('/').pop();
+        
+        // Guardamos en tu agenda (suponiendo que usas un array en localStorage)
+        let contactos = JSON.parse(localStorage.getItem('mis_contactos')) || [];
+        
+        if (!contactos.includes(idNuevoContacto)) {
+            contactos.push(idNuevoContacto);
+            localStorage.setItem('mis_contactos', JSON.stringify(contactos));
+            alert("¡Contacto agregado con éxito!");
+            pintarAgendaContactos(); // Refrescamos la lista
+        } else {
+            alert("Este contacto ya está en tu lista.");
+        }
+    } else {
+        alert("Código QR no válido para SpaceChat.");
+    }
+     }
+
+     
         async function guardarNuevoContacto() {
     const nombre = document.getElementById('nuevo-nombre').value.trim();
     const idAGuardar = document.getElementById('target-id').value.trim();
