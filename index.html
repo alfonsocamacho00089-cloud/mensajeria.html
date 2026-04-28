@@ -1709,8 +1709,19 @@ async function guardarCambiosPerfil() {
         localStorage.setItem('mi_estado', est);
         localStorage.setItem('mi_foto', fotoParaGuardar);
 
-        alert("✅ Perfil actualizado");
-        alternarVistaPerfil(); // Cerramos la edición
+         alert("✅ Perfil actualizado");
+        
+        // --- ESTO ES LO QUE FALTA ---
+        // 1. Actualizar el Header (donde sale tu nombre/foto arriba)
+        const headerFoto = document.getElementById('foto-perfil-header');
+        if (headerFoto) headerFoto.src = fotoParaGuardar;
+
+        // 2. Si tienes una sección de "Mi Perfil" abierta, actualiza su imagen
+        const previaFoto = document.getElementById('mi-foto-previa');
+        if (previaFoto) previaFoto.src = fotoParaGuardar;
+        // ----------------------------
+
+        alternarVistaPerfil();
     } catch(e) {
         console.error(e);
         alert("Error al guardar cambios");
@@ -1802,7 +1813,18 @@ async function eliminarContactoDeAgenda() {
         alert(`${nombreABorrar} ha sido eliminado de tu agenda.`);
     }
 } // CIERRE DE ELIMINAR CONTACTO
+function inicializarInterfaz() {
+    const fotoLocal = localStorage.getItem('mi_foto');
+    const nombreLocal = localStorage.getItem('mi_nombre');
 
+    if (fotoLocal) {
+        document.getElementById('foto-perfil-header').src = fotoLocal;
+    }
+    if (nombreLocal) {
+        document.getElementById('nombre-dueño-header').innerText = nombreLocal;
+    }
+}
+inicializarInterfaz();
 // BLOQUE DEL TECLADO
 if (window.visualViewport) {
     const vv = window.visualViewport;
