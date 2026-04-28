@@ -21,7 +21,7 @@
     -webkit-tap-highlight-color: transparent;
 }
 
-            body {
+    body {
     font-family: sans-serif;
     background-color: #000000;
     /* Usamos la imagen aquí para que sea global */
@@ -493,19 +493,25 @@ margin: 0;
     opacity: 0.6;            /* Se pone un poco transparente al presionarlo */
 }
      /* Esto es para que los iconos (cámara/clip) no se peguen al techo del contenedor */
-.adjuntar-iconos, .btn-icono, label[for="file-input"] {
+/* Esto NO toca tu fondo de Goku ni tu scroll */
+label[for="file-input"] {
     display: flex;
     align-items: center;
     justify-content: center;
-    height: 50px; /* Misma altura que tu input para que queden alineados */
+    height: 45px; /* Ajustado a la altura de tu textarea */
+    flex-shrink: 0; /* Para que no se aplaste */
 }
 
-/* Esto es para que el icono tenga ese gris de WhatsApp que no brilla más que tu dorado */
-.fa-camera, .fa-paperclip {
+.fa-camera {
     color: #8696a0;
     font-size: 20px;
     cursor: pointer;
- }
+    transition: color 0.2s;
+}
+
+.fa-camera:active {
+    color: #ffd700; /* Se pone dorado solo cuando lo tocas */
+}
            
     </style>
 
