@@ -498,7 +498,14 @@ label[for="file-input"] {
 .fa-camera:active {
     color: #ffd700; /* Se pone dorado solo cuando lo tocas */
 }
-           
+       /* Un estilo limpio para que la foto siempre se vea */
+#foto-perfil-header, #mi-foto-previa {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%; /* Para que sea redonda */
+    object-fit: cover;  /* Para que no se estire feo */
+    border: 2px solid #ffd700; /* El toque dorado que te gusta */
+}    
     </style>
 
 </head>
@@ -1822,6 +1829,23 @@ async function eliminarContactoDeAgenda() {
         alert(`${nombreABorrar} ha sido eliminado de tu agenda.`);
     }
 } // CIERRE DE ELIMINAR CONTACTO
+
+     function cargarFotoInicial() {
+    const fotoGuardada = localStorage.getItem('mi_foto');
+    if (fotoGuardada && fotoGuardada !== "") {
+        // La pone en el header
+        const imgHeader = document.getElementById('foto-perfil-header');
+        if (imgHeader) imgHeader.src = fotoGuardada;
+
+        // La pone en el modal de edición
+        const imgPrevia = document.getElementById('mi-foto-previa');
+        if (imgPrevia) imgPrevia.src = fotoGuardada;
+    }
+}
+
+// Llama a esta función al final de tu código o en el onload
+cargarFotoInicial();
+     
 function inicializarInterfaz() {
     const fotoLocal = localStorage.getItem('mi_foto');
     const nombreLocal = localStorage.getItem('mi_nombre');
