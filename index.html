@@ -1221,17 +1221,8 @@ function cargarConversacionCon(idDestino, nombreDestino, fotoDestino) {
      }
 
     // 3. Buscamos los mensajes de ESE contacto en LocalStorage
-    const claveChat = 'chat_' + idDestino;
-    const mensajes = JSON.parse(localStorage.getItem(claveChat)) || [];
-
+    // ... (final de la función cargarConversacionCon)
     
-    // 4. Los pintamos uno por uno (Pasando ID y Estado)
-    mensajes.forEach(m => {
-        // Le pasamos m.id y m.status que ya guardamos en enviarMensajeSatelital
-        pintarMensaje(m.texto, m.clase, m.hora || null, m.status || 'enviado', m.id);
-    });
-     }
-     
  function pintarAgendaContactos() {
     const lista = document.getElementById('lista-contactos');
     if (!lista) return;
@@ -1410,32 +1401,29 @@ let mensajeSeleccionado = null;
 
 
      function marcarMensajeComoRecibido(msgId, emisorID) {
-    // 1. Cambiarlo en la pantalla (si el chat está abierto)
     const elementoMsg = document.getElementById('msg-' + msgId);
     if (elementoMsg) {
         const checkIcon = elementoMsg.querySelector('.bi-check') || elementoMsg.querySelector('.bi-check-all');
         if (checkIcon) {
-            checkIcon.className = 'bi bi-check-all'; // Asegura que sea doble check
+            checkIcon.className = 'bi bi-check-all';
             checkIcon.style.color = '#34B7F1';
         }
     }
 
-    // 2. ACTUALIZACIÓN NECESARIA: Guardar en el historial
     let clave = 'chat_' + emisorID;
     let historial = JSON.parse(localStorage.getItem(clave)) || [];
     let modificado = false;
 
     historial = historial.map(m => {
         if (m.id === msgId) {
-            m.status = 'recibido'; // Cambiamos el estatus
+            m.status = 'recibido';
             modificado = true;
         }
         return m;
     });
 
     if (modificado) localStorage.setItem(clave, JSON.stringify(historial));
-     }
-     }
+} // <--- Solo UNA llave de cierre aquí.
 // Función para ejecutar las acciones del menú
 function accionMensaje(tipo) {
     if (!mensajeSeleccionado) return;
@@ -1690,35 +1678,19 @@ async function manejarSeleccionImagen(event) {
     const archivo = event.target.files[0];
     if (!archivo) return;
 
-    console.log("🛰️ Iniciando subida satelital de imagen...");
-    
-    // 1. Referencia a la "nube" de Firebase
-    // Guardamos la foto en una carpeta llamada 'fotos_chat' con un nombre único
     const nombreArchivo = Date.now() + "_" + archivo.name;
     const refStorage = firebase.storage().ref().child('fotos_chat/' + nombreArchivo);
 
     try {
-        // 2. SUBIDA REAL: Ponemos el archivo en la nube
         const snapshot = await refStorage.put(archivo);
-        
-        // 3. OBTENER EL LINK: Le pedimos a Firebase la dirección pública de la foto
         const urlImagen = await snapshot.ref.getDownloadURL();
-
-        console.log("🔗 Foto en la nube:", urlImagen);
-
-        // 4. REUTILIZAMOS TU ENVÍO: 
-        // Pasamos la URL a tu función mágica. Ella se encarga del msgId y el Doble Check.
-        // Importante: Pasa la URL como primer argumento (el texto del mensaje)
         await enviarMensajeSatelital(urlImagen);
-
-        // Limpiamos el botón para que puedas enviar otra
         event.target.value = "";
-        
     } catch (e) {
         console.error("❌ Error en la subida:", e);
         alert("Fallo al lanzar la imagen al espacio.");
     }
-     
+} // <--- ESTA LLAVE FALTABA
 
 // Variable para la foto nueva
 
