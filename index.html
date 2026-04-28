@@ -1836,37 +1836,27 @@ async function eliminarContactoDeAgenda() {
         document.getElementById('modal-perfil').style.display = 'none';
         cerrarModalQR(); // Para volver al chat principal
 
+        // ... (Aquí vendría tu función de eliminarContactoDeAgenda)
         alert(`${nombreABorrar} ha sido eliminado de tu agenda.`);
     }
-}
-// Detecta cuando el teclado sube (cambio de tamaño visual)
+} // CIERRE DE ELIMINAR CONTACTO
+
+// BLOQUE DEL TECLADO
 if (window.visualViewport) {
     const vv = window.visualViewport;
-
     const ajustarInterfaz = () => {
-        // 1. Forzamos la altura exacta
         document.body.style.height = `${vv.height}px`;
-
-        // 2. Corregimos el desplazamiento del body
         document.body.style.top = `${vv.offsetTop}px`;
-
         window.scrollTo(0, 0);
-
         const chatBox = document.getElementById('chat-box');
         if (chatBox) {
-            requestAnimationFrame(() => {
-                chatBox.scrollTop = chatBox.scrollHeight;
-            });
+            requestAnimationFrame(() => { chatBox.scrollTop = chatBox.scrollHeight; });
         }
     };
-
-    // Faltaban estas líneas y cerrar las llaves:
     vv.addEventListener('resize', ajustarInterfaz);
     vv.addEventListener('scroll', ajustarInterfaz);
-    ajustarInterfaz(); // Ejecución inicial
-} // <--- Aquí se cierra el IF
-// Detectar cuando el teclado se abre para ajustar el tamaño manualmente
-
+    ajustarInterfaz();
+     }
      
 </script>
 </body>
