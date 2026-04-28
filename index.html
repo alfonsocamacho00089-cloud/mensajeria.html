@@ -1530,19 +1530,17 @@ function renderizarMensajes(listaDeMensajes) {
         }
 
         div.innerHTML = `
-            ${contenido}
-            <div class="msg-info" style="display: flex; justify-content: flex-end; align-items: center; gap: 5px; font-size: 10px; opacity: 0.7;">
-                <span class="tiempo">${tiempo}</span>
-                ${msg.clase.includes('derecha') ? `<span class="checks" style="color: ${colorCheck};">${iconoCheck}</span>` : ''}
-            </div>
-        `;
+    <span>${msg.texto}</span>
+    <div class="msg-info" style="display: flex; justify-content: flex-end; align-items: center; gap: 5px; font-size: 10px; opacity: 0.7;">
+        <span class="tiempo">${tiempo}</span>
+        ${msg.clase.includes('derecha') ? `<span class="checks" style="color: ${colorCheck};">${iconoCheck}</span>` : ''}
+    </div>
+`;
         
         chatBox.appendChild(div);
     });
     
-    // Auto-scroll al último mensaje
-    chatBox.scrollTop = chatBox.scrollHeight;
-     }
+    
          
 function gestionarQR() {
     const seccion = document.getElementById('seccion-mi-qr');
