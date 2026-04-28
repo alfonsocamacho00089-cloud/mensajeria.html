@@ -1336,6 +1336,11 @@ let mensajeSeleccionado = null;
     // ... (resto de tu lógica de Resp >)
     div.innerHTML = `${texto} <span class="msg-info">${tiempo}${checkHTML}</span>`;
     // ...
+     // Dentro de pintarMensaje, antes de crear el contenidoHTML:
+let contenidoFinal = texto;
+if (texto.startsWith('http') && (texto.includes('.jpg') || texto.includes('.png') || texto.includes('firebasestorage'))) {
+    contenidoFinal = `<img src="${texto}" style="max-width:200px; border-radius:10px; display:block; margin-bottom:5px;">`;
+     }
      }
 
     div.onclick = (e) => {
@@ -1602,7 +1607,24 @@ function previsualizarMiFoto(input) {
 }
 
 
+async function manejarEnvioFoto(archivo) {
+    // 1. Mostrar un pequeño aviso de "Subiendo..." para que el usuario no se desespere
+    console.log("Subiendo imagen al satélite...");
 
+    try {
+        // 2. Aquí va tu lógica de subida a Firebase Storage o Cloudinary
+        // Supongamos que esta función te devuelve el link:
+        const urlFoto = await subirArchivoAFirebase(archivo);
+
+        // 3. REUTILIZAMOS tu función maestra de envío
+        // Enviamos el link como si fuera un mensaje de texto
+        await enviarMensajeSatelital(urlFoto);
+        
+        console.log("✅ Foto enviada con éxito");
+    } catch (e) {
+        alert("Error al subir la foto");
+    }
+     }
      
      
 
