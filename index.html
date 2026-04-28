@@ -510,7 +510,40 @@ margin: 0;
         <span>➤</span>
     </button>
     </div>
-  
+
+
+<div id="modal-perfil" class="modal" style="display:none; z-index: 25000;">
+    <div class="modal-cover" style="text-align: center;">
+        <img id="perfil-foto-grande" src="" style="width: 150px; height: 150px; border-radius: 50%; border: 1px solid #ffd700; margin-bottom: 15px; object-fit: cover;">
+        <h2 id="perfil-nombre" style="color: white; margin-bottom: 5px;"></h2>
+        <p style="color: #8696a0; font-size: 14px;">👤</p>
+    <button onclick="eliminarChatEspecifico(); event.stopPropagation();" 
+        style="width: 100%; padding: 10px; background: rgba(255, 77, 77, 0.1); border: 1px solid #ff4d4d; border-radius: 8px; color: #ff4d4d; font-size: 13px; font-weight: 600; cursor: pointer; margin-top: 10px;">
+    🗑️ BORRAR CONVERSACIÓN
+</button>
+
+<button onclick="eliminarContactoDeAgenda(); event.stopPropagation();" 
+        style="width: 100%; padding: 8px; background: transparent; border: 1px solid #555; border-radius: 8px; color: #8696a0; font-size: 12px; font-weight: 500; cursor: pointer; margin-top: 8px;">
+    👤 ELIMINAR CONTACTO
+</button>
+    
+    
+    
+        <button onclick="document.getElementById('modal-perfil').style.display='none'; event.stopPropagation();" 
+        style="margin-top: 20px; width: 100%; padding: 12px; background: transparent; border: none; color: white; font-size: 24px; font-weight: 300;">
+    ✕
+</button>
+    </div>
+</div>
+
+ <div id="menu-acciones" class="menu-mensaje">
+    <div onclick="accionMensaje('responder')">↩️ Responder</div>
+    <div onclick="accionMensaje('editar')">✏️ Editar</div>
+    <div onclick="accionMensaje('copiar-id')">👤 Guardar ID</div>
+    <div onclick="accionMensaje('borrar')" style="color: #ff5c5c;">🗑️ Borrar</div>
+    </div>
+    <script>
+ 
             <div id="pantalla-carga" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; display: flex; align-items: center; justify-content: center; z-index: 999999; transition: opacity 0.5s ease;">
     
     <img src="assets/logo-final.png" alt="Logo ChatSpace" style="width: 150px; height: auto; display: block;">
@@ -688,29 +721,7 @@ margin: 0;
            
       
 
-<div id="modal-perfil" class="modal" style="display:none; z-index: 25000;">
-    <div class="modal-cover" style="text-align: center;">
-        <img id="perfil-foto-grande" src="" style="width: 150px; height: 150px; border-radius: 50%; border: 1px solid #ffd700; margin-bottom: 15px; object-fit: cover;">
-        <h2 id="perfil-nombre" style="color: white; margin-bottom: 5px;"></h2>
-        <p style="color: #8696a0; font-size: 14px;">👤</p>
-    <button onclick="eliminarChatEspecifico(); event.stopPropagation();" 
-        style="width: 100%; padding: 10px; background: rgba(255, 77, 77, 0.1); border: 1px solid #ff4d4d; border-radius: 8px; color: #ff4d4d; font-size: 13px; font-weight: 600; cursor: pointer; margin-top: 10px;">
-    🗑️ BORRAR CONVERSACIÓN
-</button>
 
-<button onclick="eliminarContactoDeAgenda(); event.stopPropagation();" 
-        style="width: 100%; padding: 8px; background: transparent; border: 1px solid #555; border-radius: 8px; color: #8696a0; font-size: 12px; font-weight: 500; cursor: pointer; margin-top: 8px;">
-    👤 ELIMINAR CONTACTO
-</button>
-    
-    
-    
-        <button onclick="document.getElementById('modal-perfil').style.display='none'; event.stopPropagation();" 
-        style="margin-top: 20px; width: 100%; padding: 12px; background: transparent; border: none; color: white; font-size: 24px; font-weight: 300;">
-    ✕
-</button>
-    </div>
-</div>
 
 
 <div id="modal-mi-perfil" class="modal" style="display:none; z-index: 30000;">
@@ -738,12 +749,7 @@ margin: 0;
  
 
      
-    <div id="menu-acciones" class="menu-mensaje">
-    <div onclick="accionMensaje('responder')">↩️ Responder</div>
-    <div onclick="accionMensaje('editar')">✏️ Editar</div>
-    <div onclick="accionMensaje('copiar-id')">👤 Guardar ID</div>
-    <div onclick="accionMensaje('borrar')" style="color: #ff5c5c;">🗑️ Borrar</div>
-    </div>
+    
     <script>
      
  
