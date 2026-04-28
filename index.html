@@ -1569,38 +1569,33 @@ function cerrarModalNuevo() {
 
 
 function alternarVistaPerfil() {
-
     const seccion = document.getElementById('seccion-mi-perfil');
+    if (!seccion) return;
 
-    if (seccion.style.display === "none") {
-
+    if (seccion.style.display === "none" || seccion.style.display === "") {
         seccion.style.display = "block";
 
-        // Rellenar con datos actuales
-
+        // 1. Rellenamos nombre y estado
         document.getElementById('mi-nuevo-nombre').value = localStorage.getItem('mi_nombre') || "";
-
         document.getElementById('mi-nuevo-estado').value = localStorage.getItem('mi_estado') || "";
 
+        // 2. EL PEDAZO DE LA FOTO (Lo que te expliqué)
         const foto = localStorage.getItem('mi_foto');
+        const previa = document.getElementById('mi-foto-previa');
+        const placeholder = document.getElementById('mi-placeholder-foto');
 
-        if(foto) {
-
-            document.getElementById('mi-foto-previa').src = foto;
-
-            document.getElementById('mi-foto-previa').style.display = "block";
-
-            document.getElementById('mi-placeholder-foto').style.display = "none";
-
+        if (foto && foto !== "") {
+            previa.src = foto;
+            previa.style.display = "block";
+            if (placeholder) placeholder.style.display = "none";
+        } else {
+            previa.style.display = "none";
+            if (placeholder) placeholder.style.display = "flex";
         }
-
     } else {
-
         seccion.style.display = "none";
-
     }
-
-}
+     }
 
 
 
