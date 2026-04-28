@@ -985,8 +985,10 @@ async function enviarMensajeSatelital() {
         // Creamos el paquete incluyendo el ID único
         const payload = SuperAppPayload.create({ 
             chatText: msgProtegido,
-            msgId: msgId 
-        });
+            msgId: msgId,
+            type: 0 // 0 significa que es un mensaje de texto normal
+});
+        
         
         const buffer = SuperAppPayload.encode(payload).finish();
         
@@ -1289,17 +1291,21 @@ const fotoURL = contacto.foto || 'https://via.placeholder.com/45';
 }; // <--- Aquí termina el window.onload  
 async function cargarProto() {
     const schema = `
-        package superapp;
         syntax = "proto3";
-        message SuperAppPayload {
-            string chatText = 1;
-            string msgId = 2;
+        message SpacePayload {
+            string msgId = 1;      // ID único del mensaje
+            uint32 type = 2;       // 0=Texto, 1=ACK (Check), 2=Foto, 3=SOS
+            string chatText = 3;   // El texto del mensaje
+            bytes fileData = 4;    // Para pedazos de fotos (futuro)
+            uint32 chunkIndex = 5; // Para saber qué pedazo de foto es
+            uint32 totalChunks = 6;// Total de pedazos
         }
     `;
     const root = protobuf.parse(schema).root;
     return root;
-}
- 
+     }
+
+     
 // --- 5. LÓGICA DE INTERFAZ CORREGIDA ---
 // Variable necesaria para que el menú sepa a qué mensaje le diste clic
 let mensajeSeleccionado = null;
