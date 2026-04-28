@@ -1291,14 +1291,15 @@ const fotoURL = contacto.foto || 'https://via.placeholder.com/45';
 }; // <--- Aquí termina el window.onload  
 async function cargarProto() {
     const schema = `
+        package superapp;
         syntax = "proto3";
-        message SpacePayload {
-            string msgId = 1;      // ID único del mensaje
-            uint32 type = 2;       // 0=Texto, 1=ACK (Check), 2=Foto, 3=SOS
-            string chatText = 3;   // El texto del mensaje
-            bytes fileData = 4;    // Para pedazos de fotos (futuro)
-            uint32 chunkIndex = 5; // Para saber qué pedazo de foto es
-            uint32 totalChunks = 6;// Total de pedazos
+        message SuperAppPayload {
+            string chatText = 1;
+            string msgId = 2;
+            uint32 tipo = 3;
+            bytes archivoData = 4;
+            uint32 piezaActual = 5;
+            uint32 totalPiezas = 6;
         }
     `;
     const root = protobuf.parse(schema).root;
