@@ -1132,45 +1132,33 @@ function cerrarModalQR() {
 document.getElementById('modal-qr').style.display = 'none';
 document.querySelector('.contenedor-flotante').style.display = 'flex';
 }
-        function guardarNuevoContacto() {
-    // 1. Capturamos los datos del modal
+        async function guardarNuevoContacto() {
     const nombre = document.getElementById('nuevo-nombre').value.trim();
     const idAGuardar = document.getElementById('target-id').value.trim();
 
-    if (!idAGuardar || !nombre) {
-        alert("⚠️ Pedro, escribe el nombre e ID para guardar.");
-        return;
-    }
+    if (!idAGuardar || !nombre) return;
 
-    // 2. Traemos la agenda vieja del teléfono (localStorage)
     let agenda = JSON.parse(localStorage.getItem('mis_contactos')) || [];
     
-    // 3. Evitar duplicados
-    const existe = agenda.find(c => c.id === idAGuardar);
-    if (existe) {
-        alert("Este ID ya está en tu agenda como: " + existe.nombre);
-        return;
-    }
+    // 1. Buscamos la foto en Firebase SOLO ESTA VEZ
+    let fotoParaGuardar = 'https://via.placeholder.com/45';
+    try {
+        const snap = await db.ref('usuarios/' + idAGuardar).once('value');
+        if(snap.val() && snap.val().foto) fotoParaGuardar = snap.val().foto;
+    } catch(e) { console.log("Error trayendo foto"); }
 
-    // 4. Guardamos el nuevo contacto en la lista
-    agenda.push({ nombre: nombre, id: idAGuardar });
-    localStorage.setItem('mis_contactos', JSON.stringify(agenda));
+    // 2. Guardamos TODO en el local, incluida la foto
+    agenda.push({ 
+        nombre: nombre, 
+        id: idAGuardar, 
+        foto: fotoParaGuardar // <--- Aquí se queda guardada para siempre
+    });
     
-    alert("✅ Contacto " + nombre + " guardado con éxito.");
-
-    // 5. Limpiamos y cerramos el modal
-    document.getElementById('nuevo-nombre').value = "";
-    document.getElementById('target-id').value = "";
+    localStorage.setItem('mis_contactos', JSON.stringify(agenda));
+    alert("✅ Guardado en el teléfono");
+    
     document.getElementById('modal-nuevocontacto').style.display = 'none';
-// Agrega esta línea al final para refrescar la lista sin salir
     pintarAgendaContactos();
-    // 6. ¡MUY IMPORTANTE! Refrescar la lista del modal QR
-    // Si tu función para cargar la lista se llama diferente, cámbiala aquí
-    if (typeof cargarContactos === "function") {
-        cargarContactos(); 
-    } else if (typeof mostrarContactos === "function") {
-        mostrarContactos();
-    }
      }
      
 function cargarConversacionCon(idDestino, nombreDestino, fotoDestino) {
@@ -1227,37 +1215,29 @@ function cargarConversacionCon(idDestino, nombreDestino, fotoDestino) {
 
     // 3. Buscamos los mensajes de ESE contacto en LocalStorage
     // ... (final de la función cargarConversacionCon)
-    
- function pintarAgendaContactos() {
+    function pintarAgendaContactos() {
     const lista = document.getElementById('lista-contactos');
     if (!lista) return;
 
-    // 1. Cargamos contactos (reales o de prueba)
-    const contactos = JSON.parse(localStorage.getItem('mis_contactos')) || [
-        { nombre: "Hijo 1", id: "ID_AQUI_1" }, 
-        { nombre: "Hijo 2", id: "ID_AQUI_2" }
-    ];
- 
+    // Cargamos lo que hay en el teléfono
+    const contactos = JSON.parse(localStorage.getItem('mis_contactos')) || [];
     lista.innerHTML = ""; 
- 
+
     contactos.forEach(contacto => {
         const numNoLeidos = localStorage.getItem('unread_' + contacto.id) || 0;
         const badgeHTML = numNoLeidos > 0 ? `<div class="contador-nube">${numNoLeidos}</div>` : '';
-// AÑADE ESTA LÍNEA AQUÍ:
-const fotoURL = contacto.foto || 'https://via.placeholder.com/45';
+
+        // Prioridad 1: Foto guardada en el local. Prioridad 2: Placeholder.
+        const fotoURL = contacto.foto || 'https://via.placeholder.com/45';
 
         const btn = document.createElement('div');
         btn.className = 'fila-contacto'; 
-
-        // 1. Sacamos la inicial de tu variable contacto.nombre
         const inicial = contacto.nombre ? contacto.nombre.charAt(0).toUpperCase() : '?';
 
-        // 2. Pintamos el contenido (Respetando tu estructura original)
-        // Solo cambiamos la parte de la <img> para que si es placeholder, use el círculo
         btn.innerHTML = `
             ${fotoURL.includes('placeholder.com') ? 
                 `<div class="foto-perfil" style="width:45px; height:45px; border-radius:50%; background:#ffd700; color:#000; display:flex; align-items:center; justify-content:center; font-weight:900; font-size:20px; border: 2px solid #000; flex-shrink:0;">${inicial}</div>` : 
-                `<img src="${fotoURL}" class="foto-perfil" style="width:45px; height:45px; border-radius:50%; object-fit:cover;">`
+                `<img src="${fotoURL}" class="foto-perfil" style="width:45px; height:45px; border-radius:50%; object-fit:cover; border: 2px solid #ffd700;">`
             }
             <div style="flex-grow: 1; margin-left: 10px;">
                 <div style="font-weight: bold; color: white;">${contacto.nombre}</div>
@@ -1266,26 +1246,16 @@ const fotoURL = contacto.foto || 'https://via.placeholder.com/45';
             ${badgeHTML} 
         `;
 
-        // 3. El evento click (Exactamente como tú lo tenías)
         btn.onclick = () => {
             cargarConversacionCon(contacto.id, contacto.nombre, fotoURL); 
-            
-            if (typeof actualizarListaConversaciones === "function") {
-                actualizarListaConversaciones(contacto.id, contacto.nombre);
-            }
-            
         }; 
         
         lista.appendChild(btn);
     }); 
-
+     }
  
- 
- }
-     
 
-      
-
+   
  
 // Reemplaza el bloque final por este:
  window.onload = () => {
