@@ -536,18 +536,24 @@ margin: 0;
     <div id="chat-box">
 </div>
     
-<div id="modal-registro" class="modal" style="display: none; align-items: center; justify-content: center;">
-    <div class="modal-cover" style="position: relative; width: 85%; max-width: 400px; padding: 25px; background: #1e222b; border-radius: 15px; text-align: center; border: 1px solid #333;">
+
+<div id="modal-registro" class="modal" style="display: none; align-items: center; justify-content: center; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #1e222b; z-index: 30000;">
+  
+          <div class="modal-cover" style="position: relative; width: 100vw; height: 100vh; padding: 50px 30px 50px 30px; box-sizing: border-box; background: #1e222b; border-radius: 0px; text-align: center; border: 0px solid #333; box-shadow: 0 0 20px rgba(0,0,0,0.5);">   
         <h3 style="color: #ffd700; margin-bottom: 20px;">SPACECHAT</h3>
         
         <input type="text" id="reg-nombre" placeholder="Nombre" 
-            style="width: 100%; padding: 15px; margin-bottom: 15px; background:  #1e222b; color: white; border: 1px solid #333; border-radius: 8px; box-sizing: border-box;">
+            onfocus="this.style.boxShadow='0 0 5px #ffd700'; this.style.borderColor='#ffd700';" 
+            onblur="this.style.boxShadow='none'; this.style.borderColor='#999';"
+             style="width: 100%; padding: 18px; margin-bottom: 15px; background: #2a2f3a; color: white; border: 1px solid #999; border-radius: 8px; box-sizing: border-box; outline: none;">
         
         <input type="text" id="reg-apellido" placeholder="Apellido" 
-            style="width: 100%; padding: 15px; margin-bottom: 25px; background: #1e222b; color: white; border: 1px solid #333; border-radius: 8px; box-sizing: border-box;">
+            onfocus="this.style.boxShadow='0 0 5px #ffd700'; this.style.borderColor='#ffd700';" 
+            onblur="this.style.boxShadow='none'; this.style.borderColor='#999';"
+             style="width: 100%; padding: 18px; margin-bottom: 15px; background: #2a2f3a; color: white; border: 1px solid #999; border-radius: 8px; box-sizing: border-box; outline: none;">
 
         <button onclick="ejecutarRegistroCompleto()" 
-            style="width: 100%; padding: 15px; background: #ffd700; border: none; border-radius: 25px; font-weight: bold; color: #000; cursor: pointer; font-size: 16px; margin-bottom: 20px;">
+            style="width: 100%; padding: 15px; background: #ffd700; border: none; border-radius: 25px; font-weight: bold; color: #000; cursor: pointer; font-size: 16px; margin-bottom: 20pxtext-transform: uppercase; box-shadow: 0 0 5px #ffd700;">
             CREAR MI CUENTA ID
         </button>
 
@@ -557,6 +563,7 @@ margin: 0;
         </p>
     </div>
 </div>
+    
     
     <div class="fondo-estatico"></div>
 
@@ -635,13 +642,13 @@ margin: 0;
         </div>
 
         
-     
 
+     
 <div id="modal-nuevocontacto" class="modal" style="display: none; align-items: center; justify-content: center; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #1e222b; z-index: 30000;">
     
-          <div class="modal-cover" style="position: relative; width: 100vw; height: 100vh; padding: 50px 20px 50px 20px; box-sizing: border-box; background: #1e222b; border-radius: 0px; text-align: center; border: 0px solid #333; box-shadow: 0 0 20px rgba(0,0,0,0.5);">                                                
+          <div class="modal-cover" style="position: relative; width: 100vw; height: 100vh; padding: 50px 30px 50px 30px; box-sizing: border-box; background: #1e222b; border-radius: 0px; text-align: center; border: 0px solid #333; box-shadow: 0 0 20px rgba(0,0,0,0.5);">                                                
         
-<div style="display: flex; align-items: center; justify-content: center; gap: 5px; margin-bottom: 10px;">
+<div style="display: flex; align-items: center;justify-content: flex-start; margin-left: 20px; gap: 15px; margin-bottom: 20px;">
     
     <button onclick="cerrarModalNuevo()" style="background: transparent; border: none; color: white; font-size: 20px; cursor: pointer;">
          <span style="display: inline-block; transform: scaleX(-1);">➔</span>
@@ -652,18 +659,27 @@ margin: 0;
 </div>
         
         <input type="text" id="nuevo-nombre" placeholder="Nombre" 
-            style="width: 100%; padding: 18px; margin-bottom: 15px; background: #2a2f3a; color: white; border: 1px solid #333; border-radius: 8px; box-sizing: border-box; outline: none;">
+            onfocus="this.style.boxShadow='0 0 5px #ffd700'; this.style.borderColor='#ffd700';" 
+            onblur="this.style.boxShadow='none'; this.style.borderColor='#999';"
+             style="width: 100%; padding: 18px; margin-bottom: 15px; background: #2a2f3a; color: white; border: 1px solid #999; border-radius: 8px; box-sizing: border-box; outline: none;">
         
-        <input type="text" id="nuevo-apellido-contacto" placeholder="Apellido" 
-            style="width: 100%; padding: 18px; margin-bottom: 15px; background: #2a2f3a; color: white; border: 1px solid #333; border-radius: 8px; box-sizing: border-box; outline: none;">
+        <input type="text" id="nuevo-apellido-contacto" placeholder="Apellido"
+        onfocus="this.style.boxShadow='0 0 5px #ffd700'; this.style.borderColor='#ffd700';" 
+            onblur="this.style.boxShadow='none'; this.style.borderColor='#999';"
+            style="width: 100%; padding: 18px; margin-bottom: 15px; background: #2a2f3a; color: white; border: 1px solid #999; border-radius: 8px; box-sizing: border-box; outline: none;">
 
         <input type="text" id="target-id" placeholder="ID Space (Ej: 12345)" 
-            style="width: 100%; padding: 18px; margin-bottom: 15px; background: #2a2f3a; color: white; border: 1px solid #333; border-radius: 8px; box-sizing: border-box; outline: none;">
+        onfocus="this.style.boxShadow='0 0 5px #ffd700'; this.style.borderColor='#ffd700';" 
+            onblur="this.style.boxShadow='none'; this.style.borderColor='#999';"
+            style="width: 100%; padding: 18px; margin-bottom: 15px; background: #2a2f3a; color: white; border: 1px solid #999; border-radius: 8px; box-sizing: border-box; outline: none;">
 
         <input type="email" id="correo" placeholder="Correo (@)" 
-            style="width: 100%; padding: 10px; margin-top: 20px; background: #2a2f3a; color: white; border: 1px solid #333; border-radius: 8px; box-sizing: border-box; outline: none;">
+        onfocus="this.style.boxShadow='0 0 5px #ffd700'; this.style.borderColor='#ffd700';" 
+            onblur="this.style.boxShadow='none'; this.style.borderColor='#999';"
+            style="width: 100%; padding: 10px; margin-top: 20px; background: #2a2f3a; color: white; border: 1px solid #999; border-radius: 8px; box-sizing: border-box; outline: none;">
+
 <button onclick="guardarNuevoContacto()" 
-    style="width: 100%; padding: 10px; margin-top: 60px; background: #ffd700; border: none; border-radius: 15px; font-weight: bold; color: #000; cursor: pointer; font-size: 15px; text-transform: uppercase;">
+    style="width: 100%; padding: 10px; margin-top: 60px; background: #ffd700; border: none; border-radius: 15px; font-weight: bold; color: #000; cursor: pointer; font-size: 15px; text-transform: uppercase; box-shadow: 0 0 5px #ffd700;">
     GUARDAR 
 </button>
     </div>
