@@ -1312,45 +1312,31 @@ async function cargarProto() {
 let mensajeSeleccionado = null;
  
     // Tu código del menú (onclick) se queda igualito abajo...
-    function pintarMensaje(texto, clase, hora = null, estado = 'enviado') {
+    function pintarMensaje(texto, clase, hora = null, estado = 'enviado', msgId = null) {
     const box = document.getElementById('chat-box');
     if (!box) return;
 
     const div = document.createElement('div');
     div.className = 'msg-burbuja ' + clase;
+    
+    // ESTA LÍNEA ES VITAL: Le pone la "cédula" al div
+    if (msgId) div.id = 'msg-' + msgId; 
 
     const tiempo = hora || new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
     
-    // Decidimos qué icono y qué color poner
-// Elegimos el dibujo (1 palomita o 2)
-let iconName = (estado === 'enviado') ? 'fa-solid fa-check' : 'fa-solid fa-check-double';
-
-// Generamos el HTML usando la CLASE de tu CSS (enviado, recibido o leido)
-// Cambia la línea de checkHTML por esta:
-let checkHTML = (clase.includes('derecha')) ? (estado === 'leido' ? ' ✓✓' : ' ✓') : '';
-
-
-    let contenidoHTML = "";
-    if (texto && texto.includes("Resp >")) {
-        const partes = texto.split("\n— ");
-        const cabezalCita = partes[0].replace("Resp >", "").trim(); // Limpiamos el texto
-        const mensajeReal = partes[1] || "";
-        
-        div.style.backgroundColor = "#2a2a2a"; 
-        div.style.border = "1px solid rgba(255,215,0,0.2)";
- 
-        contenidoHTML = `
-            <div style="font-size: 11px; opacity: 0.5; border-bottom: 1px solid rgba(255,255,255,0.1); padding: 0; margin: 0 0 2px 0; line-height: 1; font-style: italic;">
-                Resp: ${cabezalCita}
-            </div>
-            <div style="margin: 0; padding: 0; line-height: 1.1;">${mensajeReal}</div>
-        `;
-    } else {
-        contenidoHTML = `<span>${texto}</span>`;
+    // Lógica de checks mejorada
+    let checkHTML = "";
+    if (clase.includes('derecha')) {
+        // Si el estado es 'recibido', ponemos doble check azul, si no, uno gris
+        const color = (estado === 'recibido') ? '#34B7F1' : '#8696a0';
+        const icon = (estado === 'recibido') ? '✓✓' : '✓';
+        checkHTML = `<span class="checks" style="color: ${color}; margin-left: 5px;">${icon}</span>`;
     }
-div.innerHTML = `${texto} <span class="msg-info">${tiempo}${checkHTML}</span>`;
 
-
+    // ... (resto de tu lógica de Resp >)
+    div.innerHTML = `${texto} <span class="msg-info">${tiempo}${checkHTML}</span>`;
+    // ...
+     }
 
     div.onclick = (e) => {
         mensajeSeleccionado = div; 
@@ -1480,7 +1466,14 @@ function renderizarMensajes(listaDeMensajes) {
 
     listaDeMensajes.forEach(msg => {
         const div = document.createElement('div');
-        
+        listaDeMensajes.forEach(msg => {
+        const div = document.createElement('div');
+        div.className = `msg-burbuja ${msg.clase}`; 
+        if (msg.id) div.id = 'msg-' + msg.id; // También aquí
+
+        // Definimos el icono rápido
+        const colorCheck = (msg.status === 'recibido') ? '#4fc3f7' : '#8696a0';
+        const iconoCheck = (msg.status === 'recibido') ? '✓✓' : '✓';
         // Aquí usamos la "clase" que vimos en tu consola (msg-izquierda o msg-derecha)
         div.className = `msg-burbuja ${msg.clase}`; 
         
