@@ -907,58 +907,68 @@ setTimeout(() => {
             const SuperAppPayload = root.lookupType("SuperAppPayload");
             const buffer = Uint8Array.from(atob(data.p), c => c.charCodeAt(0));
             const decoded = SuperAppPayload.decode(buffer);
-            const textoReal = decodeURIComponent(escape(atob(decoded.chatText)));
 
             const emisorID = data.from; 
             const chatAbiertoActualmente = document.querySelector('#target-id').value;
 
-            // 1. Guardar mensaje en el historial
+            // --- 1. LÓGICA DE CONFIRMACIÓN (DOBLE CHECK) ---
+            if (decoded.tipo === 1) { 
+                // Si el tipo es 1, es un "Eco". No pintamos nada, solo marcamos el check.
+                if (typeof marcarMensajeComoRecibido === "function") {
+                    marcarMensajeComoRecibido(decoded.msgId, emisorID);
+                }
+                snapshot.ref.remove(); 
+                return; // Salimos para no procesar como mensaje de texto
+            }
+
+            // --- 2. LÓGICA DE MENSAJE DE TEXTO (TIPO 0) ---
+            const textoReal = decodeURIComponent(escape(atob(decoded.chatText)));
+
+            // Guardar mensaje en el historial local (Incluyendo el msgId)
             let clave = 'chat_' + emisorID;
             let historial = JSON.parse(localStorage.getItem(clave)) || [];
-            historial.push({ texto: textoReal, clase: 'msg-izquierda' });
+            historial.push({ 
+                id: decoded.msgId, // Guardamos el ID para futuras referencias
+                texto: textoReal, 
+                clase: 'msg-izquierda',
+                ts: Date.now() 
+            });
             localStorage.setItem(clave, JSON.stringify(historial));
 
-            // 2. Lógica de Notificaciones y Contadores
+            // Manejo de Interfaz y Notificaciones
             if (emisorID === chatAbiertoActualmente) {
-                pintarMensaje(textoReal, 'msg-izquierda');
+                // Pasamos el msgId a pintarMensaje para que el HTML sea rastreable
+                pintarMensaje(textoReal, 'msg-izquierda', null, 'enviado', decoded.msgId);
             } else {
-                // Aumentar contador de mensajes no leídos
                 let noLeidos = parseInt(localStorage.getItem('unread_' + emisorID)) || 0;
                 localStorage.setItem('unread_' + emisorID, noLeidos + 1);
                 
-                // Actualizar la lista de contactos visualmente
                 pintarAgendaContactos();
 
-                // Notificación del teléfono (Arriba)
-                mostrarNotificacionNativa("Nuevo mensaje de SpaceChat", textoReal);
+                // Notificación Nativa corregida
+                if ('serviceWorker' in navigator) {
+                    navigator.serviceWorker.ready.then(registration => {
+                        registration.showNotification("SpaceChat: " + emisorID, {
+                            body: textoReal,
+                            icon: 'https://cdn-icons-png.flaticon.com/512/733/733585.png',
+                            vibrate: [200, 100, 200],
+                            tag: 'nuevo-mensaje-' + emisorID, 
+                            renotify: true,
+                            data: { emisor: emisorID }
+                        });
+                    });
+                }
+            }
+
+            // --- 3. ENVIAR ECO AUTOMÁTICO AL EMISOR ---
+            // Le avisamos al otro que ya recibimos su mensaje
+            if (typeof enviarEco === "function") {
+                enviarEco(decoded.msgId, emisorID);
             }
 
             snapshot.ref.remove(); 
-        } catch (e) { console.error(e); }
+        } catch (e) { console.error("Error en Antena:", e); }
     });
-}
-
-// Función para las notificaciones que salen arriba en el cel
-// En lugar de: mostrarNotificacionNativa(...)
-// Usa esto que despierta al Service Worker:
-
-// DENTRO de activarAntena, después de: const textoReal = ...
-if (emisorID !== chatAbiertoActualmente) {
-    // Aumentar contador...
-    
-    // NOTIFICACIÓN CORREGIDA:
-    if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.ready.then(registration => {
-            registration.showNotification("SpaceChat: Nuevo Mensaje", {
-                body: textoReal, // Ya no dirá "undefined"
-                icon: 'https://cdn-icons-png.flaticon.com/512/733/733585.png',
-                vibrate: [200, 100, 200],
-                tag: 'nuevo-mensaje-' + emisorID, 
-                renotify: true,
-                data: { emisor: emisorID } // Guardamos quién lo envió por si el usuario toca la notificación
-            });
-        });
-    }
      }
        
         
