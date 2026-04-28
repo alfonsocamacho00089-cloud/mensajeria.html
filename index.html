@@ -1188,22 +1188,12 @@ if (imgHeader) {
     const claveChat = 'chat_' + idDestino;
     const mensajes = JSON.parse(localStorage.getItem(claveChat)) || [];
 
-    // 4. Los pintamos uno por uno
+    
+    // 4. Los pintamos uno por uno (Pasando ID y Estado)
     mensajes.forEach(m => {
-        pintarMensaje(m.texto, m.clase);
+        // Le pasamos m.id y m.status que ya guardamos en enviarMensajeSatelital
+        pintarMensaje(m.texto, m.clase, m.hora || null, m.status || 'enviado', m.id);
     });
-    localStorage.setItem('unread_' + idDestino, 0);
-    
-    // Refrescar la agenda para que se borre el círculo verde/rojo
-    pintarAgendaContactos();
-    console.log("📂 Historial cargado con: " + nombreDestino);
-    
-    // 5. Cerramos el modal de contactos para empezar a escribir
-    cerrarModalQR();
-    
-    const inputMsg = document.getElementById('msg-text');
-    if(inputMsg) inputMsg.focus();
-     }
      
      
  function pintarAgendaContactos() {
@@ -1376,7 +1366,34 @@ div.innerHTML = `${texto} <span class="msg-info">${tiempo}${checkHTML}</span>`;
     box.appendChild(div);
     box.scrollTop = box.scrollHeight;
         }
- 
+
+
+     function marcarMensajeComoRecibido(msgId, emisorID) {
+    // 1. Cambiarlo en la pantalla (si el chat está abierto)
+    const elementoMsg = document.getElementById('msg-' + msgId);
+    if (elementoMsg) {
+        const checkIcon = elementoMsg.querySelector('.bi-check') || elementoMsg.querySelector('.bi-check-all');
+        if (checkIcon) {
+            checkIcon.className = 'bi bi-check-all'; // Asegura que sea doble check
+            checkIcon.style.color = '#34B7F1';
+        }
+    }
+
+    // 2. ACTUALIZACIÓN NECESARIA: Guardar en el historial
+    let clave = 'chat_' + emisorID;
+    let historial = JSON.parse(localStorage.getItem(clave)) || [];
+    let modificado = false;
+
+    historial = historial.map(m => {
+        if (m.id === msgId) {
+            m.status = 'recibido'; // Cambiamos el estatus
+            modificado = true;
+        }
+        return m;
+    });
+
+    if (modificado) localStorage.setItem(clave, JSON.stringify(historial));
+     }
 // Función para ejecutar las acciones del menú
 function accionMensaje(tipo) {
     if (!mensajeSeleccionado) return;
