@@ -937,16 +937,25 @@ setTimeout(() => {
 
             // Guardar mensaje en el historial local (Incluyendo el msgId)
             let clave = 'chat_' + emisorID;
-            let historial = JSON.parse(localStorage.getItem(clave)) || [];
+            
+
+           let historial = JSON.parse(localStorage.getItem(clave)) || [];
             historial.push({ 
-                id: decoded.msgId, 
+                id: decoded.msgId, // Guardamos el ID para futuras referencias
                 texto: textoReal, 
                 clase: 'msg-izquierda',
                 ts: Date.now(),
-                // LÍNEA CLAVE: Guarda la hora aquí
+
                 hora: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })
             });
+           
             localStorage.setItem(clave, JSON.stringify(historial));
+
+            // Manejo de Interfaz y Notificaciones
+            if (emisorID === chatAbiertoActualmente) {
+                // Pasamos el msgId a pintarMensaje para que el HTML sea rastreable
+                pintarMensaje(textoReal, 'msg-izquierda', 'enviado', decoded.msgId);
+         
         } else {
                 let noLeidos = parseInt(localStorage.getItem('unread_' + emisorID)) || 0;
                 localStorage.setItem('unread_' + emisorID, noLeidos + 1);
