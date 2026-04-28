@@ -942,18 +942,24 @@ setTimeout(() => {
 // En lugar de: mostrarNotificacionNativa(...)
 // Usa esto que despierta al Service Worker:
 
-if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.ready.then(registration => {
-        registration.showNotification("SpaceChat: " + emisorID, {
-            body: textoReal,
-            icon: 'https://cdn-icons-png.flaticon.com/512/733/733585.png',
-            badge: 'https://cdn-icons-png.flaticon.com/512/733/733585.png', // Icono chiquito para la barra
-            vibrate: [200, 100, 200], // ¡Haz que el cel vibre!
-            tag: 'nuevo-mensaje-' + emisorID, // Evita que se amontonen mil avisos
-            renotify: true
+// DENTRO de activarAntena, después de: const textoReal = ...
+if (emisorID !== chatAbiertoActualmente) {
+    // Aumentar contador...
+    
+    // NOTIFICACIÓN CORREGIDA:
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.ready.then(registration => {
+            registration.showNotification("SpaceChat: Nuevo Mensaje", {
+                body: textoReal, // Ya no dirá "undefined"
+                icon: 'https://cdn-icons-png.flaticon.com/512/733/733585.png',
+                vibrate: [200, 100, 200],
+                tag: 'nuevo-mensaje-' + emisorID, 
+                renotify: true,
+                data: { emisor: emisorID } // Guardamos quién lo envió por si el usuario toca la notificación
+            });
         });
-    });
-         }
+    }
+     }
        
         
 async function enviarMensajeSatelital() {
@@ -1280,6 +1286,7 @@ async function cargarProto() {
         syntax = "proto3";
         message SuperAppPayload {
             string chatText = 1;
+            string msgId = 2;
         }
     `;
     const root = protobuf.parse(schema).root;
