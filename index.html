@@ -1481,26 +1481,34 @@ function cargarMensajesLocales() {
          
 function renderizarMensajes(listaDeMensajes) {
     const chatBox = document.getElementById('chat-box');
+    if (!chatBox) return;
+
     chatBox.innerHTML = ''; // Limpiamos para no duplicar
 
     listaDeMensajes.forEach(msg => {
         const div = document.createElement('div');
-        listaDeMensajes.forEach(msg => {
-        const div = document.createElement('div');
         div.className = `msg-burbuja ${msg.clase}`; 
-        if (msg.id) div.id = 'msg-' + msg.id; // También aquí
+        
+        // Le ponemos su ID para que el Doble Check sepa dónde pintar
+        if (msg.id) div.id = 'msg-' + msg.id; 
 
-        // Definimos el icono rápido
+        // 1. Lógica para el color y el icono del check
         const colorCheck = (msg.status === 'recibido') ? '#4fc3f7' : '#8696a0';
         const iconoCheck = (msg.status === 'recibido') ? '✓✓' : '✓';
-        // Aquí usamos la "clase" que vimos en tu consola (msg-izquierda o msg-derecha)
-        div.className = `msg-burbuja ${msg.clase}`; 
-        
+        const tiempo = msg.hora || "17:33"; // Usamos la hora del mensaje o una por defecto
+
+        // 2. Construimos el contenido (Igual que en pintarMensaje)
+        let contenido = msg.texto;
+        // Si es una foto, la pintamos
+        if (msg.texto.startsWith('http')) {
+            contenido = `<img src="${msg.texto}" style="max-width:100%; border-radius:10px;">`;
+        }
+
         div.innerHTML = `
-            ${msg.texto}
-            <div class="msg-info">
-                <span class="tiempo">17:33</span><span class="checks" style="color: #4fc3f7;">${checkIcon}</span>
-        
+            ${contenido}
+            <div class="msg-info" style="display: flex; justify-content: flex-end; align-items: center; gap: 5px; font-size: 10px; opacity: 0.7;">
+                <span class="tiempo">${tiempo}</span>
+                ${msg.clase.includes('derecha') ? `<span class="checks" style="color: ${colorCheck};">${iconoCheck}</span>` : ''}
             </div>
         `;
         
@@ -1509,7 +1517,7 @@ function renderizarMensajes(listaDeMensajes) {
     
     // Auto-scroll al último mensaje
     chatBox.scrollTop = chatBox.scrollHeight;
-}
+     }
          
 function gestionarQR() {
     const seccion = document.getElementById('seccion-mi-qr');
