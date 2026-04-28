@@ -1036,7 +1036,7 @@ async function enviarMensajeSatelital() {
             ts: Date.now(),
             // AGREGA ESTA LÍNEA JUSTO AQUÍ:
             hora: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })
-        });
+});
         localStorage.setItem('chat_' + targetID, JSON.stringify(historialEnv));
 
         // 5. LIMPIEZA DE INPUT (Manteniendo el foco y reseteando altura)
@@ -1192,9 +1192,12 @@ function cargarConversacionCon(idDestino, nombreDestino, fotoDestino) {
     mensajes.forEach(m => {
        
     
-    pintarMensaje(m.texto, m.clase, m.hora || null, m.status || 'enviado', m.id);
+    pintarMensaje(m.texto, m.clase, m.hora, m.status || 'enviado', m.id);
     });
 
+
+
+     
     // 6. TU LÓGICA DE LIMPIEZA (Lo que te había borrado)
     localStorage.setItem('unread_' + idDestino, 0);
     
