@@ -1327,7 +1327,7 @@ let checkHTML = (clase.includes('derecha')) ? (estado === 'leido' ? ' ✓✓' : 
     } else {
         contenidoHTML = `<span>${texto}</span>`;
     }
-div.innerHTML = `${texto} <span class="msg-info">${tiempo}${checkHTML}</span>`;
+div.innerHTML = `${contenidoFinal} <span class="msg-info" style="font-size: 10px; opacity: 0.7; display: block; text-align: right; margin-top: 3px;">${tiempo}${checkHTML}</span>`;
 
 
 
@@ -1434,19 +1434,16 @@ function renderizarMensajes(listaDeMensajes) {
         const div = document.createElement('div');
         
         // Aquí usamos la "clase" que vimos en tu consola (msg-izquierda o msg-derecha)
-        div.className = `msg-burbuja ${msg.clase}`; 
-        
         div.innerHTML = `
             ${msg.texto}
-            <div class="msg-info">
-                <span class="tiempo">17:33</span><span class="checks" style="color: #4fc3f7;">${checkIcon}</span>
-        
+            <div class="msg-info" style="display: flex; justify-content: flex-end; align-items: center; gap: 5px; font-size: 10px; opacity: 0.7;">
+                <span class="tiempo">${msg.hora || '17:33'}</span>
+                ${msg.clase.includes('derecha') ? `<span class="checks" style="color: ${msg.status === 'recibido' ? '#34B7F1' : '#8696a0'};">${msg.status === 'recibido' ? '✓✓' : '✓'}</span>` : ''}
             </div>
         `;
-        
-        chatBox.appendChild(div);
-    });
-    
+    chatBox.appendChild(div);
+
+});
     // Auto-scroll al último mensaje
     chatBox.scrollTop = chatBox.scrollHeight;
 }
