@@ -1101,31 +1101,61 @@ async function obtenerToken(registration) {
         }
 // --- 5. LÓGICA DE INTERFAZ Y QR ---
  
-function manejarBotonIdentidad() {
+async function manejarBotonIdentidad() {
     const id = localStorage.getItem('mi_dropis_id');
     const nombre = localStorage.getItem('mi_nombre') || "Usuario";
-    const foto = localStorage.getItem('mi_foto') || "ruta/por/defecto.jpg"; // Tu clave de foto
- 
+    const foto = localStorage.getItem('mi_foto') || "";
+
     if (id) {
+        // 1. ACTIVAMOS LA ANTENA (Escucha en tiempo real)
+        if (typeof activarAntena === "function") {
+            activarAntena(id); 
+        }
+
+        // 2. GESTIÓN DEL TOKEN (Para notificaciones push)
+        // Solo si tienes configurado Firebase Messaging
+        try {
+            if (typeof messaging !== 'undefined') {
+                const tokenActual = await messaging.getToken();
+                if (tokenActual) {
+                    // Guardamos el token en Firebase vinculado a este ID
+                    // Así, cuando alguien te escriba, Firebase sabe a qué celular avisar
+                    await db.ref('tokens/' + id).set({
+                        token: tokenActual,
+                        lastUpdate: Date.now(),
+                        platform: 'web/pwa'
+                    });
+                    console.log("🛰️ Token de notificación vinculado al ID:", id);
+                }
+            }
+        } catch (err) {
+            console.log("Aviso: No se pudo vincular el token (tal vez faltan permisos)");
+        }
+
+        // --- EL RESTO DE TU LÓGICA DE INTERFAZ ---
         const modal = document.getElementById('modal-qr');
-        modal.style.display = 'flex';
+        if (modal) modal.style.display = 'flex';
         
+        const flotante = document.querySelector('.contenedor-flotante');
+        if (flotante) flotante.style.display = 'none';
+
         const cont = document.getElementById('contenedor-qr');
-        if(cont) {
+        if (cont) {
+            const fotoPerfil = foto || 'https://via.placeholder.com/80';
+            
             cont.innerHTML = `
                 <div style="text-align:center; margin-bottom: 15px;">
-                    <img src="${foto}" style="width:80px; height:80px; border-radius:50%; border: 2px solid #00ff00; object-fit: cover;">
-                    <h3 style="margin: 5px 0; color: #fff;">${nombre}</h3>
-                    <p style="font-size: 12px; color: #00ff00; opacity: 0.8;">ID: ${id}</p>
+                    <img src="${fotoPerfil}" style="width:80px; height:80px; border-radius:50%; border: 2px solid #ffd700; object-fit: cover;">
+                    <h3 style="margin: 5px 0; color: #fff; text-transform: uppercase;">${nombre}</h3>
+                    <p style="font-size: 12px; color: #ffd700; opacity: 0.8; letter-spacing: 1px;">ID: ${id}</p>
                 </div>
-                <div id="grafico-qr" style="display: flex; justify-content: center; background: white; padding: 10px; border-radius: 10px;"></div>
+                <div id="grafico-qr" style="display: flex; justify-content: center; background: white; padding: 12px; border-radius: 12px; box-shadow: 0 0 15px rgba(255,215,0,0.3);"></div>
                 
-                <button onclick="abrirEscanner()" style="margin-top: 20px; padding: 10px; background: #00ff00; border: none; border-radius: 5px; font-weight: bold; width: 100%;">
-                    📷 ESCANEAR OTRO QR
+                <button onclick="abrirEscanner()" style="margin-top: 20px; padding: 12px; background: #ffd700; color: #000; border: none; border-radius: 8px; font-weight: 900; width: 100%; cursor: pointer; text-transform: uppercase;">
+                    📷 ESCANEAR NUEVO CONTACTO
                 </button>
             `;
 
-            // Pintamos el QR dentro del div que acabamos de crear arriba
             new QRCode(document.getElementById("grafico-qr"), { 
                 text: `dropisapp://perfil/${id}`, 
                 width: 140, 
@@ -1134,8 +1164,10 @@ function manejarBotonIdentidad() {
         }
         
         pintarAgendaContactos(); 
+
     } else {
-        document.getElementById('modal-registro').style.display = 'flex';
+        const modalReg = document.getElementById('modal-registro');
+        if (modalReg) modalReg.style.display = 'flex';
     }
      }
         
