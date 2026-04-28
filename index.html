@@ -1311,38 +1311,52 @@ async function cargarProto() {
 // Variable necesaria para que el menú sepa a qué mensaje le diste clic
 let mensajeSeleccionado = null;
  
-    // Tu código del menú (onclick) se queda igualito abajo...
-    function pintarMensaje(texto, clase, hora = null, estado = 'enviado', msgId = null) {
+ function pintarMensaje(texto, clase, hora = null, estado = 'enviado', msgId = null) {
     const box = document.getElementById('chat-box');
     if (!box) return;
 
     const div = document.createElement('div');
     div.className = 'msg-burbuja ' + clase;
     
-    // ESTA LÍNEA ES VITAL: Le pone la "cédula" al div
+    // 1. Identificador único para el Doble Check
     if (msgId) div.id = 'msg-' + msgId; 
 
     const tiempo = hora || new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
     
-    // Lógica de checks mejorada
+    // 2. Lógica de checks (Gris si es enviado, Azul si es recibido)
     let checkHTML = "";
     if (clase.includes('derecha')) {
-        // Si el estado es 'recibido', ponemos doble check azul, si no, uno gris
         const color = (estado === 'recibido') ? '#34B7F1' : '#8696a0';
         const icon = (estado === 'recibido') ? '✓✓' : '✓';
-        checkHTML = `<span class="checks" style="color: ${color}; margin-left: 5px;">${icon}</span>`;
+        checkHTML = `<span class="checks" style="color: ${color}; margin-left: 5px; font-weight: bold;">${icon}</span>`;
     }
 
-    // ... (resto de tu lógica de Resp >)
-    div.innerHTML = `${texto} <span class="msg-info">${tiempo}${checkHTML}</span>`;
-    // ...
-     // Dentro de pintarMensaje, antes de crear el contenidoHTML:
-let contenidoFinal = texto;
-if (texto.startsWith('http') && (texto.includes('.jpg') || texto.includes('.png') || texto.includes('firebasestorage'))) {
-    contenidoFinal = `<img src="${texto}" style="max-width:200px; border-radius:10px; display:block; margin-bottom:5px;">`;
-     }
-     }
+    // 3. FILTRO DE CONTENIDO: ¿Es foto, respuesta o texto normal?
+    let contenidoFinal = "";
 
+    if (texto.startsWith('http') && (texto.includes('firebasestorage') || texto.includes('.jpg') || texto.includes('.png'))) {
+        // Es una FOTO
+        contenidoFinal = `<img src="${texto}" style="max-width:250px; border-radius:10px; display:block; margin-bottom:5px; cursor:pointer;" onclick="window.open('${texto}')">`;
+    } else if (texto && texto.includes("Resp >")) {
+        // Es una RESPUESTA (Cita)
+        const partes = texto.split("\n— ");
+        const cabezalCita = partes[0].replace("Resp >", "").trim();
+        const mensajeReal = partes[1] || "";
+        contenidoFinal = `
+            <div style="font-size: 11px; opacity: 0.6; border-left: 3px solid #ffd700; padding-left: 5px; margin-bottom: 5px; font-style: italic;">
+                Resp: ${cabezalCita}
+            </div>
+            <div>${mensajeReal}</div>
+        `;
+    } else {
+        // Es TEXTO NORMAL
+        contenidoFinal = `<span>${texto}</span>`;
+    }
+
+    // 4. Armamos el HTML final
+    div.innerHTML = `${contenidoFinal} <span class="msg-info" style="font-size: 10px; opacity: 0.7; display: block; text-align: right; margin-top: 3px;">${tiempo}${checkHTML}</span>`;
+
+    // 5. Menú de acciones (Borrar, Editar, etc.)
     div.onclick = (e) => {
         mensajeSeleccionado = div; 
         const menu = document.getElementById('menu-acciones');
@@ -1356,7 +1370,7 @@ if (texto.startsWith('http') && (texto.includes('.jpg') || texto.includes('.png'
 
     box.appendChild(div);
     box.scrollTop = box.scrollHeight;
-        }
+     }
 
 
      function marcarMensajeComoRecibido(msgId, emisorID) {
@@ -1627,7 +1641,39 @@ async function manejarEnvioFoto(archivo) {
      }
      
      
+async function manejarSeleccionImagen(event) {
+    const archivo = event.target.files[0];
+    if (!archivo) return;
 
+    console.log("🛰️ Iniciando subida satelital de imagen...");
+    
+    // 1. Referencia a la "nube" de Firebase
+    // Guardamos la foto en una carpeta llamada 'fotos_chat' con un nombre único
+    const nombreArchivo = Date.now() + "_" + archivo.name;
+    const refStorage = firebase.storage().ref().child('fotos_chat/' + nombreArchivo);
+
+    try {
+        // 2. SUBIDA REAL: Ponemos el archivo en la nube
+        const snapshot = await refStorage.put(archivo);
+        
+        // 3. OBTENER EL LINK: Le pedimos a Firebase la dirección pública de la foto
+        const urlImagen = await snapshot.ref.getDownloadURL();
+
+        console.log("🔗 Foto en la nube:", urlImagen);
+
+        // 4. REUTILIZAMOS TU ENVÍO: 
+        // Pasamos la URL a tu función mágica. Ella se encarga del msgId y el Doble Check.
+        // Importante: Pasa la URL como primer argumento (el texto del mensaje)
+        await enviarMensajeSatelital(urlImagen);
+
+        // Limpiamos el botón para que puedas enviar otra
+        event.target.value = "";
+        
+    } catch (e) {
+        console.error("❌ Error en la subida:", e);
+        alert("Fallo al lanzar la imagen al espacio.");
+    }
+     }
 
 // Variable para la foto nueva
 
