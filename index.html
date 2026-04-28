@@ -954,7 +954,7 @@ setTimeout(() => {
             // Manejo de Interfaz y Notificaciones
             if (emisorID === chatAbiertoActualmente) {
                 // Pasamos el msgId a pintarMensaje para que el HTML sea rastreable
-                pintarMensaje(textoReal, 'msg-izquierda', 'enviado', decoded.msgId);
+                pintarMensaje(textoReal, 'msg-izquierda',null, 'enviado', decoded.msgId);
          
         } else {
                 let noLeidos = parseInt(localStorage.getItem('unread_' + emisorID)) || 0;
