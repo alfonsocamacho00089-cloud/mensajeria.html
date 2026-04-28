@@ -1674,45 +1674,47 @@ async function manejarSeleccionImagen(event) {
 
 
 
+     
 async function guardarCambiosPerfil() {
     const miID = localStorage.getItem('mi_dropis_id');
     const nom = document.getElementById('mi-nuevo-nombre').value.trim();
     const est = document.getElementById('mi-nuevo-estado').value.trim();
-    const fotoParaGuardar = miFotoBase64 || localStorage.getItem('mi_foto') || "";
+    
+    // Si no elegiste foto nueva, usamos la que ya tenías
+    const fotoFinal = miFotoBase64 || localStorage.getItem('mi_foto') || "";
 
     if (!nom) return alert("¡El nombre no puede estar vacío!");
 
     try {
-        // 1. Guardar en Firebase
+        // 1. Guardamos en Firebase una sola vez
         await db.ref('usuarios/' + miID).update({
             nombre: nom,
             estado: est,
-            foto: fotoParaGuardar
+            foto: fotoFinal
         });
 
-        // 2. Actualizar LocalStorage
+        // 2. Guardamos en el teléfono
         localStorage.setItem('mi_nombre', nom);
         localStorage.setItem('mi_estado', est);
-        localStorage.setItem('mi_foto', fotoParaGuardar);
+        localStorage.setItem('mi_foto', fotoFinal);
 
-         alert("✅ Perfil actualizado");
+        // 3. Actualizamos el Header de una vez
+        document.getElementById('foto-perfil-header').src = fotoFinal;
+
+        alert("✅ Perfil actualizado");
+
+        // 4. ¡ESTO ES LO IMPORTANTE! 
+        // Cerramos el modal para que el código se detenga y no se repita.
+        document.getElementById('modal-editar-perfil').style.display = 'none';
         
-        // --- ESTO ES LO QUE FALTA ---
-        // 1. Actualizar el Header (donde sale tu nombre/foto arriba)
-        const headerFoto = document.getElementById('foto-perfil-header');
-        if (headerFoto) headerFoto.src = fotoParaGuardar;
+        // Limpiamos la variable temporal para la próxima vez
+        miFotoBase64 = "";
 
-        // 2. Si tienes una sección de "Mi Perfil" abierta, actualiza su imagen
-        const previaFoto = document.getElementById('mi-foto-previa');
-        if (previaFoto) previaFoto.src = fotoParaGuardar;
-        // ----------------------------
-
-        alternarVistaPerfil();
     } catch(e) {
-        console.error(e);
-        alert("Error al guardar cambios");
+        alert("Error al guardar");
     }
-}
+     }
+ 
 
 function abrirPerfilContacto() {
     // 1. Sacamos los datos de TU header
