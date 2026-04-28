@@ -1540,7 +1540,9 @@ function renderizarMensajes(listaDeMensajes) {
         chatBox.appendChild(div);
     });
     
-    
+        // Auto-scroll al último mensaje
+    chatBox.scrollTop = chatBox.scrollHeight;
+     }
          
 function gestionarQR() {
     const seccion = document.getElementById('seccion-mi-qr');
