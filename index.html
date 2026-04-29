@@ -89,9 +89,19 @@
     
     /* Esto lo manda al fondo de todo */
     z-index: -1; 
+      
     pointer-events: none;
-}
+    background-size: 100% 100%; /* Fuerza a la imagen a encajar exacto sin sobrar */
+    background-attachment: scroll; /* Evita que el navegador intente moverla internamente */
+    
+    overflow: hidden; /* Corta cualquier pedazo que intente salirse */
+    touch-action: none; /* Bloquea que el dedo la arrastre */
+    pointer-events: none; /* Los toques pasan directo al chat */
+     }
 
+    
+    /* CAMBIA ESTO: */
+    
 
 
 
