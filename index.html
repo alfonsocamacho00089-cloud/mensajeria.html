@@ -589,15 +589,20 @@ label[for="file-input"] {
      </div>
  </div>
     </div>
-
-
 <div class="contenedor-flotante">
     <label for="file-input" style="cursor:pointer; padding: 0 10px; display: flex; align-items: center;">
         <i class="fa-solid fa-camera" style="color: #8696a0; font-size: 20px;"></i>
     </label>
     <input type="file" id="file-input" accept="image/*" style="display:none;" onchange="manejarSeleccionImagen(event)">
-    <textarea id="msg-text" placeholder="Escribe un mensaje..." oninput="this.style.height='45px'; this.style.height=this.scrollHeight+'px';"></textarea>
-    <button id="btn-enviar" onclick="enviarMensajeSatelital()"><span>➤</span></button>
+    
+    <textarea 
+        id="msg-text" 
+        placeholder="Escribe un mensaje..."
+        oninput="this.style.height='45px'; this.style.height=this.scrollHeight+'px';"></textarea>
+    
+    <button id="btn-enviar" onclick="enviarMensajeSatelital()">
+        <span>➤</span>
+    </button>
 </div>
 
 <div id="menu-acciones" class="menu-mensaje">
@@ -611,9 +616,23 @@ label[for="file-input"] {
     <div class="modal-cover" style="text-align: center;">
         <img id="perfil-foto-grande" src="" style="width: 150px; height: 150px; border-radius: 50%; border: 1px solid #ffd700; margin-bottom: 15px; object-fit: cover;">
         <h2 id="perfil-nombre" style="color: white; margin-bottom: 5px;"></h2>
-        <button onclick="eliminarChatEspecifico(); event.stopPropagation();" style="width: 100%; padding: 10px; background: rgba(255, 77, 77, 0.1); border: 1px solid #ff4d4d; border-radius: 8px; color: #ff4d4d; font-size: 13px; font-weight: 600; cursor: pointer; margin-top: 10px;">🗑️ BORRAR CONVERSACIÓN</button>
-        <button onclick="eliminarContactoDeAgenda(); event.stopPropagation();" style="width: 100%; padding: 8px; background: transparent; border: 1px solid #555; border-radius: 8px; color: #8696a0; font-size: 12px; font-weight: 500; cursor: pointer; margin-top: 8px;">👤 ELIMINAR CONTACTO</button>
-        <button onclick="document.getElementById('modal-perfil').style.display='none'; event.stopPropagation();" style="margin-top: 20px; width: 100%; padding: 12px; background: transparent; border: none; color: white; font-size: 24px; font-weight: 300;">✕</button>
+        <p style="color: #8696a0; font-size: 14px;">👤</p>
+    <button onclick="eliminarChatEspecifico(); event.stopPropagation();" 
+        style="width: 100%; padding: 10px; background: rgba(255, 77, 77, 0.1); border: 1px solid #ff4d4d; border-radius: 8px; color: #ff4d4d; font-size: 13px; font-weight: 600; cursor: pointer; margin-top: 10px;">
+    🗑️ BORRAR CONVERSACIÓN
+</button>
+
+<button onclick="eliminarContactoDeAgenda(); event.stopPropagation();" 
+        style="width: 100%; padding: 8px; background: transparent; border: 1px solid #555; border-radius: 8px; color: #8696a0; font-size: 12px; font-weight: 500; cursor: pointer; margin-top: 8px;">
+    👤 ELIMINAR CONTACTO
+</button>
+    
+    
+    
+        <button onclick="document.getElementById('modal-perfil').style.display='none'; event.stopPropagation();" 
+        style="margin-top: 20px; width: 100%; padding: 12px; background: transparent; border: none; color: white; font-size: 24px; font-weight: 300;">
+    ✕
+</button>
     </div>
 </div>
 
