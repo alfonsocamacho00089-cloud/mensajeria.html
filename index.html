@@ -487,11 +487,13 @@ margin: 0;
      /* Esto es para que los iconos (cámara/clip) no se peguen al techo del contenedor */
 /* Esto NO toca tu fondo de Goku ni tu scroll */
 label[for="file-input"] {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    height: 45px; /* Ajustado a la altura de tu textarea */
-    flex-shrink: 0; /* Para que no se aplaste */
+    display: inline-block;
+    width: 40px;
+    height: 40px;
+    line-height: 40px; /* Alinea el icono verticalmente */
+    text-align: center;
+    flex-shrink: 0; /* Prohibido que se encoja o crezca */
+    margin: 0;
 }
 
 .fa-camera {
@@ -505,13 +507,15 @@ label[for="file-input"] {
     color: #ffd700; /* Se pone dorado solo cuando lo tocas */
 }
        /* Un estilo limpio para que la foto siempre se vea */
+/* Solo afecta a estos dos elementos, no toca las fotos del chat */
 #foto-perfil-header, #mi-foto-previa {
-    width: 45px;
-    height: 45px;
-    border-radius: 50%; /* Para que sea redonda */
-    object-fit: cover;  /* Para que no se estire feo */
-    border: 2px solid #ffd700; /* El toque dorado que te gusta */
-}    
+    width: 45px !important;
+    height: 45px !important;
+    border-radius: 50% !important;
+    object-fit: cover !important;
+    border: 2px solid #ffd700 !important;
+    flex-shrink: 0; /* Evita que se aplaste si el nombre es largo */
+     } 
     </style>
 
 </head>
