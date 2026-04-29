@@ -518,6 +518,32 @@ label[for="file-input"] {
 
 <body>
  
+
+ 
+    
+ 
+                    <div id="pantalla-carga" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; display: flex; align-items: center; justify-content: center; z-index: 999999; transition: opacity 0.5s ease;">
+    <img src="assets/logo-nuevo.png" alt="Logo ChatSpace" style="width: 150px; height: auto; display: block;">
+</div>
+
+<div class="fondo-estatico"></div>
+
+<div class="header" id="chat-header">
+    <div class="header-content" onclick="abrirPerfilContacto()" style="cursor: pointer;">
+        <button onclick="manejarBotonIdentidad(); event.stopPropagation();" class="btn-back-clean">
+            <span style="display: inline-block; transform: scaleX(-1);">➔</span>
+        </button>
+        <img src="https://via.placeholder.com/40" id="foto-perfil-header" class="foto-perfil">
+        <div class="user-info">
+            <h1 id="nombre-dueño-header">SpaceChat</h1>
+            <small class="user-status">En línea</small>
+        </div>
+    </div>
+</div>
+
+<div id="chat-box">
+    </div>
+
 <div class="contenedor-flotante">
     <label for="file-input" style="cursor:pointer; padding: 0 10px; display: flex; align-items: center;">
         <i class="fa-solid fa-camera" style="color: #8696a0; font-size: 20px;"></i>
@@ -534,243 +560,84 @@ label[for="file-input"] {
     </button>
 </div>
 
-
-
-<div id="modal-perfil" class="modal" style="display:none; z-index: 25000;">
-    <div class="modal-cover" style="text-align: center;">
-        <img id="perfil-foto-grande" src="" style="width: 150px; height: 150px; border-radius: 50%; border: 1px solid #ffd700; margin-bottom: 15px; object-fit: cover;">
-        <h2 id="perfil-nombre" style="color: white; margin-bottom: 5px;"></h2>
-        <p style="color: #8696a0; font-size: 14px;">👤</p>
-    <button onclick="eliminarChatEspecifico(); event.stopPropagation();" 
-        style="width: 100%; padding: 10px; background: rgba(255, 77, 77, 0.1); border: 1px solid #ff4d4d; border-radius: 8px; color: #ff4d4d; font-size: 13px; font-weight: 600; cursor: pointer; margin-top: 10px;">
-    🗑️ BORRAR CONVERSACIÓN
-</button>
-
-<button onclick="eliminarContactoDeAgenda(); event.stopPropagation();" 
-        style="width: 100%; padding: 8px; background: transparent; border: 1px solid #555; border-radius: 8px; color: #8696a0; font-size: 12px; font-weight: 500; cursor: pointer; margin-top: 8px;">
-    👤 ELIMINAR CONTACTO
-</button>
-    
-    
-    
-        <button onclick="document.getElementById('modal-perfil').style.display='none'; event.stopPropagation();" 
-        style="margin-top: 20px; width: 100%; padding: 12px; background: transparent; border: none; color: white; font-size: 24px; font-weight: 300;">
-    ✕
-</button>
-    </div>
+<div id="menu-acciones" class="menu-mensaje">
+    <div onclick="accionMensaje('responder')">↩️ Responder</div>
+    <div onclick="accionMensaje('editar')">✏️ Editar</div>
+    <div onclick="accionMensaje('copiar-id')">👤 Guardar ID</div>
+    <div onclick="accionMensaje('borrar')" style="color: #ff5c5c;">🗑️ Borrar</div>
 </div>
-
- >
-    
- 
-            <div id="pantalla-carga" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; display: flex; align-items: center; justify-content: center; z-index: 999999; transition: opacity 0.5s ease;">
-    
-    <img src="assets/logo-nuevo.png" alt="Logo ChatSpace" style="width: 150px; height: auto; display: block;">
-
-            </div>
-
-<div class="header" id="chat-header">
-    <div class="header-content" onclick="abrirPerfilContacto()" style="cursor: pointer;">
-        <!-- StopPropagation evita que al darle atrás se abra el perfil -->
-        <button onclick="manejarBotonIdentidad(); event.stopPropagation();" class="btn-back-clean">
-    <span style="display: inline-block; transform: scaleX(-1);">➔</span>
-</button>
-        <img src="https://via.placeholder.com/40" id="foto-perfil-header" class="foto-perfil">
-        
-        <div class="user-info">
-            <h1 id="nombre-dueño-header">SpaceChat</h1>
-            <small class="user-status">En línea</small>
-        </div>
-    </div>
-</div>
-
-    
-    <div id="chat-box">
-</div>
-    
 
 <div id="modal-registro" class="modal" style="display: none; align-items: center; justify-content: center; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #1e222b; z-index: 30000;">
-  
-          <div class="modal-cover" style="position: relative; width: 100vw; height: 100vh; padding: 50px 30px 50px 30px; box-sizing: border-box; background: #1e222b; border-radius: 0px; text-align: center; border: 0px solid #333; box-shadow: 0 0 20px rgba(0,0,0,0.5);">   
+    <div class="modal-cover" style="position: relative; width: 100vw; height: 100vh; padding: 50px 30px; box-sizing: border-box; background: #1e222b; text-align: center;">   
         <h3 style="color: #ffd700; margin-bottom: 20px;">SPACECHAT</h3>
-        
-        <input type="text" id="reg-nombre" placeholder="Nombre" 
-            onfocus="this.style.boxShadow='0 0 5px #ffd700'; this.style.borderColor='#ffd700';" 
-            onblur="this.style.boxShadow='none'; this.style.borderColor='#999';"
-             style="width: 100%; padding: 18px; margin-bottom: 15px; background: #2a2f3a; color: white; border: 1px solid #999; border-radius: 8px; box-sizing: border-box; outline: none;">
-        
-        <input type="text" id="reg-apellido" placeholder="Apellido" 
-            onfocus="this.style.boxShadow='0 0 5px #ffd700'; this.style.borderColor='#ffd700';" 
-            onblur="this.style.boxShadow='none'; this.style.borderColor='#999';"
-             style="width: 100%; padding: 18px; margin-bottom: 15px; background: #2a2f3a; color: white; border: 1px solid #999; border-radius: 8px; box-sizing: border-box; outline: none;">
-
-        <button onclick="ejecutarRegistroCompleto()" 
-            style="width: 100%; padding: 15px; background: #ffd700; border: none; border-radius: 25px; font-weight: bold; color: #000; cursor: pointer; font-size: 16px; margin-bottom: 20pxtext-transform: uppercase; box-shadow: 0 0 5px #ffd700;">
-            CREAR MI CUENTA ID
-        </button>
-
-        <p style="font-size: 13px; color: #ffd700; cursor: pointer; text-decoration: underline;" 
-           onclick="recuperarCuentaConID()">
-           ¿Ya tienes tu cuenta ID? ingresar o recuperar
-        </p>
+        <input type="text" id="reg-nombre" placeholder="Nombre" style="width: 100%; padding: 18px; margin-bottom: 15px; background: #2a2f3a; color: white; border: 1px solid #999; border-radius: 8px;">
+        <input type="text" id="reg-apellido" placeholder="Apellido" style="width: 100%; padding: 18px; margin-bottom: 15px; background: #2a2f3a; color: white; border: 1px solid #999; border-radius: 8px;">
+        <button onclick="ejecutarRegistroCompleto()" style="width: 100%; padding: 15px; background: #ffd700; border: none; border-radius: 25px; font-weight: bold; text-transform: uppercase;">CREAR MI CUENTA ID</button>
+        <p style="font-size: 13px; color: #ffd700; cursor: pointer; text-decoration: underline; margin-top: 20px;" onclick="recuperarCuentaConID()">¿Ya tienes tu cuenta ID? ingresar</p>
     </div>
 </div>
-    
-    
-    <div class="fondo-estatico"></div>
 
-    <div id="modal-huella" class="modal">
-    <div class="modal-content" style="background: #000; color: #ffd700; border: 2px solid #ffd700;">
-        <div style="font-size: 60px; margin-bottom: 15px;">🫆</div>
-        <h3 style="color: #fff;">Validando Huella...</h3>
-        <p style="color: #ffd700; font-family: monospace; font-size: 12px;">Vinculando Token Satelital</p>
+<div id="modal-perfil" class="modal" style="display:none; z-index: 25000;">
+    <div class="modal-cover" style="text-align: center; background: #1e222b; padding: 30px;">
+        <img id="perfil-foto-grande" src="" style="width: 150px; height: 150px; border-radius: 50%; border: 1px solid #ffd700; margin-bottom: 15px; object-fit: cover;">
+        <h2 id="perfil-nombre" style="color: white; margin-bottom: 5px;"></h2>
+        <p style="color: #8696a0; font-size: 14px;">👤 Perfil de Usuario</p>
+        
+        <button onclick="eliminarChatEspecifico(); event.stopPropagation();" style="width: 100%; padding: 10px; background: rgba(255, 77, 77, 0.1); border: 1px solid #ff4d4d; border-radius: 8px; color: #ff4d4d; margin-top: 10px; cursor: pointer;">🗑️ BORRAR CONVERSACIÓN</button>
+        <button onclick="eliminarContactoDeAgenda(); event.stopPropagation();" style="width: 100%; padding: 8px; background: transparent; border: 1px solid #555; border-radius: 8px; color: #8696a0; margin-top: 8px; cursor: pointer;">👤 ELIMINAR CONTACTO</button>
+        <button onclick="document.getElementById('modal-perfil').style.display='none';" style="margin-top: 20px; width: 100%; background: transparent; border: none; color: white; font-size: 24px;">✕</button>
     </div>
-    </div>
-
-
-
- 
-
+</div>
 
 <div id="modal-qr" class="modal">
-    <div class="modal-content" style="display: flex; flex-direction: column; height: 100dvh; position: relative; background-image: linear-gradient(rgba(11, 20, 26, 0.9), rgba(11, 20, 26, 0.9)), url('./assets/logo.webp'); background-size: cover; background-position: center; background-attachment: fixed;">      
-     <div id="nombre-dueño-header-lista" style="background: rgba(32, 44, 51, 0.7); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); color: #ffffff; padding: 15px; font-weight: 900; text-transform: uppercase; text-align: left; border-bottom: 1px solid #333; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 1001;">
+    <div class="modal-content" style="display: flex; flex-direction: column; height: 100dvh; background: #0b141a;">      
+        <div id="nombre-dueño-header-lista" style="background: rgba(32, 44, 51, 0.7); color: #ffffff; padding: 15px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 1001;">
             <span>SPACECHAT</span>
-            <div onclick="alternarVistaPerfil()" style="cursor: pointer; color: #ffd700; font-size: 22px; padding: 0 10px;">⋮</div>
+            <div onclick="alternarVistaPerfil()" style="cursor: pointer; color: #ffd700; font-size: 22px;">⋮</div>
         </div>
 
-
-<div id="seccion-mi-perfil" style="display: none; padding: 15px; background: #0a0a0a; border-bottom: 1px solid #ffd700;">
-            <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 15px;">
-                <div onclick="document.getElementById('input-mi-foto').click()" style="width: 70px; height: 70px; border-radius: 50%; border: 2px solid #ffd700; overflow: hidden; background: #222; display: flex; align-items: center; justify-content: center; cursor: pointer;">
-                    <img id="mi-foto-previa" src="" style="width: 100%; height: 100%; object-fit: cover; display: none;">
-                    <span id="mi-placeholder-foto" style="font-size: 20px;">📷</span>
-                </div>
-                <input type="file" id="input-mi-foto" accept="image/*" style="display: none;" onchange="previsualizarMiFoto(this)">
-                <button onclick="gestionarQR()" style="background: #ffd700; color: #000; border: none; border-radius: 8px; padding: 8px 12px; font-weight: 900; font-size: 14px; cursor: pointer;">QR</button>
-            </div>
-            <input type="text" id="mi-nuevo-nombre" placeholder="Editar mi nombre..." style="width:100%; padding:10px; margin-bottom:8px; background:#1a1a1a; color:white; border:1px solid #333; border-radius:8px;">
-            <input type="text" id="mi-nuevo-estado" placeholder="Estado (Ej: Disponible)" style="width:100%; padding:10px; margin-bottom:8px; background:#1a1a1a; color:white; border:1px solid #333; border-radius:8px;">
-            <button onclick="guardarCambiosPerfil()" style="width: 100%; padding: 10px; background: #ffd700; border: none; border-radius: 8px; font-weight: bold; color: #000;">GUARDAR CAMBIOS</button>
-</div>
-
-
-     
-     
-        
         <div id="cuerpo-modal-lista" style="flex-grow: 1; overflow-y: auto; padding: 0 15px 100px 15px;">
-            <div id="seccion-mi-qr" style="display: none; padding: 20px; flex-direction: column; align-items: center; border-bottom: 1px solid #444;">
-                <div id="contenedor-qr" style="background: white; padding: 10px; border-radius: 10px;"></div>
-                <button onclick="document.getElementById('seccion-mi-qr').style.display='none'" style="margin-top: 10px; color: #ffd700; background: transparent; border: none; cursor: pointer;">[ Ocultar QR ]</button>
+            <div id="seccion-mi-qr" style="display: none; padding: 20px; text-align: center;">
+                <div id="contenedor-qr" style="display: inline-block; background: white; padding: 10px; border-radius: 10px;"></div>
+                <button onclick="document.getElementById('seccion-mi-qr').style.display='none'" style="display: block; margin: 10px auto; color: #ffd700; background: transparent; border: none;">[ Ocultar QR ]</button>
             </div>
-            <h4 style="color: #ffd700; margin: 20px 0 10px 0; font-size: 14px; text-shadow: 1px 1px 2px black;">CONTACTOS</h4>
+            <h4 style="color: #ffd700; margin: 20px 0 10px 0;">CONTACTOS</h4>
             <div id="lista-contactos">
                 <p style="color: #8696a0; font-size: 12px;">Cargando contactos...</p>
             </div>
         </div>
 
-        <button onclick="abrirModalNuevoContacto()" 
-            style="position: absolute; right: 20px; bottom: 100px; 
-                   background: rgba(255, 215, 0, 0.25); 
-                   backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); 
-                   border: 1px solid rgba(255, 215, 0, 0.4); 
-                   border-radius: 50%; width: 55px; height: 55px; 
-                   color: #ffd700; cursor: pointer; z-index: 100; 
-                   font-size: 25px; display: flex; 
-                   align-items: center; justify-content: center;">
-            + 
-        </button>
+        <button onclick="abrirModalNuevoContacto()" style="position: absolute; right: 20px; bottom: 100px; background: rgba(255, 215, 0, 0.25); border: 1px solid #ffd700; border-radius: 50%; width: 55px; height: 55px; color: #ffd700; font-size: 25px;">+</button>
 
         <div class="barra-flotante-premium">
-            <div class="btn-nav" onclick="irAContactos()">
-                <span>👥</span><span>Contactos</span>
-            </div>
-            <div class="btn-nav active" onclick="cerrarModalQR()">
-                <span>💬</span><span>Chat</span>
-            </div>
-            <div class="btn-nav" onclick="abrirAjustes()">
-                <span>⚙️</span><span>Ajustes</span>
-            </div>
+            <div class="btn-nav" onclick="irAContactos()"><span>👥</span><span>Contactos</span></div>
+            <div class="btn-nav active" onclick="cerrarModalQR()"><span>💬</span><span>Chat</span></div>
+            <div class="btn-nav" onclick="abrirAjustes()"><span>⚙️</span><span>Ajustes</span></div>
         </div>
-
-        
-
-     
-<div id="modal-nuevocontacto" class="modal" style="display: none; align-items: center; justify-content: center; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #1e222b; z-index: 30000;">
-    
-          <div class="modal-cover" style="position: relative; width: 100vw; height: 100vh; padding: 50px 30px 50px 30px; box-sizing: border-box; background: #1e222b; border-radius: 0px; text-align: center; border: 0px solid #333; box-shadow: 0 0 20px rgba(0,0,0,0.5);">                                                
-        
-<div style="display: flex; align-items: center;justify-content: flex-start; margin-left: 20px; gap: 15px; margin-bottom: 20px;">
-    
-    <button onclick="cerrarModalNuevo()" style="background: transparent; border: none; color: white; font-size: 20px; cursor: pointer;">
-         <span style="display: inline-block; transform: scaleX(-1);">➔</span>
-    </button>
-
-    <h3 style="color: #ffd700; margin: 0;">NUEVO CONTACTO</h3>
-
-</div>
-        
-        <input type="text" id="nuevo-nombre" placeholder="Nombre" 
-            onfocus="this.style.boxShadow='0 0 5px #ffd700'; this.style.borderColor='#ffd700';" 
-            onblur="this.style.boxShadow='none'; this.style.borderColor='#999';"
-             style="width: 100%; padding: 18px; margin-bottom: 15px; background: #2a2f3a; color: white; border: 1px solid #999; border-radius: 8px; box-sizing: border-box; outline: none;">
-        
-        <input type="text" id="nuevo-apellido-contacto" placeholder="Apellido"
-        onfocus="this.style.boxShadow='0 0 5px #ffd700'; this.style.borderColor='#ffd700';" 
-            onblur="this.style.boxShadow='none'; this.style.borderColor='#999';"
-            style="width: 100%; padding: 18px; margin-bottom: 15px; background: #2a2f3a; color: white; border: 1px solid #999; border-radius: 8px; box-sizing: border-box; outline: none;">
-
-        <input type="text" id="target-id" placeholder="ID Space (Ej: 12345)" 
-        onfocus="this.style.boxShadow='0 0 5px #ffd700'; this.style.borderColor='#ffd700';" 
-            onblur="this.style.boxShadow='none'; this.style.borderColor='#999';"
-            style="width: 100%; padding: 18px; margin-bottom: 15px; background: #2a2f3a; color: white; border: 1px solid #999; border-radius: 8px; box-sizing: border-box; outline: none;">
-
-        <input type="email" id="correo" placeholder="Correo (@)" 
-        onfocus="this.style.boxShadow='0 0 5px #ffd700'; this.style.borderColor='#ffd700';" 
-            onblur="this.style.boxShadow='none'; this.style.borderColor='#999';"
-            style="width: 100%; padding: 10px; margin-top: 20px; background: #2a2f3a; color: white; border: 1px solid #999; border-radius: 8px; box-sizing: border-box; outline: none;">
-
-<button onclick="guardarNuevoContacto()" 
-    style="width: 100%; padding: 10px; margin-top: 60px; background: #ffd700; border: none; border-radius: 15px; font-weight: bold; color: #000; cursor: pointer; font-size: 15px; text-transform: uppercase; box-shadow: 0 0 5px #ffd700;">
-    GUARDAR 
-</button>
     </div>
 </div>
 
-           
-      
-
-
-
-
-<div id="modal-mi-perfil" class="modal" style="display:none; z-index: 30000;">
-    <div class="modal-cover" style="text-align: center; background: #000; border: 1px solid #ffd700; padding: 20px; border-radius: 15px;">
-        <h3 style="color: #ffd700; margin-bottom: 15px;">MI CUENTA</h3>
-
-        <div onclick="document.getElementById('input-mi-foto').click()" style="width: 100px; height: 100px; border-radius: 50%; border: 2px dashed #ffd700; margin: 0 auto 15px; display: flex; align-items: center; justify-content: center; cursor: pointer; overflow: hidden;">
-            <img id="mi-foto-previa" src="" style="display:none; width: 100%; height: 100%; object-fit: cover;">
-            <span id="txt-foto-placeholder" style="font-size: 30px;">📷</span>
+<div id="modal-nuevocontacto" class="modal" style="display: none; z-index: 30000;">
+    <div class="modal-cover" style="width: 100vw; height: 100vh; padding: 50px 30px; background: #1e222b; text-align: center;">                                                
+        <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 20px;">
+            <button onclick="cerrarModalNuevo()" style="background: transparent; border: none; color: white; font-size: 20px;"><span style="display: inline-block; transform: scaleX(-1);">➔</span></button>
+            <h3 style="color: #ffd700; margin: 0;">NUEVO CONTACTO</h3>
         </div>
-        <input type="file" id="input-mi-foto" accept="image/*" style="display: none;" onchange="previsualizarMiFoto(this)">
-
-        <input type="text" id="mi-nuevo-nombre" placeholder="Nuevo nombre..." style="width:100%; padding:12px; margin-bottom: 10px; border-radius: 8px; border: none;">
-        <input type="text" id="mi-nuevo-estado" placeholder="Estado (Ej: En la luna 🚀)" style="width:100%; padding:12px; margin-bottom: 20px; border-radius: 8px; border: none;">
-
-        <button onclick="guardarCambiosPerfil()" style="width: 100%; padding: 12px; background: #ffd700; color: #000; border: none; border-radius: 8px; font-weight: bold; cursor: pointer;">
-            GUARDAR CAMBIOS
-        </button>
-        
-        <p onclick="document.getElementById('modal-mi-perfil').style.display='none'" style="color: white; margin-top: 15px; cursor: pointer; font-size: 13px;">Cancelar</p>
+        <input type="text" id="nuevo-nombre" placeholder="Nombre" style="width: 100%; padding: 18px; margin-bottom: 15px; background: #2a2f3a; color: white; border: 1px solid #999; border-radius: 8px;">
+        <input type="text" id="nuevo-apellido-contacto" placeholder="Apellido" style="width: 100%; padding: 18px; margin-bottom: 15px; background: #2a2f3a; color: white; border: 1px solid #999; border-radius: 8px;">
+        <input type="text" id="target-id" placeholder="ID Space (Ej: 12345)" style="width: 100%; padding: 18px; margin-bottom: 15px; background: #2a2f3a; color: white; border: 1px solid #999; border-radius: 8px;">
+        <input type="email" id="correo" placeholder="Correo (@)" style="width: 100%; padding: 10px; margin-top: 20px; background: #2a2f3a; color: white; border: 1px solid #999; border-radius: 8px;">
+        <button onclick="guardarNuevoContacto()" style="width: 100%; padding: 15px; margin-top: 30px; background: #ffd700; border: none; border-radius: 15px; font-weight: bold; color: #000;">GUARDAR</button>
     </div>
 </div>
-        
 
- <div id="menu-acciones" class="menu-mensaje">
-    <div onclick="accionMensaje('responder')">↩️ Responder</div>
-    <div onclick="accionMensaje('editar')">✏️ Editar</div>
-    <div onclick="accionMensaje('copiar-id')">👤 Guardar ID</div>
-    <div onclick="accionMensaje('borrar')" style="color: #ff5c5c;">🗑️ Borrar</div>
-    </div
+<div id="modal-huella" class="modal">
+    <div class="modal-content" style="background: #000; color: #ffd700; border: 2px solid #ffd700; text-align: center; padding: 20px;">
+        <div style="font-size: 60px; margin-bottom: 15px;">🫆</div>
+        <h3 style="color: #fff;">Validando Huella...</h3>
+        <p style="color: #ffd700; font-family: monospace; font-size: 12px;">Vinculando Token Satelital</p>
+    </div>
+ </div>
 
      
     
