@@ -25,26 +25,18 @@
     -webkit-tap-highlight-color: transparent;
 }
 
-    body {
-    font-family: sans-serif;
+    
+     body {
     background-color: #000000;
-    /* Usamos la imagen aquí para que sea global */
-    background-image: url('./assets/tu-foto-de-goku.jpg'); 
-    background-attachment: fixed; /* LA CLAVE: El fondo no se mueve con el scroll */
-    background-position: center;
-    background-size: cover;
-    background-repeat: no-repeat;
     margin: 0;
     width: 100%;
+    height: 100vh;
+    height: 100svh;
+    overflow: hidden;
+    position: fixed;
     display: flex;
     flex-direction: column;
-
-    left: 0;
-    height: 100vh;
-    height: 100svh; /* Altura segura para móviles */
-    overflow: hidden;
-    position: fixed; /* Evita que el navegador desplace toda la pantalla */
-}
+     }
 
 #chat-box {
    background: transparent !important;
@@ -73,25 +65,27 @@
  
     
      
+
 .fondo-estatico {
     position: fixed;
     top: 0;
     left: 0;
-    width: 100vw;
-    height: 100vh;
+    width: 100%;
+    height: 100%; /* Aquí usamos % en lugar de vh para evitar el salto del teclado */
+    
+    /* Tu imagen y degradado */
     background-image: linear-gradient(rgba(11, 20, 26, 0.7), rgba(11, 20, 26, 0.7)), 
-                      url('./assets/logo.webp');
-    background-repeat: no-repeat;
+                      url('./assets/tu-foto-de-goku.jpg');
+    
+    background-size: cover;
     background-position: center;
-    background-size: cover; 
+    background-repeat: no-repeat;
+    
+    /* LA CLAVE PARA QUE NO SALTE */
     z-index: -1; 
     pointer-events: none;
-    
-    /* AÑADE ESTO PARA SINCRONIZAR */
-    touch-action: none; 
-    overflow: hidden;
+    transform: translateZ(0); /* Crea una capa de renderizado aparte para que no parpadee */
 }
-
 
 
 /* --- INPUT AREA --- */
