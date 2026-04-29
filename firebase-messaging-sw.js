@@ -32,8 +32,16 @@ messaging.onBackgroundMessage((payload) => {
         body: payload.notification?.body || "Nuevo mensaje",
         icon: './logo.png',
         badge: './placa.png',
-        tag: 'mensaje-nuevo',
-        renotify: true
+        tag: payload.data?.senderId || 'mensaje-nuevo', // Dinámico para evitar spam
+        renotify: true,
+        // --- LO QUE AGREGO PARA EL FUTURO (SIN TOCAR LO ANTERIOR) ---
+        data: {
+            url: '/index.html' // O la ruta de tu chat
+        },
+        actions: [
+            { action: 'abrir', title: '💬 VER CHAT' },
+            { action: 'cerrar', title: '❌ CERRAR' }
+        ]
     };
     return self.registration.showNotification(notificationTitle, notificationOptions);
 });
@@ -81,4 +89,23 @@ async function guardarEnLocal(storeName, data) {
         };
         request.onerror = (e) => reject(e.target.error);
     });
-                              }
+}
+
+// ==========================================
+// 6. GESTIÓN DE CLIC EN NOTIFICACIÓN (NUEVO)
+// ==========================================
+self.addEventListener('notificationclick', (event) => {
+    event.notification.close(); // Cerramos la notificación al tocarla
+
+    if (event.action === 'cerrar') return;
+
+    // Abrir la App o enfocarla si ya está abierta
+    event.waitUntil(
+        clients.matchAll({ type: 'window', includeUncontrolled: true }).then(clientList => {
+            if (clientList.length > 0) {
+                return clientList[0].focus();
+            }
+            return clients.openWindow(event.notification.data.url);
+        })
+    );
+});
