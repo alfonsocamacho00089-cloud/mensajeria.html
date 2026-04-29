@@ -60,8 +60,14 @@
     mask-image: linear-gradient(to bottom, black 85%, transparent 95%);
     -webkit-mask-image: linear-gradient(to bottom, black 85%, transparent 95%);
     overscroll-behavior-y: contain;  /* Bloquea que el scroll mueva el fondo */
-}
-    
+
+ 
+     z-index: 1;
+    /* Y MUY IMPORTANTE: El fondo tiene que ser transparente 
+       para que se vea la imagen de abajo */
+    background-color: transparent !important; 
+    background-image: none !important;
+     }
  
     
      
