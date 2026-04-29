@@ -1203,9 +1203,8 @@ let mensajeSeleccionado = null;
     if (clase.includes('derecha')) {
         const color = (estado === 'recibido') ? '#34B7F1' : '#8696a0';
         const icon = (estado === 'recibido') ? '✓✓' : '✓';
-        checkHTML = `<span class="checks" style="color: ${color}; margin-left: 5px; font-weight: bold;">${icon}</span>`;
+        checkHTML = `<span class="checks-render" style="color: ${color}; margin-left: 5px; font-weight: bold;">${icon}</span>`;
     }
-
     // 3. FILTRO DE CONTENIDO: ¿Es foto, respuesta o texto normal?
     let contenidoFinal = "";
 
@@ -1250,13 +1249,13 @@ let mensajeSeleccionado = null;
 
      function marcarMensajeComoRecibido(msgId, emisorID) {
     const elementoMsg = document.getElementById('msg-' + msgId);
-    if (elementoMsg) {
-        const checkIcon = elementoMsg.querySelector('.bi-check') || elementoMsg.querySelector('.bi-check-all');
-        if (checkIcon) {
-            checkIcon.className = 'bi bi-check-all';
-            checkIcon.style.color = '#34B7F1';
-        }
+if (elementoMsg) {
+    const checkSpan = elementoMsg.querySelector('.checks-render');
+    if (checkSpan) {
+        checkSpan.innerText = '✓✓';
+        checkSpan.style.color = '#34B7F1';
     }
+}
 
     let clave = 'chat_' + emisorID;
     let historial = JSON.parse(localStorage.getItem(clave)) || [];
@@ -1728,6 +1727,8 @@ function lanzarInstalacion() {
 if (window.visualViewport) {
     const vv = window.visualViewport;
     const ajustarInterfaz = () => {
+     document.documentElement.style.setProperty('--vh', `${vv.height * 0.01}px`);
+    
         document.body.style.height = `${vv.height}px`;
         document.body.style.top = `${vv.offsetTop}px`;
         window.scrollTo(0, 0);
