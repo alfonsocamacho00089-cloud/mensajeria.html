@@ -1,6 +1,12 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+
+ <meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="ChatSpace">
+
+<link rel="apple-touch-icon" href="assets/logo.png">
  <link rel="manifest" href="manifest.json">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
@@ -1900,6 +1906,32 @@ function inicializarInterfaz() {
 }
 inicializarInterfaz();
 // BLOQUE DEL TECLADO
+     let instaladorDiferido;
+
+window.addEventListener('beforeinstallprompt', (e) => {
+    // Evita que Chrome muestre el aviso automático feo
+    e.preventDefault();
+    // Guarda el evento para usarlo cuando tú quieras
+    instaladorDiferido = e;
+    
+    // OPCIONAL: Aquí podrías mostrar un botón que diga "DESCARGAR SPACECHAT"
+    // O lanzarlo de una vez si quieres ser agresivo como en Netlify:
+    setTimeout(() => {
+        lanzarInstalacion();
+    }, 2000); // Espera 2 segundos para que el usuario vea la app primero
+});
+
+function lanzarInstalacion() {
+    if (instaladorDiferido) {
+        instaladorDiferido.prompt();
+        instaladorDiferido.userChoice.then((choiceResult) => {
+            if (choiceResult.outcome === 'accepted') {
+                console.log('¡El usuario aceptó la descarga!');
+            }
+            instaladorDiferido = null;
+        });
+    }
+     }
 if (window.visualViewport) {
     const vv = window.visualViewport;
     const ajustarInterfaz = () => {
