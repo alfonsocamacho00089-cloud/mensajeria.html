@@ -573,8 +573,6 @@ label[for="file-input"] {
 </div>
     
         
- 
-
 <div id="modal-huella" class="modal">
     <div class="modal-content" style="background: #000; color: #ffd700; border: 2px solid #ffd700;">
         <div style="font-size: 60px; margin-bottom: 15px;">🫆</div>
@@ -585,20 +583,13 @@ label[for="file-input"] {
 
 <div id="modal-qr" class="modal">
     <div class="modal-content" style="display: flex; flex-direction: column; height: 100dvh; position: relative; background-image: linear-gradient(rgba(11, 20, 26, 0.9), rgba(11, 20, 26, 0.9)), url('./assets/logo.webp'); background-size: cover; background-position: center; background-attachment: fixed;">      
-        <div id="nombre-dueño-header-lista" style="background: rgba(32, 44, 51, 0.7); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); color: #ffffff; padding: 15px; font-weight: 900; text-transform: uppercase; text-align: left; border-bottom: 1px solid #333; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 1001;">
+     <div id="nombre-dueño-header-lista" style="background: rgba(32, 44, 51, 0.7); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); color: #ffffff; padding: 15px; font-weight: 900; text-transform: uppercase; text-align: left; border-bottom: 1px solid #333; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 1001;">
             <span>SPACECHAT</span>
             <div onclick="alternarVistaPerfil()" style="cursor: pointer; color: #ffd700; font-size: 22px; padding: 0 10px;">⋮</div>
-        </div>
-        <div id="cuerpo-modal-lista" style="flex-grow: 1; overflow-y: auto; padding: 0 15px 100px 15px;">
-            <div id="lista-contactos"><p style="color: #8696a0; font-size: 12px;">Cargando contactos...</p></div>
-        </div>
-        <div class="barra-flotante-premium">
-            <div class="btn-nav" onclick="irAContactos()"><span>👥</span><span>Contactos</span></div>
-            <div class="btn-nav active" onclick="cerrarModalQR()"><span>💬</span><span>Chat</span></div>
-            <div class="btn-nav" onclick="abrirAjustes()"><span>⚙️</span><span>Ajustes</span></div>
-        </div>
+     </div>
+ </div>
     </div>
-</div>
+
 
 <div class="contenedor-flotante">
     <label for="file-input" style="cursor:pointer; padding: 0 10px; display: flex; align-items: center;">
@@ -637,9 +628,20 @@ label[for="file-input"] {
         <button onclick="guardarCambiosPerfil()" style="width: 100%; padding: 12px; background: #ffd700; font-weight: bold;">GUARDAR</button>
     </div>
 </div>
-    
- 
-                    
+    <div id="seccion-mi-perfil" style="display: none; padding: 15px; background: #0a0a0a; border-bottom: 1px solid #ffd700;">
+            <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 15px;">
+                <div onclick="document.getElementById('input-mi-foto').click()" style="width: 70px; height: 70px; border-radius: 50%; border: 2px solid #ffd700; overflow: hidden; background: #222; display: flex; align-items: center; justify-content: center; cursor: pointer;">
+                    <img id="mi-foto-previa" src="" style="width: 100%; height: 100%; object-fit: cover; display: none;">
+                    <span id="mi-placeholder-foto" style="font-size: 20px;">📷</span>
+                </div>
+                <input type="file" id="input-mi-foto" accept="image/*" style="display: none;" onchange="previsualizarMiFoto(this)">
+                <button onclick="gestionarQR()" style="background: #ffd700; color: #000; border: none; border-radius: 8px; padding: 8px 12px; font-weight: 900; font-size: 14px; cursor: pointer;">QR</button>
+            </div>
+            <input type="text" id="mi-nuevo-nombre" placeholder="Editar mi nombre..." style="width:100%; padding:10px; margin-bottom:8px; background:#1a1a1a; color:white; border:1px solid #333; border-radius:8px;">
+            <input type="text" id="mi-nuevo-estado" placeholder="Estado (Ej: Disponible)" style="width:100%; padding:10px; margin-bottom:8px; background:#1a1a1a; color:white; border:1px solid #333; border-radius:8px;">
+            <button onclick="guardarCambiosPerfil()" style="width: 100%; padding: 10px; background: #ffd700; border: none; border-radius: 8px; font-weight: bold; color: #000;">GUARDAR CAMBIOS</button>
+    </div>
+             
     
     <script>
      
