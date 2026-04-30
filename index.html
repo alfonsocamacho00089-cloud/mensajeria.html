@@ -79,11 +79,14 @@ body {
     left: 0;
     width: 100vw;
     height: 100vh;
-    background-image: linear-gradient(rgba(11, 20, 26, 0.7), rgba(11, 20, 26, 0.7)), 
+    background-image: linear-gradient(rgba(11, 20, 26, 0.3), rgba(11, 20, 26, 0.3)), 
                       url('./assets/logo.webp');
+  
+                 
+    
     background-repeat: no-repeat;
     background-position: center;
-    background-size: contain; 
+     
     z-index: -1; 
     pointer-events: none;
     
@@ -92,6 +95,8 @@ body {
     overflow: hidden;
     transform: scale(1.1); /* Esto le da un 10% de zoom manual */
     overscroll-behavior: none;
+    background-size: 100vw 100vh; /* Obliga a la imagen a medir lo mismo que la ventana */
+    background-attachment: fixed;
    }
      
 
