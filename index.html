@@ -72,35 +72,25 @@ body {
     
 } 
     
-   .fondo-estatico {
-   
-        position: fixed;
+        .fondo-estatico {
+    position: fixed;
     top: 0;
     left: 0;
     width: 100vw;
     height: 100vh;
-    background-image: linear-gradient(rgba(11, 20, 26, 0.3), rgba(11, 20, 26, 0.3)), 
+    /* Tu imagen aquí */
+    background-image: linear-gradient(rgba(11, 20, 26, 0.7), rgba(11, 20, 26, 0.7)), 
                       url('./assets/logo.webp');
-  
-                 
-    
     background-repeat: no-repeat;
     background-position: center;
-     
+    
+    /* USA PX AQUÍ PARA QUE SEA IMPOSIBLE QUE CREZCA */
+    background-size:cover; 
+    
+    /* Esto lo manda al fondo de todo */
     z-index: -1; 
     pointer-events: none;
-    
-    /* AÑADE ESTO PARA SINCRONIZAR */
-    touch-action: none; 
-    overflow: hidden;
-    
-    overscroll-behavior: none;
-    background-size: contain; /* Obliga a la imagen a medir lo mismo que la ventana */
-    background-attachment:fixed ;
-    
-    user-select: none;    /* Evita que se seleccione la imagen por error */
-   
-   }
+        }
      
 
 /* --- INPUT AREA --- */
