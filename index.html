@@ -212,9 +212,9 @@ button#btn-enviar:active {
 .msg-burbuja { 
     max-width: 85%; 
     width: fit-content; 
-    padding: 8px 20px 8px 10px; 
+    padding: 8px 20px 8px 10px !important; 
     border-radius: 15px; 
-    font-size: 16px; 
+    font-size: 16px !important; 
     
     position: relative; 
     word-wrap: break-word; 
@@ -234,11 +234,14 @@ button#btn-enviar:active {
     display: flex;
     align-items: center;
     white-space: nowrap;
+ 
+    
 
-    float: right; /* <--- Esto la manda a la derecha del texto */
-    font-size: 12px;
+ 
+    float: right !important; /* <--- Esto la manda a la derecha del texto */
+    font-size: 12px !important;
     opacity: 0.7;
-    margin-top:2px; /* Ajusta para que baje un poquito y quede a nivel de la última línea */
+    margin-top:2px !important; /* Ajusta para que baje un poquito y quede a nivel de la última línea */
     margin-left: 6px; /* Separación del texto */
     gap: 3px;
 
