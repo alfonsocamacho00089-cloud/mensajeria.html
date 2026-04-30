@@ -26,7 +26,7 @@
 }
 
     
-     body {
+body {
     font-family: sans-serif;
     background-color: #000000;
     /* Usamos la imagen aquí para que sea global */
@@ -45,8 +45,7 @@
     height: 100svh; /* Altura segura para móviles */
     overflow: hidden;
     position: fixed; /* Evita que el navegador desplace toda la pantalla */
-     }
-
+}
 
 #chat-box {
    background: transparent !important;
@@ -54,7 +53,7 @@
     flex-shrink: 1;
     overflow-y: auto;
     padding: 20px;
-    padding-bottom: 120px !important;
+    padding-bottom: 150px !important;
     display: flex;
     flex-direction: column;
     gap: 4px;
@@ -72,29 +71,27 @@
 
     
 } 
- 
     
-     
-
-.fondo-estatico {
-        position: fixed;
+     .fondo-estatico {
+    position: fixed;
     top: 0;
     left: 0;
     width: 100vw;
     height: 100vh;
+    /* Tu imagen aquí */
     background-image: linear-gradient(rgba(11, 20, 26, 0.7), rgba(11, 20, 26, 0.7)), 
                       url('./assets/logo.webp');
     background-repeat: no-repeat;
     background-position: center;
-    background-size: cover; 
+    
+    /* USA PX AQUÍ PARA QUE SEA IMPOSIBLE QUE CREZCA */
+    background-size:cover; 
+    
+    /* Esto lo manda al fondo de todo */
     z-index: -1; 
     pointer-events: none;
-    
-    /* AÑADE ESTO PARA SINCRONIZAR */
-    touch-action: none; 
-    overflow: hidden;
-}
-
+     }
+     
 
 /* --- INPUT AREA --- */
 
