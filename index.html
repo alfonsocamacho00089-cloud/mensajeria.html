@@ -60,18 +60,15 @@ body {
     position: relative; /* Necesario para el fondo */
     background: #0b141a; /* Color base oscuro */
 
-/* 1. Control de altura y posición (Elimina el padding-bottom de 150px) */
-height: calc(100svh - 180px); /* Ajusta el área de scroll al espacio visible */
-margin-top: 65px;             /* Deja el espacio exacto para el header */
-padding-bottom: 15px !important; /* Espacio pequeño al final del último mensaje */
-
-/* 2. Efecto de desvanecimiento (Para que se vea como la foto 4) */
--webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 8%, black 92%, transparent 100%);
-mask-image: linear-gradient(to bottom, transparent 0%, black 8%, black 92%, transparent 100%);
-
-/* 3. Comportamiento de los mensajes */
-justify-content: flex-end;    /* Empuja los mensajes hacia abajo si hay pocos */
- 
+ /* Elimina el padding-bottom de 150px que tenías y pon esto: */
+    height: calc(100svh - 135px);    /* 60px header + 75px input aprox */
+    margin-top: 60px;                /* La misma altura que el header */
+    padding-bottom: 15px !important; /* El espacio pequeño que se ve en la foto 2 */
+    justify-content: flex-end;       /* Alinea los mensajes desde abajo */
+    
+    /* Sustituye tu mask-image vieja por esta (Efecto Foto 4): */
+    -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 8%, black 92%, transparent 100%);
+    mask-image: linear-gradient(to bottom, transparent 0%, black 8%, black 92%, transparent 100%);
  
   
     touch-action: pan-y; /* Permite scroll solo de arriba a abajo */
