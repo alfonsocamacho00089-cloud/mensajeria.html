@@ -1885,6 +1885,26 @@ async function eliminarContactoDeAgenda() {
     }
 } // CIERRE DE ELIMINAR CONTACTO
 
+     // Esperamos a que cargue el DOM para que encuentre los IDs
+document.addEventListener("DOMContentLoaded", () => {
+    const tx = document.getElementById('msg-text');
+    const chatBox = document.getElementById('chat-box');
+
+    if (tx && chatBox) {
+        tx.addEventListener("input", function() {
+            // 1. Reset para recalcular
+            this.style.height = '45px'; 
+            
+            // 2. Crecer hasta un máximo de 150px
+            const alturaReal = this.scrollHeight;
+            this.style.height = (alturaReal > 150 ? 150 : alturaReal) + 'px';
+
+            // 3. ¡EL EMPUJE! 
+            // Hacemos que el chat siempre muestre el final
+            chatBox.scrollTop = chatBox.scrollHeight;
+        });
+    }
+});
      function cargarFotoInicial() {
     const fotoGuardada = localStorage.getItem('mi_foto');
     if (fotoGuardada && fotoGuardada !== "") {
