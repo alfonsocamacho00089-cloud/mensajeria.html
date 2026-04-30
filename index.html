@@ -208,34 +208,44 @@ button#btn-enviar:active {
     background: rgba(255, 215, 0, 0.6); /* Se oscurece un poco al tocarlo */
     transform: scale(0.9);
 }
-
+     
 .msg-burbuja { 
     max-width: 85%; 
     width: fit-content; 
-    padding: 8px 10px 8px 10px; 
+    
     border-radius: 15px; 
-    font-size: 16px !important;
+    
     
     position: relative; 
     word-wrap: break-word; 
-    margin-bottom: 4px;
+    margin-bottom: 2px;
     display: inline-block; /* <--- CAMBIA flex por block */
     line-height: 1.2;
 
-}
-.msg-info {
-    display: flex; 
-    float: right; /* Alinea la hora y el check a la derecha */
-    align-items: center;
-    font-size: 14px; /* Prueba bajarlo un poco para que se note el contraste */
-    opacity: 0.7;
-    margin-top: 4px; /* Esto empuja la hora hacia abajo del texto */
-    gap: 3px;
-    width: 50%; /* Obliga a que ocupe todo el ancho y baje */
-    white-space: nowrap;
-    margin-left: 10px; 
+ font-size: 20px !important; /* Ponlo exagerado para notar si cambia */
+    padding: 10px !important;
+
 }
 
+
+
+
+
+.msg-info {
+    
+    
+    display: flex;
+    align-items: center;
+    white-space: nowrap;
+
+    float: right; /* <--- Esto la manda a la derecha del texto */
+    font-size: 12px;
+    opacity: 0.7;
+    margin-top:2px; /* Ajusta para que baje un poquito y quede a nivel de la última línea */
+    margin-left: 10px; /* Separación del texto */
+    gap: 3px;
+
+}        
 
 
 
