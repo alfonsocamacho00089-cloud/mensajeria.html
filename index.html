@@ -53,12 +53,24 @@ body {
     flex-shrink: 1;
     overflow-y: auto;
     padding: 20px;
-    padding-bottom: 150px !important;
+    
     display: flex;
     flex-direction: column;
     gap: 4px;
     position: relative; /* Necesario para el fondo */
     background: #0b141a; /* Color base oscuro */
+
+/* 1. Control de altura y posición (Elimina el padding-bottom de 150px) */
+height: calc(100svh - 130px); /* Ajusta el área de scroll al espacio visible */
+margin-top: 65px;             /* Deja el espacio exacto para el header */
+padding-bottom: 15px !important; /* Espacio pequeño al final del último mensaje */
+
+/* 2. Efecto de desvanecimiento (Para que se vea como la foto 4) */
+-webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 8%, black 92%, transparent 100%);
+mask-image: linear-gradient(to bottom, transparent 0%, black 8%, black 92%, transparent 100%);
+
+/* 3. Comportamiento de los mensajes */
+justify-content: flex-end;    /* Empuja los mensajes hacia abajo si hay pocos */
  
  
   
@@ -66,9 +78,7 @@ body {
     -webkit-overflow-scrolling: touch;
     
     /* ... tus estilos ... */
-    mask-image: linear-gradient(to bottom, black 85%, transparent 95%);
-    -webkit-mask-image: linear-gradient(to bottom, black 85%, transparent 95%);
-    overscroll-behavior-y: contain;  /* Bloquea que el scroll mueva el fondo */
+        overscroll-behavior-y: contain;  /* Bloquea que el scroll mueva el fondo */
 }
     
      .fondo-estatico {
