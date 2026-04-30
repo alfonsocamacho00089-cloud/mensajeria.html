@@ -54,7 +54,7 @@
     flex-shrink: 1;
     overflow-y: auto;
     padding: 20px;
-    padding-bottom: 150px !important;
+    padding-bottom: 120px !important;
     display: flex;
     flex-direction: column;
     gap: 4px;
@@ -77,24 +77,22 @@
      
 
 .fondo-estatico {
-    position: fixed;
+        position: fixed;
     top: 0;
     left: 0;
-    width: 100%;
-    height: 100%; /* Aquí usamos % en lugar de vh para evitar el salto del teclado */
-    
-    /* Tu imagen y degradado */
+    width: 100vw;
+    height: 100vh;
     background-image: linear-gradient(rgba(11, 20, 26, 0.7), rgba(11, 20, 26, 0.7)), 
-                      url('./assets/tu-foto-de-goku.jpg');
-    
-    background-size: cover;
-    background-position: center;
+                      url('./assets/logo.webp');
     background-repeat: no-repeat;
-    
-    /* LA CLAVE PARA QUE NO SALTE */
+    background-position: center;
+    background-size: cover; 
     z-index: -1; 
     pointer-events: none;
-    transform: translateZ(0); /* Crea una capa de renderizado aparte para que no parpadee */
+    
+    /* AÑADE ESTO PARA SINCRONIZAR */
+    touch-action: none; 
+    overflow: hidden;
 }
 
 
