@@ -214,7 +214,7 @@ button#btn-enviar:active {
     width: fit-content; 
     padding: 8px 10px 8px 10px; 
     border-radius: 15px; 
-    font-size: 16px; 
+    font-size: 18px !important;
     
     position: relative; 
     word-wrap: break-word; 
@@ -223,26 +223,21 @@ button#btn-enviar:active {
     line-height: 1.2;
 
 }
-
-
-
-
-
 .msg-info {
-    
-    
-    display: flex;
+    display: flex; 
+    justify-content: flex-end; /* Alinea la hora y el check a la derecha */
     align-items: center;
-    white-space: nowrap;
-
-    float: right; /* <--- Esto la manda a la derecha del texto */
-    font-size: 14px;
-    opacity: 0.6;
-    margin-top:10px; /* Ajusta para que baje un poquito y quede a nivel de la última línea */
-    margin-left: 10px; /* Separación del texto */
+    font-size: 11px; /* Prueba bajarlo un poco para que se note el contraste */
+    opacity: 0.7;
+    margin-top: 4px; /* Esto empuja la hora hacia abajo del texto */
     gap: 3px;
+    width: 100%; /* Obliga a que ocupe todo el ancho y baje */
+}
 
-}        
+
+
+
+
  
 .msg-derecha { 
     align-self: flex-end; 
