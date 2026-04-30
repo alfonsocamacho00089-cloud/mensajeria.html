@@ -106,7 +106,7 @@ body {
     gap: 8px;
     z-index: 100;
     pointer-events: auto; /* IMPORTANTE: Para que puedas hacer clic en el input */
-    bottom: 20;
+    
     /* Efecto para que parezca que la foto sigue debajo */
     background: rgba(0, 0, 0, 0.1); 
     backdrop-filter: blur(5px); /* Opcional: desenfoca un poco para legibilidad */
@@ -531,13 +531,12 @@ label[for="file-input"] {
     <label for="file-input" style="cursor:pointer; padding: 0 10px; display: flex; align-items: center;">
         <i class="fa-fa-camera" style="color: #8696a0; font-size: 20px;"></i>
     </label>
-    <input type="file" id="file-input" accept="image/*" style="display:none;" onchange="manejarSeleccionImagen(event)">
+    <qinput type="file" id="file-input" accept="image/*" style="display:none;" onchange="manejarSeleccionImagen(event)">
     
     <textarea 
-        id="msg-text" 
-        placeholder="Escribe un mensaje..."
-        oninput="this.style.height='45px'; this.style.height=this.scrollHeight+'px';"></textarea>
-    
+    id="msg-text" 
+    placeholder="Escribe un mensaje..."
+    rows="1"></textarea> <!-- Añadimos rows="1" para que empiece pequeño -->
     <button id="btn-enviar" onclick="enviarMensajeSatelital()">
         <span>➤</span>
     </button>
