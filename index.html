@@ -73,29 +73,24 @@ body {
 } 
     
    .fondo-estatico {
-    position: fixed;
+   
+        position: fixed;
     top: 0;
     left: 0;
     width: 100vw;
     height: 100vh;
-    z-index: -1;
-    pointer-events: none; /* Nadie puede tocar esto */
-    overflow: hidden;    /* Corta cualquier sobrante */
-    background-color: #0b141a; /* El color de tu app para los bordes */
-}
-
-.fondo-estatico img {
-    width: 100%;
-    height: 100%;
-    /* 'contain' aquí hace lo mismo que en background, 
-       pero al ser una imagen real en un div fijo, NO se desliza */
-    object-fit: contain; 
+    background-image: linear-gradient(rgba(11, 20, 26, 0.7), rgba(11, 20, 26, 0.7)), 
+                      url('./assets/logo.webp');
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: cover; 
+    z-index: -1; 
+    pointer-events: none;
     
-    /* Si quieres que se vea un poco más grande sin que se mueva, 
-       puedes usar un scale, pero contain es lo más seguro */
-    object-position: center;
-    opacity: 0.3; /* Para simular el efecto del gradiente/transparencia */
-}
+    /* AÑADE ESTO PARA SINCRONIZAR */
+    touch-action: none; 
+    overflow: hidden;
+   }
      
 
 /* --- INPUT AREA --- */
