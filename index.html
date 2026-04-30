@@ -108,8 +108,7 @@ justify-content: flex-end;    /* Empuja los mensajes hacia abajo si hay pocos */
 /* --- INPUT AREA --- */
 
 .contenedor-flotante {
-    position: absolute; /* Se queda pegado a la pantalla, no al chat */
-    bottom: 0;
+    position: fixed; /* Cambiar absolute por fixed para que no flote con el contenido */    bottom: 0;
     left: 0;
     width: 100%;
     display: flex;
@@ -142,7 +141,11 @@ justify-content: flex-end;    /* Empuja los mensajes hacia abajo si hay pocos */
 
  
     z-index: 10;
-    position: relative;
+    position: fixed; /* Cambiar relative por fixed para clavar el header arriba */
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 100;    /* Subir el z-index para que esté siempre encima */
  /* LA MAGIA DEL CRISTAL */
     backdrop-filter: blur(15px); 
     -webkit-backdrop-filter: blur(10px); /* OBLIGATORIO para iPhone y muchos Android */
