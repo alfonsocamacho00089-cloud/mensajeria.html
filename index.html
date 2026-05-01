@@ -1497,17 +1497,16 @@ checkHTML = `<span class="icono-check" style="color: ${color}; margin-left: 5px;
 
 
      function marcarMensajeComoRecibido(msgId, emisorID) {
+    cfunction marcarMensajeComoRecibido(msgId, emisorID) {
     const elementoMsg = document.getElementById('msg-' + msgId);
     if (elementoMsg) {
-        // CORRECCIÓN: Buscamos la clase "icono-check" que tú mismo creaste
-        // Sustituye la línea del querySelector por esta:
-const checkSpan = elementoMsg.querySelector('.icono-check');
-if (checkSpan) {
-    checkSpan.innerText = '✓✓'; 
-    checkSpan.style.color = '#34B7F1'; 
-     }
-    // El resto de tu lógica de historial está perfecta y no se toca
-     
+        // Buscamos la clase "icono-check" que definimos en pintarMensaje
+        const checkSpan = elementoMsg.querySelector('.icono-check');
+        if (checkSpan) {
+            checkSpan.innerText = '✓✓'; 
+            checkSpan.style.color = '#34B7F1'; 
+        }
+    }
 
     let clave = 'chat_' + emisorID;
     let historial = JSON.parse(localStorage.getItem(clave)) || [];
@@ -1521,8 +1520,11 @@ if (checkSpan) {
         return m;
     });
 
-    if (modificado) localStorage.setItem(clave, JSON.stringify(historial));
-} // <--- Solo UNA llave de cierre aquí.
+    if (modificado) {
+        localStorage.setItem(clave, JSON.stringify(historial));
+    }
+} // <--- ESTA LLAVE CIERRA LA FUNCIÓN 
+      
 // Función para ejecutar las acciones del menú
 function accionMensaje(tipo) {
     if (!mensajeSeleccionado) return;
