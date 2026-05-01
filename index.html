@@ -951,15 +951,21 @@ setTimeout(() => {
             const emisorID = data.from; 
             const chatAbiertoActualmente = document.querySelector('#target-id').value;
 
+  
             // --- 1. LÓGICA DE CONFIRMACIÓN (DOBLE CHECK) ---
             if (decoded.tipo === 1) { 
-                // Si el tipo es 1, es un "Eco". No pintamos nada, solo marcamos el check.
-                if (typeof marcarMensajeComoRecibido === "function") {
-                    marcarMensajeComoRecibido(decoded.msgId, emisorID);
-                }
+                console.log("Recibido ECO para el mensaje:", decoded.msgId);
+                
+                // Forzamos que se ejecute después de que el DOM esté listo
+                setTimeout(() => {
+                    if (typeof marcarMensajeComoRecibido === "function") {
+                        marcarMensajeComoRecibido(decoded.msgId, emisorID);
+                    }
+                }, 100);
+
                 snapshot.ref.remove(); 
-                return; // Salimos para no procesar como mensaje de texto
-            }
+                return; 
+     }
 
             // --- 2. LÓGICA DE MENSAJE DE TEXTO (TIPO 0) ---
             const textoReal = decodeURIComponent(escape(atob(decoded.chatText)));
