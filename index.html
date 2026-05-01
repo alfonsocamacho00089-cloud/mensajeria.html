@@ -1591,26 +1591,26 @@ function renderizarMensajes(listaDeMensajes) {
     div.className = `msg-burbuja ${msg.clase}`; 
     if (msg.id) div.id = 'msg-' + msg.id; 
 
+    // Corregido: Declaramos colorCheck una sola vez para evitar el SyntaxError
     const colorCheck = (msg.status === 'recibido') ? '#34B7F1' : '#8696a0';
-    const colorCheck = (msg.status === 'recibido') ? '#34B7F1' : '#8696a0';
-const iconoCheck = (msg.status === 'recibido') ? '✓✓' : '✓';
-const tiempo = msg.hora || new Date(msg.ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
+    const iconoCheck = (msg.status === 'recibido') ? '✓✓' : '✓';
+    const tiempo = msg.hora || new Date(msg.ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
 
-// FILTRO INTELIGENTE (Para que no salgan los IDs y se vean las fotos)
-let contenidoFinal = "";
-if (msg.texto.startsWith('http') && (msg.texto.includes('firebasestorage') || msg.texto.includes('.jpg'))) {
-    contenidoFinal = `<img src="${msg.texto}" style="max-width:250px; border-radius:10px; display:block; margin-bottom:5px;">`;
-} else {
-    contenidoFinal = `<span>${msg.texto}</span>`;
-}
+    // FILTRO INTELIGENTE (Se mantiene igual)
+    let contenidoFinal = "";
+    if (msg.texto.startsWith('http') && (msg.texto.includes('firebasestorage') || msg.texto.includes('.jpg'))) {
+        contenidoFinal = `<img src="${msg.texto}" style="max-width:250px; border-radius:10px; display:block; margin-bottom:5px;">`;
+    } else {
+        contenidoFinal = `<span>${msg.texto}</span>`;
+    }
 
-div.innerHTML = `
-    ${contenidoFinal}
-    <div class="msg-info" style="display: flex; justify-content: flex-end; align-items: center; gap: 5px; font-size: 10px; opacity: 0.7; margin-top: 3px;">
-        <span class="tiempo">${tiempo}</span>
-        ${msg.clase.includes('derecha') ? `<span class="icono-check" style="color: ${colorCheck}; font-weight: bold;">${iconoCheck}</span>` : ''}
-    </div>
-`;
+    div.innerHTML = `
+        ${contenidoFinal}
+        <div class="msg-info" style="display: flex; justify-content: flex-end; align-items: center; gap: 5px; font-size: 10px; opacity: 0.7; margin-top: 3px;">
+            <span class="tiempo">${tiempo}</span>
+            ${msg.clase.includes('derecha') ? `<span class="icono-check" style="color: ${colorCheck}; font-weight: bold;">${iconoCheck}</span>` : ''}
+        </div>
+    `;
     
     chatBox.appendChild(div);
 });
