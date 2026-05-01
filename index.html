@@ -1443,9 +1443,9 @@ if (clase.includes('derecha')) {
     const icon = (estado === 'recibido') ? '✓✓' : '✓';
     
     // IMPORTANTE: La clase "icono-check" es obligatoria aquí
-    checkHTML = `<span class="icono-check" style="color: ${color}; margin-left: 5px; font-weight: bold;">${icon}</span>`;
+    // Sustituye solo esta línea dentro de pintarMensaje
+checkHTML = `<span class="icono-check" style="color: ${color}; margin-left: 5px; font-weight: bold;">${icon}</span>`;
      }
-
     // 3. FILTRO DE CONTENIDO: ¿Es foto, respuesta o texto normal?
     let contenidoFinal = "";
 
@@ -1500,12 +1500,12 @@ if (clase.includes('derecha')) {
     const elementoMsg = document.getElementById('msg-' + msgId);
     if (elementoMsg) {
         // CORRECCIÓN: Buscamos la clase "icono-check" que tú mismo creaste
-        const checkSpan = elementoMsg.querySelector('.icono-check');
-        if (checkSpan) {
-            checkSpan.innerText = '✓✓'; 
-            checkSpan.style.color = '#34B7F1'; 
-        }
-    }
+        // Sustituye la línea del querySelector por esta:
+const checkSpan = elementoMsg.querySelector('.icono-check');
+if (checkSpan) {
+    checkSpan.innerText = '✓✓'; 
+    checkSpan.style.color = '#34B7F1'; 
+     }
     // El resto de tu lógica de historial está perfecta y no se toca
      
 
