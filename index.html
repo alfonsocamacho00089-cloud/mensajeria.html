@@ -978,6 +978,7 @@ setTimeout(() => {
                 id: decoded.msgId, // Guardamos el ID para futuras referencias
                 texto: textoReal, 
                 clase: 'msg-izquierda',
+                status: 'recibido',
                 ts: Date.now(),
 
                 hora: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })
