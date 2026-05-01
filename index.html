@@ -520,6 +520,16 @@ label[for="file-input"] {
     border: 2px solid #ffd700 !important;
     flex-shrink: 0; /* Evita que se aplaste si el nombre es largo */
      } 
+
+     /* Ocultamos todo por defecto excepto la carga */
+#chat-header, #chat-box, .contenedor-flotante, .modal {
+    display: none;
+}
+
+/* Solo la pantalla de carga debe estar visible al abrir */
+#pantalla-carga {
+    display: flex !important;
+     }
     </style>
 
 </head>
