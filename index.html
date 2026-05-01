@@ -526,7 +526,11 @@ label[for="file-input"] {
 
 <body>
  
-          
+          <div id="pantalla-carga" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; display: flex; align-items: center; justify-content: center; z-index: 999999; transition: opacity 0.5s ease;">
+    
+    <img src="assets/logo-nuevo.png" alt="Logo ChatSpace" style="width: 150px; height: auto; display: block;">
+
+          </div>
 
 <div class="header" id="chat-header">
     <div class="header-content" onclick="abrirPerfilContacto()" style="cursor: pointer;">
@@ -547,6 +551,7 @@ label[for="file-input"] {
 </div>
     <div class="fondo-estatico"></div>
  
+ 
 <div class="contenedor-flotante">
     <label for="file-input" style="cursor:pointer; padding: 0 10px; display: flex; align-items: center;">
         <i class="fa-fa-camera" style="color: #8696a0; font-size: 20px;"></i>
@@ -562,6 +567,42 @@ label[for="file-input"] {
         <span>➤</span>
     </button>
 </div>
+<div id="modal-registro" class="modal" style="display: none; align-items: center; justify-content: center; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #1e222b; z-index: 30000;">
+  
+          <div class="modal-cover" style="position: relative; width: 100vw; height: 100vh; padding: 50px 30px 50px 30px; box-sizing: border-box; background: #1e222b; border-radius: 0px; text-align: center; border: 0px solid #333; box-shadow: 0 0 20px rgba(0,0,0,0.5);">   
+        <h3 style="color: #ffd700; margin-bottom: 20px;">SPACECHAT</h3>
+        
+     
+     
+        <input type="text" id="reg-nombre" placeholder="Nombre" 
+            onfocus="this.style.boxShadow='0 0 5px #ffd700'; this.style.borderColor='#ffd700';" 
+            onblur="this.style.boxShadow='none'; this.style.borderColor='#999';"
+             style="width: 100%; padding: 18px; margin-bottom: 15px; background: #2a2f3a; color: white; border: 1px solid #999; border-radius: 8px; box-sizing: border-box; outline: none;">
+        
+        <input type="text" id="reg-apellido" placeholder="Apellido" 
+            onfocus="this.style.boxShadow='0 0 5px #ffd700'; this.style.borderColor='#ffd700';" 
+            onblur="this.style.boxShadow='none'; this.style.borderColor='#999';"
+             style="width: 100%; padding: 18px; margin-bottom: 15px; background: #2a2f3a; color: white; border: 1px solid #999; border-radius: 8px; box-sizing: border-box; outline: none;">
+
+        <button onclick="ejecutarRegistroCompleto()" 
+            style="width: 100%; padding: 15px; background: #ffd700; border: none; border-radius: 25px; font-weight: bold; color: #000; cursor: pointer; font-size: 16px; margin-bottom: 20px; text-transform: uppercase; box-shadow: 0 0 5px #ffd700;">
+            CREAR MI CUENTA ID
+        </button>
+
+        <p style="font-size: 13px; color: #ffd700; cursor: pointer; text-decoration: underline;" 
+           onclick="recuperarCuentaConID()">
+           ¿Ya tienes tu cuenta ID? ingresar o recuperar
+        </p>
+    </div>
+</div>
+
+    <div id="modal-huella" class="modal">
+    <div class="modal-content" style="background: #000; color: #ffd700; border: 2px solid #ffd700;">
+        <div style="font-size: 60px; margin-bottom: 15px;">🫆</div>
+        <h3 style="color: #fff;">Validando Huella...</h3>
+        <p style="color: #ffd700; font-family: monospace; font-size: 12px;">Vinculando Token Satelital</p>
+    </div>
+    </div>
  
 <div id="modal-qr" class="modal">
     <div class="modal-content" style="display: flex; flex-direction: column; height: 100dvh; position: relative; background-image: linear-gradient(rgba(11, 20, 26, 0.9), rgba(11, 20, 26, 0.9)), url('./assets/logo.webp'); background-size: cover; background-position: center; background-attachment: fixed;">      
@@ -715,46 +756,7 @@ label[for="file-input"] {
 </div>
     
 
-<div id="modal-registro" class="modal" style="display: none; align-items: center; justify-content: center; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #1e222b; z-index: 30000;">
-  
-          <div class="modal-cover" style="position: relative; width: 100vw; height: 100vh; padding: 50px 30px 50px 30px; box-sizing: border-box; background: #1e222b; border-radius: 0px; text-align: center; border: 0px solid #333; box-shadow: 0 0 20px rgba(0,0,0,0.5);">   
-        <h3 style="color: #ffd700; margin-bottom: 20px;">SPACECHAT</h3>
-        
-        <input type="text" id="reg-nombre" placeholder="Nombre" 
-            onfocus="this.style.boxShadow='0 0 5px #ffd700'; this.style.borderColor='#ffd700';" 
-            onblur="this.style.boxShadow='none'; this.style.borderColor='#999';"
-             style="width: 100%; padding: 18px; margin-bottom: 15px; background: #2a2f3a; color: white; border: 1px solid #999; border-radius: 8px; box-sizing: border-box; outline: none;">
-        
-        <input type="text" id="reg-apellido" placeholder="Apellido" 
-            onfocus="this.style.boxShadow='0 0 5px #ffd700'; this.style.borderColor='#ffd700';" 
-            onblur="this.style.boxShadow='none'; this.style.borderColor='#999';"
-             style="width: 100%; padding: 18px; margin-bottom: 15px; background: #2a2f3a; color: white; border: 1px solid #999; border-radius: 8px; box-sizing: border-box; outline: none;">
 
-        <button onclick="ejecutarRegistroCompleto()" 
-            style="width: 100%; padding: 15px; background: #ffd700; border: none; border-radius: 25px; font-weight: bold; color: #000; cursor: pointer; font-size: 16px; margin-bottom: 20px; text-transform: uppercase; box-shadow: 0 0 5px #ffd700;">
-            CREAR MI CUENTA ID
-        </button>
-
-        <p style="font-size: 13px; color: #ffd700; cursor: pointer; text-decoration: underline;" 
-           onclick="recuperarCuentaConID()">
-           ¿Ya tienes tu cuenta ID? ingresar o recuperar
-        </p>
-    </div>
-</div>
-
-    <div id="modal-huella" class="modal">
-    <div class="modal-content" style="background: #000; color: #ffd700; border: 2px solid #ffd700;">
-        <div style="font-size: 60px; margin-bottom: 15px;">🫆</div>
-        <h3 style="color: #fff;">Validando Huella...</h3>
-        <p style="color: #ffd700; font-family: monospace; font-size: 12px;">Vinculando Token Satelital</p>
-    </div>
-    </div>
-     
-     <div id="pantalla-carga" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; display: flex; align-items: center; justify-content: center; z-index: 999999; transition: opacity 0.5s ease;">
-    
-    <img src="assets/logo-nuevo.png" alt="Logo ChatSpace" style="width: 150px; height: auto; display: block;">
-
-     </div>
     
     <script>
      
