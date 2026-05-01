@@ -227,24 +227,20 @@ button#btn-enviar:active {
 
 
 .msg-info {
-    
-    
+  
     display: flex;
     align-items: center;
     white-space: nowrap;
  
-    
-
- 
-    float: right !important; /* <--- Esto la manda a la derecha del texto */
-    font-size: 12px !important;
-    opacity: 0.7;
-    margin-top:2px !important; /* Ajusta para que baje un poquito y quede a nivel de la última línea */
-    margin-left: 10px; /* Separación del texto */
-    gap: 3px;
-
-}        
-
+  
+         
+    justify-content: flex-end; /* Alinea al final de la burbuja */
+    gap: 4px;
+    font-size: 11px !important;
+    opacity: 0.8;
+    margin-top: 4px;
+    /* Eliminamos el float para evitar que el check desaparezca */
+}
 
 
 
