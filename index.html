@@ -951,14 +951,16 @@ setTimeout(() => {
             const chatAbiertoActualmente = document.querySelector('#target-id').value;
 
   
+            
             // --- 1. LÓGICA DE CONFIRMACIÓN (DOBLE CHECK) ---
             if (decoded.tipo === 1) { 
-                console.log("Recibido ECO para el mensaje:", decoded.msgId);
+                // Usamos data.msgId que es el que viene de Firebase
+                const idParaMarcar = data.msgId; 
+                console.log("Recibido ECO para el mensaje:", idParaMarcar);
                 
-                // Forzamos que se ejecute después de que el DOM esté listo
                 setTimeout(() => {
                     if (typeof marcarMensajeComoRecibido === "function") {
-                        marcarMensajeComoRecibido(decoded.msgId, emisorID);
+                        marcarMensajeComoRecibido(idParaMarcar, emisorID);
                     }
                 }, 100);
 
@@ -1061,7 +1063,7 @@ async function enviarMensajeSatelital() {
             p: base64,         // Paquete ProtoBuf
             from: miID,        // Remitente
             ts: Date.now(),    // Timestamp
-            mId: msgId         // ID para rastreo de Doble Check
+            msgId: msgId         // ID para rastreo de Doble Check
         });
 
         // 4. INTERFAZ Y PERSISTENCIA LOCAL
