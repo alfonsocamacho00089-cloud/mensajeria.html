@@ -1097,14 +1097,21 @@ async function enviarMensajeSatelital() {
 // --- 4. GESTIÓN DE TOKENS Y SERVICE WORKER ---
 
 // Registrar el Service Worker al cargar la página
-if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('firebase-messaging-sw.js')
-        .then(registration => {
-            console.log("🛰️ Antena (SW) lista para recibir señales");
-            // Aquí llamarías a obtenerToken(registration) si ya tienes esa función lista
-        })
-        .catch(err => console.error("❌ Fallo en registro de antena:", err));
-}
+// Notificación Nativa protegida (Para que no rompa el código)
+if ('serviceWorker' in navigator && Notification.permission === "granted") {
+    navigator.serviceWorker.ready.then(registration => {
+        registration.showNotification("SpaceChat: " + emisorID, {
+            body: textoReal,
+            icon: 'https://cdn-icons-png.flaticon.com/512/733/733585.png',
+            vibrate: [200, 100, 200],
+            tag: 'nuevo-mensaje-' + emisorID, 
+            renotify: true,
+            data: { emisor: emisorID }
+        });
+    }).catch(err => console.log("Notificación bloqueada o fallida"));
+} else {
+    console.log("Notificaciones no permitidas por el usuario.");
+     }
 async function obtenerToken(registration) {
     try {
         const miVapidKey = 'BIrsA9YbBXfIuo4PTMrKRtuktRsK2RbK0XevupuofGGOUDy9w5VZ9yaXbZXsenXppmFsR62-2B7jBOG0Z8RdxvU';
