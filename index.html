@@ -547,20 +547,24 @@ label[for="file-input"] {
     </div>
 </div>
 
+ <div class="contenedor-flotante">
+    <label for="file-input" style="cursor:pointer; padding: 0 10px; display: flex; align-items: center;">
+        <i class="fa-fa-camera" style="color: #8696a0; font-size: 20px;"></i>
+    </label>
+    <input type="file" id="file-input" accept="image/*" style="display:none;" onchange="manejarSeleccionImagen(event)">
+    
+    <textarea 
+        id="msg-text" 
+        placeholder="Escribe un mensaje..."
+        oninput="this.style.height='45px'; this.style.height=this.scrollHeight+'px';"></textarea>
+    
+    <button id="btn-enviar" onclick="enviarMensajeSatelital()">
+        <span>➤</span>
+    </button>
+ </div>
  
 
  
- <div class="barra-flotante-premium">
-            <div class="btn-nav" onclick="irAContactos()">
-                <span>👥</span><span>Contactos</span>
-            </div>
-            <div class="btn-nav active" onclick="cerrarModalQR()">
-                <span>💬</span><span>Chat</span>
-            </div>
-            <div class="btn-nav" onclick="abrirAjustes()">
-                <span>⚙️</span><span>Ajustes</span>
-            </div>
- </div>
 
  <div id="chat-box">
 </div>
@@ -647,22 +651,18 @@ label[for="file-input"] {
             + 
         </button>
 
+ <div class="barra-flotante-premium">
+            <div class="btn-nav" onclick="irAContactos()">
+                <span>👥</span><span>Contactos</span>
+            </div>
+            <div class="btn-nav active" onclick="cerrarModalQR()">
+                <span>💬</span><span>Chat</span>
+            </div>
+            <div class="btn-nav" onclick="abrirAjustes()">
+                <span>⚙️</span><span>Ajustes</span>
+            </div>
+ </div>
         
-<div class="contenedor-flotante">
-    <label for="file-input" style="cursor:pointer; padding: 0 10px; display: flex; align-items: center;">
-        <i class="fa-fa-camera" style="color: #8696a0; font-size: 20px;"></i>
-    </label>
-    <input type="file" id="file-input" accept="image/*" style="display:none;" onchange="manejarSeleccionImagen(event)">
-    
-    <textarea 
-        id="msg-text" 
-        placeholder="Escribe un mensaje..."
-        oninput="this.style.height='45px'; this.style.height=this.scrollHeight+'px';"></textarea>
-    
-    <button id="btn-enviar" onclick="enviarMensajeSatelital()">
-        <span>➤</span>
-    </button>
-</div>
 
  
      
