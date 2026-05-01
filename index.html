@@ -1444,7 +1444,9 @@ if (clase.includes('derecha')) {
         const partes = texto.split("\n— ");
         const cabezalCita = partes[0].replace("Resp >", "").trim();
         const mensajeReal = partes[1] || "";
-        contenidoFinal = `
+       
+     
+     contenidoFinal = `
             <div style="font-size: 11px; opacity: 0.6; border-left: 3px solid #ffd700; padding-left: 5px; margin-bottom: 5px; font-style: italic;">
                 Resp: ${cabezalCita}
             </div>
@@ -1455,9 +1457,15 @@ if (clase.includes('derecha')) {
         contenidoFinal = `<span>${texto}</span>`;
     }
 
+   
     // 4. Armamos el HTML final
-    div.innerHTML = `${contenidoFinal} <span class="msg-info" style="font-size: 10px; opacity: 0.7; display: block; text-align: right; margin-top: 3px;">${tiempo}${checkHTML}</span>`;
-
+    div.innerHTML = `
+        ${contenidoFinal} 
+        <div class="msg-info" style="display: flex; justify-content: flex-end; align-items: center; gap: 5px; font-size: 10px; opacity: 0.7; margin-top: 3px;">
+            <span class="tiempo">${tiempo}</span>
+            ${checkHTML}
+        </div>
+    `;
     // 5. Menú de acciones (Borrar, Editar, etc.)
     div.onclick = (e) => {
         mensajeSeleccionado = div; 
@@ -1478,12 +1486,15 @@ if (clase.includes('derecha')) {
      function marcarMensajeComoRecibido(msgId, emisorID) {
     const elementoMsg = document.getElementById('msg-' + msgId);
     if (elementoMsg) {
-        const checkIcon = elementoMsg.querySelector('.bi-check') || elementoMsg.querySelector('.bi-check-all');
-        if (checkIcon) {
-            checkIcon.className = 'bi bi-check-all';
-            checkIcon.style.color = '#34B7F1';
+        // CORRECCIÓN: Buscamos la clase "icono-check" que tú mismo creaste
+        const checkSpan = elementoMsg.querySelector('.icono-check');
+        if (checkSpan) {
+            checkSpan.innerText = '✓✓'; 
+            checkSpan.style.color = '#34B7F1'; 
         }
     }
+    // El resto de tu lógica de historial está perfecta y no se toca
+     
 
     let clave = 'chat_' + emisorID;
     let historial = JSON.parse(localStorage.getItem(clave)) || [];
