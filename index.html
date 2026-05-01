@@ -1423,12 +1423,16 @@ let mensajeSeleccionado = null;
     const tiempo = hora || new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
     
     // 2. Lógica de checks (Gris si es enviado, Azul si es recibido)
-    let checkHTML = "";
-    if (clase.includes('derecha')) {
-        const color = (estado === 'recibido') ? '#34B7F1' : '#8696a0';
-        const icon = (estado === 'recibido') ? '✓✓' : '✓';
-        checkHTML = `<span class="checks" style="color: ${color}; margin-left: 5px; font-weight: bold;">${icon}</span>`;
-    }
+    // --- SUSTITUIR DENTRO DE pintarMensaje ---
+let checkHTML = "";
+if (clase.includes('derecha')) {
+    // Si nace como 'recibido' (desde historial), azul. Si no, gris.
+    const color = (estado === 'recibido') ? '#34B7F1' : '#8696a0';
+    const icon = (estado === 'recibido') ? '✓✓' : '✓';
+    
+    // IMPORTANTE: La clase "icono-check" es obligatoria aquí
+    checkHTML = `<span class="icono-check" style="color: ${color}; margin-left: 5px; font-weight: bold;">${icon}</span>`;
+     }
 
     // 3. FILTRO DE CONTENIDO: ¿Es foto, respuesta o texto normal?
     let contenidoFinal = "";
@@ -1588,24 +1592,25 @@ function renderizarMensajes(listaDeMensajes) {
     if (msg.id) div.id = 'msg-' + msg.id; 
 
     const colorCheck = (msg.status === 'recibido') ? '#34B7F1' : '#8696a0';
-    const iconoCheck = (msg.status === 'recibido') ? '✓✓' : '✓';
-    const tiempo = msg.hora || new Date(msg.ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
+    const colorCheck = (msg.status === 'recibido') ? '#34B7F1' : '#8696a0';
+const iconoCheck = (msg.status === 'recibido') ? '✓✓' : '✓';
+const tiempo = msg.hora || new Date(msg.ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
 
-    // FILTRO INTELIGENTE (Para que no salgan los IDs y se vean las fotos)
-    let contenidoFinal = "";
-    if (msg.texto.startsWith('http') && (msg.texto.includes('firebasestorage') || msg.texto.includes('.jpg'))) {
-        contenidoFinal = `<img src="${msg.texto}" style="max-width:250px; border-radius:10px; display:block; margin-bottom:5px;">`;
-    } else {
-        contenidoFinal = `<span>${msg.texto}</span>`;
-    }
+// FILTRO INTELIGENTE (Para que no salgan los IDs y se vean las fotos)
+let contenidoFinal = "";
+if (msg.texto.startsWith('http') && (msg.texto.includes('firebasestorage') || msg.texto.includes('.jpg'))) {
+    contenidoFinal = `<img src="${msg.texto}" style="max-width:250px; border-radius:10px; display:block; margin-bottom:5px;">`;
+} else {
+    contenidoFinal = `<span>${msg.texto}</span>`;
+}
 
-    div.innerHTML = `
-        ${contenidoFinal}
-        <div class="msg-info" style="display: flex; justify-content: flex-end; align-items: center; gap: 5px; font-size: 10px; opacity: 0.7; margin-top: 3px;">
-            <span class="tiempo">${tiempo}</span>
-            ${msg.clase.includes('derecha') ? `<span class="checks" style="color: ${colorCheck};">${iconoCheck}</span>` : ''}
-        </div>
-    `;
+div.innerHTML = `
+    ${contenidoFinal}
+    <div class="msg-info" style="display: flex; justify-content: flex-end; align-items: center; gap: 5px; font-size: 10px; opacity: 0.7; margin-top: 3px;">
+        <span class="tiempo">${tiempo}</span>
+        ${msg.clase.includes('derecha') ? `<span class="icono-check" style="color: ${colorCheck}; font-weight: bold;">${iconoCheck}</span>` : ''}
+    </div>
+`;
     
     chatBox.appendChild(div);
 });
