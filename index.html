@@ -277,7 +277,7 @@ button#btn-enviar:active {
 
 
 .menu-mensaje {
-    position: fixed; /* O absolute, según tu lógica de JS */
+    position: absolute; /* O absolute, según tu lógica de JS */
     background: rgba(11, 20, 26, 0.95); /* Color oscuro sólido para que resalte sobre Goku */
     backdrop-filter: blur(10px); /* Efecto de desenfoque premium */
     border: 1px solid #ffd700; /* Borde dorado para tu estética Black & Gold */
@@ -285,8 +285,15 @@ button#btn-enviar:active {
     z-index: 100000 !important; /* Esto lo pone por encima de TODO */
     box-shadow: 0 4px 15px rgba(0,0,0,0.5);
     min-width: 150px;
-    overflow: hidden;
-}
+    overflow: none;
+
+
+
+    
+    /* Estas líneas ayudan a que no aparezca en la esquina de arriba por defecto */
+    top: 0; 
+    left: 0;
+     }
 
 .menu-mensaje div {
     padding: 12px 20px; /* Un poco más de espacio para el dedo */
