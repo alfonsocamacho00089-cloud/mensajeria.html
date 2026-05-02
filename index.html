@@ -578,16 +578,18 @@ label[for="file-input"] {
 </div>
  <div id="chat-box">
  </div>
+
 <div id="modal-perfil" class="modal" style="display:none; background: #1e222b;z-index: 25000;">
     <div class="modal-cover" style="text-align: center;">
         <img id="perfil-foto-grande" src="" style="width: 150px; height: 150px; border-radius: 50%; border: 1px solid #ffd700; margin-bottom: 15px; object-fit: cover;">
         <h2 id="perfil-nombre" style="color: white; margin-bottom: 5px;"></h2>
         <p style="color: #8696a0; font-size: 14px;">👤</p>
     <button onclick="eliminarChatEspecifico(); event.stopPropagation();" 
-        style="width: 100%; padding: 10px; background: rgba(255, 77, 77, 0.1); border: 1px solid #ff4d4d; border-radius: 8px; color: #ff4d4d; font-size: 13px; font-weight: 600; cursor: pointer; margin-top: 10px;">
+        style="width: 50%; padding: 10px; background: rgba(255, 77, 77, 0.1); border: 1px solid #ff4d4d; border-radius: 8px; color: #ff4d4d; font-size: 13px; font-weight: 600; cursor: pointer; margin-top: 10px;">
     🗑️ BORRAR CONVERSACIÓN
-</button>
+    </button>
 
+ 
 <button onclick="eliminarContactoDeAgenda(); event.stopPropagation();" 
         style="width: 100%; padding: 8px; background: transparent; border: 1px solid #555; border-radius: 8px; color: #8696a0; font-size: 12px; font-weight: 500; cursor: pointer; margin-top: 8px;">
     👤 ELIMINAR CONTACTO
@@ -688,11 +690,9 @@ label[for="file-input"] {
             <div onclick="alternarVistaPerfil()" style="cursor: pointer; color: #ffd700; font-size: 22px; padding: 0 10px;">⋮</div>
         </div>
      
-     
-<div id="seccion-mi-perfil" style="display: none; align-items: center; justify-content: center; position: relative; top: 0; left: 0; width: 100%; height: 100%; background: #1e222b;">
-  
-              <div style="display: flex; position: relative; align-items: center; justify-content: center; gap: 15px; margin-bottom: 15px;">
-             
+     <div id="seccion-mi-perfil" style="display: none; padding: 15px; background: #0a0a0a; border-bottom: 1px solid #ffd700;">
+            <div style="display: flex; align-items: center; justify-content: center; gap: 15px; margin-bottom: 15px;">
+
    
              <div onclick="document.getElementById('input-mi-foto').click()" style="width: 100px; height: 10;0px; border-radius: 70%; border: 1px solid #ffd700; overflow: hidden; background: #222; display: flex; align-items: center; justify-content: center; cursor: pointer;">
                     <img id="mi-foto-previa" src="" style="width: 150px; height: 150px; border-radius: 50%; border: 1px solid #ffd700; margin-bottom: 15px;">
