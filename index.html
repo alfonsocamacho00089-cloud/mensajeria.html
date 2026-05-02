@@ -553,7 +553,8 @@ label[for="file-input"] {
 </head>
 
 <body>
- 
+ <!-- Botón Premium (Negro y Dorado) para descargar -->
+
           <div id="pantalla-carga" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; display: flex; align-items: center; justify-content: center; z-index: 999999; transition: opacity 0.5s ease;">
     
     <img src="assets/logo-nuevo.png" alt="Logo ChatSpace" style="width: 150px; height: auto; display: block;">
@@ -801,7 +802,10 @@ label[for="file-input"] {
  </div>
      
  
-
+<button onclick="descargarApp()" style="background: #000; color: #FFD700; border: 1px solid #FFD700; padding: 10px; border-radius: 8px; cursor: pointer;">
+    Descargar SpaceChat
+</button>
+ 
    
     
     <script>
@@ -1020,32 +1024,41 @@ setTimeout(() => {
                 // --- BLOQUE: NOTIFICACIÓN NATIVA ---
                 // --- BLOQUE: ANTENA (RECIBIR) ---
 // --- 2. NOTIFICACIÓN (ANTENA) ---
-            if ('serviceWorker' in navigator) {
-                navigator.serviceWorker.ready.then(registration => {
-                    registration.showNotification("SpaceChat: " + emisorID, {
-                        body: textoReal,
-                        icon: 'assets/logo-nuevo.png', 
-                        vibrate: [200, 100, 200],
-                        tag: 'nuevo-mensaje-' + emisorID, 
-                        renotify: true,
-                        data: { emisor: emisorID }
-                    });
-                });
-            }
-
-            // --- 3. ENVIAR ECO AUTOMÁTICO AL EMISOR ---
-            if (typeof enviarEco === "function") {
-                enviarEco(decoded.msgId, emisorID);
-            }
-
-            // Limpieza original de tu código
-            snapshot.ref.remove(); 
-        } catch (e) { 
-            console.error("Error en Antena:", e); 
-        }
+            // ... dentro de tu lógica de recepción
+if (Notification.permission === "granted") {
+    navigator.serviceWorker.ready.then(registration => {
+        registration.showNotification("SpaceChat: " + emisorID, {
+            body: textoReal,
+            icon: 'https://cdn-icons-png.flaticon.com/512/733/733585.png', // Tu icono dorado
+            vibrate: [200, 100, 200],
+            tag: 'nuevo-mensaje-' + emisorID, 
+            renotify: true,
+            data: { emisor: emisorID }
+        });
     });
-     }
-       
+}
+
+// --- ECO AUTOMÁTICO ---
+if (typeof enviarEco === "function") {
+    enviarEco(decoded.msgId, emisorID);
+}
+snapshot.ref.remove();
+// ...
+             // ... (Toda tu lógica actual de Firebase y Antena) ...
+
+// --- PEGAR AQUÍ EL BLOQUE DE INSTALACIÓN ---
+let eventoInstalacion;
+
+window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    eventoInstalacion = e;
+    console.log("SpaceChat lista para ser instalada.");
+    
+    // Si tienes un botón de "Descargar" oculto, aquí puedes hacerlo aparecer:
+    // document.getElementById('btnDescarga').style.display = 'block';
+});
+
+
         
 async function enviarMensajeSatelital() {
     const inputMsg = document.querySelector('#msg-text');
@@ -1125,22 +1138,27 @@ async function enviarMensajeSatelital() {
 // --- BLOQUE: ENVIAR MENSAJE (NOTIFICAR) ---
 // --- 2. MOSTRAR NOTIFICACIÓN ---
         // --- BLOQUE: PERMISOS (ENVÍO) ---
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.ready.then(registration => {
-                Notification.requestPermission().then(permission => {
-                    if (permission === "granted") {
-                        console.log("Sistema de notificaciones SpaceChat listo.");
-                    } else {
-                        console.log("Notificaciones no permitidas por el usuario.");
-                    }
-                });
-            }).catch(err => console.log("Error en el sistema de envío:", err));
-        }
-        
-    } catch (e) {
-        console.error("❌ Fallo en el lanzamiento:", e);
-    }
-     }
+        // --- 1. NOTIFICACIÓN (Solo un bloque, limpio) ---
+if ('serviceWorker' in navigator && Notification.permission === "granted") {
+    navigator.serviceWorker.ready.then(registration => {
+        registration.showNotification("SpaceChat: " + emisorID, {
+            body: textoReal,
+            icon: 'https://cdn-icons-png.flaticon.com/512/733/733585.png',
+            vibrate: [200, 100, 200],
+            tag: 'nuevo-mensaje-' + emisorID, 
+            renotify: true,
+            data: { emisor: emisorID }
+        });
+    }).catch(err => console.log("Error en notificación:", err));
+}
+
+// --- 2. ENVIAR ECO AUTOMÁTICO AL EMISOR ---
+if (typeof enviarEco === "function") {
+    enviarEco(decoded.msgId, emisorID);
+}
+
+// --- 3. LIMPIEZA DE FIREBASE ---
+snapshot.ref.remove();
 
 async function obtenerToken(registration) {
     try {
@@ -1165,6 +1183,34 @@ async function obtenerToken(registration) {
     }
         }
 // --- 5. LÓGICA DE INTERFAZ Y QR ---
+
+     // ... (Toda tu lógica actual de Firebase y Antena) ...
+
+// --- PEGAR AQUÍ EL BLOQUE DE INSTALACIÓN ---
+let eventoInstalacion;
+
+window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    eventoInstalacion = e;
+    console.log("SpaceChat lista para ser instalada.");
+    
+    // Si tienes un botón de "Descargar" oculto, aquí puedes hacerlo aparecer:
+    // document.getElementById('btnDescarga').style.display = 'block';
+});
+
+async function descargarApp() {
+    if (eventoInstalacion) {
+        eventoInstalacion.prompt();
+        const { outcome } = await eventoInstalacion.userChoice;
+        eventoInstalacion = null;
+    } else {
+        if (/iPhone|iPad|iPod/.test(navigator.userAgent)) {
+            alert("En iOS: Pulsa el icono de 'Compartir' y selecciona 'Añadir a la pantalla de inicio'.");
+        } else {
+            alert("La aplicación ya está instalada o tu navegador no soporta la descarga directa.");
+        }
+    }
+     }
  async function manejarBotonIdentidad() {
     const id = localStorage.getItem('mi_dropis_id');
     const nombre = localStorage.getItem('mi_nombre') || "Usuario";
@@ -2022,6 +2068,7 @@ if (window.visualViewport) {
     vv.addEventListener('scroll', ajustarInterfaz);
     ajustarInterfaz();
      }
+             
      
 </script>
 </body>
