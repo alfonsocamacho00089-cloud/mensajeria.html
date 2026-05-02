@@ -1112,6 +1112,7 @@ async function enviarMensajeSatelital() {
 // Registrar el Service Worker al cargar la página
 // Notificación Nativa protegida (Para que no rompa el código)
 // --- BLOQUE: ENVIAR MENSAJE (NOTIFICAR) ---
+// --- BLOQUE: ENVIAR MENSAJE (NOTIFICAR) ---
 if ('serviceWorker' in navigator) {
     navigator.serviceWorker.ready.then(registration => {
         registration.showNotification("SpaceChat: " + emisorID, {
@@ -1131,6 +1132,12 @@ if (typeof enviarEco === "function") {
 }
 
 snapshot.ref.remove();
+} catch (e) { console.error("Error en Antena:", e); }
+
+});
+
+     }
+
 async function obtenerToken(registration) {
     try {
         const miVapidKey = 'BIrsA9YbBXfIuo4PTMrKRtuktRsK2RbK0XevupuofGGOUDy9w5VZ9yaXbZXsenXppmFsR62-2B7jBOG0Z8RdxvU';
