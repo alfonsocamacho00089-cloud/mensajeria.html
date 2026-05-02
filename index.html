@@ -1015,29 +1015,25 @@ setTimeout(() => {
                 pintarAgendaContactos();
 
                 // Notificación Nativa corregida
-                if ('serviceWorker' in navigator) {
-                    navigator.serviceWorker.ready.then(registration => {
-                        registration.showNotification("SpaceChat: " + emisorID, {
-                            body: textoReal,
-                            icon: 'https://cdn-icons-png.flaticon.com/512/733/733585.png',
-                            vibrate: [200, 100, 200],
-                            tag: 'nuevo-mensaje-' + emisorID, 
-                            renotify: true,
-                            data: { emisor: emisorID }
-                        });
-                    });
-                }
+                // --- BLOQUE: ACTIVAR ANTENA ---
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.ready.then(registration => {
+        // Pedimos permiso si aún no lo tenemos
+        Notification.requestPermission().then(permission => {
+            if (permission === "granted") {
+                registration.showNotification("SpaceChat: " + emisorID, {
+                    body: textoReal,
+                    icon: 'assets/logo-nuevo.png', // Ruta actualizada a tu carpeta assets
+                    vibrate: [200, 100, 200],
+                    tag: 'nuevo-mensaje-' + emisorID, 
+                    renotify: true,
+                    data: { emisor: emisorID }
+                });
+            } else {
+                console.log("El usuario rechazó las notificaciones.");
             }
-
-            // --- 3. ENVIAR ECO AUTOMÁTICO AL EMISOR ---
-            // Le avisamos al otro que ya recibimos su mensaje
-            if (typeof enviarEco === "function") {
-                enviarEco(decoded.msgId, emisorID);
-            }
-
-            snapshot.ref.remove(); 
-        } catch (e) { console.error("Error en Antena:", e); }
-    });
+        });
+    }).catch(err => console.log("Error al preparar el Service Worker:", err));
      }
        
         
@@ -1115,20 +1111,26 @@ async function enviarMensajeSatelital() {
 
 // Registrar el Service Worker al cargar la página
 // Notificación Nativa protegida (Para que no rompa el código)
-if ('serviceWorker' in navigator && Notification.permission === "granted") {
+// --- BLOQUE: ENVIAR MENSAJE (NOTIFICAR) ---
+if ('serviceWorker' in navigator) {
     navigator.serviceWorker.ready.then(registration => {
         registration.showNotification("SpaceChat: " + emisorID, {
             body: textoReal,
-            icon: 'https://cdn-icons-png.flaticon.com/512/733/733585.png',
+            icon: 'assets/logo-nuevo.png', // Ruta actualizada a tu carpeta assets
             vibrate: [200, 100, 200],
             tag: 'nuevo-mensaje-' + emisorID, 
             renotify: true,
             data: { emisor: emisorID }
         });
-    }).catch(err => console.log("Notificación bloqueada o fallida"));
-} else {
-    console.log("Notificaciones no permitidas por el usuario.");
-     }
+    });
+}
+
+// --- 3. ENVIAR ECO AUTOMÁTICO AL EMISOR ---
+if (typeof enviarEco === "function") {
+    enviarEco(decoded.msgId, emisorID);
+}
+
+snapshot.ref.remove();
 async function obtenerToken(registration) {
     try {
         const miVapidKey = 'BIrsA9YbBXfIuo4PTMrKRtuktRsK2RbK0XevupuofGGOUDy9w5VZ9yaXbZXsenXppmFsR62-2B7jBOG0Z8RdxvU';
