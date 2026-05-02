@@ -948,14 +948,39 @@ setTimeout(() => {
 
 // --- 4. ANTENA SATELITAL ---
 
-  async function activarAntena() {
+  
+             // 1. DECLARACIÓN GLOBAL (Solo una vez aquí arriba)
+let eventoInstalacion;
+
+// --- ESCUCHA DE INSTALACIÓN (Android/PC) ---
+window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    eventoInstalacion = e;
+    console.log("SpaceChat: Sistema de descarga listo.");
+});
+
+// --- FUNCIÓN PARA EL BOTÓN DE DESCARGA ---
+async function descargarApp() {
+    if (eventoInstalacion) {
+        eventoInstalacion.prompt();
+        const { outcome } = await eventoInstalacion.userChoice;
+        eventoInstalacion = null;
+    } else {
+        if (/iPhone|iPad|iPod/.test(navigator.userAgent)) {
+            alert("En iOS: Pulsa 'Compartir' y luego 'Añadir a la pantalla de inicio'.");
+        } else {
+            alert("La app ya está instalada o el navegador no permite la descarga directa.");
+        }
+    }
+}
+
+// 2. FUNCIÓN ANTENA (RECIBIR MENSAJES)
+async function activarAntena() {
     const miID = localStorage.getItem('mi_dropis_id');
     if (!miID) return;
-
     if (window.listenerActivo) window.listenerActivo.off(); 
 
     window.listenerActivo = db.ref('cola_satelital/' + miID);
-    
     window.listenerActivo.on('child_added', async (snapshot) => {
         const data = snapshot.val();
         if (!data || !data.p) return; 
@@ -965,101 +990,65 @@ setTimeout(() => {
             const SuperAppPayload = root.lookupType("SuperAppPayload");
             const buffer = Uint8Array.from(atob(data.p), c => c.charCodeAt(0));
             const decoded = SuperAppPayload.decode(buffer);
-
             const emisorID = data.from; 
             const chatAbiertoActualmente = document.querySelector('#target-id').value;
 
-  
-            
-            // --- 1. LÓGICA DE CONFIRMACIÓN (DOBLE CHECK) ---
+            // --- LÓGICA ECO (DOBLE CHECK) ---
             if (decoded.tipo === 1) { 
-                // Usamos data.msgId que es el que viene de Firebase
                 const idParaMarcar = data.msgId; 
-                console.log("Recibido ECO para el mensaje:", idParaMarcar);
-                
                 setTimeout(() => {
                     if (typeof marcarMensajeComoRecibido === "function") {
                         marcarMensajeComoRecibido(idParaMarcar, emisorID);
                     }
                 }, 100);
-
                 snapshot.ref.remove(); 
                 return; 
-     }
+            }
 
-            // --- 2. LÓGICA DE MENSAJE DE TEXTO (TIPO 0) ---
+            // --- LÓGICA MENSAJE DE TEXTO ---
             const textoReal = decodeURIComponent(escape(atob(decoded.chatText)));
-
-            // Guardar mensaje en el historial local (Incluyendo el msgId)
             let clave = 'chat_' + emisorID;
-            
-
-           let historial = JSON.parse(localStorage.getItem(clave)) || [];
+            let historial = JSON.parse(localStorage.getItem(clave)) || [];
             historial.push({ 
-                id: decoded.msgId, // Guardamos el ID para futuras referencias
+                id: decoded.msgId, 
                 texto: textoReal, 
                 clase: 'msg-izquierda',
                 status: 'recibido',
                 ts: Date.now(),
-
                 hora: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })
             });
-           
             localStorage.setItem(clave, JSON.stringify(historial));
 
-            // Manejo de Interfaz y Notificaciones
             if (emisorID === chatAbiertoActualmente) {
-                // Pasamos el msgId a pintarMensaje para que el HTML sea rastreable
-                pintarMensaje(textoReal, 'msg-izquierda',null, 'enviado', decoded.msgId);
-         
-        } else {
+                pintarMensaje(textoReal, 'msg-izquierda', null, 'enviado', decoded.msgId);
+            } else {
                 let noLeidos = parseInt(localStorage.getItem('unread_' + emisorID)) || 0;
                 localStorage.setItem('unread_' + emisorID, noLeidos + 1);
-                
                 pintarAgendaContactos();
 
-                // Notificación Nativa corregida
-                // --- BLOQUE: ACTIVAR ANTENA ---
-// --- BLOQUE: NOTIFICACIÓN NATIVA ---
-                // --- BLOQUE: NOTIFICACIÓN NATIVA ---
-                // --- BLOQUE: ANTENA (RECIBIR) ---
-// --- 2. NOTIFICACIÓN (ANTENA) ---
-            // ... dentro de tu lógica de recepción
-if (Notification.permission === "granted") {
-    navigator.serviceWorker.ready.then(registration => {
-        registration.showNotification("SpaceChat: " + emisorID, {
-            body: textoReal,
-            icon: 'https://cdn-icons-png.flaticon.com/512/733/733585.png', // Tu icono dorado
-            vibrate: [200, 100, 200],
-            tag: 'nuevo-mensaje-' + emisorID, 
-            renotify: true,
-            data: { emisor: emisorID }
-        });
+                // NOTIFICACIÓN NATIVA AL RECIBIR
+                if (Notification.permission === "granted") {
+                    navigator.serviceWorker.ready.then(reg => {
+                        reg.showNotification("SpaceChat: " + emisorID, {
+                            body: textoReal,
+                            icon: 'https://cdn-icons-png.flaticon.com/512/733/733585.png',
+                            vibrate: [200, 100, 200],
+                            tag: 'nuevo-mensaje-' + emisorID, 
+                            renotify: true
+                        });
+                    });
+                }
+            }
+            
+            // ECO Y LIMPIEZA
+            if (typeof enviarEco === "function") { enviarEco(decoded.msgId, emisorID); }
+            snapshot.ref.remove(); 
+
+        } catch (e) { console.error("Error en Antena:", e); }
     });
 }
 
-// --- ECO AUTOMÁTICO ---
-if (typeof enviarEco === "function") {
-    enviarEco(decoded.msgId, emisorID);
-}
-snapshot.ref.remove();
-// ...
-             // ... (Toda tu lógica actual de Firebase y Antena) ...
-
-// --- PEGAR AQUÍ EL BLOQUE DE INSTALACIÓN ---
-let eventoInstalacion;
-
-window.addEventListener('beforeinstallprompt', (e) => {
-    e.preventDefault();
-    eventoInstalacion = e;
-    console.log("SpaceChat lista para ser instalada.");
-    
-    // Si tienes un botón de "Descargar" oculto, aquí puedes hacerlo aparecer:
-    // document.getElementById('btnDescarga').style.display = 'block';
-});
-
-
-        
+// 3. FUNCIÓN ENVIAR (Lanzamiento Satelital)
 async function enviarMensajeSatelital() {
     const inputMsg = document.querySelector('#msg-text');
     const inputTarget = document.querySelector('#target-id');
@@ -1069,96 +1058,35 @@ async function enviarMensajeSatelital() {
 
     if (!targetID || !msg) return alert("ID y Mensaje son obligatorios");
 
-    // 1. GENERAMOS EL ID ÚNICO (La "cédula" del mensaje)
     const msgId = "msg_" + Date.now();
-
     try {
-        // 2. MOTOR PROTOBUF
         const root = await cargarProto();
         const SuperAppPayload = root.lookupType("SuperAppPayload");
-        
-        // Ofuscamos el mensaje (Base64 + URI Encode)
         const msgProtegido = btoa(unescape(encodeURIComponent(msg))); 
-        
-        // Creamos el paquete incluyendo el ID único
-        const payload = SuperAppPayload.create({ 
-            chatText: msgProtegido,
-            msgId: msgId,
-            tipo: 0 // 0 significa que es un mensaje de texto normal
-});
-        
-        
+        const payload = SuperAppPayload.create({ chatText: msgProtegido, msgId: msgId, tipo: 0 });
         const buffer = SuperAppPayload.encode(payload).finish();
-        
-        // 3. CONVERSIÓN Y LANZAMIENTO
         const base64 = btoa(String.fromCharCode.apply(null, buffer));
         
         await db.ref('cola_satelital/' + targetID).push({
-            p: base64,         // Paquete ProtoBuf
-            from: miID,        // Remitente
-            ts: Date.now(),    // Timestamp
-            msgId: msgId         // ID para rastreo de Doble Check
+            p: base64, from: miID, ts: Date.now(), msgId: msgId 
         });
 
-        // 4. INTERFAZ Y PERSISTENCIA LOCAL
-        // Pintamos el mensaje pasando el msgId para el futuro Doble Check
         pintarMensaje(msg, 'msg-derecha', null, 'enviado', msgId);
-        // Guardamos en el historial con toda la data necesaria
         let historialEnv = JSON.parse(localStorage.getItem('chat_' + targetID)) || [];
         historialEnv.push({ 
-            id: msgId, 
-            texto: msg, 
-            clase: 'msg-derecha', 
-            status: 'enviado',
-            ts: Date.now(),
-            // AGREGA ESTA LÍNEA JUSTO AQUÍ:
+            id: msgId, texto: msg, clase: 'msg-derecha', status: 'enviado', ts: Date.now(),
             hora: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })
-});
+        });
         localStorage.setItem('chat_' + targetID, JSON.stringify(historialEnv));
 
-        // 5. LIMPIEZA DE INPUT (Manteniendo el foco y reseteando altura)
         if (inputMsg) {
             inputMsg.value = "";
-            inputMsg.style.height = '36px'; // Mantiene tu diseño visual
+            inputMsg.style.height = '36px';
             inputMsg.focus(); 
         }
-
-        console.log("🚀 Mensaje con ID " + msgId + " lanzado al espacio hacia:", targetID);
-
-    } catch (e) {
-        console.error("❌ Fallo en el lanzamiento:", e);
-        alert("Error al enviar el mensaje.");
-    }
-     }
-// --- 4. GESTIÓN DE TOKENS Y SERVICE WORKER ---
-
-// Registrar el Service Worker al cargar la página
-// Notificación Nativa protegida (Para que no rompa el código)
-// --- BLOQUE: ENVIAR MENSAJE (NOTIFICAR) ---
-// --- BLOQUE: ENVIAR MENSAJE (NOTIFICAR) ---
-// --- 2. MOSTRAR NOTIFICACIÓN ---
-        // --- BLOQUE: PERMISOS (ENVÍO) ---
-        // --- 1. NOTIFICACIÓN (Solo un bloque, limpio) ---
-if ('serviceWorker' in navigator && Notification.permission === "granted") {
-    navigator.serviceWorker.ready.then(registration => {
-        registration.showNotification("SpaceChat: " + emisorID, {
-            body: textoReal,
-            icon: 'https://cdn-icons-png.flaticon.com/512/733/733585.png',
-            vibrate: [200, 100, 200],
-            tag: 'nuevo-mensaje-' + emisorID, 
-            renotify: true,
-            data: { emisor: emisorID }
-        });
-    }).catch(err => console.log("Error en notificación:", err));
-}
-
-// --- 2. ENVIAR ECO AUTOMÁTICO AL EMISOR ---
-if (typeof enviarEco === "function") {
-    enviarEco(decoded.msgId, emisorID);
-}
-
-// --- 3. LIMPIEZA DE FIREBASE ---
-snapshot.ref.remove();
+    } catch (e) { console.error("Error en envío:", e); }
+                }
+   
 
 async function obtenerToken(registration) {
     try {
@@ -1186,31 +1114,6 @@ async function obtenerToken(registration) {
 
      // ... (Toda tu lógica actual de Firebase y Antena) ...
 
-// --- PEGAR AQUÍ EL BLOQUE DE INSTALACIÓN ---
-let eventoInstalacion;
-
-window.addEventListener('beforeinstallprompt', (e) => {
-    e.preventDefault();
-    eventoInstalacion = e;
-    console.log("SpaceChat lista para ser instalada.");
-    
-    // Si tienes un botón de "Descargar" oculto, aquí puedes hacerlo aparecer:
-    // document.getElementById('btnDescarga').style.display = 'block';
-});
-
-async function descargarApp() {
-    if (eventoInstalacion) {
-        eventoInstalacion.prompt();
-        const { outcome } = await eventoInstalacion.userChoice;
-        eventoInstalacion = null;
-    } else {
-        if (/iPhone|iPad|iPod/.test(navigator.userAgent)) {
-            alert("En iOS: Pulsa el icono de 'Compartir' y selecciona 'Añadir a la pantalla de inicio'.");
-        } else {
-            alert("La aplicación ya está instalada o tu navegador no soporta la descarga directa.");
-        }
-    }
-     }
  async function manejarBotonIdentidad() {
     const id = localStorage.getItem('mi_dropis_id');
     const nombre = localStorage.getItem('mi_nombre') || "Usuario";
