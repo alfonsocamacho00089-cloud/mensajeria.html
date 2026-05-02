@@ -607,7 +607,7 @@ label[for="file-input"] {
 
 <!-- Botón de acción abajo -->
 <button onclick="recuperarCuentaConID()" 
-    style="width: 100%; padding: 15px; background: #2a2f3a; border: 1px solid #ffd700; border-radius: 12px; color: white; cursor: pointer; font-size: 14px; font-weight: bold; text-transform: uppercase;">
+    style="width: 80%; padding: 15px; background: #2a2f3a; border: 1px solid #ffd700; border-radius: 10px; color: white; cursor: pointer; font-size: 14px; font-weight: bold; text-transform: uppercase;">
    Ingresar aqui 
 </button>
     
@@ -841,7 +841,7 @@ async function recuperarCuentaConID() {
                 apellido: datos.apellido,
                 fcm_token: datos.fcm_token || '' 
             });
-            alert(`🚀 ¡Identidad recuperada! Bienvenido ${datos.nombre}.`);
+            alert(`✅Bienvenido ${datos.nombre}.`);
             location.reload(); 
         } else {
             alert("❌ ID no encontrado en el satélite.");
@@ -1257,7 +1257,7 @@ function procesarQRScanner(contenido) {
     });
     
     localStorage.setItem('mis_contactos', JSON.stringify(agenda));
-    alert("✅ Guardado en el teléfono");
+    alert("✅ Guardado en la agenda");
     
     document.getElementById('modal-nuevocontacto').style.display = 'none';
     pintarAgendaContactos();
