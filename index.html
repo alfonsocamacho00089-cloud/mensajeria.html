@@ -1126,6 +1126,28 @@ if ('serviceWorker' in navigator && Notification.permission === "granted") {
 } else {
     console.log("Notificaciones no permitidas por el usuario.");
      }
+async function obtenerToken(registration) {
+    try {
+        const miVapidKey = 'BIrsA9YbBXfIuo4PTMrKRtuktRsK2RbK0XevupuofGGOUDy9w5VZ9yaXbZXsenXppmFsR62-2B7jBOG0Z8RdxvU';
+        const token = await messaging.getToken({ 
+            vapidKey: miVapidKey, 
+            serviceWorkerRegistration: registration 
+        });
+ 
+        if (token) {
+            console.log("🎫 TU TOKEN DROPIS:", token);
+            localStorage.setItem('fcm_token', token);
+            
+            // Si el usuario ya tiene ID, actualizamos el token en la nube silenciosamente
+            const miID = localStorage.getItem('mi_dropis_id');
+            if (miID) {
+                firebase.database().ref('usuarios/' + miID).update({ fcm_token: token });
+            }
+        }
+    } catch (err) {
+        console.warn("⚠️ No se pudo obtener el token:", err);
+    }
+     }
 // --- 5. LÓGICA DE INTERFAZ Y QR ---
  async function manejarBotonIdentidad() {
     const id = localStorage.getItem('mi_dropis_id');
