@@ -1016,30 +1016,34 @@ setTimeout(() => {
 
                 // Notificación Nativa corregida
                 // --- BLOQUE PARA LA ANTENA (RECIBIR) ---
-if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.ready.then(registration => {
-        // Verifica si ya tenemos permiso
-        if (Notification.permission === "granted") {
-            registration.showNotification("SpaceChat: " + emisorID, {
-                body: textoReal,
-                icon: 'assets/logo-nuevo.png', 
-                vibrate: [200, 100, 200],
-                tag: 'nuevo-mensaje-' + emisorID, 
-                renotify: true
-            });
-        } else {
-            // Si no hay permiso, lo pide
-            Notification.requestPermission();
+// --- BLOQUE PARA LA ANTENA (RECIBIR) ---
+                if ('serviceWorker' in navigator) {
+                    navigator.serviceWorker.ready.then(registration => {
+                        if (Notification.permission === "granted") {
+                            registration.showNotification("SpaceChat: " + emisorID, {
+                                body: textoReal,
+                                icon: 'assets/logo-nuevo.png', 
+                                vibrate: [200, 100, 200],
+                                tag: 'nuevo-mensaje-' + emisorID, 
+                                renotify: true
+                            });
+                        } else {
+                            Notification.requestPermission();
+                        }
+                    });
+                }
+
+                // Lógica de respuesta y limpieza
+                if (typeof enviarEco === "function") {
+                    enviarEco(decoded.msgId, emisorID);
+                }
+                snapshot.ref.remove();
+
+        } catch (e) { 
+            console.error("Error en Antena:", e); 
         }
     });
-}
-
-// Lógica de respuesta y limpieza (Vital para que no falle)
-if (typeof enviarEco === "function") {
-    enviarEco(decoded.msgId, emisorID);
-}
-snapshot.ref.remove();
-       
+     }
         
 async function enviarMensajeSatelital() {
     const inputMsg = document.querySelector('#msg-text');
