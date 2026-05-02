@@ -109,3 +109,8 @@ self.addEventListener('notificationclick', (event) => {
         })
     );
 });
+// AGREGAR AL FINAL PARA ACTIVAR INSTALACIÓN PWA
+self.addEventListener('fetch', (event) => {
+    // Esto permite que la app sea instalable sin cachear todo obligatoriamente
+    event.respondWith(fetch(event.request));
+});
