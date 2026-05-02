@@ -691,14 +691,17 @@ label[for="file-input"] {
 
 <div id="seccion-mi-perfil" style="display: none; padding: 15px; background: #1e222b; border-bottom: 1px solid #1e222b;">
             <div style="display: flex; align-items: center; justify-content: center; gap: 15px; margin-bottom: 15px;">
-                <div onclick="document.getElementById('input-mi-foto').click()" style="width: 90px; height: 90px; border-radius: 70%; border: 1px solid #ffd700; overflow: hidden; background: #222; display: flex; align-items: center; justify-content: center; cursor: pointer;">
-                    <img id="mi-foto-previa" src="" style="width: 100%; height: 100%; object-fit: cover; display: none;">
+                <div onclick="document.getElementById('input-mi-foto').click()" style="width: 70px; height: 70px; border-radius: 70%; border: 1px solid #ffd700; overflow: hidden; background: #222; display: flex; align-items: center; justify-content: center; cursor: pointer;">
+                    <img id="mi-foto-previa" src="" style="width: 150%; height: 150%; object-fit: cover; display: none;">
                     <span id="mi-placeholder-foto" style="font-size: 20px;">📷</span>
                 </div>
                 <input type="file" id="input-mi-foto" accept="image/*" style="display: none;" onchange="previsualizarMiFoto(this)">
                 <button onclick="gestionarQR()" style="background: #ffd700; color: #000; border: none; border-radius: 8px; padding: 8px 12px; font-weight: 900; font-size: 14px; cursor: pointer;">QR</button>
             </div>
-            <input type="text" id="mi-nuevo-nombre" placeholder="Editar mi nombre..." style="width:80%; padding:10px; margin-bottom:8px; background:#1a1a1a; color:white; border:1px solid #333; border-radius:8px;">
+            <input type="text" id="mi-nuevo-nombre" placeholder="Editar mi nombre..." onfocus="this.style.boxShadow='0 0 5px #ffd700'; this.style.borderColor='#ffd700';" 
+            onblur="this.style.boxShadow='none'; this.style.borderColor='#999';"
+             style="width: 100%; padding: 18px; margin-bottom: 15px; background: #2a2f3a; color: white; border: 1px solid #999; border-radius: 8px; box-sizing: border-box; outline: none;">
+        
             <input type="text" id="mi-nuevo-estado" placeholder="Estado (Ej: Disponible)" style="width:80%; padding:10px; margin-bottom:8px; background:#1a1a1a; color:white; border:1px solid #333; border-radius:8px;">
             <button onclick="guardarCambiosPerfil()" style="width: 50%; padding: 10px; background: #ffd700; border: none; border-radius: 8px; font-weight: bold; color: #000;">GUARDAR CAMBIOS</button>
 </div>
