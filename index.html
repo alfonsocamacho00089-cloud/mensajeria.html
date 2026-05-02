@@ -1018,22 +1018,21 @@ setTimeout(() => {
                 // --- BLOQUE: ACTIVAR ANTENA ---
 if ('serviceWorker' in navigator) {
     navigator.serviceWorker.ready.then(registration => {
-        // Pedimos permiso si aún no lo tenemos
         Notification.requestPermission().then(permission => {
             if (permission === "granted") {
                 registration.showNotification("SpaceChat: " + emisorID, {
                     body: textoReal,
-                    icon: 'assets/logo-nuevo.png', // Ruta actualizada a tu carpeta assets
+                    icon: 'assets/logo-nuevo.png', 
                     vibrate: [200, 100, 200],
                     tag: 'nuevo-mensaje-' + emisorID, 
                     renotify: true,
                     data: { emisor: emisorID }
                 });
             } else {
-                console.log("El usuario rechazó las notificaciones.");
+                console.log("Notificaciones no permitidas.");
             }
         });
-    }).catch(err => console.log("Error al preparar el Service Worker:", err));
+    }).catch(err => console.log("Error en Service Worker:", err));
      }
        
         
@@ -1113,30 +1112,30 @@ async function enviarMensajeSatelital() {
 // Notificación Nativa protegida (Para que no rompa el código)
 // --- BLOQUE: ENVIAR MENSAJE (NOTIFICAR) ---
 // --- BLOQUE: ENVIAR MENSAJE (NOTIFICAR) ---
-if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.ready.then(registration => {
-        registration.showNotification("SpaceChat: " + emisorID, {
-            body: textoReal,
-            icon: 'assets/logo-nuevo.png', // Ruta actualizada a tu carpeta assets
-            vibrate: [200, 100, 200],
-            tag: 'nuevo-mensaje-' + emisorID, 
-            renotify: true,
-            data: { emisor: emisorID }
-        });
-    });
-}
+// --- 2. MOSTRAR NOTIFICACIÓN ---
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.ready.then(registration => {
+                registration.showNotification("SpaceChat: " + emisorID, {
+                    body: textoReal,
+                    icon: 'assets/logo-nuevo.png', 
+                    vibrate: [200, 100, 200],
+                    tag: 'nuevo-mensaje-' + emisorID, 
+                    renotify: true,
+                    data: { emisor: emisorID }
+                });
+            });
+        }
 
-// --- 3. ENVIAR ECO AUTOMÁTICO AL EMISOR ---
-if (typeof enviarEco === "function") {
-    enviarEco(decoded.msgId, emisorID);
-}
+        // --- 3. ENVIAR ECO AUTOMÁTICO AL EMISOR ---
+        if (typeof enviarEco === "function") {
+            enviarEco(decoded.msgId, emisorID);
+        }
 
-snapshot.ref.remove();
-} catch (e) { console.error("Error en Antena:", e); }
-
+        snapshot.ref.remove(); 
+    } catch (e) { 
+        console.error("Error en Antena:", e); 
+    }
 });
-
-     }
 
 async function obtenerToken(registration) {
     try {
