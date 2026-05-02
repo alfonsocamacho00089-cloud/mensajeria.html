@@ -1016,23 +1016,34 @@ setTimeout(() => {
 
                 // Notificación Nativa corregida
                 // --- BLOQUE: ACTIVAR ANTENA ---
-if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.ready.then(registration => {
-        Notification.requestPermission().then(permission => {
-            if (permission === "granted") {
-                registration.showNotification("SpaceChat: " + emisorID, {
-                    body: textoReal,
-                    icon: 'assets/logo-nuevo.png', 
-                    vibrate: [200, 100, 200],
-                    tag: 'nuevo-mensaje-' + emisorID, 
-                    renotify: true,
-                    data: { emisor: emisorID }
+// --- BLOQUE: NOTIFICACIÓN NATIVA ---
+                // --- BLOQUE: NOTIFICACIÓN NATIVA ---
+                // --- BLOQUE: ANTENA (RECIBIR) ---
+// --- 2. NOTIFICACIÓN (ANTENA) ---
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.ready.then(registration => {
+                    registration.showNotification("SpaceChat: " + emisorID, {
+                        body: textoReal,
+                        icon: 'assets/logo-nuevo.png', 
+                        vibrate: [200, 100, 200],
+                        tag: 'nuevo-mensaje-' + emisorID, 
+                        renotify: true,
+                        data: { emisor: emisorID }
+                    });
                 });
-            } else {
-                console.log("Notificaciones no permitidas.");
             }
-        });
-    }).catch(err => console.log("Error en Service Worker:", err));
+
+            // --- 3. ENVIAR ECO AUTOMÁTICO AL EMISOR ---
+            if (typeof enviarEco === "function") {
+                enviarEco(decoded.msgId, emisorID);
+            }
+
+            // Limpieza original de tu código
+            snapshot.ref.remove(); 
+        } catch (e) { 
+            console.error("Error en Antena:", e); 
+        }
+    });
      }
        
         
@@ -1113,29 +1124,23 @@ async function enviarMensajeSatelital() {
 // --- BLOQUE: ENVIAR MENSAJE (NOTIFICAR) ---
 // --- BLOQUE: ENVIAR MENSAJE (NOTIFICAR) ---
 // --- 2. MOSTRAR NOTIFICACIÓN ---
+        // --- BLOQUE: PERMISOS (ENVÍO) ---
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.ready.then(registration => {
-                registration.showNotification("SpaceChat: " + emisorID, {
-                    body: textoReal,
-                    icon: 'assets/logo-nuevo.png', 
-                    vibrate: [200, 100, 200],
-                    tag: 'nuevo-mensaje-' + emisorID, 
-                    renotify: true,
-                    data: { emisor: emisorID }
+                Notification.requestPermission().then(permission => {
+                    if (permission === "granted") {
+                        console.log("Sistema de notificaciones SpaceChat listo.");
+                    } else {
+                        console.log("Notificaciones no permitidas por el usuario.");
+                    }
                 });
-            });
+            }).catch(err => console.log("Error en el sistema de envío:", err));
         }
-
-        // --- 3. ENVIAR ECO AUTOMÁTICO AL EMISOR ---
-        if (typeof enviarEco === "function") {
-            enviarEco(decoded.msgId, emisorID);
-        }
-
-        snapshot.ref.remove(); 
-    } catch (e) { 
-        console.error("Error en Antena:", e); 
+        
+    } catch (e) {
+        console.error("❌ Fallo en el lanzamiento:", e);
     }
-});
+     }
 
 async function obtenerToken(registration) {
     try {
