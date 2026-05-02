@@ -633,49 +633,8 @@ label[for="file-input"] {
             <div onclick="alternarVistaPerfil()" style="cursor: pointer; color: #ffd700; font-size: 22px; padding: 0 10px;">⋮</div>
         </div>
 
+<div id="seccion-mi-perfil" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 10002; width: 90%; max-width: 350px; padding: 15px; background: #0a0a0a; border: 1px solid #ffd700; border-radius: 15px;">
 
-<div id="seccion-mi-perfil" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 90%; max-width: 350px; background: #0a0a0a; border: 1px solid #ffd700; border-radius: 20px; padding: 25px; z-index: 10002; box-shadow: 0 0 30px rgba(0,0,0,0.8);">
-    
-    <h3 style="color: #ffd700; text-align: center; margin-top: 0; margin-bottom: 20px; font-size: 18px; letter-spacing: 1px;">MI ESPACIO</h3>
-
-    <!-- Contenedor de Foto Circular -->
-    <div style="display: flex; flex-direction: column; align-items: center; gap: 15px; margin-bottom: 20px;">
-        <div onclick="document.getElementById('input-mi-foto-perfil').click()" 
-             style="width: 110px; height: 110px; border-radius: 50%; border: 2px solid #ffd700; overflow: hidden; background: #1a1a1a; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 0 10px rgba(255, 215, 0, 0.2);">
-            <img id="mi-foto-viva" src="" style="width: 100%; height: 100%; object-fit: cover; display: none;">
-            <span id="mi-foto-placeholder" style="font-size: 30px;">📷</span>
-        </div>
-        <input type="file" id="input-mi-foto-perfil" accept="image/*" style="display: none;" onchange="previsualizarMiFoto(this)">
-        
-        <button onclick="gestionarQR()" style="background: rgba(255, 215, 0, 0.1); color: #ffd700; border: 1px solid #ffd700; border-radius: 20px; padding: 5px 15px; font-size: 12px; font-weight: bold; cursor: pointer;">
-            CÓDIGO QR 
-        </button>
-    </div>
-
-    <!-- Inputs de Texto -->
-    <div style="margin-bottom: 20px;">
-        <label style="color: #8696a0; font-size: 11px; margin-left: 5px;">NOMBRE EN SPACECHAT</label>
-        <input type="text" id="perfil-edit-nombre" placeholder="Tu nombre..." 
-               style="width:100%; padding:12px; margin-top:5px; margin-bottom:15px; background:#1a1a1a; color:white; border:1px solid #333; border-radius:10px; outline: none; box-sizing: border-box;">
-        
-        <label style="color: #8696a0; font-size: 11px; margin-left: 5px;">ESTADO</label>
-        <input type="text" id="perfil-edit-estado" placeholder="¿Qué estás pensando?" 
-               style="width:100%; padding:12px; margin-top:5px; background:#1a1a1a; color:white; border:1px solid #333; border-radius:10px; outline: none; box-sizing: border-box;">
-    </div>
-
-    <!-- Botones de Acción -->
-    <div style="display: flex; flex-direction: column; gap: 10px;">
-        <button onclick="guardarCambiosPerfil()" 
-                style="width: 100%; padding: 14px; background: #ffd700; border: none; border-radius: 12px; font-weight: 900; color: #000; cursor: pointer; text-transform: uppercase; box-shadow: 0 4px 10px rgba(0,0,0,0.3);">
-            ACTUALIZAR PERFIL
-        </button>
-        
-        <button onclick="document.getElementById('seccion-mi-perfil').style.display='none'" 
-                style="width: 100%; padding: 10px; background: transparent; border: none; color: #8696a0; font-size: 13px; cursor: pointer;">
-            Cerrar
-        </button>
-    </div>
-</div>
 
         <div id="cuerpo-modal-lista" style="flex-grow: 1; overflow-y: auto; padding: 0 15px 100px 15px;">
             <div id="seccion-mi-qr" style="display: none; padding: 20px; flex-direction: column; align-items: center; border-bottom: 1px solid #444;">
