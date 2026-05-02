@@ -1147,7 +1147,7 @@ async function manejarBotonIdentidad() {
     const nombre = localStorage.getItem('mi_nombre') || "Usuario";
 
     if (id) {
-        // --- 1. LÓGICA TÉCNICA (LA NUEVA) ---
+        // --- 1. LÓGICA TÉCNICA (SIN TOCAR POSICIONES) ---
         if (typeof activarAntena === "function") {
             activarAntena(id); 
         }
@@ -1161,17 +1161,16 @@ async function manejarBotonIdentidad() {
                         lastUpdate: Date.now(),
                         platform: 'web/pwa'
                     });
-                    console.log("🛰️ Token vinculado");
                 }
             }
         } catch (err) {
             console.log("Aviso: Token no vinculado");
         }
 
-        // --- 2. DISEÑO DEL QR (EL ANTIGUO QUE TE GUSTA) ---
+        // --- 2. EL DISEÑO QUE QUERÍAS (ANTIGUO Y LIMPIO) ---
+        // Solo modificamos el contenido interno de tu contenedor-qr
         const cont = document.getElementById('contenedor-qr');
         if (cont) {
-            // Inyectamos solo Nombre e ID (SIN FOTO)
             cont.innerHTML = `
                 <div style="text-align:center; padding: 10px;">
                     <h3 style="margin: 0; color: #333; text-transform: uppercase; font-size: 16px;">${nombre}</h3>
@@ -1185,7 +1184,6 @@ async function manejarBotonIdentidad() {
                 </div>
             `;
 
-            // Generamos el QR dentro del nuevo div interno
             new QRCode(document.getElementById("grafico-qr-antiguo"), { 
                 text: `dropisapp://perfil/${id}`, 
                 width: 150, 
@@ -1193,10 +1191,13 @@ async function manejarBotonIdentidad() {
             });
         }
         
-        if (typeof pintarAgendaContactos === "function") pintarAgendaContactos(); 
+        // Mantenemos tu llamado a la agenda
+        if (typeof pintarAgendaContactos === "function") {
+            pintarAgendaContactos(); 
+        }
 
     } else {
-        // Si no hay ID, al registro
+        // Registro si no hay ID (manteniendo tu flujo)
         const modalReg = document.getElementById('modal-registro');
         if (modalReg) modalReg.style.display = 'flex';
     }
