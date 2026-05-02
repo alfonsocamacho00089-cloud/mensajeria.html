@@ -1,6 +1,6 @@
 {
-  "short_name": "ChatSpace",
-  "name": "ChatSpace: Super App Satelital",
+  "short_name": "SpaceChat",
+  "name": "SpaceChat",
   "description": "Mensajería y comercio con tecnología satelital para Venezuela.",
   "icons": [
     {
@@ -15,20 +15,9 @@
       "purpose": "any maskable"
     }
   ],
-  "screenshots": [
-    {
-      "src": "assets/preview-celular.png",
-      "type": "image/png",
-      "sizes": "1080x1920",
-      "form_factor": "narrow",
-      "label": "SpaceChat en acción"
-    }
-  ],
   "start_url": "./index.html",
-  "background_color": "#000000",
-  "theme_color": "#FFD700",
   "display": "standalone",
-  "orientation": "portrait",
   "scope": "/",
-  "categories": ["finance", "productivity", "social"]
+  "background_color": "#000000",
+  "theme_color": "#FFD700"
 }
