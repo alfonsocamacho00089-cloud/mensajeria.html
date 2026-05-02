@@ -802,10 +802,7 @@ label[for="file-input"] {
  </div>
      
  
-<button onclick="descargarApp()" style="background: #000; color: #FFD700; border: 1px solid #FFD700; padding: 10px; border-radius: 8px; cursor: pointer;">
-    Descargar SpaceChat
-</button>
- 
+
    
     
     <script>
@@ -949,30 +946,6 @@ setTimeout(() => {
 // --- 4. ANTENA SATELITAL ---
 
   
-             // 1. DECLARACIÓN GLOBAL (Solo una vez aquí arriba)
-let eventoInstalacion;
-
-// --- ESCUCHA DE INSTALACIÓN (Android/PC) ---
-window.addEventListener('beforeinstallprompt', (e) => {
-    e.preventDefault();
-    eventoInstalacion = e;
-    console.log("SpaceChat: Sistema de descarga listo.");
-});
-
-// --- FUNCIÓN PARA EL BOTÓN DE DESCARGA ---
-async function descargarApp() {
-    if (eventoInstalacion) {
-        eventoInstalacion.prompt();
-        const { outcome } = await eventoInstalacion.userChoice;
-        eventoInstalacion = null;
-    } else {
-        if (/iPhone|iPad|iPod/.test(navigator.userAgent)) {
-            alert("En iOS: Pulsa 'Compartir' y luego 'Añadir a la pantalla de inicio'.");
-        } else {
-            alert("La app ya está instalada o el navegador no permite la descarga directa.");
-        }
-    }
-}
 
 // 2. FUNCIÓN ANTENA (RECIBIR MENSAJES)
 async function activarAntena() {
@@ -1047,7 +1020,25 @@ async function activarAntena() {
         } catch (e) { console.error("Error en Antena:", e); }
     });
 }
+// --- BLOQUE: ANTENA (RECIBIR MENSAJE) ---
+if (Notification.permission === "granted") {
+    navigator.serviceWorker.ready.then(registration => {
+        registration.showNotification("SpaceChat: " + emisorID, {
+            body: textoReal,
+            icon: 'https://cdn-icons-png.flaticon.com/512/733/733585.png',
+            vibrate: [200, 100, 200],
+            tag: 'nuevo-mensaje-' + emisorID, 
+            renotify: true,
+            data: { emisor: emisorID }
+        });
+    });
+}
 
+// Confirmación y limpieza automática en Firebase
+if (typeof enviarEco === "function") {
+    enviarEco(decoded.msgId, emisorID);
+}
+snapshot.ref.remove();
 // 3. FUNCIÓN ENVIAR (Lanzamiento Satelital)
 async function enviarMensajeSatelital() {
     const inputMsg = document.querySelector('#msg-text');
