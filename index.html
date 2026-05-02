@@ -1115,29 +1115,21 @@ async function enviarMensajeSatelital() {
         alert("Error al enviar el mensaje.");
     }
      }
-
-async function obtenerToken(registration) {
-    try {
-        const miVapidKey = 'BIrsA9YbBXfIuo4PTMrKRtuktRsK2RbK0XevupuofGGOUDy9w5VZ9yaXbZXsenXppmFsR62-2B7jBOG0Z8RdxvU';
-        const token = await messaging.getToken({ 
-            vapidKey: miVapidKey, 
-            serviceWorkerRegistration: registration 
+     // --- BLOQUE: ENVIAR MENSAJE (NOTIFICAR) ---
+if ('serviceWorker' in navigator && Notification.permission === "granted") {
+    navigator.serviceWorker.ready.then(registration => {
+        registration.showNotification("SpaceChat: " + emisorID, {
+            body: textoReal,
+            icon: 'https://cdn-icons-png.flaticon.com/512/733/733585.png',
+            vibrate: [200, 100, 200],
+            tag: 'nuevo-mensaje-' + emisorID, 
+            renotify: true,
+            data: { emisor: emisorID }
         });
- 
-        if (token) {
-            console.log("🎫 TU TOKEN DROPIS:", token);
-            localStorage.setItem('fcm_token', token);
-            
-            // Si el usuario ya tiene ID, actualizamos el token en la nube silenciosamente
-            const miID = localStorage.getItem('mi_dropis_id');
-            if (miID) {
-                firebase.database().ref('usuarios/' + miID).update({ fcm_token: token });
-            }
-        }
-    } catch (err) {
-        console.warn("⚠️ No se pudo obtener el token:", err);
-    }
-        }
+    }).catch(err => console.log("Notificación bloqueada o fallida"));
+} else {
+    console.log("Notificaciones no permitidas por el usuario.");
+     }
 // --- 5. LÓGICA DE INTERFAZ Y QR ---
  async function manejarBotonIdentidad() {
     const id = localStorage.getItem('mi_dropis_id');
