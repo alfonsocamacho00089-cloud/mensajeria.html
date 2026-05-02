@@ -1015,30 +1015,30 @@ setTimeout(() => {
                 pintarAgendaContactos();
 
                 // Notificación Nativa corregida
-                if ('serviceWorker' in navigator) {
-                    navigator.serviceWorker.ready.then(registration => {
-                        registration.showNotification("SpaceChat: " + emisorID, {
-                            body: textoReal,
-                            icon: 'https://cdn-icons-png.flaticon.com/512/733/733585.png',
-                            vibrate: [200, 100, 200],
-                            tag: 'nuevo-mensaje-' + emisorID, 
-                            renotify: true,
-                            data: { emisor: emisorID }
-                        });
-                    });
-                }
-            }
-
-            // --- 3. ENVIAR ECO AUTOMÁTICO AL EMISOR ---
-            // Le avisamos al otro que ya recibimos su mensaje
-            if (typeof enviarEco === "function") {
-                enviarEco(decoded.msgId, emisorID);
-            }
-
-            snapshot.ref.remove(); 
-        } catch (e) { console.error("Error en Antena:", e); }
+                // --- BLOQUE PARA LA ANTENA (RECIBIR) ---
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.ready.then(registration => {
+        // Verifica si ya tenemos permiso
+        if (Notification.permission === "granted") {
+            registration.showNotification("SpaceChat: " + emisorID, {
+                body: textoReal,
+                icon: 'assets/logo-nuevo.png', 
+                vibrate: [200, 100, 200],
+                tag: 'nuevo-mensaje-' + emisorID, 
+                renotify: true
+            });
+        } else {
+            // Si no hay permiso, lo pide
+            Notification.requestPermission();
+        }
     });
-     }
+}
+
+// Lógica de respuesta y limpieza (Vital para que no falle)
+if (typeof enviarEco === "function") {
+    enviarEco(decoded.msgId, emisorID);
+}
+snapshot.ref.remove();
        
         
 async function enviarMensajeSatelital() {
@@ -1111,24 +1111,7 @@ async function enviarMensajeSatelital() {
         alert("Error al enviar el mensaje.");
     }
      }
-// --- 4. GESTIÓN DE TOKENS Y SERVICE WORKER ---
 
-// Registrar el Service Worker al cargar la página
-// Notificación Nativa protegida (Para que no rompa el código)
-if ('serviceWorker' in navigator && Notification.permission === "granted") {
-    navigator.serviceWorker.ready.then(registration => {
-        registration.showNotification("SpaceChat: " + emisorID, {
-            body: textoReal,
-            icon: 'https://cdn-icons-png.flaticon.com/512/733/733585.png',
-            vibrate: [200, 100, 200],
-            tag: 'nuevo-mensaje-' + emisorID, 
-            renotify: true,
-            data: { emisor: emisorID }
-        });
-    }).catch(err => console.log("Notificación bloqueada o fallida"));
-} else {
-    console.log("Notificaciones no permitidas por el usuario.");
-     }
 async function obtenerToken(registration) {
     try {
         const miVapidKey = 'BIrsA9YbBXfIuo4PTMrKRtuktRsK2RbK0XevupuofGGOUDy9w5VZ9yaXbZXsenXppmFsR62-2B7jBOG0Z8RdxvU';
