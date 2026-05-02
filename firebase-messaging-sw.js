@@ -109,8 +109,12 @@ self.addEventListener('notificationclick', (event) => {
         })
     );
 });
-// AGREGAR AL FINAL PARA ACTIVAR INSTALACIÓN PWA
+// Este bloque es el que activa el botón de "Instalar" en Chrome
 self.addEventListener('fetch', (event) => {
-    // Esto permite que la app sea instalable sin cachear todo obligatoriamente
-    event.respondWith(fetch(event.request));
+    // No necesita hacer nada complejo, solo estar presente
+    event.respondWith(
+        fetch(event.request).catch(() => {
+            return caches.match(event.request);
+        })
+    );
 });
