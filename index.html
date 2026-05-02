@@ -1115,39 +1115,33 @@ async function obtenerToken(registration) {
     }
         }
 // --- 5. LÓGICA DE INTERFAZ Y QR ---
- 
-async function manejarBotonIdentidad() {
+ async function manejarBotonIdentidad() {
     const id = localStorage.getItem('mi_dropis_id');
     const nombre = localStorage.getItem('mi_nombre') || "Usuario";
-    const foto = localStorage.getItem('mi_foto') || "";
 
     if (id) {
-        // 1. ACTIVAMOS LA ANTENA (Escucha en tiempo real)
+        // 1. ACTIVAMOS LA ANTENA
         if (typeof activarAntena === "function") {
             activarAntena(id); 
         }
 
-        // 2. GESTIÓN DEL TOKEN (Para notificaciones push)
-        // Solo si tienes configurado Firebase Messaging
+        // 2. GESTIÓN DEL TOKEN
         try {
             if (typeof messaging !== 'undefined') {
                 const tokenActual = await messaging.getToken();
                 if (tokenActual) {
-                    // Guardamos el token en Firebase vinculado a este ID
-                    // Así, cuando alguien te escriba, Firebase sabe a qué celular avisar
                     await db.ref('tokens/' + id).set({
                         token: tokenActual,
                         lastUpdate: Date.now(),
                         platform: 'web/pwa'
                     });
-                    console.log("🛰️ Token de notificación vinculado al ID:", id);
                 }
             }
         } catch (err) {
-            console.log("Aviso: No se pudo vincular el token (tal vez faltan permisos)");
+            console.log("Token no vinculado");
         }
 
-        // --- EL RESTO DE TU LÓGICA DE INTERFAZ ---
+        // --- INTERFAZ SIN FOTO ---
         const modal = document.getElementById('modal-qr');
         if (modal) modal.style.display = 'flex';
         
@@ -1156,15 +1150,13 @@ async function manejarBotonIdentidad() {
 
         const cont = document.getElementById('contenedor-qr');
         if (cont) {
-            const fotoPerfil = foto || 'https://via.placeholder.com/80';
-            
             cont.innerHTML = `
                 <div style="text-align:center; margin-bottom: 15px;">
-                    <img src="${fotoPerfil}" style="width:80px; height:80px; border-radius:50%; border: 2px solid #ffd700; object-fit: cover;">
-                    <h3 style="margin: 5px 0; color: #fff; text-transform: uppercase;">${nombre}</h3>
-                    <p style="font-size: 12px; color: #ffd700; opacity: 0.8; letter-spacing: 1px;">ID: ${id}</p>
+                    <h3 style="margin: 5px 0; color: #fff; text-transform: uppercase; font-size: 18px;">${nombre}</h3>
+                    <p style="font-size: 13px; color: #ffd700; opacity: 0.8; letter-spacing: 1px; font-family: monospace;">ID: ${id}</p>
                 </div>
-                <div id="grafico-qr" style="display: flex; justify-content: center; background: white; padding: 12px; border-radius: 12px; box-shadow: 0 0 15px rgba(255,215,0,0.3);"></div>
+                
+                <div id="grafico-qr" style="display: flex; justify-content: center; background: white; padding: 12px; border-radius: 12px; width: fit-content; margin: 0 auto; box-shadow: 0 0 15px rgba(255,215,0,0.3);"></div>
                 
                 <button onclick="abrirEscanner()" style="margin-top: 20px; padding: 12px; background: #ffd700; color: #000; border: none; border-radius: 8px; font-weight: 900; width: 100%; cursor: pointer; text-transform: uppercase;">
                     📷 ESCANEAR NUEVO CONTACTO
@@ -1173,18 +1165,21 @@ async function manejarBotonIdentidad() {
 
             new QRCode(document.getElementById("grafico-qr"), { 
                 text: `dropisapp://perfil/${id}`, 
-                width: 140, 
-                height: 140 
+                width: 150, 
+                height: 150 
             });
         }
         
-        pintarAgendaContactos(); 
+        if (typeof pintarAgendaContactos === "function") {
+            pintarAgendaContactos(); 
+        }
 
     } else {
         const modalReg = document.getElementById('modal-registro');
         if (modalReg) modalReg.style.display = 'flex';
     }
      }
+
         
 function cerrarModalQR() {
    
