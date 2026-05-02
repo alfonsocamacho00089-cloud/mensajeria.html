@@ -634,18 +634,47 @@ label[for="file-input"] {
         </div>
 
 
-<div id="seccion-mi-perfil" style="display: none; padding: 15px; background: #0a0a0a; border-bottom: 1px solid #ffd700;">
-            <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 15px;">
-                <div onclick="document.getElementById('input-mi-foto').click()" style="width: 70px; height: 70px; border-radius: 50%; border: 2px solid #ffd700; overflow: hidden; background: #222; display: flex; align-items: center; justify-content: center; cursor: pointer;">
-                    <img id="mi-foto-previa" src="" style="width: 100%; height: 100%; object-fit: cover; display: none;">
-                    <span id="mi-placeholder-foto" style="font-size: 20px;">📷</span>
-                </div>
-                <input type="file" id="input-mi-foto" accept="image/*" style="display: none;" onchange="previsualizarMiFoto(this)">
-                <button onclick="gestionarQR()" style="background: #ffd700; color: #000; border: none; border-radius: 8px; padding: 8px 12px; font-weight: 900; font-size: 14px; cursor: pointer;">QR</button>
-            </div>
-            <input type="text" id="mi-nuevo-nombre" placeholder="Editar mi nombre..." style="width:100%; padding:10px; margin-bottom:8px; background:#1a1a1a; color:white; border:1px solid #333; border-radius:8px;">
-            <input type="text" id="mi-nuevo-estado" placeholder="Estado (Ej: Disponible)" style="width:100%; padding:10px; margin-bottom:8px; background:#1a1a1a; color:white; border:1px solid #333; border-radius:8px;">
-            <button onclick="guardarCambiosPerfil()" style="width: 100%; padding: 10px; background: #ffd700; border: none; border-radius: 8px; font-weight: bold; color: #000;">GUARDAR CAMBIOS</button>
+<div id="seccion-mi-perfil" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 90%; max-width: 350px; background: #0a0a0a; border: 1px solid #ffd700; border-radius: 20px; padding: 25px; z-index: 10002; box-shadow: 0 0 30px rgba(0,0,0,0.8);">
+    
+    <h3 style="color: #ffd700; text-align: center; margin-top: 0; margin-bottom: 20px; font-size: 18px; letter-spacing: 1px;">MI ESPACIO</h3>
+
+    <!-- Contenedor de Foto Circular -->
+    <div style="display: flex; flex-direction: column; align-items: center; gap: 15px; margin-bottom: 20px;">
+        <div onclick="document.getElementById('input-mi-foto-perfil').click()" 
+             style="width: 110px; height: 110px; border-radius: 50%; border: 2px solid #ffd700; overflow: hidden; background: #1a1a1a; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 0 10px rgba(255, 215, 0, 0.2);">
+            <img id="mi-foto-viva" src="" style="width: 100%; height: 100%; object-fit: cover; display: none;">
+            <span id="mi-foto-placeholder" style="font-size: 30px;">📷</span>
+        </div>
+        <input type="file" id="input-mi-foto-perfil" accept="image/*" style="display: none;" onchange="previsualizarMiFoto(this)">
+        
+        <button onclick="gestionarQR()" style="background: rgba(255, 215, 0, 0.1); color: #ffd700; border: 1px solid #ffd700; border-radius: 20px; padding: 5px 15px; font-size: 12px; font-weight: bold; cursor: pointer;">
+            CÓDIGO QR 
+        </button>
+    </div>
+
+    <!-- Inputs de Texto -->
+    <div style="margin-bottom: 20px;">
+        <label style="color: #8696a0; font-size: 11px; margin-left: 5px;">NOMBRE EN SPACECHAT</label>
+        <input type="text" id="perfil-edit-nombre" placeholder="Tu nombre..." 
+               style="width:100%; padding:12px; margin-top:5px; margin-bottom:15px; background:#1a1a1a; color:white; border:1px solid #333; border-radius:10px; outline: none; box-sizing: border-box;">
+        
+        <label style="color: #8696a0; font-size: 11px; margin-left: 5px;">ESTADO</label>
+        <input type="text" id="perfil-edit-estado" placeholder="¿Qué estás pensando?" 
+               style="width:100%; padding:12px; margin-top:5px; background:#1a1a1a; color:white; border:1px solid #333; border-radius:10px; outline: none; box-sizing: border-box;">
+    </div>
+
+    <!-- Botones de Acción -->
+    <div style="display: flex; flex-direction: column; gap: 10px;">
+        <button onclick="guardarCambiosPerfil()" 
+                style="width: 100%; padding: 14px; background: #ffd700; border: none; border-radius: 12px; font-weight: 900; color: #000; cursor: pointer; text-transform: uppercase; box-shadow: 0 4px 10px rgba(0,0,0,0.3);">
+            ACTUALIZAR PERFIL
+        </button>
+        
+        <button onclick="document.getElementById('seccion-mi-perfil').style.display='none'" 
+                style="width: 100%; padding: 10px; background: transparent; border: none; color: #8696a0; font-size: 13px; cursor: pointer;">
+            Cerrar
+        </button>
+    </div>
 </div>
 
         <div id="cuerpo-modal-lista" style="flex-grow: 1; overflow-y: auto; padding: 0 15px 100px 15px;">
@@ -1116,68 +1145,58 @@ async function obtenerToken(registration) {
 async function manejarBotonIdentidad() {
     const id = localStorage.getItem('mi_dropis_id');
     const nombre = localStorage.getItem('mi_nombre') || "Usuario";
-    const foto = localStorage.getItem('mi_foto') || "";
 
     if (id) {
-        // 1. ACTIVAMOS LA ANTENA (Escucha en tiempo real)
+        // --- 1. LÓGICA TÉCNICA (LA NUEVA) ---
         if (typeof activarAntena === "function") {
             activarAntena(id); 
         }
 
-        // 2. GESTIÓN DEL TOKEN (Para notificaciones push)
-        // Solo si tienes configurado Firebase Messaging
         try {
             if (typeof messaging !== 'undefined') {
                 const tokenActual = await messaging.getToken();
                 if (tokenActual) {
-                    // Guardamos el token en Firebase vinculado a este ID
-                    // Así, cuando alguien te escriba, Firebase sabe a qué celular avisar
                     await db.ref('tokens/' + id).set({
                         token: tokenActual,
                         lastUpdate: Date.now(),
                         platform: 'web/pwa'
                     });
-                    console.log("🛰️ Token de notificación vinculado al ID:", id);
+                    console.log("🛰️ Token vinculado");
                 }
             }
         } catch (err) {
-            console.log("Aviso: No se pudo vincular el token (tal vez faltan permisos)");
+            console.log("Aviso: Token no vinculado");
         }
 
-        // --- EL RESTO DE TU LÓGICA DE INTERFAZ ---
-        const modal = document.getElementById('modal-qr');
-        if (modal) modal.style.display = 'flex';
-        
-        const flotante = document.querySelector('.contenedor-flotante');
-        if (flotante) flotante.style.display = 'none';
-
+        // --- 2. DISEÑO DEL QR (EL ANTIGUO QUE TE GUSTA) ---
         const cont = document.getElementById('contenedor-qr');
         if (cont) {
-            const fotoPerfil = foto || 'https://via.placeholder.com/80';
-            
+            // Inyectamos solo Nombre e ID (SIN FOTO)
             cont.innerHTML = `
-                <div style="text-align:center; margin-bottom: 15px;">
-                    <img src="${fotoPerfil}" style="width:80px; height:80px; border-radius:50%; border: 2px solid #ffd700; object-fit: cover;">
-                    <h3 style="margin: 5px 0; color: #fff; text-transform: uppercase;">${nombre}</h3>
-                    <p style="font-size: 12px; color: #ffd700; opacity: 0.8; letter-spacing: 1px;">ID: ${id}</p>
+                <div style="text-align:center; padding: 10px;">
+                    <h3 style="margin: 0; color: #333; text-transform: uppercase; font-size: 16px;">${nombre}</h3>
+                    <p style="font-size: 13px; color: #666; font-family: monospace; margin: 5px 0 15px 0;">ID: ${id}</p>
+                    
+                    <div id="grafico-qr-antiguo" style="display: flex; justify-content: center;"></div>
+                    
+                    <button onclick="abrirEscanner()" style="margin-top: 20px; padding: 12px; background: #ffd700; color: #000; border: none; border-radius: 8px; font-weight: 900; width: 100%; cursor: pointer; text-transform: uppercase;">
+                        📷 ESCANEAR NUEVO CONTACTO
+                    </button>
                 </div>
-                <div id="grafico-qr" style="display: flex; justify-content: center; background: white; padding: 12px; border-radius: 12px; box-shadow: 0 0 15px rgba(255,215,0,0.3);"></div>
-                
-                <button onclick="abrirEscanner()" style="margin-top: 20px; padding: 12px; background: #ffd700; color: #000; border: none; border-radius: 8px; font-weight: 900; width: 100%; cursor: pointer; text-transform: uppercase;">
-                    📷 ESCANEAR NUEVO CONTACTO
-                </button>
             `;
 
-            new QRCode(document.getElementById("grafico-qr"), { 
+            // Generamos el QR dentro del nuevo div interno
+            new QRCode(document.getElementById("grafico-qr-antiguo"), { 
                 text: `dropisapp://perfil/${id}`, 
-                width: 140, 
-                height: 140 
+                width: 150, 
+                height: 150
             });
         }
         
-        pintarAgendaContactos(); 
+        if (typeof pintarAgendaContactos === "function") pintarAgendaContactos(); 
 
     } else {
+        // Si no hay ID, al registro
         const modalReg = document.getElementById('modal-registro');
         if (modalReg) modalReg.style.display = 'flex';
     }
