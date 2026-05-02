@@ -600,19 +600,38 @@ label[for="file-input"] {
             CREAR MI CUENTA ID
         </button>
 
-        <!-- PEGA ESTO DEBAJO DEL H3 -->
     <div style="display: flex; gap: 8px; margin-top: 15px; width: 100%; box-sizing: border-box; align-items: center;">
     
-    <!-- Campo para escribir el ID -->
-    <input type="text" id="input-login-directo" placeholder="¿Ya tienes cuenta space? ingresa tu ID" 
+    <input type="text" id="input-login-directo" placeholder="¿Ya tienes cuenta? ingresa tu ID" 
         style="flex-grow: 1; padding: 15px; background: #2a2f3a; color: white; border: 1px solid #ffd700; border-radius: 12px; outline: none; font-weight: bold; text-align: center; font-size: 14px;">
 
-    <!-- Botón pequeño para entrar -->
-    <button onclick="let idManual = document.getElementById('input-login-directo').value; if(idManual) { recuperarCuentaConID(idManual); } else { alert('INGRESA TU ID'); }" 
+    <!-- Flecha para entrar directo -->
+    <button onclick="ejecutarLoginDirecto()" 
         style="padding: 15px 18px; background: #ffd700; border: none; border-radius: 12px; font-weight: bold; color: #000; cursor: pointer; text-transform: uppercase; font-size: 14px; box-shadow: 0 0 8px rgba(255, 215, 0, 0.4);">
        <span style="display: inline-block;">➔</span>
     </button>
-    </div>
+</div>
+
+<script>
+function ejecutarLoginDirecto() {
+    const idManual = document.getElementById('input-login-directo').value.trim();
+    if (idManual) {
+        // Guardamos el ID en el almacenamiento para que la app lo reconozca
+        localStorage.setItem('userSpaceID', idManual);
+        
+        // Aquí llamas a la lógica de bienvenida sin pasar por el prompt
+        // Si tu función de bienvenida se llama diferente, ajusta el nombre
+        if (typeof verificarUsuario === "function") {
+            verificarUsuario(idManual);
+        } else {
+            // Si no, forzamos la recarga para que entre con el ID guardado
+            location.reload();
+        }
+    } else {
+        alert('POR FAVOR, INGRESA TU ID');
+    }
+}
+</script>
     </div>
 
     <div id="modal-huella" class="modal">
