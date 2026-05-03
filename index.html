@@ -1285,7 +1285,8 @@ function procesarQRScanner(contenido) {
      }
 
      
-        async function guardarNuevoContacto() {
+       
+   async function guardarNuevoContacto() {
     const nombre = document.getElementById('nuevo-nombre').value.trim();
     const idAGuardar = document.getElementById('target-id').value.trim();
 
@@ -1293,22 +1294,27 @@ function procesarQRScanner(contenido) {
 
     let agenda = JSON.parse(localStorage.getItem('mis_contactos')) || [];
     
-    // 1. Buscamos la foto en Firebase SOLO ESTA VEZ
-    let fotoParaGuardar = 'https://via.placeholder.com/45';
-    try {
-        const snap = await db.ref('usuarios/' + idAGuardar).once('value');
-        if(snap.val() && snap.val().foto) fotoParaGuardar = snap.val().foto;
-    } catch(e) { console.log("Error trayendo foto"); }
+    // Verificamos si el contacto ya existe para no duplicarlo
+    if (agenda.some(c => c.id === idAGuardar)) {
+        alert("Este contacto ya está en tu agenda");
+        return;
+    }
 
-    // 2. Guardamos TODO en el local, incluida la foto
+    // 1. Guardamos solo lo básico para no saturar el LocalStorage
     agenda.push({ 
         nombre: nombre, 
-        id: idAGuardar, 
-        foto: fotoParaGuardar // <--- Aquí se queda guardada para siempre
+        id: idAGuardar
+        // NOTA: No guardamos la foto aquí para evitar el QuotaExceededError
     });
     
-    localStorage.setItem('mis_contactos', JSON.stringify(agenda));
-    alert("✅ Guardado en la agenda");
+    try {
+        localStorage.setItem('mis_contactos', JSON.stringify(agenda));
+        alert("✅ Guardado en la agenda");
+    } catch(e) {
+        // Si aún así falla, es que tienes demasiados mensajes guardados
+        console.error("Error crítico de espacio:", e);
+        alert("⚠️ No hay espacio en el teléfono. Borra algunos chats.");
+    }
     
     document.getElementById('modal-nuevocontacto').style.display = 'none';
     pintarAgendaContactos();
@@ -1372,26 +1378,21 @@ function cargarConversacionCon(idDestino, nombreDestino, fotoDestino) {
     const lista = document.getElementById('lista-contactos');
     if (!lista) return;
 
-    // Cargamos lo que hay en el teléfono
     const contactos = JSON.parse(localStorage.getItem('mis_contactos')) || [];
     lista.innerHTML = ""; 
 
-    contactos.forEach(contacto => {
+    contactos.forEach(async (contacto) => { // Añadimos async para buscar la foto
         const numNoLeidos = localStorage.getItem('unread_' + contacto.id) || 0;
         const badgeHTML = numNoLeidos > 0 ? `<div class="contador-nube">${numNoLeidos}</div>` : '';
-
-        // Prioridad 1: Foto guardada en el local. Prioridad 2: Placeholder.
-        const fotoURL = contacto.foto || 'https://via.placeholder.com/45';
-
-        const btn = document.createElement('div');
-        btn.className = 'fila-contacto'; 
         const inicial = contacto.nombre ? contacto.nombre.charAt(0).toUpperCase() : '?';
 
+        // Creamos el contenedor del contacto
+        const btn = document.createElement('div');
+        btn.className = 'fila-contacto'; 
+        
+        // Ponemos el diseño base (con la inicial por defecto)
         btn.innerHTML = `
-            ${fotoURL.includes('placeholder.com') ? 
-                `<div class="foto-perfil" style="width:45px; height:45px; border-radius:50%; background:#ffd700; color:#000; display:flex; align-items:center; justify-content:center; font-weight:900; font-size:20px; border: 2px solid #000; flex-shrink:0;">${inicial}</div>` : 
-                `<img src="${fotoURL}" class="foto-perfil" style="width:45px; height:45px; border-radius:50%; object-fit:cover; border: 2px solid #ffd700;">`
-            }
+            <div id="img-cont-${contacto.id}" class="foto-perfil" style="width:45px; height:45px; border-radius:50%; background:#ffd700; color:#000; display:flex; align-items:center; justify-content:center; font-weight:900; font-size:20px; border: 2px solid #000; flex-shrink:0;">${inicial}</div>
             <div style="flex-grow: 1; margin-left: 10px;">
                 <div style="font-weight: bold; color: white;">${contacto.nombre}</div>
                 <div style="font-size: 12px; color: #8696a0;">ID: ${contacto.id}</div>
@@ -1399,14 +1400,36 @@ function cargarConversacionCon(idDestino, nombreDestino, fotoDestino) {
             ${badgeHTML} 
         `;
 
+        // BUSCAMOS LA FOTO EN FIREBASE EN TIEMPO REAL
+        db.ref('usuarios/' + contacto.id + '/foto').once('value').then(snap => {
+            const fotoReal = snap.val();
+            if (fotoReal) {
+                const contenedorFoto = document.getElementById(`img-cont-${contacto.id}`);
+                if (contenedorFoto) {
+                    contenedorFoto.innerHTML = ""; // Quitamos la inicial
+                    contenedorFoto.style.background = "transparent";
+                    contenedorFoto.style.border = "2px solid #ffd700";
+                    const img = document.createElement('img');
+                    img.src = fotoReal;
+                    img.style.width = "100%";
+                    img.style.height = "100%";
+                    img.style.borderRadius = "50%";
+                    img.style.objectFit = "cover";
+                    contenedorFoto.appendChild(img);
+                }
+            }
+        });
+
         btn.onclick = () => {
-            cargarConversacionCon(contacto.id, contacto.nombre, fotoURL); 
+            // Buscamos la foto otra vez para pasarla al header del chat
+            db.ref('usuarios/' + contacto.id + '/foto').once('value').then(snap => {
+                cargarConversacionCon(contacto.id, contacto.nombre, snap.val()); 
+            });
         }; 
         
         lista.appendChild(btn);
     }); 
      }
- 
 
    
  
