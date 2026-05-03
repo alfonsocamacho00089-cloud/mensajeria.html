@@ -1374,25 +1374,25 @@ function cargarConversacionCon(idDestino, nombreDestino, fotoDestino) {
 
     // 3. Buscamos los mensajes de ESE contacto en LocalStorage
     // ... (final de la función cargarConversacionCon)
-    function pintarAgendaContactos() {
+  function pintarAgendaContactos() {
     const lista = document.getElementById('lista-contactos');
     if (!lista) return;
 
     const contactos = JSON.parse(localStorage.getItem('mis_contactos')) || [];
     lista.innerHTML = ""; 
 
-    contactos.forEach(async (contacto) => { // Añadimos async para buscar la foto
+    contactos.forEach(contacto => {
         const numNoLeidos = localStorage.getItem('unread_' + contacto.id) || 0;
         const badgeHTML = numNoLeidos > 0 ? `<div class="contador-nube">${numNoLeidos}</div>` : '';
         const inicial = contacto.nombre ? contacto.nombre.charAt(0).toUpperCase() : '?';
+        const idImg = `img-cont-${contacto.id}`;
 
-        // Creamos el contenedor del contacto
         const btn = document.createElement('div');
         btn.className = 'fila-contacto'; 
         
-        // Ponemos el diseño base (con la inicial por defecto)
+        // Diseño base con inicial (Carga instantánea)
         btn.innerHTML = `
-            <div id="img-cont-${contacto.id}" class="foto-perfil" style="width:45px; height:45px; border-radius:50%; background:#ffd700; color:#000; display:flex; align-items:center; justify-content:center; font-weight:900; font-size:20px; border: 2px solid #000; flex-shrink:0;">${inicial}</div>
+            <div id="${idImg}" class="foto-perfil" style="width:45px; height:45px; border-radius:50%; background:#ffd700; color:#000; display:flex; align-items:center; justify-content:center; font-weight:900; font-size:20px; border: 2px solid #000; flex-shrink:0;">${inicial}</div>
             <div style="flex-grow: 1; margin-left: 10px;">
                 <div style="font-weight: bold; color: white;">${contacto.nombre}</div>
                 <div style="font-size: 12px; color: #8696a0;">ID: ${contacto.id}</div>
@@ -1400,94 +1400,75 @@ function cargarConversacionCon(idDestino, nombreDestino, fotoDestino) {
             ${badgeHTML} 
         `;
 
-        // BUSCAMOS LA FOTO EN FIREBASE EN TIEMPO REAL
-        db.ref('usuarios/' + contacto.id + '/foto').once('value').then(snap => {
-            const fotoReal = snap.val();
-            if (fotoReal) {
-                const contenedorFoto = document.getElementById(`img-cont-${contacto.id}`);
-                if (contenedorFoto) {
-                    contenedorFoto.innerHTML = ""; // Quitamos la inicial
-                    contenedorFoto.style.background = "transparent";
-                    contenedorFoto.style.border = "2px solid #ffd700";
-                    const img = document.createElement('img');
-                    img.src = fotoReal;
-                    img.style.width = "100%";
-                    img.style.height = "100%";
-                    img.style.borderRadius = "50%";
-                    img.style.objectFit = "cover";
-                    contenedorFoto.appendChild(img);
+        // LÓGICA DE CACHÉ INTELIGENTE
+        if (cacheFotosContactos[contacto.id]) {
+            // Si ya la pedimos antes, la ponemos de una vez
+            inyectarFoto(idImg, cacheFotosContactos[contacto.id]);
+        } else {
+            // Si no, la pedimos a Firebase SOLO UNA VEZ
+            db.ref('usuarios/' + contacto.id + '/foto').once('value').then(snap => {
+                const f = snap.val();
+                if (f) {
+                    cacheFotosContactos[contacto.id] = f; // La guardamos en RAM
+                    inyectarFoto(idImg, f);
                 }
-            }
-        });
+            });
+        }
 
         btn.onclick = () => {
-            // Buscamos la foto otra vez para pasarla al header del chat
-            db.ref('usuarios/' + contacto.id + '/foto').once('value').then(snap => {
-                cargarConversacionCon(contacto.id, contacto.nombre, snap.val()); 
-            });
+            // Aquí ya no pedimos nada a Firebase, usamos lo que hay en RAM
+            cargarConversacionCon(contacto.id, contacto.nombre, cacheFotosContactos[contacto.id]); 
         }; 
-        
+   
         lista.appendChild(btn);
     }); 
+}
+
+// Función auxiliar para no repetir código
+function inyectarFoto(elementoId, src) {
+    const contenedor = document.getElementById(elementoId);
+    if (contenedor) {
+        contenedor.innerHTML = `<img src="${src}" style="width:100%; height:100%; border-radius:50%; object-fit:cover;">`;
+        contenedor.style.background = "transparent";
+        contenedor.style.border = "2px solid #ffd700";
+    }
      }
+    
 
    
  
 // Reemplaza el bloque final por este:
- window.onload = async () => { // Añadimos 'async' para poder usar 'await'
+ window.onload = async () => {
     const id = localStorage.getItem('mi_dropis_id');
     const modalRegistro = document.getElementById('modal-registro');
     const splash = document.getElementById('pantalla-carga'); 
     
+    // 1. QUITAMOS EL SPLASH DE UNA VEZ (Fluidez inmediata)
+    if (splash) {
+        splash.style.opacity = '0'; 
+        setTimeout(() => { splash.style.display = 'none'; }, 150); 
+    }
+
     if (id) {
-        // 1. Mostramos el ID primero
         const display = document.getElementById('mi-id-display');
         if(display) display.innerText = "Tu ID: " + id;
         
-        // --- NUEVA LÓGICA: RECUPERACIÓN DE PERFIL ---
-        try {
-            // Buscamos los datos en Firebase por si el LocalStorage se borró o llenó
-            const snapshot = await db.ref('usuarios/' + id).once('value');
+        // 2. RECUPERACIÓN EN SEGUNDO PLANO
+        db.ref('usuarios/' + id).once('value').then(snapshot => {
             const data = snapshot.val();
-            
-            if (data) {
-                // Si Firebase tiene foto y el Local no, o si queremos asegurar, actualizamos la interfaz
-                const fotoParaMostrar = data.foto || "";
+            if (data && data.foto) {
                 const headerFoto = document.getElementById('foto-perfil-header');
-                
-                if (headerFoto && fotoParaMostrar) {
-                    headerFoto.src = fotoParaMostrar;
-                    // Intentamos guardarla en local solo si hay espacio
-                    try { localStorage.setItem('mi_foto', fotoParaMostrar); } catch(e) {}
-                }
-                
-                // Actualizamos nombre y estado por si acaso
-                if (data.nombre) localStorage.setItem('mi_nombre', data.nombre);
-                if (data.estado) localStorage.setItem('mi_estado', data.estado);
+                if (headerFoto) headerFoto.src = data.foto;
+                // Guardamos en la variable global para el satélite
+                miFotoCache = data.foto; 
             }
-        } catch (error) {
-            console.log("Error recuperando perfil, usando datos locales:", error);
-        }
-        // --------------------------------------------
+        }).catch(e => console.log("Carga de perfil lenta por red"));
 
-        // 2. Encendemos la conexión
-        if (typeof activarAntena === "function") {
-            activarAntena(); 
-        }
-
-        // 3. Visual
+        if (typeof activarAntena === "function") activarAntena(); 
         manejarBotonIdentidad();
         
     } else {
         if(modalRegistro) modalRegistro.style.display = 'flex';
-    }
-
-    // Control del Splash
-    if (splash) {
-        splash.style.opacity = '0'; 
-        setTimeout(() => {
-            splash.style.display = 'none';
-        }, 150); 
     }
 };
      // <--- ¡ASEGÚRATE DE QUE ESTA LLAVE Y PUNTO Y COMA ESTÉN AQUÍ!// <--- Aquí termina el window.onload  
