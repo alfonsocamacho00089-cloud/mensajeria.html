@@ -1383,24 +1383,25 @@ function cargarConversacionCon(idDestino, nombreDestino, fotoDestino) {
     if (id) {
         const display = document.getElementById('mi-id-display');
         if(display) display.innerText = "Tu ID: " + id;
-        
+        manejarBotonIdentidad();
         if (typeof activarAntena === "function") {
             activarAntena(); 
         }
-        manejarBotonIdentidad();
+     
+        
     } else {
         if(modalRegistro) modalRegistro.style.display = 'flex';
     }
 
     if (splash) {
-        setTimeout(() => {
-            splash.style.opacity = '0';
-            setTimeout(() => {
-                splash.style.display = 'none';
-            }, 500); 
-        }, 100); 
-    }
-}; // <--- ¡ASEGÚRATE DE QUE ESTA LLAVE Y PUNTO Y COMA ESTÉN AQUÍ!// <--- Aquí termina el window.onload  
+    // Eliminamos el primer setTimeout para que la transición sea instantánea
+    splash.style.opacity = '0'; 
+    
+    // Solo dejamos el tiempo necesario para que termine la animación y se elimine el div
+    setTimeout(() => {
+        splash.style.display = 'none';
+    }, 500); 
+     } // <--- ¡ASEGÚRATE DE QUE ESTA LLAVE Y PUNTO Y COMA ESTÉN AQUÍ!// <--- Aquí termina el window.onload  
 async function cargarProto() {
     const schema = `
         package superapp;
