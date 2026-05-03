@@ -9,7 +9,7 @@
       "sizes": "192x192"
     },
     {
-      "src": "assets/logo-nuevo.png",
+      "src": "assets/imagen-logo-nuevo.png",
       "type": "image/png",
       "sizes": "512x512",
       "purpose": "any maskable"
