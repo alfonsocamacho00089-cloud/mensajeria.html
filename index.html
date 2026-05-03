@@ -1411,37 +1411,62 @@ function cargarConversacionCon(idDestino, nombreDestino, fotoDestino) {
    
  
 // Reemplaza el bloque final por este:
- window.onload = () => {
+ window.onload = async () => { // Añadimos 'async' para poder usar 'await'
     const id = localStorage.getItem('mi_dropis_id');
     const modalRegistro = document.getElementById('modal-registro');
     const splash = document.getElementById('pantalla-carga'); 
+    
     if (id) {
-    // 1. Mostramos el ID primero para que el usuario sepa quién es
-    const display = document.getElementById('mi-id-display');
-    if(display) display.innerText = "Tu ID: " + id;
-    
-    
-    
-    // 2. Encendemos la conexión a Firebase/Mensajes
-    if (typeof activarAntena === "function") {
-        activarAntena(); 
-     }
-     // 3. Preparamos los botones y la visual (Look & Feel)
-    manejarBotonIdentidad();
-    
-} else {
-    // Si no hay ID, mandamos al registro de una vez
-    if(modalRegistro) modalRegistro.style.display = 'flex';
-}
+        // 1. Mostramos el ID primero
+        const display = document.getElementById('mi-id-display');
+        if(display) display.innerText = "Tu ID: " + id;
+        
+        // --- NUEVA LÓGICA: RECUPERACIÓN DE PERFIL ---
+        try {
+            // Buscamos los datos en Firebase por si el LocalStorage se borró o llenó
+            const snapshot = await db.ref('usuarios/' + id).once('value');
+            const data = snapshot.val();
+            
+            if (data) {
+                // Si Firebase tiene foto y el Local no, o si queremos asegurar, actualizamos la interfaz
+                const fotoParaMostrar = data.foto || "";
+                const headerFoto = document.getElementById('foto-perfil-header');
+                
+                if (headerFoto && fotoParaMostrar) {
+                    headerFoto.src = fotoParaMostrar;
+                    // Intentamos guardarla en local solo si hay espacio
+                    try { localStorage.setItem('mi_foto', fotoParaMostrar); } catch(e) {}
+                }
+                
+                // Actualizamos nombre y estado por si acaso
+                if (data.nombre) localStorage.setItem('mi_nombre', data.nombre);
+                if (data.estado) localStorage.setItem('mi_estado', data.estado);
+            }
+        } catch (error) {
+            console.log("Error recuperando perfil, usando datos locales:", error);
+        }
+        // --------------------------------------------
 
-// Control del Splash: Ahora es inmediato apenas termina lo anterior
-if (splash) {
-    splash.style.opacity = '0'; 
-    setTimeout(() => {
-        splash.style.display = 'none';
-    }, 150); 
-     }
-  };
+        // 2. Encendemos la conexión
+        if (typeof activarAntena === "function") {
+            activarAntena(); 
+        }
+
+        // 3. Visual
+        manejarBotonIdentidad();
+        
+    } else {
+        if(modalRegistro) modalRegistro.style.display = 'flex';
+    }
+
+    // Control del Splash
+    if (splash) {
+        splash.style.opacity = '0'; 
+        setTimeout(() => {
+            splash.style.display = 'none';
+        }, 150); 
+    }
+};
      // <--- ¡ASEGÚRATE DE QUE ESTA LLAVE Y PUNTO Y COMA ESTÉN AQUÍ!// <--- Aquí termina el window.onload  
 async function cargarProto() {
     const schema = `
@@ -1844,42 +1869,48 @@ async function guardarCambiosPerfil() {
     const miID = localStorage.getItem('mi_dropis_id');
     const nom = document.getElementById('mi-nuevo-nombre').value.trim();
     const est = document.getElementById('mi-nuevo-estado').value.trim();
+    
+    // Usamos la foto que ya tienes cargada
     const fotoParaGuardar = miFotoBase64 || localStorage.getItem('mi_foto') || "";
 
     if (!nom) return alert("¡El nombre no puede estar vacío!");
 
     try {
-        // 1. Guardar en Firebase
+        // 1. Guardar en Firebase (Aquí no hay problema de espacio)
         await db.ref('usuarios/' + miID).update({
             nombre: nom,
             estado: est,
-            foto: fotoParaGuardar
+            foto: fotoParaGuardar // Se guarda en la nube
         });
 
-        // 2. Actualizar LocalStorage
+        // 2. Actualizar LocalStorage con CUIDADO
         localStorage.setItem('mi_nombre', nom);
         localStorage.setItem('mi_estado', est);
-        localStorage.setItem('mi_foto', fotoParaGuardar);
-
-         alert("✅ Perfil actualizado");
         
-        // --- ESTO ES LO QUE FALTA ---
-        // 1. Actualizar el Header (donde sale tu nombre/foto arriba)
-        const headerFoto = document.getElementById('foto-perfil-header');
-        if (headerFoto) headerFoto.src = fotoParaGuardar;
+        // INTENTAMOS guardar la foto, si falla por espacio, no bloqueamos la app
+        try {
+            localStorage.setItem('mi_foto', fotoParaGuardar);
+        } catch (spaceError) {
+            console.warn("LocalStorage lleno, la foto se cargará desde Firebase la próxima vez.");
+            // Si da error de espacio, mejor la borramos del local para que la app no muera
+            localStorage.removeItem('mi_foto'); 
+        }
 
-        // 2. Si tienes una sección de "Mi Perfil" abierta, actualiza su imagen
+        alert("✅ Perfil actualizado");
+        
+        // 3. Actualizar la interfaz (Header y Previa)
+        const headerFoto = document.getElementById('foto-perfil-header');
+        if (headerFoto && fotoParaGuardar) headerFoto.src = fotoParaGuardar;
+
         const previaFoto = document.getElementById('mi-foto-previa');
-        if (previaFoto) previaFoto.src = fotoParaGuardar;
-        // ----------------------------
+        if (previaFoto && fotoParaGuardar) previaFoto.src = fotoParaGuardar;
 
         alternarVistaPerfil();
     } catch(e) {
-        console.error(e);
+        console.error("Error en Firebase:", e);
         alert("Error al guardar cambios");
     }
      }
- 
 
 function abrirPerfilContacto() {
     // 1. Sacamos los datos de TU header
