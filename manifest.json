@@ -8,12 +8,22 @@
       "type": "image/png",
       "sizes": "192x192"
     },
-    {
-      "src": "assets/imagen-logo-nuevo.png",
-      "type": "image/png",
-      "sizes": "512x512",
-      "purpose": "any maskable"
-    }
+    "icons": [
+  {
+    "src": "imagen-logo-nuevo_2.png", 
+    "sizes": "512x512",
+    "type": "image/png",
+    "purpose": "maskable" 
+  },
+  {
+    "src": "logo-nuevo.png", 
+    "sizes": "512x512",
+    "type": "image/png",
+    "purpose": "any"
+  }
+],
+"background_color": "#000000",
+"theme_color": "#000000"
   ],
   "start_url": "./index.html",
   "display": "standalone",
