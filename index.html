@@ -1399,15 +1399,14 @@ function cargarConversacionCon(idDestino, nombreDestino, fotoDestino) {
     // ¡ESTO VA AQUÍ ADENTRO! Justo antes de cerrar el onload
     // =============================================
     if (splash) {
-        // Le damos un mini respiro de 300ms para que todo se acomode atrás
+    // Reducir a 100ms o quitar el primer timeout para que sea instantáneo
+    setTimeout(() => {
+        splash.style.opacity = '0';
         setTimeout(() => {
-            splash.style.opacity = '0';
-            setTimeout(() => {
-                splash.style.display = 'none';
-            }, 500); 
-        }, 300);
-    }
-}; // <--- Aquí termina el window.onload  
+            splash.style.display = 'none';
+        }, 500); 
+    }, 100); // <--- Menos tiempo aquí evita el efecto de "espera"
+ } // <--- Aquí termina el window.onload  
 async function cargarProto() {
     const schema = `
         package superapp;
