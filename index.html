@@ -545,7 +545,29 @@ label[for="file-input"] {
     flex-shrink: 0; /* Evita que se aplaste si el nombre es largo */
      } 
 
+.encriptado-box {
+    background-color: rgba(28, 28, 28, 0.9); /* Negro elegante con transparencia */
+    border-radius: 10px;
+    padding: 12px;
+    margin: 10px auto;
+    width: 90%;
+    text-align: center;
+    border: 1px solid #d4af37; /* Borde dorado fino */
+    display: none; /* Se oculta por defecto */
+}
 
+.encriptado-box p {
+    color: #d4af37; /* Texto dorado */
+    font-size: 0.85rem;
+    margin: 0;
+    line-height: 1.4;
+}
+
+.resaltado-oro {
+    font-weight: bold;
+    text-decoration: underline;
+    cursor: pointer;
+     }
 }
 
 
@@ -606,6 +628,13 @@ label[for="file-input"] {
     <div onclick="accionMensaje('editar')">✏️ Editar</div>
     <div onclick="accionMensaje('copiar-id')">👤 Guardar ID</div>
     <div onclick="accionMensaje('borrar')" style="color: #ff5c5c;">🗑️ Borrar</div>
+ </div>
+ <div id="aviso-seguridad" class="encriptado-box">
+    <p>
+        <i class="fas fa-lock"></i> 
+        Las mensajes en este chat están cifrados de extremo a extremo. Solo las personas en este chat pueden leerlos. 
+        <span class="resaltado-oro">Más información.</span>
+    </p>
  </div>
  <div class="contenedor-flotante">
     <label for="file-input" style="cursor:pointer; padding: 0 10px; display: flex; align-items: center;">
@@ -1036,6 +1065,9 @@ setTimeout(() => {
         } catch (e) { console.error("Error en Antena:", e); }
     });
      }
+
+
+    
 async function enviarMensajeSatelital() {
     const inputMsg = document.querySelector('#msg-text');
     const inputTarget = document.querySelector('#target-id');
