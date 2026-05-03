@@ -9,7 +9,7 @@
 <link rel="apple-touch-icon" href="assets/logo.png">
  <link rel="manifest" href="manifest.json">
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>SpaceChat</title> </head>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
@@ -1376,29 +1376,31 @@ function cargarConversacionCon(idDestino, nombreDestino, fotoDestino) {
     const id = localStorage.getItem('mi_dropis_id');
     const modalRegistro = document.getElementById('modal-registro');
     const splash = document.getElementById('pantalla-carga'); 
-    
     if (id) {
-        const display = document.getElementById('mi-id-display');
-        if(display) display.innerText = "Tu ID: " + id;
-        manejarBotonIdentidad();
-        if (typeof activarAntena === "function") {
-            activarAntena(); 
-        }
-    }
-        
-    } else {
-        if(modalRegistro) modalRegistro.style.display = 'flex';
-    }
-
-    if (splash) {
-    // Eliminamos el primer setTimeout para que la transición sea instantánea
-    splash.style.opacity = '0'; 
+    // 1. Mostramos el ID primero para que el usuario sepa quién es
+    const display = document.getElementById('mi-id-display');
+    if(display) display.innerText = "Tu ID: " + id;
     
-    // Solo dejamos el tiempo necesario para que termine la animación y se elimine el div
+    // 2. Preparamos los botones y la visual (Look & Feel)
+    manejarBotonIdentidad();
+    
+    // 3. Encendemos la conexión a Firebase/Mensajes
+    if (typeof activarAntena === "function") {
+        activarAntena(); 
+    }
+} else {
+    // Si no hay ID, mandamos al registro de una vez
+    if(modalRegistro) modalRegistro.style.display = 'flex';
+}
+
+// Control del Splash: Ahora es inmediato apenas termina lo anterior
+if (splash) {
+    splash.style.opacity = '0'; 
     setTimeout(() => {
         splash.style.display = 'none';
     }, 500); 
-     } // <--- ¡ASEGÚRATE DE QUE ESTA LLAVE Y PUNTO Y COMA ESTÉN AQUÍ!// <--- Aquí termina el window.onload  
+     }
+     // <--- ¡ASEGÚRATE DE QUE ESTA LLAVE Y PUNTO Y COMA ESTÉN AQUÍ!// <--- Aquí termina el window.onload  
 async function cargarProto() {
     const schema = `
         package superapp;
