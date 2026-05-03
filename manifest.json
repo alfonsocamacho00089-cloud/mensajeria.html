@@ -10,7 +10,7 @@
     },
     "icons": [
   {
-    "src": "imagen-logo-nuevo_2.png", 
+    "src": "imagen-logo-nuevo.png", 
     "sizes": "512x512",
     "type": "image/png",
     "purpose": "maskable" 
