@@ -5,7 +5,26 @@
 importScripts('https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js');
 importScripts('https://www.gstatic.com/firebasejs/9.0.0/firebase-messaging-compat.js');
 importScripts('./protobuf.min.js'); 
+// ==========================================
+// 1.5. CACHÉ PARA FUNCIONAR SIN INTERNET
+// ==========================================
+const CACHE_NAME = 'spacechat-cache-v1';
+const urlsToCache = [
+  './',
+  './index.html',
+  './manifest.json',
+  './assets/logo-nuevo.png',
+  // Agrega aquí tus archivos .css o .js principales
+];
 
+// Instalar y guardar archivos en el celular
+self.addEventListener('install', (event) => {
+  event.waitUntil(
+    caches.open(CACHE_NAME).then((cache) => {
+      return cache.addAll(urlsToCache);
+    })
+  );
+});
 // ==========================================
 // 2. CONFIGURACIÓN
 // ==========================================
@@ -111,10 +130,10 @@ self.addEventListener('notificationclick', (event) => {
 });
 // Este bloque es el que activa el botón de "Instalar" en Chrome
 self.addEventListener('fetch', (event) => {
-    // No necesita hacer nada complejo, solo estar presente
     event.respondWith(
-        fetch(event.request).catch(() => {
-            return caches.match(event.request);
+        caches.match(event.request).then((response) => {
+            // Si está en caché, lo devuelve. Si no, va a internet.
+            return response || fetch(event.request);
         })
     );
 });
