@@ -1472,7 +1472,11 @@ function inyectarFoto(elementoId, src) {
     }
 };
      // <--- ¡ASEGÚRATE DE QUE ESTA LLAVE Y PUNTO Y COMA ESTÉN AQUÍ!// <--- Aquí termina el window.onload  
-async function cargarProto() {
+
+let cacheFotosContactos = {}; // <--- AQUÍ EXACTAMENTE
+     
+     
+     async function cargarProto() {
     const schema = `
         package superapp;
         syntax = "proto3";
@@ -1762,8 +1766,7 @@ function cerrarModalNuevo() {
         }
     }
      }
-
-     let miFotoBase64 = ""; 
+  let miFotoBase64 = ""; 
 
 
 
