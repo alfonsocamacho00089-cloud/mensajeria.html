@@ -8,9 +8,8 @@
       "type": "image/png",
       "sizes": "192x192"
     },
-    "icons": [
   {
-    "src": "imagen-logo-nuevo.png", 
+    "src": "imagen-logo-nuevo_2.png", 
     "sizes": "512x512",
     "type": "image/png",
     "purpose": "maskable" 
@@ -24,7 +23,7 @@
 ],
 "background_color": "#000000",
 "theme_color": "#000000"
-  ],
+  [
   "start_url": "./index.html",
   "display": "standalone",
   "scope": "/",
