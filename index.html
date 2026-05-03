@@ -597,7 +597,13 @@ label[for="file-input"] {
 </div>
  <div id="chat-box">
  </div>
-
+ <div id="aviso-seguridad" class="encriptado-box">
+    <p>
+        <i class="fas fa-lock"></i> 
+        Las mensajes en este chat están cifrados de extremo a extremo. Solo las personas en este chat pueden leerlos. 
+        <span class="resaltado-oro">Más información.</span>
+    </p>
+ </div>
 <div id="modal-perfil" class="modal" style="display:none; background: #1e222b;z-index: 25000;">
     <div class="modal-cover" style="text-align: center;">
         <img id="perfil-foto-grande" src="" style="width: 150px; height: 150px; border-radius: 50%; border: 1px solid #ffd700; margin-bottom: 15px; object-fit: cover;">
@@ -629,13 +635,7 @@ label[for="file-input"] {
     <div onclick="accionMensaje('copiar-id')">👤 Guardar ID</div>
     <div onclick="accionMensaje('borrar')" style="color: #ff5c5c;">🗑️ Borrar</div>
  </div>
- <div id="aviso-seguridad" class="encriptado-box">
-    <p>
-        <i class="fas fa-lock"></i> 
-        Las mensajes en este chat están cifrados de extremo a extremo. Solo las personas en este chat pueden leerlos. 
-        <span class="resaltado-oro">Más información.</span>
-    </p>
- </div>
+
  <div class="contenedor-flotante">
     <label for="file-input" style="cursor:pointer; padding: 0 10px; display: flex; align-items: center;">
         <i class="fa-fa-camera" style="color: #8696a0; font-size: 20px;"></i>
