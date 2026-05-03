@@ -1111,6 +1111,13 @@ async function enviarMensajeSatelital() {
         // 4. INTERFAZ Y PERSISTENCIA LOCAL
         // Pintamos el mensaje pasando el msgId para el futuro Doble Check
         pintarMensaje(msg, 'msg-derecha', null, 'enviado', msgId);
+
+     // --- PEGA EL CÓDIGO AQUÍ (Lógica del aviso de seguridad) ---
+        const aviso = document.getElementById('aviso-seguridad');
+        const contenedorMensajes = document.getElementById('tus-mensajes-container');
+        if (aviso && contenedorMensajes && contenedorMensajes.children.length >= 1) {
+            aviso.style.display = 'block';
+     }
         // Guardamos en el historial con toda la data necesaria
         let historialEnv = JSON.parse(localStorage.getItem('chat_' + targetID)) || [];
         historialEnv.push({ 
