@@ -1818,29 +1818,19 @@ function alternarVistaPerfil() {
 
 
 function previsualizarMiFoto(input) {
-
     if (input.files && input.files[0]) {
-
         const reader = new FileReader();
-
         reader.onload = (e) => {
-
-            miFotoBase64 = e.target.result;
-
-            document.getElementById('mi-foto-previa').src = miFotoBase64;
-
-            document.getElementById('mi-foto-previa').style.display = "block";
-
-            document.getElementById('mi-placeholder-foto').style.display = "none";
-
+            const previa = document.getElementById('mi-foto-previa');
+            const placeholder = document.getElementById('mi-placeholder-foto');
+            
+            previa.src = e.target.result; // Esto es solo para verla tú en el momento
+            previa.style.display = "block";
+            if (placeholder) placeholder.style.display = "none";
         };
-
         reader.readAsDataURL(input.files[0]);
-
     }
-
-}
-
+     }
 
 async function manejarEnvioFoto(archivo) {
     // 1. Mostrar un pequeño aviso de "Subiendo..." para que el usuario no se desespere
@@ -1882,56 +1872,64 @@ async function manejarSeleccionImagen(event) {
 
 // Variable para la foto nueva
 
+async function subirFotoPerfil(archivo, miID) {
+    // 1. Crear la referencia en el "satélite" de Storage
+    const refStorage = firebase.storage().ref().child('perfiles/' + miID + '.jpg');
 
+    // 2. Subir el archivo
+    const snapshot = await refStorage.put(archivo);
+
+    // 3. Obtener la URL mágica (la que es cortita y rápida)
+    const urlPublica = await snapshot.ref.getDownloadURL();
+    
+    return urlPublica;
+     }
 
 
 
 
      
+// Variable global (Vive en la RAM, no en el disco de 5MB)
+let miFotoCache = ""; 
+
 async function guardarCambiosPerfil() {
     const miID = localStorage.getItem('mi_dropis_id');
     const nom = document.getElementById('mi-nuevo-nombre').value.trim();
     const est = document.getElementById('mi-nuevo-estado').value.trim();
     
-    // Usamos la foto que ya tienes cargada
-    const fotoParaGuardar = miFotoBase64 || localStorage.getItem('mi_foto') || "";
+    // Usamos la variable global o el input, evitando saturar LocalStorage
+    const fotoParaGuardar = miFotoBase64 || miFotoCache || "";
 
     if (!nom) return alert("¡El nombre no puede estar vacío!");
 
     try {
-        // 1. Guardar en Firebase (Aquí no hay problema de espacio)
+        // 1. Sincronizar con Firebase (Para cuando haya internet)
         await db.ref('usuarios/' + miID).update({
             nombre: nom,
             estado: est,
-            foto: fotoParaGuardar // Se guarda en la nube
+            foto: fotoParaGuardar 
         });
 
-        // 2. Actualizar LocalStorage con CUIDADO
+        // 2. Guardar en LocalStorage SOLO lo ligero
         localStorage.setItem('mi_nombre', nom);
         localStorage.setItem('mi_estado', est);
         
-        // INTENTAMOS guardar la foto, si falla por espacio, no bloqueamos la app
-        try {
-            localStorage.setItem('mi_foto', fotoParaGuardar);
-        } catch (spaceError) {
-            console.warn("LocalStorage lleno, la foto se cargará desde Firebase la próxima vez.");
-            // Si da error de espacio, mejor la borramos del local para que la app no muera
-            localStorage.removeItem('mi_foto'); 
-        }
+        // Guardamos la foto en la RAM (Variable global) para que sea instantáneo
+        miFotoCache = fotoParaGuardar;
 
-        alert("✅ Perfil actualizado");
-        
-        // 3. Actualizar la interfaz (Header y Previa)
+        // 3. ACTUALIZACIÓN VISUAL INMEDIATA
         const headerFoto = document.getElementById('foto-perfil-header');
-        if (headerFoto && fotoParaGuardar) headerFoto.src = fotoParaGuardar;
-
+        if (headerFoto) headerFoto.src = fotoParaGuardar;
+        
         const previaFoto = document.getElementById('mi-foto-previa');
-        if (previaFoto && fotoParaGuardar) previaFoto.src = fotoParaGuardar;
+        if (previaFoto) previaFoto.src = fotoParaGuardar;
 
+        alert("✅ Perfil listo para enlace satelital");
         alternarVistaPerfil();
+
     } catch(e) {
-        console.error("Error en Firebase:", e);
-        alert("Error al guardar cambios");
+        console.error("Error:", e);
+        alert("Fallo en la sincronización");
     }
      }
 
