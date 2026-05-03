@@ -3,11 +3,7 @@
   "name": "SpaceChat",
   "description": "Mensajería y comercio con tecnología satelital para Venezuela.",
   "icons": [
-    {
-      "src": "assets/logo-mini.png",
-      "type": "image/png",
-      "sizes": "192x192"
-    },
+    
     {
       "src": "assets/imagen-logo-nuevo.png",
       "type": "image/png",
