@@ -4,7 +4,7 @@
   "description": "Mensajería y comercio con tecnología satelital para Venezuela.",
   "icons": [
     {
-      "src": "assets/logo-nuevo.png",
+      "src": "assets/logo-mini.png",
       "type": "image/png",
       "sizes": "192x192"
     },
