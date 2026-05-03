@@ -1333,25 +1333,30 @@ function cargarConversacionCon(idDestino, nombreDestino, fotoDestino) {
         document.getElementById('nombre-dueño-header').innerText = nombreDestino;
     }
 
-    
     // 3. Gestión de la FOTO de perfil en el Header
+
     const imgHeader = document.getElementById('foto-perfil-header');
+
     if (imgHeader) {
-        // PRIORIDAD: RAM (cacheFotosContactos), luego el parámetro, luego placeholder
-        const fotoFinal = cacheFotosContactos[idDestino] || fotoDestino;
-        
-        imgHeader.src = fotoFinal || 'https://via.placeholder.com/40';
-        
-        if (!fotoFinal || fotoFinal.includes('placeholder.com')) {
+
+        imgHeader.src = fotoDestino || 'https://via.placeholder.com/40';
+
+        if (!fotoDestino || fotoDestino.includes('placeholder.com')) {
+
             const inicial = nombreDestino ? nombreDestino.charAt(0).toUpperCase() : '?';
-            // Mantenemos tu lógica de la inicial si no hay foto
+
             imgHeader.style.display = "none"; 
+
             imgHeader.outerHTML = `<div id="foto-perfil-header" class="foto-perfil" style="width:40px; height:40px; border-radius:50%; background:#ffd700; color:#000; display:flex; align-items:center; justify-content:center; font-weight:900; border:2px solid #000;">${inicial}</div>`;
-        } else {
-            // Si hay foto, nos aseguramos que el elemento sea un <img> y se vea
-            imgHeader.style.display = "block";
+
         }
-     }
+
+    }
+
+
+
+     
+    
 
     // 4. Buscamos los mensajes de ESE contacto en LocalStorage
     const claveChat = 'chat_' + idDestino;
@@ -1443,7 +1448,13 @@ function inyectarFoto(elementoId, src) {
     }
      }
     
-
+function volverALista() {
+    document.getElementById('pantalla-chat').style.display = 'none';
+    document.getElementById('pantalla-contactos').style.display = 'block';
+    
+    // ESTA ES LA LÍNEA CLAVE
+    pintarAgendaContactos(); 
+     }
    
  
 // Reemplaza el bloque final por este:
