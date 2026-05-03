@@ -1381,13 +1381,15 @@ function cargarConversacionCon(idDestino, nombreDestino, fotoDestino) {
     const display = document.getElementById('mi-id-display');
     if(display) display.innerText = "Tu ID: " + id;
     
-    // 2. Preparamos los botones y la visual (Look & Feel)
-    manejarBotonIdentidad();
     
-    // 3. Encendemos la conexión a Firebase/Mensajes
+    
+    // 2. Encendemos la conexión a Firebase/Mensajes
     if (typeof activarAntena === "function") {
         activarAntena(); 
-    }
+     }
+     // 3. Preparamos los botones y la visual (Look & Feel)
+    manejarBotonIdentidad();
+    
 } else {
     // Si no hay ID, mandamos al registro de una vez
     if(modalRegistro) modalRegistro.style.display = 'flex';
