@@ -1378,35 +1378,29 @@ function cargarConversacionCon(idDestino, nombreDestino, fotoDestino) {
  window.onload = () => {
     const id = localStorage.getItem('mi_dropis_id');
     const modalRegistro = document.getElementById('modal-registro');
-    const splash = document.getElementById('pantalla-carga'); // <--- Llamamos al splash aquí
+    const splash = document.getElementById('pantalla-carga'); 
     
     if (id) {
-        // --- CASO 1: YA ESTÁ REGISTRADO ---
         const display = document.getElementById('mi-id-display');
         if(display) display.innerText = "Tu ID: " + id;
         
         if (typeof activarAntena === "function") {
             activarAntena(); 
         }
-
         manejarBotonIdentidad();
-
     } else {
-        // --- CASO 2: NO HAY REGISTRO ---
         if(modalRegistro) modalRegistro.style.display = 'flex';
     }
-    // =============================================
-    // ¡ESTO VA AQUÍ ADENTRO! Justo antes de cerrar el onload
-    // =============================================
+
     if (splash) {
-    // Reducir a 100ms o quitar el primer timeout para que sea instantáneo
-    setTimeout(() => {
-        splash.style.opacity = '0';
         setTimeout(() => {
-            splash.style.display = 'none';
-        }, 500); 
-    }, 100); // <--- Menos tiempo aquí evita el efecto de "espera"
- } // <--- Aquí termina el window.onload  
+            splash.style.opacity = '0';
+            setTimeout(() => {
+                splash.style.display = 'none';
+            }, 500); 
+        }, 100); 
+    }
+}; // <--- ¡ASEGÚRATE DE QUE ESTA LLAVE Y PUNTO Y COMA ESTÉN AQUÍ!// <--- Aquí termina el window.onload  
 async function cargarProto() {
     const schema = `
         package superapp;
