@@ -1990,76 +1990,82 @@ function abrirPerfilContacto() {
     document.getElementById('modal-perfil').style.display = 'flex';
 }
 
+async function irAContactos() {
+    // Forzamos el reset de la vista
+    const lista = document.getElementById('lista-contactos');
+    if (lista) lista.innerHTML = ""; 
+    
+    // Vaciamos la memoria de "pintados" para que 'pintarAgendaContactos' los vuelva a crear todos
+    contactosRenderizados.clear(); 
 
+    // Llamamos a tu función de siempre, que ahora los pintará todos porque el Set está vacío
+    await pintarAgendaContactos();
+    
+    console.log("Agenda completa restaurada");
+     }
+     
 async function eliminarChatEspecifico() {
-    // 1. Obtenemos el ID del contacto que está cargado actualmente en tu input oculto
     const idDestino = document.querySelector('#target-id').value;
-    const nombreDestino = document.getElementById('nombre-dueño-header')?.innerText || "este contacto";
+    const nombreDestino = document.getElementById('perfil-nombre')?.innerText || "este contacto";
 
     if (!idDestino) return alert("No hay un chat seleccionado para eliminar");
 
     if (confirm(`¿Eliminar todos los mensajes con ${nombreDestino}?`)) {
-        
-        // 2. ELIMINACIÓN EN LOCALSTORAGE (Donde lo guardas actualmente)
-        const claveChat = 'chat_' + idDestino;
-        localStorage.removeItem(claveChat);
+        // 1. LIMPIEZA DE DATOS (LocalStorage e IndexedDB v10)
+        localStorage.removeItem('chat_' + idDestino);
+        localStorage.setItem('unread_' + idDestino, 0);
 
-        // 3. ELIMINACIÓN EN INDEXEDDB (Para tu nueva estructura DropisDB)
-        // Usamos la lógica de borrar que definimos antes
-        const db = await abrirDB();
-        const tx = db.transaction('mensajes', 'readwrite');
-        const store = tx.objectStore('mensajes');
-        
-        // Borramos usando el prefijo y el ID único
-        store.delete('msg_' + idDestino);
+        try {
+            const db = await abrirDB();
+            const tx = db.transaction('mensajes', 'readwrite');
+            await tx.objectStore('mensajes').delete('msg_' + idDestino);
+        } catch (e) { console.log("Error al borrar en v10"); }
 
-        // 4. LIMPIEZA VISUAL
+        // 2. LIMPIEZA VISUAL INSTANTÁNEA
+        // Sacamos al contacto de la memoria de "pintados"
+        contactosRenderizados.delete(idDestino); 
+
+        // Borramos su fila de la lista de chats para que "desaparezca"
+        const fila = document.getElementById(`fila-${idDestino}`);
+        if (fila) fila.remove();
+
         const box = document.getElementById('chat-box');
         if (box) box.innerHTML = ""; 
 
-        // 5. REFRESCAR AGENDA
-        // Esto quita contadores de mensajes no leídos si los hubiera
-        localStorage.setItem('unread_' + idDestino, 0);
-        pintarAgendaContactos();
-
-        // 6. CERRAR MODAL (Si el botón estaba dentro del perfil)
-        const modalPerfil = document.getElementById('modal-perfil');
-        if (modalPerfil) modalPerfil.style.display = 'none';
-
-        console.log("✅ Chat borrado con éxito para ID: " + idDestino);
+        // 3. CIERRE
+        document.getElementById('modal-perfil').style.display = 'none';
+        console.log("✅ Chat ocultado y borrado: " + idDestino);
     }
-}
+     }
 
 async function eliminarContactoDeAgenda() {
-    // 1. Obtenemos el ID del contacto que está cargado en el input oculto
     const idABorrar = document.querySelector('#target-id').value;
     const nombreABorrar = document.getElementById('perfil-nombre')?.innerText || "este contacto";
 
     if (!idABorrar) return;
 
-    if (confirm(`¿Eliminar a ${nombreABorrar} de tu agenda? (Los mensajes se conservarán)`)) {
-        
-        // 2. Traemos la lista actual
+    if (confirm(`¿Eliminar a ${nombreABorrar} de tu agenda?`)) {
+        // 1. FILTRAR LISTA
         let contactos = JSON.parse(localStorage.getItem('mis_contactos')) || [];
-
-        // 3. Filtramos la lista para quitar a ese ID
         contactos = contactos.filter(c => c.id !== idABorrar);
-
-        // 4. Guardamos la nueva lista limpia
         localStorage.setItem('mis_contactos', JSON.stringify(contactos));
 
-        // 5. Refrescamos la lista visual en el modal de la agenda
-        pintarAgendaContactos();
+        // 2. BORRAR DE MEMORIA Y VISTA
+        contactosRenderizados.delete(idABorrar);
+        const fila = document.getElementById(`fila-${idABorrar}`);
+        if (fila) fila.remove();
 
-        // 6. Cerramos los modales
+        // 3. BORRAR DE INDEXEDDB v10 (Para que no aparezca al "Ir a Contactos")
+        try {
+            await eliminarLocal('perfiles', idABorrar);
+        } catch(e) { console.log("No estaba en perfiles"); }
+
+        // 4. CIERRE
         document.getElementById('modal-perfil').style.display = 'none';
-        cerrarModalQR(); // Para volver al chat principal
-
-        // ... (Aquí vendría tu función de eliminarContactoDeAgenda)
-        alert(`${nombreABorrar} ha sido eliminado de tu agenda.`);
+        cerrarModalQR(); 
+        alert(`${nombreABorrar} eliminado de la agenda.`);
     }
-} // CIERRE DE ELIMINAR CONTACTO
-
+     }
      
 
      function cargarFotoInicial() {
