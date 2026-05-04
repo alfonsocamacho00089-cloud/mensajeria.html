@@ -1392,16 +1392,23 @@ if (imgHeader) {
     if (!lista) return;
 
     const contactos = JSON.parse(localStorage.getItem('mis_contactos')) || [];
-    lista.innerHTML = ""; 
+    
+    // COMENTADO: lista.innerHTML = ""; <-- Quitamos esto para que no borre lo que ya existe
 
     for (const contacto of contactos) {
+        // --- NUEVA LÓGICA DE CONTROL ---
+        // Si el contacto ya está renderizado, saltamos al siguiente para no duplicar
+        if (contactosRenderizados.has(contacto.id)) continue;
+        // -------------------------------
+
         const numNoLeidos = localStorage.getItem('unread_' + contacto.id) || 0;
         const badgeHTML = numNoLeidos > 0 ? `<div class="contador-nube">${numNoLeidos}</div>` : '';
         const inicial = contacto.nombre ? contacto.nombre.charAt(0).toUpperCase() : '?';
 
         const btn = document.createElement('div');
         btn.className = 'fila-contacto'; 
-        // Importante: El ID 'img-cont-...' debe existir antes de llamar a aplicarFotoCapa
+        btn.id = `fila-${contacto.id}`; // Le damos un ID a la fila para control
+        
         btn.innerHTML = `
             <div id="img-cont-${contacto.id}" class="foto-perfil" style="width:45px; height:45px; border-radius:50%; background:#ffd700; color:#000; display:flex; align-items:center; justify-content:center; font-weight:900; font-size:20px; border: 2px solid #000; flex-shrink:0;">${inicial}</div>
             <div style="flex-grow: 1; margin-left: 10px;">
@@ -1411,23 +1418,22 @@ if (imgHeader) {
             ${badgeHTML} 
         `;
 
-        // 1. PRIMERO añadimos el contacto a la lista (Para que el DOM lo reconozca)
         lista.appendChild(btn);
+        
+        // --- MARCAMOS COMO RENDERIZADO ---
+        contactosRenderizados.add(contacto.id);
+        // ---------------------------------
 
-        // 2. DESPUÉS buscamos y aplicamos la foto
         try {
             const perfilLocal = await obtenerLocal('perfiles', contacto.id);
             
             if (perfilLocal && perfilLocal.foto) {
-                // Si está en IndexedDB, la ponemos directo
                 aplicarFotoCapa(contacto.id, perfilLocal.foto);
             } else {
-                // Si no, la pedimos a Firebase
                 db.ref('usuarios/' + contacto.id + '/foto').once('value').then(async (snap) => {
                     const fotoReal = snap.val();
                     if (fotoReal) {
                         aplicarFotoCapa(contacto.id, fotoReal);
-                        // La guardamos para que la próxima vez sea instantáneo
                         await guardarLocal('perfiles', { 
                             id: contacto.id, 
                             nombre: contacto.nombre, 
@@ -1445,7 +1451,7 @@ if (imgHeader) {
             cargarConversacionCon(contacto.id, contacto.nombre, (perfil && perfil.foto) ? perfil.foto : null);
         }; 
     }
-     } 
+     }
  
 
 // Función auxiliar para no repetir código
