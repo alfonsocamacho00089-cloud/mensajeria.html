@@ -1756,23 +1756,28 @@ function cerrarModalNuevo() {
 
 
 
-function alternarVistaPerfil() {
+async function alternarVistaPerfil() {
     const seccion = document.getElementById('seccion-mi-perfil');
     if (!seccion) return;
 
     if (seccion.style.display === "none" || seccion.style.display === "") {
         seccion.style.display = "block";
 
-        // 1. Rellenamos nombre y estado
-        document.getElementById('mi-nuevo-nombre').value = localStorage.getItem('mi_nombre') || "";
-        document.getElementById('mi-nuevo-estado').value = localStorage.getItem('mi_estado') || "";
+        const miID = localStorage.getItem('mi_dropis_id');
+        
+        // 1. Buscamos los datos completos en nuestra DB local
+        const miPerfil = await obtenerLocal('perfiles', miID);
 
-        // 2. EL PEDAZO DE LA FOTO (Lo que te expliqué)
-        const foto = localStorage.getItem('mi_foto');
+        // 2. Rellenamos la interfaz
+        document.getElementById('mi-nuevo-nombre').value = miPerfil?.nombre || localStorage.getItem('mi_nombre') || "";
+        document.getElementById('mi-nuevo-estado').value = miPerfil?.estado || localStorage.getItem('mi_estado') || "";
+
         const previa = document.getElementById('mi-foto-previa');
         const placeholder = document.getElementById('mi-placeholder-foto');
 
-        if (foto && foto !== "") {
+        // 3. La foto ahora viene de IndexedDB (sin límites de tamaño)
+        const foto = miPerfil?.foto || localStorage.getItem('mi_foto');
+        if (foto) {
             previa.src = foto;
             previa.style.display = "block";
             if (placeholder) placeholder.style.display = "none";
@@ -1784,7 +1789,6 @@ function alternarVistaPerfil() {
         seccion.style.display = "none";
     }
      }
-
 
 
 function previsualizarMiFoto(input) {
@@ -1842,68 +1846,84 @@ async function manejarSeleccionImagen(event) {
     try {
         const snapshot = await refStorage.put(archivo);
         const urlImagen = await snapshot.ref.getDownloadURL();
+        
+        // --- NUEVO: Guardar rastro en mensajes locales ---
+        const idDestino = document.querySelector('#target-id').value;
+        const nuevoMensaje = {
+            contactoId: idDestino,
+            texto: urlImagen,
+            clase: 'msg-derecha',
+            hora: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+            status: 'enviado',
+            ts: Date.now()
+        };
+        
+        await guardarLocal('mensajes', nuevoMensaje);
+        // ------------------------------------------------
+        
         await enviarMensajeSatelital(urlImagen);
         event.target.value = "";
     } catch (e) {
         console.error("❌ Error en la subida:", e);
         alert("Fallo al lanzar la imagen al espacio.");
     }
-} // <--- ESTA LLAVE FALTABA
+     } // <--- ESTA LLAVE FALTABA
 
 // Variable para la foto nueva
 
 
 
 
-
-
-     
 async function guardarCambiosPerfil() {
     const miID = localStorage.getItem('mi_dropis_id');
     const nom = document.getElementById('mi-nuevo-nombre').value.trim();
     const est = document.getElementById('mi-nuevo-estado').value.trim();
     
-    // Usamos la foto que ya tienes cargada
-    const fotoParaGuardar = miFotoBase64 || localStorage.getItem('mi_foto') || "";
+    // Obtenemos la foto actual o la nueva previsualizada
+    const miPerfilActual = await obtenerLocal('perfiles', miID);
+    const fotoParaGuardar = miFotoBase64 || miPerfilActual?.foto || "";
 
     if (!nom) return alert("¡El nombre no puede estar vacío!");
 
     try {
-        // 1. Guardar en Firebase (Aquí no hay problema de espacio)
+        // 1. Guardar en Firebase (Nube)
         await db.ref('usuarios/' + miID).update({
             nombre: nom,
             estado: est,
-            foto: fotoParaGuardar // Se guarda en la nube
+            foto: fotoParaGuardar
         });
 
-        // 2. Actualizar LocalStorage con CUIDADO
+        // 2. GUARDADO MAESTRO EN INDEXEDDB (Local)
+        // Aquí no hay error de espacio. Guardamos el objeto completo.
+        await guardarLocal('perfiles', {
+            id: miID,
+            nombre: nom,
+            estado: est,
+            foto: fotoParaGuardar,
+            ultimaActualizacion: Date.now()
+        });
+
+        // 3. Actualizamos LocalStorage solo para datos ligeros (opcional)
         localStorage.setItem('mi_nombre', nom);
         localStorage.setItem('mi_estado', est);
-        
-        // INTENTAMOS guardar la foto, si falla por espacio, no bloqueamos la app
-        try {
-            localStorage.setItem('mi_foto', fotoParaGuardar);
-        } catch (spaceError) {
-            console.warn("LocalStorage lleno, la foto se cargará desde Firebase la próxima vez.");
-            // Si da error de espacio, mejor la borramos del local para que la app no muera
-            localStorage.removeItem('mi_foto'); 
-        }
+        // Borramos la foto de localStorage para liberar espacio, 
+        // ya que ahora vive segura en IndexedDB
+        localStorage.removeItem('mi_foto'); 
 
-        alert("✅ Perfil actualizado");
+        alert("✅ Perfil guardado localmente y en la nube");
         
-        // 3. Actualizar la interfaz (Header y Previa)
+        // 4. Actualizar Interfaz
         const headerFoto = document.getElementById('foto-perfil-header');
         if (headerFoto && fotoParaGuardar) headerFoto.src = fotoParaGuardar;
 
-        const previaFoto = document.getElementById('mi-foto-previa');
-        if (previaFoto && fotoParaGuardar) previaFoto.src = fotoParaGuardar;
-
         alternarVistaPerfil();
     } catch(e) {
-        console.error("Error en Firebase:", e);
-        alert("Error al guardar cambios");
+        console.error("Error al guardar:", e);
+        alert("Fallo al sincronizar perfil");
     }
      }
+
+     
 
 function abrirPerfilContacto() {
     // 1. Sacamos los datos de TU header
