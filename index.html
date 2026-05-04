@@ -1324,49 +1324,59 @@ function procesarQRScanner(contenido) {
      
 
     function cargarConversacionCon(idDestino, nombreDestino, fotoDestino) {
-    // Usamos TUS IDs originales. Si se llaman diferente, cámbialos aquí:
-    const vistaLista = document.getElementById('pantalla-contactos'); 
-    const vistaChat = document.getElementById('pantalla-chat');
+    const box = document.getElementById('chat-box');
+    if (!box) return;
 
-    // SEGURIDAD: Si no los encuentra, que no rompa la app
-    if (!vistaLista || !vistaChat) {
-        console.warn("Revisa si tus IDs son 'pantalla-contactos' y 'pantalla-chat'");
-        // Si tus IDs son otros, ejemplo 'main-list', ponlos arriba.
-    } else {
-        vistaLista.style.display = 'none';
-        vistaChat.style.display = 'block';
+    // 1. Limpiamos el chat visualmente
+    box.innerHTML = ""; 
+
+    // 2. Actualizamos la interfaz (ID y Nombre arriba)
+    document.querySelector('#target-id').value = idDestino;
+    if (document.getElementById('nombre-dueño-header')) {
+        document.getElementById('nombre-dueño-header').innerText = nombreDestino;
     }
 
-    const box = document.getElementById('chat-box');
-    if (box) box.innerHTML = ""; 
-
-    // Actualizar ID y Nombre
-    document.querySelector('#target-id').value = idDestino;
-    const headerNombre = document.getElementById('nombre-dueño-header');
-    if (headerNombre) headerNombre.innerText = nombreDestino;
-
-    // FOTO DEL HEADER: Forzamos que se dibuje
+    // 3. Gestión de la FOTO de perfil en el Header
     const imgHeader = document.getElementById('foto-perfil-header');
     if (imgHeader) {
-        // Si hay foto, la ponemos. Si no, ponemos la inicial.
-        if (fotoDestino && fotoDestino !== "") {
-            imgHeader.src = fotoDestino;
-            imgHeader.style.display = "block";
-        } else {
+        imgHeader.src = fotoDestino || 'https://via.placeholder.com/40';
+        if (!fotoDestino || fotoDestino.includes('placeholder.com')) {
             const inicial = nombreDestino ? nombreDestino.charAt(0).toUpperCase() : '?';
-            // Creamos el div de la inicial si la imagen falla
-            imgHeader.parentElement.innerHTML = `<div id="foto-perfil-header" class="foto-perfil" style="width:40px; height:40px; border-radius:50%; background:#ffd700; color:#000; display:flex; align-items:center; justify-content:center; font-weight:900; border:2px solid #000;">${inicial}</div>`;
+            imgHeader.style.display = "none"; 
+            imgHeader.outerHTML = `<div id="foto-perfil-header" class="foto-perfil" style="width:40px; height:40px; border-radius:50%; background:#ffd700; color:#000; display:flex; align-items:center; justify-content:center; font-weight:900; border:2px solid #000;">${inicial}</div>`;
         }
     }
 
-    // Cargar mensajes
-    const mensajes = JSON.parse(localStorage.getItem('chat_' + idDestino)) || [];
+    // 4. Buscamos los mensajes de ESE contacto en LocalStorage
+    const claveChat = 'chat_' + idDestino;
+    const mensajes = JSON.parse(localStorage.getItem(claveChat)) || [];
+
+    // 5. Pintamos los mensajes
     mensajes.forEach(m => {
         pintarMensaje(m.texto, m.clase, m.hora, m.status || 'enviado', m.id);
     });
 
+    // 6. Limpieza de notificaciones
     localStorage.setItem('unread_' + idDestino, 0);
+    
+    // --- CAMBIO AQUÍ: OCULTAR EN VEZ DE RE-PINTAR ---
+    // En lugar de llamar a pintarAgendaContactos(), solo ocultamos/mostramos
+    const pContactos = document.getElementById('pantalla-contactos');
+    const pChat = document.getElementById('pantalla-chat');
+    
+    if (pContactos && pChat) {
+        pContactos.style.display = 'none';
+        pChat.style.display = 'block';
+    }
+    // -----------------------------------------------
+
+    console.log("📂 Historial cargado con: " + nombreDestino);
+    
+    // 7. Cerramos el modal para empezar a chatear
     cerrarModalQR();
+    
+    const inputMsg = document.getElementById('msg-text');
+    if(inputMsg) inputMsg.focus();
      }
 
 
@@ -1429,12 +1439,14 @@ function inyectarFoto(elementoId, src) {
      }
     
 function volverALista() {
-    document.getElementById('pantalla-chat').style.display = 'none';
-    document.getElementById('pantalla-contactos').style.display = 'block';
-    
-    // Solo refrescamos la agenda si es necesario (ej: borrar notificaciones)
-    // Pero como ya cargamos las fotos en cacheFotosContactos, será muy rápido.
-    pintarAgendaContactos(); 
+    const pContactos = document.getElementById('pantalla-contactos');
+    const pChat = document.getElementById('pantalla-chat');
+
+    if (pContactos && pChat) {
+        pChat.style.display = 'none';
+        pContactos.style.display = 'block';
+    }
+    // NOTA: No llamamos a pintarAgendaContactos() aquí para que sea instantáneo.
      }
  
 // Reemplaza el bloque final por este:
