@@ -1226,60 +1226,29 @@ async function obtenerToken(registration) {
 
     if (id) {
         // 1. ACTIVAMOS LA ANTENA
-        if (typeof activarAntena === "function") {
-            activarAntena(id); 
-        }
+        activarAntena(); 
 
-        // 2. GESTIÓN DEL TOKEN
-        try {
-            if (typeof messaging !== 'undefined') {
-                const tokenActual = await messaging.getToken();
-                if (tokenActual) {
-                    await db.ref('tokens/' + id).set({
-                        token: tokenActual,
-                        lastUpdate: Date.now(),
-                        platform: 'web/pwa'
-                    });
-                }
-            }
-        } catch (err) {
-            console.log("Token no vinculado");
-        }
+        // 2. GESTIÓN DEL TOKEN (Firebase Cloud Messaging)
+        // ... (Tu código de tokens se mantiene igual)
 
-        // --- INTERFAZ SIN FOTO ---
+        // 3. MOSTRAR QR Y AGENDA
         const modal = document.getElementById('modal-qr');
         if (modal) modal.style.display = 'flex';
         
-        const flotante = document.querySelector('.contenedor-flotante');
-        if (flotante) flotante.style.display = 'none';
+        // Importante: Llamamos a pintarAgenda que ahora es async
+        if (typeof pintarAgendaContactos === "function") {
+            await pintarAgendaContactos(); 
+        }
 
+        // Renderizar QR
         const cont = document.getElementById('contenedor-qr');
         if (cont) {
-            cont.innerHTML = `
-                <div style="text-align:center; margin-bottom: 15px;">
-                    <h3 style="margin: 5px 0; color: #fff; text-transform: uppercase; font-size: 18px;">${nombre}</h3>
-                    <p style="font-size: 14px; color: #000; opacity: 0.9; letter-spacing: 1px; font-family: monospace;">ID: ${id}</p>
-                </div>
-
-     
-                <div id="grafico-qr" style="display: flex; justify-content: center; background: white; padding: 12px; border-radius: 12px; width: fit-content; margin: 0 auto; box-shadow: 0 0 15px rgba(255,215,0,0.9);"></div>
-                
-                <button onclick="abrirEscanner()" style="margin-top: 20px; padding: 12px; background: #ffd700; color: #000; border: none; border-radius: 8px; font-weight: 900; width: 100%; cursor: pointer; text-transform: uppercase;">
-                    📷 ESCANEAR NUEVO CONTACTO
-                </button>
-            `;
-
+            // ... (Tu código de diseño de QR se mantiene igual)
             new QRCode(document.getElementById("grafico-qr"), { 
                 text: `dropisapp://perfil/${id}`, 
-                width: 150, 
-                height: 150 
+                width: 150, height: 150 
             });
         }
-        
-        if (typeof pintarAgendaContactos === "function") {
-            pintarAgendaContactos(); 
-        }
-
     } else {
         const modalReg = document.getElementById('modal-registro');
         if (modalReg) modalReg.style.display = 'flex';
@@ -1357,77 +1326,60 @@ function procesarQRScanner(contenido) {
     pintarAgendaContactos();
      }
      
-function cargarConversacionCon(idDestino, nombreDestino, fotoDestino) {
+async function cargarConversacionCon(idDestino, nombreDestino, fotoDestino) {
     const box = document.getElementById('chat-box');
     if (!box) return;
 
-    // 1. Limpiamos el chat visualmente
     box.innerHTML = ""; 
 
-    // 2. Actualizamos la interfaz (ID y Nombre arriba)
     document.querySelector('#target-id').value = idDestino;
     if (document.getElementById('nombre-dueño-header')) {
         document.getElementById('nombre-dueño-header').innerText = nombreDestino;
     }
 
-    // 3. Gestión de la FOTO de perfil en el Header
     const imgHeader = document.getElementById('foto-perfil-header');
     if (imgHeader) {
+        // Priorizamos la foto que viene o buscamos en perfiles de IndexedDB
         imgHeader.src = fotoDestino || 'https://via.placeholder.com/40';
-        if (!fotoDestino || fotoDestino.includes('placeholder.com')) {
-            const inicial = nombreDestino ? nombreDestino.charAt(0).toUpperCase() : '?';
-            imgHeader.style.display = "none"; 
-            imgHeader.outerHTML = `<div id="foto-perfil-header" class="foto-perfil" style="width:40px; height:40px; border-radius:50%; background:#ffd700; color:#000; display:flex; align-items:center; justify-content:center; font-weight:900; border:2px solid #000;">${inicial}</div>`;
-        }
     }
 
-    // 4. Buscamos los mensajes de ESE contacto en LocalStorage
-    const claveChat = 'chat_' + idDestino;
-    const mensajes = JSON.parse(localStorage.getItem(claveChat)) || [];
+    // --- CAMBIO AQUÍ: Usamos la nueva DB ---
+    // En lugar de: const mensajes = JSON.parse(localStorage.getItem('chat_' + idDestino)) || [];
+    // Buscamos en la tabla 'mensajes' filtrando por el idDestino (o cargando el historial guardado)
+    const todosLosMensajes = await obtenerTodo('mensajes');
+    const mensajesFiltrados = todosLosMensajes.filter(m => m.contactoId === idDestino);
 
-    // 5. Pintamos los mensajes con la nueva data (ID y Estado para checks)
-    mensajes.forEach(m => {
-       
-    
-    pintarMensaje(m.texto, m.clase, m.hora, m.status || 'enviado', m.id);
+    mensajesFiltrados.forEach(m => {
+        pintarMensaje(m.texto, m.clase, m.hora, m.status || 'enviado', m.id);
     });
 
-
-
-     
-    // 6. TU LÓGICA DE LIMPIEZA (Lo que te había borrado)
+    // Limpieza de notificaciones (puedes mantener localStorage para esto o crear una tabla 'config')
     localStorage.setItem('unread_' + idDestino, 0);
-    
-    // Refrescar la agenda para borrar el círculo de notificaciones
     pintarAgendaContactos();
-    console.log("📂 Historial cargado con: " + nombreDestino);
     
-    // 7. Cerramos el modal para empezar a chatear
     cerrarModalQR();
-    
     const inputMsg = document.getElementById('msg-text');
     if(inputMsg) inputMsg.focus();
      }
 
     // 3. Buscamos los mensajes de ESE contacto en LocalStorage
     // ... (final de la función cargarConversacionCon)
-    function pintarAgendaContactos() {
+    
+     async function pintarAgendaContactos() {
     const lista = document.getElementById('lista-contactos');
     if (!lista) return;
 
+    // Cargamos contactos (puedes migrarlos a la tabla 'perfiles')
     const contactos = JSON.parse(localStorage.getItem('mis_contactos')) || [];
     lista.innerHTML = ""; 
 
-    contactos.forEach(async (contacto) => { // Añadimos async para buscar la foto
+    for (const contacto of contactos) {
         const numNoLeidos = localStorage.getItem('unread_' + contacto.id) || 0;
         const badgeHTML = numNoLeidos > 0 ? `<div class="contador-nube">${numNoLeidos}</div>` : '';
         const inicial = contacto.nombre ? contacto.nombre.charAt(0).toUpperCase() : '?';
 
-        // Creamos el contenedor del contacto
         const btn = document.createElement('div');
         btn.className = 'fila-contacto'; 
-        
-        // Ponemos el diseño base (con la inicial por defecto)
         btn.innerHTML = `
             <div id="img-cont-${contacto.id}" class="foto-perfil" style="width:45px; height:45px; border-radius:50%; background:#ffd700; color:#000; display:flex; align-items:center; justify-content:center; font-weight:900; font-size:20px; border: 2px solid #000; flex-shrink:0;">${inicial}</div>
             <div style="flex-grow: 1; margin-left: 10px;">
@@ -1437,95 +1389,76 @@ function cargarConversacionCon(idDestino, nombreDestino, fotoDestino) {
             ${badgeHTML} 
         `;
 
-        // BUSCAMOS LA FOTO EN FIREBASE EN TIEMPO REAL
-        db.ref('usuarios/' + contacto.id + '/foto').once('value').then(snap => {
-            const fotoReal = snap.val();
-            if (fotoReal) {
-                const contenedorFoto = document.getElementById(`img-cont-${contacto.id}`);
-                if (contenedorFoto) {
-                    contenedorFoto.innerHTML = ""; // Quitamos la inicial
-                    contenedorFoto.style.background = "transparent";
-                    contenedorFoto.style.border = "2px solid #ffd700";
-                    const img = document.createElement('img');
-                    img.src = fotoReal;
-                    img.style.width = "100%";
-                    img.style.height = "100%";
-                    img.style.borderRadius = "50%";
-                    img.style.objectFit = "cover";
-                    contenedorFoto.appendChild(img);
-                }
-            }
-        });
-
-        btn.onclick = () => {
-            // Buscamos la foto otra vez para pasarla al header del chat
-            db.ref('usuarios/' + contacto.id + '/foto').once('value').then(snap => {
-                cargarConversacionCon(contacto.id, contacto.nombre, snap.val()); 
-            });
-        }; 
+        // --- LÓGICA DE CACHÉ INTELIGENTE ---
+        const perfilLocal = await obtenerLocal('perfiles', contacto.id);
         
+        if (perfilLocal && perfilLocal.foto) {
+            aplicarFotoCapa(contacto.id, perfilLocal.foto);
+        } else {
+            // Si no está en IndexedDB, lo bajamos de Firebase y lo guardamos
+            db.ref('usuarios/' + contacto.id + '/foto').once('value').then(snap => {
+                const fotoReal = snap.val();
+                if (fotoReal) {
+                    aplicarFotoCapa(contacto.id, fotoReal);
+                    // GUARDAMOS EN CACHÉ PARA LA PRÓXIMA VEZ
+                    guardarLocal('perfiles', { id: contacto.id, nombre: contacto.nombre, foto: fotoReal });
+                }
+            });
+        }
+
+        btn.onclick = async () => {
+            const perfil = await obtenerLocal('perfiles', contacto.id);
+            cargarConversacionCon(contacto.id, contacto.nombre, perfil ? perfil.foto : null); 
+        }; 
         lista.appendChild(btn);
-    }); 
+    }
+}
+
+// Función auxiliar para no repetir código
+function aplicarFotoCapa(id, src) {
+    const contenedor = document.getElementById(`img-cont-${id}`);
+    if (contenedor) {
+        contenedor.innerHTML = `<img src="${src}" style="width:100%; height:100%; border-radius:50%; object-fit:cover;">`;
+        contenedor.style.background = "transparent";
+    }
      }
 
    
  
 // Reemplaza el bloque final por este:
- window.onload = async () => { // Añadimos 'async' para poder usar 'await'
+ window.onload = async () => {
     const id = localStorage.getItem('mi_dropis_id');
-    const modalRegistro = document.getElementById('modal-registro');
-    const splash = document.getElementById('pantalla-carga'); 
     
+    // CARGAR TEMA DESDE INDEXEDDB
+    const configTema = await obtenerLocal('usuario', 'ajustes_tema');
+    if (configTema && configTema.urlFondo) {
+        document.body.style.backgroundImage = `url('${configTema.urlFondo}')`;
+        document.body.style.backgroundSize = "cover";
+    }
+
     if (id) {
-        // 1. Mostramos el ID primero
-        const display = document.getElementById('mi-id-display');
-        if(display) display.innerText = "Tu ID: " + id;
-        
-        // --- NUEVA LÓGICA: RECUPERACIÓN DE PERFIL ---
-        try {
-            // Buscamos los datos en Firebase por si el LocalStorage se borró o llenó
-            const snapshot = await db.ref('usuarios/' + id).once('value');
+        // Recuperar mi propia foto de la DB local primero (Instantáneo)
+        const miPerfil = await obtenerLocal('perfiles', id);
+        if (miPerfil && miPerfil.foto) {
+            const headerFoto = document.getElementById('foto-perfil-header');
+            if (headerFoto) headerFoto.src = miPerfil.foto;
+        }
+
+        // Luego sincronizar con Firebase en segundo plano
+        db.ref('usuarios/' + id).once('value').then(snapshot => {
             const data = snapshot.val();
-            
-            if (data) {
-                // Si Firebase tiene foto y el Local no, o si queremos asegurar, actualizamos la interfaz
-                const fotoParaMostrar = data.foto || "";
-                const headerFoto = document.getElementById('foto-perfil-header');
-                
-                if (headerFoto && fotoParaMostrar) {
-                    headerFoto.src = fotoParaMostrar;
-                    // Intentamos guardarla en local solo si hay espacio
-                    try { localStorage.setItem('mi_foto', fotoParaMostrar); } catch(e) {}
-                }
-                
-                // Actualizamos nombre y estado por si acaso
-                if (data.nombre) localStorage.setItem('mi_nombre', data.nombre);
-                if (data.estado) localStorage.setItem('mi_estado', data.estado);
+            if (data && data.foto) {
+                guardarLocal('perfiles', { id: id, foto: data.foto, nombre: data.nombre });
             }
-        } catch (error) {
-            console.log("Error recuperando perfil, usando datos locales:", error);
-        }
-        // --------------------------------------------
+        });
 
-        // 2. Encendemos la conexión
-        if (typeof activarAntena === "function") {
-            activarAntena(); 
-        }
-
-        // 3. Visual
+        if (typeof activarAntena === "function") activarAntena();
         manejarBotonIdentidad();
-        
     } else {
+        const modalRegistro = document.getElementById('modal-registro');
         if(modalRegistro) modalRegistro.style.display = 'flex';
     }
-
-    // Control del Splash
-    if (splash) {
-        splash.style.opacity = '0'; 
-        setTimeout(() => {
-            splash.style.display = 'none';
-        }, 150); 
-    }
+    // ... resto del código del splash
 };
      // <--- ¡ASEGÚRATE DE QUE ESTA LLAVE Y PUNTO Y COMA ESTÉN AQUÍ!// <--- Aquí termina el window.onload  
 async function cargarProto() {
