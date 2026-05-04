@@ -1389,22 +1389,25 @@ function pintarAgendaContactos() {
     if (!lista) return;
 
     const contactos = JSON.parse(localStorage.getItem('mis_contactos')) || [];
-    
-    // Limpiamos solo para dibujar la versión más fresca
     lista.innerHTML = ""; 
 
     contactos.forEach(contacto => {
         const numNoLeidos = localStorage.getItem('unread_' + contacto.id) || 0;
         const badgeHTML = numNoLeidos > 0 ? `<div class="contador-nube">${numNoLeidos}</div>` : '';
+        
+        // --- SEGURO DE FOTO ---
+        // Si contacto.foto tiene datos, la usamos. Si no, usamos el placeholder.
+        const fotoURL = (contacto.foto && contacto.foto.length > 10) ? contacto.foto : 'https://via.placeholder.com/45';
         const inicial = contacto.nombre ? contacto.nombre.charAt(0).toUpperCase() : '?';
-        const idImg = `img-cont-${contacto.id}`;
 
         const btn = document.createElement('div');
         btn.className = 'fila-contacto'; 
-        
-        // Ponemos el diseño con la inicial por defecto (Carga instantánea)
+
         btn.innerHTML = `
-            <div id="${idImg}" class="foto-perfil" style="width:45px; height:45px; border-radius:50%; background:#ffd700; color:#000; display:flex; align-items:center; justify-content:center; font-weight:900; font-size:20px; border: 2px solid #000; flex-shrink:0;">${inicial}</div>
+            ${(fotoURL.includes('placeholder.com')) ? 
+                `<div class="foto-perfil" style="width:45px; height:45px; border-radius:50%; background:#ffd700; color:#000; display:flex; align-items:center; justify-content:center; font-weight:900; font-size:20px; border: 2px solid #000; flex-shrink:0;">${inicial}</div>` : 
+                `<img src="${fotoURL}" class="foto-perfil" style="width:45px; height:45px; border-radius:50%; object-fit:cover; border: 2px solid #ffd700;" onerror="this.src='https://via.placeholder.com/45'">`
+            }
             <div style="flex-grow: 1; margin-left: 10px;">
                 <div style="font-weight: bold; color: white;">${contacto.nombre}</div>
                 <div style="font-size: 12px; color: #8696a0;">ID: ${contacto.id}</div>
@@ -1412,22 +1415,14 @@ function pintarAgendaContactos() {
             ${badgeHTML} 
         `;
 
-        // LÓGICA DE FOTOS: Si ya la tenemos en RAM, la ponemos. Si no, la buscamos.
-        if (cacheFotosContactos[contacto.id]) {
-            inyectarFoto(idImg, cacheFotosContactos[contacto.id]);
-        } else if (contacto.foto) { // Si el objeto contacto ya tiene URL
-            cacheFotosContactos[contacto.id] = contacto.foto;
-            inyectarFoto(idImg, contacto.foto);
-        }
-
         btn.onclick = () => {
-            // Al hacer clic, pasamos la foto de la caché si existe
-            cargarConversacionCon(contacto.id, contacto.nombre, cacheFotosContactos[contacto.id]); 
+            // Pasamos la fotoURL exacta que acabamos de validar
+            cargarConversacionCon(contacto.id, contacto.nombre, fotoURL); 
         }; 
-   
+        
         lista.appendChild(btn);
     }); 
-}
+     }
 
 // Función auxiliar para que la foto aparezca bonito
 function inyectarFoto(elementoId, src) {
