@@ -1323,44 +1323,53 @@ function procesarQRScanner(contenido) {
     
      
 
-    
+    function cargarConversacionCon(idDestino, nombreDestino, fotoDestino) {
+    // Usamos TUS IDs originales. Si se llaman diferente, cámbialos aquí:
+    const vistaLista = document.getElementById('pantalla-contactos'); 
+    const vistaChat = document.getElementById('pantalla-chat');
 
-function cargarConversacionCon(idDestino, nombreDestino, fotoDestino) {
+    // SEGURIDAD: Si no los encuentra, que no rompa la app
+    if (!vistaLista || !vistaChat) {
+        console.warn("Revisa si tus IDs son 'pantalla-contactos' y 'pantalla-chat'");
+        // Si tus IDs son otros, ejemplo 'main-list', ponlos arriba.
+    } else {
+        vistaLista.style.display = 'none';
+        vistaChat.style.display = 'block';
+    }
+
     const box = document.getElementById('chat-box');
-    if (!box) return;
+    if (box) box.innerHTML = ""; 
 
-    box.innerHTML = ""; // Limpiamos mensajes anteriores
-
-    // Datos del header
+    // Actualizar ID y Nombre
     document.querySelector('#target-id').value = idDestino;
     const headerNombre = document.getElementById('nombre-dueño-header');
     if (headerNombre) headerNombre.innerText = nombreDestino;
 
+    // FOTO DEL HEADER: Forzamos que se dibuje
     const imgHeader = document.getElementById('foto-perfil-header');
     if (imgHeader) {
-        if (fotoDestino) {
+        // Si hay foto, la ponemos. Si no, ponemos la inicial.
+        if (fotoDestino && fotoDestino !== "") {
             imgHeader.src = fotoDestino;
             imgHeader.style.display = "block";
         } else {
-            // Si no hay foto, puedes poner la inicial aquí también
-            imgHeader.src = 'https://via.placeholder.com/40';
+            const inicial = nombreDestino ? nombreDestino.charAt(0).toUpperCase() : '?';
+            // Creamos el div de la inicial si la imagen falla
+            imgHeader.parentElement.innerHTML = `<div id="foto-perfil-header" class="foto-perfil" style="width:40px; height:40px; border-radius:50%; background:#ffd700; color:#000; display:flex; align-items:center; justify-content:center; font-weight:900; border:2px solid #000;">${inicial}</div>`;
         }
     }
 
-    // Cargar mensajes del LocalStorage
+    // Cargar mensajes
     const mensajes = JSON.parse(localStorage.getItem('chat_' + idDestino)) || [];
     mensajes.forEach(m => {
         pintarMensaje(m.texto, m.clase, m.hora, m.status || 'enviado', m.id);
     });
 
     localStorage.setItem('unread_' + idDestino, 0);
-    
-    // NAVEGACIÓN: Cambiamos de "vista"
-    document.getElementById('pantalla-contactos').style.display = 'none'; 
-    document.getElementById('pantalla-chat').style.display = 'block';
-
     cerrarModalQR();
      }
+
+
 
      // Variable global para guardar las fotos pesadas en la sesión actual
 let cacheFotosContactos = {};
