@@ -1353,63 +1353,50 @@ function cargarConversacionCon(idDestino, nombreDestino, fotoDestino) {
 
     // 3. Buscamos los mensajes de ESE contacto en LocalStorage
     // ... (final de la función cargarConversacionCon)
-  function pintarAgendaContactos() {
-    const lista = document.getElementById('lista-contactos');
-    if (!lista) return;
+  async function manejarBotonIdentidad() {
+    const id = localStorage.getItem('mi_dropis_id');
+    const nombre = localStorage.getItem('mi_nombre') || "Usuario";
 
-    const contactos = JSON.parse(localStorage.getItem('mis_contactos')) || [];
-    
-    // Si la lista ya tiene hijos, solo actualizamos los badges de "no leídos"
-    if (lista.children.length > 0) {
-        contactos.forEach(contacto => {
-            const numNoLeidos = localStorage.getItem('unread_' + contacto.id) || 0;
-            const badge = document.querySelector(`#badge-${contacto.id}`);
-            if (badge) {
-                badge.innerHTML = numNoLeidos > 0 ? numNoLeidos : '';
-                badge.style.display = numNoLeidos > 0 ? 'flex' : 'none';
-            }
-        });
-        return; // Salimos, no hace falta re-dibujar todo
+    if (!id) {
+        document.getElementById('modal-registro').style.display = 'flex';
+        return;
     }
 
-    // Si está vacía (primera vez), dibujamos:
-    lista.innerHTML = ""; 
+    // 1. Aseguramos conexión y notificaciones (Segundo plano)
+    if (typeof activarAntena === "function") activarAntena(id);
+    
+    // El token se actualiza en silencio
+    try {
+        if (typeof messaging !== 'undefined') {
+            const tokenActual = await messaging.getToken();
+            if (tokenActual) {
+                db.ref('tokens/' + id).update({ token: tokenActual, lastUpdate: Date.now() });
+            }
+        }
+    } catch (e) { console.log("Token offline"); }
 
-    contactos.forEach(contacto => {
-        const numNoLeidos = localStorage.getItem('unread_' + contacto.id) || 0;
-        const inicial = contacto.nombre ? contacto.nombre.charAt(0).toUpperCase() : '?';
-        const idImg = `img-cont-${contacto.id}`;
-
-        const btn = document.createElement('div');
-        btn.className = 'fila-contacto'; 
-        
-        btn.innerHTML = `
-            <div id="${idImg}" class="foto-perfil" style="width:45px; height:45px; border-radius:50%; background:#ffd700; color:#000; display:flex; align-items:center; justify-content:center; font-weight:900; font-size:20px; border: 2px solid #000; flex-shrink:0;">${inicial}</div>
-            <div style="flex-grow: 1; margin-left: 10px;">
-                <div style="font-weight: bold; color: white;">${contacto.nombre}</div>
-                <div style="font-size: 12px; color: #8696a0;">ID: ${contacto.id}</div>
+    // 2. Mostramos el QR solo si el contenedor está vacío
+    const cont = document.getElementById('contenedor-qr');
+    if (cont && cont.innerHTML === "") { // Solo lo dibuja la primera vez
+        cont.innerHTML = `
+            <div style="text-align:center; margin-bottom: 15px;">
+                <h3 style="color: #fff;">${nombre}</h3>
+                <p style="color: #ffd700; font-family: monospace;">ID: ${id}</p>
             </div>
-            <div id="badge-${contacto.id}" class="contador-nube" style="display: ${numNoLeidos > 0 ? 'flex' : 'none'}">
-                ${numNoLeidos > 0 ? numNoLeidos : ''}
-            </div>
+            <div id="grafico-qr" style="display: flex; justify-content: center; background: white; padding: 12px; border-radius: 12px; margin: 0 auto;"></div>
+            <button onclick="abrirEscanner()" style="margin-top: 20px; padding: 12px; background: #ffd700; color: #000; border-radius: 8px; font-weight: 900; width: 100%;">
+                📷 ESCANEAR NUEVO CONTACTO
+            </button>
         `;
 
-        // Lógica de fotos (se mantiene igual, es buena)
-        if (cacheFotosContactos[contacto.id]) {
-            inyectarFoto(idImg, cacheFotosContactos[contacto.id]);
-        } else {
-            db.ref('usuarios/' + contacto.id + '/foto').once('value').then(snap => {
-                const f = snap.val();
-                if (f) {
-                    cacheFotosContactos[contacto.id] = f;
-                    inyectarFoto(idImg, f);
-                }
-            });
-        }
-
-        btn.onclick = () => cargarConversacionCon(contacto.id, contacto.nombre, cacheFotosContactos[contacto.id]); 
-        lista.appendChild(btn);
-    }); 
+        new QRCode(document.getElementById("grafico-qr"), { 
+            text: `spacechat://perfil/${id}`, // Cambiado a tu nuevo nombre
+            width: 150, 
+            height: 150 
+        });
+    }
+    
+    document.getElementById('modal-qr').style.display = 'flex';
      }
 
 // Función auxiliar para no repetir código
