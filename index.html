@@ -1419,7 +1419,8 @@ async function cargarConversacionCon(idDestino, nombreDestino, fotoDestino) {
 
         btn.onclick = async () => {
             const perfil = await obtenerLocal('perfiles', contacto.id);
-            cargarConversacionCon(contacto.id, contacto.nombre, perfil ? perfil.foto : null); 
+            cargarConversacionCon(contacto.id, contacto.nombre, (perfil && perfil.foto) ? perfil.foto : ""); 
+     
         }; 
     }
      } 
