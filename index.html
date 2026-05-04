@@ -1337,11 +1337,24 @@ async function cargarConversacionCon(idDestino, nombreDestino, fotoDestino) {
         document.getElementById('nombre-dueño-header').innerText = nombreDestino;
     }
 
-    const imgHeader = document.getElementById('foto-perfil-header');
+    // Cambia 'foto-perfil-header' por el ID real de la imagen del chat (ej: foto-perfil-header-chat)
+    const imgHeader = document.getElementById('foto-perfil-header-chat'); 
+    const inicialCont = document.getElementById('inicial-header-container');
+
     if (imgHeader) {
-        // Priorizamos la foto que viene o buscamos en perfiles de IndexedDB
-        imgHeader.src = fotoDestino || 'https://via.placeholder.com/40';
-    }
+        if (fotoDestino && fotoDestino !== "") {
+            imgHeader.src = fotoDestino;
+            imgHeader.style.display = 'block';
+            if (inicialCont) inicialCont.style.display = 'none';
+        } else {
+            // SI NO HAY FOTO: Escondemos la imagen y mostramos la inicial
+            imgHeader.style.display = 'none';
+            if (inicialCont) {
+                inicialCont.style.display = 'flex';
+                inicialCont.innerText = nombreDestino ? nombreDestino.charAt(0).toUpperCase() : '?';
+            }
+        }
+     }
 
     // --- CAMBIO AQUÍ: Usamos la nueva DB ---
     // En lugar de: const mensajes = JSON.parse(localStorage.getItem('chat_' + idDestino)) || [];
