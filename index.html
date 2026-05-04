@@ -850,7 +850,8 @@ const db = firebase.database();
 // --- 2. MOTOR DE PERSISTENCIA (IndexedDB) ---
 const DB_NOMBRE = "DropisDB";
 const DB_VERSION = 10;
-
+// Este objeto guarda los contactos que ya están en pantalla
+const contactosRenderizados = new Set();
 /**
  * Abre la conexión con IndexedDB y crea las tablas si no existen.
  */
