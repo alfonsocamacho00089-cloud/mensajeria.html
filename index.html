@@ -1364,12 +1364,10 @@ async function cargarConversacionCon(idDestino, nombreDestino, fotoDestino) {
 
     // 3. Buscamos los mensajes de ESE contacto en LocalStorage
     // ... (final de la función cargarConversacionCon)
-    
- async function pintarAgendaContactos() {
+  async function pintarAgendaContactos() {
     const lista = document.getElementById('lista-contactos');
     if (!lista) return;
 
-    // Cargamos contactos (puedes migrarlos a la tabla 'perfiles')
     const contactos = JSON.parse(localStorage.getItem('mis_contactos')) || [];
     lista.innerHTML = ""; 
 
@@ -1380,6 +1378,7 @@ async function cargarConversacionCon(idDestino, nombreDestino, fotoDestino) {
 
         const btn = document.createElement('div');
         btn.className = 'fila-contacto'; 
+        // Importante: El ID 'img-cont-...' debe existir antes de llamar a aplicarFotoCapa
         btn.innerHTML = `
             <div id="img-cont-${contacto.id}" class="foto-perfil" style="width:45px; height:45px; border-radius:50%; background:#ffd700; color:#000; display:flex; align-items:center; justify-content:center; font-weight:900; font-size:20px; border: 2px solid #000; flex-shrink:0;">${inicial}</div>
             <div style="flex-grow: 1; margin-left: 10px;">
@@ -1389,30 +1388,42 @@ async function cargarConversacionCon(idDestino, nombreDestino, fotoDestino) {
             ${badgeHTML} 
         `;
 
-        // --- LÓGICA DE CACHÉ INTELIGENTE ---
-        const perfilLocal = await obtenerLocal('perfiles', contacto.id);
-        
-        if (perfilLocal && perfilLocal.foto) {
-            aplicarFotoCapa(contacto.id, perfilLocal.foto);
-        } else {
-            // Si no está en IndexedDB, lo bajamos de Firebase y lo guardamos
-            db.ref('usuarios/' + contacto.id + '/foto').once('value').then(snap => {
-                const fotoReal = snap.val();
-                if (fotoReal) {
-                    aplicarFotoCapa(contacto.id, fotoReal);
-                    // GUARDAMOS EN CACHÉ PARA LA PRÓXIMA VEZ
-                    guardarLocal('perfiles', { id: contacto.id, nombre: contacto.nombre, foto: fotoReal });
-                }
-            });
+        // 1. PRIMERO añadimos el contacto a la lista (Para que el DOM lo reconozca)
+        lista.appendChild(btn);
+
+        // 2. DESPUÉS buscamos y aplicamos la foto
+        try {
+            const perfilLocal = await obtenerLocal('perfiles', contacto.id);
+            
+            if (perfilLocal && perfilLocal.foto) {
+                // Si está en IndexedDB, la ponemos directo
+                aplicarFotoCapa(contacto.id, perfilLocal.foto);
+            } else {
+                // Si no, la pedimos a Firebase
+                db.ref('usuarios/' + contacto.id + '/foto').once('value').then(async (snap) => {
+                    const fotoReal = snap.val();
+                    if (fotoReal) {
+                        aplicarFotoCapa(contacto.id, fotoReal);
+                        // La guardamos para que la próxima vez sea instantáneo
+                        await guardarLocal('perfiles', { 
+                            id: contacto.id, 
+                            nombre: contacto.nombre, 
+                            foto: fotoReal 
+                        });
+                    }
+                });
+            }
+        } catch (e) {
+            console.error("Error en foto agenda:", e);
         }
 
         btn.onclick = async () => {
             const perfil = await obtenerLocal('perfiles', contacto.id);
             cargarConversacionCon(contacto.id, contacto.nombre, perfil ? perfil.foto : null); 
         }; 
-        lista.appendChild(btn);
     }
-}
+     } 
+ 
 
 // Función auxiliar para no repetir código
 function aplicarFotoCapa(id, src) {
