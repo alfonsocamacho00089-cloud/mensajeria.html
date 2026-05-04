@@ -1325,105 +1325,108 @@ function procesarQRScanner(contenido) {
 
     
 function cargarConversacionCon(idDestino, nombreDestino, fotoDestino) {
+function cargarConversacionCon(idDestino, nombreDestino, fotoDestino) {
     const box = document.getElementById('chat-box');
     if (!box) return;
 
-    box.innerHTML = ""; 
+    box.innerHTML = ""; // Limpiamos mensajes anteriores
 
+    // Datos del header
     document.querySelector('#target-id').value = idDestino;
-    if (document.getElementById('nombre-dueño-header')) {
-        document.getElementById('nombre-dueño-header').innerText = nombreDestino;
-    }
+    const headerNombre = document.getElementById('nombre-dueño-header');
+    if (headerNombre) headerNombre.innerText = nombreDestino;
 
-    // GESTIÓN DE FOTO HEADER
     const imgHeader = document.getElementById('foto-perfil-header');
     if (imgHeader) {
-        // Usamos la RAM o el parámetro
-        const fotoFinal = cacheFotosContactos[idDestino] || fotoDestino;
-        if (fotoFinal) {
-            imgHeader.innerHTML = `<img src="${fotoFinal}" style="width:100%; height:100%; border-radius:50%; object-fit:cover;">`;
+        if (fotoDestino) {
+            imgHeader.src = fotoDestino;
+            imgHeader.style.display = "block";
+        } else {
+            // Si no hay foto, puedes poner la inicial aquí también
+            imgHeader.src = 'https://via.placeholder.com/40';
         }
     }
 
-    const claveChat = 'chat_' + idDestino;
-    const mensajes = JSON.parse(localStorage.getItem(claveChat)) || [];
-
+    // Cargar mensajes del LocalStorage
+    const mensajes = JSON.parse(localStorage.getItem('chat_' + idDestino)) || [];
     mensajes.forEach(m => {
         pintarMensaje(m.texto, m.clase, m.hora, m.status || 'enviado', m.id);
     });
 
     localStorage.setItem('unread_' + idDestino, 0);
     
-    // ⬇️ ¡CIRUGÍA AQUÍ! ⬇️
-    // Ya no llamamos a pintarAgendaContactos() aquí para no estresar la RAM
-    console.log("📂 Historial cargado con: " + nombreDestino);
-    
-    // Cambiamos de pantalla (Asumiendo que tienes IDs para las pantallas)
+    // NAVEGACIÓN: Cambiamos de "vista"
     document.getElementById('pantalla-contactos').style.display = 'none'; 
     document.getElementById('pantalla-chat').style.display = 'block';
 
     cerrarModalQR();
-    const inputMsg = document.getElementById('msg-text');
-    if(inputMsg) inputMsg.focus();
      }
 
-     function pintarAgendaContactos() {
+     // Variable global para guardar las fotos pesadas en la sesión actual
+let cacheFotosContactos = {};
+
+function pintarAgendaContactos() {
     const lista = document.getElementById('lista-contactos');
     if (!lista) return;
 
     const contactos = JSON.parse(localStorage.getItem('mis_contactos')) || [];
     
-    // Solo limpiamos si realmente necesitamos re-dibujar todo
+    // Limpiamos solo para dibujar la versión más fresca
     lista.innerHTML = ""; 
 
     contactos.forEach(contacto => {
-        // ... (Tu lógica de iniciales y IDs se queda igual)
-        
+        const numNoLeidos = localStorage.getItem('unread_' + contacto.id) || 0;
+        const badgeHTML = numNoLeidos > 0 ? `<div class="contador-nube">${numNoLeidos}</div>` : '';
+        const inicial = contacto.nombre ? contacto.nombre.charAt(0).toUpperCase() : '?';
+        const idImg = `img-cont-${contacto.id}`;
+
         const btn = document.createElement('div');
         btn.className = 'fila-contacto'; 
-        btn.innerHTML = `...`; // Tu HTML de la fila
+        
+        // Ponemos el diseño con la inicial por defecto (Carga instantánea)
+        btn.innerHTML = `
+            <div id="${idImg}" class="foto-perfil" style="width:45px; height:45px; border-radius:50%; background:#ffd700; color:#000; display:flex; align-items:center; justify-content:center; font-weight:900; font-size:20px; border: 2px solid #000; flex-shrink:0;">${inicial}</div>
+            <div style="flex-grow: 1; margin-left: 10px;">
+                <div style="font-weight: bold; color: white;">${contacto.nombre}</div>
+                <div style="font-size: 12px; color: #8696a0;">ID: ${contacto.id}</div>
+            </div>
+            ${badgeHTML} 
+        `;
 
-        // Lógica de inyectar foto (Se queda igual)
+        // LÓGICA DE FOTOS: Si ya la tenemos en RAM, la ponemos. Si no, la buscamos.
         if (cacheFotosContactos[contacto.id]) {
             inyectarFoto(idImg, cacheFotosContactos[contacto.id]);
-        } else {
-            // Firebase una sola vez
+        } else if (contacto.foto) { // Si el objeto contacto ya tiene URL
+            cacheFotosContactos[contacto.id] = contacto.foto;
+            inyectarFoto(idImg, contacto.foto);
         }
 
         btn.onclick = () => {
+            // Al hacer clic, pasamos la foto de la caché si existe
             cargarConversacionCon(contacto.id, contacto.nombre, cacheFotosContactos[contacto.id]); 
         }; 
    
         lista.appendChild(btn);
     }); 
 }
-    // 3. Buscamos los mensajes de ESE contacto en LocalStorage
-    
-  
 
-// Función auxiliar para no repetir código
+// Función auxiliar para que la foto aparezca bonito
 function inyectarFoto(elementoId, src) {
     const contenedor = document.getElementById(elementoId);
     if (contenedor) {
         contenedor.innerHTML = `<img src="${src}" style="width:100%; height:100%; border-radius:50%; object-fit:cover;">`;
         contenedor.style.background = "transparent";
-        contenedor.style.border = "2px solid #ffd700";
     }
      }
     
 function volverALista() {
-    // 1. Escondemos el chat
     document.getElementById('pantalla-chat').style.display = 'none';
-    
-    // 2. Mostramos la lista que YA estaba cargada con sus fotos
     document.getElementById('pantalla-contactos').style.display = 'block';
     
-    // 3. ⚠️ IMPORTANTE: No llames a pintarAgendaContactos() aquí.
-    // Solo hazlo si quieres actualizar los globos de notificaciones, 
-    // pero por ahora, déjalo así para que las fotos NO se pierdan.
-    console.log("Regresando a la lista persistente...");
+    // Solo refrescamos la agenda si es necesario (ej: borrar notificaciones)
+    // Pero como ya cargamos las fotos en cacheFotosContactos, será muy rápido.
+    pintarAgendaContactos(); 
      }
-   
  
 // Reemplaza el bloque final por este:
  window.onload = async () => {
@@ -1466,7 +1469,6 @@ function volverALista() {
 };
      }   // <--- ¡ASEGÚRATE DE QUE ESTA LLAVE Y PUNTO Y COMA ESTÉN AQUÍ!// <--- Aquí termina el window.onload  
 
-let cacheFotosContactos = {}; // <--- AQUÍ EXACTAMENTE
      
      
      async function cargarProto() {
