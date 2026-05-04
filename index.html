@@ -1239,16 +1239,18 @@ async function obtenerToken(registration) {
             });
         }
         
-        if (typeof pintarAgendaContactos === "function") {
-            pintarAgendaContactos(); 
-        }
+        const lista = document.getElementById('lista-contactos');
+// SOLO pintamos si la lista está vacía (length < 10 por los puntos suspensivos)
+if (typeof pintarAgendaContactos === "function" && (!lista || lista.innerHTML.length < 10)) {
+    pintarAgendaContactos(); 
+     }
 
     } else {
         const modalReg = document.getElementById('modal-registro');
         if (modalReg) modalReg.style.display = 'flex';
     }
      }
-     }
+     
         
 function cerrarModalQR() {
    
@@ -1315,13 +1317,12 @@ function procesarQRScanner(contenido) {
         console.error("Error crítico de espacio:", e);
         alert("⚠️ No hay espacio en el teléfono. Borra algunos chats.");
     }
-    
-     // ... al final de manejarBotonIdentidad
-const lista = document.getElementById('lista-contactos');
-// SOLO pintamos si la lista está vacía (length < 10 por los puntos suspensivos)
-if (typeof pintarAgendaContactos === "function" && (!lista || lista.innerHTML.length < 10)) {
-    pintarAgendaContactos(); 
+    document.getElementById('modal-nuevocontacto').style.display = 'none';
+    pintarAgendaContactos();
      }
+    
+     
+
     
 function cargarConversacionCon(idDestino, nombreDestino, fotoDestino) {
     const box = document.getElementById('chat-box');
