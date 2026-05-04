@@ -160,14 +160,13 @@ body {
 }
 
 #nombre-dueño-header {
- background: rgba(26, 26, 26, 0.7); 
+    background: transparent; /* Quitamos el fondo gris de la letra */
     font-size: 16px;
     font-weight: 500;
     margin: 0;
     color: white;
     line-height: 1.2;
-     backdrop-filter: blur(10px); 
-    -webkit-backdrop-filter: blur(10px);
+    text-shadow: none !important; /* Forzamos a que no haya sombra */
 }
     
 .user-status {
