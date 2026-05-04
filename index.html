@@ -1451,7 +1451,12 @@ function volverALista() {
                 miFotoCache = data.foto; 
             }
         }).catch(e => console.log("Carga de perfil lenta por red"));
-
+        if (id) {
+        // 1. Primero lo urgente: Pintar la lista de contactos
+        // Así tus hijos ven a sus amigos de una vez
+        if (typeof pintarAgendaContactos === "function") {
+            pintarAgendaContactos(); 
+     }
         if (typeof activarAntena === "function") activarAntena(); 
         manejarBotonIdentidad();
         
