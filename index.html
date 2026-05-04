@@ -1316,10 +1316,13 @@ function procesarQRScanner(contenido) {
         alert("⚠️ No hay espacio en el teléfono. Borra algunos chats.");
     }
     
-    document.getElementById('modal-nuevocontacto').style.display = 'none';
-    pintarAgendaContactos();
+     // ... al final de manejarBotonIdentidad
+const lista = document.getElementById('lista-contactos');
+// SOLO pintamos si la lista está vacía (length < 10 por los puntos suspensivos)
+if (typeof pintarAgendaContactos === "function" && (!lista || lista.innerHTML.length < 10)) {
+    pintarAgendaContactos(); 
      }
-     
+    
 function cargarConversacionCon(idDestino, nombreDestino, fotoDestino) {
     const box = document.getElementById('chat-box');
     if (!box) return;
