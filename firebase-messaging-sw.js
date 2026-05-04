@@ -39,7 +39,7 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const messaging = firebase.messaging();
 const DB_NAME = 'DropisDB';
-const DB_VERSION = 7; 
+const DB_VERSION = 10; 
 
 // ==========================================
 // 3. NOTIFICACIONES EN SEGUNDO PLANO
