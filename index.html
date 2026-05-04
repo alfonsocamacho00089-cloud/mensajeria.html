@@ -1321,67 +1321,52 @@ function procesarQRScanner(contenido) {
      }
      
 function cargarConversacionCon(idDestino, nombreDestino, fotoDestino) {
+    // 1. Alternamos vistas (Capas)
+    document.getElementById('pantalla-contactos').classList.add('hidden');
+    document.getElementById('pantalla-chat').classList.remove('hidden');
+
     const box = document.getElementById('chat-box');
     if (!box) return;
 
-    // 1. Limpiamos el chat visualmente
-    box.innerHTML = ""; 
+    box.innerHTML = ""; // El chat sí lo limpiamos para cargar el nuevo historial
 
-    // 2. Actualizamos la interfaz (ID y Nombre arriba)
+    // 2. Header
     document.querySelector('#target-id').value = idDestino;
-    if (document.getElementById('nombre-dueño-header')) {
-        document.getElementById('nombre-dueño-header').innerText = nombreDestino;
-    }
+    const headerNombre = document.getElementById('nombre-dueño-header');
+    if (headerNombre) headerNombre.innerText = nombreDestino;
 
-    // 3. Gestión de la FOTO de perfil en el Header
-
+    // 3. Foto Header (Simplificado para evitar destruir el nodo)
     const imgHeader = document.getElementById('foto-perfil-header');
-
     if (imgHeader) {
-
-        imgHeader.src = fotoDestino || 'https://via.placeholder.com/40';
-
-        if (!fotoDestino || fotoDestino.includes('placeholder.com')) {
-
+        if (fotoDestino) {
+            imgHeader.src = fotoDestino;
+            imgHeader.style.display = "block";
+            imgHeader.innerHTML = ""; // Limpia iniciales si las había
+        } else {
             const inicial = nombreDestino ? nombreDestino.charAt(0).toUpperCase() : '?';
-
-            imgHeader.style.display = "none"; 
-
-            imgHeader.outerHTML = `<div id="foto-perfil-header" class="foto-perfil" style="width:40px; height:40px; border-radius:50%; background:#ffd700; color:#000; display:flex; align-items:center; justify-content:center; font-weight:900; border:2px solid #000;">${inicial}</div>`;
-
+            imgHeader.style.display = "flex";
+            imgHeader.style.background = "#ffd700";
+            imgHeader.innerText = inicial;
+            imgHeader.src = ""; // Quitamos la imagen rota
         }
-
     }
 
-
-
-     
-    
-
-    // 4. Buscamos los mensajes de ESE contacto en LocalStorage
+    // 4. Cargar mensajes
     const claveChat = 'chat_' + idDestino;
     const mensajes = JSON.parse(localStorage.getItem(claveChat)) || [];
+    mensajes.forEach(m => pintarMensaje(m.texto, m.clase, m.hora, m.status || 'enviado', m.id));
 
-    // 5. Pintamos los mensajes con la nueva data (ID y Estado para checks)
-    mensajes.forEach(m => {
-       
-    
-    pintarMensaje(m.texto, m.clase, m.hora, m.status || 'enviado', m.id);
-    });
-
-
-
-     
-    // 6. TU LÓGICA DE LIMPIEZA (Lo que te había borrado)
+    // 5. Limpiar no leídos
     localStorage.setItem('unread_' + idDestino, 0);
     
-    // Refrescar la agenda para borrar el círculo de notificaciones
-    pintarAgendaContactos();
-    console.log("📂 Historial cargado con: " + nombreDestino);
-    
-    // 7. Cerramos el modal para empezar a chatear
+    // OJO: Aquí ya no re-pintamos toda la agenda, solo actualizamos el badge
+    const badge = document.getElementById(`badge-${idDestino}`);
+    if(badge) {
+        badge.style.display = 'none';
+        badge.innerHTML = '';
+    }
+
     cerrarModalQR();
-    
     const inputMsg = document.getElementById('msg-text');
     if(inputMsg) inputMsg.focus();
      }
@@ -1393,50 +1378,59 @@ function cargarConversacionCon(idDestino, nombreDestino, fotoDestino) {
     if (!lista) return;
 
     const contactos = JSON.parse(localStorage.getItem('mis_contactos')) || [];
+    
+    // Si la lista ya tiene hijos, solo actualizamos los badges de "no leídos"
+    if (lista.children.length > 0) {
+        contactos.forEach(contacto => {
+            const numNoLeidos = localStorage.getItem('unread_' + contacto.id) || 0;
+            const badge = document.querySelector(`#badge-${contacto.id}`);
+            if (badge) {
+                badge.innerHTML = numNoLeidos > 0 ? numNoLeidos : '';
+                badge.style.display = numNoLeidos > 0 ? 'flex' : 'none';
+            }
+        });
+        return; // Salimos, no hace falta re-dibujar todo
+    }
+
+    // Si está vacía (primera vez), dibujamos:
     lista.innerHTML = ""; 
 
     contactos.forEach(contacto => {
         const numNoLeidos = localStorage.getItem('unread_' + contacto.id) || 0;
-        const badgeHTML = numNoLeidos > 0 ? `<div class="contador-nube">${numNoLeidos}</div>` : '';
         const inicial = contacto.nombre ? contacto.nombre.charAt(0).toUpperCase() : '?';
         const idImg = `img-cont-${contacto.id}`;
 
         const btn = document.createElement('div');
         btn.className = 'fila-contacto'; 
         
-        // Diseño base con inicial (Carga instantánea)
         btn.innerHTML = `
             <div id="${idImg}" class="foto-perfil" style="width:45px; height:45px; border-radius:50%; background:#ffd700; color:#000; display:flex; align-items:center; justify-content:center; font-weight:900; font-size:20px; border: 2px solid #000; flex-shrink:0;">${inicial}</div>
             <div style="flex-grow: 1; margin-left: 10px;">
                 <div style="font-weight: bold; color: white;">${contacto.nombre}</div>
                 <div style="font-size: 12px; color: #8696a0;">ID: ${contacto.id}</div>
             </div>
-            ${badgeHTML} 
+            <div id="badge-${contacto.id}" class="contador-nube" style="display: ${numNoLeidos > 0 ? 'flex' : 'none'}">
+                ${numNoLeidos > 0 ? numNoLeidos : ''}
+            </div>
         `;
 
-        // LÓGICA DE CACHÉ INTELIGENTE
+        // Lógica de fotos (se mantiene igual, es buena)
         if (cacheFotosContactos[contacto.id]) {
-            // Si ya la pedimos antes, la ponemos de una vez
             inyectarFoto(idImg, cacheFotosContactos[contacto.id]);
         } else {
-            // Si no, la pedimos a Firebase SOLO UNA VEZ
             db.ref('usuarios/' + contacto.id + '/foto').once('value').then(snap => {
                 const f = snap.val();
                 if (f) {
-                    cacheFotosContactos[contacto.id] = f; // La guardamos en RAM
+                    cacheFotosContactos[contacto.id] = f;
                     inyectarFoto(idImg, f);
                 }
             });
         }
 
-        btn.onclick = () => {
-            // Aquí ya no pedimos nada a Firebase, usamos lo que hay en RAM
-            cargarConversacionCon(contacto.id, contacto.nombre, cacheFotosContactos[contacto.id]); 
-        }; 
-   
+        btn.onclick = () => cargarConversacionCon(contacto.id, contacto.nombre, cacheFotosContactos[contacto.id]); 
         lista.appendChild(btn);
     }); 
-}
+     }
 
 // Función auxiliar para no repetir código
 function inyectarFoto(elementoId, src) {
@@ -1449,12 +1443,13 @@ function inyectarFoto(elementoId, src) {
      }
     
 function volverALista() {
-    document.getElementById('pantalla-chat').style.display = 'none';
-    document.getElementById('pantalla-contactos').style.display = 'block';
+    // Simplemente jugamos con la visibilidad
+    document.getElementById('pantalla-chat').classList.add('hidden');
+    document.getElementById('pantalla-contactos').classList.remove('hidden');
     
-    // ESTA ES LA LÍNEA CLAVE
-    pintarAgendaContactos(); 
-     }
+    // Opcional: Si quieres asegurar que los badges estén al día
+    // pintarAgendaContactos(); // Ahora esta función es rápida porque no borra nada
+}
    
  
 // Reemplaza el bloque final por este:
