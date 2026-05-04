@@ -1348,22 +1348,20 @@ async function cargarConversacionCon(idDestino, nombreDestino, fotoDestino) {
     }
 
     const imgHeader = document.getElementById('foto-perfil-header');
-
 if (imgHeader) {
     if (fotoDestino && fotoDestino !== "") {
-        imgHeader.innerHTML = ""; 
-        imgHeader.style.backgroundImage = `url(${fotoDestino})`;
-        imgHeader.style.backgroundSize = "cover";
-        imgHeader.style.backgroundPosition = "center";
-        imgHeader.textContent = ""; 
+        // SI HAY FOTO: Nos aseguramos de que sea una imagen
+        if (imgHeader.tagName === 'DIV') {
+            imgHeader.outerHTML = `<img id="foto-perfil-header" class="foto-perfil" style="width:40px; height:40px; border-radius:50%; object-fit:cover; border:2px solid #000;">`;
+            document.getElementById('foto-perfil-header').src = fotoDestino;
+        } else {
+            imgHeader.src = fotoDestino;
+            imgHeader.style.display = "block";
+        }
     } else {
+        // SI NO HAY FOTO: Pintamos la inicial
         const inicial = nombreDestino ? nombreDestino.charAt(0).toUpperCase() : '?';
-        imgHeader.style.backgroundImage = "none";
-        imgHeader.style.backgroundColor = "#ffd700"; // Cambiado background a backgroundColor
-        imgHeader.style.display = "flex";
-        imgHeader.style.alignItems = "center"; // <-- CORREGIDO: de align-items a alignItems
-        imgHeader.style.justifyContent = "center"; // <-- CORREGIDO: de justify-content a justifyContent
-        imgHeader.innerHTML = inicial; 
+        imgHeader.outerHTML = `<div id="foto-perfil-header" class="foto-perfil" style="width:40px; height:40px; border-radius:50%; background:#ffd700; color:#000; display:flex; align-items:center; justify-content:center; font-weight:900; border:2px solid #000;">${inicial}</div>`;
     }
      }
 
