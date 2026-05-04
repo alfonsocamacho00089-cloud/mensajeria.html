@@ -1459,6 +1459,16 @@ function aplicarFotoCapa(id, src) {
         if(modalRegistro) modalRegistro.style.display = 'flex';
     }
     // ... resto del código del splash
+const splash = document.getElementById('pantalla-carga');
+    if (splash) {
+        // Un pequeño delay de 300ms para que la transición sea suave
+        setTimeout(() => {
+            splash.style.opacity = '0';
+            setTimeout(() => {
+                splash.style.display = 'none';
+            }, 300);
+        }, 300);
+    }
 };
      // <--- ¡ASEGÚRATE DE QUE ESTA LLAVE Y PUNTO Y COMA ESTÉN AQUÍ!// <--- Aquí termina el window.onload  
 async function cargarProto() {
