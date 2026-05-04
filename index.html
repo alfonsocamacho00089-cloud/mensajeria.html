@@ -1225,30 +1225,40 @@ async function obtenerToken(registration) {
     const nombre = localStorage.getItem('mi_nombre') || "Usuario";
 
     if (id) {
-        // 1. ACTIVAMOS LA ANTENA
-        activarAntena(); 
-
-        // 2. GESTIÓN DEL TOKEN (Firebase Cloud Messaging)
-        // ... (Tu código de tokens se mantiene igual)
-
-        // 3. MOSTRAR QR Y AGENDA
+        // 1. Mostrar el modal de inmediato
         const modal = document.getElementById('modal-qr');
         if (modal) modal.style.display = 'flex';
-        
-        // Importante: Llamamos a pintarAgenda que ahora es async
-        if (typeof pintarAgendaContactos === "function") {
-            await pintarAgendaContactos(); 
-        }
 
-        // Renderizar QR
+        // 2. RENDERIZAR EL QR PRIMERO (Para que no haya espera)
         const cont = document.getElementById('contenedor-qr');
         if (cont) {
-            // ... (Tu código de diseño de QR se mantiene igual)
+            cont.innerHTML = `
+                <div style="text-align:center; margin-bottom: 15px;">
+                    <h3 style="margin: 5px 0; color: #fff; text-transform: uppercase; font-size: 18px;">${nombre}</h3>
+                    <p style="font-size: 14px; color: #000; opacity: 0.9; letter-spacing: 1px; font-family: monospace;">ID: ${id}</p>
+                </div>
+                <div id="grafico-qr" style="display: flex; justify-content: center; background: white; padding: 12px; border-radius: 12px; width: fit-content; margin: 0 auto; box-shadow: 0 0 15px rgba(255,215,0,0.9);"></div>
+                <button onclick="abrirEscanner()" style="margin-top: 20px; padding: 12px; background: #ffd700; color: #000; border: none; border-radius: 8px; font-weight: 900; width: 100%; cursor: pointer; text-transform: uppercase;">
+                    📷 ESCANEAR NUEVO CONTACTO
+                </button>
+            `;
+
+            // Esto dibuja el QR de una vez
             new QRCode(document.getElementById("grafico-qr"), { 
                 text: `dropisapp://perfil/${id}`, 
-                width: 150, height: 150 
+                width: 150, 
+                height: 150 
             });
         }
+
+        // 3. ACTIVAR ANTENA Y GESTIONAR TOKEN (En segundo plano)
+        activarAntena(id); 
+
+        // 4. CARGAR LA AGENDA AL FINAL (Sin bloquear el QR)
+        if (typeof pintarAgendaContactos === "function") {
+            pintarAgendaContactos(); // Le quitamos el 'await' para que no detenga el QR
+        }
+
     } else {
         const modalReg = document.getElementById('modal-registro');
         if (modalReg) modalReg.style.display = 'flex';
