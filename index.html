@@ -1038,7 +1038,7 @@ setTimeout(() => {
 
 // --- 4. ANTENA SATELITAL ---
 
-  async function activarAntena() {
+     async function activarAntena() {
     const miID = localStorage.getItem('mi_dropis_id');
     if (!miID) return;
 
@@ -1059,85 +1059,68 @@ setTimeout(() => {
             const emisorID = data.from; 
             const chatAbiertoActualmente = document.querySelector('#target-id').value;
 
-  
-            
             // --- 1. LÓGICA DE CONFIRMACIÓN (DOBLE CHECK) ---
             if (decoded.tipo === 1) { 
-                // Usamos data.msgId que es el que viene de Firebase
                 const idParaMarcar = data.msgId; 
-                console.log("Recibido ECO para el mensaje:", idParaMarcar);
                 
-                setTimeout(() => {
-                    if (typeof marcarMensajeComoRecibido === "function") {
-                        marcarMensajeComoRecibido(idParaMarcar, emisorID);
-                    }
-                }, 100);
+                // ACTUALIZAR EN INDEXEDDB: Buscamos el mensaje y cambiamos su estado
+                const todos = await obtenerTodo('mensajes');
+                const msgEncontrado = todos.find(m => m.id === idParaMarcar);
+                if (msgEncontrado) {
+                    msgEncontrado.status = 'recibido';
+                    await guardarLocal('mensajes', msgEncontrado);
+                }
+
+                if (typeof marcarMensajeComoRecibido === "function") {
+                    marcarMensajeComoRecibido(idParaMarcar, emisorID);
+                }
 
                 snapshot.ref.remove(); 
                 return; 
-     }
+            }
 
-            // --- 2. LÓGICA DE MENSAJE DE TEXTO (TIPO 0) ---
+            // --- 2. LÓGICA DE MENSAJE DE TEXTO ---
             const textoReal = decodeURIComponent(escape(atob(decoded.chatText)));
 
-            // Guardar mensaje en el historial local (Incluyendo el msgId)
-            let clave = 'chat_' + emisorID;
-            
-
-           let historial = JSON.parse(localStorage.getItem(clave)) || [];
-            historial.push({ 
-                id: decoded.msgId, // Guardamos el ID para futuras referencias
+            // GUARDAR EN INDEXEDDB (En lugar de localStorage)
+            const nuevoMensaje = { 
+                id: decoded.msgId,
+                contactoId: emisorID, // Para saber de quién es el mensaje
                 texto: textoReal, 
                 clase: 'msg-izquierda',
                 status: 'recibido',
                 ts: Date.now(),
-
                 hora: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })
-            });
+            };
            
-            localStorage.setItem(clave, JSON.stringify(historial));
+            await guardarLocal('mensajes', nuevoMensaje);
 
-            // Manejo de Interfaz y Notificaciones
+            // Manejo de Interfaz
             if (emisorID === chatAbiertoActualmente) {
-                // Pasamos el msgId a pintarMensaje para que el HTML sea rastreable
-                pintarMensaje(textoReal, 'msg-izquierda',null, 'enviado', decoded.msgId);
-         
-        } else {
+                pintarMensaje(textoReal, 'msg-izquierda', null, 'recibido', decoded.msgId);
+            } else {
                 let noLeidos = parseInt(localStorage.getItem('unread_' + emisorID)) || 0;
                 localStorage.setItem('unread_' + emisorID, noLeidos + 1);
-                
                 pintarAgendaContactos();
 
-                // Notificación Nativa corregida
-                // --- BLOQUE PARA LA ANTENA (RECIBIR) ---
-// --- BLOQUE PARA LA ANTENA (RECIBIR) ---
+                // Notificación Nativa
                 if ('serviceWorker' in navigator) {
-                    navigator.serviceWorker.ready.then(registration => {
-                        registration.showNotification("SpaceChat: " + emisorID, {
+                    navigator.serviceWorker.ready.then(reg => {
+                        reg.showNotification("Nuevo mensaje de " + emisorID, {
                             body: textoReal,
                             icon: 'assets/logo-nuevo.png',
-                            vibrate: [200, 100, 200],
-                            tag: 'nuevo-mensaje-' + emisorID, 
-                            renotify: true,
                             data: { emisor: emisorID }
                         });
                     });
                 }
             }
 
-            // --- 3. ENVIAR ECO AUTOMÁTICO AL EMISOR ---
-            // Le avisamos al otro que ya recibimos su mensaje
-            if (typeof enviarEco === "function") {
-                enviarEco(decoded.msgId, emisorID);
-            }
-
+            if (typeof enviarEco === "function") enviarEco(decoded.msgId, emisorID);
             snapshot.ref.remove(); 
+
         } catch (e) { console.error("Error en Antena:", e); }
     });
      }
-
-
-    
 async function enviarMensajeSatelital() {
     const inputMsg = document.querySelector('#msg-text');
     const inputTarget = document.querySelector('#target-id');
@@ -1147,74 +1130,58 @@ async function enviarMensajeSatelital() {
 
     if (!targetID || !msg) return alert("ID y Mensaje son obligatorios");
 
-    // 1. GENERAMOS EL ID ÚNICO (La "cédula" del mensaje)
     const msgId = "msg_" + Date.now();
 
     try {
-        // 2. MOTOR PROTOBUF
         const root = await cargarProto();
         const SuperAppPayload = root.lookupType("SuperAppPayload");
-        
-        // Ofuscamos el mensaje (Base64 + URI Encode)
         const msgProtegido = btoa(unescape(encodeURIComponent(msg))); 
         
-        // Creamos el paquete incluyendo el ID único
         const payload = SuperAppPayload.create({ 
             chatText: msgProtegido,
             msgId: msgId,
-            tipo: 0 // 0 significa que es un mensaje de texto normal
-});
-        
+            tipo: 0 
+        });
         
         const buffer = SuperAppPayload.encode(payload).finish();
-        
-        // 3. CONVERSIÓN Y LANZAMIENTO
         const base64 = btoa(String.fromCharCode.apply(null, buffer));
         
+        // Lanzamiento a Firebase
         await db.ref('cola_satelital/' + targetID).push({
-            p: base64,         // Paquete ProtoBuf
-            from: miID,        // Remitente
-            ts: Date.now(),    // Timestamp
-            msgId: msgId         // ID para rastreo de Doble Check
+            p: base64,
+            from: miID,
+            ts: Date.now(),
+            msgId: msgId
         });
 
-        // 4. INTERFAZ Y PERSISTENCIA LOCAL
-        // Pintamos el mensaje pasando el msgId para el futuro Doble Check
+        // PINTAR EN INTERFAZ
         pintarMensaje(msg, 'msg-derecha', null, 'enviado', msgId);
 
-     // --- PEGA EL CÓDIGO AQUÍ (Lógica del aviso de seguridad) ---
-        const aviso = document.getElementById('aviso-seguridad');
-        const contenedorMensajes = document.getElementById('tus-mensajes-container');
-        if (aviso && contenedorMensajes && contenedorMensajes.children.length >= 1) {
-            aviso.style.display = 'block';
-     }
-        // Guardamos en el historial con toda la data necesaria
-        let historialEnv = JSON.parse(localStorage.getItem('chat_' + targetID)) || [];
-        historialEnv.push({ 
+        // GUARDAR EN INDEXEDDB
+        await guardarLocal('mensajes', { 
             id: msgId, 
+            contactoId: targetID, // Clave para filtrar el chat después
             texto: msg, 
             clase: 'msg-derecha', 
             status: 'enviado',
             ts: Date.now(),
-            // AGREGA ESTA LÍNEA JUSTO AQUÍ:
             hora: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })
-});
-        localStorage.setItem('chat_' + targetID, JSON.stringify(historialEnv));
+        });
 
-        // 5. LIMPIEZA DE INPUT (Manteniendo el foco y reseteando altura)
         if (inputMsg) {
             inputMsg.value = "";
-            inputMsg.style.height = '36px'; // Mantiene tu diseño visual
+            inputMsg.style.height = '36px';
             inputMsg.focus(); 
         }
 
-        console.log("🚀 Mensaje con ID " + msgId + " lanzado al espacio hacia:", targetID);
-
     } catch (e) {
         console.error("❌ Fallo en el lanzamiento:", e);
-        alert("Error al enviar el mensaje.");
     }
      }
+  
+            
+        
+
      // --- BLOQUE: ENVIAR MENSAJE (NOTIFICAR) ---
 if ('serviceWorker' in navigator && Notification.permission === "granted") {
     navigator.serviceWorker.ready.then(registration => {
