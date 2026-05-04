@@ -2082,12 +2082,7 @@ window.addEventListener('beforeinstallprompt', (e) => {
     // Guarda el evento para usarlo cuando tú quieras
     instaladorDiferido = e;
     
-    // OPCIONAL: Aquí podrías mostrar un botón que diga "DESCARGAR SPACECHAT"
-    // O lanzarlo de una vez si quieres ser agresivo como en Netlify:
-    setTimeout(() => {
-        lanzarInstalacion();
-    }, 2000); // Espera 2 segundos para que el usuario vea la app primero
-});
+    });
 
 function lanzarInstalacion() {
     if (instaladorDiferido) {
