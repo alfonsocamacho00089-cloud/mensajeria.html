@@ -1351,21 +1351,19 @@ async function cargarConversacionCon(idDestino, nombreDestino, fotoDestino) {
 
 if (imgHeader) {
     if (fotoDestino && fotoDestino !== "") {
-        // MODO FOTO: Limpiamos el texto y ponemos la imagen de fondo
-        imgHeader.innerHTML = ""; // Quita la inicial si existía
+        imgHeader.innerHTML = ""; 
         imgHeader.style.backgroundImage = `url(${fotoDestino})`;
         imgHeader.style.backgroundSize = "cover";
         imgHeader.style.backgroundPosition = "center";
-        imgHeader.textContent = ""; // Asegura que no haya letras
+        imgHeader.textContent = ""; 
     } else {
-        // MODO INICIAL: Quitamos la foto y ponemos la letra
         const inicial = nombreDestino ? nombreDestino.charAt(0).toUpperCase() : '?';
         imgHeader.style.backgroundImage = "none";
-        imgHeader.style.background = "#ffd700"; // Tu dorado SpaceChat
+        imgHeader.style.backgroundColor = "#ffd700"; // Cambiado background a backgroundColor
         imgHeader.style.display = "flex";
-        imgHeader.style.align-items = "center";
-        imgHeader.style.justify-content = "center";
-        imgHeader.innerHTML = inicial; // Ponemos la letra
+        imgHeader.style.alignItems = "center"; // <-- CORREGIDO: de align-items a alignItems
+        imgHeader.style.justifyContent = "center"; // <-- CORREGIDO: de justify-content a justifyContent
+        imgHeader.innerHTML = inicial; 
     }
      }
 
