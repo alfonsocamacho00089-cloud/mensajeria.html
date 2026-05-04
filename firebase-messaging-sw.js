@@ -8,7 +8,7 @@ importScripts('./protobuf.min.js');
 // ==========================================
 // 1.5. CACHÉ PARA FUNCIONAR SIN INTERNET
 // ==========================================
-const CACHE_NAME = 'spacechat-cache-v4.1';
+const CACHE_NAME = 'spacechat-cache-v4.2';
 const urlsToCache = [
   './',
   './index.html',
