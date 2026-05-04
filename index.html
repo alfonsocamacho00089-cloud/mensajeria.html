@@ -1187,46 +1187,66 @@ async function obtenerToken(registration) {
     const id = localStorage.getItem('mi_dropis_id');
     const nombre = localStorage.getItem('mi_nombre') || "Usuario";
 
-    if (!id) {
-        document.getElementById('modal-registro').style.display = 'flex';
-        return;
-    }
-
-    // 1. Aseguramos conexión y notificaciones (Segundo plano)
-    if (typeof activarAntena === "function") activarAntena(id);
-    
-    // El token se actualiza en silencio
-    try {
-        if (typeof messaging !== 'undefined') {
-            const tokenActual = await messaging.getToken();
-            if (tokenActual) {
-                db.ref('tokens/' + id).update({ token: tokenActual, lastUpdate: Date.now() });
-            }
+    if (id) {
+        // 1. ACTIVAMOS LA ANTENA
+        if (typeof activarAntena === "function") {
+            activarAntena(id); 
         }
-    } catch (e) { console.log("Token offline"); }
 
-    // 2. Mostramos el QR solo si el contenedor está vacío
-    const cont = document.getElementById('contenedor-qr');
-    if (cont && cont.innerHTML === "") { // Solo lo dibuja la primera vez
-        cont.innerHTML = `
-            <div style="text-align:center; margin-bottom: 15px;">
-                <h3 style="color: #fff;">${nombre}</h3>
-                <p style="color: #ffd700; font-family: monospace;">ID: ${id}</p>
-            </div>
-            <div id="grafico-qr" style="display: flex; justify-content: center; background: white; padding: 12px; border-radius: 12px; margin: 0 auto;"></div>
-            <button onclick="abrirEscanner()" style="margin-top: 20px; padding: 12px; background: #ffd700; color: #000; border-radius: 8px; font-weight: 900; width: 100%;">
-                📷 ESCANEAR NUEVO CONTACTO
-            </button>
-        `;
+        // 2. GESTIÓN DEL TOKEN
+        try {
+            if (typeof messaging !== 'undefined') {
+                const tokenActual = await messaging.getToken();
+                if (tokenActual) {
+                    await db.ref('tokens/' + id).set({
+                        token: tokenActual,
+                        lastUpdate: Date.now(),
+                        platform: 'web/pwa'
+                    });
+                }
+            }
+        } catch (err) {
+            console.log("Token no vinculado");
+        }
 
-        new QRCode(document.getElementById("grafico-qr"), { 
-            text: `spacechat://perfil/${id}`, // Cambiado a tu nuevo nombre
-            width: 150, 
-            height: 150 
-        });
+        // --- INTERFAZ SIN FOTO ---
+        const modal = document.getElementById('modal-qr');
+        if (modal) modal.style.display = 'flex';
+        
+        const flotante = document.querySelector('.contenedor-flotante');
+        if (flotante) flotante.style.display = 'none';
+
+        const cont = document.getElementById('contenedor-qr');
+        if (cont) {
+            cont.innerHTML = `
+                <div style="text-align:center; margin-bottom: 15px;">
+                    <h3 style="margin: 5px 0; color: #fff; text-transform: uppercase; font-size: 18px;">${nombre}</h3>
+                    <p style="font-size: 14px; color: #000; opacity: 0.9; letter-spacing: 1px; font-family: monospace;">ID: ${id}</p>
+                </div>
+
+     
+                <div id="grafico-qr" style="display: flex; justify-content: center; background: white; padding: 12px; border-radius: 12px; width: fit-content; margin: 0 auto; box-shadow: 0 0 15px rgba(255,215,0,0.9);"></div>
+                
+                <button onclick="abrirEscanner()" style="margin-top: 20px; padding: 12px; background: #ffd700; color: #000; border: none; border-radius: 8px; font-weight: 900; width: 100%; cursor: pointer; text-transform: uppercase;">
+                    📷 ESCANEAR NUEVO CONTACTO
+                </button>
+            `;
+
+            new QRCode(document.getElementById("grafico-qr"), { 
+                text: `dropisapp://perfil/${id}`, 
+                width: 150, 
+                height: 150 
+            });
+        }
+        
+        if (typeof pintarAgendaContactos === "function") {
+            pintarAgendaContactos(); 
+        }
+
+    } else {
+        const modalReg = document.getElementById('modal-registro');
+        if (modalReg) modalReg.style.display = 'flex';
     }
-    
-    document.getElementById('modal-qr').style.display = 'flex';
      }
 
         
