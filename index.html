@@ -1371,6 +1371,64 @@ function cargarConversacionCon(idDestino, nombreDestino, fotoDestino) {
     if(inputMsg) inputMsg.focus();
      }
 
+     function pintarAgendaContactos() {
+    const lista = document.getElementById('lista-contactos');
+    if (!lista) return;
+
+    const contactos = JSON.parse(localStorage.getItem('mis_contactos')) || [];
+    
+    // Si la lista ya tiene hijos, solo actualizamos los badges de "no leídos"
+    if (lista.children.length > 0) {
+        contactos.forEach(contacto => {
+            const numNoLeidos = localStorage.getItem('unread_' + contacto.id) || 0;
+            const badge = document.querySelector(`#badge-${contacto.id}`);
+            if (badge) {
+                badge.innerHTML = numNoLeidos > 0 ? numNoLeidos : '';
+                badge.style.display = numNoLeidos > 0 ? 'flex' : 'none';
+            }
+        });
+        return; // Salimos, no hace falta re-dibujar todo
+    }
+
+    // Si está vacía (primera vez), dibujamos:
+    lista.innerHTML = ""; 
+
+    contactos.forEach(contacto => {
+        const numNoLeidos = localStorage.getItem('unread_' + contacto.id) || 0;
+        const inicial = contacto.nombre ? contacto.nombre.charAt(0).toUpperCase() : '?';
+        const idImg = `img-cont-${contacto.id}`;
+
+        const btn = document.createElement('div');
+        btn.className = 'fila-contacto'; 
+        
+        btn.innerHTML = `
+            <div id="${idImg}" class="foto-perfil" style="width:45px; height:45px; border-radius:50%; background:#ffd700; color:#000; display:flex; align-items:center; justify-content:center; font-weight:900; font-size:20px; border: 2px solid #000; flex-shrink:0;">${inicial}</div>
+            <div style="flex-grow: 1; margin-left: 10px;">
+                <div style="font-weight: bold; color: white;">${contacto.nombre}</div>
+                <div style="font-size: 12px; color: #8696a0;">ID: ${contacto.id}</div>
+            </div>
+            <div id="badge-${contacto.id}" class="contador-nube" style="display: ${numNoLeidos > 0 ? 'flex' : 'none'}">
+                ${numNoLeidos > 0 ? numNoLeidos : ''}
+            </div>
+        `;
+
+        // Lógica de fotos (se mantiene igual, es buena)
+        if (cacheFotosContactos[contacto.id]) {
+            inyectarFoto(idImg, cacheFotosContactos[contacto.id]);
+        } else {
+            db.ref('usuarios/' + contacto.id + '/foto').once('value').then(snap => {
+                const f = snap.val();
+                if (f) {
+                    cacheFotosContactos[contacto.id] = f;
+                    inyectarFoto(idImg, f);
+                }
+            });
+        }
+
+        btn.onclick = () => cargarConversacionCon(contacto.id, contacto.nombre, cacheFotosContactos[contacto.id]); 
+        lista.appendChild(btn);
+    }); 
+     }
     // 3. Buscamos los mensajes de ESE contacto en LocalStorage
     // ... (final de la función cargarConversacionCon)
   async function manejarBotonIdentidad() {
