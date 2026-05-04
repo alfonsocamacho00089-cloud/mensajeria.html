@@ -1338,20 +1338,24 @@ async function cargarConversacionCon(idDestino, nombreDestino, fotoDestino) {
     }
 
     const imgHeader = document.getElementById('foto-perfil-header');
+
 if (imgHeader) {
     if (fotoDestino && fotoDestino !== "") {
-        // SI HAY FOTO: Nos aseguramos de que sea una imagen
-        if (imgHeader.tagName === 'DIV') {
-            imgHeader.outerHTML = `<img id="foto-perfil-header" class="foto-perfil" style="width:40px; height:40px; border-radius:50%; object-fit:cover; border:2px solid #000;">`;
-            document.getElementById('foto-perfil-header').src = fotoDestino;
-        } else {
-            imgHeader.src = fotoDestino;
-            imgHeader.style.display = "block";
-        }
+        // MODO FOTO: Limpiamos el texto y ponemos la imagen de fondo
+        imgHeader.innerHTML = ""; // Quita la inicial si existía
+        imgHeader.style.backgroundImage = `url(${fotoDestino})`;
+        imgHeader.style.backgroundSize = "cover";
+        imgHeader.style.backgroundPosition = "center";
+        imgHeader.textContent = ""; // Asegura que no haya letras
     } else {
-        // SI NO HAY FOTO: Pintamos la inicial
+        // MODO INICIAL: Quitamos la foto y ponemos la letra
         const inicial = nombreDestino ? nombreDestino.charAt(0).toUpperCase() : '?';
-        imgHeader.outerHTML = `<div id="foto-perfil-header" class="foto-perfil" style="width:40px; height:40px; border-radius:50%; background:#ffd700; color:#000; display:flex; align-items:center; justify-content:center; font-weight:900; border:2px solid #000;">${inicial}</div>`;
+        imgHeader.style.backgroundImage = "none";
+        imgHeader.style.background = "#ffd700"; // Tu dorado SpaceChat
+        imgHeader.style.display = "flex";
+        imgHeader.style.align-items = "center";
+        imgHeader.style.justify-content = "center";
+        imgHeader.innerHTML = inicial; // Ponemos la letra
     }
      }
 
