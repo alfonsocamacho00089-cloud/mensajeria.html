@@ -1992,60 +1992,61 @@ function abrirPerfilContacto() {
 
 async function irAContactos() {
     const lista = document.getElementById('lista-contactos');
-    if (lista) lista.innerHTML = ""; // Limpiamos la pantalla
-    
-    // Vaciamos la memoria. Esto es lo que permite que el contacto
-    // que borraste del chat sea "bienvenido" otra vez a la lista.
+    if (lista) lista.innerHTML = ""; 
     contactosRenderizados.clear(); 
 
-    // Nos aseguramos de que el localStorage tenga la lista completa desde la v10
+    // Traemos a TODOS desde la base de datos v10 (aquí están los que ocultaste)
     const todos = await obtenerTodo('perfiles'); 
     if (todos.length > 0) {
+        // Los volvemos a meter al LocalStorage para que se vuelvan a pintar
         localStorage.setItem('mis_contactos', JSON.stringify(todos));
     }
 
-    // Volvemos a pintar todo. Ahora aparecerán TODOS tus contactos.
     await pintarAgendaContactos();
-    
-    console.log("Mostrando agenda completa");
      }
-     
-async function eliminarChatEspecifico() {
-    // Usamos el mismo input oculto que usas para eliminar contactos
+
+     async function eliminarChatEspecifico() {
     const idDestino = document.querySelector('#target-id').value;
     const nombreDestino = document.getElementById('perfil-nombre')?.innerText || "este contacto";
 
-    if (!idDestino) return alert("No hay un chat seleccionado");
+    if (!idDestino) return alert("No hay un chat seleccionado para eliminar");
 
-    if (confirm(`¿Ocultar la conversación con ${nombreDestino}?`)) {
+    if (confirm(`¿Eliminar mensajes y ocultar a ${nombreDestino} de la lista?`)) {
         
-        // 1. LIMPIEZA DE MENSAJES (Opcional, según prefieras)
+        // 1. ELIMINAR MENSAJES (LocalStorage e IndexedDB)
         localStorage.removeItem('chat_' + idDestino);
+        localStorage.setItem('unread_' + idDestino, 0);
+
         try {
             const db = await abrirDB();
             const tx = db.transaction('mensajes', 'readwrite');
             await tx.objectStore('mensajes').delete('msg_' + idDestino);
-        } catch (e) { console.log("Error al limpiar mensajes en v10"); }
+        } catch (e) { console.log("Error borrando mensajes en v10"); }
 
-        // 2. ELIMINAR DE LA VISTA (Igual que en eliminar contacto)
-        // Lo sacamos del Set para que el sistema lo deje de rastrear como "activo"
+        // 2. EL "DESPINTADO" (Quitarlo de la lista actual sin borrarlo de la DB)
+        
+        // Lo quitamos de la memoria de renderizado para que el sistema permita borrar la fila
         contactosRenderizados.delete(idDestino); 
 
-        // Borramos su fila del HTML para que desaparezca de la lista
-        const fila = document.getElementById(`fila-${idDestino}`);
-        if (fila) {
-            fila.remove(); 
-        }
+        // Lo quitamos de la lista de 'mis_contactos' del LocalStorage (esto es lo que lo oculta)
+        let contactos = JSON.parse(localStorage.getItem('mis_contactos')) || [];
+        contactos = contactos.filter(c => c.id !== idDestino);
+        localStorage.setItem('mis_contactos', JSON.stringify(contactos));
 
-        // 3. CIERRE DE MODAL Y LIMPIEZA DE PANTALLA
-        document.getElementById('modal-perfil').style.display = 'none';
+        // 3. LIMPIEZA VISUAL
+        const fila = document.getElementById(`fila-${idDestino}`);
+        if (fila) fila.remove(); // Quitamos la fila de la lista de chats
+
         const box = document.getElementById('chat-box');
         if (box) box.innerHTML = ""; 
 
-        console.log("Chat ocultado: " + idDestino);
+        // 4. CIERRE DE MODAL
+        const modalPerfil = document.getElementById('modal-perfil');
+        if (modalPerfil) modalPerfil.style.display = 'none';
+
+        console.log("✅ Chat e hilo eliminados. Contacto ocultado de la lista principal.");
     }
      }
-
 
      async function eliminarContactoDeAgenda() {
     const idABorrar = document.querySelector('#target-id').value;
