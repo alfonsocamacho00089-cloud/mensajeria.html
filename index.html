@@ -2109,7 +2109,7 @@ function abrirPerfilContacto() {
 
         div.onclick = () => {
             // Al tocar uno, lo "activamos" en la lista de chats y abrimos la conversación
-            activarContactoEnChat(contacto);
+            activarContactoPorId(contacto.id);
             modal.style.display = 'none';
         };
 
