@@ -2003,33 +2003,7 @@ function abrirPerfilContacto() {
     document.getElementById('modal-perfil').style.display = 'flex';
 }
 
-async function irAContactos() {
-    // 1. Traemos TODOS los perfiles
-    const todos = await obtenerTodo('perfiles');
-    
-    // 2. Filtramos: SÓLO los que tienen la marca 'oculto: true'
-    const soloOcultos = todos.filter(p => p.oculto === true);
 
-    if (soloOcultos.length === 0) {
-        return console.log("No hay contactos ocultos para mostrar.");
-    }
-
-    // 3. Los "des-ocultamos" en la base de datos para que vuelvan a ser normales
-    for (const p of soloOcultos) {
-        p.oculto = false; 
-        await guardarLocal('perfiles', p);
-    }
-
-    // 4. Actualizamos mis_contactos solo con estos que acaban de volver
-    let actuales = JSON.parse(localStorage.getItem('mis_contactos')) || [];
-    const nuevaLista = [...actuales, ...soloOcultos];
-    localStorage.setItem('mis_contactos', JSON.stringify(nuevaLista));
-
-    // 5. Pintamos (Como usamos el Set y contactosRenderizados, solo pintará los nuevos)
-    await pintarAgendaContactos();
-    
-    console.log("Se han restaurado solo los contactos que estaban ocultos.");
-}
 
      async function eliminarChatEspecifico() {
     const idDestino = document.querySelector('#target-id').value;
