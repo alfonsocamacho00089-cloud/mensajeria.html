@@ -1935,7 +1935,7 @@ async function manejarSeleccionImagen(event) {
 
 
 
-
+let agendaRenderizada = new Set();
 async function guardarCambiosPerfil() {
     const miID = localStorage.getItem('mi_dropis_id');
     const nom = document.getElementById('mi-nuevo-nombre').value.trim();
@@ -2072,6 +2072,8 @@ function abrirPerfilContacto() {
         console.log("✅ Chat ocultado y mensajes borrados.");
     }
      }// <--- ESTA LLAVE FALTABA AQUÍ
+    
+     
      async function abrirAgendaCompleta() {
     const contenedor = document.getElementById('contenedor-agenda-total');
     const modal = document.getElementById('modal-agenda-completa');
@@ -2079,56 +2081,41 @@ function abrirPerfilContacto() {
     if (!contenedor || !modal) return;
     
     modal.style.display = 'block';
-    contenedor.innerHTML = '<p style="color: #8696a0;">Cargando contactos...</p>';
+    
+    // Solo mostramos "Cargando" la primera vez
+    if (agendaRenderizada.size === 0) {
+        contenedor.innerHTML = '<p style="color: #8696a0;">Cargando contactos...</p>';
+    }
 
-    // Traemos la verdad absoluta de la base de datos v10
     const todosLosContactos = await obtenerTodo('perfiles');
 
     if (todosLosContactos.length === 0) {
-        contenedor.innerHTML = '<p style="color: #8696a0; text-align: center;">No tienes contactos guardados.</p>';
+        contenedor.innerHTML = '<p style="color: #8696a0; text-align: center;">No tienes contactos.</p>';
         return;
     }
 
-    contenedor.innerHTML = ""; // Limpiamos el "Cargando"
+    // QUITAMOS: contenedor.innerHTML = ""; (Para que no parpadee)
 
-    // Busca el forEach donde pintas los contactos en el modal nuevo
     todosLosContactos.forEach(contacto => {
-        // AQUÍ SE CREA EL DIV PARA QUE NO DE ERROR
+        // LA CLAVE: Si ya está dibujado, no lo vuelvas a poner
+        if (agendaRenderizada.has(contacto.id)) return;
+
         const div = document.createElement('div');
         div.className = 'fila-contacto';
-        div.style = "display: flex; align-items: center; padding: 12px; border-bottom: 1px solid #222; cursor: pointer;";
-        
-        const inicial = contacto.nombre ? contacto.nombre.charAt(0).toUpperCase() : '?';
-        
-        div.innerHTML = `
-            <div style="width:40px; height:40px; border-radius:50%; background:#ffd700; color:#000; display:flex; align-items:center; justify-content:center; font-weight:900; border: 1px solid #000; overflow:hidden;">
-                ${contacto.foto ? `<img src="${contacto.foto}" style="width:100%; height:100%; object-fit:cover;">` : inicial}
-            </div>
-            <div style="margin-left: 15px;">
-                <div style="color: white; font-weight: bold;">${contacto.nombre}</div>
-                <div style="color: #8696a0; font-size: 12px;">ID: ${contacto.id}</div>
-            </div>
-        `;
-    div.onclick = async () => {
-        // 1. Cerramos el modal primero para que no interfiera con el input del chat
-        document.getElementById('modal-agenda-completa').style.display = 'none';
+        // ... (tu estilo de siempre) ...
 
-        // 2. Usamos tu lógica de referencia: buscamos el perfil antes de cargar
-        const perfil = await obtenerLocal('perfiles', contacto.id);
+        div.onclick = async () => {
+            modal.style.display = 'none';
+            const perfil = await obtenerLocal('perfiles', contacto.id);
+            activarContactoEnChat(contacto);
+            cargarConversacionCon(contacto.id, contacto.nombre, (perfil && perfil.foto) ? perfil.foto : null);
+        };
+
+        contenedor.appendChild(div);
         
-        // 3. Activamos en la lista de chats
-        activarContactoEnChat(contacto);
-
-        // 4. Cargamos la conversación usando tu validación de foto
-        cargarConversacionCon(
-            contacto.id, 
-            contacto.nombre, 
-            (perfil && perfil.foto) ? perfil.foto : null
-        );
-    };
-
-    contenedor.appendChild(div);
-});
+        // Marcamos como dibujado
+        agendaRenderizada.add(contacto.id);
+    });
      }
      
         
