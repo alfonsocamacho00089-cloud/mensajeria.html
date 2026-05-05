@@ -2113,7 +2113,8 @@ div.onclick = () => {
             modal.style.display = 'none';
         };
 
-        
+        contenedor.appendChild(div);
+    });
      }
      
 
@@ -2140,7 +2141,8 @@ function activarContactoEnChat(contacto) {
     pintarAgendaContactos();
 
     // 3. Abrimos la conversación directamente
-    cargarConversacionCon(contacto.id, contacto.nombre, contacto.foto);     }
+    cargarConversacionCon(contacto.id, contacto.nombre, contacto.foto);   
+}
 
      function cargarFotoInicial() {
     const fotoGuardada = localStorage.getItem('mi_foto');
