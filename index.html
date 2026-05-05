@@ -1991,46 +1991,26 @@ function abrirPerfilContacto() {
 }
 
 async function irAContactos() {
-    // Forzamos el reset de la vista
     const lista = document.getElementById('lista-contactos');
-    if (lista) lista.innerHTML = ""; 
+    if (lista) lista.innerHTML = ""; // Limpiamos la pantalla
     
-    // Vaciamos la memoria de "pintados" para que 'pintarAgendaContactos' los vuelva a crear todos
+    // Vaciamos la memoria. Esto es lo que permite que el contacto
+    // que borraste del chat sea "bienvenido" otra vez a la lista.
     contactosRenderizados.clear(); 
 
-    // Llamamos a tu función de siempre, que ahora los pintará todos porque el Set está vacío
+    // Nos aseguramos de que el localStorage tenga la lista completa desde la v10
+    const todos = await obtenerTodo('perfiles'); 
+    if (todos.length > 0) {
+        localStorage.setItem('mis_contactos', JSON.stringify(todos));
+    }
+
+    // Volvemos a pintar todo. Ahora aparecerán TODOS tus contactos.
     await pintarAgendaContactos();
     
-    console.log("Agenda completa restaurada");
+    console.log("Mostrando agenda completa");
      }
      
-async function eliminarChatEspecifico() {
-    const idDestino = document.querySelector('#target-id').value;
-    const nombreDestino = document.getElementById('perfil-nombre')?.innerText || "este contacto";
 
-    if (!idDestino) return;
-
-    if (confirm(`¿Eliminar chat con ${nombreDestino}? (Seguirá en tu agenda)`)) {
-        // 1. Borramos mensajes en v10 y localStorage
-        localStorage.removeItem('chat_' + idDestino);
-        try {
-            const db = await abrirDB();
-            const tx = db.transaction('mensajes', 'readwrite');
-            await tx.objectStore('mensajes').delete('msg_' + idDestino);
-        } catch (e) { console.log("Error al borrar mensajes"); }
-
-        // 2. Lo sacamos de la vista y de la memoria de "pintados"
-        contactosRenderizados.delete(idDestino); 
-        const fila = document.getElementById(`fila-${idDestino}`);
-        if (fila) fila.remove();
-
-        // 3. Limpiamos el chat-box si estaba abierto
-        const box = document.getElementById('chat-box');
-        if (box) box.innerHTML = ""; 
-
-        document.getElementById('modal-perfil').style.display = 'none';
-    }
-     }
 
 
      async function eliminarContactoDeAgenda() {
