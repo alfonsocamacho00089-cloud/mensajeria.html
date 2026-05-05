@@ -2095,7 +2095,28 @@ function abrirPerfilContacto() {
     });
 }
 
+// Función para mover un contacto de la "Agenda" a la "Lista de Chats"
+function activarContactoEnChat(contacto) {
+    let actuales = JSON.parse(localStorage.getItem('mis_contactos')) || [];
+    
+    // 1. Verificamos si ya existe en la lista de chats para no duplicar datos
+    const existe = actuales.find(c => c.id === contacto.id);
+    
+    if (!existe) {
+        actuales.push(contacto);
+        localStorage.setItem('mis_contactos', JSON.stringify(actuales));
+    }
+    
+    // 2. LA CLAVE: No usamos .clear() ni pintamos todo de nuevo.
+    // Solo le pedimos a pintarAgendaContactos que procese la lista.
+    // Como tu función pintarAgenda ya debería tener la lógica de:
+    // "si el ID ya está en el Set, no lo pintes", solo pintará el nuevo.
+    
+    pintarAgendaContactos();
 
+    // 3. Abrimos la conversación directamente
+    cargarConversacionCon(contacto.id, contacto.nombre, contacto.foto);
+     }
 
      function cargarFotoInicial() {
     const fotoGuardada = localStorage.getItem('mi_foto');
