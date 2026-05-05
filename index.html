@@ -2082,11 +2082,7 @@ function abrirPerfilContacto() {
     
     modal.style.display = 'block';
     
-    // Solo mostramos "Cargando" la primera vez
-    if (agendaRenderizada.size === 0) {
-        contenedor.innerHTML = '<p style="color: #8696a0;">Cargando contactos...</p>';
-    }
-
+    // 1. Traemos los contactos de la v10
     const todosLosContactos = await obtenerTodo('perfiles');
 
     if (todosLosContactos.length === 0) {
@@ -2094,15 +2090,31 @@ function abrirPerfilContacto() {
         return;
     }
 
-    // QUITAMOS: contenedor.innerHTML = ""; (Para que no parpadee)
+    // 2. LA CLAVE: Limpiamos el mensaje de "Cargando" ANTES del forEach
+    // Pero NO limpiamos todo el contenedor si ya hay hijos, para que no parpadee
+    if (contenedor.innerHTML.includes("Cargando")) {
+        contenedor.innerHTML = ""; 
+    }
 
     todosLosContactos.forEach(contacto => {
-        // LA CLAVE: Si ya está dibujado, no lo vuelvas a poner
+        // Si ya está en pantalla, lo saltamos
         if (agendaRenderizada.has(contacto.id)) return;
 
         const div = document.createElement('div');
         div.className = 'fila-contacto';
-        // ... (tu estilo de siempre) ...
+        div.style = "display: flex; align-items: center; padding: 12px; border-bottom: 1px solid #222; cursor: pointer;";
+        
+        const inicial = contacto.nombre ? contacto.nombre.charAt(0).toUpperCase() : '?';
+        
+        div.innerHTML = `
+            <div style="width:40px; height:40px; border-radius:50%; background:#ffd700; color:#000; display:flex; align-items:center; justify-content:center; font-weight:900; border: 1px solid #000; overflow:hidden;">
+                ${contacto.foto ? `<img src="${contacto.foto}" style="width:100%; height:100%; object-fit:cover;">` : inicial}
+            </div>
+            <div style="margin-left: 15px;">
+                <div style="color: white; font-weight: bold;">${contacto.nombre}</div>
+                <div style="color: #8696a0; font-size: 12px;">ID: ${contacto.id}</div>
+            </div>
+        `;
 
         div.onclick = async () => {
             modal.style.display = 'none';
@@ -2112,13 +2124,9 @@ function abrirPerfilContacto() {
         };
 
         contenedor.appendChild(div);
-        
-        // Marcamos como dibujado
-        agendaRenderizada.add(contacto.id);
+        agendaRenderizada.add(contacto.id); // Guardamos que ya se dibujó
     });
      }
-     
-        
 
 // Función para mover un contacto de la "Agenda" a la "Lista de Chats"
 function activarContactoEnChat(contacto) {
