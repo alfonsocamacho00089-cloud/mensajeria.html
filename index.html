@@ -2107,9 +2107,13 @@ function abrirPerfilContacto() {
             </div>
         `;
 
+
+     
+
+     
         div.onclick = () => {
             // Al tocar uno, lo "activamos" en la lista de chats y abrimos la conversación
-            activarContactoPorId(contacto.id);
+            activarContactoEnChat(contacto.id); };
             modal.style.display = 'none';
         };
 
