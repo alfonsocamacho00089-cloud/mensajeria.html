@@ -768,7 +768,7 @@ label[for="file-input"] {
         </button>
 
  <div class="barra-flotante-premium">
-            <div class="btn-nav" onclick="irAContactos()">
+            <div class="btn-nav" onclick="abrirAgendaCompleta()">
                 <span>👥</span><span>Contactos</span>
             </div>
             <div class="btn-nav active" onclick="cerrarModalQR()">
@@ -781,8 +781,6 @@ label[for="file-input"] {
 
  
      
-
-
  <div id="modal-nuevocontacto" class="modal" style="display: none; align-items: center; justify-content: center; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #1e222b; z-index: 30000;">
     
           <div class="modal-cover" style="position: relative; width: 100vw; height: 100vh; padding: 50px 30px 50px 30px; box-sizing: border-box; background: #1e222b; border-radius: 0px; text-align: center; border: 0px solid #333; box-shadow: 0 0 20px rgba(0,0,0,0.5);">                                                
@@ -824,7 +822,18 @@ label[for="file-input"] {
     </div>
  </div>
      
- 
+ <div id="modal-agenda-completa" class="modal" style="display:none; background: #000; z-index: 30000;">
+    <div style="padding: 20px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h2 style="color: #ffd700; margin: 0;">👥 Mi Agenda</h2>
+            <button onclick="document.getElementById('modal-agenda-completa').style.display='none'" 
+                    style="background: transparent; border: none; color: white; font-size: 24px;">✕</button>
+        </div>
+        
+        <!-- Aquí es donde se pintarán TODOS, sin excepciones -->
+        <div id="contenedor-agenda-total" style="overflow-y: auto; max-height: 80vh;"></div>
+    </div>
+ </div>
 
    
     
@@ -2063,7 +2072,66 @@ async function irAContactos() {
         cerrarModalQR();
     }
      }
-     
+     async function abrirAgendaCompleta() {
+    const contenedor = document.getElementById('contenedor-agenda-total');
+    const modal = document.getElementById('modal-agenda-completa');
+    
+    if (!contenedor || !modal) return;
+    
+    modal.style.display = 'block';
+    contenedor.innerHTML = '<p style="color: #8696a0;">Cargando contactos...</p>';
+
+    // Traemos la verdad absoluta de la base de datos v10
+    const todosLosContactos = await obtenerTodo('perfiles');
+
+    if (todosLosContactos.length === 0) {
+        contenedor.innerHTML = '<p style="color: #8696a0; text-align: center;">No tienes contactos guardados.</p>';
+        return;
+    }
+
+    contenedor.innerHTML = ""; // Limpiamos el "Cargando"
+
+    todosLosContactos.forEach(contacto => {
+        const inicial = contacto.nombre ? contacto.nombre.charAt(0).toUpperCase() : '?';
+        const div = document.createElement('div');
+        div.className = 'fila-contacto';
+        div.style = "display: flex; align-items: center; padding: 12px; border-bottom: 1px solid #222; cursor: pointer;";
+        
+        div.innerHTML = `
+            <div style="width:40px; height:40px; border-radius:50%; background:#ffd700; color:#000; display:flex; align-items:center; justify-content:center; font-weight:900; border: 1px solid #000;">
+                ${contacto.foto ? `<img src="${contacto.foto}" style="width:100%; height:100%; border-radius:50%; object-fit:cover;">` : inicial}
+            </div>
+            <div style="margin-left: 15px;">
+                <div style="color: white; font-weight: bold;">${contacto.nombre}</div>
+                <div style="color: #8696a0; font-size: 12px;">ID: ${contacto.id}</div>
+            </div>
+        `;
+
+        div.onclick = () => {
+            // Al tocar uno, lo "activamos" en la lista de chats y abrimos la conversación
+            activarContactoEnChat(contacto);
+            modal.style.display = 'none';
+        };
+
+        contenedor.appendChild(div);
+    });
+}
+
+// Función para mover un contacto de la "Agenda" a la "Lista de Chats"
+function activarContactoEnChat(contacto) {
+    let actuales = JSON.parse(localStorage.getItem('mis_contactos')) || [];
+    
+    // Si no está en la lista de chats, lo agregamos
+    if (!actuales.find(c => c.id === contacto.id)) {
+        actuales.push(contacto);
+        localStorage.setItem('mis_contactos', JSON.stringify(actuales));
+    }
+    
+    // Refrescamos la lista de chats y abrimos la conversación
+    contactosRenderizados.clear(); 
+    pintarAgendaContactos();
+    cargarConversacionCon(contacto.id, contacto.nombre, contacto.foto);
+     }
 
      function cargarFotoInicial() {
     const fotoGuardada = localStorage.getItem('mi_foto');
