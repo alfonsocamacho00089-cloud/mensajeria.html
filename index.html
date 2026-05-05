@@ -1991,23 +1991,17 @@ function abrirPerfilContacto() {
 }
 
 async function irAContactos() {
+    // Forzamos el reset de la vista
     const lista = document.getElementById('lista-contactos');
     if (lista) lista.innerHTML = ""; 
     
-    // 1. Vaciamos la memoria para permitir que se vuelvan a pintar
+    // Vaciamos la memoria de "pintados" para que 'pintarAgendaContactos' los vuelva a crear todos
     contactosRenderizados.clear(); 
 
-    // 2. RELLENAMOS mis_contactos con TODO lo que hay en la v10
-    // Esto es lo que hace que el contacto que "borraste" del chat vuelva a aparecer
-    const todosLosPerfiles = await obtenerTodo('perfiles'); 
-    if (todosLosPerfiles.length > 0) {
-        localStorage.setItem('mis_contactos', JSON.stringify(todosLosPerfiles));
-    }
-
-    // 3. Pintamos de nuevo la agenda completa
+    // Llamamos a tu función de siempre, que ahora los pintará todos porque el Set está vacío
     await pintarAgendaContactos();
     
-    console.log("Agenda restaurada desde v10");
+    console.log("Agenda completa restaurada");
      }
      
 async function eliminarChatEspecifico() {
