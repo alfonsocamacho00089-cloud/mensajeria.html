@@ -1991,79 +1991,74 @@ function abrirPerfilContacto() {
 }
 
 async function irAContactos() {
-    // Forzamos el reset de la vista
     const lista = document.getElementById('lista-contactos');
     if (lista) lista.innerHTML = ""; 
     
-    // Vaciamos la memoria de "pintados" para que 'pintarAgendaContactos' los vuelva a crear todos
+    // 1. Vaciamos la memoria para permitir que se vuelvan a pintar
     contactosRenderizados.clear(); 
 
-    // Llamamos a tu función de siempre, que ahora los pintará todos porque el Set está vacío
+    // 2. RELLENAMOS mis_contactos con TODO lo que hay en la v10
+    // Esto es lo que hace que el contacto que "borraste" del chat vuelva a aparecer
+    const todosLosPerfiles = await obtenerTodo('perfiles'); 
+    if (todosLosPerfiles.length > 0) {
+        localStorage.setItem('mis_contactos', JSON.stringify(todosLosPerfiles));
+    }
+
+    // 3. Pintamos de nuevo la agenda completa
     await pintarAgendaContactos();
     
-    console.log("Agenda completa restaurada");
+    console.log("Agenda restaurada desde v10");
      }
      
 async function eliminarChatEspecifico() {
     const idDestino = document.querySelector('#target-id').value;
     const nombreDestino = document.getElementById('perfil-nombre')?.innerText || "este contacto";
 
-    if (!idDestino) return alert("No hay un chat seleccionado para eliminar");
+    if (!idDestino) return;
 
-    if (confirm(`¿Eliminar todos los mensajes con ${nombreDestino}?`)) {
-        // 1. LIMPIEZA DE DATOS (LocalStorage e IndexedDB v10)
+    if (confirm(`¿Eliminar chat con ${nombreDestino}? (Seguirá en tu agenda)`)) {
+        // 1. Borramos mensajes en v10 y localStorage
         localStorage.removeItem('chat_' + idDestino);
-        localStorage.setItem('unread_' + idDestino, 0);
-
         try {
             const db = await abrirDB();
             const tx = db.transaction('mensajes', 'readwrite');
             await tx.objectStore('mensajes').delete('msg_' + idDestino);
-        } catch (e) { console.log("Error al borrar en v10"); }
+        } catch (e) { console.log("Error al borrar mensajes"); }
 
-        // 2. LIMPIEZA VISUAL INSTANTÁNEA
-        // Sacamos al contacto de la memoria de "pintados"
+        // 2. Lo sacamos de la vista y de la memoria de "pintados"
         contactosRenderizados.delete(idDestino); 
-
-        // Borramos su fila de la lista de chats para que "desaparezca"
         const fila = document.getElementById(`fila-${idDestino}`);
         if (fila) fila.remove();
 
+        // 3. Limpiamos el chat-box si estaba abierto
         const box = document.getElementById('chat-box');
         if (box) box.innerHTML = ""; 
 
-        // 3. CIERRE
         document.getElementById('modal-perfil').style.display = 'none';
-        console.log("✅ Chat ocultado y borrado: " + idDestino);
     }
      }
 
-async function eliminarContactoDeAgenda() {
-    const idABorrar = document.querySelector('#target-id').value;
-    const nombreABorrar = document.getElementById('perfil-nombre')?.innerText || "este contacto";
 
+     async function eliminarContactoDeAgenda() {
+    const idABorrar = document.querySelector('#target-id').value;
     if (!idABorrar) return;
 
-    if (confirm(`¿Eliminar a ${nombreABorrar} de tu agenda?`)) {
-        // 1. FILTRAR LISTA
+    if (confirm(`¿Eliminar contacto permanentemente?`)) {
+        // 1. Lo borramos del localStorage (la fuente de la lista)
         let contactos = JSON.parse(localStorage.getItem('mis_contactos')) || [];
         contactos = contactos.filter(c => c.id !== idABorrar);
         localStorage.setItem('mis_contactos', JSON.stringify(contactos));
 
-        // 2. BORRAR DE MEMORIA Y VISTA
+        // 2. Lo borramos de IndexedDB v10
+        await eliminarLocal('perfiles', idABorrar);
+
+        // 3. Limpiamos la vista
         contactosRenderizados.delete(idABorrar);
         const fila = document.getElementById(`fila-${idABorrar}`);
         if (fila) fila.remove();
 
-        // 3. BORRAR DE INDEXEDDB v10 (Para que no aparezca al "Ir a Contactos")
-        try {
-            await eliminarLocal('perfiles', idABorrar);
-        } catch(e) { console.log("No estaba en perfiles"); }
-
-        // 4. CIERRE
         document.getElementById('modal-perfil').style.display = 'none';
-        cerrarModalQR(); 
-        alert(`${nombreABorrar} eliminado de la agenda.`);
+        cerrarModalQR();
     }
      }
      
