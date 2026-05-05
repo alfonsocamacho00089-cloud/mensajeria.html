@@ -2005,51 +2005,70 @@ function abrirPerfilContacto() {
 
 
 
-     async function eliminarChatEspecifico() {
-    const idDestino = document.querySelector('#target-id').value;
-    if (!idDestino) return;
-
-    if (confirm(`¿Ocultar chat?`)) {
-        // 1. Borrar mensajes (Tu lógica de siempre)
-        localStorage.removeItem('chat_' + idDestino);
-        
-        // 2. ACTUALIZAR EN v10: Lo marcamos como oculto
-        const perfil = await obtenerLocal('perfiles', idDestino);
-        if (perfil) {
-            perfil.oculto = true; // <--- LA MARCA
-            await guardarLocal('perfiles', perfil);
-        }
-
-        // 3. DESPINTAR
-        contactosRenderizados.delete(idDestino);
-        const fila = document.getElementById(`fila-${idDestino}`);
-        if (fila) fila.remove();
-
-        document.getElementById('modal-perfil').style.display = 'none';
-    }
-     }
      async function eliminarContactoDeAgenda() {
     const idABorrar = document.querySelector('#target-id').value;
     if (!idABorrar) return;
 
-    if (confirm(`¿Eliminar contacto permanentemente?`)) {
-        // 1. Lo borramos del localStorage (la fuente de la lista)
+    if (confirm(`¿Eliminar contacto permanentemente de la base de datos?`)) {
+        // 1. Borrar de la lista de chats actual
         let contactos = JSON.parse(localStorage.getItem('mis_contactos')) || [];
         contactos = contactos.filter(c => c.id !== idABorrar);
         localStorage.setItem('mis_contactos', JSON.stringify(contactos));
 
-        // 2. Lo borramos de IndexedDB v10
-        await eliminarLocal('perfiles', idABorrar);
+        // 2. Borrar de la base de datos persistente v10
+        try {
+            await eliminarLocal('perfiles', idABorrar);
+        } catch(e) { console.log("Error al eliminar de v10"); }
 
-        // 3. Limpiamos la vista
+        // 3. Limpiar vista
         contactosRenderizados.delete(idABorrar);
         const fila = document.getElementById(`fila-${idABorrar}`);
         if (fila) fila.remove();
 
         document.getElementById('modal-perfil').style.display = 'none';
-        cerrarModalQR();
+        if (typeof cerrarModalQR === 'function') cerrarModalQR();
+        
+        alert("Contacto eliminado de la base de datos.");
     }
      }
+
+     async function eliminarChatEspecifico() {
+    const idDestino = document.querySelector('#target-id').value;
+    if (!idDestino) return;
+
+    if (confirm(`¿Eliminar mensajes y ocultar chat?`)) {
+        // 1. Borrar mensajes
+        localStorage.removeItem('chat_' + idDestino);
+        
+        // 2. ACTUALIZAR EN v10 (Opcional si usas la marca de oculto)
+        try {
+            const perfil = await obtenerLocal('perfiles', idDestino);
+            if (perfil) {
+                perfil.oculto = true; 
+                await guardarLocal('perfiles', perfil);
+            }
+            
+            // Borramos también de la base de datos de mensajes v10
+            const db = await abrirDB();
+            const tx = db.transaction('mensajes', 'readwrite');
+            await tx.objectStore('mensajes').delete('msg_' + idDestino);
+        } catch (e) { console.log("Error en v10:", e); }
+
+        // 3. DESPINTAR Y QUITAR DE LA LISTA ACTUAL
+        contactosRenderizados.delete(idDestino);
+        
+        // Quitamos de mis_contactos para que no reaparezca al recargar el chat
+        let actuales = JSON.parse(localStorage.getItem('mis_contactos')) || [];
+        actuales = actuales.filter(c => c.id !== idDestino);
+        localStorage.setItem('mis_contactos', JSON.stringify(actuales));
+
+        const fila = document.getElementById(`fila-${idDestino}`);
+        if (fila) fila.remove();
+
+        document.getElementById('modal-perfil').style.display = 'none';
+        console.log("✅ Chat ocultado correctamente");
+    }
+} // <--- ESTA LLAVE FALTABA AQUÍ
      async function abrirAgendaCompleta() {
     const contenedor = document.getElementById('contenedor-agenda-total');
     const modal = document.getElementById('modal-agenda-completa');
