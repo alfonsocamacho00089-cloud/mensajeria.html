@@ -2007,68 +2007,71 @@ function abrirPerfilContacto() {
 
      async function eliminarContactoDeAgenda() {
     const idABorrar = document.querySelector('#target-id').value;
+    const nombreABorrar = document.getElementById('perfil-nombre')?.innerText || "este contacto";
+
     if (!idABorrar) return;
 
-    if (confirm(`¿Eliminar contacto permanentemente de la base de datos?`)) {
-        // 1. Borrar de la lista de chats actual
-        let contactos = JSON.parse(localStorage.getItem('mis_contactos')) || [];
-        contactos = contactos.filter(c => c.id !== idABorrar);
-        localStorage.setItem('mis_contactos', JSON.stringify(contactos));
-
-        // 2. Borrar de la base de datos persistente v10
+    if (confirm(`¿BORRAR PERMANENTEMENTE a ${nombreABorrar}?`)) {
+        
+        // 1. Borrar de la base de datos real (v10)
         try {
             await eliminarLocal('perfiles', idABorrar);
-        } catch(e) { console.log("Error al eliminar de v10"); }
+        } catch (e) { console.log("Error al borrar de v10"); }
 
-        // 3. Limpiar vista
+        // 2. Borrar de la lista de chats en LocalStorage
+        let lista = JSON.parse(localStorage.getItem('mis_contactos')) || [];
+        lista = lista.filter(c => c.id !== idABorrar);
+        localStorage.setItem('mis_contactos', JSON.stringify(lista));
+
+        // 3. Quitar de la vista inmediatamente
         contactosRenderizados.delete(idABorrar);
-        const fila = document.getElementById(`fila-${idABorrar}`);
-        if (fila) fila.remove();
+        const filaHtml = document.getElementById(`fila-${idABorrar}`);
+        if (filaHtml) filaHtml.remove();
 
+        // 4. Cerrar todo
         document.getElementById('modal-perfil').style.display = 'none';
         if (typeof cerrarModalQR === 'function') cerrarModalQR();
         
-        alert("Contacto eliminado de la base de datos.");
+        alert("Contacto eliminado de raíz.");
     }
      }
 
      async function eliminarChatEspecifico() {
     const idDestino = document.querySelector('#target-id').value;
-    if (!idDestino) return;
+    const nombreDestino = document.getElementById('perfil-nombre')?.innerText || "este contacto";
 
-    if (confirm(`¿Eliminar mensajes y ocultar chat?`)) {
-        // 1. Borrar mensajes
-        localStorage.removeItem('chat_' + idDestino);
+    if (!idDestino) return alert("No hay un chat seleccionado");
+
+    if (confirm(`¿Eliminar mensajes y ocultar chat con ${nombreDestino}?`)) {
         
-        // 2. ACTUALIZAR EN v10 (Opcional si usas la marca de oculto)
+        // 1. Borrar rastro de mensajes (LocalStorage e IndexedDB)
+        localStorage.removeItem('chat_' + idDestino);
+        localStorage.setItem('unread_' + idDestino, 0);
+
         try {
-            const perfil = await obtenerLocal('perfiles', idDestino);
-            if (perfil) {
-                perfil.oculto = true; 
-                await guardarLocal('perfiles', perfil);
-            }
-            
-            // Borramos también de la base de datos de mensajes v10
             const db = await abrirDB();
             const tx = db.transaction('mensajes', 'readwrite');
             await tx.objectStore('mensajes').delete('msg_' + idDestino);
-        } catch (e) { console.log("Error en v10:", e); }
+        } catch (e) { console.log("Error borrando mensajes en v10"); }
 
-        // 3. DESPINTAR Y QUITAR DE LA LISTA ACTUAL
-        contactosRenderizados.delete(idDestino);
-        
-        // Quitamos de mis_contactos para que no reaparezca al recargar el chat
+        // 2. FILTRADO: Lo quitamos de la lista de chats activos
         let actuales = JSON.parse(localStorage.getItem('mis_contactos')) || [];
         actuales = actuales.filter(c => c.id !== idDestino);
         localStorage.setItem('mis_contactos', JSON.stringify(actuales));
 
+        // 3. DESPINTADO: Lo borramos de la memoria visual y del HTML
+        contactosRenderizados.delete(idDestino);
         const fila = document.getElementById(`fila-${idDestino}`);
         if (fila) fila.remove();
 
+        // 4. LIMPIEZA DE PANTALLA
         document.getElementById('modal-perfil').style.display = 'none';
-        console.log("✅ Chat ocultado correctamente");
+        const box = document.getElementById('chat-box');
+        if (box) box.innerHTML = ""; 
+
+        console.log("✅ Chat ocultado y mensajes borrados.");
     }
-} // <--- ESTA LLAVE FALTABA AQUÍ
+     }// <--- ESTA LLAVE FALTABA AQUÍ
      async function abrirAgendaCompleta() {
     const contenedor = document.getElementById('contenedor-agenda-total');
     const modal = document.getElementById('modal-agenda-completa');
