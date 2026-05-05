@@ -2010,7 +2010,41 @@ async function irAContactos() {
     console.log("Mostrando agenda completa");
      }
      
+async function eliminarChatEspecifico() {
+    // Usamos el mismo input oculto que usas para eliminar contactos
+    const idDestino = document.querySelector('#target-id').value;
+    const nombreDestino = document.getElementById('perfil-nombre')?.innerText || "este contacto";
 
+    if (!idDestino) return alert("No hay un chat seleccionado");
+
+    if (confirm(`¿Ocultar la conversación con ${nombreDestino}?`)) {
+        
+        // 1. LIMPIEZA DE MENSAJES (Opcional, según prefieras)
+        localStorage.removeItem('chat_' + idDestino);
+        try {
+            const db = await abrirDB();
+            const tx = db.transaction('mensajes', 'readwrite');
+            await tx.objectStore('mensajes').delete('msg_' + idDestino);
+        } catch (e) { console.log("Error al limpiar mensajes en v10"); }
+
+        // 2. ELIMINAR DE LA VISTA (Igual que en eliminar contacto)
+        // Lo sacamos del Set para que el sistema lo deje de rastrear como "activo"
+        contactosRenderizados.delete(idDestino); 
+
+        // Borramos su fila del HTML para que desaparezca de la lista
+        const fila = document.getElementById(`fila-${idDestino}`);
+        if (fila) {
+            fila.remove(); 
+        }
+
+        // 3. CIERRE DE MODAL Y LIMPIEZA DE PANTALLA
+        document.getElementById('modal-perfil').style.display = 'none';
+        const box = document.getElementById('chat-box');
+        if (box) box.innerHTML = ""; 
+
+        console.log("Chat ocultado: " + idDestino);
+    }
+     }
 
 
      async function eliminarContactoDeAgenda() {
