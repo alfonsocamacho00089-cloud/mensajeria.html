@@ -2107,16 +2107,18 @@ function abrirPerfilContacto() {
             </div>
         `;
 
+div.onclick = () => {
+            // Al tocar uno, lo "activamos" en la lista de chats y abrimos la conversación
+            activarContactoEnChat(contacto);
+            modal.style.display = 'none';
+        };
 
+        
+     }
      
 
      
-        div.onclick = () => {
-    // Pasamos null en lugar de contacto.foto para liberar la memoria
-    activarContactoEnChat(contacto);
-    modal.style.display = 'none';
-    cargarConversacionCon(contacto.id, contacto.nombre, null); 
-};
+        
 
 // Función para mover un contacto de la "Agenda" a la "Lista de Chats"
 function activarContactoEnChat(contacto) {
