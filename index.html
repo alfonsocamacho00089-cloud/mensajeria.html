@@ -1991,18 +1991,17 @@ function abrirPerfilContacto() {
 }
 
 async function irAContactos() {
+    // Forzamos el reset de la vista
     const lista = document.getElementById('lista-contactos');
     if (lista) lista.innerHTML = ""; 
+    
+    // Vaciamos la memoria de "pintados" para que 'pintarAgendaContactos' los vuelva a crear todos
     contactosRenderizados.clear(); 
 
-    // Traemos a TODOS desde la base de datos v10 (aquí están los que ocultaste)
-    const todos = await obtenerTodo('perfiles'); 
-    if (todos.length > 0) {
-        // Los volvemos a meter al LocalStorage para que se vuelvan a pintar
-        localStorage.setItem('mis_contactos', JSON.stringify(todos));
-    }
-
+    // Llamamos a tu función de siempre, que ahora los pintará todos porque el Set está vacío
     await pintarAgendaContactos();
+    
+    console.log("Agenda completa restaurada");
      }
 
      async function eliminarChatEspecifico() {
