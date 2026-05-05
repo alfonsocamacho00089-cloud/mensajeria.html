@@ -2113,13 +2113,13 @@ function abrirPerfilContacto() {
      
         div.onclick = () => {
             // Al tocar uno, lo "activamos" en la lista de chats y abrimos la conversación
-            activarContactoEnChat(contacto.id); };
+            activarContactoEnChat(contacto);
             modal.style.display = 'none';
         };
 
         contenedor.appendChild(div);
     });
-}
+     }
 
 // Función para mover un contacto de la "Agenda" a la "Lista de Chats"
 function activarContactoEnChat(contacto) {
@@ -2141,7 +2141,7 @@ function activarContactoEnChat(contacto) {
     pintarAgendaContactos();
 
     // 3. Abrimos la conversación directamente
-    cargarConversacionCon(contacto.id, contacto.nombre, contacto.foto);
+    cargarConversacionCon(contacto.id, contacto.nombre, (perfil && perfil.foto) ? perfil.foto : null);
      }
 
      function cargarFotoInicial() {
