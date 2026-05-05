@@ -1991,62 +1991,56 @@ function abrirPerfilContacto() {
 }
 
 async function irAContactos() {
-    // Forzamos el reset de la vista
-    const lista = document.getElementById('lista-contactos');
-    if (lista) lista.innerHTML = ""; 
+    // 1. Traemos TODOS los perfiles
+    const todos = await obtenerTodo('perfiles');
     
-    // Vaciamos la memoria de "pintados" para que 'pintarAgendaContactos' los vuelva a crear todos
-    contactosRenderizados.clear(); 
+    // 2. Filtramos: SÓLO los que tienen la marca 'oculto: true'
+    const soloOcultos = todos.filter(p => p.oculto === true);
 
-    // Llamamos a tu función de siempre, que ahora los pintará todos porque el Set está vacío
+    if (soloOcultos.length === 0) {
+        return console.log("No hay contactos ocultos para mostrar.");
+    }
+
+    // 3. Los "des-ocultamos" en la base de datos para que vuelvan a ser normales
+    for (const p of soloOcultos) {
+        p.oculto = false; 
+        await guardarLocal('perfiles', p);
+    }
+
+    // 4. Actualizamos mis_contactos solo con estos que acaban de volver
+    let actuales = JSON.parse(localStorage.getItem('mis_contactos')) || [];
+    const nuevaLista = [...actuales, ...soloOcultos];
+    localStorage.setItem('mis_contactos', JSON.stringify(nuevaLista));
+
+    // 5. Pintamos (Como usamos el Set y contactosRenderizados, solo pintará los nuevos)
     await pintarAgendaContactos();
     
-    console.log("Agenda completa restaurada");
-     }
+    console.log("Se han restaurado solo los contactos que estaban ocultos.");
+}
 
      async function eliminarChatEspecifico() {
     const idDestino = document.querySelector('#target-id').value;
-    const nombreDestino = document.getElementById('perfil-nombre')?.innerText || "este contacto";
+    if (!idDestino) return;
 
-    if (!idDestino) return alert("No hay un chat seleccionado para eliminar");
-
-    if (confirm(`¿Eliminar mensajes y ocultar a ${nombreDestino} de la lista?`)) {
-        
-        // 1. ELIMINAR MENSAJES (LocalStorage e IndexedDB)
+    if (confirm(`¿Ocultar chat?`)) {
+        // 1. Borrar mensajes (Tu lógica de siempre)
         localStorage.removeItem('chat_' + idDestino);
-        localStorage.setItem('unread_' + idDestino, 0);
-
-        try {
-            const db = await abrirDB();
-            const tx = db.transaction('mensajes', 'readwrite');
-            await tx.objectStore('mensajes').delete('msg_' + idDestino);
-        } catch (e) { console.log("Error borrando mensajes en v10"); }
-
-        // 2. EL "DESPINTADO" (Quitarlo de la lista actual sin borrarlo de la DB)
         
-        // Lo quitamos de la memoria de renderizado para que el sistema permita borrar la fila
-        contactosRenderizados.delete(idDestino); 
+        // 2. ACTUALIZAR EN v10: Lo marcamos como oculto
+        const perfil = await obtenerLocal('perfiles', idDestino);
+        if (perfil) {
+            perfil.oculto = true; // <--- LA MARCA
+            await guardarLocal('perfiles', perfil);
+        }
 
-        // Lo quitamos de la lista de 'mis_contactos' del LocalStorage (esto es lo que lo oculta)
-        let contactos = JSON.parse(localStorage.getItem('mis_contactos')) || [];
-        contactos = contactos.filter(c => c.id !== idDestino);
-        localStorage.setItem('mis_contactos', JSON.stringify(contactos));
-
-        // 3. LIMPIEZA VISUAL
+        // 3. DESPINTAR
+        contactosRenderizados.delete(idDestino);
         const fila = document.getElementById(`fila-${idDestino}`);
-        if (fila) fila.remove(); // Quitamos la fila de la lista de chats
+        if (fila) fila.remove();
 
-        const box = document.getElementById('chat-box');
-        if (box) box.innerHTML = ""; 
-
-        // 4. CIERRE DE MODAL
-        const modalPerfil = document.getElementById('modal-perfil');
-        if (modalPerfil) modalPerfil.style.display = 'none';
-
-        console.log("✅ Chat e hilo eliminados. Contacto ocultado de la lista principal.");
+        document.getElementById('modal-perfil').style.display = 'none';
     }
      }
-
      async function eliminarContactoDeAgenda() {
     const idABorrar = document.querySelector('#target-id').value;
     if (!idABorrar) return;
