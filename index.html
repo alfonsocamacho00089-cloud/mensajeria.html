@@ -1403,7 +1403,6 @@ if (imgHeader) {
 
         const numNoLeidos = localStorage.getItem('unread_' + contacto.id) || 0;
         const badgeHTML = numNoLeidos > 0 ? `<div class="contador-nube">${numNoLeidos}</div>` : '';
-        const inicial = contacto.nombre ? contacto.nombre.charAt(0).toUpperCase() : '?';
         
         // Lógica de Foto vs Inicial (Poder del Bloque 2)
         const fotoURL = contacto.foto || '';
@@ -1509,12 +1508,13 @@ function aplicarFotoCapa(id, src) {
 const splash = document.getElementById('pantalla-carga');
     if (splash) {
         // Un pequeño delay de 300ms para que la transición sea suave
-        setTimeout(() => {
-            splash.style.opacity = '0';
-            setTimeout(() => {
-                splash.style.display = 'none';
-            }, 300);
-        }, 300);
+         setTimeout(() => {
+    splash.style.opacity = '0';
+    // Espera a que termine la animación de CSS para poner el display: none
+    splash.addEventListener('transitionend', () => {
+        splash.style.display = 'none';
+    }, { once: true });
+}, 150);
     }
 };
      // <--- ¡ASEGÚRATE DE QUE ESTA LLAVE Y PUNTO Y COMA ESTÉN AQUÍ!// <--- Aquí termina el window.onload  
