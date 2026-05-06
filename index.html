@@ -111,9 +111,7 @@ body {
 }
 
 
-
-  
-     
+   
 /* --- HEADER ESTILO WHATSAPP --- */
 .header { 
     background: rgba(26, 26, 26, 0.3);  /* Bajamos de 0.9 a 0.7 para que sea más claro */
@@ -2110,12 +2108,14 @@ function abrirPerfilContacto() {
         
         div.innerHTML = `
             <div style="width:40px; height:40px; border-radius:50%; background:#ffd700; color:#000; display:flex; align-items:center; justify-content:center; font-weight:900; border: none; overflow:hidden;">
-                ${contacto.foto ? `<img src="${contacto.foto}" style="width:100%; height:100%; object-fit:cover;">` : inicial}
-            </div>
-            <div style="margin-left: 15px;">
-                <div style="color: white; font-weight: bold;">${contacto.nombre}</div>
-                <div style="color: #8696a0; font-size: 12px;">ID: ${contacto.id}</div>
-            </div>
+    ${contacto.foto ? `<img src="${contacto.foto}" style="width:100%; height:100%; object-fit:cover;">` : inicial}
+</div>
+<div style="margin-left: 15px;">
+    <!-- Agregamos text-shadow: none aquí -->
+    <div style="color: white; font-weight: bold; text-shadow: none;">${contacto.nombre}</div>
+    <!-- Y también aquí para el ID -->
+    <div style="color: #8696a0; font-size: 12px; text-shadow: none;">ID: ${contacto.id}</div>
+</div>
         `;
 
         div.onclick = async () => {
