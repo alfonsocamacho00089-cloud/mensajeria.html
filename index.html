@@ -257,7 +257,7 @@ button#btn-enviar:active {
 
 .msg-izquierda { 
     align-self: flex-start; 
-    background: rgba(32, 44, 51, 0.8); 
+    background: rgba(32, 44, 51, 0.6); 
     color: #ffffff; 
     border-bottom-left-radius: 20px; 
     
@@ -824,7 +824,7 @@ label[for="file-input"] {
  </div>
      
  <div id="modal-agenda-completa" class="modal" style="display:none; background: #000; z-index: 30000;">
-        <div class="modal-content" style="display: flex; flex-direction: column; height: 100dvh; position: relative; background-image: linear-gradient(rgba(11, 20, 26, 0.3), rgba(11, 20, 26, 0.3)), url('./assets/logo.webp'); background-size: cover; background-position: center; background-attachment:fixed;">      
+        <div class="modal-content" style="display: flex; flex-direction: column; height: 100dvh; position: relative; background-image: linear-gradient(rgba(11, 20, 26, 0.3), rgba(11, 20, 26, 0.3)), url('./assets/imagen-niña-nuevo.png'); background-size: cover; background-position: center; background-attachment:fixed;">      
      
   
   <div style="padding: 20px;">
@@ -2107,7 +2107,7 @@ function abrirPerfilContacto() {
         const inicial = contacto.nombre ? contacto.nombre.charAt(0).toUpperCase() : '?';
         
         div.innerHTML = `
-            <div style="width:40px; height:40px; border-radius:50%; background:#ffd700; color:#000; display:flex; align-items:center; justify-content:center; font-weight:900; border: 1px solid #000; overflow:hidden;">
+            <div style="width:40px; height:40px; border-radius:50%; background:#ffd700; color:#000; display:flex; align-items:center; justify-content:center; font-weight:900; border: none; overflow:hidden;">
                 ${contacto.foto ? `<img src="${contacto.foto}" style="width:100%; height:100%; object-fit:cover;">` : inicial}
             </div>
             <div style="margin-left: 15px;">
