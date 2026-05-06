@@ -129,7 +129,7 @@ body {
     position: relative;
  /* LA MAGIA DEL CRISTAL */
     backdrop-filter: blur(6px); 
-    -webkit-backdrop-filter: blur(10px); /* OBLIGATORIO para iPhone y muchos Android */
+    -webkit-backdrop-filter: blur(6px); /* OBLIGATORIO para iPhone y muchos Android */
     
 }
 
@@ -1362,13 +1362,21 @@ async function cargarConversacionCon(idDestino, nombreDestino, fotoDestino) {
     }
 
     const imgHeader = document.getElementById('foto-perfil-header');
-    if (imgHeader) {
-        imgHeader.src = fotoDestino || 'https://via.placeholder.com/40';
-        if (!fotoDestino || fotoDestino.includes('placeholder.com')) {
-            const inicial = nombreDestino ? nombreDestino.charAt(0).toUpperCase() : '?';
-            imgHeader.style.display = "none"; 
-            imgHeader.outerHTML = `<div id="foto-perfil-header" class="foto-perfil" style="width:40px; height:40px; border-radius:50%; background:#ffd700; color:#000; display:flex; align-items:center; justify-content:center; font-weight:900; border:2px solid #000;">${inicial}</div>`;
+if (imgHeader) {
+    if (fotoDestino && fotoDestino !== "") {
+        // SI HAY FOTO: Nos aseguramos de que sea una imagen
+        if (imgHeader.tagName === 'DIV') {
+            imgHeader.outerHTML = `<img id="foto-perfil-header" class="foto-perfil" style="width:40px; height:40px; border-radius:50%; object-fit:cover; border:2px solid #000;">`;
+            document.getElementById('foto-perfil-header').src = fotoDestino;
+        } else {
+            imgHeader.src = fotoDestino;
+            imgHeader.style.display = "block";
         }
+    } else {
+        // SI NO HAY FOTO: Pintamos la inicial
+        const inicial = nombreDestino ? nombreDestino.charAt(0).toUpperCase() : '?';
+        imgHeader.outerHTML = `<div id="foto-perfil-header" class="foto-perfil" style="width:40px; height:40px; border-radius:50%; background:#ffd700; color:#000; display:flex; align-items:center; justify-content:center; font-weight:600; border:2px solid #000; text-shadow: none !important;">${inicial}</div>`;
+    }
      }
 
     // --- CAMBIO AQUÍ: Usamos la nueva DB ---
@@ -1397,31 +1405,36 @@ async function cargarConversacionCon(idDestino, nombreDestino, fotoDestino) {
     if (!lista) return;
 
     const contactos = JSON.parse(localStorage.getItem('mis_contactos')) || [];
+
+// Mantenemos la lista limpia de duplicados pero sin borrar todo (Velocidad del Bloque 1)
+for (const contacto of contactos) {
+    if (contactosRenderizados.has(contacto.id)) continue;
+
+    const numNoLeidos = localStorage.getItem('unread_' + contacto.id) || 0;
+    const badgeHTML = numNoLeidos > 0 ? `<div class="contador-nube">${numNoLeidos}</div>` : '';
+    const inicial = contacto.nombre ? contacto.nombre.charAt(0).toUpperCase() : '?';
     
-    // COMENTADO: lista.innerHTML = ""; <-- Quitamos esto para que no borre lo que ya existe
+    // Lógica de Foto vs Inicial (Poder del Bloque 2)
+    const fotoURL = contacto.foto || '';
 
-    for (const contacto of contactos) {
-        // --- NUEVA LÓGICA DE CONTROL ---
-        // Si el contacto ya está renderizado, saltamos al siguiente para no duplicar
-        if (contactosRenderizados.has(contacto.id)) continue;
-        // -------------------------------
+    const btn = document.createElement('div');
+    btn.className = 'fila-contacto'; 
+    btn.id = `fila-${contacto.id}`;
+ btn.innerHTML = `
+        <div id="img-cont-${contacto.id}" class="foto-perfil" style="width:45px; height:45px; border-radius:50%; background:#ffd700; color:#000; display:flex; align-items:center; justify-content:center; font-weight:900; font-size:20px; border: 2px solid #000; flex-shrink:0; overflow:hidden;">
+            ${fotoURL && fotoURL !== "" ? 
+                `<img src="${fotoURL}" style="width:100%; height:100%; object-fit:cover;">` : 
+                inicial
+            }
+        </div>
+        <div style="flex-grow: 1; margin-left: 10px;">
+            <div style="font-weight: bold; color: white; text-shadow: none !important;">${contacto.nombre}</div>
+            <div style="font-size: 12px; color: #8696a0; text-shadow: none !important;">ID: ${contacto.id}</div>
+        </div>
+        ${badgeHTML} 
+    `;
 
-        const numNoLeidos = localStorage.getItem('unread_' + contacto.id) || 0;
-        const badgeHTML = numNoLeidos > 0 ? `<div class="contador-nube">${numNoLeidos}</div>` : '';
-        const inicial = contacto.nombre ? contacto.nombre.charAt(0).toUpperCase() : '?';
-
-        const btn = document.createElement('div');
-        btn.className = 'fila-contacto'; 
-        btn.id = `fila-${contacto.id}`; // Le damos un ID a la fila para control
-        
-        btn.innerHTML = `
-            <div id="img-cont-${contacto.id}" class="foto-perfil" style="width:45px; height:45px; border-radius:50%; background:#ffd700; color:#000; display:flex; align-items:center; justify-content:center; font-weight:900; font-size:20px; border: 2px solid #000; flex-shrink:0;">${inicial}</div>
-            <div style="flex-grow: 1; margin-left: 10px;">
-                <div style="font-weight: bold; color: white;">${contacto.nombre}</div>
-                <div style="font-size: 12px; color: #8696a0;">ID: ${contacto.id}</div>
-            </div>
-            ${badgeHTML} 
-        `;
+    
 
         lista.appendChild(btn);
         
