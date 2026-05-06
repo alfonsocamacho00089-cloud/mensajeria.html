@@ -1429,7 +1429,7 @@ for (const contacto of contactos) {
         </div>
         <div style="flex-grow: 1; margin-left: 10px;">
             <div style="font-weight: bold; color: white; text-shadow: none !important;">${contacto.nombre}</div>
-            <div style="font-size: 12px; color: #8696a0; text-shadow: none !important;">ID: ${contacto.id}</div>
+            <div style="font-size: 12px; color: #8696a0; text-shadow: none !important;transform: translateZ(0); will-change: transform; -webkit-font-smoothing: antialiased;">ID: ${contacto.id}</div>
         </div>
         ${badgeHTML} 
     `;
