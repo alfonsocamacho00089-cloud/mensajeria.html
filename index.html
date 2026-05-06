@@ -1397,35 +1397,33 @@ if (imgHeader) {
 
     const contactos = JSON.parse(localStorage.getItem('mis_contactos')) || [];
 
-// Mantenemos la lista limpia de duplicados pero sin borrar todo (Velocidad del Bloque 1)
-for (const contacto of contactos) {
-    if (contactosRenderizados.has(contacto.id)) continue;
+    // Mantenemos la lista limpia de duplicados pero sin borrar todo (Velocidad del Bloque 1)
+    for (const contacto of contactos) {
+        if (contactosRenderizados.has(contacto.id)) continue;
 
-    const numNoLeidos = localStorage.getItem('unread_' + contacto.id) || 0;
-    const badgeHTML = numNoLeidos > 0 ? `<div class="contador-nube">${numNoLeidos}</div>` : '';
-    const inicial = contacto.nombre ? contacto.nombre.charAt(0).toUpperCase() : '?';
-    
-    // Lógica de Foto vs Inicial (Poder del Bloque 2)
-    const fotoURL = contacto.foto || '';
+        const numNoLeidos = localStorage.getItem('unread_' + contacto.id) || 0;
+        const badgeHTML = numNoLeidos > 0 ? `<div class="contador-nube">${numNoLeidos}</div>` : '';
+        const inicial = contacto.nombre ? contacto.nombre.charAt(0).toUpperCase() : '?';
+        
+        // Lógica de Foto vs Inicial (Poder del Bloque 2)
+        const fotoURL = contacto.foto || '';
 
-    const btn = document.createElement('div');
-    btn.className = 'fila-contacto'; 
-    btn.id = `fila-${contacto.id}`;
- btn.innerHTML = `
-        <div id="img-cont-${contacto.id}" class="foto-perfil" style="width:45px; height:45px; border-radius:50%; background:#ffd700; color:#000; display:flex; align-items:center; justify-content:center; font-weight:900; font-size:20px; border: 2px solid #000; flex-shrink:0; overflow:hidden;">
-            ${fotoURL && fotoURL !== "" ? 
-                `<img src="${fotoURL}" class="foto-perfil" style="width:45px; height:45px; border-radius:50%; object-fit:cover; border: 2px solid #ffd700;">`
-     }
-            }
-        </div>
-        <div style="flex-grow: 1; margin-left: 10px;">
-            <div style="font-weight: bold; color: white; text-shadow: none !important;">${contacto.nombre}</div>
-            <div style="font-size: 12px; color: #8696a0; text-shadow: none !important;transform: translateZ(0); will-change: transform; -webkit-font-smoothing: antialiased;">ID: ${contacto.id}</div>
-        </div>
-        ${badgeHTML} 
-    `;
-
-    
+        const btn = document.createElement('div');
+        btn.className = 'fila-contacto'; 
+        btn.id = `fila-${contacto.id}`;
+        btn.innerHTML = `
+            <div id="img-cont-${contacto.id}" class="foto-perfil" style="width:45px; height:45px; border-radius:50%; background:#ffd700; color:#000; display:flex; align-items:center; justify-content:center; font-weight:900; font-size:20px; border: 2px solid #000; flex-shrink:0; overflow:hidden;">
+                ${fotoURL && fotoURL !== "" ? 
+                    `<img src="${fotoURL}" class="foto-perfil" style="width:45px; height:45px; border-radius:50%; object-fit:cover; border: 2px solid #ffd700;">` 
+                    : inicial
+                }
+            </div>
+            <div style="flex-grow: 1; margin-left: 10px;">
+                <div style="font-weight: bold; color: white; text-shadow: none !important;">${contacto.nombre}</div>
+                <div style="font-size: 12px; color: #8696a0; text-shadow: none !important;transform: translateZ(0); will-change: transform; -webkit-font-smoothing: antialiased;">ID: ${contacto.id}</div>
+            </div>
+            ${badgeHTML} 
+        `;
 
         lista.appendChild(btn);
         
