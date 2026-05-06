@@ -1403,6 +1403,7 @@ if (imgHeader) {
 
         const numNoLeidos = localStorage.getItem('unread_' + contacto.id) || 0;
         const badgeHTML = numNoLeidos > 0 ? `<div class="contador-nube">${numNoLeidos}</div>` : '';
+        const inicial = contacto.nombre ? contacto.nombre.charAt(0).toUpperCase() : '?';
         
         // Lógica de Foto vs Inicial (Poder del Bloque 2)
         const fotoURL = contacto.foto || '';
