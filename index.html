@@ -2099,25 +2099,27 @@ function abrirPerfilContacto() {
 
         // Dentro del forEach de abrirAgendaCompleta...
 div.onclick = async () => {
-    modal.style.display = 'none';
-    
-    // IMPORTANTE: Buscamos si ya tenemos la foto en nuestra DB local 
-    // antes de activar el chat para que pase la info completa
-    const perfilData = await obtenerLocal('perfiles', contacto.id);
-    const fotoParaElChat = (perfilData && perfilData.foto) ? perfilData.foto : contacto.foto;
+            modal.style.display = 'none';
 
-    activarContactoEnChat({
-        id: contacto.id,
-        nombre: contacto.nombre,
-        foto: fotoParaElChat
+            // 1. Buscamos el perfil para tener la foto para el Header
+            const perfil = await obtenerLocal('perfiles', contacto.id);
+            const fotoFinal = (perfil && perfil.foto) ? perfil.foto : contacto.foto;
 
+            // 2. CREAMOS UNA COPIA SIN FOTO para activarContactoEnChat
+            // Así el localStorage no se llena y no sale el error de Quota
+            const contactoSinFoto = { ...contacto };
+            delete contactoSinFoto.foto; 
 
-     
-        agendaRenderizada.add(contacto.id); // Guardamos que ya se dibujó
-    
-    });
-};
+            activarContactoEnChat(contactoSinFoto);
 
+            // 3. Cargamos el chat pasando la foto pesada solo a la memoria (el Header)
+            cargarConversacionCon(contacto.id, contacto.nombre, fotoFinal);
+        };
+
+        contenedor.appendChild(div);
+        agendaRenderizada.add(contacto.id); 
+    }); // Cierre del forEach
+} // Cierre de abrirAgendaCompleta
         
 
 // Función para mover un contacto de la "Agenda" a la "Lista de Chats"
