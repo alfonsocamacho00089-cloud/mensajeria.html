@@ -1695,30 +1695,43 @@ function accionMensaje(tipo) {
  
 // Esta función es para que el borrado sea REAL y no vuelvan al recargar
 
-async function borrarMensajeDeMemoria(idMensajeV10, elementoHTML) {
+async function borrarMensajeIndividual(idMensajeV10, elementoHTML) {
     const idDestino = document.querySelector('#target-id').value;
-    if(!idDestino || !idMensajeV10) return;
+    if (!idMensajeV10) return;
 
-    // 1. Borrado visual inmediato
-    if(elementoHTML) elementoHTML.remove();
+    // 1. Borrado visual inmediato (para que el usuario sienta velocidad)
+    if (elementoHTML) elementoHTML.remove();
 
-    // 2. BORRAR DE LA V10 (IndexedDB)
+    // 2. Borrar de la v10 (IndexedDB) - Usando tu lógica de seguridad
     try {
-        await eliminarLocal('mensajes', idMensajeV10);
-        console.log("Eliminado de v10");
-    } catch (e) { console.error("Error en v10:", e); }
+        const db = await abrirDB();
+        const tx = db.transaction('mensajes', 'readwrite');
+        const store = tx.objectStore('mensajes');
+        
+        // Aquí lo borramos directamente por su ID único
+        await store.delete(idMensajeV10); 
+        console.log("✅ Mensaje eliminado de v10");
+    } catch (e) { 
+        console.error("Error eliminando en v10:", e); 
+    }
 
-    // 3. LA CLAVE: Borrar también del localStorage para que no "reviva" el pintado
+    // 3. Limpiar LocalStorage (Para que no 'reviva' al recargar)
     try {
         const claveChat = 'chat_' + idDestino;
-        let mensajesLS = JSON.parse(localStorage.getItem(claveChat)) || [];
+        let historialLS = JSON.parse(localStorage.getItem(claveChat)) || [];
         
-        // Filtramos el mensaje del localStorage para que muera del todo
-        mensajesLS = mensajesLS.filter(m => m.id !== idMensajeV10);
+        // Filtramos para quitar el mensaje de la libreta vieja
+        historialLS = historialLS.filter(m => m.id !== idMensajeV10);
         
-        localStorage.setItem(claveChat, JSON.stringify(mensajesLS));
-        console.log("Eliminado de LocalStorage");
-    } catch (e) { console.log("No había nada en LocalStorage"); }
+        if (historialLS.length > 0) {
+            localStorage.setItem(claveChat, JSON.stringify(historialLS));
+        } else {
+            localStorage.removeItem(claveChat);
+        }
+        console.log("✅ Limpieza de LocalStorage completada");
+    } catch (e) { 
+        console.log("No se encontró rastro en LocalStorage"); 
+    }
      }
      
 
