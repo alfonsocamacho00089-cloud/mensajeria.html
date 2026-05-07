@@ -1325,54 +1325,62 @@ function procesarQRScanner(contenido) {
     pintarAgendaContactos();
      }
      
-async function cargarConversacionCon(idDestino, nombreDestino, fotoDestino) {
+async function cargarConversacionCon(idDestino, nombre, foto) {
+    // 1. Actualizar Interfaz (Header)
+    const targetInput = document.querySelector('#target-id');
+    if (targetInput) targetInput.value = idDestino;
+
+    const nombreHeader = document.getElementById('perfil-nombre');
+    if (nombreHeader) nombreHeader.innerText = nombre;
+
+    const imgPerfil = document.getElementById('perfil-foto');
+    if (imgPerfil) {
+        imgPerfil.src = foto || 'assets/default-avatar.png';
+    }
+
+    // 2. Limpiar el contenedor de mensajes (Mesa limpia)
     const box = document.getElementById('chat-box');
     if (!box) return;
-
     box.innerHTML = ""; 
 
-    document.querySelector('#target-id').value = idDestino;
-    if (document.getElementById('nombre-dueño-header')) {
-        document.getElementById('nombre-dueño-header').innerText = nombreDestino;
-    }
+    try {
+        // 3. LEER DE LA V10 (IndexedDB) - La fuente de verdad
+        const todosLosMensajes = await obtenerTodo('mensajes');
+        
+        // 4. FILTRAR: Solo los mensajes que pertenecen a este chat
+        const misMensajes = todosLosMensajes.filter(m => String(m.contactoId) === String(idDestino));
 
-    const imgHeader = document.getElementById('foto-perfil-header');
-if (imgHeader) {
-    if (fotoDestino && fotoDestino !== "") {
-        // SI HAY FOTO: Nos aseguramos de que sea una imagen
-        if (imgHeader.tagName === 'DIV') {
-            imgHeader.outerHTML = `<img id="foto-perfil-header" class="foto-perfil" style="width:40px; height:40px; border-radius:50%; object-fit:cover; border:2px solid #000;">`;
-            document.getElementById('foto-perfil-header').src = fotoDestino;
-        } else {
-            imgHeader.src = fotoDestino;
-            imgHeader.style.display = "block";
+        // 5. RENDERIZAR: Dibujamos todo el historial filtrado
+        if (typeof renderizarMensajes === "function") {
+            renderizarMensajes(misMensajes); 
         }
-    } else {
-        // SI NO HAY FOTO: Pintamos la inicial
-        const inicial = nombreDestino ? nombreDestino.charAt(0).toUpperCase() : '?';
-        imgHeader.outerHTML = `<div id="foto-perfil-header" class="foto-perfil" style="width:40px; height:40px; border-radius:50%; background:#ffd700; color:#000; display:flex; align-items:center; justify-content:center; font-weight:900; border:2px solid #000; text-shadow: none !important;">${inicial}</div>`;
+        
+        console.log(`✅ v10: Cargados ${misMensajes.length} mensajes para ${nombre}`);
+    } catch (e) {
+        console.error("❌ Error al cargar desde v10:", e);
     }
-     }
 
-    // --- CAMBIO AQUÍ: Usamos la nueva DB ---
-    // En lugar de: const mensajes = JSON.parse(localStorage.getItem('chat_' + idDestino)) || [];
-    // Buscamos en la tabla 'mensajes' filtrando por el idDestino (o cargando el historial guardado)
-    const todosLosMensajes = await obtenerTodo('mensajes');
-    const mensajesFiltrados = todosLosMensajes.filter(m => m.contactoId === idDestino);
-
-    mensajesFiltrados.forEach(m => {
-        pintarMensaje(m.texto, m.clase, m.hora, m.status || 'enviado', m.id);
-    });
-
-    // Limpieza de notificaciones (puedes mantener localStorage para esto o crear una tabla 'config')
-    localStorage.setItem('unread_' + idDestino, 0);
-    pintarAgendaContactos();
+    // 6. DETALLES DE TU CÓDIGO ORIGINAL (UI y Notificaciones)
     
-    cerrarModalQR();
-    const inputMsg = document.getElementById('msg-text');
-    if(inputMsg) inputMsg.focus();
-     }
+    // Limpiar contador de no leídos
+    localStorage.setItem('unread_' + idDestino, 0);
+    if (typeof pintarAgendaContactos === "function") {
+        pintarAgendaContactos();
+    }
 
+    // Cerrar el modal de la agenda
+    const modalAgenda = document.getElementById('modal-agenda');
+    if (modalAgenda) modalAgenda.style.display = 'none';
+
+    // Foco automático en el input (Clave para desarrollo móvil)
+    const inputMsg = document.getElementById('msg-text');
+    if (inputMsg) {
+        inputMsg.focus();
+    }
+
+    // Auto-scroll al final del chat
+    box.scrollTop = box.scrollHeight;
+     }
     // 3. Buscamos los mensajes de ESE contacto en LocalStorage
     // ... (final de la función cargarConversacionCon)
   async function pintarAgendaContactos() {
@@ -1600,33 +1608,35 @@ checkHTML = `<span class="icono-check" style="color: ${color}; margin-left: 5px;
 
 
      
-    function marcarMensajeComoRecibido(msgId, emisorID) {
+    async function marcarMensajeComoRecibido(msgId, emisorID) {
+    // 1. CAMBIO VISUAL (Lo que ves en el momento)
     const elementoMsg = document.getElementById('msg-' + msgId);
     if (elementoMsg) {
-        // Buscamos la clase "icono-check" que definimos en pintarMensaje
         const checkSpan = elementoMsg.querySelector('.icono-check');
         if (checkSpan) {
             checkSpan.innerText = '✓✓'; 
-            checkSpan.style.color = '#34B7F1'; 
+            checkSpan.style.color = '#34B7F1'; // Azul SpaceChat
         }
     }
 
-    let clave = 'chat_' + emisorID;
-    let historial = JSON.parse(localStorage.getItem(clave)) || [];
-    let modificado = false;
-
-    historial = historial.map(m => {
-        if (m.id === msgId) {
-            m.status = 'recibido';
-            modificado = true;
+    // 2. CAMBIO EN LA V10 (Para que sea permanente al recargar)
+    try {
+        const todos = await obtenerTodo('mensajes');
+        // Buscamos el mensaje específico por su ID
+        const msgParaActualizar = todos.find(m => m.id === msgId);
+        
+        if (msgParaActualizar) {
+            msgParaActualizar.status = 'recibido'; // Le ponemos el estado de doble check
+            await guardarLocal('mensajes', msgParaActualizar); 
+            console.log("✅ v10: Doble check guardado para " + msgId);
         }
-        return m;
-    });
-
-    if (modificado) {
-        localStorage.setItem(clave, JSON.stringify(historial));
+    } catch (e) {
+        console.error("❌ Error al actualizar doble check en v10:", e);
     }
-} // <--- ESTA LLAVE CIERRA LA FUNCIÓN 
+
+    // Nota: Ya no hace falta el código del localStorage (clave chat_emisorID)
+    // porque ahora tu función cargarConversacionCon lee directo de la v10.
+     }// <--- ESTA LLAVE CIERRA LA FUNCIÓN 
       
 // Función para ejecutar las acciones del menú
 function accionMensaje(tipo) {
