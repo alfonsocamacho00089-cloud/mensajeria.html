@@ -1705,29 +1705,39 @@ async function borrarMensajeDeMemoria(idMensajeV10, elementoHTML) {
     const idDestino = document.querySelector('#target-id').value;
     if (!idMensajeV10) return;
 
-    // 1. Lo quitamos de la vista YA
-    if (elementoHTML) {
-        elementoHTML.style.display = 'none'; // Lo ocultamos de inmediato
-    }
+    // 1. Borrado visual (desaparece al toque)
+    if (elementoHTML) elementoHTML.remove();
 
+    // 2. Borrar de la v10 (Imitando tu lógica de eliminarChatEspecifico)
     try {
         const db = await abrirDB();
         const tx = db.transaction('mensajes', 'readwrite');
         const store = tx.objectStore('mensajes');
         
-        // BORRADO DOBLE EN v10: Por si acaso el ID es String o Número
-        await store.delete(idMensajeV10);
-        await store.delete(Number(idMensajeV10));
-        await store.delete(String(idMensajeV10));
-        
-        console.log("✅ v10: Purga total.");
-    } catch (e) { console.error(e); }
+        // El "bisturí": borra el ID exacto en IndexedDB
+        await store.delete(idMensajeV10); 
+        console.log("✅ v10: Mensaje fulminado.");
+    } catch (e) { 
+        console.error("Error en v10:", e); 
+    }
 
-    // 2. LIMPIEZA RADICAL DE LOCALSTORAGE
-    // Esto borra CUALQUIER rastro viejo para que no reviva nada
-    localStorage.removeItem('chat_' + idDestino);
+    // 3. Limpiar el LocalStorage (Para que el fantasma no reviva)
+    try {
+        const claveChat = 'chat_' + idDestino;
+        let historialLS = JSON.parse(localStorage.getItem(claveChat)) || [];
+        
+        // Filtramos para que muera en la libreta vieja también
+        historialLS = historialLS.filter(m => m.id !== idMensajeV10);
+        
+        if (historialLS.length > 0) {
+            localStorage.setItem(claveChat, JSON.stringify(historialLS));
+        } else {
+            localStorage.removeItem(claveChat);
+        }
+    } catch (e) { 
+        console.log("Sin rastros en LocalStorage"); 
+    }
      }
-     
 
          
 function renderizarMensajes(listaDeMensajes) {
