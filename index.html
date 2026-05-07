@@ -2010,15 +2010,14 @@ async function eliminarLocal(tabla, id) {
 
     if (confirm(`¿BORRAR PERMANENTEMENTE a ${nombreABorrar}?`)) {
         
-        try {
-            // 1. Borrar de la v10 (Tabla 'perfiles')
-            // Intentamos con el ID como string y como número por si acaso
-            await eliminarLocal('perfiles', idABorrar);
-            await eliminarLocal('perfiles', Number(idABorrar));
-            console.log("Contacto eliminado de perfiles v10");
-        } catch (e) { 
-            console.error("Fallo al borrar contacto de v10:", e); 
-        }
+        // En lugar de los dos "await eliminarLocal", usa solo este:
+try {
+    // Esto borra solo en TU teléfono
+    await eliminarLocal('perfiles', String(idABorrar));
+    console.log("Limpieza local completada.");
+} catch (e) { 
+    console.log("Ya estaba borrado o ID no encontrado localmente."); 
+     }
 
         // 2. Borrar de la lista de chats activos (LocalStorage)
         let lista = JSON.parse(localStorage.getItem('mis_contactos')) || [];
