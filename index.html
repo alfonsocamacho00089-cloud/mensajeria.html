@@ -1995,25 +1995,48 @@ function abrirPerfilContacto() {
         
         // 1. Borrar de la base de datos real (v10)
         try {
+            // Intentamos borrar usando el ID tal cual y también como número por si acaso
             await eliminarLocal('perfiles', idABorrar);
-        } catch (e) { console.log("Error al borrar de v10"); }
+            await eliminarLocal('perfiles', Number(idABorrar)); 
+            console.log("Borrado exitoso de v10");
+        } catch (e) { 
+            console.error("Error crítico al borrar de v10:", e); 
+        }
 
         // 2. Borrar de la lista de chats en LocalStorage
         let lista = JSON.parse(localStorage.getItem('mis_contactos')) || [];
-        lista = lista.filter(c => c.id !== idABorrar);
+        lista = lista.filter(c => String(c.id) !== String(idABorrar));
         localStorage.setItem('mis_contactos', JSON.stringify(lista));
 
-        // 3. Quitar de la vista inmediatamente
+        // 3. Quitar de la vista y LIMPIAR MEMORIA de renderizado
         contactosRenderizados.delete(idABorrar);
+        
+        // --- LA CLAVE PARA LA AGENDA ---
+        if (typeof agendaRenderizada !== 'undefined') {
+            agendaRenderizada.delete(idABorrar);
+        }
+
+        // Borrar el elemento visual de la lista de chats
         const filaHtml = document.getElementById(`fila-${idABorrar}`);
         if (filaHtml) filaHtml.remove();
 
-        // 4. Cerrar todo
+        // 4. Forzar limpieza visual en el contenedor de la agenda completa
+        const contenedorAgenda = document.getElementById('contenedor-agenda-total');
+        if (contenedorAgenda) {
+            // Buscamos cualquier elemento que mencione el ID dentro de la agenda y lo borramos
+            const elementosAgenda = contenedorAgenda.querySelectorAll('.fila-contacto');
+            elementosAgenda.forEach(el => {
+                if (el.innerHTML.includes(idABorrar)) el.remove();
+            });
+        }
+
+        // 5. Cerrar todo
         document.getElementById('modal-perfil').style.display = 'none';
         if (typeof cerrarModalQR === 'function') cerrarModalQR();
         
         alert("Contacto eliminado de raíz.");
     }
+     }
      }
 
      async function eliminarChatEspecifico() {
