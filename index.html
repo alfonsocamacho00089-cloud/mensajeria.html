@@ -1676,28 +1676,20 @@ function accionMensaje(tipo) {
 // Esta función es para que el borrado sea REAL y no vuelvan al recargar
 
 async function borrarMensajeDeMemoria(idMensajeV10, elementoHTML) {
-    const idDestino = document.querySelector('#target-id').value;
-    if(!idDestino) return;
+    if(!idMensajeV10) return;
 
-    // 1. Borrado visual inmediato
+    // 1. Borrado visual
     if(elementoHTML) elementoHTML.remove();
 
-    // 2. Borrar de la v10 (Tabla 'mensajes')
+    // 2. Borrar de la v10 por su clave numérica
     try {
-        // idMensajeV10 debe ser la clave que genera el autoIncrement
         await eliminarLocal('mensajes', idMensajeV10);
         console.log("Mensaje borrado de v10");
     } catch (e) {
         console.error("Error al borrar mensaje de v10:", e);
     }
-
-    // 3. Borrar del localStorage (Antiguo sistema)
-    const claveChat = 'chat_' + idDestino;
-    let mensajes = JSON.parse(localStorage.getItem(claveChat)) || [];
-    // Aquí filtramos por contenido si no tienes IDs en localStorage
-    mensajes = mensajes.filter(m => m.id !== idMensajeV10); 
-    localStorage.setItem(claveChat, JSON.stringify(mensajes));
      }
+     
 function cargarMensajesLocales() {
     const datos = localStorage.getItem('chat_' + idDestino);
     if (!datos) return; 
@@ -2047,41 +2039,55 @@ try {
      }
 
      async function eliminarChatEspecifico() {
+    
     const idDestino = document.querySelector('#target-id').value;
     const nombreDestino = document.getElementById('perfil-nombre')?.innerText || "este contacto";
 
-    if (!idDestino) return alert("No hay un chat seleccionado");
+    if (!idDestino) return;
 
     if (confirm(`¿Eliminar mensajes y ocultar chat con ${nombreDestino}?`)) {
         
-        // 1. Borrar rastro de mensajes (LocalStorage e IndexedDB)
-        localStorage.removeItem('chat_' + idDestino);
-        localStorage.setItem('unread_' + idDestino, 0);
-
+        // 1. Borrar de la v10 (IndexedDB) - DE RAÍZ
         try {
             const db = await abrirDB();
             const tx = db.transaction('mensajes', 'readwrite');
-            await tx.objectStore('mensajes').delete('msg_' + idDestino);
+            const store = tx.objectStore('mensajes');
+            const request = store.openCursor();
+
+            request.onsuccess = (e) => {
+                const cursor = e.target.result;
+                if (cursor) {
+                    // Si el mensaje pertenece a este contacto, lo borramos por su clave real
+                    if (cursor.value.contactoId === idDestino) {
+                        cursor.delete();
+                    }
+                    cursor.continue();
+                }
+            };
         } catch (e) { console.log("Error borrando mensajes en v10"); }
 
-        // 2. FILTRADO: Lo quitamos de la lista de chats activos
+        // 2. Limpiar LocalStorage
+        localStorage.removeItem('chat_' + idDestino);
+        localStorage.setItem('unread_' + idDestino, 0);
+
+        // 3. Quitar de la lista de chats activos
         let actuales = JSON.parse(localStorage.getItem('mis_contactos')) || [];
-        actuales = actuales.filter(c => c.id !== idDestino);
+        actuales = actuales.filter(c => String(c.id) !== String(idDestino));
         localStorage.setItem('mis_contactos', JSON.stringify(actuales));
 
-        // 3. DESPINTADO: Lo borramos de la memoria visual y del HTML
+        // 4. Limpieza visual
         contactosRenderizados.delete(idDestino);
         const fila = document.getElementById(`fila-${idDestino}`);
         if (fila) fila.remove();
 
-        // 4. LIMPIEZA DE PANTALLA
         document.getElementById('modal-perfil').style.display = 'none';
         const box = document.getElementById('chat-box');
         if (box) box.innerHTML = ""; 
 
-        console.log("✅ Chat ocultado y mensajes borrados.");
+        console.log("✅ Chat eliminado de raíz local.");
     }
-     }// <--- ESTA LLAVE FALTABA AQUÍ
+ }
+     // <--- ESTA LLAVE FALTABA AQUÍ
     
      
      async function abrirAgendaCompleta() {
