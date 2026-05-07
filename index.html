@@ -93,23 +93,47 @@ body {
 
 /* --- INPUT AREA --- */
 .contenedor-flotante {
-    position: absolute; /* Se queda pegado a la pantalla, no al chat */
-    bottom: 0;
-    left: 0;
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
     width: 100%;
     display: flex;
     align-items: center;
     padding:  10px;
+    max-width: 450px;
     gap: 8px;
     z-index: 100;
     pointer-events: auto; /* IMPORTANTE: Para que puedas hacer clic en el input */
-    
+    justify-content: space-around; 
     /* Efecto para que parezca que la foto sigue debajo */
     background: rgba(0, 0, 0, 0.1); 
     backdrop-filter: blur(5px); /* Opcional: desenfoca un poco para legibilidad */
     -webkit-backdrop-filter: blur(5px);
 }
-
+.barra-flotante-premium {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 92%;
+    max-width: 450px;
+    
+    background: rgba(32, 44, 51, 0.8);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    
+    /* Cambiamos a FLEX para los botones */
+    display: flex;
+    justify-content: space-around; /* Reparte los botones con espacio igual */
+    align-items: center;
+    
+    padding: 10px 5px;
+    border-radius: 25px;
+    border: 1px solid rgba(255, 215, 0, 0.3);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    z-index: 30001;
+}
 
    
 /* --- HEADER ESTILO WHATSAPP --- */
@@ -452,29 +476,7 @@ margin: 0;
 }
 
 
-     .barra-flotante-premium {
-    position: fixed;
-    bottom: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 92%;
-    max-width: 450px;
-    
-    background: rgba(32, 44, 51, 0.8);
-    backdrop-filter: blur(15px);
-    -webkit-backdrop-filter: blur(15px);
-    
-    /* Cambiamos a FLEX para los botones */
-    display: flex;
-    justify-content: space-around; /* Reparte los botones con espacio igual */
-    align-items: center;
-    
-    padding: 10px 5px;
-    border-radius: 25px;
-    border: 1px solid rgba(255, 215, 0, 0.3);
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-    z-index: 30001;
-}
+     
 
 /* Estilo para los botones individuales dentro de la barra */
 .btn-nav {
