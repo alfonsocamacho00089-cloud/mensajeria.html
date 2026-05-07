@@ -528,6 +528,23 @@ label[for="file-input"] {
        /* Un estilo limpio para que la foto siempre se vea */
 /* Solo afecta a estos dos elementos, no toca las fotos del chat */
 
+     #foto-perfil-header, #mi-foto-previa {
+    width: 45px !important;
+    height: 45px !important;
+    /* 1. Cambiamos de círculo a cuadrado */
+    border-radius: 0% !important; 
+    
+    /* 2. Para ver la foto completa sin que se corte nada */
+    object-fit: contain !important; 
+    background-color: #000; /* Fondo negro por si la foto es más larga que ancha */
+
+    border: 2px solid #ffd700 !important;
+    flex-shrink: 0;
+
+    /* 3. Para moverlo hacia abajo si margin-top no te funcionó */
+    position: relative !important;
+    top: 10px !important; /* Ajusta este número (15px, 20px...) hasta que quede donde quieres */
+     }
 
 .encriptado-box {
     background-color: rgba(28, 28, 28, 0.9); /* Negro elegante con transparencia */
