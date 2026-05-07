@@ -513,12 +513,11 @@ margin: 0;
     border-radius: 50% !important;
     object-fit: cover !important;
     border: none
-    flex-shrink: 1; /* Evita que se aplaste si el nombre es largo */
+    flex-shrink: 0; /* Evita que se aplaste si el nombre es largo */
      
       
     
     
-    top: 20px !important; /* Ajusta este número (15px, 20px...) hasta que quede donde quieres */
      }
 
 .encriptado-box {
@@ -586,7 +585,7 @@ margin: 0;
  </div>
 <div id="modal-perfil" class="modal" style="display:none; background: #1e222b;z-index: 25000;">
     <div class="modal-cover" style="text-align: center;">
-        <img id="perfil-foto-grande" src="" style="width: 150px; height: 150px; border-radius: 0; border: 1px solid #ffd700; margin-top: 30px; margin-bottom: 5px; object-fit: cover;">
+        <img id="perfil-foto-grande" src="" style="width: 150px; height: 150px; border-radius: 0; border: 1px solid #ffd700; margin-bottom: 5px; object-fit: cover;">
         <h2 id="perfil-nombre" style="color: white; margin-bottom: 5px;"></h2>
         <p style="color: #8696a0; font-size: 14px;">👤</p>
     <button onclick="eliminarChatEspecifico(); event.stopPropagation();" 
