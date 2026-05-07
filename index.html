@@ -637,29 +637,21 @@ label[for="file-input"] {
     <div onclick="accionMensaje('borrar')" style="color: #ff5c5c;">🗑️ Borrar</div>
  </div>
 
-<div class="contenedor-flotante" style="display: flex; align-items: flex-end; background: #2a2f32; border-radius: 25px; padding: 5px 10px; border: 1px solid #3d444b;">
-    
-    <!-- Icono de Cámara (Botón invisible que activa el input) -->
-    <label for="file-input" style="cursor:pointer; padding: 10px; display: flex; align-items: center;">
+
+<div class="contenedor-flotante" style="display: flex; align-items: center; gap: 5px;">
+    <label for="file-input" style="cursor:pointer; padding: 0 10px; display: flex; align-items: center; flex-shrink: 0;">
         <i class="fa-fa-camera" style="color: #8696a0; font-size: 20px;"></i>
     </label>
     <input type="file" id="file-input" accept="image/*" style="display:none;" onchange="manejarSeleccionImagen(event)">
     
-    <!-- Icono de Clip (Adjuntar) -->
-    <label style="cursor:pointer; padding: 10px; display: flex; align-items: center;">
-        <i class="fa-fa-paperclip" style="color: #8696a0; font-size: 20px;"></i>
-    </label>
-
-    <!-- El Textarea con su Placeholder -->
     <textarea 
         id="msg-text" 
-        placeholder="Escribe un mensaje..." 
-        style="flex: 1; background: transparent; border: none; outline: none; color: white; padding: 10px 5px; resize: none; height: 45px; font-family: inherit;"
+        placeholder="Escribe un mensaje..."
+        style="flex: 1; min-width: 0; box-sizing: border-box;" 
         oninput="this.style.height='45px'; this.style.height=this.scrollHeight+'px';"></textarea>
     
-    <!-- Botón de enviar -->
-    <button id="btn-enviar" onclick="enviarMensajeSatelital()" style="background: transparent; border: none; padding: 10px; cursor: pointer;">
-        <span style="color: #8696a0; font-size: 20px;">➤</span>
+    <button id="btn-enviar" onclick="enviarMensajeSatelital()" style="flex-shrink: 0;">
+        <span>➤</span>
     </button>
 </div>
    
