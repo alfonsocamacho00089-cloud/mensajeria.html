@@ -1675,26 +1675,27 @@ function accionMensaje(tipo) {
  
 // Esta función es para que el borrado sea REAL y no vuelvan al recargar
 
-async function borrarMensajeDeMemoria(idMensajeUnico, elementoHTML) {
+async function borrarMensajeDeMemoria(idMensajeV10, elementoHTML) {
     const idDestino = document.querySelector('#target-id').value;
     if(!idDestino) return;
 
     // 1. Borrado visual inmediato
     if(elementoHTML) elementoHTML.remove();
 
-    // 2. Borrar de la v10 (La base de datos real ahora)
+    // 2. Borrar de la v10 (Tabla 'mensajes')
     try {
-        // Usamos la misma función eliminarLocal que arreglamos para los contactos
-        await eliminarLocal('mensajes', idMensajeUnico);
+        // idMensajeV10 debe ser la clave que genera el autoIncrement
+        await eliminarLocal('mensajes', idMensajeV10);
         console.log("Mensaje borrado de v10");
     } catch (e) {
-        console.log("Error al borrar mensaje de v10", e);
+        console.error("Error al borrar mensaje de v10:", e);
     }
 
-    // 3. Borrar del localStorage (Por si todavía queda algo ahí de versiones viejas)
+    // 3. Borrar del localStorage (Antiguo sistema)
     const claveChat = 'chat_' + idDestino;
     let mensajes = JSON.parse(localStorage.getItem(claveChat)) || [];
-    mensajes = mensajes.filter(m => m.id !== idMensajeUnico);
+    // Aquí filtramos por contenido si no tienes IDs en localStorage
+    mensajes = mensajes.filter(m => m.id !== idMensajeV10); 
     localStorage.setItem(claveChat, JSON.stringify(mensajes));
      }
 function cargarMensajesLocales() {
@@ -1991,16 +1992,13 @@ function abrirPerfilContacto() {
 
 // Asegúrate de tener esta función en tu archivo de base de datos
 async function eliminarLocal(tabla, id) {
+    const db = await abrirDB();
     return new Promise((resolve, reject) => {
-        const request = indexedDB.open("MiBaseDeDatos", 10); // Usa tu nombre de DB y versión
-        request.onsuccess = (e) => {
-            const db = e.target.result;
-            const transaction = db.transaction([tabla], "readwrite");
-            const store = transaction.objectStore(tabla);
-            const deleteRequest = store.delete(id);
-            deleteRequest.onsuccess = () => resolve(true);
-            deleteRequest.onerror = () => reject("Error al borrar");
-        };
+        const tx = db.transaction(tabla, 'readwrite');
+        const store = tx.objectStore(tabla);
+        const request = store.delete(id);
+        request.onsuccess = () => resolve(true);
+        request.onerror = () => reject(request.error);
     });
      }
 
@@ -2012,51 +2010,42 @@ async function eliminarLocal(tabla, id) {
 
     if (confirm(`¿BORRAR PERMANENTEMENTE a ${nombreABorrar}?`)) {
         
-        // 1. Borrar de la base de datos real (v10)
         try {
-            // Intentamos borrar usando el ID tal cual y también como número por si acaso
+            // 1. Borrar de la v10 (Tabla 'perfiles')
+            // Intentamos con el ID como string y como número por si acaso
             await eliminarLocal('perfiles', idABorrar);
-            await eliminarLocal('perfiles', Number(idABorrar)); 
-            console.log("Borrado exitoso de v10");
+            await eliminarLocal('perfiles', Number(idABorrar));
+            console.log("Contacto eliminado de perfiles v10");
         } catch (e) { 
-            console.error("Error crítico al borrar de v10:", e); 
+            console.error("Fallo al borrar contacto de v10:", e); 
         }
 
-        // 2. Borrar de la lista de chats en LocalStorage
+        // 2. Borrar de la lista de chats activos (LocalStorage)
         let lista = JSON.parse(localStorage.getItem('mis_contactos')) || [];
         lista = lista.filter(c => String(c.id) !== String(idABorrar));
         localStorage.setItem('mis_contactos', JSON.stringify(lista));
 
-        // 3. Quitar de la vista y LIMPIAR MEMORIA de renderizado
+        // 3. Limpieza visual y de memoria
         contactosRenderizados.delete(idABorrar);
-        
-        // --- LA CLAVE PARA LA AGENDA ---
-        if (typeof agendaRenderizada !== 'undefined') {
-            agendaRenderizada.delete(idABorrar);
-        }
+        if (typeof agendaRenderizada !== 'undefined') agendaRenderizada.delete(idABorrar);
 
-        // Borrar el elemento visual de la lista de chats
+        // Quitar de la lista de chats principal
         const filaHtml = document.getElementById(`fila-${idABorrar}`);
         if (filaHtml) filaHtml.remove();
 
-        // 4. Forzar limpieza visual en el contenedor de la agenda completa
-        const contenedorAgenda = document.getElementById('contenedor-agenda-total');
-        if (contenedorAgenda) {
-            // Buscamos cualquier elemento que mencione el ID dentro de la agenda y lo borramos
-            const elementosAgenda = contenedorAgenda.querySelectorAll('.fila-contacto');
-            elementosAgenda.forEach(el => {
-                if (el.innerHTML.includes(idABorrar)) el.remove();
+        // Quitar de la agenda completa (modal)
+        const contenedor = document.getElementById('contenedor-agenda-total');
+        if (contenedor) {
+            const filasAgenda = contenedor.querySelectorAll('.fila-contacto');
+            filasAgenda.forEach(div => {
+                if (div.innerHTML.includes(idABorrar)) div.remove();
             });
         }
 
-        // 5. Cerrar todo
         document.getElementById('modal-perfil').style.display = 'none';
-        if (typeof cerrarModalQR === 'function') cerrarModalQR();
-        
         alert("Contacto eliminado de raíz.");
     }
      }
-     
 
      async function eliminarChatEspecifico() {
     const idDestino = document.querySelector('#target-id').value;
