@@ -2109,34 +2109,32 @@ try {
     
     if (!contenedor || !modal) return;
     
-    // Mostramos el modal
     modal.style.display = 'block';
     
-    // --- LIMPIEZA CLAVE PARA CONTACTOS NUEVOS ---
-    // Borramos lo que haya en el contenedor y reiniciamos el Set de memoria
-    contenedor.innerHTML = ""; 
-    if (typeof agendaRenderizada !== 'undefined') {
-        agendaRenderizada.clear(); 
-    }
-
     // 1. Traemos los contactos de la v10
     const todosLosContactos = await obtenerTodo('perfiles');
 
     if (todosLosContactos.length === 0) {
-        contenedor.innerHTML = '<p style="color: #8696a0; text-align: center; padding: 20px;">No tienes contactos guardados.</p>';
+        contenedor.innerHTML = '<p style="color: #8696a0; text-align: center;">No tienes contactos.</p>';
         return;
     }
 
+    // 2. LA CLAVE: Limpiamos el mensaje de "Cargando" ANTES del forEach
+    // Pero NO limpiamos todo el contenedor si ya hay hijos, para que no parpadee
+    if (contenedor.innerHTML.includes("Cargando")) {
+        contenedor.innerHTML = ""; 
+    }
+
     todosLosContactos.forEach(contacto => {
-        // Doble seguridad: Si por alguna razón ya se pintó, no lo repetimos
+        // Si ya está en pantalla, lo saltamos
         if (agendaRenderizada.has(contacto.id)) return;
 
         const div = document.createElement('div');
         div.className = 'fila-contacto';
         div.style = "display: flex; align-items: center; padding: 12px; border-bottom: none; cursor: pointer;";
         
-        // Lógica de la inicial si no hay foto
         const inicial = contacto.nombre ? contacto.nombre.charAt(0).toUpperCase() : '?';
+        
         
         div.innerHTML = `
             <div style="width:40px; height:40px; border-radius:50%; background:#ffd700; color:#000; display:flex; align-items:center; justify-content:center; font-weight:1200; border: 1px solid #ffd700; overflow:hidden;">
@@ -2148,35 +2146,28 @@ try {
             </div>
         `;
 
-        // Acción al tocar el contacto
-        div.onclick = async () => {
+        // Dentro del forEach de abrirAgendaCompleta...
+div.onclick = async () => {
             modal.style.display = 'none';
 
-            // 1. Buscamos el perfil para tener la foto real (pesada) para el Header
+            // 1. Buscamos el perfil para tener la foto para el Header
             const perfil = await obtenerLocal('perfiles', contacto.id);
             const fotoFinal = (perfil && perfil.foto) ? perfil.foto : contacto.foto;
 
             // 2. CREAMOS UNA COPIA SIN FOTO para activarContactoEnChat
-            // Evitamos que el localStorage explote por falta de espacio
+            // Así el localStorage no se llena y no sale el error de Quota
             const contactoSinFoto = { ...contacto };
             delete contactoSinFoto.foto; 
 
-            if (typeof activarContactoEnChat === "function") {
-                activarContactoEnChat(contactoSinFoto);
-            }
+            activarContactoEnChat(contactoSinFoto);
 
-            // 3. Cargamos el chat pasando la foto al Header
-            if (typeof cargarConversacionCon === "function") {
-                cargarConversacionCon(contacto.id, contacto.nombre, fotoFinal);
-            }
+            // 3. Cargamos el chat pasando la foto pesada solo a la memoria (el Header)
+            cargarConversacionCon(contacto.id, contacto.nombre, fotoFinal);
         };
 
-        // Lo agregamos al contenedor y al Set de memoria
         contenedor.appendChild(div);
         agendaRenderizada.add(contacto.id); 
-    }); 
-
-    console.log(`✅ Agenda cargada: ${todosLosContactos.length} contactos.`);
+    }); // Cierre del forEach
      } // Cierre de abrirAgendaCompleta
         
 
