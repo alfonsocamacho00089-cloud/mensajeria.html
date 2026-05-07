@@ -1325,60 +1325,70 @@ function procesarQRScanner(contenido) {
     pintarAgendaContactos();
      }
      
-async function cargarConversacionCon(idDestino, nombre, foto) {
-    // 1. Actualizar Interfaz (Header)
+async function cargarConversacionCon(idDestino, nombreDestino, fotoDestino) {
+    const box = document.getElementById('chat-box');
+    if (!box) return;
+
+    // 1. Limpiar pantalla
+    box.innerHTML = ""; 
+
+    // 2. Guardar el ID del contacto en el input oculto
     const targetInput = document.querySelector('#target-id');
     if (targetInput) targetInput.value = idDestino;
 
-    const nombreHeader = document.getElementById('perfil-nombre');
-    if (nombreHeader) nombreHeader.innerText = nombre;
-
-    const imgPerfil = document.getElementById('perfil-foto');
-    if (imgPerfil) {
-        imgPerfil.src = foto || 'assets/default-avatar.png';
+    // 3. Poner el nombre en el Header (usando TU ID: nombre-dueño-header)
+    const headerNombre = document.getElementById('nombre-dueño-header');
+    if (headerNombre) {
+        headerNombre.innerText = nombreDestino;
     }
 
-    // 2. Limpiar el contenedor de mensajes (Mesa limpia)
-    const box = document.getElementById('chat-box');
-    if (!box) return;
-    box.innerHTML = ""; 
-
-    try {
-        // 3. LEER DE LA V10 (IndexedDB) - La fuente de verdad
-        const todosLosMensajes = await obtenerTodo('mensajes');
-        
-        // 4. FILTRAR: Solo los mensajes que pertenecen a este chat
-        const misMensajes = todosLosMensajes.filter(m => String(m.contactoId) === String(idDestino));
-
-        // 5. RENDERIZAR: Dibujamos todo el historial filtrado
-        if (typeof renderizarMensajes === "function") {
-            renderizarMensajes(misMensajes); 
+    // 4. Lógica de tu FOTO original (Mantiene el DIV con inicial o la IMG)
+    const imgHeader = document.getElementById('foto-perfil-header');
+    if (imgHeader) {
+        if (fotoDestino && fotoDestino !== "") {
+            if (imgHeader.tagName === 'DIV') {
+                imgHeader.outerHTML = `<img id="foto-perfil-header" class="foto-perfil" style="width:40px; height:40px; border-radius:50%; object-fit:cover; border:2px solid #000;">`;
+                document.getElementById('foto-perfil-header').src = fotoDestino;
+            } else {
+                imgHeader.src = fotoDestino;
+                imgHeader.style.display = "block";
+            }
+        } else {
+            const inicial = nombreDestino ? nombreDestino.charAt(0).toUpperCase() : '?';
+            imgHeader.outerHTML = `<div id="foto-perfil-header" class="foto-perfil" style="width:40px; height:40px; border-radius:50%; background:#ffd700; color:#000; display:flex; align-items:center; justify-content:center; font-weight:900; border:2px solid #000; text-shadow: none !important;">${inicial}</div>`;
         }
-        
-        console.log(`✅ v10: Cargados ${misMensajes.length} mensajes para ${nombre}`);
+    }
+
+    // 5. CARGA DESDE v10 (IndexedDB)
+    try {
+        const todosLosMensajes = await obtenerTodo('mensajes');
+        // Usamos String() para que no falle la comparación
+        const mensajesFiltrados = todosLosMensajes.filter(m => String(m.contactoId) === String(idDestino));
+
+        // Usamos tu función renderizarMensajes o el forEach de pintarMensaje
+        if (typeof renderizarMensajes === "function") {
+            renderizarMensajes(mensajesFiltrados);
+        } else {
+            mensajesFiltrados.forEach(m => {
+                pintarMensaje(m.texto, m.clase, m.hora, m.status || 'enviado', m.id);
+            });
+        }
     } catch (e) {
-        console.error("❌ Error al cargar desde v10:", e);
+        console.error("Error cargando mensajes de v10:", e);
     }
 
-    // 6. DETALLES DE TU CÓDIGO ORIGINAL (UI y Notificaciones)
-    
-    // Limpiar contador de no leídos
+    // 6. UI y Notificaciones
     localStorage.setItem('unread_' + idDestino, 0);
-    if (typeof pintarAgendaContactos === "function") {
-        pintarAgendaContactos();
-    }
-
-    // Cerrar el modal de la agenda
+    if (typeof pintarAgendaContactos === "function") pintarAgendaContactos();
+    
+    // Cerrar modales (Agenda o QR)
+    if (typeof cerrarModalQR === 'function') cerrarModalQR();
     const modalAgenda = document.getElementById('modal-agenda');
     if (modalAgenda) modalAgenda.style.display = 'none';
 
-    // Foco automático en el input (Clave para desarrollo móvil)
+    // Foco en el teclado y Scroll
     const inputMsg = document.getElementById('msg-text');
-    if (inputMsg) {
-        inputMsg.focus();
-    }
-
-    // Auto-scroll al final del chat
+    if(inputMsg) inputMsg.focus();
     box.scrollTop = box.scrollHeight;
      }
     // 3. Buscamos los mensajes de ESE contacto en LocalStorage
