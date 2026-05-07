@@ -637,20 +637,24 @@ label[for="file-input"] {
     <div onclick="accionMensaje('borrar')" style="color: #ff5c5c;">🗑️ Borrar</div>
  </div>
 
-<div class="contenedor-flotante" style="background: #2a2f32; border-radius: 25px; margin: 10px; width: calc(100% - 20px);">
-<div class="contenedor-flotante">
-    <label for="file-input" style="cursor:pointer; padding: 0 10px; display: flex; align-items: center;">
-        <i class="fa-solid fa-camera" style="color: #8696a0; font-size: 20px;"></i>
+<div class="contenedor-flotante" style="display: flex; align-items: flex-end; background: #1e222b; padding: 8px 12px; gap: 8px; border-top: 1px solid #333;">
+    
+    <!-- Icono de Cámara -->
+    <label for="file-input" style="cursor:pointer; padding: 8px; display: flex; align-items: center; margin-bottom: 2px;">
+        <i class="fas fa-camera" style="color: #8696a0; font-size: 20px;"></i>
     </label>
     <input type="file" id="file-input" accept="image/*" style="display:none;" onchange="manejarSeleccionImagen(event)">
     
+    <!-- Textarea que se estira (flex: 1) -->
     <textarea 
         id="msg-text" 
         placeholder="Escribe un mensaje..."
-        oninput="this.style.height='45px'; this.style.height=this.scrollHeight+'px';"></textarea>
+        style="flex: 1; background: #2a2f32; border: 1px solid #3d444b; border-radius: 20px; color: white; padding: 10px 15px; resize: none; outline: none; font-size: 15px; height: 40px; max-height: 150px; box-sizing: border-box; line-height: 20px;"
+        oninput="this.style.height='40px'; this.style.height=this.scrollHeight+'px';"></textarea>
     
-    <button id="btn-enviar" onclick="enviarMensajeSatelital()">
-        <span>➤</span>
+    <!-- Botón de enviar -->
+    <button id="btn-enviar" onclick="enviarMensajeSatelital()" style="background: transparent; border: none; color: #ffd700; cursor: pointer; padding: 8px; margin-bottom: 2px; display: flex; align-items: center;">
+        <span style="font-size: 20px;">➤</span>
     </button>
 </div>
 
