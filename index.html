@@ -1710,24 +1710,7 @@ async function borrarMensajeDeMemoria(idMensajeV10, elementoHTML) {
     }
      }
      
-async function cargarMensajesLocales(idDestino) {
-    const box = document.getElementById('chat-box');
-    if (!box) return;
 
-    box.innerHTML = ""; // Limpiamos antes de cargar
-
-    // 1. Traemos los mensajes de la v10 (La memoria de verdad)
-    const todosLosMensajes = await obtenerTodo('mensajes');
-    
-    // 2. Filtramos solo los de este chat
-    const mensajesFiltrados = todosLosMensajes.filter(m => m.contactoId === idDestino);
-
-    // 3. Los pintamos
-    mensajesFiltrados.forEach(m => {
-        // Asegúrate de pasar el ID (m.id) para que luego se pueda borrar
-        pintarMensaje(m.texto, m.clase, m.hora, m.status, m.id);
-    });
-     }
          
 function renderizarMensajes(listaDeMensajes) {
     const chatBox = document.getElementById('chat-box');
