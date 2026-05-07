@@ -1674,23 +1674,29 @@ function accionMensaje(tipo) {
 }
  
 // Esta función es para que el borrado sea REAL y no vuelvan al recargar
-function borrarMensajeDeMemoria(texto) {
+
+async function borrarMensajeDeMemoria(idMensajeUnico, elementoHTML) {
     const idDestino = document.querySelector('#target-id').value;
     if(!idDestino) return;
 
+    // 1. Borrado visual inmediato
+    if(elementoHTML) elementoHTML.remove();
+
+    // 2. Borrar de la v10 (La base de datos real ahora)
+    try {
+        // Usamos la misma función eliminarLocal que arreglamos para los contactos
+        await eliminarLocal('mensajes', idMensajeUnico);
+        console.log("Mensaje borrado de v10");
+    } catch (e) {
+        console.log("Error al borrar mensaje de v10", e);
+    }
+
+    // 3. Borrar del localStorage (Por si todavía queda algo ahí de versiones viejas)
     const claveChat = 'chat_' + idDestino;
     let mensajes = JSON.parse(localStorage.getItem(claveChat)) || [];
-    
-    mensajes = mensajes.filter(m => m.texto !== texto);
+    mensajes = mensajes.filter(m => m.id !== idMensajeUnico);
     localStorage.setItem(claveChat, JSON.stringify(mensajes));
-}
- 
-// Cerrar el menú si tocas fuera
-document.addEventListener('click', () => {
-    const menu = document.getElementById('menu-acciones');
-    if(menu) menu.style.display = 'none';
-});
-        
+     }
 function cargarMensajesLocales() {
     const datos = localStorage.getItem('chat_' + idDestino);
     if (!datos) return; 
