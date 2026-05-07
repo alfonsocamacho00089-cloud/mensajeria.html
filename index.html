@@ -473,7 +473,7 @@ margin: 0;
     border-radius: 25px;
     border: 1px solid rgba(255, 215, 0, 0.3);
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-    z-index: 50000;
+    z-index: 30001;
 }
 
 /* Estilo para los botones individuales dentro de la barra */
@@ -589,24 +589,7 @@ label[for="file-input"] {
 </div>
  <div id="chat-box">
  </div>
-
-  <div class="contenedor-flotante">
-    <label for="file-input" style="cursor:pointer; padding: 0 10px; display: flex; align-items: center;">
-        <i class="fa-fa-camera" style="color: #8696a0; font-size: 20px;"></i>
-    </label>
-    <input type="file" id="file-input" accept="image/*" style="display:none;" onchange="manejarSeleccionImagen(event)">
-    
-    <textarea 
-        id="msg-text" 
-        placeholder="Escribe un mensaje..."
-        oninput="this.style.height='45px'; this.style.height=this.scrollHeight+'px';"></textarea>
-    
-    <button id="btn-enviar" onclick="enviarMensajeSatelital()">
-        <span>➤</span>
-    </button>
- </div>
-
-    <div class="barra-flotante-premium">
+<div class="barra-flotante-premium">
             <div class="btn-nav" onclick="abrirAgendaCompleta()">
                 <span>👥</span><span>Contactos</span>
             </div>
@@ -625,6 +608,23 @@ label[for="file-input"] {
         <span class="resaltado-oro">Más información.</span>
     </p>
  </div>
+  <div class="contenedor-flotante">
+    <label for="file-input" style="cursor:pointer; padding: 0 10px; display: flex; align-items: center;">
+        <i class="fa-fa-camera" style="color: #8696a0; font-size: 20px;"></i>
+    </label>
+    <input type="file" id="file-input" accept="image/*" style="display:none;" onchange="manejarSeleccionImagen(event)">
+    
+    <textarea 
+        id="msg-text" 
+        placeholder="Escribe un mensaje..."
+        oninput="this.style.height='45px'; this.style.height=this.scrollHeight+'px';"></textarea>
+    
+    <button id="btn-enviar" onclick="enviarMensajeSatelital()">
+        <span>➤</span>
+    </button>
+ </div>
+
+    
 
 
 <div id="modal-perfil" class="modal" style="display:none; background: #1e222b;z-index: 25000;">
