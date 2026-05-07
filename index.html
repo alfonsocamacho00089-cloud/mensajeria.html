@@ -2110,6 +2110,11 @@ div.onclick = async () => {
         id: contacto.id,
         nombre: contacto.nombre,
         foto: fotoParaElChat
+
+
+     contenedor.appendChild(div);
+        agendaRenderizada.add(contacto.id); // Guardamos que ya se dibujó
+    
     });
 };
 
