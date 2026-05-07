@@ -1705,39 +1705,27 @@ async function borrarMensajeDeMemoria(idMensajeV10, elementoHTML) {
     const idDestino = document.querySelector('#target-id').value;
     if (!idMensajeV10) return;
 
-    // 1. Borrado visual inmediato (para que el usuario sienta velocidad)
-    if (elementoHTML) elementoHTML.remove();
+    // 1. Lo quitamos de la vista YA
+    if (elementoHTML) {
+        elementoHTML.style.display = 'none'; // Lo ocultamos de inmediato
+    }
 
-    // 2. Borrar de la v10 (IndexedDB) - Usando tu lógica de seguridad
     try {
         const db = await abrirDB();
         const tx = db.transaction('mensajes', 'readwrite');
         const store = tx.objectStore('mensajes');
         
-        // Aquí lo borramos directamente por su ID único
-        await store.delete(idMensajeV10); 
-        console.log("✅ Mensaje eliminado de v10");
-    } catch (e) { 
-        console.error("Error eliminando en v10:", e); 
-    }
+        // BORRADO DOBLE EN v10: Por si acaso el ID es String o Número
+        await store.delete(idMensajeV10);
+        await store.delete(Number(idMensajeV10));
+        await store.delete(String(idMensajeV10));
+        
+        console.log("✅ v10: Purga total.");
+    } catch (e) { console.error(e); }
 
-    // 3. Limpiar LocalStorage (Para que no 'reviva' al recargar)
-    try {
-        const claveChat = 'chat_' + idDestino;
-        let historialLS = JSON.parse(localStorage.getItem(claveChat)) || [];
-        
-        // Filtramos para quitar el mensaje de la libreta vieja
-        historialLS = historialLS.filter(m => m.id !== idMensajeV10);
-        
-        if (historialLS.length > 0) {
-            localStorage.setItem(claveChat, JSON.stringify(historialLS));
-        } else {
-            localStorage.removeItem(claveChat);
-        }
-        console.log("✅ Limpieza de LocalStorage completada");
-    } catch (e) { 
-        console.log("No se encontró rastro en LocalStorage"); 
-    }
+    // 2. LIMPIEZA RADICAL DE LOCALSTORAGE
+    // Esto borra CUALQUIER rastro viejo para que no reviva nada
+    localStorage.removeItem('chat_' + idDestino);
      }
      
 
