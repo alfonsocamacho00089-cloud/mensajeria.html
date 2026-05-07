@@ -504,35 +504,14 @@ margin: 0;
 .btn-back-clean:active {
     opacity: 0.6;            /* Se pone un poco transparente al presionarlo */
 }
-     /* Esto es para que los iconos (cámara/clip) no se peguen al techo del contenedor */
-/* Esto NO toca tu fondo de Goku ni tu scroll */
-label[for="file-input"] {
-    display: inline-block;
-    width: 40px;
-    height: 40px;
-    line-height: 40px; /* Alinea el icono verticalmente */
-    text-align: center;
-    flex-shrink: 0; /* Prohibido que se encoja o crezca */
-    margin: 0;
-}
 
-.fa-camera {
-    color: #8696a0;
-    font-size: 20px;
-    cursor: pointer;
-    transition: color 0.2s;
-}
-
-.fa-camera:active {
-    color: #ffd700; /* Se pone dorado solo cuando lo tocas */
-}
        /* Un estilo limpio para que la foto siempre se vea */
 /* Solo afecta a estos dos elementos, no toca las fotos del chat */
 #foto-perfil-header, #mi-foto-previa {
     width: 45px !important;
     height: 45px !important;
     border-radius: 50% !important;
-    object-fit: contain !important;
+    object-fit: cover !important;
     border: 2px solid #ffd700 !important;
     flex-shrink: 0; /* Evita que se aplaste si el nombre es largo */
      
@@ -639,14 +618,10 @@ label[for="file-input"] {
 
 
 <div class="contenedor-flotante" style="display: flex; align-items: center; gap: 5px;">
-    <label for="file-input" style="cursor:pointer; padding: 0 10px; display: flex; align-items: center; flex-shrink: 0;">
-        <i class="fa-fa-camera" style="color: #8696a0; font-size: 20px;"></i>
-    </label>
-    <input type="file" id="file-input" accept="image/*" style="display:none;" onchange="manejarSeleccionImagen(event)">
     
     <textarea 
         id="msg-text" 
-        placeholder="Escribe un mensaje..."
+        placeholder="Mensaje..."
         style="flex: 1; min-width: 0; box-sizing: border-box;" 
         oninput="this.style.height='45px'; this.style.height=this.scrollHeight+'px';"></textarea>
     
@@ -1423,10 +1398,10 @@ if (imgHeader) {
         btn.className = 'fila-contacto'; 
         btn.id = `fila-${contacto.id}`;
         btn.innerHTML = `
-    <div id="img-cont-${contacto.id}" class="foto-perfil" style="width:45px; height:45px; border-radius:50%; background:#ffd700; color:#000; display:flex; align-items:center; justify-content:center; font-weight:900; font-size:20px; border: 2px solid #000; flex-shrink:0; position:relative;">
+    <div id="img-cont-${contacto.id}" class="foto-perfil" style="width:45px; height:45px; border-radius:50%; background:#ffd700; color:#000; display:flex; align-items:center; justify-content:center; font-weight:1200; font-size:20px; border: 1px solid #ffd700; flex-shrink:0; position:relative;">
         ${inicial}
         ${fotoURL && fotoURL !== "" ? 
-            `<img src="${fotoURL}" class="foto-perfil" style="width:45px; height:45px; border-radius:50%; object-fit:cover; border: 2px solid #ffd700; position:absolute; top:-2px; left:-2px;">` 
+            `<img src="${fotoURL}" class="foto-perfil" style="width:45px; height:45px; border-radius:50%; object-fit:cover; border: 1px solid #ffd700; position:absolute; top:-2px; left:-2px;">` 
             : '' 
         }
     </div>
@@ -2115,7 +2090,7 @@ function abrirPerfilContacto() {
         
         
         div.innerHTML = `
-            <div style="width:40px; height:40px; border-radius:50%; background:#ffd700; color:#000; display:flex; align-items:center; justify-content:center; font-weight:900; border: none; overflow:hidden;">
+            <div style="width:40px; height:40px; border-radius:50%; background:#ffd700; color:#000; display:flex; align-items:center; justify-content:center; font-weight:1200; border: 1px solid #ffd700; overflow:hidden;">
                 ${contacto.foto ? `<img src="${contacto.foto}" style="width:100%; height:100%; object-fit:cover;">` : inicial}
             </div>
             <div style="margin-left: 15px;">
