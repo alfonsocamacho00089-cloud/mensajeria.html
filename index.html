@@ -1696,18 +1696,29 @@ function accionMensaje(tipo) {
 // Esta función es para que el borrado sea REAL y no vuelvan al recargar
 
 async function borrarMensajeDeMemoria(idMensajeV10, elementoHTML) {
-    if(!idMensajeV10) return;
+    const idDestino = document.querySelector('#target-id').value;
+    if(!idDestino || !idMensajeV10) return;
 
-    // 1. Borrado visual
+    // 1. Borrado visual inmediato
     if(elementoHTML) elementoHTML.remove();
 
-    // 2. Borrar de la v10 por su clave numérica
+    // 2. BORRAR DE LA V10 (IndexedDB)
     try {
         await eliminarLocal('mensajes', idMensajeV10);
-        console.log("Mensaje borrado de v10");
-    } catch (e) {
-        console.error("Error al borrar mensaje de v10:", e);
-    }
+        console.log("Eliminado de v10");
+    } catch (e) { console.error("Error en v10:", e); }
+
+    // 3. LA CLAVE: Borrar también del localStorage para que no "reviva" el pintado
+    try {
+        const claveChat = 'chat_' + idDestino;
+        let mensajesLS = JSON.parse(localStorage.getItem(claveChat)) || [];
+        
+        // Filtramos el mensaje del localStorage para que muera del todo
+        mensajesLS = mensajesLS.filter(m => m.id !== idMensajeV10);
+        
+        localStorage.setItem(claveChat, JSON.stringify(mensajesLS));
+        console.log("Eliminado de LocalStorage");
+    } catch (e) { console.log("No había nada en LocalStorage"); }
      }
      
 
