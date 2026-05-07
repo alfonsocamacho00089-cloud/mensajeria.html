@@ -583,30 +583,30 @@ margin: 0;
         <span class="resaltado-oro">Más información.</span>
     </p>
  </div>
-<div id="modal-perfil" class="modal" style="display:none; padding: 15px; background: #1e222b; z-index: 25000;">
-    <!-- Agregamos align-items: center aquí para centrar todo -->
-    <div class="modal-cover" style="display: flex; flex-direction: column; align-items: center;">
-      
-        <!-- Con align-self: flex-start mandamos la flecha a la izquierda -->
-        <button onclick="document.getElementById('modal-perfil').style.display='none'" 
-                style="background: transparent; border: none; color: white; font-size: 24px; transform: scaleX(-1); align-self: flex-start; cursor: pointer;">➔</button>
+<div id="modal-perfil" class="modal" style="display:none; padding: 15px; background: #1e222b; z-index: 25000; box-sizing: border-box;">
     
-        <img id="perfil-foto-grande" src="" style="width: 150px; height: 150px; border-radius: 0; border: 1px solid #ffd700; margin-top: 20px !important; margin-bottom: 5px; object-fit: cover;">
+    <div style="display: flex; justify-content: flex-start; width: 100%; margin-bottom: 20px;">
+        <button onclick="document.getElementById('modal-perfil').style.display='none'" 
+                style="background: transparent; border: none; color: white; font-size: 24px; transform: scaleX(-1); cursor: pointer; padding: 0;">➔</button>
+    </div>
+
+    <div class="modal-cover" style="display: flex; flex-direction: column; align-items: center; width: 100%;">
+      
+        <img id="perfil-foto-grande" src="AQUÍ_TU_URL_DE_FOTO" style="width: 150px; height: 150px; border-radius: 0; border: 1px solid #ffd700; margin-bottom: 15px; object-fit: cover;">
         
-        <h2 id="perfil-nombre" style="color: white; margin-bottom: 5px; text-align: center;"></h2>
+        <h2 id="perfil-nombre" style="color: white; margin-bottom: 20px; text-align: center; font-size: 24px; font-weight: bold;">Arturo Martinez</h2>
        
         <button onclick="eliminarChatEspecifico(); event.stopPropagation();" 
-                style="width: 50%; padding: 8px; background: transparent; border: none; border-radius: 8px; color: #8696a0; font-size: 12px; font-weight: 500; cursor: pointer; margin-top: 10px;">
+                style="width: 180px; padding: 10px; background: transparent; border: none; color: #8696a0; font-size: 14px; font-weight: 500; cursor: pointer; text-align: center;">
             Vaciar chat 
         </button>
 
         <button onclick="eliminarContactoDeAgenda(); event.stopPropagation();" 
-                style="width: 50%; padding: 8px; background: transparent; border: none; border-radius: 8px; color: #8696a0; font-size: 12px; font-weight: 500; cursor: pointer; margin-top: 8px;">
+                style="width: 180px; padding: 10px; background: transparent; border: none; color: #8696a0; font-size: 14px; font-weight: 500; cursor: pointer; margin-top: 5px; text-align: center;">
             Eliminar 
         </button>
     </div>
 </div>
-
  <div id="menu-acciones" class="menu-mensaje">
     <div onclick="accionMensaje('responder')">↩️ Responder</div>
     <div onclick="accionMensaje('editar')">✏️ Editar</div>
