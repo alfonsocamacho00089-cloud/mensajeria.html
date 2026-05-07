@@ -2097,17 +2097,23 @@ function abrirPerfilContacto() {
             </div>
         `;
 
-        div.onclick = async () => {
-            modal.style.display = 'none';
-            const perfil = await obtenerLocal('perfiles', contacto.id);
-            activarContactoEnChat(contacto);
-            cargarConversacionCon(contacto.id, contacto.nombre, (perfil && perfil.foto) ? perfil.foto : null);
-        };
+        // Dentro del forEach de abrirAgendaCompleta...
+div.onclick = async () => {
+    modal.style.display = 'none';
+    
+    // IMPORTANTE: Buscamos si ya tenemos la foto en nuestra DB local 
+    // antes de activar el chat para que pase la info completa
+    const perfilData = await obtenerLocal('perfiles', contacto.id);
+    const fotoParaElChat = (perfilData && perfilData.foto) ? perfilData.foto : contacto.foto;
 
-        contenedor.appendChild(div);
-        agendaRenderizada.add(contacto.id); // Guardamos que ya se dibujó
+    activarContactoEnChat({
+        id: contacto.id,
+        nombre: contacto.nombre,
+        foto: fotoParaElChat
     });
-     }
+};
+
+        
 
 // Función para mover un contacto de la "Agenda" a la "Lista de Chats"
 function activarContactoEnChat(contacto) {
