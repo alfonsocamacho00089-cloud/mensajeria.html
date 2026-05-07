@@ -583,26 +583,26 @@ margin: 0;
         <span class="resaltado-oro">Más información.</span>
     </p>
  </div>
-<div id="modal-perfil" class="modal" style="display:none; padding: 15px; background: #1e222b; z-index: 25000; box-sizing: border-box;">
+<div id="modal-perfil" class="modal" style="display:none; padding: 20px; background: #1e222b; z-index: 25000; position: fixed; top: 0; left: 0; width: 100%; height: 100%; box-sizing: border-box;">
     
-    <div style="display: flex; justify-content: flex-start; width: 100%; margin-bottom: 20px;">
+    <div style="width: 100%; display: flex; justify-content: flex-start;">
         <button onclick="document.getElementById('modal-perfil').style.display='none'" 
-                style="background: transparent; border: none; color: white; font-size: 24px; transform: scaleX(-1); cursor: pointer; padding: 0;">➔</button>
+                style="background: transparent; border: none; color: white; font-size: 28px; transform: scaleX(-1); cursor: pointer; padding: 10px;">➔</button>
     </div>
 
-    <div class="modal-cover" style="display: flex; flex-direction: column; align-items: center; width: 100%;">
+    <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; margin-top: 20px; width: 100%;">
       
-        <img id="perfil-foto-grande" src="AQUÍ_TU_URL_DE_FOTO" style="width: 150px; height: 150px; border-radius: 0; border: 1px solid #ffd700; margin-bottom: 15px; object-fit: cover;">
+        <img id="perfil-foto-grande" src="" style="width: 180px; height: 180px; border: 2px solid #ffd700; object-fit: cover; margin-bottom: 15px;">
         
-        <h2 id="perfil-nombre" style="color: white; margin-bottom: 20px; text-align: center; font-size: 24px; font-weight: bold;">Arturo Martinez</h2>
+        <h2 id="perfil-nombre" style="color: white; margin-bottom: 30px; text-align: center; font-size: 22px;">Arturo Martinez</h2>
        
-        <button onclick="eliminarChatEspecifico(); event.stopPropagation();" 
-                style="width: 180px; padding: 10px; background: transparent; border: none; color: #8696a0; font-size: 14px; font-weight: 500; cursor: pointer; text-align: center;">
+        <button onclick="eliminarChatEspecifico();" 
+                style="width: 200px; padding: 12px; background: transparent; border: none; color: #8696a0; font-size: 14px; cursor: pointer;">
             Vaciar chat 
         </button>
 
-        <button onclick="eliminarContactoDeAgenda(); event.stopPropagation();" 
-                style="width: 180px; padding: 10px; background: transparent; border: none; color: #8696a0; font-size: 14px; font-weight: 500; cursor: pointer; margin-top: 5px; text-align: center;">
+        <button onclick="eliminarContactoDeAgenda();" 
+                style="width: 200px; padding: 12px; background: transparent; border: none; color: #8696a0; font-size: 14px; cursor: pointer; margin-top: 10px;">
             Eliminar 
         </button>
     </div>
