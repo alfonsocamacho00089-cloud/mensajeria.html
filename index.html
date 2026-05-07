@@ -638,22 +638,18 @@ label[for="file-input"] {
  </div>
 
 <div class="contenedor-flotante" style="background: #2a2f32; border-radius: 25px; margin: 10px; width: calc(100% - 20px);">
-    
-    <!-- Icono de Cámara corregido -->
-    <label for="file-input" style="cursor:pointer; padding: 0 12px; display: flex; align-items: center;">
+<div class="contenedor-flotante">
+    <label for="file-input" style="cursor:pointer; padding: 0 10px; display: flex; align-items: center;">
         <i class="fas fa-camera" style="color: #8696a0; font-size: 20px;"></i>
     </label>
     <input type="file" id="file-input" accept="image/*" style="display:none;" onchange="manejarSeleccionImagen(event)">
     
-    <!-- El Textarea -->
     <textarea 
         id="msg-text" 
         placeholder="Escribe un mensaje..."
-        style="flex: 1; background: transparent; border: none; color: white; outline: none; padding: 10px 5px; resize: none; font-size: 16px; height: 45px; max-height: 150px;"
         oninput="this.style.height='45px'; this.style.height=this.scrollHeight+'px';"></textarea>
     
-    <!-- El botón de enviar -->
-    <button id="btn-enviar" onclick="enviarMensajeSatelital()" style="background: transparent; border: none; color: #00a884; font-size: 20px; cursor: pointer; padding: 0 10px;">
+    <button id="btn-enviar" onclick="enviarMensajeSatelital()">
         <span>➤</span>
     </button>
 </div>
