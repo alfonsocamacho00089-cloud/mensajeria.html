@@ -74,10 +74,11 @@
   "theme_color": "#000000"
 }
 
+
 {
-  "short_name": "SpaceChat-Mio",
-  "name": "SpaceChat - Mio",
-  "description": "Mensajería para Mio",
+  "short_name": "SpaceChat-Joa",
+  "name": "SpaceChat - Joa",
+  "description": "Mensajería para Joa",
   "icons": [
     {
       "src": "assets/imagen-logo-nuevo.png",
@@ -86,7 +87,7 @@
       "purpose": "any maskable"
     }
   ],
-  "start_url": "./mio.html",
+  "start_url": "./joa.html",
   "display": "standalone",
   "scope": "/",
   "background_color": "#000000",
