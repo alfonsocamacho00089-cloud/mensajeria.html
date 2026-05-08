@@ -56,47 +56,4 @@
 }
 
 
-{
-  "short_name": "SpaceChat-Joa",
-  "name": "SpaceChat - Joa",
-  "description": "Mensajería para Joa",
-  "icons": [
-    {
-      "src": "assets/imagen-logo-nuevo.png",
-      "type": "image/png",
-      "sizes": "512x512",
-      "purpose": "any maskable"
-    }
-  ],
-  "start_url": "./joa.html",
-  "display": "standalone",
-  "scope": "/",
-  "background_color": "#000000",
-  "theme_color": "#000000"
-}
 
-{
-  "short_name": "SpaceChat-mio",
-  "name": "SpaceChat - mio",
-  "description": "Mensajería para mio",
-  "id": "/mio-htlm-id",
-  "icons": [
-    {
-      "src": "assets/imagen-logo-nuevo.png",
-      "type": "image/png",
-      "sizes": "192x192",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "assets/imagen-logo-nuevo.png",
-      "type": "image/png",
-      "sizes": "512x512",
-      "purpose": "any maskable"
-    }
-  ],
-  "start_url": "./mio.html",
-  "display": "standalone",
-  "scope": "/",
-  "background_color": "#000000",
-  "theme_color": "#000000"
-}
