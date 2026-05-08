@@ -10,20 +10,9 @@ importScripts('./protobuf.min.js');
 // ==========================================
 const CACHE_NAME = 'spacechat-cache-v4.6';
 const urlsToCache = [
-  
   '/',
   '/index.html',
-  '/sami.html',     // Corregido .html
-  '/marley.html',   // Corregido .html
-  '/cristian.html', // Corregido .html
-  '/mio.html',       // Corregido .html
-  '/style.css',
-  '/manifest.json',
-  '/manifest-sami.json',    // Agregamos los manifiestos nuevos
-  '/manifest-marley.json',
-  '/manifest-cristian.json',
-  '/manifest-mio.json',
-  '/manifest-index.json'
+  '/style.css' // Solo lo básico para probar
 ];
 
 // --- Los eventos (Install, Activate, Fetch) se quedan EXACTAMENTE IGUAL ---
