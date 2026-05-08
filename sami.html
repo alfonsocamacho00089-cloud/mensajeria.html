@@ -2223,6 +2223,40 @@ inicializarInterfaz();
      let instaladorDiferido;
 
 
+window.addEventListener('beforeinstallprompt', (e) => {
+    // Evita que Chrome muestre el aviso automático feo
+    e.preventDefault();
+    // Guarda el evento para usarlo cuando tú quieras
+    instaladorDiferido = e;
+    
+    });
+
+function lanzarInstalacion() {
+    if (instaladorDiferido) {
+        instaladorDiferido.prompt();
+        instaladorDiferido.userChoice.then((choiceResult) => {
+            if (choiceResult.outcome === 'accepted') {
+                console.log('¡El usuario aceptó la descarga!');
+            }
+            instaladorDiferido = null;
+        });
+    }
+     }
+if (window.visualViewport) {
+    const vv = window.visualViewport;
+    const ajustarInterfaz = () => {
+        document.body.style.height = `${vv.height}px`;
+        document.body.style.top = `${vv.offsetTop}px`;
+        window.scrollTo(0, 0);
+        const chatBox = document.getElementById('chat-box');
+        if (chatBox) {
+            requestAnimationFrame(() => { chatBox.scrollTop = chatBox.scrollHeight; });
+        }
+    };
+    vv.addEventListener('resize', ajustarInterfaz);
+    vv.addEventListener('scroll', ajustarInterfaz);
+    ajustarInterfaz();
+     }
      
 </script>
 </body>
