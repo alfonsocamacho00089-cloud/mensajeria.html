@@ -22,7 +22,7 @@ const urlsToCache = [
   '/manifest-sami.json',    // Agregamos los manifiestos nuevos
   '/manifest-marley.json',
   '/manifest-cristian.json',
-  '/manifest-mio.json'
+  '/manifest-mio.json',
   '/manifest-index.json'
 ];
 
