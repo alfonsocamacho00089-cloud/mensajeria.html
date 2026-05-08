@@ -8,14 +8,26 @@ importScripts('./protobuf.min.js');
 // ==========================================
 // 1.5. CACHÉ PARA FUNCIONAR SIN INTERNET
 // ==========================================
-const CACHE_NAME = 'spacechat-cache-v4.5';
+const CACHE_NAME = 'spacechat-cache-v4.6';
 const urlsToCache = [
-  './',
-  './index.html',
-  './manifest.json',
-  './assets/logo-nuevo.png',
-  // Agrega aquí tus archivos .css o .js principales
+  
+  '/',
+  '/index.html',
+  '/sami.html',     // Corregido .html
+  '/marley.html',   // Corregido .html
+  '/cristian.html', // Corregido .html
+  '/mio.html',       // Corregido .html
+  '/style.css',
+  '/manifest.json',
+  '/manifest-sami.json',    // Agregamos los manifiestos nuevos
+  '/manifest-marley.json',
+  '/manifest-cristian.json',
+  '/manifest-mio.json'
+  '/manifest-index.json'
 ];
+
+// --- Los eventos (Install, Activate, Fetch) se quedan EXACTAMENTE IGUAL ---
+// No hace falta cambiar nada en el resto del código que pusiste.
 
 // Instalar y guardar archivos en el celular
 self.addEventListener('install', (event) => {
