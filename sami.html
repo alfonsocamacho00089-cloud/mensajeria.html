@@ -2262,8 +2262,7 @@ if (window.visualViewport) {
 // 1. Capturamos el evento de instalación
 window.addEventListener('beforeinstallprompt', (e) => {
     // Evitamos que salga el aviso pequeñito de Chrome abajo
-    e.preventDefault();
-    // Guardamos el evento en la variable
+    alert("¡Chrome detectó que la app se puede instalar!");
     promptInstalacion = e;
 
     // 2. EL TRUCO: Al primer toque del usuario en la pantalla, lanzamos el cuadro
@@ -2280,6 +2279,8 @@ window.addEventListener('beforeinstallprompt', (e) => {
         }
     }, { once: true }); // "{ once: true }" hace que solo funcione al primer clic
 });
+
+     
      
 </script>
 </body>
