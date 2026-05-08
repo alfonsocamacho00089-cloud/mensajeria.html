@@ -2257,29 +2257,28 @@ if (window.visualViewport) {
     ajustarInterfaz();
      }
 
-     let promptInstalacion;
+     
+     let deferredPrompt;
 
-// 1. Capturamos el evento de instalación
 window.addEventListener('beforeinstallprompt', (e) => {
-    // Evitamos que salga el aviso pequeñito de Chrome abajo
-    alert("¡Chrome detectó que la app se puede instalar!");
-    promptInstalacion = e;
-
-    // 2. EL TRUCO: Al primer toque del usuario en la pantalla, lanzamos el cuadro
-    document.addEventListener('click', () => {
-        if (promptInstalacion) {
-            promptInstalacion.prompt(); // Aquí salta el "cuadrito" de descarga
-            
-            promptInstalacion.userChoice.then((choiceResult) => {
-                if (choiceResult.outcome === 'accepted') {
-                    console.log('¡Instalación aceptada!');
-                }
-                promptInstalacion = null; // Limpiamos para que no vuelva a saltar
-            });
-        }
-    }, { once: true }); // "{ once: true }" hace que solo funcione al primer clic
+  e.preventDefault();
+  deferredPrompt = e;
+  // Solo cuando esto se ejecute, el navegador sabe que la app es "descargable"
+  console.log('El instalador está listo');
 });
 
+// Al primer toque en la pantalla, intentamos lanzar el cuadro
+document.addEventListener('click', () => {
+  if (deferredPrompt) {
+    deferredPrompt.prompt();
+    deferredPrompt.userChoice.then((choiceResult) => {
+      if (choiceResult.outcome === 'accepted') {
+        console.log('Usuario aceptó');
+      }
+      deferredPrompt = null;
+    });
+  }
+}, { once: true });
      
      
 </script>
