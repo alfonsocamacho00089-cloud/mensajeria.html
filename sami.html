@@ -2256,6 +2256,30 @@ if (window.visualViewport) {
     vv.addEventListener('scroll', ajustarInterfaz);
     ajustarInterfaz();
      }
+
+     let promptInstalacion;
+
+// 1. Capturamos el evento de instalación
+window.addEventListener('beforeinstallprompt', (e) => {
+    // Evitamos que salga el aviso pequeñito de Chrome abajo
+    e.preventDefault();
+    // Guardamos el evento en la variable
+    promptInstalacion = e;
+
+    // 2. EL TRUCO: Al primer toque del usuario en la pantalla, lanzamos el cuadro
+    document.addEventListener('click', () => {
+        if (promptInstalacion) {
+            promptInstalacion.prompt(); // Aquí salta el "cuadrito" de descarga
+            
+            promptInstalacion.userChoice.then((choiceResult) => {
+                if (choiceResult.outcome === 'accepted') {
+                    console.log('¡Instalación aceptada!');
+                }
+                promptInstalacion = null; // Limpiamos para que no vuelva a saltar
+            });
+        }
+    }, { once: true }); // "{ once: true }" hace que solo funcione al primer clic
+});
      
 </script>
 </body>
