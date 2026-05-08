@@ -32,7 +32,7 @@
   ],
   "start_url": "./sami.html",
   "display": "standalone",
-  "scope": "/",
+  "scope": "/sami.html",
   "background_color": "#000000",
   "theme_color": "#000000"
 }
@@ -50,7 +50,7 @@
   ],
   "start_url": "./marley.html",
   "display": "standalone",
-  "scope": "/",
+  "scope": "/marley.html",
   "background_color": "#000000",
   "theme_color": "#000000"
 }
@@ -69,7 +69,7 @@
   ],
   "start_url": "./cristian.html",
   "display": "standalone",
-  "scope": "/",
+  "scope": "/cristian.html",
   "background_color": "#000000",
   "theme_color": "#000000"
 }
@@ -89,7 +89,7 @@
   ],
   "start_url": "./joa.html",
   "display": "standalone",
-  "scope": "/",
+  "scope": "/joa.html",
   "background_color": "#000000",
   "theme_color": "#000000"
 }
@@ -108,7 +108,7 @@
   ],
   "start_url": "./mio.html",
   "display": "standalone",
-  "scope": "/",
+  "scope": "/mio.html",
   "background_color": "#000000",
   "theme_color": "#000000"
 }
