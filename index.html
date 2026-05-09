@@ -2318,7 +2318,36 @@ function toggleStickers() {
         if (imgPrevia) imgPrevia.src = fotoGuardada;
     }
 }
+// Librería de recursos (URLs fijas para que no pesen)
+const bibliotecaSpaceChat = {
+    stickers: [
+        'https://tusitio.com/stickers/goku_arriba.png',
+        'https://tusitio.com/stickers/shinobu_hola.png',
+        'https://tusitio.com/stickers/vegeta_orgullo.png'
+    ],
+    gifs: [
+        'https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjEx.../giphy.gif',
+        'https://tusitio.com/gifs/kamehameha.gif'
+    ]
+};
 
+function abrirGaleriaMultimedia(tipo) {
+    const grid = document.getElementById('contenedor-grid-stickers'); // Tu ID de la bandeja
+    grid.innerHTML = ""; // Limpiar
+
+    const items = bibliotecaSpaceChat[tipo];
+    
+    items.forEach(url => {
+        const img = document.createElement('img');
+        img.src = url;
+        img.style = "width:80px; height:80px; margin:5px; cursor:pointer; object-fit:contain;";
+        img.onclick = () => {
+            enviarMediaPorURL(url, tipo === 'stickers' ? 'sticker' : 'gif');
+            toggleStickers(); // Cerrar el panel
+        };
+        grid.appendChild(img);
+    });
+     }
 // Llama a esta función al final de tu código o en el onload
 cargarFotoInicial();
      
