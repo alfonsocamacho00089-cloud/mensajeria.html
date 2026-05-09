@@ -1,5 +1,24 @@
 
 {
+  "short_name": "SpaceChat-Joa",
+  "name": "SpaceChat - Joa",
+  "description": "Mensajería para Joa",
+  "icons": [
+    {
+      "src": "assets/imagen-logo-nuevo.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "any maskable"
+    }
+  ],
+  "start_url": "./joa.html",
+  "display": "standalone",
+  "scope": "/",
+  "background_color": "#000000",
+  "theme_color": "#000000"
+}
+
+{
   "short_name": "SpaceChat-Sami",
   "name": "SpaceChat - Sami",
   "description": "Mensajería para Sami",
@@ -37,9 +56,9 @@
 }
 
 {
-  "short_name": "SpaceChat-Cristian",
-  "name": "SpaceChat - Cristian",
-  "description": "Mensajería para Cristian",
+  "short_name": "SpaceChat",
+  "name": "SpaceChat",
+  "description": "Mensajería",
   "icons": [
     {
       "src": "assets/imagen-logo-nuevo.png",
@@ -48,7 +67,7 @@
       "purpose": "any maskable"
     }
   ],
-  "start_url": "./cristian.html",
+  "start_url": "./index.html",
   "display": "standalone",
   "scope": "/",
   "background_color": "#000000",
