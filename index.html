@@ -1740,28 +1740,24 @@ async function borrarMensajeDeMemoria(idMensajeV10, elementoHTML) {
     const idDestino = document.querySelector('#target-id').value;
     if (!idMensajeV10) return;
 
-    // 1. Borrado visual (desaparece al toque)
+    // 1. Borrado visual inmediato
     if (elementoHTML) elementoHTML.remove();
 
-    // 2. Borrar de la v10 (Imitando tu lógica de eliminarChatEspecifico)
+    // 2. Borrar de la v10 (IndexedDB)
     try {
         const db = await abrirDB();
         const tx = db.transaction('mensajes', 'readwrite');
         const store = tx.objectStore('mensajes');
-        
-        // El "bisturí": borra el ID exacto en IndexedDB
         await store.delete(idMensajeV10); 
-        console.log("✅ v10: Mensaje fulminado.");
+        console.log("✅ v10: Mensaje eliminado.");
     } catch (e) { 
         console.error("Error en v10:", e); 
     }
 
-    // 3. Limpiar el LocalStorage (Para que el fantasma no reviva)
+    // 3. Limpiar el LocalStorage (Borrar el rastro viejo)
     try {
         const claveChat = 'chat_' + idDestino;
         let historialLS = JSON.parse(localStorage.getItem(claveChat)) || [];
-        
-        // Filtramos para que muera en la libreta vieja también
         historialLS = historialLS.filter(m => m.id !== idMensajeV10);
         
         if (historialLS.length > 0) {
@@ -2127,7 +2123,7 @@ try {
     
     modal.style.display = 'block';
     
-    // 1. Traemos los contactos de la v10
+    // 1. Traemos los contactos de la v10 (IndexedDB)
     const todosLosContactos = await obtenerTodo('perfiles');
 
     if (todosLosContactos.length === 0) {
@@ -2135,14 +2131,11 @@ try {
         return;
     }
 
-    // 2. LA CLAVE: Limpiamos el mensaje de "Cargando" ANTES del forEach
-    // Pero NO limpiamos todo el contenedor si ya hay hijos, para que no parpadee
     if (contenedor.innerHTML.includes("Cargando")) {
         contenedor.innerHTML = ""; 
     }
 
     todosLosContactos.forEach(contacto => {
-        // Si ya está en pantalla, lo saltamos
         if (agendaRenderizada.has(contacto.id)) return;
 
         const div = document.createElement('div');
@@ -2150,7 +2143,6 @@ try {
         div.style = "display: flex; align-items: center; padding: 12px; border-bottom: none; cursor: pointer;";
         
         const inicial = contacto.nombre ? contacto.nombre.charAt(0).toUpperCase() : '?';
-        
         
         div.innerHTML = `
             <div style="width:40px; height:40px; border-radius:50%; background:#ffd700; color:#000; display:flex; align-items:center; justify-content:center; font-weight:1200; border: 1px solid #ffd700; overflow:hidden;">
@@ -2162,28 +2154,26 @@ try {
             </div>
         `;
 
-        // Dentro del forEach de abrirAgendaCompleta...
-div.onclick = async () => {
+        div.onclick = async () => {
             modal.style.display = 'none';
 
-            // 1. Buscamos el perfil para tener la foto para el Header
+            // 1. Buscamos el perfil para tener la foto real para el Header
             const perfil = await obtenerLocal('perfiles', contacto.id);
             const fotoFinal = (perfil && perfil.foto) ? perfil.foto : contacto.foto;
 
-            // 2. CREAMOS UNA COPIA SIN FOTO para activarContactoEnChat
-            // Así el localStorage no se llena y no sale el error de Quota
+            // 2. CREAMOS UNA COPIA SIN FOTO (Evita error de Quota en LocalStorage)
             const contactoSinFoto = { ...contacto };
             delete contactoSinFoto.foto; 
 
-            activarContactoEnChat(contactoSinFoto);
+            if (typeof activarContactoEnChat === "function") activarContactoEnChat(contactoSinFoto);
 
-            // 3. Cargamos el chat pasando la foto pesada solo a la memoria (el Header)
+            // 3. Cargamos el chat (Memoria temporal para el Header)
             cargarConversacionCon(contacto.id, contacto.nombre, fotoFinal);
         };
 
         contenedor.appendChild(div);
         agendaRenderizada.add(contacto.id); 
-    }); // Cierre del forEach
+    });
      } // Cierre de abrirAgendaCompleta
         
 
