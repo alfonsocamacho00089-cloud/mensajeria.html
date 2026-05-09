@@ -1062,33 +1062,33 @@ setTimeout(() => {
             const emisorID = data.from; 
             const chatAbiertoActualmente = document.querySelector('#target-id').value;
 
-            // --- 1. LÓGICA DE CONFIRMACIÓN (DOBLE CHECK) ---
             if (decoded.tipo === 1) { 
                 const idParaMarcar = data.msgId; 
-                
-                // ACTUALIZAR EN INDEXEDDB: Buscamos el mensaje y cambiamos su estado
                 const todos = await obtenerTodo('mensajes');
                 const msgEncontrado = todos.find(m => m.id === idParaMarcar);
                 if (msgEncontrado) {
                     msgEncontrado.status = 'recibido';
                     await guardarLocal('mensajes', msgEncontrado);
                 }
-
                 if (typeof marcarMensajeComoRecibido === "function") {
                     marcarMensajeComoRecibido(idParaMarcar, emisorID);
                 }
-
                 snapshot.ref.remove(); 
                 return; 
             }
 
-            // --- 2. LÓGICA DE MENSAJE DE TEXTO ---
             const textoReal = decodeURIComponent(escape(atob(decoded.chatText)));
 
-            // GUARDAR EN INDEXEDDB (En lugar de localStorage)
+            // --- TRADUCCIÓN PARA NOTIFICACIÓN ---
+            let textoNotificacion = textoReal;
+            if (textoReal.startsWith('MEDIA_TIPO:')) {
+                const tipo = textoReal.split('|')[0].split(':')[1];
+                textoNotificacion = "📷 Envío un " + tipo;
+            }
+
             const nuevoMensaje = { 
                 id: decoded.msgId,
-                contactoId: emisorID, // Para saber de quién es el mensaje
+                contactoId: emisorID,
                 texto: textoReal, 
                 clase: 'msg-izquierda',
                 status: 'recibido',
@@ -1098,19 +1098,18 @@ setTimeout(() => {
            
             await guardarLocal('mensajes', nuevoMensaje);
 
-            // Manejo de Interfaz
             if (emisorID === chatAbiertoActualmente) {
+                // pintarMensaje ya tiene la lógica para dibujar stickers/videos
                 pintarMensaje(textoReal, 'msg-izquierda', null, 'recibido', decoded.msgId);
             } else {
                 let noLeidos = parseInt(localStorage.getItem('unread_' + emisorID)) || 0;
                 localStorage.setItem('unread_' + emisorID, noLeidos + 1);
                 pintarAgendaContactos();
 
-                // Notificación Nativa
                 if ('serviceWorker' in navigator) {
                     navigator.serviceWorker.ready.then(reg => {
-                        reg.showNotification("Nuevo mensaje de " + emisorID, {
-                            body: textoReal,
+                        reg.showNotification("SpaceChat: " + emisorID, {
+                            body: textoNotificacion, // Texto limpio para el usuario
                             icon: 'assets/logo-nuevo.png',
                             data: { emisor: emisorID }
                         });
@@ -1124,14 +1123,18 @@ setTimeout(() => {
         } catch (e) { console.error("Error en Antena:", e); }
     });
      }
-async function enviarMensajeSatelital() {
+
+// Añadimos 'msgManual' para poder enviar URLs de stickers/videos directamente
+async function enviarMensajeSatelital(msgManual = null) {
     const inputMsg = document.querySelector('#msg-text');
     const inputTarget = document.querySelector('#target-id');
-    const msg = inputMsg ? inputMsg.value.trim() : "";
+    
+    // Si viene msgManual (sticker/video), usamos ese. Si no, el del input.
+    const msg = msgManual ? msgManual : (inputMsg ? inputMsg.value.trim() : "");
     const targetID = inputTarget ? inputTarget.value.trim() : "";
     const miID = localStorage.getItem('mi_dropis_id') || "ID_DESCONOCIDO";
 
-    if (!targetID || !msg) return alert("ID y Mensaje son obligatorios");
+    if (!targetID || !msg) return; // Quitamos el alert para que sea más fluido
 
     const msgId = "msg_" + Date.now();
 
@@ -1149,7 +1152,6 @@ async function enviarMensajeSatelital() {
         const buffer = SuperAppPayload.encode(payload).finish();
         const base64 = btoa(String.fromCharCode.apply(null, buffer));
         
-        // Lanzamiento a Firebase
         await db.ref('cola_satelital/' + targetID).push({
             p: base64,
             from: miID,
@@ -1157,13 +1159,12 @@ async function enviarMensajeSatelital() {
             msgId: msgId
         });
 
-        // PINTAR EN INTERFAZ
+        // pintarMensaje detectará si es MEDIA_TIPO y lo dibujará
         pintarMensaje(msg, 'msg-derecha', null, 'enviado', msgId);
 
-        // GUARDAR EN INDEXEDDB
         await guardarLocal('mensajes', { 
             id: msgId, 
-            contactoId: targetID, // Clave para filtrar el chat después
+            contactoId: targetID, 
             texto: msg, 
             clase: 'msg-derecha', 
             status: 'enviado',
@@ -1171,34 +1172,16 @@ async function enviarMensajeSatelital() {
             hora: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })
         });
 
-        if (inputMsg) {
+        // Solo limpiamos el input si el mensaje vino del teclado
+        if (inputMsg && !msgManual) {
             inputMsg.value = "";
-            inputMsg.style.height = '36px';
+            inputMsg.style.height = '45px';
             inputMsg.focus(); 
         }
 
     } catch (e) {
         console.error("❌ Fallo en el lanzamiento:", e);
     }
-     }
-  
-            
-        
-
-     // --- BLOQUE: ENVIAR MENSAJE (NOTIFICAR) ---
-if ('serviceWorker' in navigator && Notification.permission === "granted") {
-    navigator.serviceWorker.ready.then(registration => {
-        registration.showNotification("SpaceChat: " + emisorID, {
-            body: textoReal,
-            icon: 'https://cdn-icons-png.flaticon.com/512/733/733585.png',
-            vibrate: [200, 100, 200],
-            tag: 'nuevo-mensaje-' + emisorID, 
-            renotify: true,
-            data: { emisor: emisorID }
-        });
-    }).catch(err => console.log("Notificación bloqueada o fallida"));
-} else {
-    console.log("Notificaciones no permitidas por el usuario.");
      }
 async function obtenerToken(registration) {
     try {
