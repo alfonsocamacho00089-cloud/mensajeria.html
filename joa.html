@@ -834,51 +834,39 @@ const messaging = firebase.messaging();
 const db = firebase.database();
 
 // --- 2. MOTOR DE PERSISTENCIA (IndexedDB) ---
-const dbNombre = "DropisDB"; // Mantienes tu nombre original
-const dbVersion = 11; // Subimos a 11 para que se cree la tabla 'perfiles' que faltaba
+const dbNombre = "DropisDB";
+const dbVersion = 11; // Subimos a 11 para que cree la tabla 'perfiles'
 
 function abrirDB() {
     return new Promise((resolve, reject) => {
-        // Usas tu variable original aquí
         const request = indexedDB.open(dbNombre, dbVersion);
-
         request.onupgradeneeded = (e) => {
             const db = e.target.result;
-            // Se crean las tablas necesarias para SpaceChat
             if (!db.objectStoreNames.contains('mensajes')) db.createObjectStore('mensajes', { autoIncrement: true });
-            if (!db.objectStoreNames.contains('perfiles')) db.createObjectStore('perfiles', { keyPath: 'id' });
             if (!db.objectStoreNames.contains('usuario')) db.createObjectStore('usuario', { keyPath: 'id' });
+            // Agregada para que no falle al guardar fotos de contactos
+            if (!db.objectStoreNames.contains('perfiles')) db.createObjectStore('perfiles', { keyPath: 'id' });
         };
-
         request.onsuccess = () => resolve(request.result);
-        request.onerror = () => reject("Error al abrir IndexedDB");
+        request.onerror = () => reject("Error DB");
     });
 }
 
 async function guardarLocal(tabla, datos) {
-    try {
-        const db = await abrirDB();
-        return new Promise((resolve, reject) => {
-            const tx = db.transaction(tabla, 'readwrite');
-            const store = tx.objectStore(tabla);
-            const request = store.put(datos);
-
-            tx.oncomplete = () => resolve(true);
-            tx.onerror = () => reject(request.error);
-        });
-    } catch (err) {
-        console.error("Error en guardarLocal:", err);
-    }
+    const db = await abrirDB();
+    const tx = db.transaction(tabla, 'readwrite');
+    tx.objectStore(tabla).put(datos);
+    // Agregamos este return para que el registro sepa cuando termina
+    return new Promise((res) => { tx.oncomplete = () => res(true); });
 }
-// IMPORTANTE: No pongas ninguna otra función guardarLocal después de esta.
-async function obtenerTodo(tabla, id) {
+
+async function obtenerLocal(tabla, id) {
     try {
         const db = await abrirDB();
         return new Promise((resolve, reject) => {
             const tx = db.transaction(tabla, 'readonly');
             const store = tx.objectStore(tabla);
             const request = store.get(id);
-
             request.onsuccess = () => resolve(request.result);
             request.onerror = () => reject(request.error);
         });
@@ -887,6 +875,14 @@ async function obtenerTodo(tabla, id) {
     }
 }
 
+async function obtenerTodo(tabla) {
+    const db = await abrirDB();
+    return new Promise((resolve) => {
+        const tx = db.transaction(tabla, 'readonly');
+        const request = tx.objectStore(tabla).getAll();
+        request.onsuccess = () => resolve(request.result);
+    });
+     }
 // --- 3. SOLO REGISTRO Y RECUPERACIÓN ---
 
 async function recuperarCuentaConID() {
