@@ -14,7 +14,9 @@
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-messaging-compat.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <!-- Añade esta línea para activar el almacenamiento de archivos -->
+   <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-storage.js"></script>
+   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/protobufjs@7.2.4/dist/protobuf.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/eruda"></script>
     <script>eruda.init();</script>
@@ -2330,19 +2332,19 @@ const bibliotecaSpaceChat = {
      // ESTA ES LA FUNCIÓN QUE FALTA SEGÚN TU CONSOLA
 async function subirArchivoAFirebase(archivo, carpeta) {
     try {
-        // Generar un nombre único para que no se sobrescriban
+        // Usamos firebase.app().storage() para asegurar que conecte con tu config
+        const storage = firebase.app().storage(); 
         const nombreUnico = Date.now() + "-" + archivo.name;
-        const storageRef = firebase.storage().ref().child(`${carpeta}/${nombreUnico}`);
+        const storageRef = storage.ref().child(`${carpeta}/${nombreUnico}`);
         
-        // Subida al satélite
         const snapshot = await storageRef.put(archivo);
-        
-        // Obtener la URL pública para el chat
         const urlDescarga = await snapshot.ref.getDownloadURL();
+        
+        console.log("🚀 Satélite: Archivo en órbita con éxito");
         return urlDescarga;
     } catch (error) {
         console.error("Error crítico en la subida:", error);
-        throw error; // Lanza el error para que el 'catch' de la UI lo atrape
+        throw error;
     }
      }
 function abrirGaleriaMultimedia(tipo) {
