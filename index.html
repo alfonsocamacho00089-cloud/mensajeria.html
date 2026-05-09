@@ -1357,28 +1357,26 @@ async function cargarConversacionCon(idDestino, nombreDestino, fotoDestino) {
     }
 
     // 5. CARGA DESDE v10 (IndexedDB)
-    // 1. MATAMOS AL FANTASMA: Limpiamos la libreta vieja antes de leer la nueva
-localStorage.removeItem('chat_' + idDestino);
+    localStorage.removeItem('chat_' + idDestino);
 
-try {
-    // 2. Traemos solo lo que existe en la v10
-    const todosLosMensajes = await obtenerTodo('mensajes');
-    const mensajesFiltrados = todosLosMensajes.filter(m => String(m.contactoId) === String(idDestino));
+    try {
+        const todosLosMensajes = await obtenerTodo('mensajes');
+        // Filtramos mensajes asegurando que el ID coincida para ver el historial correcto
+        const mensajesFiltrados = todosLosMensajes.filter(m => String(m.contactoId) === String(idDestino));
 
-    // 3. Limpiamos el contenedor visual por seguridad
-    const box = document.getElementById('chat-box');
-    if (box) box.innerHTML = ""; 
+        if (box) box.innerHTML = ""; 
 
-    if (typeof renderizarMensajes === "function") {
-        renderizarMensajes(mensajesFiltrados);
-    } else {
-        mensajesFiltrados.forEach(m => {
-            pintarMensaje(m.texto, m.clase, m.hora, m.status || 'enviado', m.id);
-        });
+        if (typeof renderizarMensajes === "function") {
+            renderizarMensajes(mensajesFiltrados);
+        } else {
+            mensajesFiltrados.forEach(m => {
+                // pintarMensaje ahora procesará automáticamente MEDIA_TIPO si existe en el texto
+                pintarMensaje(m.texto, m.clase, m.hora, m.status || 'enviado', m.id);
+            });
+        }
+    } catch (e) {
+        console.error("Error cargando mensajes de v10:", e);
     }
-} catch (e) {
-    console.error("Error cargando mensajes de v10:", e);
-     }
 
     // 6. UI y Notificaciones
     localStorage.setItem('unread_' + idDestino, 0);
@@ -1393,7 +1391,28 @@ try {
     const inputMsg = document.getElementById('msg-text');
     if(inputMsg) inputMsg.focus();
     box.scrollTop = box.scrollHeight;
+}
+
+function renderizarMensajes(listaDeMensajes) {
+    const chatBox = document.getElementById('chat-box');
+    if (!chatBox) return;
+
+    chatBox.innerHTML = ''; 
+
+    listaDeMensajes.forEach(msg => {
+        // Al renderizar, pasamos el texto a pintarMensaje para que identifique si es sticker, video o texto
+        pintarMensaje(
+            msg.texto, 
+            msg.clase, 
+            msg.hora || new Date(msg.ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true }), 
+            msg.status || 'enviado', 
+            msg.id
+        );
+    });
+    
+    chatBox.scrollTop = chatBox.scrollHeight;
      }
+     
     // 3. Buscamos los mensajes de ESE contacto en LocalStorage
     // ... (final de la función cargarConversacionCon)
   async function pintarAgendaContactos() {
@@ -1756,26 +1775,7 @@ async function borrarMensajeDeMemoria(idMensajeV10, elementoHTML) {
      }
 
          
-function renderizarMensajes(listaDeMensajes) {
-    const chatBox = document.getElementById('chat-box');
-    if (!chatBox) return;
 
-    chatBox.innerHTML = ''; // Limpiamos mesa
-
-    listaDeMensajes.forEach(msg => {
-        // USAMOS LA FUNCIÓN QUE YA TIENE EL MENÚ DE BORRAR
-        // (texto, clase, hora, estado, msgId)
-        pintarMensaje(
-            msg.texto, 
-            msg.clase, 
-            msg.hora || new Date(msg.ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true }), 
-            msg.status || 'enviado', 
-            msg.id
-        );
-    });
-    
-    chatBox.scrollTop = chatBox.scrollHeight;
-     }
          
 function gestionarQR() {
     const seccion = document.getElementById('seccion-mi-qr');
