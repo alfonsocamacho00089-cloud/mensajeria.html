@@ -95,6 +95,26 @@
 }
 
 
+{
+  "short_name": "SpaceChat-Cristian",
+  "name": "SpaceChat-Cristian",
+  "description": "Mensajería-Cristian",
+  "icons": [
+    {
+      "src": "assets/imagen-logo-nuevo.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "any maskable"
+    }
+  ],
+  "start_url": "./cristian.html",
+  "display": "standalone",
+  "scope": "/",
+  "background_color": "#000000",
+  "theme_color": "#000000"
+}
+
+
 
 
 
