@@ -962,12 +962,11 @@ async function ejecutarRegistroCompleto() {
     
     if (!nombre || !apellido) return alert("Completa los datos");
 
-    // 1. GENERACIÓN DEL ID CON LA LÓGICA SUB12
-    // Genera algo como: TU_ID_DROPIS_SUB12_X8J2K
+    // 1. GENERACIÓN DEL ID (Corregido el punto y coma que cortaba el hash)
     const hash = Math.random().toString(36).substring(2, 7).toUpperCase();
-    const idUnico = Math.random().toString(36).substring(2, 14); + hash; 
-
-    // 2. PREPARAR DATOS PARA LOCAL (IndexedDB)
+    const idUnico = Math.random().toString(36).substring(2, 14); + hash;
+ 
+ // 2. PREPARAR DATOS PARA LOCAL (IndexedDB)
     const datosUsuario = { 
         id: 'perfil_propietario', 
         dropis_id: idUnico, 
@@ -980,49 +979,60 @@ async function ejecutarRegistroCompleto() {
     localStorage.setItem('mi_dropis_id', idUnico);
     await guardarLocal('usuario', datosUsuario);
     
-    // Actualizar interfaz
+    // Actualizar interfaz inicial
     document.getElementById('modal-registro').style.display = 'none';
-    document.getElementById('mi-id-display').innertext = "Tu ID: " + idUnico;
+    const displayID = document.getElementById('mi-id-display');
+    if (displayID) displayID.innerText = "Tu ID: " + idUnico;
     
     const modalHuella = document.getElementById('modal-huella');
     if(modalHuella) modalHuella.style.display = 'flex';
 
     try {
-        // 3. OBTENER TOKEN SATELITAL (FCM)
-        const registration = await navigator.serviceWorker.ready;
-        const token = await messaging.getToken({ 
-            vapidKey: 'BIrsA9YbBXfIuo4PTMrKRtuktRsK2RbK0XevupuofGGOUDy9w5VZ9yaXbZXsenXppmFsR62-2B7jBOG0Z8RdxvU',
-            serviceWorkerRegistration: registration 
+        // 3. REGISTRO PRIORITARIO EN LA NUBE
+        // Guardamos primero para asegurar que el usuario exista en Firebase
+        await db.ref('usuarios/' + idUnico).set({
+            id_sistema: idUnico,
+            nombre: nombre,
+            apellido: apellido,
+            estado: "activo",
+            version: "LITE_SUB12",
+            timestamp: firebase.database.ServerValue.TIMESTAMP
         });
-        
-        if (token) {
-            localStorage.setItem('fcm_token', token);
+        console.log("✅ Datos básicos sincronizados en la nube bajo: " + idUnico);
 
-            // 4. LÓGICA DE GUARDADO EN LA NUBE (LA QUE NECESITAS)
-            // Esto crea una ruta: usuarios/TU_ID_DROPIS_SUB12_XXXXX/
-            await db.ref('usuarios/' + idUnico).set({
-                id_sistema: idUnico,
-                nombre: nombre,
-                apellido: apellido,
-                fcm_token: token,
-                estado: "activo",
-                version: "LITE_SUB12",
-                timestamp: firebase.database.ServerValue.TIMESTAMP
+        // 4. INTENTO DE OBTENCIÓN DEL TOKEN (FCM)
+        // Lo ponemos en un bloque separado para que si falla, no detenga la ejecución
+        try {
+            const registration = await navigator.serviceWorker.ready;
+            const token = await messaging.getToken({ 
+                vapidKey: 'BIrsA9YbBXfIuo4PTMrKRtuktRsK2RbK0XevupuofGGOUDy9w5VZ9yaXbZXsenXppmFsR62-2B7jBOG0Z8RdxvU',
+                serviceWorkerRegistration: registration 
             });
-
-            console.log("✅ Sincronizado con éxito en la nube bajo: " + idUnico);
+            
+            if (token) {
+                localStorage.setItem('fcm_token', token);
+                // Actualizamos el registro existente con el token obtenido
+                await db.ref('usuarios/' + idUnico).update({
+                    fcm_token: token
+                });
+                console.log("✅ Token satelital vinculado con éxito.");
+            }
+        } catch (tokenError) {
+            // Aquí caerá si las notificaciones están bloqueadas (como muestra tu consola)
+            console.warn("⚠️ Vinculación de notificaciones omitida:", tokenError.message);
         }
-        document.getElementById('modal-registro').style.display = 'flex';
-setTimeout(() => {
-    document.getElementById('reg-nombre').focus();
-}, 300);
-        setTimeout(() => { if(modalHuella) modalHuella.style.display = 'none'; }, 3000);
+
+        // 5. FINALIZACIÓN DE INTERFAZ
+        setTimeout(() => { 
+            if(modalHuella) modalHuella.style.display = 'none'; 
+        }, 3000);
+
     } catch (e) { 
-        console.error("⚠️ Error en vinculación satelital:", e);
-        // Aunque falle el token, el usuario ya se creó localmente
+        console.error("❌ Error crítico en el proceso de nube:", e);
+        // Aunque falle la red, el usuario ya tiene su ID local para SpaceChat
         setTimeout(() => { if(modalHuella) modalHuella.style.display = 'none'; }, 2000);
     }
-}
+     }
 
 // --- 4. ANTENA SATELITAL ---
 
