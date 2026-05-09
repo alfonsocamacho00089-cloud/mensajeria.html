@@ -543,7 +543,11 @@ margin: 0;
     cursor: pointer;
      }
 }
-
+#panel-stickers {
+    transition: transform 0.3s ease-in-out;
+    /* Asegúrate de que el panel no cubra el área de escritura si quieres que sigan viendo el texto */
+    bottom: 0;
+}
 
     </style>
 
@@ -614,16 +618,27 @@ margin: 0;
  </div>
 
 
-<div class="contenedor-flotante" style="display: flex; align-items: center; gap: 5px;">
+<div class="contenedor-flotante" style="display: flex; align-items: center; gap: 8px; padding: 10px; background: #000; border-top: 1px solid #ffd700;">
     
-    <textarea 
-        id="msg-text" 
-        placeholder="Mensaje..."
-        style="flex: 1; min-width: 0; box-sizing: border-box;" 
-        oninput="this.style.height='45px'; this.style.height=this.scrollHeight+'px';"></textarea>
+    <button onclick="toggleStickers()" style="background: none; border: none; color: #ffd700; font-size: 20px; cursor: pointer;">
+        <span>😊</span>
+    </button>
+
+    <label for="input-foto" style="cursor: pointer; color: #ffd700; font-size: 20px;">
+        <span>📷</span>
+        <input type="file" id="input-foto" accept="image/*" style="display: none;" onchange="prepararEnvioFoto(this)">
+    </label>
+
+    <!-- NUEVO: Botón para Vídeos -->
+    <label for="input-video" style="cursor: pointer; color: #ffd700; font-size: 20px;">
+        <span>🎥</span>
+        <input type="file" id="input-video" accept="video/*" style="display: none;" onchange="prepararEnvioVideo(this)">
+    </label>
     
-    <button id="btn-enviar" onclick="enviarMensajeSatelital()" style="flex-shrink: 0;">
-        <span>➤</span>
+    <textarea id="msg-text" placeholder="Mensaje..." style="flex: 1; min-width: 0; box-sizing: border-box; background: #1a1a1a; color: #fff; border: 1px solid #333; border-radius: 20px; padding: 10px 15px; height: 45px; outline: none; resize: none;"></textarea>
+    
+    <button id="btn-enviar" onclick="enviarMensajeSatelital()" style="flex-shrink: 0; background: #ffd700; border: none; width: 40px; height: 40px; border-radius: 50%;">
+        <span style="color: #000; font-weight: bold;">➤</span>
     </button>
 </div>
    
@@ -1548,56 +1563,75 @@ async function cargarProto() {
 // Variable necesaria para que el menú sepa a qué mensaje le diste clic
 let mensajeSeleccionado = null;
  
- function pintarMensaje(texto, clase, hora = null, estado = 'enviado', msgId = null) {
+ 
+function pintarMensaje(texto, clase, hora = null, estado = 'enviado', msgId = null) {
     const box = document.getElementById('chat-box');
     if (!box) return;
 
     const div = document.createElement('div');
     div.className = 'msg-burbuja ' + clase;
     
-    // 1. Identificador único para el Doble Check
     if (msgId) div.id = 'msg-' + msgId; 
 
     const tiempo = hora || new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
     
-    // 2. Lógica de checks (Gris si es enviado, Azul si es recibido)
-    // --- SUSTITUIR DENTRO DE pintarMensaje ---
-let checkHTML = "";
-if (clase.includes('derecha')) {
-    // Si nace como 'recibido' (desde historial), azul. Si no, gris.
-    const color = (estado === 'recibido') ? '#34B7F1' : '#8696a0';
-    const icon = (estado === 'recibido') ? '✓✓' : '✓';
-    
-    // IMPORTANTE: La clase "icono-check" es obligatoria aquí
-    // Sustituye solo esta línea dentro de pintarMensaje
-checkHTML = `<span class="icono-check" style="color: ${color}; margin-left: 5px; font-weight: bold;">${icon}</span>`;
-     }
-    // 3. FILTRO DE CONTENIDO: ¿Es foto, respuesta o texto normal?
+    let checkHTML = "";
+    if (clase.includes('derecha')) {
+        const color = (estado === 'recibido') ? '#34B7F1' : '#8696a0';
+        const icon = (estado === 'recibido') ? '✓✓' : '✓';
+        checkHTML = `<span class="icono-check" style="color: ${color}; margin-left: 5px; font-weight: bold;">${icon}</span>`;
+    }
+
+    // --- FILTRO DE CONTENIDO ACTUALIZADO ---
     let contenidoFinal = "";
 
-    if (texto.startsWith('http') && (texto.includes('firebasestorage') || texto.includes('.jpg') || texto.includes('.png'))) {
-        // Es una FOTO
+    // 1. DETECTAR MULTIMEDIA (Stickers, GIFs, Vídeos por paquete URL)
+    if (texto && texto.startsWith('MEDIA_TIPO:')) {
+        const partes = texto.split('|URL:');
+        const tipo = partes[0].replace('MEDIA_TIPO:', '');
+        const url = partes[1];
+
+        if (tipo === 'sticker') {
+            // Estilo "Line": Sin fondo y con sombra suave
+            contenidoFinal = `<img src="${url}" style="width:130px; height:auto; filter: drop-shadow(2px 2px 5px rgba(0,0,0,0.4)); margin: 5px 0;">`;
+            // Quitamos el fondo a la burbuja del sticker para estética pura
+            div.style.background = "transparent";
+            div.style.border = "none";
+            div.style.boxShadow = "none";
+        } 
+        else if (tipo === 'video') {
+            contenidoFinal = `
+                <video controls style="width:100%; max-width:250px; border-radius:12px; border:2px solid #ffd700; background:#000;">
+                    <source src="${url}" type="video/mp4">
+                    Tu navegador no soporta vídeos.
+                </video>`;
+        } 
+        else { // Para GIFs o Fotos enviados por la nueva lógica de URL
+            contenidoFinal = `<img src="${url}" style="max-width:250px; border-radius:12px; border: 2px solid #ffd700; display:block; margin-bottom:5px; cursor:pointer;" onclick="window.open('${url}')">`;
+        }
+    } 
+    // 2. FOTOS DIRECTAS (Tu lógica original de Firebase)
+    else if (texto.startsWith('http') && (texto.includes('firebasestorage') || texto.includes('.jpg') || texto.includes('.png'))) {
         contenidoFinal = `<img src="${texto}" style="max-width:250px; border-radius:10px; display:block; margin-bottom:5px; cursor:pointer;" onclick="window.open('${texto}')">`;
-    } else if (texto && texto.includes("Resp >")) {
-        // Es una RESPUESTA (Cita)
+    } 
+    // 3. RESPUESTAS (Citas)
+    else if (texto && texto.includes("Resp >")) {
         const partes = texto.split("\n— ");
         const cabezalCita = partes[0].replace("Resp >", "").trim();
         const mensajeReal = partes[1] || "";
-       
-     
-     contenidoFinal = `
+        contenidoFinal = `
             <div style="font-size: 11px; opacity: 0.6; border-left: 3px solid #ffd700; padding-left: 5px; margin-bottom: 5px; font-style: italic;">
                 Resp: ${cabezalCita}
             </div>
             <div>${mensajeReal}</div>
         `;
-    } else {
-        // Es TEXTO NORMAL
+    } 
+    // 4. TEXTO NORMAL
+    else {
         contenidoFinal = `<span>${texto}</span>`;
     }
 
-   
-    // 4. Armamos el HTML final
+    // Armamos el HTML final
     div.innerHTML = `
         ${contenidoFinal} 
         <div class="msg-info" style="display: flex; justify-content: flex-end; align-items: center; gap: 5px; font-size: 10px; opacity: 0.7; margin-top: 3px;">
@@ -1605,7 +1639,7 @@ checkHTML = `<span class="icono-check" style="color: ${color}; margin-left: 5px;
             ${checkHTML}
         </div>
     `;
-    // 5. Menú de acciones (Borrar, Editar, etc.)
+
     div.onclick = (e) => {
         mensajeSeleccionado = div; 
         const menu = document.getElementById('menu-acciones');
@@ -2191,6 +2225,85 @@ function activarContactoEnChat(contacto) {
 
     // 3. Abrimos la conversación directamente
     cargarConversacionCon(contacto.id, contacto.nombre, contacto.foto);   
+     }
+
+     async function prepararEnvioVideo(input) {
+    if (input.files && input.files[0]) {
+        const archivo = input.files[0];
+        console.log("Subiendo vídeo al satélite...");
+
+        try {
+            // Subida a Firebase Storage (v10)
+            const urlDescarga = await subirArchivoAFirebase(archivo); 
+            
+            // Enviamos la URL con el tipo 'video'
+            await enviarMediaPorURL(urlDescarga, 'video');
+            
+            input.value = ""; 
+        } catch (e) {
+            console.error("Error al subir vídeo:", e);
+            alert("No se pudo enviar el vídeo");
+        }
+    }
+     }
+
+     // 1. Manejar la subida de fotos desde el botón de la cámara
+async function prepararEnvioFoto(input) {
+    if (input.files && input.files[0]) {
+        const archivo = input.files[0];
+        console.log("Subiendo foto al satélite...");
+
+        try {
+            // Reutilizamos tu lógica de Firebase v10 para subir el archivo
+            // Esta función debe devolver la URL de descarga (downloadURL)
+            const urlDescarga = await subirArchivoAFirebase(archivo); 
+            
+            // Enviamos la URL como tipo 'foto'
+            await enviarMediaPorURL(urlDescarga, 'foto');
+            
+            // Limpiamos el input para poder subir la misma foto luego si se desea
+            input.value = ""; 
+        } catch (e) {
+            console.error("Error al procesar foto:", e);
+            alert("No se pudo subir la imagen");
+        }
+    }
+}
+
+// 2. Modificación a toggleStickers para que funcione con el botón 😊
+function toggleStickers() {
+    const panel = document.getElementById('panel-stickers');
+    if (!panel) return;
+
+    if (panel.style.display === 'none' || panel.style.transform === 'translateY(100%)') {
+        panel.style.display = 'block';
+        panel.style.transform = 'translateY(0)';
+        // Por defecto cargamos los stickers primero
+        abrirGaleriaMultimedia('stickers'); 
+    } else {
+        panel.style.transform = 'translateY(100%)';
+        setTimeout(() => { panel.style.display = 'none'; }, 300);
+    }
+     }
+
+     async function prepararEnvioVideo(input) {
+    if (input.files && input.files[0]) {
+        const archivo = input.files[0];
+        console.log("Subiendo vídeo al satélite...");
+
+        try {
+            // Subida a Firebase Storage (v10)
+            const urlDescarga = await subirArchivoAFirebase(archivo); 
+            
+            // Enviamos la URL con el tipo 'video'
+            await enviarMediaPorURL(urlDescarga, 'video');
+            
+            input.value = ""; 
+        } catch (e) {
+            console.error("Error al subir vídeo:", e);
+            alert("No se pudo enviar el vídeo");
+        }
+    }
      }
 
      function cargarFotoInicial() {
