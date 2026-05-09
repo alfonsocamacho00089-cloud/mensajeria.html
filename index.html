@@ -2327,6 +2327,24 @@ const bibliotecaSpaceChat = {
     ]
 };
 
+     // ESTA ES LA FUNCIÓN QUE FALTA SEGÚN TU CONSOLA
+async function subirArchivoAFirebase(archivo, carpeta) {
+    try {
+        // Generar un nombre único para que no se sobrescriban
+        const nombreUnico = Date.now() + "-" + archivo.name;
+        const storageRef = firebase.storage().ref().child(`${carpeta}/${nombreUnico}`);
+        
+        // Subida al satélite
+        const snapshot = await storageRef.put(archivo);
+        
+        // Obtener la URL pública para el chat
+        const urlDescarga = await snapshot.ref.getDownloadURL();
+        return urlDescarga;
+    } catch (error) {
+        console.error("Error crítico en la subida:", error);
+        throw error; // Lanza el error para que el 'catch' de la UI lo atrape
+    }
+     }
 function abrirGaleriaMultimedia(tipo) {
     const grid = document.getElementById('contenedor-grid-stickers'); // Tu ID de la bandeja
     grid.innerHTML = ""; // Limpiar
