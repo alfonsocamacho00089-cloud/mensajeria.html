@@ -2007,7 +2007,55 @@ function abrirPerfilContacto() {
     document.getElementById('modal-perfil').style.display = 'flex';
 }
 
-// Asegúrate de tener esta función en tu archivo de base de datos
+
+
+     async function eliminarContactoDeAgenda() {
+    const idABorrar = document.querySelector('#target-id').value;
+    const nombreABorrar = document.getElementById('nombre-dueño-header')?.innerText || "este contacto";
+
+    if (!idABorrar) return;
+
+    if (confirm(`¿BORRAR PERMANENTEMENTE a ${nombreABorrar}?`)) {
+        try {
+            // 1. Borrado en la v10 (IndexedDB)
+            await eliminarLocal('perfiles', String(idABorrar));
+            console.log("Limpieza local de perfiles completada.");
+        } catch (e) { 
+            console.log("ID no encontrado localmente."); 
+        }
+
+        // 2. Borrar de la lista de chats activos
+        let lista = JSON.parse(localStorage.getItem('mis_contactos')) || [];
+        lista = lista.filter(c => String(c.id) !== String(idABorrar));
+        localStorage.setItem('mis_contactos', JSON.stringify(lista));
+
+        // 3. Limpieza de Sets de renderizado
+        if (typeof contactosRenderizados !== 'undefined') contactosRenderizados.delete(idABorrar);
+        if (typeof agendaRenderizada !== 'undefined') agendaRenderizada.delete(idABorrar);
+
+        // 4. Limpieza Visual
+        const filaHtml = document.getElementById(`fila-${idABorrar}`);
+        if (filaHtml) filaHtml.remove();
+
+        const contenedor = document.getElementById('contenedor-agenda-total');
+        if (contenedor) {
+            const filasAgenda = contenedor.querySelectorAll('.fila-contacto');
+            filasAgenda.forEach(div => {
+                if (div.innerHTML.includes(idABorrar)) div.remove();
+            });
+        }
+
+        const modalPerfil = document.getElementById('modal-perfil');
+        if (modalPerfil) modalPerfil.style.display = 'none';
+        
+        alert("Contacto eliminado de raíz.");
+        
+        // Volvemos a la lista de contactos si el chat estaba abierto
+        if (typeof volverALista === "function") volverALista();
+    }
+}
+
+// Función auxiliar de apoyo
 async function eliminarLocal(tabla, id) {
     const db = await abrirDB();
     return new Promise((resolve, reject) => {
@@ -2019,54 +2067,11 @@ async function eliminarLocal(tabla, id) {
     });
      }
 
-     async function eliminarContactoDeAgenda() {
-    const idABorrar = document.querySelector('#target-id').value;
-    const nombreABorrar = document.getElementById('perfil-nombre')?.innerText || "este contacto";
-
-    if (!idABorrar) return;
-
-    if (confirm(`¿BORRAR PERMANENTEMENTE a ${nombreABorrar}?`)) {
-        
-        // En lugar de los dos "await eliminarLocal", usa solo este:
-try {
-    // Esto borra solo en TU teléfono
-    await eliminarLocal('perfiles', String(idABorrar));
-    console.log("Limpieza local completada.");
-} catch (e) { 
-    console.log("Ya estaba borrado o ID no encontrado localmente."); 
-     }
-
-        // 2. Borrar de la lista de chats activos (LocalStorage)
-        let lista = JSON.parse(localStorage.getItem('mis_contactos')) || [];
-        lista = lista.filter(c => String(c.id) !== String(idABorrar));
-        localStorage.setItem('mis_contactos', JSON.stringify(lista));
-
-        // 3. Limpieza visual y de memoria
-        contactosRenderizados.delete(idABorrar);
-        if (typeof agendaRenderizada !== 'undefined') agendaRenderizada.delete(idABorrar);
-
-        // Quitar de la lista de chats principal
-        const filaHtml = document.getElementById(`fila-${idABorrar}`);
-        if (filaHtml) filaHtml.remove();
-
-        // Quitar de la agenda completa (modal)
-        const contenedor = document.getElementById('contenedor-agenda-total');
-        if (contenedor) {
-            const filasAgenda = contenedor.querySelectorAll('.fila-contacto');
-            filasAgenda.forEach(div => {
-                if (div.innerHTML.includes(idABorrar)) div.remove();
-            });
-        }
-
-        document.getElementById('modal-perfil').style.display = 'none';
-        alert("Contacto eliminado de raíz.");
-    }
-     }
-
      async function eliminarChatEspecifico() {
     
     const idDestino = document.querySelector('#target-id').value;
-    const nombreDestino = document.getElementById('perfil-nombre')?.innerText || "este contacto";
+    // Usamos el ID de tu header original para obtener el nombre
+    const nombreDestino = document.getElementById('nombre-dueño-header')?.innerText || "este contacto";
 
     if (!idDestino) return;
 
@@ -2082,36 +2087,54 @@ try {
             request.onsuccess = (e) => {
                 const cursor = e.target.result;
                 if (cursor) {
-                    // Si el mensaje pertenece a este contacto, lo borramos por su clave real
-                    if (cursor.value.contactoId === idDestino) {
+                    // Si el mensaje pertenece a este contacto, lo borramos
+                    // Esto incluye textos, MEDIA_TIPO:sticker, video, etc.
+                    if (String(cursor.value.contactoId) === String(idDestino)) {
                         cursor.delete();
                     }
                     cursor.continue();
                 }
             };
-        } catch (e) { console.log("Error borrando mensajes en v10"); }
+            
+            tx.oncomplete = () => {
+                console.log("✅ v10: Todos los mensajes multimedia y texto eliminados.");
+            };
+        } catch (e) { 
+            console.log("Error borrando mensajes en v10"); 
+        }
 
-        // 2. Limpiar LocalStorage
+        // 2. Limpiar LocalStorage (El "fantasma" y notificaciones)
         localStorage.removeItem('chat_' + idDestino);
         localStorage.setItem('unread_' + idDestino, 0);
 
-        // 3. Quitar de la lista de chats activos
+        // 3. Quitar de la lista de chats activos (LocalStorage)
         let actuales = JSON.parse(localStorage.getItem('mis_contactos')) || [];
         actuales = actuales.filter(c => String(c.id) !== String(idDestino));
         localStorage.setItem('mis_contactos', JSON.stringify(actuales));
 
-        // 4. Limpieza visual
-        contactosRenderizados.delete(idDestino);
+        // 4. Limpieza visual y de memoria de renderizado
+        if (typeof contactosRenderizados !== 'undefined') {
+            contactosRenderizados.delete(idDestino);
+        }
+        
         const fila = document.getElementById(`fila-${idDestino}`);
         if (fila) fila.remove();
 
-        document.getElementById('modal-perfil').style.display = 'none';
+        // Cerramos modal de perfil y limpiamos el área de mensajes
+        const modalPerfil = document.getElementById('modal-perfil');
+        if (modalPerfil) modalPerfil.style.display = 'none';
+        
         const box = document.getElementById('chat-box');
         if (box) box.innerHTML = ""; 
 
+        // 5. Regresar a la lista de contactos automáticamente
+        if (typeof volverALista === "function") {
+            volverALista();
+        }
+
         console.log("✅ Chat eliminado de raíz local.");
     }
- }
+     }
      // <--- ESTA LLAVE FALTABA AQUÍ
     
      
