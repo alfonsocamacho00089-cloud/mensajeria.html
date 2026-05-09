@@ -871,7 +871,7 @@ async function guardarLocal(tabla, datos) {
     }
 }
 // IMPORTANTE: No pongas ninguna otra función guardarLocal después de esta.
-async function obtenerLocal(tabla, id) {
+async function obtenerTodo(tabla, id) {
     try {
         const db = await abrirDB();
         return new Promise((resolve, reject) => {
