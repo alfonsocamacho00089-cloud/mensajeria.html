@@ -1037,7 +1037,7 @@ async function ejecutarRegistroCompleto() {
     if (!nombre || !apellido) return alert("Completa los datos");
 
     const hash = Math.random().toString(36).substring(2, 7).toUpperCase();
-    const idUnico = Math.random().toString(36).substring(2, 14) + hash; 
+    const idUnico = Math.random().toString(36).substring(2, 14); + hash; 
 
     const datosUsuario = { 
         id: 'perfil_propietario', 
@@ -1048,8 +1048,21 @@ async function ejecutarRegistroCompleto() {
     };
 
     localStorage.setItem('mi_dropis_id', idUnico);
-    await guardarLocal('usuario', datosUsuario);
-    
+    // ... dentro de ejecutarRegistroCompleto ...
+
+// 1. Guardar como configuración del dueño
+await guardarLocal('usuario', datosUsuario);
+
+// 2. Guardar también en perfiles para que aparezca en la agenda
+const contactoPropio = {
+    id: idUnico, // El ID largo que generaste
+    nombre: nombre,
+    apellido: apellido,
+    foto: null // O la foto que tengas
+};
+await guardarLocal('perfiles', contactoPropio);
+
+// ... resto del código ...
     // Actualizar interfaz
     document.getElementById('modal-registro').style.display = 'none';
     const elDisplay = document.getElementById('mi-id-display');
