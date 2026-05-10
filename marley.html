@@ -672,14 +672,7 @@ margin: 0;
 </div>
  
 
-    <div id="modal-huella" class="modal">
-    <div class="modal-content" style="background: #000; color: #ffd700; border: 2px solid #ffd700;">
-        <div style="font-size: 60px; margin-bottom: 15px;">🫆</div>
-        <h3 style="color: #fff;">Validando Huella...</h3>
-        <p style="color: #ffd700; font-family: monospace; font-size: 12px;">Vinculando Token Satelital</p>
-    </div>
-    </div>
- 
+    
 <div id="modal-qr" class="modal">
     <div class="modal-content" style="display: flex; flex-direction: column; height: 100dvh; position: relative; background-image: linear-gradient(rgba(11, 20, 26, 0.3), rgba(11, 20, 26, 0.3)), url('./assets/imagen-niñas.png'); background-size: cover; background-position: center; background-attachment: fixed;">      
    
@@ -835,100 +828,179 @@ const messaging = firebase.messaging();
 const db = firebase.database();
 
 // --- 2. MOTOR DE PERSISTENCIA (IndexedDB) ---
-const DB_NOMBRE = "DropisDB";
-const DB_VERSION = 10;
+ const dbNombre = "DropisDB";
+
+const dbVersion = 11;
+
 // Este objeto guarda los contactos que ya están en pantalla
+const agendaRenderizada = new Set();
 const contactosRenderizados = new Set();
+
 /**
+
  * Abre la conexión con IndexedDB y crea las tablas si no existen.
+
  */
+
 function abrirDB() {
+
     return new Promise((resolve, reject) => {
-        const request = indexedDB.open(DB_NOMBRE, DB_VERSION);
+
+        const request = indexedDB.open(dbNombre, dbVersion);
+
+
 
         request.onupgradeneeded = (e) => {
+
             const db = e.target.result;
 
+
+
             // 1. Tabla para mensajes (historial)
+
             if (!db.objectStoreNames.contains('mensajes')) {
+
                 db.createObjectStore('mensajes', { autoIncrement: true });
+
             }
+
+
 
             // 2. Tabla para perfiles de otros contactos (fotos pesadas)
+
             if (!db.objectStoreNames.contains('perfiles')) {
+
                 db.createObjectStore('perfiles', { keyPath: 'id' });
+
             }
+
+
 
             // 3. Tabla para datos del usuario y configuración (temas, urls)
+
             if (!db.objectStoreNames.contains('usuario')) {
+
                 db.createObjectStore('usuario', { keyPath: 'id' });
+
             }
+
         };
 
+
+
         request.onsuccess = () => resolve(request.result);
+
         request.onerror = () => reject("Error al abrir IndexedDB");
+
     });
+
 }
 
+
+
 /**
+
  * Guarda o actualiza datos en cualquier tabla.
+
  * @param {string} tabla - Nombre de la tabla ('mensajes', 'perfiles', 'usuario')
+
  * @param {Object} datos - El objeto a guardar
+
  */
+
 async function guardarLocal(tabla, datos) {
+
     try {
+
         const db = await abrirDB();
+
         return new Promise((resolve, reject) => {
+
             const tx = db.transaction(tabla, 'readwrite');
+
             const store = tx.objectStore(tabla);
+
             const request = store.put(datos);
 
+
+
             tx.oncomplete = () => resolve(true);
+
             tx.onerror = () => reject(request.error);
+
         });
+
     } catch (err) {
+
         console.error("Error en guardarLocal:", err);
+
     }
+
 }
 
+
+
 /**
+
  * Obtiene un registro por su ID de una tabla específica.
+
  */
+
 async function obtenerLocal(tabla, id) {
+
     try {
+
         const db = await abrirDB();
+
         return new Promise((resolve, reject) => {
+
             const tx = db.transaction(tabla, 'readonly');
+
             const store = tx.objectStore(tabla);
+
             const request = store.get(id);
 
+
+
             request.onsuccess = () => resolve(request.result);
+
             request.onerror = () => reject(request.error);
+
         });
+
     } catch (err) {
+
         console.error("Error en obtenerLocal:", err);
+
     }
+
 }
+
+
 
 /**
+
  * Obtiene todos los registros de una tabla (ej. para cargar todos los mensajes).
+
  */
+
 async function obtenerTodo(tabla) {
+
     const db = await abrirDB();
+
     return new Promise((resolve) => {
+
         const tx = db.transaction(tabla, 'readonly');
+
         const request = tx.objectStore(tabla).getAll();
+
         request.onsuccess = () => resolve(request.result);
-    });
+
+    })
      }
-
-async function guardarLocal(tabla, datos) {
-    const db = await abrirDB();
-    const tx = db.transaction(tabla, 'readwrite');
-    tx.objectStore(tabla).put(datos);
-}
-
-// --- 3. SOLO REGISTRO Y RECUPERACIÓN ---
+/**
+ * Recupera cuenta desde Firebase.
+ */
 
 async function recuperarCuentaConID() {
     const idParaRecuperar = prompt("Escribe tu ID Dropis:");
@@ -962,11 +1034,10 @@ async function ejecutarRegistroCompleto() {
     
     if (!nombre || !apellido) return alert("Completa los datos");
 
-    // 1. GENERACIÓN DEL ID (Corregido el punto y coma que cortaba el hash)
     const hash = Math.random().toString(36).substring(2, 7).toUpperCase();
-    const idUnico = Math.random().toString(36).substring(2, 14); + hash;
- 
- // 2. PREPARAR DATOS PARA LOCAL (IndexedDB)
+    const idUnico = Math.random().toString(36).substring(2, 9) + hash; 
+
+     
     const datosUsuario = { 
         id: 'perfil_propietario', 
         dropis_id: idUnico, 
@@ -975,64 +1046,61 @@ async function ejecutarRegistroCompleto() {
         fecha: Date.now() 
     };
 
-    // Guardar en el teléfono (Local)
     localStorage.setItem('mi_dropis_id', idUnico);
-    await guardarLocal('usuario', datosUsuario);
-    
-    // Actualizar interfaz inicial
-    document.getElementById('modal-registro').style.display = 'none';
-    const displayID = document.getElementById('mi-id-display');
-    if (displayID) displayID.innerText = "Tu ID: " + idUnico;
-    
-    const modalHuella = document.getElementById('modal-huella');
-    if(modalHuella) modalHuella.style.display = 'flex';
+    // ... dentro de ejecutarRegistroCompleto ...
 
-    try {
-        // 3. REGISTRO PRIORITARIO EN LA NUBE
-        // Guardamos primero para asegurar que el usuario exista en Firebase
+// 1. Guardar como configuración del dueño
+await guardarLocal('usuario', datosUsuario);
+
+// 2. Guardar también en perfiles para que aparezca en la agenda
+const contactoPropio = {
+    id: idUnico, // El ID largo que generaste
+    nombre: nombre,
+    apellido: apellido,
+    foto: null // O la foto que tengas
+};
+await guardarLocal('perfiles', contactoPropio);
+
+// ... resto del código ...
+    // Actualizar interfaz
+    document.getElementById('modal-registro').style.display = 'none';
+    const elDisplay = document.getElementById('mi-id-display');
+    if (elDisplay) {
+        elDisplay.innerText = "Tu ID: " + idUnico;
+    }
+    
+    // 3. OBTENER TOKEN SATELITAL (FCM)
+    const registration = await navigator.serviceWorker.ready;
+    const token = await messaging.getToken({ 
+        vapidKey: 'BIrsA9YbBXfIuo4PTMrKRtuktRsK2RbK0XevupuofGGOUDy9w5VZ9yaXbZXsenXppmFsR62-2B7jBOG0Z8RdxvU',
+        serviceWorkerRegistration: registration 
+    });
+        
+    if (token) {
+        localStorage.setItem('fcm_token', token);
+
         await db.ref('usuarios/' + idUnico).set({
             id_sistema: idUnico,
             nombre: nombre,
             apellido: apellido,
+            fcm_token: token,
             estado: "activo",
             version: "LITE_SUB12",
             timestamp: firebase.database.ServerValue.TIMESTAMP
         });
-        console.log("✅ Datos básicos sincronizados en la nube bajo: " + idUnico);
 
-        // 4. INTENTO DE OBTENCIÓN DEL TOKEN (FCM)
-        // Lo ponemos en un bloque separado para que si falla, no detenga la ejecución
-        try {
-            const registration = await navigator.serviceWorker.ready;
-            const token = await messaging.getToken({ 
-                vapidKey: 'BIrsA9YbBXfIuo4PTMrKRtuktRsK2RbK0XevupuofGGOUDy9w5VZ9yaXbZXsenXppmFsR62-2B7jBOG0Z8RdxvU',
-                serviceWorkerRegistration: registration 
-            });
-            
-            if (token) {
-                localStorage.setItem('fcm_token', token);
-                // Actualizamos el registro existente con el token obtenido
-                await db.ref('usuarios/' + idUnico).update({
-                    fcm_token: token
-                });
-                console.log("✅ Token satelital vinculado con éxito.");
-            }
-        } catch (tokenError) {
-            // Aquí caerá si las notificaciones están bloqueadas (como muestra tu consola)
-            console.warn("⚠️ Vinculación de notificaciones omitida:", tokenError.message);
-        }
-
-        // 5. FINALIZACIÓN DE INTERFAZ
-        setTimeout(() => { 
-            if(modalHuella) modalHuella.style.display = 'none'; 
-        }, 3000);
-
-    } catch (e) { 
-        console.error("❌ Error crítico en el proceso de nube:", e);
-        // Aunque falle la red, el usuario ya tiene su ID local para SpaceChat
-        setTimeout(() => { if(modalHuella) modalHuella.style.display = 'none'; }, 2000);
+        console.log("✅ Sincronizado con éxito en la nube bajo: " + idUnico);
     }
-     }
+
+    document.getElementById('modal-registro').style.display = 'flex';
+    setTimeout(() => {
+        document.getElementById('reg-nombre').focus();
+    }, 300);
+
+} // <-- Esta llave cierra la función. La que estaba debajo sobraba.
+
+     
+
 
 // --- 4. ANTENA SATELITAL ---
 
@@ -1936,7 +2004,7 @@ async function manejarSeleccionImagen(event) {
 
 
 
-let agendaRenderizada = new Set();
+
 async function guardarCambiosPerfil() {
     const miID = localStorage.getItem('mi_dropis_id');
     const nom = document.getElementById('mi-nuevo-nombre').value.trim();
@@ -2111,7 +2179,6 @@ try {
  }
      // <--- ESTA LLAVE FALTABA AQUÍ
     
-     
      async function abrirAgendaCompleta() {
     const contenedor = document.getElementById('contenedor-agenda-total');
     const modal = document.getElementById('modal-agenda-completa');
@@ -2178,7 +2245,8 @@ div.onclick = async () => {
         agendaRenderizada.add(contacto.id); 
     }); // Cierre del forEach
      } // Cierre de abrirAgendaCompleta
-        
+                                  
+     
 
 // Función para mover un contacto de la "Agenda" a la "Lista de Chats"
 function activarContactoEnChat(contacto) {
