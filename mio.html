@@ -1062,8 +1062,10 @@ async function ejecutarRegistroCompleto() {
     
     // Actualizar interfaz
     document.getElementById('modal-registro').style.display = 'none';
-    document.getElementById('mi-id-display')?.innerText = "Tu ID: " + idUnico;
- 
+    const elDisplay = document.getElementById('mi-id-display');
+if (elDisplay) {
+    elDisplay.innerText = "Tu ID: " + idUnico;
+     }
     const modalHuella = document.getElementById('modal-huella');
     if(modalHuella) modalHuella.style.display = 'flex';
 
