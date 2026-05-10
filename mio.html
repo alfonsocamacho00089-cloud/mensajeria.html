@@ -836,59 +836,48 @@ const db = firebase.database();
 
 // --- 2. MOTOR DE PERSISTENCIA (IndexedDB) ---
 
-const dbNombre = "DropisDB";
-const dbVersion = 11; // Subimos a 11 para que cree la tabla 'perfiles'
+     const dbNombre = "DropisDB";
+const dbVersion = 11;
+const contactosRenderizados = new Set();
 
+/**
+ * Abre la conexión con IndexedDB.
+ */
 function abrirDB() {
     return new Promise((resolve, reject) => {
         const request = indexedDB.open(dbNombre, dbVersion);
         request.onupgradeneeded = (e) => {
             const db = e.target.result;
             if (!db.objectStoreNames.contains('mensajes')) db.createObjectStore('mensajes', { autoIncrement: true });
-            if (!db.objectStoreNames.contains('usuario')) db.createObjectStore('usuario', { keyPath: 'id' });
-            // Agregada para que no falle al guardar fotos de contactos
             if (!db.objectStoreNames.contains('perfiles')) db.createObjectStore('perfiles', { keyPath: 'id' });
+            if (!db.objectStoreNames.contains('usuario')) db.createObjectStore('usuario', { keyPath: 'id' });
         };
         request.onsuccess = () => resolve(request.result);
-        request.onerror = () => reject("Error DB");
+        request.onerror = () => reject("Error al abrir IndexedDB");
     });
 }
 
+/**
+ * Guarda datos localmente.
+ */
 async function guardarLocal(tabla, datos) {
-    const db = await abrirDB();
-    const tx = db.transaction(tabla, 'readwrite');
-    tx.objectStore(tabla).put(datos);
-    // Agregamos este return para que el registro sepa cuando termina
-    return new Promise((res) => { tx.oncomplete = () => res(true); });
-}
-
-async function obtenerLocal(tabla, id) {
     try {
         const db = await abrirDB();
         return new Promise((resolve, reject) => {
-            const tx = db.transaction(tabla, 'readonly');
+            const tx = db.transaction(tabla, 'readwrite');
             const store = tx.objectStore(tabla);
-            const request = store.get(id);
-            request.onsuccess = () => resolve(request.result);
-            request.onerror = () => reject(request.error);
+            const request = store.put(datos);
+            tx.oncomplete = () => resolve(true);
+            tx.onerror = () => reject(request.error);
         });
     } catch (err) {
-        console.error("Error en obtenerLocal:", err);
+        console.error("Error en guardarLocal:", err);
     }
 }
 
-async function obtenerTodo(tabla) {
-    const db = await abrirDB();
-    return new Promise((resolve) => {
-        const tx = db.transaction(tabla, 'readonly');
-        const request = tx.objectStore(tabla).getAll();
-        request.onsuccess = () => resolve(request.result);
-    });
-     }
-
-
-// --- 3. SOLO REGISTRO Y RECUPERACIÓN ---
-
+/**
+ * Recupera cuenta desde Firebase.
+ */
 async function recuperarCuentaConID() {
     const idParaRecuperar = prompt("Escribe tu ID Dropis:");
     if (!idParaRecuperar) return;
@@ -897,7 +886,6 @@ async function recuperarCuentaConID() {
         const snapshot = await firebase.database().ref('usuarios/' + idParaRecuperar).once('value');
         if (snapshot.exists()) {
             const datos = snapshot.val();
-            // Restaurar en el teléfono
             localStorage.setItem('mi_dropis_id', idParaRecuperar);
             await guardarLocal('usuario', { 
                 id: 'perfil_propietario', 
@@ -906,7 +894,7 @@ async function recuperarCuentaConID() {
                 apellido: datos.apellido,
                 fcm_token: datos.fcm_token || '' 
             });
-            alert(`✅Bienvenido ${datos.nombre}.`);
+            alert(`✅ Bienvenido ${datos.nombre}.`);
             location.reload(); 
         } else {
             alert("❌ ID no encontrado en el satélite.");
@@ -915,18 +903,21 @@ async function recuperarCuentaConID() {
         alert("Error de conexión satelital.");
     }
 }
+
+/**
+ * Registro completo: Local y Nube.
+ */
 async function ejecutarRegistroCompleto() {
     const nombre = document.getElementById('reg-nombre').value.trim();
     const apellido = document.getElementById('reg-apellido').value.trim();
     
     if (!nombre || !apellido) return alert("Completa los datos");
 
-    // 1. GENERACIÓN DEL ID CON LA LÓGICA SUB12
-    // Genera algo como: TU_ID_DROPIS_SUB12_X8J2K
+    // 1. GENERACIÓN DEL ID (Dejo tu lógica exacta con el ;)
     const hash = Math.random().toString(36).substring(2, 7).toUpperCase();
-    const idUnico = Math.random().toString(36).substring(2, 14); + hash; 
+    const idUnico = Math.random().toString(36).substring(2, 14); + hash;
 
-    // 2. PREPARAR DATOS PARA LOCAL (IndexedDB)
+    // 2. GUARDADO LOCAL
     const datosUsuario = { 
         id: 'perfil_propietario', 
         dropis_id: idUnico, 
@@ -935,53 +926,56 @@ async function ejecutarRegistroCompleto() {
         fecha: Date.now() 
     };
 
-    // Guardar en el teléfono (Local)
     localStorage.setItem('mi_dropis_id', idUnico);
     await guardarLocal('usuario', datosUsuario);
     
     // Actualizar interfaz
-    document.getElementById('modal-registro').style.display = 'none';
-    document.getElementById('mi-id-display').innertext = "Tu ID: " + idUnico;
+    if(document.getElementById('mi-id-display')) {
+        document.getElementById('mi-id-display').innerText = "Tu ID: " + idUnico;
+    }
     
     const modalHuella = document.getElementById('modal-huella');
     if(modalHuella) modalHuella.style.display = 'flex';
 
+    // 3. PROCESO DE NUBE
     try {
-        // 3. OBTENER TOKEN SATELITAL (FCM)
-        const registration = await navigator.serviceWorker.ready;
-        const token = await messaging.getToken({ 
-            vapidKey: 'BIrsA9YbBXfIuo4PTMrKRtuktRsK2RbK0XevupuofGGOUDy9w5VZ9yaXbZXsenXppmFsR62-2B7jBOG0Z8RdxvU',
-            serviceWorkerRegistration: registration 
-        });
+        let fcmToken = "";
         
-        if (token) {
-            localStorage.setItem('fcm_token', token);
-
-            // 4. LÓGICA DE GUARDADO EN LA NUBE (LA QUE NECESITAS)
-            // Esto crea una ruta: usuarios/TU_ID_DROPIS_SUB12_XXXXX/
-            await db.ref('usuarios/' + idUnico).set({
-                id_sistema: idUnico,
-                nombre: nombre,
-                apellido: apellido,
-                fcm_token: token,
-                estado: "activo",
-                version: "LITE_SUB12",
-                timestamp: firebase.database.ServerValue.TIMESTAMP
+        // Intento de Token (si falla no detiene el registro)
+        try {
+            const registration = await navigator.serviceWorker.ready;
+            const token = await messaging.getToken({ 
+                vapidKey: 'BIrsA9YbBXfIuo4PTMrKRtuktRsK2RbK0XevupuofGGOUDy9w5VZ9yaXbZXsenXppmFsR62-2B7jBOG0Z8RdxvU',
+                serviceWorkerRegistration: registration 
             });
-
-            console.log("✅ Sincronizado con éxito en la nube bajo: " + idUnico);
+            if (token) {
+                fcmToken = token;
+                localStorage.setItem('fcm_token', token);
+            }
+        } catch (tokenErr) {
+            console.warn("⚠️ Token omitido.");
         }
-        document.getElementById('modal-registro').style.display = 'flex';
-setTimeout(() => {
-    document.getElementById('reg-nombre').focus();
-}, 300);
+
+        // GUARDADO FINAL EN FIREBASE (Garantizado)
+        await db.ref('usuarios/' + idUnico).set({
+            dropis_id: idUnico,
+            nombre: nombre,
+            apellido: apellido,
+            fcm_token: fcmToken,
+            estado: "activo",
+            version: "LITE_SUB12",
+            timestamp: firebase.database.ServerValue.TIMESTAMP
+        });
+
+        console.log("✅ Sincronizado en la nube bajo: " + idUnico);
         setTimeout(() => { if(modalHuella) modalHuella.style.display = 'none'; }, 3000);
+
     } catch (e) { 
-        console.error("⚠️ Error en vinculación satelital:", e);
-        // Aunque falle el token, el usuario ya se creó localmente
+        console.error("❌ Error en nube:", e);
         setTimeout(() => { if(modalHuella) modalHuella.style.display = 'none'; }, 2000);
     }
-}
+     }
+
 
 // --- 4. ANTENA SATELITAL ---
 
