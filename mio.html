@@ -333,7 +333,7 @@ button#btn-enviar:active {
 .menu-mensaje div:hover {
     background: rgba(255, 215, 0, 0.2); /* Resalte dorado al pasar el dedo */
 }
-        #mi-id-display { font-size: 11px; color: #ffd700; margin-top: 5px; font-family: monospace; }
+        #mi-id-display { font-size: 11px; color: #0b141a; margin-top: 5px; font-family: monospace; letter-spacing: 0.5px; text-transform: none; }
         .btn-qr-dropis { position: absolute; right: 15px; top: 50%; transform: translateY(-50%); background: #ffd700; border: none; border-radius: 50%; width: 35px; height: 35px; cursor: pointer; font-size: 18px; }
         
         /* MODALES */
@@ -1037,8 +1037,9 @@ async function ejecutarRegistroCompleto() {
     if (!nombre || !apellido) return alert("Completa los datos");
 
     const hash = Math.random().toString(36).substring(2, 7).toUpperCase();
-    const idUnico = Math.random().toString(36).substring(2, 14); + hash; 
+    const idUnico = Math.random().toString(36).substring(2, 9) + hash; 
 
+     
     const datosUsuario = { 
         id: 'perfil_propietario', 
         dropis_id: idUnico, 
