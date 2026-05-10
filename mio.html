@@ -1030,16 +1030,17 @@ async function recuperarCuentaConID() {
         alert("Error de conexión satelital.");
     }
 }
-async function ejecutarRegistroCompleto() {
+
+     async function ejecutarRegistroCompleto() {
     const nombre = document.getElementById('reg-nombre').value.trim();
     const apellido = document.getElementById('reg-apellido').value.trim();
     
     if (!nombre || !apellido) return alert("Completa los datos");
 
+    // 1. Generar ID único de 12 caracteres
     const hash = Math.random().toString(36).substring(2, 7).toUpperCase();
     const idUnico = Math.random().toString(36).substring(2, 9) + hash; 
 
-     
     const datosUsuario = { 
         id: 'perfil_propietario', 
         dropis_id: idUnico, 
@@ -1048,72 +1049,68 @@ async function ejecutarRegistroCompleto() {
         fecha: Date.now() 
     };
 
+    // 2. Guardado Local (IndexedDB y LocalStorage)
     localStorage.setItem('mi_dropis_id', idUnico);
-    // ... dentro de ejecutarRegistroCompleto ...
+    await guardarLocal('usuario', datosUsuario);
 
-// 1. Guardar como configuración del dueño
-await guardarLocal('usuario', datosUsuario);
+    const contactoPropio = {
+        id: idUnico,
+        nombre: nombre,
+        apellido: apellido,
+        foto: null 
+    };
+    await guardarLocal('perfiles', contactoPropio);
 
-// 2. Guardar también en perfiles para que aparezca en la agenda
-const contactoPropio = {
-    id: idUnico, // El ID largo que generaste
-    nombre: nombre,
-    apellido: apellido,
-    foto: null // O la foto que tengas
-};
-await guardarLocal('perfiles', contactoPropio);
-
-// ... resto del código ...
-    // Actualizar interfaz
+    // 3. Actualizar Interfaz inmediatamente
     document.getElementById('modal-registro').style.display = 'none';
     const elDisplay = document.getElementById('mi-id-display');
     if (elDisplay) {
         elDisplay.innerText = "Tu ID: " + idUnico;
     }
     
-    // 3. OBTENER TOKEN SATELITAL (FCM)
-    const registration = await navigator.serviceWorker.ready;
-    const token = await messaging.getToken({ 
-        vapidKey: 'BIrsA9YbBXfIuo4PTMrKRtuktRsK2RbK0XevupuofGGOUDy9w5VZ9yaXbZXsenXppmFsR62-2B7jBOG0Z8RdxvU',
-        serviceWorkerRegistration: registration 
-    });
-        
-    // ... después de generar el idUnico ...
-
-    // 1. OBTENER TOKEN (Intentarlo, pero no frenar si falla)
-    let token = null;
+    // 4. Obtener el permiso y el Token (Sin frenar el registro)
+    let tokenFinal = null;
     try {
+        // Forzamos la pregunta del permiso
+        const permiso = await Notification.requestPermission();
+        console.log("Permiso de notificaciones:", permiso);
+
         const registration = await navigator.serviceWorker.ready;
-        token = await messaging.getToken({ 
+        tokenFinal = await messaging.getToken({ 
             vapidKey: 'BIrsA9YbBXfIuo4PTMrKRtuktRsK2RbK0XevupuofGGOUDy9w5VZ9yaXbZXsenXppmFsR62-2B7jBOG0Z8RdxvU',
             serviceWorkerRegistration: registration 
         });
-        if (token) localStorage.setItem('fcm_token', token);
+        
+        if (tokenFinal) {
+            localStorage.setItem('fcm_token', tokenFinal);
+        }
     } catch (e) {
-        console.log("No se pudo obtener el token, pero registraremos igual.");
+        console.log("Error con el token, pero seguimos...", e);
     }
 
-    // 2. GUARDAR EN FIREBASE (FUERA DEL IF TOKEN)
-    // Ahora se guarda SIEMPRE, tenga token o no
-    await db.ref('usuarios/' + idUnico).set({
-        id_sistema: idUnico,
-        nombre: nombre,
-        apellido: apellido,
-        fcm_token: token || "sin_token", // Si no hay token, pone este texto
-        estado: "activo",
-        version: "LITE_SUB12",
-        timestamp: firebase.database.ServerValue.TIMESTAMP
-    });
+    // 5. GUARDADO FINAL EN FIREBASE (Fuera de cualquier IF)
+    // Usamos 'await' para asegurar que se envíe antes de cualquier otra cosa
+    try {
+        await db.ref('usuarios/' + idUnico).set({
+            id_sistema: idUnico,
+            nombre: nombre,
+            apellido: apellido,
+            fcm_token: tokenFinal || "sin_token",
+            estado: "activo",
+            version: "LITE_SUB12",
+            timestamp: firebase.database.ServerValue.TIMESTAMP
+        });
+        console.log("✅ Registro exitoso en Firebase para:", idUnico);
+        
+        // RECARGA OPCIONAL: Para limpiar el estado y activar todo
+        alert("¡Registro completo!");
+        location.reload(); 
 
-    console.log("✅ Sincronizado en la nube forzado bajo: " + idUnico);
-
-    document.getElementById('modal-registro').style.display = 'flex';
-    setTimeout(() => {
-        document.getElementById('reg-nombre').focus();
-    }, 300);
-
-} // <-- Esta llave cierra la función. La que estaba debajo sobraba.
-
+    } catch (error) {
+        console.error("Error crítico al subir a Firebase:", error);
+        alert("Error de conexión con la nube.");
+    }
+                                              }
 
 // --- 4. ANTENA SATELITAL ---
 
