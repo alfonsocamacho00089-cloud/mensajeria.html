@@ -1045,7 +1045,7 @@ async function ejecutarRegistroCompleto() {
     // 1. GENERACIÓN DEL ID CON LA LÓGICA SUB12
     // Genera algo como: TU_ID_DROPIS_SUB12_X8J2K
     const hash = Math.random().toString(36).substring(2, 7).toUpperCase();
-    const idUnico = Math.random().toString(36).substring(2, 14); + hash; 
+    const idUnico = Math.random().toString(36).substring(2, 14) + hash; 
 
     // 2. PREPARAR DATOS PARA LOCAL (IndexedDB)
     const datosUsuario = { 
