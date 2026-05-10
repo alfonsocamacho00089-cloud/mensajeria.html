@@ -1061,7 +1061,7 @@ if (elDisplay) {
     elDisplay.innerText = "Tu ID: " + idUnico;
      }
     
-    try {
+    
         // 3. OBTENER TOKEN SATELITAL (FCM)
         const registration = await navigator.serviceWorker.ready;
         const token = await messaging.getToken({ 
