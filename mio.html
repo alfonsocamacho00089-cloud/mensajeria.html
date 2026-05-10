@@ -1078,21 +1078,34 @@ await guardarLocal('perfiles', contactoPropio);
         serviceWorkerRegistration: registration 
     });
         
-    if (token) {
-        localStorage.setItem('fcm_token', token);
+    // ... después de generar el idUnico ...
 
-        await db.ref('usuarios/' + idUnico).set({
-            id_sistema: idUnico,
-            nombre: nombre,
-            apellido: apellido,
-            fcm_token: token,
-            estado: "activo",
-            version: "LITE_SUB12",
-            timestamp: firebase.database.ServerValue.TIMESTAMP
+    // 1. OBTENER TOKEN (Intentarlo, pero no frenar si falla)
+    let token = null;
+    try {
+        const registration = await navigator.serviceWorker.ready;
+        token = await messaging.getToken({ 
+            vapidKey: 'BIrsA9YbBXfIuo4PTMrKRtuktRsK2RbK0XevupuofGGOUDy9w5VZ9yaXbZXsenXppmFsR62-2B7jBOG0Z8RdxvU',
+            serviceWorkerRegistration: registration 
         });
-
-        console.log("✅ Sincronizado con éxito en la nube bajo: " + idUnico);
+        if (token) localStorage.setItem('fcm_token', token);
+    } catch (e) {
+        console.log("No se pudo obtener el token, pero registraremos igual.");
     }
+
+    // 2. GUARDAR EN FIREBASE (FUERA DEL IF TOKEN)
+    // Ahora se guarda SIEMPRE, tenga token o no
+    await db.ref('usuarios/' + idUnico).set({
+        id_sistema: idUnico,
+        nombre: nombre,
+        apellido: apellido,
+        fcm_token: token || "sin_token", // Si no hay token, pone este texto
+        estado: "activo",
+        version: "LITE_SUB12",
+        timestamp: firebase.database.ServerValue.TIMESTAMP
+    });
+
+    console.log("✅ Sincronizado en la nube forzado bajo: " + idUnico);
 
     document.getElementById('modal-registro').style.display = 'flex';
     setTimeout(() => {
