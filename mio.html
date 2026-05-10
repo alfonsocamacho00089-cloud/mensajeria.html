@@ -672,13 +672,7 @@ margin: 0;
 </div>
  
 
-    <div id="modal-huella" class="modal">
-    <div class="modal-content" style="background: #000; color: #ffd700; border: 2px solid #ffd700;">
-        <div style="font-size: 60px; margin-bottom: 15px;">🫆</div>
-        <h3 style="color: #fff;">Validando Huella...</h3>
-        <p style="color: #ffd700; font-family: monospace; font-size: 12px;">Vinculando Token Satelital</p>
-    </div>
-    </div>
+
  
 <div id="modal-qr" class="modal">
     <div class="modal-content" style="display: flex; flex-direction: column; height: 100dvh; position: relative; background-image: linear-gradient(rgba(11, 20, 26, 0.3), rgba(11, 20, 26, 0.3)), url('./assets/logo.webp'); background-size: cover; background-position: center; background-attachment: fixed;">      
@@ -1066,9 +1060,7 @@ async function ejecutarRegistroCompleto() {
 if (elDisplay) {
     elDisplay.innerText = "Tu ID: " + idUnico;
      }
-    const modalHuella = document.getElementById('modal-huella');
-    if(modalHuella) modalHuella.style.display = 'flex';
-
+    
     try {
         // 3. OBTENER TOKEN SATELITAL (FCM)
         const registration = await navigator.serviceWorker.ready;
@@ -1098,12 +1090,7 @@ if (elDisplay) {
 setTimeout(() => {
     document.getElementById('reg-nombre').focus();
 }, 300);
-        setTimeout(() => { if(modalHuella) modalHuella.style.display = 'none'; }, 3000);
-    } catch (e) { 
-        console.error("⚠️ Error en vinculación satelital:", e);
-        // Aunque falle el token, el usuario ya se creó localmente
-        setTimeout(() => { if(modalHuella) modalHuella.style.display = 'none'; }, 2000);
-    }
+            }
      }
 
 
