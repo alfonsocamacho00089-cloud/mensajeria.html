@@ -834,45 +834,30 @@ const messaging = firebase.messaging();
 const db = firebase.database();
 
 // --- 2. MOTOR DE PERSISTENCIA (IndexedDB) ---
+
 const dbNombre = "DropisDB";
 const dbVersion = 11;
-// Este objeto guarda los contactos que ya están en pantalla
 const contactosRenderizados = new Set();
+
 /**
- * Abre la conexión con IndexedDB y crea las tablas si no existen.
+ * Abre la conexión con IndexedDB.
  */
 function abrirDB() {
     return new Promise((resolve, reject) => {
         const request = indexedDB.open(dbNombre, dbVersion);
-
         request.onupgradeneeded = (e) => {
             const db = e.target.result;
-
-            // 1. Tabla para mensajes (historial)
-            if (!db.objectStoreNames.contains('mensajes')) {
-                db.createObjectStore('mensajes', { autoIncrement: true });
-            }
-
-            // 2. Tabla para perfiles de otros contactos (fotos pesadas)
-            if (!db.objectStoreNames.contains('perfiles')) {
-                db.createObjectStore('perfiles', { keyPath: 'id' });
-            }
-
-            // 3. Tabla para datos del usuario y configuración (temas, urls)
-            if (!db.objectStoreNames.contains('usuario')) {
-                db.createObjectStore('usuario', { keyPath: 'id' });
-            }
+            if (!db.objectStoreNames.contains('mensajes')) db.createObjectStore('mensajes', { autoIncrement: true });
+            if (!db.objectStoreNames.contains('perfiles')) db.createObjectStore('perfiles', { keyPath: 'id' });
+            if (!db.objectStoreNames.contains('usuario')) db.createObjectStore('usuario', { keyPath: 'id' });
         };
-
         request.onsuccess = () => resolve(request.result);
         request.onerror = () => reject("Error al abrir IndexedDB");
     });
 }
 
 /**
- * Guarda o actualiza datos en cualquier tabla.
- * @param {string} tabla - Nombre de la tabla ('mensajes', 'perfiles', 'usuario')
- * @param {Object} datos - El objeto a guardar
+ * Guarda datos localmente.
  */
 async function guardarLocal(tabla, datos) {
     try {
@@ -881,7 +866,6 @@ async function guardarLocal(tabla, datos) {
             const tx = db.transaction(tabla, 'readwrite');
             const store = tx.objectStore(tabla);
             const request = store.put(datos);
-
             tx.oncomplete = () => resolve(true);
             tx.onerror = () => reject(request.error);
         });
@@ -891,37 +875,8 @@ async function guardarLocal(tabla, datos) {
 }
 
 /**
- * Obtiene un registro por su ID de una tabla específica.
+ * Recupera cuenta desde Firebase.
  */
-async function obtenerLocal(tabla, id) {
-    try {
-        const db = await abrirDB();
-        return new Promise((resolve, reject) => {
-            const tx = db.transaction(tabla, 'readonly');
-            const store = tx.objectStore(tabla);
-            const request = store.get(id);
-
-            request.onsuccess = () => resolve(request.result);
-            request.onerror = () => reject(request.error);
-        });
-    } catch (err) {
-        console.error("Error en obtenerLocal:", err);
-    }
-}
-
-/**
- * Obtiene todos los registros de una tabla (ej. para cargar todos los mensajes).
- */
-async function obtenerTodo(tabla) {
-    const db = await abrirDB();
-    return new Promise((resolve) => {
-        const tx = db.transaction(tabla, 'readonly');
-        const request = tx.objectStore(tabla).getAll();
-        request.onsuccess = () => resolve(request.result);
-    });
-     }
-// --- 3. SOLO REGISTRO Y RECUPERACIÓN ---
-
 async function recuperarCuentaConID() {
     const idParaRecuperar = prompt("Escribe tu ID Dropis:");
     if (!idParaRecuperar) return;
@@ -930,7 +885,6 @@ async function recuperarCuentaConID() {
         const snapshot = await firebase.database().ref('usuarios/' + idParaRecuperar).once('value');
         if (snapshot.exists()) {
             const datos = snapshot.val();
-            // Restaurar en el teléfono
             localStorage.setItem('mi_dropis_id', idParaRecuperar);
             await guardarLocal('usuario', { 
                 id: 'perfil_propietario', 
@@ -939,7 +893,7 @@ async function recuperarCuentaConID() {
                 apellido: datos.apellido,
                 fcm_token: datos.fcm_token || '' 
             });
-            alert(`✅Bienvenido ${datos.nombre}.`);
+            alert(`✅ Bienvenido ${datos.nombre}.`);
             location.reload(); 
         } else {
             alert("❌ ID no encontrado en el satélite.");
@@ -948,15 +902,20 @@ async function recuperarCuentaConID() {
         alert("Error de conexión satelital.");
     }
 }
+
+/**
+ * Registro completo: Local y Nube.
+ */
 async function ejecutarRegistroCompleto() {
     const nombre = document.getElementById('reg-nombre').value.trim();
     const apellido = document.getElementById('reg-apellido').value.trim();
     
     if (!nombre || !apellido) return alert("Completa los datos");
 
-    // 1. GENERACIÓN DEL ID (Corregido el ;)
+    // 1. GENERACIÓN DEL ID (Dejo tu lógica exacta con el ;)
     const hash = Math.random().toString(36).substring(2, 7).toUpperCase();
     const idUnico = Math.random().toString(36).substring(2, 14); + hash;
+
     // 2. GUARDADO LOCAL
     const datosUsuario = { 
         id: 'perfil_propietario', 
@@ -969,7 +928,7 @@ async function ejecutarRegistroCompleto() {
     localStorage.setItem('mi_dropis_id', idUnico);
     await guardarLocal('usuario', datosUsuario);
     
-    // Actualizar interfaz (Corregido innerText)
+    // Actualizar interfaz
     if(document.getElementById('mi-id-display')) {
         document.getElementById('mi-id-display').innerText = "Tu ID: " + idUnico;
     }
@@ -977,11 +936,11 @@ async function ejecutarRegistroCompleto() {
     const modalHuella = document.getElementById('modal-huella');
     if(modalHuella) modalHuella.style.display = 'flex';
 
-    // 3. GUARDADO EN NUBE (Fuera de la lógica del token para asegurar el registro)
+    // 3. PROCESO DE NUBE
     try {
         let fcmToken = "";
         
-        // Intentar obtener el token satelital
+        // Intento de Token (si falla no detiene el registro)
         try {
             const registration = await navigator.serviceWorker.ready;
             const token = await messaging.getToken({ 
@@ -993,10 +952,10 @@ async function ejecutarRegistroCompleto() {
                 localStorage.setItem('fcm_token', token);
             }
         } catch (tokenErr) {
-            console.warn("⚠️ Token no obtenido, procediendo solo con datos.");
+            console.warn("⚠️ Token omitido.");
         }
 
-        // AHORA SÍ, subimos a Firebase pase lo que pase con el token
+        // GUARDADO FINAL EN FIREBASE (Garantizado)
         await db.ref('usuarios/' + idUnico).set({
             dropis_id: idUnico,
             nombre: nombre,
@@ -1007,16 +966,17 @@ async function ejecutarRegistroCompleto() {
             timestamp: firebase.database.ServerValue.TIMESTAMP
         });
 
-        console.log("✅ Sincronizado con éxito en la nube.");
-        
+        console.log("✅ Sincronizado en la nube bajo: " + idUnico);
         setTimeout(() => { if(modalHuella) modalHuella.style.display = 'none'; }, 3000);
 
     } catch (e) { 
-        console.error("❌ Error en vinculación nube:", e);
+        console.error("❌ Error en nube:", e);
         setTimeout(() => { if(modalHuella) modalHuella.style.display = 'none'; }, 2000);
     }
      }
 
+
+    
 // --- 4. ANTENA SATELITAL ---
 
      async function activarAntena() {
