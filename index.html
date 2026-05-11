@@ -621,8 +621,9 @@ margin: 0;
     placeholder="Mensaje" 
     inputmode="text" 
     enterkeyhint="send"
-            oninput="this.style.height='40px'; this.style.height=this.scrollHeight+'px';"></textarea>
-
+    autocomplete="off"
+    oninput="this.style.height='40px'; this.style.height=this.scrollHeight+'px';">
+        </textarea>
     
         <label class="icon-btn" for="input-archivo">
             <span>📎</span>
@@ -2365,11 +2366,41 @@ function abrirGaleriaMultimedia(tipo) {
      }
 // Llama a esta función al final de tu código o en el onload
 cargarFotoInicial();
+// 1. Hacer que la carita abra el teclado
 function toggleStickers() {
-    // En lugar de abrir un panel, le damos el foco al texto
-    // Esto despliega el teclado nativo con sus emojis/stickers
-    document.getElementById('msg-text').focus();
-     }
+    const input = document.getElementById('msg-text');
+    input.focus(); // Esto abre el teclado nativo
+}
+
+// 2. Habilitar la recepción de Stickers y GIFs del teclado
+const inputMensaje = document.getElementById('msg-text');
+
+inputMensaje.addEventListener('paste', (event) => {
+    // Verificamos si hay archivos en lo que se pega (Stickers/GIFs)
+    const items = (event.clipboardData || event.originalEvent.clipboardData).items;
+    
+    let encontrado = false;
+    for (let index in items) {
+        const item = items[index];
+        if (item.kind === 'file') {
+            const blob = item.getAsFile();
+            
+            // Creamos un objeto que simula un input file para tu función existente
+            const dataTransfer = new DataTransfer();
+            dataTransfer.items.add(blob);
+            const inputSimulado = { files: dataTransfer.files };
+            
+            // Llamamos a tu función de fotos/videos
+            prepararEnvioFoto(inputSimulado);
+            encontrado = true;
+        }
+    }
+    
+    // Si pegaste un sticker, evitamos que se escriba texto raro en el input
+    if (encontrado) {
+        event.preventDefault();
+    }
+});
 
 function inicializarInterfaz() {
     const fotoLocal = localStorage.getItem('mi_foto');
