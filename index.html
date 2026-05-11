@@ -538,34 +538,7 @@ margin: 0;
      }
 }
 /* Personaliza el scroll del panel de stickers */
-#panel-stickers::-webkit-scrollbar {
-    width: 6px;
-}
 
-#panel-stickers::-webkit-scrollbar-track {
-    background: #1a1a1a;
-}
-
-#panel-stickers::-webkit-scrollbar-thumb {
-    background: #ffd700; /* Scroll dorado */
-    border-radius: 10px;
-}
-
-#panel-stickers {
-    position: fixed;
-    bottom: 70px; 
-    left: 10px;
-    right: 10px;
-    background: #1a1a1a;
-    border: 1px solid rgba(255, 215, 0, 0.5); /* Dorado con transparencia */
-    border-radius: 15px;
-    height: 300px; /* Un poquito más alto para ver más stickers */
-    display: none; 
-    z-index: 900;
-    overflow-y: auto;
-    box-shadow: 0 -5px 15px rgba(0,0,0,0.5); /* Sombra hacia arriba */
-    padding: 10px;
-}
 
     </style>
 
@@ -644,10 +617,13 @@ margin: 0;
         </button>
         
         <textarea 
-            id="msg-text" 
-            placeholder="Mensaje" 
+    id="msg-text" 
+    placeholder="Mensaje" 
+    inputmode="text" 
+    enterkeyhint="send"
             oninput="this.style.height='40px'; this.style.height=this.scrollHeight+'px';"></textarea>
 
+    
         <label class="icon-btn" for="input-archivo">
             <span>📎</span>
             <input type="file" id="input-archivo" style="display: none;" onchange="prepararEnvioArchivo(this)">
@@ -2389,7 +2365,12 @@ function abrirGaleriaMultimedia(tipo) {
      }
 // Llama a esta función al final de tu código o en el onload
 cargarFotoInicial();
-     
+function toggleStickers() {
+    // En lugar de abrir un panel, le damos el foco al texto
+    // Esto despliega el teclado nativo con sus emojis/stickers
+    document.getElementById('msg-text').focus();
+     }
+
 function inicializarInterfaz() {
     const fotoLocal = localStorage.getItem('mi_foto');
     const nombreLocal = localStorage.getItem('mi_nombre');
@@ -2439,8 +2420,31 @@ if (window.visualViewport) {
     vv.addEventListener('scroll', ajustarInterfaz);
     ajustarInterfaz();
      }
-     
+     <script>
+    // ... Tus funciones anteriores (enviarMensajeSatelital, etc.) ...
+
+    // CAPTURAR STICKERS Y GIFS DEL TECLADO
+    const inputMensaje = document.getElementById('msg-text');
+
+    inputMensaje.addEventListener('paste', (event) => {
+        const items = (event.clipboardData || event.originalEvent.clipboardData).items;
+        
+        for (let index in items) {
+            const item = items[index];
+            
+            // Si lo que se pega es un archivo (como un Sticker o GIF del teclado)
+            if (item.kind === 'file') {
+                const blob = item.getAsFile();
+                
+                // Usamos tu función existente de fotos para procesarlo
+                // Creamos un objeto similar al que envía el input type="file"
+                const archivoSimulado = { files: [blob] };
+                prepararEnvioFoto(archivoSimulado); 
+            }
+        }
+    });
 </script>
+
 </body>
 </html>
  
