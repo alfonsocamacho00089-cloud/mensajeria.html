@@ -2450,30 +2450,7 @@ if (window.visualViewport) {
     vv.addEventListener('scroll', ajustarInterfaz);
     ajustarInterfaz();
      }
-     <script>
-    // ... Tus funciones anteriores (enviarMensajeSatelital, etc.) ...
-
-    // CAPTURAR STICKERS Y GIFS DEL TECLADO
-    const inputMensaje = document.getElementById('msg-text');
-
-    inputMensaje.addEventListener('paste', (event) => {
-        const items = (event.clipboardData || event.originalEvent.clipboardData).items;
-        
-        for (let index in items) {
-            const item = items[index];
-            
-            // Si lo que se pega es un archivo (como un Sticker o GIF del teclado)
-            if (item.kind === 'file') {
-                const blob = item.getAsFile();
-                
-                // Usamos tu función existente de fotos para procesarlo
-                // Creamos un objeto similar al que envía el input type="file"
-                const archivoSimulado = { files: [blob] };
-                prepararEnvioFoto(archivoSimulado); 
-            }
-        }
-    });
-</script>
+     
 
 </body>
 </html>
