@@ -95,20 +95,83 @@ body {
 /* --- INPUT AREA --- */
 .contenedor-flotante {
     position: absolute; /* Se queda pegado a la pantalla, no al chat */
+        position: fixed;
     bottom: 0;
     left: 0;
     width: 100%;
     display: flex;
-    align-items: center;
+    align-items: flex-end; /* Alinea al fondo si el textarea crece */
     padding: 10px;
     gap: 8px;
-    z-index: 100;
-    pointer-events: auto; /* IMPORTANTE: Para que puedas hacer clic en el input */
-    
-    /* Efecto para que parezca que la foto sigue debajo */
-    background: rgba(0, 0, 0, 0.1); 
-    backdrop-filter: blur(5px); /* Opcional: desenfoca un poco para legibilidad */
-    -webkit-backdrop-filter: blur(5px);
+    box-sizing: border-box;
+    z-index: 1000;
+    background: transparent; /* Para que se vea el chat detrás */
+}
+
+.input-wrapper {
+    flex: 1;
+    display: flex;
+    align-items: flex-end;
+    background: #1a1a1a; /* Fondo oscuro */
+    border-radius: 25px;
+    padding: 5px 10px;
+    border: 1px solid rgba(255, 215, 0, 0.3); /* Borde dorado sutil */
+    box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+}
+
+#msg-text {
+    flex: 1;
+    background: transparent;
+    border: none;
+    color: white;
+    padding: 10px 5px;
+    font-size: 16px;
+    max-height: 150px;
+    resize: none;
+    outline: none;
+    line-height: 20px;
+    height: 40px;
+}
+
+.icon-btn {
+    background: none;
+    border: none;
+    padding: 8px;
+    cursor: pointer;
+    color: #858a8d; /* Color grisáceo tipo WhatsApp */
+    font-size: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Estilo para que los iconos resalten en dorado al tocarlos */
+.icon-btn:active {
+    color: #ffd700;
+}
+
+#btn-enviar {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: #ffd700; /* Fondo Dorado */
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+    cursor: pointer;
+}
+
+#btn-enviar span {
+    font-size: 22px;
+    color: #000; /* Icono negro sobre fondo dorado */
+}
+
+#btn-enviar:active {
+    transform: scale(0.9);
+    opacity: 0.8;
 }
      
 .barra-flotante-premium {
@@ -200,35 +263,6 @@ body {
     margin-top: 2px;
 }
 
-#msg-text {
-    flex: 1;
-    background: rgba(32, 44, 51, 0.9); /* Un gris oscuro con transparencia */
-    backdrop-filter: blur(10px);        /* Efecto cristal */
-    border-radius: 25px;
-    padding: 12px 15px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    color: white;
-    height: 50px;
-    max-height: 120px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.3); /* Sombrita para que flote */
-}
-
-#btn-enviar {
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
-    background: #ffd700; /* Dorado sólido o con glass */
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-}
-
-/* Efecto cuando pasas el dedo o el mouse */
-button#btn-enviar:active {
-    background: rgba(255, 215, 0, 0.6); /* Se oscurece un poco al tocarlo */
-    transform: scale(0.9);
-}
      
 .msg-burbuja { 
     max-width: 85%; 
@@ -462,49 +496,7 @@ margin: 0;
     text-align: center;
     margin-left: auto; /* Lo empuja a la derecha */
 }
-.btn-back-clean {
-    background: transparent; /* Quita el color de fondo */
-    border: none;            /* Quita el borde */
-    outline: none;           /* Quita el borde de enfoque al hacer clic */
-    color: white;            /* Color de la flechita */
-    font-size: 20px;         /* Tamaño de la flecha */
-    padding: 5px;           /* Espacio para que sea fácil de tocar con el dedo */
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
 
-
-     
-
-/* Estilo para los botones individuales dentro de la barra */
-.btn-nav {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    color: #8696a0; /* Color gris suave para los no seleccionados */
-    text-decoration: none;
-    font-size: 11px;
-    font-weight: 500;
-    flex: 1;
-    cursor: pointer;
-    transition: 0.3s;
-}.
-
-/* El botón que esté activo o cuando lo toques */
-.btn-nav.active, .btn-nav:active {
-    color: #ffd700; /* Dorado para resaltar */
-}
-
-.btn-nav i {
-    font-size: 20px; /* Tamaño para los iconos */
-    margin-bottom: 4px;
-}
-/* Efecto opcional al tocarlo */
-.btn-back-clean:active {
-    opacity: 0.6;            /* Se pone un poco transparente al presionarlo */
-}
 
        /* Un estilo limpio para que la foto siempre se vea */
 /* Solo afecta a estos dos elementos, no toca las fotos del chat */
@@ -545,10 +537,34 @@ margin: 0;
     cursor: pointer;
      }
 }
+/* Personaliza el scroll del panel de stickers */
+#panel-stickers::-webkit-scrollbar {
+    width: 6px;
+}
+
+#panel-stickers::-webkit-scrollbar-track {
+    background: #1a1a1a;
+}
+
+#panel-stickers::-webkit-scrollbar-thumb {
+    background: #ffd700; /* Scroll dorado */
+    border-radius: 10px;
+}
+
 #panel-stickers {
-    transition: transform 0.3s ease-in-out;
-    /* Asegúrate de que el panel no cubra el área de escritura si quieres que sigan viendo el texto */
-    bottom: 0;
+    position: fixed;
+    bottom: 70px; 
+    left: 10px;
+    right: 10px;
+    background: #1a1a1a;
+    border: 1px solid rgba(255, 215, 0, 0.5); /* Dorado con transparencia */
+    border-radius: 15px;
+    height: 300px; /* Un poquito más alto para ver más stickers */
+    display: none; 
+    z-index: 900;
+    overflow-y: auto;
+    box-shadow: 0 -5px 15px rgba(0,0,0,0.5); /* Sombra hacia arriba */
+    padding: 10px;
 }
 
     </style>
@@ -620,29 +636,36 @@ margin: 0;
  </div>
 
 
-<div class="contenedor-flotante" style="display: flex; align-items: center; gap: 8px; padding: 10px; background: #000; border-top: 1px solid #ffd700;">
+<div class="contenedor-flotante">
     
-    <button onclick="toggleStickers()" style="background: none; border: none; color: #ffd700; font-size: 20px; cursor: pointer;">
-        <span>😊</span>
-    </button>
+    <div class="input-wrapper">
+        <button class="icon-btn" onclick="toggleStickers()">
+            <span>😊</span>
+        </button>
+        
+        <textarea 
+            id="msg-text" 
+            placeholder="Mensaje" 
+            oninput="this.style.height='40px'; this.style.height=this.scrollHeight+'px';"></textarea>
 
-    <label for="input-foto" style="cursor: pointer; color: #ffd700; font-size: 20px;">
-        <span>📷</span>
-        <input type="file" id="input-foto" accept="image/*" style="display: none;" onchange="prepararEnvioFoto(this)">
-    </label>
+        <label class="icon-btn" for="input-archivo">
+            <span>📎</span>
+            <input type="file" id="input-archivo" style="display: none;" onchange="prepararEnvioArchivo(this)">
+        </label>
 
-    <!-- NUEVO: Botón para Vídeos -->
-    <label for="input-video" style="cursor: pointer; color: #ffd700; font-size: 20px;">
-        <span>🎥</span>
-        <input type="file" id="input-video" accept="video/*" style="display: none;" onchange="prepararEnvioVideo(this)">
-    </label>
+        <label class="icon-btn" for="input-foto">
+            <span>📷</span>
+            <input type="file" id="input-foto" accept="image/*" style="display: none;" onchange="prepararEnvioFoto(this)">
+        </label>
+    </div>
     
-    <textarea id="msg-text" placeholder="Mensaje..." style="flex: 1; min-width: 0; box-sizing: border-box; background: #1a1a1a; color: #fff; border: 1px solid #333; border-radius: 20px; padding: 10px 15px; height: 45px; outline: none; resize: none;"></textarea>
-    
-    <button id="btn-enviar" onclick="enviarMensajeSatelital()" style="flex-shrink: 0; background: #ffd700; border: none; width: 40px; height: 40px; border-radius: 50%;">
-        <span style="color: #000; font-weight: bold;">➤</span>
-    </button>
+    <button id="btn-enviar" onclick="enviarMensajeSatelital()">
+        <span id="icon-accion">🎙️</span> </button>
 </div>
+
+ 
+
+
    
  <div class="fondo-estatico"></div>
 
