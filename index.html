@@ -100,7 +100,7 @@ body {
     align-items: center;
     padding: 10px;
     gap: 8px;
-    z-index: 1000;
+    z-index: 100;
     pointer-events: auto; /* IMPORTANTE: Para que puedas hacer clic en el input */
     
     /* Efecto para que parezca que la foto sigue debajo */
@@ -211,16 +211,15 @@ body {
 
 #msg-text {
     flex: 1;
-    background: transparent; /* Un gris oscuro con transparencia */
-    backdrop-filter: blur(10px);        /* Efecto cristal */
-    border-radius: 25px;
-    padding: 12px 15px;
-    border: none;       /* <--- ADIÓS AL BORDE BLANCO */
-    outline: none;      /* <--- ADIÓS AL BORDE AL HACER CLIC */
+    background: transparent; /* Se vuelve invisible para mostrar el fondo del padre */
+    border: none;
+    outline: none;
     color: white;
-    height: 50px;
+    padding: 10px 5px;
+    height: 40px; /* Ajusta según prefieras */
     max-height: 120px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.3); /* Sombrita para que flote */
+    resize: none;
+    /* Quitamos box-shadow y backdrop-filter de aquí */
 }
 
 #btn-enviar {
