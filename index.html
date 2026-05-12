@@ -2147,14 +2147,14 @@ async function manejarSeleccionImagen(event) {
 
 // . Modificación a toggleStickers para que funcione con el botón 😊
 function toggleStickers() {
-    const panel = document.getElementById('panel-stickers');
+    const panel = document.getElementById('panel-stickers'); // Asegúrate de que tu HTML tenga este ID
     if (!panel) return;
 
     if (panel.style.display === 'none' || panel.style.transform === 'translateY(100%)') {
         panel.style.display = 'block';
         panel.style.transform = 'translateY(0)';
-        // Por defecto cargamos los stickers primero
-        abrirGaleriaMultimedia('stickers'); 
+        // CAMBIO AQUÍ: Debe ser el mismo nombre que definiste arriba
+        abrirTiendaMultimedia('stickers'); 
     } else {
         panel.style.transform = 'translateY(100%)';
         setTimeout(() => { panel.style.display = 'none'; }, 300);
