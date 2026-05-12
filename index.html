@@ -1584,9 +1584,21 @@ function aplicarFotoCapa(id, src) {
  
 // Reemplaza el bloque final por este:
  window.onload = async () => {
+    // 1. EJECUCIÓN INMEDIATA DEL SPLASH (No espera a nadie)
+    const splash = document.getElementById('pantalla-carga');
+    if (splash) {
+        setTimeout(() => {
+            splash.style.opacity = '0';
+            splash.addEventListener('transitionend', () => {
+                splash.style.display = 'none';
+            }, { once: true });
+        }, 100); // 100ms es suficiente para que el usuario vea el icono
+    }
+
+    // 2. LÓGICA DE DATOS (Sigue corriendo de fondo)
     const id = localStorage.getItem('mi_dropis_id');
     
-    // CARGAR TEMA DESDE INDEXEDDB
+    // Cargar tema (esto puede tardar unos ms por el await)
     const configTema = await obtenerLocal('usuario', 'ajustes_tema');
     if (configTema && configTema.urlFondo) {
         document.body.style.backgroundImage = `url('${configTema.urlFondo}')`;
@@ -1594,14 +1606,14 @@ function aplicarFotoCapa(id, src) {
     }
 
     if (id) {
-        // Recuperar mi propia foto de la DB local primero (Instantáneo)
+        // Recuperar foto local
         const miPerfil = await obtenerLocal('perfiles', id);
         if (miPerfil && miPerfil.foto) {
             const headerFoto = document.getElementById('foto-perfil-header');
             if (headerFoto) headerFoto.src = miPerfil.foto;
         }
 
-        // Luego sincronizar con Firebase en segundo plano
+        // Sincronizar Firebase (Sin await para que no bloquee)
         db.ref('usuarios/' + id).once('value').then(snapshot => {
             const data = snapshot.val();
             if (data && data.foto) {
@@ -1614,18 +1626,6 @@ function aplicarFotoCapa(id, src) {
     } else {
         const modalRegistro = document.getElementById('modal-registro');
         if(modalRegistro) modalRegistro.style.display = 'flex';
-    }
-    // ... resto del código del splash
-const splash = document.getElementById('pantalla-carga');
-    if (splash) {
-        // Un pequeño delay de 300ms para que la transición sea suave
-         setTimeout(() => {
-    splash.style.opacity = '0';
-    // Espera a que termine la animación de CSS para poner el display: none
-    splash.addEventListener('transitionend', () => {
-        splash.style.display = 'none';
-    }, { once: true });
-}, 150);
     }
 };
      // <--- ¡ASEGÚRATE DE QUE ESTA LLAVE Y PUNTO Y COMA ESTÉN AQUÍ!// <--- Aquí termina el window.onload  
