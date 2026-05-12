@@ -835,7 +835,23 @@ margin: 0;
         <div id="contenedor-agenda-total" style="overflow-y: auto; max-height: 80vh;"></div>
     </div>
  </div>
+<div id="modal-tienda" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:10000; color:white; font-family:sans-serif;">
+    <div style="padding:20px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #ffd700; padding-bottom:10px;">
+            <h2 style="color:#ffd700; margin:0;">Space Tienda</h2>
+            <button onclick="document.getElementById('modal-tienda').style.display='none'" style="background:none; border:none; color:white; font-size:24px;">×</button>
+        </div>
+        
+        <div style="display:flex; justify-content:space-around; margin:20px 0;">
+            <button onclick="abrirTiendaMultimedia('gifs')" style="background:#222; color:#ffd700; border:1px solid #ffd700; padding:10px; border-radius:20px; width:30%;">GIFs</button>
+            <button onclick="abrirTiendaMultimedia('stickers')" style="background:#222; color:#ffd700; border:1px solid #ffd700; padding:10px; border-radius:20px; width:30%;">Stickers</button>
+            <button onclick="abrirTiendaMultimedia('temas')" style="background:#222; color:#ffd700; border:1px solid #ffd700; padding:10px; border-radius:20px; width:30%;">Temas</button>
+        </div>
 
+        <div id="contenedor-items-tienda" style="display:flex; flex-wrap:wrap; justify-content:center; max-height:60vh; overflow-y:auto; padding-bottom:50px;">
+            </div>
+    </div>
+</div>
    
     
     <script>
@@ -1971,7 +1987,114 @@ function previsualizarMiFoto(input) {
 
 }
 
+     // --- 1. PROCESADOR MULTIMEDIA (SIN FIREBASE STORAGE) ---
+async function subirArchivoAFirebase(archivo) {
+    // Convertimos el archivo a Base64 para guardarlo en la Database v10 directamente
+    // Así evitamos pagar el plan Blaze de Firebase Storage
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = (e) => resolve(e.target.result);
+        reader.onerror = (e) => reject("Error al leer archivo local");
+        reader.readAsDataURL(archivo);
+    });
+}
 
+// --- 2. RECEPCIÓN DESDE EL TECLADO (STICKERS/GIFS NATIVOS) ---
+const inputMensaje = document.getElementById('msg-text');
+inputMensaje.addEventListener('paste', async (event) => {
+    const items = (event.clipboardData || event.originalEvent.clipboardData).items;
+    for (let item of items) {
+        if (item.kind === 'file') {
+            const blob = item.getAsFile();
+            const urlBase64 = await subirArchivoAFirebase(blob);
+            // Enviamos según el tipo de archivo
+            const tipo = blob.type.includes('video') ? 'video' : 'foto';
+            enviarMediaPorURL(urlBase64, tipo);
+            event.preventDefault();
+        }
+    }
+});
+
+
+
+// CONFIGURACIÓN DE LA TIENDA
+const API_KEY_GIPHY = "y04S2YI56Z8Rz8Xp05f6e87h66v98mS2"; // <--- Tu nueva llave de GIPHY
+
+const bibliotecaSpaceChat = {
+    stickers: [
+        "https://i.ibb.co/Y7m8Y8X/goku-sticker.png",
+        "https://i.ibb.co/vXvXvXv/shinobu.png"
+    ],
+    temas: [
+        { nombre: "Space Gold", fondo: "#000", acento: "#ffd700", imagen: "" },
+        { nombre: "Goku Ultra", fondo: "url('https://i.ibb.co/your-goku-bg.jpg')", acento: "#ff4500" },
+        { nombre: "Shinobu Butterfly", fondo: "url('https://i.ibb.co/your-shinobu-bg.jpg')", acento: "#da70d6" }
+    ]
+};
+
+// FUNCIÓN PARA CARGAR LA TIENDA
+async function abrirTiendaMultimedia(tipo) {
+    const contenedor = document.getElementById('contenedor-items-tienda');
+    contenedor.innerHTML = "<p style='color:white;'>Cargando energía...</p>";
+    
+    if (tipo === 'gifs') {
+        try {
+            // Ahora usamos GIPHY con tu llave. Buscamos 'anime' para empezar.
+            const urlGiphy = `https://api.giphy.com/v1/gifs/search?api_key=${API_KEY_GIPHY}&q=anime&limit=15&rating=g`;
+            const res = await fetch(urlGiphy);
+            const data = await res.json();
+            
+            // Extraemos las URLs de los GIFs (usamos 'fixed_width_small' para que carguen rápido en el móvil)
+            const gifs = data.data.map(g => g.images.fixed_width_small.url);
+            renderizarItems(gifs, 'gif');
+        } catch (e) {
+            console.error("Error GIPHY:", e);
+            contenedor.innerHTML = "<p style='color:red;'>Error al conectar con el satélite de GIFs</p>";
+        }
+    } else if (tipo === 'stickers') {
+        renderizarItems(bibliotecaSpaceChat.stickers, 'sticker');
+    } else if (tipo === 'temas') {
+        renderizarTemas();
+    }
+     }
+
+
+
+function renderizarItems(urls, tipoEnvio) {
+    const contenedor = document.getElementById('contenedor-items-tienda');
+    contenedor.innerHTML = "";
+    urls.forEach(url => {
+        const img = document.createElement('img');
+        img.src = url;
+        img.style = "width:30%; margin:5px; border-radius:8px; cursor:pointer; background:#111;";
+        img.onclick = () => {
+            enviarMediaPorURL(url, tipoEnvio);
+            document.getElementById('modal-tienda').style.display = 'none';
+        };
+        contenedor.appendChild(img);
+    });
+}
+
+// FUNCIÓN PARA CAMBIAR EL TEMA (FONDOS)
+function renderizarTemas() {
+    const contenedor = document.getElementById('contenedor-items-tienda');
+    contenedor.innerHTML = "";
+    bibliotecaSpaceChat.temas.forEach(tema => {
+        const btn = document.createElement('div');
+        btn.innerHTML = tema.nombre;
+        btn.style = `padding:15px; margin:10px; background:${tema.acento}; color:#000; font-weight:bold; border-radius:8px; cursor:pointer; text-align:center;`;
+        btn.onclick = () => {
+            // Aplicamos el fondo al body o al contenedor del chat
+            document.body.style.background = tema.fondo;
+            document.body.style.backgroundSize = "cover";
+            // Guardamos el tema preferido en el teléfono
+            localStorage.setItem('tema_preferido', JSON.stringify(tema));
+            document.getElementById('modal-tienda').style.display = 'none';
+        };
+        contenedor.appendChild(btn);
+    });
+     }
+     
 async function manejarEnvioFoto(archivo) {
     // 1. Mostrar un pequeño aviso de "Subiendo..." para que el usuario no se desespere
     console.log("Subiendo imagen al satélite...");
