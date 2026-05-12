@@ -112,7 +112,7 @@ body {
  .input-wrapper {
     flex: 1;
     display: flex;
-    align-items: flex-end;
+    align-items: center;
     background: rgba(32, 44, 51, 0.9); /* Fondo gris */
     border-radius: 25px;
     padding: 5px 10px;
@@ -651,8 +651,9 @@ margin: 0;
         </label>
     </div>
     
-    <button id="btn-enviar" onclick="enviarMensajeSatelital()">
-        <span id="icon-accion">🎙️</span> </button>
+    <button id="btn-enviar" onclick="enviarMensajeSatelital()" style="flex-shrink: 0; background: #ffd700; border: none; width: 40px; height: 40px; border-radius: 50%;">
+        <span style="color: #000; font-weight: bold;">➤</span>
+    </button>
 </div>
    
  <div class="fondo-estatico"></div>
