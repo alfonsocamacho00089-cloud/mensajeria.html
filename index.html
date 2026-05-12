@@ -2164,13 +2164,13 @@ function toggleStickers() {
      async function prepararEnvioVideo(input) {
     if (input.files && input.files[0]) {
         const archivo = input.files[0];
-        console.log("Subiendo vídeo al satélite...");
+        console.log("H.A.R.V.I.S.: Lanzando video al espacio..."); // Un toque de personalidad
 
         try {
-            // Subida a Firebase Storage (v10)
+            // Convierte a Base64 para ahorro de costos
             const urlDescarga = await subirArchivoAFirebase(archivo); 
             
-            // Enviamos la URL con el tipo 'video'
+            // Envía con el tipo correcto para que el chat lo reconozca
             await enviarMediaPorURL(urlDescarga, 'video');
             
             input.value = ""; 
@@ -2180,8 +2180,6 @@ function toggleStickers() {
         }
     }
      }
-     
-
 
 
 
