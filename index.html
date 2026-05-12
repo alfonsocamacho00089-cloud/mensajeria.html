@@ -108,6 +108,17 @@ body {
     backdrop-filter: blur(5px); /* Opcional: desenfoca un poco para legibilidad */
     -webkit-backdrop-filter: blur(5px);
 }
+
+ .input-wrapper {
+    flex: 1;
+    display: flex;
+    align-items: flex-end;
+    background: #1a1a1a; /* Fondo oscuro */
+    border-radius: 25px;
+    padding: 5px 10px;
+    border: 1px solid rgba(255, 215, 0, 0.3); /* Borde dorado sutil */
+    box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+ }
      
 .barra-flotante-premium {
     position: fixed;
@@ -614,17 +625,34 @@ margin: 0;
  </div>
 
 
-<div class="contenedor-flotante" style="display: flex; align-items: center; gap: 5px;">
+<div class="contenedor-flotante">
     
-    <textarea 
-        id="msg-text" 
-        placeholder="Mensaje..."
-        style="flex: 1; min-width: 0; box-sizing: border-box;" 
-        oninput="this.style.height='45px'; this.style.height=this.scrollHeight+'px';"></textarea>
+    <div class="input-wrapper">
+        <button class="icon-btn" onclick="toggleStickers()">
+            <span>😊</span>
+        </button>
+        
+        <textarea 
+    id="msg-text" 
+    placeholder="Mensaje" 
+    inputmode="text" 
+    enterkeyhint="send"
+    autocomplete="off"
+    oninput="this.style.height='40px'; this.style.height=this.scrollHeight+'px';"></textarea>
     
-    <button id="btn-enviar" onclick="enviarMensajeSatelital()" style="flex-shrink: 0;">
-        <span>➤</span>
-    </button>
+        <label class="icon-btn" for="input-archivo">
+            <span>📎</span>
+            <input type="file" id="input-archivo" style="display: none;" onchange="prepararEnvioArchivo(this)">
+        </label>
+
+        <label class="icon-btn" for="input-foto">
+            <span>📷</span>
+            <input type="file" id="input-foto" accept="image/*" style="display: none;" onchange="prepararEnvioFoto(this)">
+        </label>
+    </div>
+    
+    <button id="btn-enviar" onclick="enviarMensajeSatelital()">
+        <span id="icon-accion">🎙️</span> </button>
 </div>
    
  <div class="fondo-estatico"></div>
