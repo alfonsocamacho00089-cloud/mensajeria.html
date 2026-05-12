@@ -1,0 +1,2341 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+ <meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="ChatSpace">
+
+<link rel="apple-touch-icon" href="assets/logo.png">
+ <link rel="manifest" href="/manifest-mio.json">    
+ <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>SpaceChat</title> </head>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-messaging-compat.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/protobufjs@7.2.4/dist/protobuf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/eruda"></script>
+    <script>eruda.init();</script>
+    <style>
+   
+    * {
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+}
+
+body {
+    font-family: sans-serif;
+    background-color: #000000;
+    /* Usamos la imagen aquí para que sea global */
+    background-image: url('./assets/logo.webp');  
+    background-attachment: fixed; /* LA CLAVE: El fondo no se mueve con el scroll */
+    background-position: center;
+    background-size: cover;
+    background-repeat: no-repeat;
+    margin: 0;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+ 
+    left: 0;
+    height: 100vh;
+    height: 100svh; /* Altura segura para móviles */
+    overflow: hidden;
+    position: fixed; /* Evita que el navegador desplace toda la pantalla */
+}
+
+#chat-box {
+   background: transparent !important;
+    flex: 1;
+    flex-shrink: 1;
+    overflow-y: auto;
+    
+    padding-bottom: 135px !important;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    position: relative; /* Necesario para el fondo */
+    background: #0b141a; /* Color base oscuro */
+ 
+ 
+  
+    touch-action: pan-y; /* Permite scroll solo de arriba a abajo */
+    -webkit-overflow-scrolling: touch;
+    
+    /* ... tus estilos ... */
+    mask-image: linear-gradient(to bottom, black 85%, transparent 95%);
+    -webkit-mask-image: linear-gradient(to bottom, black 85%, transparent 95%);
+    overscroll-behavior-y: contain;  /* Bloquea que el scroll mueva el fondo */
+}
+    
+     .fondo-estatico {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-image: linear-gradient(rgba(11, 20, 26, 0.3), rgba(11, 20, 26, 0.3)), 
+                      url('./assets/logo.webp');
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: cover; 
+    z-index: -1; 
+    pointer-events: none;
+    
+    /* AÑADE ESTO PARA SINCRONIZAR */
+    touch-action: none; 
+    overflow: hidden;
+     }
+
+
+
+/* --- INPUT AREA --- */
+.contenedor-flotante {
+    position: absolute; /* Se queda pegado a la pantalla, no al chat */
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    gap: 8px;
+    z-index: 100;
+    pointer-events: auto; /* IMPORTANTE: Para que puedas hacer clic en el input */
+    
+    /* Efecto para que parezca que la foto sigue debajo */
+    background: rgba(0, 0, 0, 0.1); 
+    backdrop-filter: blur(5px); /* Opcional: desenfoca un poco para legibilidad */
+    -webkit-backdrop-filter: blur(5px);
+}
+     
+.barra-flotante-premium {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 92%;
+    max-width: 450px;
+    
+    background: rgba(32, 44, 51, 0.8);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    
+    /* Cambiamos a FLEX para los botones */
+    display: flex;
+    justify-content: space-around; /* Reparte los botones con espacio igual */
+    align-items: center;
+    
+    padding: 10px 5px;
+    border-radius: 25px;
+    border: 1px solid rgba(255, 215, 0, 0.3);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    z-index: 30001;
+}
+
+   
+/* --- HEADER ESTILO WHATSAPP --- */
+.header { 
+    background: rgba(32, 44, 51, 0.3); /* Bajamos de 0.9 a 0.7 para que sea más claro */
+   
+ padding: 0 20px;    
+    display: flex;
+    align-items: center;
+    flex-shrink: 0; 
+    height: 60px;
+   
+ 
+ 
+ 
+    z-index: 10;
+    position: relative;
+ /* LA MAGIA DEL CRISTAL */
+    backdrop-filter: blur(5px); 
+    -webkit-backdrop-filter: blur(10px); /* OBLIGATORIO para iPhone y muchos Android */
+    
+}
+
+
+
+.header-content {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex: 1;
+}
+ 
+
+
+
+
+.foto-perfil {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    background-color: #555;
+}
+
+.user-info {
+    display: flex;
+    flex-direction: column;
+}
+
+#nombre-dueño-header {
+ background: rgba(26, 26, 26, 0.3); 
+    font-size: 16px;
+    font-weight: 500;
+    margin: 0;
+    color: white;
+    line-height: 1.2;
+     backdrop-filter: blur(5px); 
+    -webkit-backdrop-filter: blur(10px);
+}
+    
+.user-status {
+    font-size: 12px;
+    color: #8696a0;
+    margin-top: 2px;
+}
+
+#msg-text {
+    flex: 1;
+    background: rgba(32, 44, 51, 0.9); /* Un gris oscuro con transparencia */
+    backdrop-filter: blur(10px);        /* Efecto cristal */
+    border-radius: 25px;
+    padding: 12px 15px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: white;
+    height: 50px;
+    max-height: 120px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3); /* Sombrita para que flote */
+}
+
+#btn-enviar {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: #ffd700; /* Dorado sólido o con glass */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+}
+
+/* Efecto cuando pasas el dedo o el mouse */
+button#btn-enviar:active {
+    background: rgba(255, 215, 0, 0.6); /* Se oscurece un poco al tocarlo */
+    transform: scale(0.9);
+}
+     
+.msg-burbuja { 
+    max-width: 85%; 
+    width: fit-content; 
+    padding: 8px 15px 8px 15px !important; 
+    border-radius: 12px; 
+    font-size: 16px !important; 
+    
+    position: relative; 
+    word-wrap: break-word; 
+    margin-bottom: 2px;
+    display: inline-block; /* <--- CAMBIA flex por block */
+    line-height: 1.2;
+
+}
+
+
+
+
+
+.msg-info {
+  
+    display: flex;
+    align-items: center;
+    white-space: nowrap;
+ 
+  
+         
+    float: right !important; /* <--- Esto la manda a la derecha del texto */
+    font-size: 12px !important;
+    opacity: 0.7;
+    margin-top:2px !important; /* Ajusta para que baje un poquito y quede a nivel de la última línea */
+    margin-left: 10px; /* Separación del texto */
+    gap: 3px;
+ 
+}
+
+
+
+ 
+.msg-derecha { 
+    align-self: flex-end; 
+    background: linear-gradient(135deg, rgba(0, 92, 75, 0.8) 0%, rgba(0, 77, 64, 0.8) 100%);
+    color: #ffffff; 
+
+    border-bottom-right-radius: 15px; 
+    border-top-right-radius: 2px;
+}
+
+.msg-izquierda { 
+    align-self: flex-start; 
+    background: rgba(32, 44, 51, 0.6); 
+    color: #ffffff; 
+    border-bottom-left-radius: 20px; 
+    
+     border-top-left-radius: 2px;
+}
+
+/* Si el mensaje de la izquierda va seguido de otro de la izquierda */
+.msg-izquierda + .msg-izquierda {
+    border-top-left-radius: 4px; /* Hace que la esquina de arriba sea más cuadrada */
+}
+
+/* Si el mensaje de la derecha va seguido de otro de la derecha */
+.msg-derecha + .msg-derecha {
+    border-top-right-radius: 4px;
+}
+
+
+
+
+.menu-mensaje {
+    position: absolute; /* O absolute, según tu lógica de JS */
+    display: none;
+    background: rgba(11, 20, 26, 0.95); /* Color oscuro sólido para que resalte sobre Goku */
+    backdrop-filter: blur(10px); /* Efecto de desenfoque premium */
+    border: 1px solid #ffd700; /* Borde dorado para tu estética Black & Gold */
+    border-radius: 12px;
+    z-index: 15000 !important; /* Esto lo pone por encima de TODO */
+    box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+    min-width: 100px;
+    
+
+
+
+    
+    /* Estas líneas ayudan a que no aparezca en la esquina de arriba por defecto */
+    top: 0; 
+    left: 0;
+     }
+
+.menu-mensaje div {
+    padding: 12px 20px; /* Un poco más de espacio para el dedo */
+    color: white;
+    font-size: 14px;
+    cursor: pointer;
+    border-bottom: 0.5px solid rgba(255, 215, 0, 0.1); /* Separador sutil */
+}
+
+.menu-mensaje div:last-child {
+    border-bottom: none;
+}
+
+.menu-mensaje div:hover {
+    background: rgba(255, 215, 0, 0.2); /* Resalte dorado al pasar el dedo */
+}
+        #mi-id-display { font-size: 11px; color: #0b141a; margin-top: 5px; font-family: monospace; letter-spacing: 0.5px; text-transform: none; }
+        .btn-qr-dropis { position: absolute; right: 15px; top: 50%; transform: translateY(-50%); background: #ffd700; border: none; border-radius: 50%; width: 35px; height: 35px; cursor: pointer; font-size: 18px; }
+        
+        /* MODALES */
+        /* 1. EL CONTENEDOR (Ocupa toda la pantalla) */
+/* 1. EL FONDO NEGRO DETRÁS DEL MODAL */
+/* EL MODAL: Usa 'dvh' para que ignore el teclado y no se encoja */
+.modal {
+    display: none; 
+    position: fixed; 
+    top: 0; 
+    left: 0; 
+    width: 100%; 
+    height: 100%; 
+    background: #000000;
+    
+    z-index: 1000; 
+    transition: all 0.5s ease;
+}
+
+
+     
+/* 2. EL CONTENIDO (Pantalla Completa con Fondo) */
+.modal-content { 
+    background-color: #0b141a;
+    /* Aplicamos el fondo con el logo igual que en tu chat */
+    background-image: linear-gradient(rgba(11, 20, 26, 0.9), rgba(11, 20, 26, 0.9)), 
+                      url('./assets/logo.webp');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    
+    width: 100%; 
+    
+    display: flex;
+    
+    flex-direction: column; /* Esto permite que el header esté arriba y el botón abajo */
+    color: white; 
+    animation: fadeIn 0.4s ease; 
+    
+    height: 100dvh; /* Usa el alto dinámico para móviles */
+margin: 0;
+    
+    /* Agrega estas dos líneas: */
+    overflow: hidden;
+    justify-content: space-between;
+}
+/* 3. LAS FILAS DE CONTACTOS (Estilo WhatsApp) */
+.fila-contacto {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 10px;
+    cursor: pointer;
+    background: rgba(32, 44, 51, 0.05); /* Fondo semi-transparente para ver el logo atrás */
+    
+    transition: background 0.3s ease;
+    text-align: left; /* Alinea el texto a la izquierda */
+}
+
+
+/* El efecto dorado suave cuando pasas el dedo o el mouse */
+.fila-contacto:hover {
+    background: rgba(255, 215, 0, 0.1) !important;
+}
+
+#cuerpo-modal-lista {
+    flex-grow: 1; /* Estira este div para llenar el vacío */
+    overflow-y: auto; /* Permite scroll si hay muchos contactos */
+    background: transparent; 
+}
+     
+
+
+/* Animaciones */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* Las reglas de las animaciones (van afuera de las llaves) */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideUp {
+    from { transform: translateY(20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+                /* Estilo para el botón dentro de la barra amarilla */
+
+   /* Cambiamos el nombre a .btn-modal-contacto para que no choque con el otro */
+.btn-modal-contacto { 
+    position:absolute;
+    top: 70px;            
+    right: 20px;          
+    background: #ffd700; 
+    border: none; 
+    border-radius: 50%; 
+    width: 45px; 
+    height: 45px; 
+    cursor: pointer; 
+    font-size: 20px; 
+    z-index: 10;          
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#cuerpo-modal-lista {
+    padding-bottom: 100px !important; /* Espacio extra para que la barra no tape nada */
+}
+     
+.contador-nube {
+    background:  #ffd700; /* Verde tipo WhatsApp */
+    color: white;
+    border-radius: 50%;
+    padding: 2px 7px;
+    font-size: 12px;
+    font-weight: bold;
+    min-width: 15px;
+    text-align: center;
+    margin-left: auto; /* Lo empuja a la derecha */
+}
+.btn-back-clean {
+    background: transparent; /* Quita el color de fondo */
+    border: none;            /* Quita el borde */
+    outline: none;           /* Quita el borde de enfoque al hacer clic */
+    color: white;            /* Color de la flechita */
+    font-size: 20px;         /* Tamaño de la flecha */
+    padding: 5px;           /* Espacio para que sea fácil de tocar con el dedo */
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+
+     
+
+/* Estilo para los botones individuales dentro de la barra */
+.btn-nav {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color: #8696a0; /* Color gris suave para los no seleccionados */
+    text-decoration: none;
+    font-size: 11px;
+    font-weight: 500;
+    flex: 1;
+    cursor: pointer;
+    transition: 0.3s;
+}.
+
+/* El botón que esté activo o cuando lo toques */
+.btn-nav.active, .btn-nav:active {
+    color: #ffd700; /* Dorado para resaltar */
+}
+
+.btn-nav i {
+    font-size: 20px; /* Tamaño para los iconos */
+    margin-bottom: 4px;
+}
+/* Efecto opcional al tocarlo */
+.btn-back-clean:active {
+    opacity: 0.6;            /* Se pone un poco transparente al presionarlo */
+}
+
+       /* Un estilo limpio para que la foto siempre se vea */
+/* Solo afecta a estos dos elementos, no toca las fotos del chat */
+ #mi-foto-previa {
+    width: 45px !important;
+    height: 45px !important;
+    border-radius: 50% !important;
+    object-fit: cover !important;
+    border: none
+    flex-shrink: 0; /* Evita que se aplaste si el nombre es largo */
+     
+      
+    
+    
+     }
+
+.encriptado-box {
+    background-color: rgba(28, 28, 28, 0.9); /* Negro elegante con transparencia */
+    border-radius: 10px;
+    padding: 12px;
+    margin: 10px auto;
+    width: 90%;
+    text-align: center;
+    border: 1px solid #d4af37; /* Borde dorado fino */
+    display: none; /* Se oculta por defecto */
+}
+
+.encriptado-box p {
+    color: #d4af37; /* Texto dorado */
+    font-size: 0.85rem;
+    margin: 0;
+    line-height: 1.4;
+}
+
+.resaltado-oro {
+    font-weight: bold;
+    text-decoration: underline;
+    cursor: pointer;
+     }
+}
+
+
+    </style>
+
+</head>
+
+<body>
+ 
+    
+    
+    
+    
+            <div id="pantalla-carga" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; display: flex; align-items: center; justify-content: center; z-index: 999999; transition: opacity 0.5s ease;">      
+
+          </div>
+ 
+<div class="header" id="chat-header">
+    <div class="header-content" onclick="abrirPerfilContacto()" style="cursor: pointer;">
+        <!-- StopPropagation evita que al darle atrás se abra el perfil -->
+        <button onclick="manejarBotonIdentidad(); event.stopPropagation();" class="btn-back-clean">
+    <span style="display: inline-block; transform: scaleX(-1);">➔</span>
+</button>
+        <img src="https://via.placeholder.com/40" id="foto-perfil-header" class="foto-perfil">
+        
+        <div class="user-info">
+            <h1 id="nombre-dueño-header">SpaceChat</h1>
+          
+        </div>
+    </div>
+</div>
+ <div id="chat-box">
+ </div>
+ <div id="aviso-seguridad" class="encriptado-box">
+    <p>
+        <i class="fas fa-lock"></i> 
+        Las mensajes en este chat están cifrados de extremo a extremo. Solo las personas en este chat pueden leerlos. 
+        <span class="resaltado-oro">Más información.</span>
+    </p>
+ </div>
+
+<div id="modal-perfil" class="modal" style="display:none; padding: 15px; background: #1e222b; z-index: 25000; box-sizing: border-box; text-align: center;">
+    
+    <button onclick="document.getElementById('modal-perfil').style.display='none'" 
+            style="background: transparent; border: none; color: white; font-size: 24px; transform: scaleX(-1); cursor: pointer; padding: 0; position: absolute; top: 15px; left: 15px;">➔</button>
+
+    <div class="modal-cover" style="display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; min-height: 80vh;">
+      
+        <img id="perfil-foto-grande" src="" style="width: 150px; height: 150px; border: 1px solid #ffd700; margin-bottom: 15px; object-fit: cover;">
+        
+        <h2 id="perfil-nombre" style="color: white; margin-bottom: 20px; font-size: 24px; font-weight: bold;">Arturo Martinez</h2>
+       
+        <button onclick="eliminarChatEspecifico(); event.stopPropagation();" 
+                style="width: 180px; padding: 10px; background: transparent; border: none; color: #8696a0; font-size: 14px; font-weight: 500; cursor: pointer;">
+            Vaciar chat 
+        </button>
+
+        <button onclick="eliminarContactoDeAgenda(); event.stopPropagation();" 
+                style="width: 180px; padding: 10px; background: transparent; border: none; color: #8696a0; font-size: 14px; font-weight: 500; cursor: pointer; margin-top: 5px;">
+            Eliminar 
+        </button>
+    </div>
+</div>
+ 
+ <div id="menu-acciones" class="menu-mensaje">
+    <div onclick="accionMensaje('responder')">↩️ Responder</div>
+    <div onclick="accionMensaje('editar')">✏️ Editar</div>
+    <div onclick="accionMensaje('copiar-id')">👤 Guardar ID</div>
+    <div onclick="accionMensaje('borrar')" style="color: #ff5c5c;">🗑️ Borrar</div>
+ </div>
+
+
+<div class="contenedor-flotante" style="display: flex; align-items: center; gap: 5px;">
+    
+    <textarea 
+        id="msg-text" 
+        placeholder="Mensaje..."
+        style="flex: 1; min-width: 0; box-sizing: border-box;" 
+        oninput="this.style.height='45px'; this.style.height=this.scrollHeight+'px';"></textarea>
+    
+    <button id="btn-enviar" onclick="enviarMensajeSatelital()" style="flex-shrink: 0;">
+        <span>➤</span>
+    </button>
+</div>
+   
+ <div class="fondo-estatico"></div>
+
+
+ 
+ <div id="modal-registro" class="modal" style="display: none; align-items: center; justify-content: center; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #1e222b; z-index: 30000;">
+  
+          <div class="modal-cover" style="position: relative; width: 100vw; height: 100vh; padding: 50px 30px 50px 30px; box-sizing: border-box; background: #1e222b; border-radius: 0px; text-align: center; border: 0px solid #333; box-shadow: 0 0 20px rgba(0,0,0,0.5);">   
+
+<img src="assets/imagen-logo.png" alt="SpaceChat Logo" 
+     style="width: 80px; height: auto; display: block; margin: 0 auto 15px; position: relative; left: 2px; filter: drop-shadow(0px 4px 8px rgba(255, 215, 0, 0.3));">           
+           
+           <h3 style="color: #ffd700; margin-bottom: 20px;">SPACECHAT</h3>
+        
+     
+     
+        <input type="text" id="reg-nombre" placeholder="Nombre" 
+            onfocus="this.style.boxShadow='0 0 5px #ffd700'; this.style.borderColor='#ffd700';" 
+            onblur="this.style.boxShadow='none'; this.style.borderColor='#999';"
+             style="width: 100%; padding: 18px; margin-bottom: 15px; background: #2a2f3a; color: white; border: 1px solid #999; border-radius: 8px; box-sizing: border-box; outline: none;">
+        
+        <input type="text" id="reg-apellido" placeholder="Apellido" 
+            onfocus="this.style.boxShadow='0 0 5px #ffd700'; this.style.borderColor='#ffd700';" 
+            onblur="this.style.boxShadow='none'; this.style.borderColor='#999';"
+             style="width: 100%; padding: 18px; margin-bottom: 15px; background: #2a2f3a; color: white; border: 1px solid #999; border-radius: 8px; box-sizing: border-box; outline: none;">
+
+        <button onclick="ejecutarRegistroCompleto()" 
+            style="width: 100%; padding: 15px; background: #ffd700; border: none; border-radius: 25px; font-weight: bold; color: #000; cursor: pointer; font-size: 16px; margin-bottom: 20px; text-transform: uppercase; box-shadow: 0 0 5px #ffd700;">
+            CREAR MI CUENTA 
+        </button>
+
+<!-- Texto informativo arriba -->
+<p style="font-size: 14px; color: #ffd700; margin-bottom: 10px; font-family: sans-serif;">
+   ¿Ya tienes tu cuenta Space?
+</p>
+
+<!-- Botón de acción abajo -->
+<button onclick="recuperarCuentaConID()" 
+    style="width: 25%; padding: 15px; background: #ffd700; border: none; border-radius: 10px; color: #000; cursor: pointer; font-size: 12px; font-weight: bold; text-transform: uppercase; box-shadow: 0 0 5px #ffd700;">
+   Entrar
+</button>
+    
+    </div>
+</div>
+ 
+
+
+ 
+<div id="modal-qr" class="modal">
+    <div class="modal-content" style="display: flex; flex-direction: column; height: 100dvh; position: relative; background-image: linear-gradient(rgba(11, 20, 26, 0.3), rgba(11, 20, 26, 0.3)), url('./assets/logo.webp'); background-size: cover; background-position: center; background-attachment: fixed;">      
+   
+     <div id="nombre-dueño-header-lista" style="background: rgba(32, 44, 51, 0.3); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(15px); color: #ffffff; padding: 15px; font-weight: 900; text-transform: uppercase; text-align: left; border-bottom: 1px solid #333; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 1001;">
+            <span>SPACECHAT</span>
+            <div onclick="alternarVistaPerfil()" style="cursor: pointer; color: #ffd700; font-size: 22px; padding: 0 10px;">⋮</div>
+        </div>
+     
+     <div id="seccion-mi-perfil" style="display: none; padding: 15px; background: #1e222b; border-bottom: 1px solid #1e222b;">
+            <!-- Modifica el estilo del div que envuelve los inputs y el botón -->
+<div style="display: flex; flex-direction: column; align-items: center; width: 100%; text-align: center;">
+   
+             <div onclick="document.getElementById('input-mi-foto').click()" style="width: 100px; height: 100px; border-radius: 50%; border: 1px solid #ffd700; overflow: hidden; background: #222; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0;">
+              <img id="mi-foto-previa" src="" style="width: 100%; height: 100%; object-fit: cover; display: block;">
+              <span id="mi-placeholder-foto" style="font-size: 20px;">📷</span>
+                </div>
+                <input type="file" id="input-mi-foto" accept="image/*" style="display: none;" onchange="previsualizarMiFoto(this)">
+                <button onclick="gestionarQR()" style="background: #ffd700; color: #000; border: none; border-radius: 8px; padding: 8px 12px; font-weight: 900; font-size: 14px; margin: 20px auto; display: block; cursor: pointer;">QR</button>
+            </div>
+            <input type="text" id="mi-nuevo-nombre" placeholder="Editar mi nombre..." onfocus="this.style.boxShadow='0 0 5px #ffd700'; this.style.borderColor='#ffd700';" 
+            onblur="this.style.boxShadow='none'; this.style.borderColor='#999';"
+             style="width: 80%; padding: 12px; background: #2a2f3a; color: white; border: 1px solid #999; margin: 0 auto 15px auto; display: block; border-radius: 8px; box-sizing: border-box; outline: none;">
+                                                       
+            <input type="text" id="mi-nuevo-estado" placeholder="Estado (Ej: Disponible)" onfocus="this.style.boxShadow='0 0 5px #ffd700'; this.style.borderColor='#ffd700';" 
+            onblur="this.style.boxShadow='none'; this.style.borderColor='#999';"
+             style="width: 80%; padding: 12px; background: #2a2f3a; color: white; border: 1px solid #999; margin: 0 auto 15px auto; display: block; border-radius: 8px; box-sizing: border-box; outline: none;">
+        
+            <button onclick="guardarCambiosPerfil()" style="width: 50%; padding: 10px; background: #ffd700; border: none; border-radius: 10px; font-weight: bold; color: #000; cursor: pointer; font-size: 16px; margin: 20px auto; display: block; text-transform: uppercase; box-shadow: 0 0 5px #ffd700;">
+      GUARDAR 
+     </button>
+    
+    </div>
+
+ 
+
+                                                                         
+     
+        <div id="cuerpo-modal-lista" style="flex-grow: 1; overflow-y: auto; padding: 0 15px 100px 15px;">
+            <div id="seccion-mi-qr" style="display: none; padding: 20px; flex-direction: column; align-items: center; border-bottom: 1px solid #444;">
+                <div id="contenedor-qr" style="background: white; padding: 10px; border-radius: 10px;"></div>
+                <button onclick="document.getElementById('seccion-mi-qr').style.display='none'" style="margin-top: 10px; color: #ffd700; background: transparent; border: none; cursor: pointer;">[ Ocultar QR ]</button>
+            </div>
+            <h4 style="color: #ffd700; margin: 20px 0 10px 0; font-size: 14px; text-shadow: 1px 1px 2px black;">CONTACTOS</h4>
+            <div id="lista-contactos">
+           </div>
+        </div>
+
+     
+     
+
+        <button onclick="abrirModalNuevoContacto()" 
+            style="position: absolute; right: 20px; bottom: 100px; 
+                   background: rgba(255, 215, 0, 0.25); 
+                   backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); 
+                   border: 1px solid rgba(255, 215, 0, 0.4); 
+                   border-radius: 50%; width: 55px; height: 55px; 
+                   color: #ffd700; cursor: pointer; z-index: 100; 
+                   font-size: 25px; display: flex; 
+                   align-items: center; justify-content: center;">
+            + 
+        </button>
+
+ <div class="barra-flotante-premium">
+            <div class="btn-nav" onclick="abrirAgendaCompleta()">
+                <span>👥</span><span>Contactos</span>
+            </div>
+            <div class="btn-nav active" onclick="document.getElementById('modal-agenda-completa').style.display='none'">
+                <span>💬</span><span>Chat</span>
+            </div>
+            <div class="btn-nav" onclick="abrirAjustes()">
+                <span>⚙️</span><span>Ajustes</span>
+            </div>
+ </div>
+
+ 
+     
+ <div id="modal-nuevocontacto" class="modal" style="display: none; align-items: center; justify-content: center; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #1e222b; z-index: 30000;">
+    
+          <div class="modal-cover" style="position: relative; width: 100vw; height: 100vh; padding: 50px 30px 50px 30px; box-sizing: border-box; background: #1e222b; border-radius: 0px; text-align: center; border: 0px solid #333; box-shadow: 0 0 20px rgba(0,0,0,0.5);">                                                
+        
+<div style="display: flex; align-items: center;justify-content: flex-start; margin-left: 20px; gap: 15px; margin-bottom: 20px;">
+    
+    <button onclick="cerrarModalNuevo()" style="background: transparent; border: none; color: white; font-size: 20px; cursor: pointer;">
+         <span style="display: inline-block; transform: scaleX(-1);">➔</span>
+    </button>
+
+    <h3 style="color: #ffd700; margin: 0;">NUEVO CONTACTO</h3>
+
+</div>
+        
+        <input type="text" id="nuevo-nombre" placeholder="Nombre" 
+            onfocus="this.style.boxShadow='0 0 5px #ffd700'; this.style.borderColor='#ffd700';" 
+            onblur="this.style.boxShadow='none'; this.style.borderColor='#999';"
+             style="width: 100%; padding: 18px; margin-bottom: 15px; background: #2a2f3a; color: white; border: 1px solid #999; border-radius: 8px; box-sizing: border-box; outline: none;">
+        
+        <input type="text" id="nuevo-apellido-contacto" placeholder="Apellido"
+        onfocus="this.style.boxShadow='0 0 5px #ffd700'; this.style.borderColor='#ffd700';" 
+            onblur="this.style.boxShadow='none'; this.style.borderColor='#999';"
+            style="width: 100%; padding: 18px; margin-bottom: 15px; background: #2a2f3a; color: white; border: 1px solid #999; border-radius: 8px; box-sizing: border-box; outline: none;">
+
+        <input type="text" id="target-id" placeholder="ID Space (Ej: 12345)" 
+        onfocus="this.style.boxShadow='0 0 5px #ffd700'; this.style.borderColor='#ffd700';" 
+            onblur="this.style.boxShadow='none'; this.style.borderColor='#999';"
+            style="width: 100%; padding: 18px; margin-bottom: 15px; background: #2a2f3a; color: white; border: 1px solid #999; border-radius: 8px; box-sizing: border-box; outline: none;">
+
+        <input type="email" id="correo" placeholder="Correo (@)" 
+        onfocus="this.style.boxShadow='0 0 5px #ffd700'; this.style.borderColor='#ffd700';" 
+            onblur="this.style.boxShadow='none'; this.style.borderColor='#999';"
+            style="width: 100%; padding: 10px; margin-top: 20px; background: #2a2f3a; color: white; border: 1px solid #999; border-radius: 8px; box-sizing: border-box; outline: none;">
+
+<button onclick="guardarNuevoContacto()" 
+    style="width: 100%; padding: 10px; margin-top: 60px; background: #ffd700; border: none; border-radius: 15px; font-weight: bold; color: #000; cursor: pointer; font-size: 15px; text-transform: uppercase; box-shadow: 0 0 5px #ffd700;">
+    GUARDAR 
+</button>
+    </div>
+ </div>
+     
+ <div id="modal-agenda-completa" class="modal" style="display:none; background: #000; z-index: 30000;">
+        <div class="modal-content" style="display: flex; flex-direction: column; height: 100dvh; position: relative; background-image: linear-gradient(rgba(11, 20, 26, 0.3), rgba(11, 20, 26, 0.3)), url('./assets/logo.webp'); background-size: cover; background-position: center; background-attachment:fixed;">      
+     
+  
+  <div style="padding: 20px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h2 style="color: #ffd700; margin: 0;">👥 Mi Agenda</h2>
+            <button onclick="document.getElementById('modal-agenda-completa').style.display='none'" 
+                    style="background: transparent; border: none; color: white; font-size: 24px;">✕</button>
+        </div>
+        
+        <!-- Aquí es donde se pintarán TODOS, sin excepciones -->
+        <div id="contenedor-agenda-total" style="overflow-y: auto; max-height: 80vh;"></div>
+    </div>
+ </div>
+
+   
+    
+    <script>
+     
+ 
+                
+
+        // 1. CONFIGURACIÓN Y REGISTRO DE ANTENA (INDISPENSABLE PARA EL TOKEN)
+        
+const firebaseConfig = {
+    apiKey: "AIzaSyCaUyhX2iBMl4A5xeKeu4SeE6HClp4V1s",
+    authDomain: "real-market-elite-2025.firebaseapp.com",
+    projectId: "real-market-elite-2025",
+    databaseURL: "https://real-market-elite-2025-default-rtdb.firebaseio.com",
+    messagingSenderId: "226489002778",
+    appId: "1:226489002778:web:6722d21a9e78b33b5b1aa3"
+};
+firebase.initializeApp(firebaseConfig);
+const messaging = firebase.messaging();
+const db = firebase.database();
+
+// --- 2. MOTOR DE PERSISTENCIA (IndexedDB) ---
+
+     const dbNombre = "DropisDB";
+
+const dbVersion = 11;
+
+// Este objeto guarda los contactos que ya están en pantalla
+const agendaRenderizada = new Set();
+const contactosRenderizados = new Set();
+
+/**
+
+ * Abre la conexión con IndexedDB y crea las tablas si no existen.
+
+ */
+
+function abrirDB() {
+
+    return new Promise((resolve, reject) => {
+
+        const request = indexedDB.open(dbNombre, dbVersion);
+
+
+
+        request.onupgradeneeded = (e) => {
+
+            const db = e.target.result;
+
+
+
+            // 1. Tabla para mensajes (historial)
+
+            if (!db.objectStoreNames.contains('mensajes')) {
+
+                db.createObjectStore('mensajes', { autoIncrement: true });
+
+            }
+
+
+
+            // 2. Tabla para perfiles de otros contactos (fotos pesadas)
+
+            if (!db.objectStoreNames.contains('perfiles')) {
+
+                db.createObjectStore('perfiles', { keyPath: 'id' });
+
+            }
+
+
+
+            // 3. Tabla para datos del usuario y configuración (temas, urls)
+
+            if (!db.objectStoreNames.contains('usuario')) {
+
+                db.createObjectStore('usuario', { keyPath: 'id' });
+
+            }
+
+        };
+
+
+
+        request.onsuccess = () => resolve(request.result);
+
+        request.onerror = () => reject("Error al abrir IndexedDB");
+
+    });
+
+}
+
+
+
+/**
+
+ * Guarda o actualiza datos en cualquier tabla.
+
+ * @param {string} tabla - Nombre de la tabla ('mensajes', 'perfiles', 'usuario')
+
+ * @param {Object} datos - El objeto a guardar
+
+ */
+
+async function guardarLocal(tabla, datos) {
+
+    try {
+
+        const db = await abrirDB();
+
+        return new Promise((resolve, reject) => {
+
+            const tx = db.transaction(tabla, 'readwrite');
+
+            const store = tx.objectStore(tabla);
+
+            const request = store.put(datos);
+
+
+
+            tx.oncomplete = () => resolve(true);
+
+            tx.onerror = () => reject(request.error);
+
+        });
+
+    } catch (err) {
+
+        console.error("Error en guardarLocal:", err);
+
+    }
+
+}
+
+
+
+/**
+
+ * Obtiene un registro por su ID de una tabla específica.
+
+ */
+
+async function obtenerLocal(tabla, id) {
+
+    try {
+
+        const db = await abrirDB();
+
+        return new Promise((resolve, reject) => {
+
+            const tx = db.transaction(tabla, 'readonly');
+
+            const store = tx.objectStore(tabla);
+
+            const request = store.get(id);
+
+
+
+            request.onsuccess = () => resolve(request.result);
+
+            request.onerror = () => reject(request.error);
+
+        });
+
+    } catch (err) {
+
+        console.error("Error en obtenerLocal:", err);
+
+    }
+
+}
+
+
+
+/**
+
+ * Obtiene todos los registros de una tabla (ej. para cargar todos los mensajes).
+
+ */
+
+async function obtenerTodo(tabla) {
+
+    const db = await abrirDB();
+
+    return new Promise((resolve) => {
+
+        const tx = db.transaction(tabla, 'readonly');
+
+        const request = tx.objectStore(tabla).getAll();
+
+        request.onsuccess = () => resolve(request.result);
+
+    })
+     }
+/**
+ * Recupera cuenta desde Firebase.
+ */
+
+async function recuperarCuentaConID() {
+    const idParaRecuperar = prompt("Escribe tu ID Dropis:");
+    if (!idParaRecuperar) return;
+
+    try {
+        const snapshot = await firebase.database().ref('usuarios/' + idParaRecuperar).once('value');
+        if (snapshot.exists()) {
+            const datos = snapshot.val();
+            // Restaurar en el teléfono
+            localStorage.setItem('mi_dropis_id', idParaRecuperar);
+            await guardarLocal('usuario', { 
+                id: 'perfil_propietario', 
+                dropis_id: idParaRecuperar,
+                nombre: datos.nombre,
+                apellido: datos.apellido,
+                fcm_token: datos.fcm_token || '' 
+            });
+            alert(`✅Bienvenido ${datos.nombre}.`);
+            location.reload(); 
+        } else {
+            alert("❌ ID no encontrado en el satélite.");
+        }
+    } catch (e) {
+        alert("Error de conexión satelital.");
+    }
+}
+
+     async function ejecutarRegistroCompleto() {
+    const nombre = document.getElementById('reg-nombre').value.trim();
+    const apellido = document.getElementById('reg-apellido').value.trim();
+    
+    if (!nombre || !apellido) return alert("Completa los datos");
+
+    // 1. GENERACIÓN DEL ID EXACTO (12 caracteres)
+    const hash = Math.random().toString(36).substring(2, 7).toUpperCase(); 
+    const idUnico = Math.random().toString(36).substring(2, 9) + hash; 
+
+    // 2. GUARDADO LOCAL
+    const datosUsuario = { 
+        id: 'perfil_propietario', 
+        dropis_id: idUnico, 
+        nombre: nombre, 
+        apellido: apellido, 
+        fecha: Date.now() 
+    };
+
+    try {
+        localStorage.setItem('mi_dropis_id', idUnico);
+        await guardarLocal('usuario', datosUsuario);
+        await guardarLocal('perfiles', { id: idUnico, nombre, apellido, foto: null });
+
+        // 3. ACTUALIZAR INTERFAZ (Sin que el error de display detenga el proceso)
+        document.getElementById('modal-registro').style.display = 'none';
+        const elDisplay = document.getElementById('mi-id-display');
+        if (elDisplay) {
+            elDisplay.textContent = "Tu ID: " + idUnico;
+        }
+
+        // 4. OBTENER TOKEN Y REGISTRAR EN FIREBASE
+        const registration = await navigator.serviceWorker.ready;
+        let token = null;
+        try {
+            token = await messaging.getToken({ 
+                vapidKey: 'BIrsA9YbBXfIuo4PTMrKRtuktRsK2RbK0XevupuofGGOUDy9w5VZ9yaXbZXsenXppmFsR62-2B7jBOG0Z8RdxvU',
+                serviceWorkerRegistration: registration 
+            });
+        } catch (e) {
+            console.log("Error obteniendo token, se usará 'sin_token'");
+        }
+
+        // 5. ENVÍO OBLIGATORIO A FIREBASE
+        await db.ref('usuarios/' + idUnico).set({
+            id_sistema: idUnico,
+            nombre: nombre,
+            apellido: apellido,
+            fcm_token: token || "sin_token",
+            estado: "activo",
+            version: "LITE_SUB12_FINAL",
+            timestamp: firebase.database.ServerValue.TIMESTAMP
+        });
+
+        console.log("✅ Sincronizado en Firebase: " + idUnico);
+        
+        // Un pequeño aviso y recarga para confirmar que terminó
+        alert("¡Registro Exitoso!");
+        location.reload();
+
+    } catch (error) { 
+        console.error("⚠️ Error en el proceso:", error);
+        alert("Error al registrar. Revisa tu conexión.");
+    }
+}
+                                      
+
+// --- 4. ANTENA SATELITAL ---
+
+     async function activarAntena() {
+    const miID = localStorage.getItem('mi_dropis_id');
+    if (!miID) return;
+
+    if (window.listenerActivo) window.listenerActivo.off(); 
+
+    window.listenerActivo = db.ref('cola_satelital/' + miID);
+    
+    window.listenerActivo.on('child_added', async (snapshot) => {
+        const data = snapshot.val();
+        if (!data || !data.p) return; 
+
+        try {
+            const root = await cargarProto();
+            const SuperAppPayload = root.lookupType("SuperAppPayload");
+            const buffer = Uint8Array.from(atob(data.p), c => c.charCodeAt(0));
+            const decoded = SuperAppPayload.decode(buffer);
+
+            const emisorID = data.from; 
+            const chatAbiertoActualmente = document.querySelector('#target-id').value;
+
+            // --- 1. LÓGICA DE CONFIRMACIÓN (DOBLE CHECK) ---
+            if (decoded.tipo === 1) { 
+                const idParaMarcar = data.msgId; 
+                
+                // ACTUALIZAR EN INDEXEDDB: Buscamos el mensaje y cambiamos su estado
+                const todos = await obtenerTodo('mensajes');
+                const msgEncontrado = todos.find(m => m.id === idParaMarcar);
+                if (msgEncontrado) {
+                    msgEncontrado.status = 'recibido';
+                    await guardarLocal('mensajes', msgEncontrado);
+                }
+
+                if (typeof marcarMensajeComoRecibido === "function") {
+                    marcarMensajeComoRecibido(idParaMarcar, emisorID);
+                }
+
+                snapshot.ref.remove(); 
+                return; 
+            }
+
+            // --- 2. LÓGICA DE MENSAJE DE TEXTO ---
+            const textoReal = decodeURIComponent(escape(atob(decoded.chatText)));
+
+            // GUARDAR EN INDEXEDDB (En lugar de localStorage)
+            const nuevoMensaje = { 
+                id: decoded.msgId,
+                contactoId: emisorID, // Para saber de quién es el mensaje
+                texto: textoReal, 
+                clase: 'msg-izquierda',
+                status: 'recibido',
+                ts: Date.now(),
+                hora: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })
+            };
+           
+            await guardarLocal('mensajes', nuevoMensaje);
+
+            // Manejo de Interfaz
+            if (emisorID === chatAbiertoActualmente) {
+                pintarMensaje(textoReal, 'msg-izquierda', null, 'recibido', decoded.msgId);
+            } else {
+                let noLeidos = parseInt(localStorage.getItem('unread_' + emisorID)) || 0;
+                localStorage.setItem('unread_' + emisorID, noLeidos + 1);
+                pintarAgendaContactos();
+
+                // Notificación Nativa
+                if ('serviceWorker' in navigator) {
+                    navigator.serviceWorker.ready.then(reg => {
+                        reg.showNotification("Nuevo mensaje de " + emisorID, {
+                            body: textoReal,
+                            icon: 'assets/logo-nuevo.png',
+                            data: { emisor: emisorID }
+                        });
+                    });
+                }
+            }
+
+            if (typeof enviarEco === "function") enviarEco(decoded.msgId, emisorID);
+            snapshot.ref.remove(); 
+
+        } catch (e) { console.error("Error en Antena:", e); }
+    });
+     }
+async function enviarMensajeSatelital() {
+    const inputMsg = document.querySelector('#msg-text');
+    const inputTarget = document.querySelector('#target-id');
+    const msg = inputMsg ? inputMsg.value.trim() : "";
+    const targetID = inputTarget ? inputTarget.value.trim() : "";
+    const miID = localStorage.getItem('mi_dropis_id') || "ID_DESCONOCIDO";
+
+    if (!targetID || !msg) return alert("ID y Mensaje son obligatorios");
+
+    const msgId = "msg_" + Date.now();
+
+    try {
+        const root = await cargarProto();
+        const SuperAppPayload = root.lookupType("SuperAppPayload");
+        const msgProtegido = btoa(unescape(encodeURIComponent(msg))); 
+        
+        const payload = SuperAppPayload.create({ 
+            chatText: msgProtegido,
+            msgId: msgId,
+            tipo: 0 
+        });
+        
+        const buffer = SuperAppPayload.encode(payload).finish();
+        const base64 = btoa(String.fromCharCode.apply(null, buffer));
+        
+        // Lanzamiento a Firebase
+        await db.ref('cola_satelital/' + targetID).push({
+            p: base64,
+            from: miID,
+            ts: Date.now(),
+            msgId: msgId
+        });
+
+        // PINTAR EN INTERFAZ
+        pintarMensaje(msg, 'msg-derecha', null, 'enviado', msgId);
+
+        // GUARDAR EN INDEXEDDB
+        await guardarLocal('mensajes', { 
+            id: msgId, 
+            contactoId: targetID, // Clave para filtrar el chat después
+            texto: msg, 
+            clase: 'msg-derecha', 
+            status: 'enviado',
+            ts: Date.now(),
+            hora: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })
+        });
+
+        if (inputMsg) {
+            inputMsg.value = "";
+            inputMsg.style.height = '36px';
+            inputMsg.focus(); 
+        }
+
+    } catch (e) {
+        console.error("❌ Fallo en el lanzamiento:", e);
+    }
+     }
+  
+            
+        
+
+     // --- BLOQUE: ENVIAR MENSAJE (NOTIFICAR) ---
+if ('serviceWorker' in navigator && Notification.permission === "granted") {
+    navigator.serviceWorker.ready.then(registration => {
+        registration.showNotification("SpaceChat: " + emisorID, {
+            body: textoReal,
+            icon: 'https://cdn-icons-png.flaticon.com/512/733/733585.png',
+            vibrate: [200, 100, 200],
+            tag: 'nuevo-mensaje-' + emisorID, 
+            renotify: true,
+            data: { emisor: emisorID }
+        });
+    }).catch(err => console.log("Notificación bloqueada o fallida"));
+} else {
+    console.log("Notificaciones no permitidas por el usuario.");
+     }
+async function obtenerToken(registration) {
+    try {
+        const miVapidKey = 'BIrsA9YbBXfIuo4PTMrKRtuktRsK2RbK0XevupuofGGOUDy9w5VZ9yaXbZXsenXppmFsR62-2B7jBOG0Z8RdxvU';
+        const token = await messaging.getToken({ 
+            vapidKey: miVapidKey, 
+            serviceWorkerRegistration: registration 
+        });
+ 
+        if (token) {
+            console.log("🎫 TU TOKEN DROPIS:", token);
+            localStorage.setItem('fcm_token', token);
+            
+            // Si el usuario ya tiene ID, actualizamos el token en la nube silenciosamente
+            const miID = localStorage.getItem('mi_dropis_id');
+            if (miID) {
+                firebase.database().ref('usuarios/' + miID).update({ fcm_token: token });
+            }
+        }
+    } catch (err) {
+        console.warn("⚠️ No se pudo obtener el token:", err);
+    }
+     }
+// --- 5. LÓGICA DE INTERFAZ Y QR ---
+ async function manejarBotonIdentidad() {
+    const id = localStorage.getItem('mi_dropis_id');
+    const nombre = localStorage.getItem('mi_nombre') || "Usuario";
+
+    if (id) {
+        // 1. Mostrar el modal de inmediato
+        const modal = document.getElementById('modal-qr');
+        if (modal) modal.style.display = 'flex';
+
+        // 2. RENDERIZAR EL QR PRIMERO (Para que no haya espera)
+        const cont = document.getElementById('contenedor-qr');
+        if (cont) {
+            cont.innerHTML = `
+                <div style="text-align:center; margin-bottom: 15px;">
+                    <h3 style="margin: 5px 0; color: #fff; text-transform: uppercase; font-size: 18px;">${nombre}</h3>
+                    <p style="font-size: 14px; color: #000; opacity: 0.9; letter-spacing: 1px; font-family: monospace;">ID: ${id}</p>
+                </div>
+                <div id="grafico-qr" style="display: flex; justify-content: center; background: white; padding: 12px; border-radius: 12px; width: fit-content; margin: 0 auto; box-shadow: 0 0 15px rgba(255,215,0,0.9);"></div>
+                <button onclick="abrirEscanner()" style="margin-top: 20px; padding: 12px; background: #ffd700; color: #000; border: none; border-radius: 8px; font-weight: 900; width: 100%; cursor: pointer; text-transform: uppercase;">
+                    📷 ESCANEAR NUEVO CONTACTO
+                </button>
+            `;
+
+            // Esto dibuja el QR de una vez
+            new QRCode(document.getElementById("grafico-qr"), { 
+                text: `dropisapp://perfil/${id}`, 
+                width: 150, 
+                height: 150 
+            });
+        }
+
+        // 3. ACTIVAR ANTENA Y GESTIONAR TOKEN (En segundo plano)
+        activarAntena(id); 
+
+        // 4. CARGAR LA AGENDA AL FINAL (Sin bloquear el QR)
+        if (typeof pintarAgendaContactos === "function") {
+            pintarAgendaContactos(); // Le quitamos el 'await' para que no detenga el QR
+        }
+
+    } else {
+        const modalReg = document.getElementById('modal-registro');
+        if (modalReg) modalReg.style.display = 'flex';
+    }
+     }
+
+        
+function cerrarModalQR() {
+   
+document.getElementById('modal-qr').style.display = 'none';
+document.querySelector('.contenedor-flotante').style.display = 'flex';
+}
+
+function abrirEscanner() {
+    // Aquí abrirías tu interfaz de cámara. 
+    // Supongamos que el resultado del escaneo es: "dropisapp://perfil/12345"
+    const resultadoEscaneo = "dropisapp://perfil/12345"; // Esto vendría de la cámara
+    
+    procesarQRScanner(resultadoEscaneo);
+}
+
+function procesarQRScanner(contenido) {
+    if (contenido.startsWith("dropisapp://perfil/")) {
+        const idNuevoContacto = contenido.split('/').pop();
+        
+        // Guardamos en tu agenda (suponiendo que usas un array en localStorage)
+        let contactos = JSON.parse(localStorage.getItem('mis_contactos')) || [];
+        
+        if (!contactos.includes(idNuevoContacto)) {
+            contactos.push(idNuevoContacto);
+            localStorage.setItem('mis_contactos', JSON.stringify(contactos));
+            alert("¡Contacto agregado con éxito!");
+            pintarAgendaContactos(); // Refrescamos la lista
+        } else {
+            alert("Este contacto ya está en tu lista.");
+        }
+    } else {
+        alert("Código QR no válido para SpaceChat.");
+    }
+     }
+
+     
+       
+   async function guardarNuevoContacto() {
+    const nombre = document.getElementById('nuevo-nombre').value.trim();
+    const idAGuardar = document.getElementById('target-id').value.trim();
+
+    if (!idAGuardar || !nombre) return;
+
+    let agenda = JSON.parse(localStorage.getItem('mis_contactos')) || [];
+    
+    // Verificamos si el contacto ya existe para no duplicarlo
+    if (agenda.some(c => c.id === idAGuardar)) {
+        alert("Este contacto ya está en tu agenda");
+        return;
+    }
+
+    // 1. Guardamos solo lo básico para no saturar el LocalStorage
+    agenda.push({ 
+        nombre: nombre, 
+        id: idAGuardar
+        // NOTA: No guardamos la foto aquí para evitar el QuotaExceededError
+    });
+    
+    try {
+        localStorage.setItem('mis_contactos', JSON.stringify(agenda));
+        alert("✅ Guardado en la agenda");
+    } catch(e) {
+        // Si aún así falla, es que tienes demasiados mensajes guardados
+        console.error("Error crítico de espacio:", e);
+        alert("⚠️ No hay espacio en el teléfono. Borra algunos chats.");
+    }
+    
+    document.getElementById('modal-nuevocontacto').style.display = 'none';
+    pintarAgendaContactos();
+     }
+     
+async function cargarConversacionCon(idDestino, nombreDestino, fotoDestino) {
+    const box = document.getElementById('chat-box');
+    if (!box) return;
+
+    // 1. Limpiar pantalla
+    box.innerHTML = ""; 
+
+    // 2. Guardar el ID del contacto en el input oculto
+    const targetInput = document.querySelector('#target-id');
+    if (targetInput) targetInput.value = idDestino;
+
+    // 3. Poner el nombre en el Header (usando TU ID: nombre-dueño-header)
+    const headerNombre = document.getElementById('nombre-dueño-header');
+    if (headerNombre) {
+        headerNombre.innerText = nombreDestino;
+    }
+
+    // 4. Lógica de tu FOTO original (Mantiene el DIV con inicial o la IMG)
+    const imgHeader = document.getElementById('foto-perfil-header');
+    if (imgHeader) {
+        if (fotoDestino && fotoDestino !== "") {
+            if (imgHeader.tagName === 'DIV') {
+                imgHeader.outerHTML = `<img id="foto-perfil-header" class="foto-perfil" style="width:40px; height:40px; border-radius:50%; object-fit:cover; border:2px solid #000;">`;
+                document.getElementById('foto-perfil-header').src = fotoDestino;
+            } else {
+                imgHeader.src = fotoDestino;
+                imgHeader.style.display = "block";
+            }
+        } else {
+            const inicial = nombreDestino ? nombreDestino.charAt(0).toUpperCase() : '?';
+            imgHeader.outerHTML = `<div id="foto-perfil-header" class="foto-perfil" style="width:40px; height:40px; border-radius:50%; background:#ffd700; color:#000; display:flex; align-items:center; justify-content:center; font-weight:900; border:2px solid #000; text-shadow: none !important;">${inicial}</div>`;
+        }
+    }
+
+    // 5. CARGA DESDE v10 (IndexedDB)
+    // 1. MATAMOS AL FANTASMA: Limpiamos la libreta vieja antes de leer la nueva
+localStorage.removeItem('chat_' + idDestino);
+
+try {
+    // 2. Traemos solo lo que existe en la v10
+    const todosLosMensajes = await obtenerTodo('mensajes');
+    const mensajesFiltrados = todosLosMensajes.filter(m => String(m.contactoId) === String(idDestino));
+
+    // 3. Limpiamos el contenedor visual por seguridad
+    const box = document.getElementById('chat-box');
+    if (box) box.innerHTML = ""; 
+
+    if (typeof renderizarMensajes === "function") {
+        renderizarMensajes(mensajesFiltrados);
+    } else {
+        mensajesFiltrados.forEach(m => {
+            pintarMensaje(m.texto, m.clase, m.hora, m.status || 'enviado', m.id);
+        });
+    }
+} catch (e) {
+    console.error("Error cargando mensajes de v10:", e);
+     }
+
+    // 6. UI y Notificaciones
+    localStorage.setItem('unread_' + idDestino, 0);
+    if (typeof pintarAgendaContactos === "function") pintarAgendaContactos();
+    
+    // Cerrar modales (Agenda o QR)
+    if (typeof cerrarModalQR === 'function') cerrarModalQR();
+    const modalAgenda = document.getElementById('modal-agenda');
+    if (modalAgenda) modalAgenda.style.display = 'none';
+
+    // Foco en el teclado y Scroll
+    const inputMsg = document.getElementById('msg-text');
+    if(inputMsg) inputMsg.focus();
+    box.scrollTop = box.scrollHeight;
+     }
+    // 3. Buscamos los mensajes de ESE contacto en LocalStorage
+    // ... (final de la función cargarConversacionCon)
+  async function pintarAgendaContactos() {
+    const lista = document.getElementById('lista-contactos');
+    if (!lista) return;
+
+    const contactos = JSON.parse(localStorage.getItem('mis_contactos')) || [];
+
+    // Mantenemos la lista limpia de duplicados pero sin borrar todo (Velocidad del Bloque 1)
+    for (const contacto of contactos) {
+        if (contactosRenderizados.has(contacto.id)) continue;
+
+        const numNoLeidos = localStorage.getItem('unread_' + contacto.id) || 0;
+        const badgeHTML = numNoLeidos > 0 ? `<div class="contador-nube">${numNoLeidos}</div>` : '';
+        const inicial = contacto.nombre ? contacto.nombre.charAt(0).toUpperCase() : '?';
+        
+        // Lógica de Foto vs Inicial (Poder del Bloque 2)
+        const fotoURL = contacto.foto || '';
+
+        const btn = document.createElement('div');
+        btn.className = 'fila-contacto'; 
+        btn.id = `fila-${contacto.id}`;
+        btn.innerHTML = `
+    <div id="img-cont-${contacto.id}" class="foto-perfil" style="width:45px; height:45px; border-radius:50%; background:#ffd700; color:#000; display:flex; align-items:center; justify-content:center; font-weight:1200; font-size:20px; border: 1px solid #ffd700; flex-shrink:0; position:relative;">
+        ${inicial}
+        ${fotoURL && fotoURL !== "" ? 
+            `<img src="${fotoURL}" class="foto-perfil" style="width:45px; height:45px; border-radius:50%; object-fit:cover; border: 1px solid #ffd700; position:absolute; top:-2px; left:-2px;">` 
+            : '' 
+        }
+    </div>
+    <div style="flex-grow: 1; margin-left: 10px;">
+        <div style="font-weight: bold; color: white; text-shadow: none !important;">${contacto.nombre}</div>
+        <div style="font-size: 12px; color: #8696a0; text-shadow: none !important; transform: translateZ(0); -webkit-font-smoothing: antialiased;">ID: ${contacto.id}</div>
+    </div>
+    ${badgeHTML} 
+`;
+
+        lista.appendChild(btn);
+        
+        // --- MARCAMOS COMO RENDERIZADO ---
+        contactosRenderizados.add(contacto.id);
+        // ---------------------------------
+
+        try {
+            const perfilLocal = await obtenerLocal('perfiles', contacto.id);
+            
+            if (perfilLocal && perfilLocal.foto) {
+                aplicarFotoCapa(contacto.id, perfilLocal.foto);
+            } else {
+                db.ref('usuarios/' + contacto.id + '/foto').once('value').then(async (snap) => {
+                    const fotoReal = snap.val();
+                    if (fotoReal) {
+                        aplicarFotoCapa(contacto.id, fotoReal);
+                        await guardarLocal('perfiles', { 
+                            id: contacto.id, 
+                            nombre: contacto.nombre, 
+                            foto: fotoReal 
+                        });
+                    }
+                });
+            }
+        } catch (e) {
+            console.error("Error en foto agenda:", e);
+        }
+
+        btn.onclick = async () => {
+            const perfil = await obtenerLocal('perfiles', contacto.id);
+            cargarConversacionCon(contacto.id, contacto.nombre, (perfil && perfil.foto) ? perfil.foto : null);
+        }; 
+    }
+     }
+ 
+
+// Función auxiliar para no repetir código
+function aplicarFotoCapa(id, src) {
+    const contenedor = document.getElementById(`img-cont-${id}`);
+    if (contenedor) {
+        contenedor.innerHTML = `<img src="${src}" style="width:100%; height:100%; border-radius:50%; object-fit:cover;">`;
+        contenedor.style.background = "transparent";
+    }
+     }
+   
+ 
+// Reemplaza el bloque final por este:
+ window.onload = async () => {
+    const id = localStorage.getItem('mi_dropis_id');
+    
+    // CARGAR TEMA DESDE INDEXEDDB
+    const configTema = await obtenerLocal('usuario', 'ajustes_tema');
+    if (configTema && configTema.urlFondo) {
+        document.body.style.backgroundImage = `url('${configTema.urlFondo}')`;
+        document.body.style.backgroundSize = "cover";
+    }
+
+    if (id) {
+        // Recuperar mi propia foto de la DB local primero (Instantáneo)
+        const miPerfil = await obtenerLocal('perfiles', id);
+        if (miPerfil && miPerfil.foto) {
+            const headerFoto = document.getElementById('foto-perfil-header');
+            if (headerFoto) headerFoto.src = miPerfil.foto;
+        }
+
+        // Luego sincronizar con Firebase en segundo plano
+        db.ref('usuarios/' + id).once('value').then(snapshot => {
+            const data = snapshot.val();
+            if (data && data.foto) {
+                guardarLocal('perfiles', { id: id, foto: data.foto, nombre: data.nombre });
+            }
+        });
+
+        if (typeof activarAntena === "function") activarAntena();
+        manejarBotonIdentidad();
+    } else {
+        const modalRegistro = document.getElementById('modal-registro');
+        if(modalRegistro) modalRegistro.style.display = 'flex';
+    }
+    // ... resto del código del splash
+const splash = document.getElementById('pantalla-carga');
+    if (splash) {
+        // Un pequeño delay de 300ms para que la transición sea suave
+         setTimeout(() => {
+    splash.style.opacity = '0';
+    // Espera a que termine la animación de CSS para poner el display: none
+    splash.addEventListener('transitionend', () => {
+        splash.style.display = 'none';
+    }, { once: true });
+}, 150);
+    }
+};
+     // <--- ¡ASEGÚRATE DE QUE ESTA LLAVE Y PUNTO Y COMA ESTÉN AQUÍ!// <--- Aquí termina el window.onload  
+async function cargarProto() {
+    const schema = `
+        package superapp;
+        syntax = "proto3";
+        message SuperAppPayload {
+            string chatText = 1;
+            string msgId = 2;
+            uint32 tipo = 3;
+            bytes archivoData = 4;
+            uint32 piezaActual = 5;
+            uint32 totalPiezas = 6;
+        }
+    `;
+    const root = protobuf.parse(schema).root;
+    return root;
+     }
+
+     
+// --- 5. LÓGICA DE INTERFAZ CORREGIDA ---
+// Variable necesaria para que el menú sepa a qué mensaje le diste clic
+let mensajeSeleccionado = null;
+ 
+ function pintarMensaje(texto, clase, hora = null, estado = 'enviado', msgId = null) {
+    const box = document.getElementById('chat-box');
+    if (!box) return;
+
+    const div = document.createElement('div');
+    div.className = 'msg-burbuja ' + clase;
+    
+    // 1. Identificador único para el Doble Check
+    if (msgId) div.id = 'msg-' + msgId; 
+
+    const tiempo = hora || new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
+    
+    // 2. Lógica de checks (Gris si es enviado, Azul si es recibido)
+    // --- SUSTITUIR DENTRO DE pintarMensaje ---
+let checkHTML = "";
+if (clase.includes('derecha')) {
+    // Si nace como 'recibido' (desde historial), azul. Si no, gris.
+    const color = (estado === 'recibido') ? '#34B7F1' : '#8696a0';
+    const icon = (estado === 'recibido') ? '✓✓' : '✓';
+    
+    // IMPORTANTE: La clase "icono-check" es obligatoria aquí
+    // Sustituye solo esta línea dentro de pintarMensaje
+checkHTML = `<span class="icono-check" style="color: ${color}; margin-left: 5px; font-weight: bold;">${icon}</span>`;
+     }
+    // 3. FILTRO DE CONTENIDO: ¿Es foto, respuesta o texto normal?
+    let contenidoFinal = "";
+
+    if (texto.startsWith('http') && (texto.includes('firebasestorage') || texto.includes('.jpg') || texto.includes('.png'))) {
+        // Es una FOTO
+        contenidoFinal = `<img src="${texto}" style="max-width:250px; border-radius:10px; display:block; margin-bottom:5px; cursor:pointer;" onclick="window.open('${texto}')">`;
+    } else if (texto && texto.includes("Resp >")) {
+        // Es una RESPUESTA (Cita)
+        const partes = texto.split("\n— ");
+        const cabezalCita = partes[0].replace("Resp >", "").trim();
+        const mensajeReal = partes[1] || "";
+       
+     
+     contenidoFinal = `
+            <div style="font-size: 11px; opacity: 0.6; border-left: 3px solid #ffd700; padding-left: 5px; margin-bottom: 5px; font-style: italic;">
+                Resp: ${cabezalCita}
+            </div>
+            <div>${mensajeReal}</div>
+        `;
+    } else {
+        // Es TEXTO NORMAL
+        contenidoFinal = `<span>${texto}</span>`;
+    }
+
+   
+    // 4. Armamos el HTML final
+    div.innerHTML = `
+        ${contenidoFinal} 
+        <div class="msg-info" style="display: flex; justify-content: flex-end; align-items: center; gap: 5px; font-size: 10px; opacity: 0.7; margin-top: 3px;">
+            <span class="tiempo">${tiempo}</span>
+            ${checkHTML}
+        </div>
+    `;
+    // 5. Menú de acciones (Borrar, Editar, etc.)
+    div.onclick = (e) => {
+        mensajeSeleccionado = div; 
+        const menu = document.getElementById('menu-acciones');
+        if(menu) {
+            menu.style.display = 'block';
+            menu.style.top = e.pageY + "px";
+            menu.style.left = (e.pageX > 200 ? e.pageX - 150 : e.pageX) + "px";
+        }
+        e.stopPropagation(); 
+    };
+
+    box.appendChild(div);
+    box.scrollTop = box.scrollHeight;
+     }
+
+
+     
+    async function marcarMensajeComoRecibido(msgId, emisorID) {
+    // 1. CAMBIO VISUAL (Lo que ves en el momento)
+    const elementoMsg = document.getElementById('msg-' + msgId);
+    if (elementoMsg) {
+        const checkSpan = elementoMsg.querySelector('.icono-check');
+        if (checkSpan) {
+            checkSpan.innerText = '✓✓'; 
+            checkSpan.style.color = '#34B7F1'; // Azul SpaceChat
+        }
+    }
+
+    // 2. CAMBIO EN LA V10 (Para que sea permanente al recargar)
+    try {
+        const todos = await obtenerTodo('mensajes');
+        // Buscamos el mensaje específico por su ID
+        const msgParaActualizar = todos.find(m => m.id === msgId);
+        
+        if (msgParaActualizar) {
+            msgParaActualizar.status = 'recibido'; // Le ponemos el estado de doble check
+            await guardarLocal('mensajes', msgParaActualizar); 
+            console.log("✅ v10: Doble check guardado para " + msgId);
+        }
+    } catch (e) {
+        console.error("❌ Error al actualizar doble check en v10:", e);
+    }
+
+    // Nota: Ya no hace falta el código del localStorage (clave chat_emisorID)
+    // porque ahora tu función cargarConversacionCon lee directo de la v10.
+     }// <--- ESTA LLAVE CIERRA LA FUNCIÓN 
+      
+// Función para ejecutar las acciones del menú
+function accionMensaje(tipo) {
+    if (!mensajeSeleccionado) return;
+    
+    const textoOriginal = mensajeSeleccionado.innerText;
+    const inputMsg = document.querySelector('#msg-text');
+    const inputTarget = document.querySelector('#target-id');
+ 
+    // --- EL CEREBRO PARA SUBIR LA CITA ---
+    if (tipo === 'responder') {
+    // Buscamos solo el div del mensaje, ignorando el de la hora (msg-info)
+    const corpo = mensajeSeleccionado.querySelector('div:first-child');
+    let cita = corpo ? corpo.innerText : mensajeSeleccionado.innerText;
+    
+    // Limpiamos si la cita es muy larga para que no haga la burbuja gigante
+    if(cita.length > 50) cita = cita.substring(0, 50) + "...";
+
+    inputMsg.value = `Resp > ${cita.trim()}\n— `;
+    inputMsg.focus();
+    }
+        
+    else if (tipo === 'editar') {
+        inputMsg.value = textoOriginal;
+        // Al editar, borramos el viejo para sobreescribir
+        borrarMensajeDeMemoria(textoOriginal);
+        mensajeSeleccionado.remove();
+        inputMsg.focus();
+    } 
+    else if (tipo === 'copiar-id') {
+        if(inputTarget) {
+            inputTarget.value = textoOriginal.trim();
+            inputTarget.style.boxShadow = "0 0 10px #ffd700";
+            setTimeout(() => inputTarget.style.boxShadow = "none", 1000);
+        }
+    } 
+    else if (tipo === 'borrar') {
+        if(confirm("¿Borrar mensaje para siempre?")) {
+            borrarMensajeDeMemoria(textoOriginal);
+            mensajeSeleccionado.remove();
+        }
+    }
+ 
+    document.getElementById('menu-acciones').style.display = 'none';
+}
+ 
+// Esta función es para que el borrado sea REAL y no vuelvan al recargar
+
+async function borrarMensajeDeMemoria(idMensajeV10, elementoHTML) {
+    const idDestino = document.querySelector('#target-id').value;
+    if (!idMensajeV10) return;
+
+    // 1. Borrado visual (desaparece al toque)
+    if (elementoHTML) elementoHTML.remove();
+
+    // 2. Borrar de la v10 (Imitando tu lógica de eliminarChatEspecifico)
+    try {
+        const db = await abrirDB();
+        const tx = db.transaction('mensajes', 'readwrite');
+        const store = tx.objectStore('mensajes');
+        
+        // El "bisturí": borra el ID exacto en IndexedDB
+        await store.delete(idMensajeV10); 
+        console.log("✅ v10: Mensaje fulminado.");
+    } catch (e) { 
+        console.error("Error en v10:", e); 
+    }
+
+    // 3. Limpiar el LocalStorage (Para que el fantasma no reviva)
+    try {
+        const claveChat = 'chat_' + idDestino;
+        let historialLS = JSON.parse(localStorage.getItem(claveChat)) || [];
+        
+        // Filtramos para que muera en la libreta vieja también
+        historialLS = historialLS.filter(m => m.id !== idMensajeV10);
+        
+        if (historialLS.length > 0) {
+            localStorage.setItem(claveChat, JSON.stringify(historialLS));
+        } else {
+            localStorage.removeItem(claveChat);
+        }
+    } catch (e) { 
+        console.log("Sin rastros en LocalStorage"); 
+    }
+     }
+
+         
+function renderizarMensajes(listaDeMensajes) {
+    const chatBox = document.getElementById('chat-box');
+    if (!chatBox) return;
+
+    chatBox.innerHTML = ''; // Limpiamos mesa
+
+    listaDeMensajes.forEach(msg => {
+        // USAMOS LA FUNCIÓN QUE YA TIENE EL MENÚ DE BORRAR
+        // (texto, clase, hora, estado, msgId)
+        pintarMensaje(
+            msg.texto, 
+            msg.clase, 
+            msg.hora || new Date(msg.ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true }), 
+            msg.status || 'enviado', 
+            msg.id
+        );
+    });
+    
+    chatBox.scrollTop = chatBox.scrollHeight;
+     }
+         
+function gestionarQR() {
+    const seccion = document.getElementById('seccion-mi-qr');
+    
+    if (seccion) {
+        // Obtenemos el estilo real que tiene en ese momento
+        const estaVisible = window.getComputedStyle(seccion).display;
+
+        if (estaVisible === 'none') {
+            seccion.style.display = 'flex';
+            // Aquí puedes añadir una animación o scroll automático si quieres
+            seccion.scrollIntoView({ behavior: 'smooth' });
+        } else {
+            seccion.style.display = 'none';
+        }
+    }
+                }
+                
+       function abrirModalNuevoContacto() {
+    const modal = document.getElementById('modal-nuevocontacto');
+    if (modal) {
+        // Aseguramos que se vea por encima de TODO
+        modal.style.zIndex = "20000"; 
+        modal.style.display = 'flex';
+        
+        // OPCIONAL: Si quieres asegurar que la lista de contactos esté abierta atrás
+        const modalLista = document.getElementById('modal-contactos'); // o el ID de tu lista
+        if (modalLista) modalLista.style.display = 'block';
+
+        console.log("Abriendo: Nuevo Contacto sobre la agenda");
+    }
+}
+
+function cerrarModalNuevo() {
+    const modal = document.getElementById('modal-nuevocontacto');
+    if (modal) {
+        modal.style.display = 'none';
+        
+        // IMPORTANTE: Al cerrar, refrescamos la agenda para que 
+        // el usuario vea sus contactos actualizados inmediatamente
+        if (typeof pintarAgendaContactos === "function") {
+            pintarAgendaContactos();
+        }
+    }
+     }
+
+     let miFotoBase64 = ""; 
+
+
+
+async function alternarVistaPerfil() {
+    const seccion = document.getElementById('seccion-mi-perfil');
+    if (!seccion) return;
+
+    if (seccion.style.display === "none" || seccion.style.display === "") {
+        seccion.style.display = "block";
+
+        const miID = localStorage.getItem('mi_dropis_id');
+        
+        // 1. Buscamos los datos completos en nuestra DB local
+        const miPerfil = await obtenerLocal('perfiles', miID);
+
+        // 2. Rellenamos la interfaz
+        document.getElementById('mi-nuevo-nombre').value = miPerfil?.nombre || localStorage.getItem('mi_nombre') || "";
+        document.getElementById('mi-nuevo-estado').value = miPerfil?.estado || localStorage.getItem('mi_estado') || "";
+
+        const previa = document.getElementById('mi-foto-previa');
+        const placeholder = document.getElementById('mi-placeholder-foto');
+
+        // 3. La foto ahora viene de IndexedDB (sin límites de tamaño)
+        const foto = miPerfil?.foto || localStorage.getItem('mi_foto');
+        if (foto) {
+            previa.src = foto;
+            previa.style.display = "block";
+            if (placeholder) placeholder.style.display = "none";
+        } else {
+            previa.style.display = "none";
+            if (placeholder) placeholder.style.display = "flex";
+        }
+    } else {
+        seccion.style.display = "none";
+    }
+     }
+
+
+function previsualizarMiFoto(input) {
+
+    if (input.files && input.files[0]) {
+
+        const reader = new FileReader();
+
+        reader.onload = (e) => {
+
+            miFotoBase64 = e.target.result;
+
+            document.getElementById('mi-foto-previa').src = miFotoBase64;
+
+            document.getElementById('mi-foto-previa').style.display = "block";
+
+            document.getElementById('mi-placeholder-foto').style.display = "none";
+
+        };
+
+        reader.readAsDataURL(input.files[0]);
+
+    }
+
+}
+
+
+async function manejarEnvioFoto(archivo) {
+    // 1. Mostrar un pequeño aviso de "Subiendo..." para que el usuario no se desespere
+    console.log("Subiendo imagen al satélite...");
+
+    try {
+        // 2. Aquí va tu lógica de subida a Firebase Storage o Cloudinary
+        // Supongamos que esta función te devuelve el link:
+        const urlFoto = await subirArchivoAFirebase(archivo);
+
+        // 3. REUTILIZAMOS tu función maestra de envío
+        // Enviamos el link como si fuera un mensaje de texto
+        await enviarMensajeSatelital(urlFoto);
+        
+        console.log("✅ Foto enviada con éxito");
+    } catch (e) {
+        alert("Error al subir la foto");
+    }
+     }
+     
+     
+async function manejarSeleccionImagen(event) {
+    const archivo = event.target.files[0];
+    if (!archivo) return;
+
+    const nombreArchivo = Date.now() + "_" + archivo.name;
+    const refStorage = firebase.storage().ref().child('fotos_chat/' + nombreArchivo);
+
+    try {
+        const snapshot = await refStorage.put(archivo);
+        const urlImagen = await snapshot.ref.getDownloadURL();
+        
+        // --- NUEVO: Guardar rastro en mensajes locales ---
+        const idDestino = document.querySelector('#target-id').value;
+        const nuevoMensaje = {
+            contactoId: idDestino,
+            texto: urlImagen,
+            clase: 'msg-derecha',
+            hora: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+            status: 'enviado',
+            ts: Date.now()
+        };
+        
+        await guardarLocal('mensajes', nuevoMensaje);
+        // ------------------------------------------------
+        
+        await enviarMensajeSatelital(urlImagen);
+        event.target.value = "";
+    } catch (e) {
+        console.error("❌ Error en la subida:", e);
+        alert("Fallo al lanzar la imagen al espacio.");
+    }
+     } // <--- ESTA LLAVE FALTABA
+
+// Variable para la foto nueva
+
+
+
+async function guardarCambiosPerfil() {
+    const miID = localStorage.getItem('mi_dropis_id');
+    const nom = document.getElementById('mi-nuevo-nombre').value.trim();
+    const est = document.getElementById('mi-nuevo-estado').value.trim();
+    
+    // Obtenemos la foto actual o la nueva previsualizada
+    const miPerfilActual = await obtenerLocal('perfiles', miID);
+    const fotoParaGuardar = miFotoBase64 || miPerfilActual?.foto || "";
+
+    if (!nom) return alert("¡El nombre no puede estar vacío!");
+
+    try {
+        // 1. Guardar en Firebase (Nube)
+        await db.ref('usuarios/' + miID).update({
+            nombre: nom,
+            estado: est,
+            foto: fotoParaGuardar
+        });
+
+        // 2. GUARDADO MAESTRO EN INDEXEDDB (Local)
+        // Aquí no hay error de espacio. Guardamos el objeto completo.
+        await guardarLocal('perfiles', {
+            id: miID,
+            nombre: nom,
+            estado: est,
+            foto: fotoParaGuardar,
+            ultimaActualizacion: Date.now()
+        });
+
+        // 3. Actualizamos LocalStorage solo para datos ligeros (opcional)
+        localStorage.setItem('mi_nombre', nom);
+        localStorage.setItem('mi_estado', est);
+        // Borramos la foto de localStorage para liberar espacio, 
+        // ya que ahora vive segura en IndexedDB
+        localStorage.removeItem('mi_foto'); 
+
+        alert("✅ Perfil guardado localmente y en la nube");
+        
+        // 4. Actualizar Interfaz
+        const headerFoto = document.getElementById('foto-perfil-header');
+        if (headerFoto && fotoParaGuardar) headerFoto.src = fotoParaGuardar;
+
+        alternarVistaPerfil();
+    } catch(e) {
+        console.error("Error al guardar:", e);
+        alert("Fallo al sincronizar perfil");
+    }
+     }
+
+     
+
+function abrirPerfilContacto() {
+    // 1. Sacamos los datos de TU header
+    const nombreActual = document.getElementById('nombre-dueño-header').innerText;
+    const fotoActual = document.getElementById('foto-perfil-header').src;
+    
+    // 2. Los ponemos en el modal de perfil (el que creamos en el paso anterior)
+    const modalNombre = document.getElementById('perfil-nombre');
+    const modalFoto = document.getElementById('perfil-foto-grande');
+    
+    if(modalNombre) modalNombre.innerText = nombreActual;
+    if(modalFoto) modalFoto.src = fotoActual;
+
+    // 3. Mostramos el modal
+    document.getElementById('modal-perfil').style.display = 'flex';
+}
+
+// Asegúrate de tener esta función en tu archivo de base de datos
+async function eliminarLocal(tabla, id) {
+    const db = await abrirDB();
+    return new Promise((resolve, reject) => {
+        const tx = db.transaction(tabla, 'readwrite');
+        const store = tx.objectStore(tabla);
+        const request = store.delete(id);
+        request.onsuccess = () => resolve(true);
+        request.onerror = () => reject(request.error);
+    });
+     }
+
+     async function eliminarContactoDeAgenda() {
+    const idABorrar = document.querySelector('#target-id').value;
+    const nombreABorrar = document.getElementById('perfil-nombre')?.innerText || "este contacto";
+
+    if (!idABorrar) return;
+
+    if (confirm(`¿BORRAR PERMANENTEMENTE a ${nombreABorrar}?`)) {
+        
+        // En lugar de los dos "await eliminarLocal", usa solo este:
+try {
+    // Esto borra solo en TU teléfono
+    await eliminarLocal('perfiles', String(idABorrar));
+    console.log("Limpieza local completada.");
+} catch (e) { 
+    console.log("Ya estaba borrado o ID no encontrado localmente."); 
+     }
+
+        // 2. Borrar de la lista de chats activos (LocalStorage)
+        let lista = JSON.parse(localStorage.getItem('mis_contactos')) || [];
+        lista = lista.filter(c => String(c.id) !== String(idABorrar));
+        localStorage.setItem('mis_contactos', JSON.stringify(lista));
+
+        // 3. Limpieza visual y de memoria
+        contactosRenderizados.delete(idABorrar);
+        if (typeof agendaRenderizada !== 'undefined') agendaRenderizada.delete(idABorrar);
+
+        // Quitar de la lista de chats principal
+        const filaHtml = document.getElementById(`fila-${idABorrar}`);
+        if (filaHtml) filaHtml.remove();
+
+        // Quitar de la agenda completa (modal)
+        const contenedor = document.getElementById('contenedor-agenda-total');
+        if (contenedor) {
+            const filasAgenda = contenedor.querySelectorAll('.fila-contacto');
+            filasAgenda.forEach(div => {
+                if (div.innerHTML.includes(idABorrar)) div.remove();
+            });
+        }
+
+        document.getElementById('modal-perfil').style.display = 'none';
+        alert("Contacto eliminado de raíz.");
+    }
+     }
+
+     async function eliminarChatEspecifico() {
+    
+    const idDestino = document.querySelector('#target-id').value;
+    const nombreDestino = document.getElementById('perfil-nombre')?.innerText || "este contacto";
+
+    if (!idDestino) return;
+
+    if (confirm(`¿Eliminar mensajes y ocultar chat con ${nombreDestino}?`)) {
+        
+        // 1. Borrar de la v10 (IndexedDB) - DE RAÍZ
+        try {
+            const db = await abrirDB();
+            const tx = db.transaction('mensajes', 'readwrite');
+            const store = tx.objectStore('mensajes');
+            const request = store.openCursor();
+
+            request.onsuccess = (e) => {
+                const cursor = e.target.result;
+                if (cursor) {
+                    // Si el mensaje pertenece a este contacto, lo borramos por su clave real
+                    if (cursor.value.contactoId === idDestino) {
+                        cursor.delete();
+                    }
+                    cursor.continue();
+                }
+            };
+        } catch (e) { console.log("Error borrando mensajes en v10"); }
+
+        // 2. Limpiar LocalStorage
+        localStorage.removeItem('chat_' + idDestino);
+        localStorage.setItem('unread_' + idDestino, 0);
+
+        // 3. Quitar de la lista de chats activos
+        let actuales = JSON.parse(localStorage.getItem('mis_contactos')) || [];
+        actuales = actuales.filter(c => String(c.id) !== String(idDestino));
+        localStorage.setItem('mis_contactos', JSON.stringify(actuales));
+
+        // 4. Limpieza visual
+        contactosRenderizados.delete(idDestino);
+        const fila = document.getElementById(`fila-${idDestino}`);
+        if (fila) fila.remove();
+
+        document.getElementById('modal-perfil').style.display = 'none';
+        const box = document.getElementById('chat-box');
+        if (box) box.innerHTML = ""; 
+
+        console.log("✅ Chat eliminado de raíz local.");
+    }
+ }
+     // <--- ESTA LLAVE FALTABA AQUÍ
+    
+     
+     
+            async function abrirAgendaCompleta() {
+    const contenedor = document.getElementById('contenedor-agenda-total');
+    const modal = document.getElementById('modal-agenda-completa');
+    
+    if (!contenedor || !modal) return;
+    
+    modal.style.display = 'block';
+    
+    // 1. Traemos los contactos de la v10
+    const todosLosContactos = await obtenerTodo('perfiles');
+
+    if (todosLosContactos.length === 0) {
+        contenedor.innerHTML = '<p style="color: #8696a0; text-align: center;">No tienes contactos.</p>';
+        return;
+    }
+
+    // 2. LA CLAVE: Limpiamos el mensaje de "Cargando" ANTES del forEach
+    // Pero NO limpiamos todo el contenedor si ya hay hijos, para que no parpadee
+    if (contenedor.innerHTML.includes("Cargando")) {
+        contenedor.innerHTML = ""; 
+    }
+
+    todosLosContactos.forEach(contacto => {
+        // Si ya está en pantalla, lo saltamos
+        if (agendaRenderizada.has(contacto.id)) return;
+
+        const div = document.createElement('div');
+        div.className = 'fila-contacto';
+        div.style = "display: flex; align-items: center; padding: 12px; border-bottom: none; cursor: pointer;";
+        
+        const inicial = contacto.nombre ? contacto.nombre.charAt(0).toUpperCase() : '?';
+        
+        
+        div.innerHTML = `
+            <div style="width:40px; height:40px; border-radius:50%; background:#ffd700; color:#000; display:flex; align-items:center; justify-content:center; font-weight:1200; border: 1px solid #ffd700; overflow:hidden;">
+                ${contacto.foto ? `<img src="${contacto.foto}" style="width:100%; height:100%; object-fit:cover;">` : inicial}
+            </div>
+            <div style="margin-left: 15px;">
+                <div style="color: white; font-weight: bold;">${contacto.nombre}</div>
+                <div style="color: #8696a0; font-size: 12px;">ID: ${contacto.id}</div>
+            </div>
+        `;
+
+        // Dentro del forEach de abrirAgendaCompleta...
+div.onclick = async () => {
+            modal.style.display = 'none';
+
+            // 1. Buscamos el perfil para tener la foto para el Header
+            const perfil = await obtenerLocal('perfiles', contacto.id);
+            const fotoFinal = (perfil && perfil.foto) ? perfil.foto : contacto.foto;
+
+            // 2. CREAMOS UNA COPIA SIN FOTO para activarContactoEnChat
+            // Así el localStorage no se llena y no sale el error de Quota
+            const contactoSinFoto = { ...contacto };
+            delete contactoSinFoto.foto; 
+
+            activarContactoEnChat(contactoSinFoto);
+
+            // 3. Cargamos el chat pasando la foto pesada solo a la memoria (el Header)
+            cargarConversacionCon(contacto.id, contacto.nombre, fotoFinal);
+        };
+
+        contenedor.appendChild(div);
+        agendaRenderizada.add(contacto.id); 
+    }); // Cierre del forEach
+     } // Cierre de abrirAgendaCompleta
+
+     
+
+// Función para mover un contacto de la "Agenda" a la "Lista de Chats"
+function activarContactoEnChat(contacto) {
+    let actuales = JSON.parse(localStorage.getItem('mis_contactos')) || [];
+    
+    // 1. Verificamos si ya existe en la lista de chats para no duplicar datos
+    const existe = actuales.find(c => c.id === contacto.id);
+    
+    if (!existe) {
+        actuales.push(contacto);
+        localStorage.setItem('mis_contactos', JSON.stringify(actuales));
+    }
+    
+    // 2. LA CLAVE: No usamos .clear() ni pintamos todo de nuevo.
+    // Solo le pedimos a pintarAgendaContactos que procese la lista.
+    // Como tu función pintarAgenda ya debería tener la lógica de:
+    // "si el ID ya está en el Set, no lo pintes", solo pintará el nuevo.
+    
+    pintarAgendaContactos();
+
+    // 3. Abrimos la conversación directamente
+    cargarConversacionCon(contacto.id, contacto.nombre, contacto.foto);   
+     }
+
+     function cargarFotoInicial() {
+    const fotoGuardada = localStorage.getItem('mi_foto');
+    if (fotoGuardada && fotoGuardada !== "") {
+        // La pone en el header
+        const imgHeader = document.getElementById('foto-perfil-header');
+        if (imgHeader) imgHeader.src = fotoGuardada;
+
+        // La pone en el modal de edición
+        const imgPrevia = document.getElementById('mi-foto-previa');
+        if (imgPrevia) imgPrevia.src = fotoGuardada;
+    }
+}
+
+// Llama a esta función al final de tu código o en el onload
+cargarFotoInicial();
+     
+function inicializarInterfaz() {
+    const fotoLocal = localStorage.getItem('mi_foto');
+    const nombreLocal = localStorage.getItem('mi_nombre');
+
+    if (fotoLocal) {
+        document.getElementById('foto-perfil-header').src = fotoLocal;
+    }
+    if (nombreLocal) {
+        document.getElementById('nombre-dueño-header').innerText = nombreLocal;
+    }
+}
+inicializarInterfaz();
+// BLOQUE DEL TECLADO
+     let instaladorDiferido;
+
+window.addEventListener('beforeinstallprompt', (e) => {
+    // Evita que Chrome muestre el aviso automático feo
+    e.preventDefault();
+    // Guarda el evento para usarlo cuando tú quieras
+    instaladorDiferido = e;
+    
+    });
+
+function lanzarInstalacion() {
+    if (instaladorDiferido) {
+        instaladorDiferido.prompt();
+        instaladorDiferido.userChoice.then((choiceResult) => {
+            if (choiceResult.outcome === 'accepted') {
+                console.log('¡El usuario aceptó la descarga!');
+            }
+            instaladorDiferido = null;
+        });
+    }
+     }
+if (window.visualViewport) {
+    const vv = window.visualViewport;
+    const ajustarInterfaz = () => {
+        document.body.style.height = `${vv.height}px`;
+        document.body.style.top = `${vv.offsetTop}px`;
+        window.scrollTo(0, 0);
+        const chatBox = document.getElementById('chat-box');
+        if (chatBox) {
+            requestAnimationFrame(() => { chatBox.scrollTop = chatBox.scrollHeight; });
+        }
+    };
+    vv.addEventListener('resize', ajustarInterfaz);
+    vv.addEventListener('scroll', ajustarInterfaz);
+    ajustarInterfaz();
+     }
+     
+</script>
+</body>
+</html>
+ 
+     
