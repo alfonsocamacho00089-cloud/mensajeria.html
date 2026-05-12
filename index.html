@@ -1987,6 +1987,9 @@ function previsualizarMiFoto(input) {
 
 }
 
+     
+    
+
      // --- 1. PROCESADOR MULTIMEDIA (SIN FIREBASE STORAGE) ---
 async function subirArchivoAFirebase(archivo) {
     // Convertimos el archivo a Base64 para guardarlo en la Database v10 directamente
@@ -2119,14 +2122,10 @@ async function manejarSeleccionImagen(event) {
     const archivo = event.target.files[0];
     if (!archivo) return;
 
-    const nombreArchivo = Date.now() + "_" + archivo.name;
-    const refStorage = firebase.storage().ref().child('fotos_chat/' + nombreArchivo);
-
     try {
-        const snapshot = await refStorage.put(archivo);
-        const urlImagen = await snapshot.ref.getDownloadURL();
+        // Usamos Base64 para evitar el plan de pago de Firebase Storage
+        const urlImagen = await subirArchivoAFirebase(archivo); 
         
-        // --- NUEVO: Guardar rastro en mensajes locales ---
         const idDestino = document.querySelector('#target-id').value;
         const nuevoMensaje = {
             contactoId: idDestino,
@@ -2137,18 +2136,52 @@ async function manejarSeleccionImagen(event) {
             ts: Date.now()
         };
         
-        await guardarLocal('mensajes', nuevoMensaje);
-        // ------------------------------------------------
-        
+        await guardarLocal('mensajes', nuevoMensaje); // Optimización con IndexedDB
         await enviarMensajeSatelital(urlImagen);
         event.target.value = "";
     } catch (e) {
         console.error("❌ Error en la subida:", e);
         alert("Fallo al lanzar la imagen al espacio.");
     }
-     } // <--- ESTA LLAVE FALTABA
+     }
 
-// Variable para la foto nueva
+// . Modificación a toggleStickers para que funcione con el botón 😊
+function toggleStickers() {
+    const panel = document.getElementById('panel-stickers');
+    if (!panel) return;
+
+    if (panel.style.display === 'none' || panel.style.transform === 'translateY(100%)') {
+        panel.style.display = 'block';
+        panel.style.transform = 'translateY(0)';
+        // Por defecto cargamos los stickers primero
+        abrirGaleriaMultimedia('stickers'); 
+    } else {
+        panel.style.transform = 'translateY(100%)';
+        setTimeout(() => { panel.style.display = 'none'; }, 300);
+    }
+     }
+
+     async function prepararEnvioVideo(input) {
+    if (input.files && input.files[0]) {
+        const archivo = input.files[0];
+        console.log("Subiendo vídeo al satélite...");
+
+        try {
+            // Subida a Firebase Storage (v10)
+            const urlDescarga = await subirArchivoAFirebase(archivo); 
+            
+            // Enviamos la URL con el tipo 'video'
+            await enviarMediaPorURL(urlDescarga, 'video');
+            
+            input.value = ""; 
+        } catch (e) {
+            console.error("Error al subir vídeo:", e);
+            alert("No se pudo enviar el vídeo");
+        }
+    }
+     }
+     
+
 
 
 
