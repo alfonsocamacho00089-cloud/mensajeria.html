@@ -2037,20 +2037,18 @@ async function abrirTiendaMultimedia(tipo) {
 
 
 
-function renderizarItems(urls, tipoEnvio) {
+function renderizarItems(listaUrls, tipo) {
     const contenedor = document.getElementById('contenedor-items-tienda');
-    contenedor.innerHTML = "";
-    urls.forEach(url => {
+    contenedor.innerHTML = ""; // Limpiamos el "Cargando..."
+
+    listaUrls.forEach(url => {
         const img = document.createElement('img');
-        img.src = url;
-        img.style = "width:30%; margin:5px; border-radius:8px; cursor:pointer; background:#111;";
-        img.onclick = () => {
-            enviarMediaPorURL(url, tipoEnvio);
-            document.getElementById('modal-tienda').style.display = 'none';
-        };
+        img.src = url; // Aquí es donde la URL "mágica" se convierte en imagen real
+        img.className = 'item-tienda';
+        img.onclick = () => seleccionarParaChat(url); // Para mandarlo al chat
         contenedor.appendChild(img);
     });
-}
+     }
 
 // FUNCIÓN PARA CAMBIAR EL TEMA (FONDOS)
 function renderizarTemas() {
