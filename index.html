@@ -2042,23 +2042,31 @@ function renderizarItems(urls, tipoEnvio) {
     const contenedor = document.getElementById('contenedor-items-tienda');
     contenedor.innerHTML = "";
 
+    if (!urls || urls.length === 0) {
+        contenedor.innerHTML = "<p style='color:gray;'>No hay energía multimedia disponible...</p>";
+        return;
+    }
+
     urls.forEach(url => {
-        // VALIDACIÓN PARA EVITAR LA IMAGEN AZUL:
-        // Si la URL contiene "ibb.co", es un enlace viejo que probablemente no sirve.
-        if (typeof url === 'string' && url.includes('ibb.co')) {
-            return; // Saltamos este item para que no aparezca el error
+        // Solo ignoramos si es un enlace de ImgBB que sabemos que no sirve
+        if (typeof url === 'string' && url.includes('ibb.co') && url.includes('your-')) {
+            return; 
         }
 
         const img = document.createElement('img');
         
-        // Aseguramos que 'url' sea el string directo (evita el [object Object])
-        const urlReal = (typeof url === 'object') ? url.url : url; 
+        // EXTRACCIÓN REAL: Si la API manda un objeto, sacamos la URL. 
+        // Si manda un string (como tu .map de Giphy), lo usamos directo.
+        const urlFinal = (typeof url === 'object') ? (url.url || url.fixed_width_small.url) : url;
         
-        img.src = urlReal; 
-        img.style = "width:30%; margin:5px; border-radius:8px; cursor:pointer; background:#111;";
+        img.src = urlFinal; 
+        img.style = "width:30%; margin:5px; border-radius:8px; cursor:pointer; background:#111; min-height:50px;";
         
+        // Si la imagen falla al cargar, la quitamos para que no ocupe espacio
+        img.onerror = () => img.style.display = 'none';
+
         img.onclick = () => {
-            enviarMediaPorURL(urlReal, tipoEnvio);
+            enviarMediaPorURL(urlFinal, tipoEnvio);
             document.getElementById('modal-tienda').style.display = 'none';
         };
         contenedor.appendChild(img);
