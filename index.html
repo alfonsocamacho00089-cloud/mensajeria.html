@@ -1995,17 +1995,19 @@ inputMensaje.addEventListener('paste', async (event) => {
 
 
 // CONFIGURACIÓN DE LA TIENDA
-const API_KEY_GIPHY = "y04S2YI56Z8Rz8Xp05f6e87h66v98mS2"; // <--- Tu nueva llave de GIPHY
+const API_KEY_GIPHY = "y04S2YI56Z8Rz8Xp05f6e87h66v98mS2"; // <--- Tu llave activa
 
 const bibliotecaSpaceChat = {
+    // Reemplazamos los enlaces rotos de ImgBB por stickers reales de Giphy (Goku y Shinobu)
     stickers: [
-        "https://i.ibb.co/Y7m8Y8X/goku-sticker.png",
-        "https://i.ibb.co/vXvXvXv/shinobu.png"
+        "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExNHJueXZueXpueXpueXpueXpueXpueXpueXpueXpueXpueXpueSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/cb9aF9tDyiRkY/giphy.gif",
+        "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExNHJueXZueXpueXpueXpueXpueXpueXpueXpueXpueXpueXpueSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/11S6Y63U8OAsGk/giphy.gif"
     ],
     temas: [
         { nombre: "Space Gold", fondo: "#000", acento: "#ffd700", imagen: "" },
-        { nombre: "Goku Ultra", fondo: "url('https://i.ibb.co/your-goku-bg.jpg')", acento: "#ff4500" },
-        { nombre: "Shinobu Butterfly", fondo: "url('https://i.ibb.co/your-shinobu-bg.jpg')", acento: "#da70d6" }
+        // Eliminamos las URLs "your-goku-bg" que no existen y causan error
+        { nombre: "Goku Ultra", fondo: "url('https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExNHJueXZueXpueXpueXpueXpueXpueXpueXpueXpueXpueXpueSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/cb9aF9tDyiRkY/giphy.gif')", acento: "#ff4500" },
+        { nombre: "Shinobu Butterfly", fondo: "url('https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExNHJueXZueXpueXpueXpueXpueXpueXpueXpueXpueXpueXpueSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/11S6Y63U8OAsGk/giphy.gif')", acento: "#da70d6" }
     ]
 };
 
