@@ -2039,13 +2039,22 @@ async function abrirTiendaMultimedia(tipo) {
 
 function renderizarItems(listaUrls, tipo) {
     const contenedor = document.getElementById('contenedor-items-tienda');
-    contenedor.innerHTML = ""; // Limpiamos el "Cargando..."
+    contenedor.innerHTML = ""; 
 
     listaUrls.forEach(url => {
         const img = document.createElement('img');
-        img.src = url; // Aquí es donde la URL "mágica" se convierte en imagen real
-        img.className = 'item-tienda';
-        img.onclick = () => seleccionarParaChat(url); // Para mandarlo al chat
+        img.src = url; 
+        img.style.width = "120px";
+        img.style.margin = "10px";
+        img.style.borderRadius = "8px";
+        img.style.cursor = "pointer";
+
+        // CAMBIA 'nombreDeTuFuncionReal' por la que usas para enviar mensajes
+        img.onclick = () => {
+            nombreDeTuFuncionReal(url); 
+            document.getElementById('modal-tienda').style.display = 'none';
+        };
+
         contenedor.appendChild(img);
     });
      }
