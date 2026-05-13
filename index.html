@@ -2042,12 +2042,24 @@ renderizarItems(gifs, 'gif');
 function renderizarItems(urls, tipoEnvio) {
     const contenedor = document.getElementById('contenedor-items-tienda');
     contenedor.innerHTML = "";
+
     urls.forEach(url => {
+        // VALIDACIÓN PARA EVITAR LA IMAGEN AZUL:
+        // Si la URL contiene "ibb.co", es un enlace viejo que probablemente no sirve.
+        if (typeof url === 'string' && url.includes('ibb.co')) {
+            return; // Saltamos este item para que no aparezca el error
+        }
+
         const img = document.createElement('img');
-        img.src = url;
+        
+        // Aseguramos que 'url' sea el string directo (evita el [object Object])
+        const urlReal = (typeof url === 'object') ? url.url : url; 
+        
+        img.src = urlReal; 
         img.style = "width:30%; margin:5px; border-radius:8px; cursor:pointer; background:#111;";
+        
         img.onclick = () => {
-            enviarMediaPorURL(url, tipoEnvio);
+            enviarMediaPorURL(urlReal, tipoEnvio);
             document.getElementById('modal-tienda').style.display = 'none';
         };
         contenedor.appendChild(img);
