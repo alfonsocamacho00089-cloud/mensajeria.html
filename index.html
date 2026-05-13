@@ -631,8 +631,14 @@ margin: 0;
             <span>😊</span>
         </button>
         
-        <textarea id="msg-text" placeholder="Mensaje" inputmode="text" enterkeyhint="send" oninput="this.style.height='40px'; this.style.height=this.scrollHeight+'px';"></textarea>
-    
+        <textarea 
+    id="msg-text" 
+    placeholder="Mensaje" 
+    inputmode="text" 
+    enterkeyhint="send"
+    contenteditable="true"
+    role="textbox"
+    oninput="this.style.height='40px'; this.style.height=this.scrollHeight+'px';"></textarea>
         <label class="icon-btn" for="input-archivo">
             <span>📎</span>
             <input type="file" id="input-archivo" style="display: none;" onchange="prepararEnvioMedia(this, 'archivo')">
@@ -1202,52 +1208,61 @@ async function recuperarCuentaConID() {
 });
      }    
 // Agregamos parámetros opcionales: multimediaUrl y tipoMedia
-async function enviarMensajeSatelital(multimediaUrl = null, tipoMedia = 'texto') {
+
+        async function enviarMensajeSatelital(multimediaUrl = null, tipoMedia = 'texto') {
     const inputMsg = document.querySelector('#msg-text');
     const inputTarget = document.querySelector('#target-id');
     
-    // Si hay multimediaUrl, usamos eso; si no, usamos el texto del input
+    // Si multimediaUrl tiene datos, lo usamos. Si no, leemos el teclado.
     const msg = multimediaUrl ? multimediaUrl : (inputMsg ? inputMsg.value.trim() : "");
-    const targetID = inputTarget ? inputTarget.value.trim() : "";
+    
+    // Importante: Si no hay targetID, detenemos todo antes del error
+    if (!inputTarget || !inputTarget.value) {
+        console.error("H.A.R.V.I.S.: No hay un satélite de destino (ID vacío)");
+        return;
+    }
+    const targetID = inputTarget.value.trim();
     const miID = localStorage.getItem('mi_dropis_id') || "ID_DESCONOCIDO";
 
-    // VALIDACIÓN CORREGIDA: Ahora permite enviar si hay mensaje O multimedia
-    if (!targetID || !msg) return alert("ID y Mensaje son obligatorios");
+    if (!msg) return; // Evita enviar globos vacíos
 
     const msgId = "msg_" + Date.now();
 
     try {
         const root = await cargarProto();
         const SuperAppPayload = root.lookupType("SuperAppPayload");
+        
+        // Protegemos el mensaje (sea texto o URL de foto)
         const msgProtegido = btoa(unescape(encodeURIComponent(msg))); 
         
         const payload = SuperAppPayload.create({ 
             chatText: msgProtegido,
             msgId: msgId,
-            tipo: 0 // Puedes usar diferentes números para tipos: 0 texto, 2 media, etc.
+            tipo: 0 
         });
         
         const buffer = SuperAppPayload.encode(payload).finish();
         const base64 = btoa(String.fromCharCode.apply(null, buffer));
         
+        // Lanzamiento a Firebase (Añadimos el campo mediaType para que no haya fallos)
         await db.ref('cola_satelital/' + targetID).push({
             p: base64,
             from: miID,
             ts: Date.now(),
             msgId: msgId,
-            mediaType: tipoMedia // Guardamos el tipo para que el receptor sepa qué es
+            mediaType: tipoMedia 
         });
 
-        // PINTAR EN INTERFAZ (Enviamos el tipoMedia para que sepa si renderizar <img> o texto)
+        // Pintamos y guardamos (pasando el tipoMedia)
         pintarMensaje(msg, 'msg-derecha', null, 'enviado', msgId, tipoMedia);
-
+        
         await guardarLocal('mensajes', { 
             id: msgId, 
             contactoId: targetID,
             texto: msg, 
             clase: 'msg-derecha', 
             status: 'enviado',
-            tipo: tipoMedia, // Importante guardar el tipo en IndexedDB
+            tipo: tipoMedia,
             ts: Date.now(),
             hora: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })
         });
@@ -1258,7 +1273,7 @@ async function enviarMensajeSatelital(multimediaUrl = null, tipoMedia = 'texto')
         }
 
     } catch (e) {
-        console.error("❌ Fallo en el lanzamiento:", e);
+        console.error("❌ Fallo crítico en el lanzamiento:", e);
     }
      }
   
