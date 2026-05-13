@@ -1998,11 +1998,10 @@ inputMensaje.addEventListener('paste', async (event) => {
 const API_KEY_GIPHY = "y04S2YI56Z8Rz8Xp05f6e87h66v98mS2"; // <--- Tu llave activa
 
 const bibliotecaSpaceChat = {
-    // Reemplazamos los enlaces rotos de ImgBB por stickers reales de Giphy (Goku y Shinobu)
     stickers: [
-        "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExNHJueXZueXpueXpueXpueXpueXpueXpueXpueXpueXpueXpueSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/cb9aF9tDyiRkY/giphy.gif",
-        "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExNHJueXZueXpueXpueXpueXpueXpueXpueXpueXpueXpueXpueSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/11S6Y63U8OAsGk/giphy.gif"
-    ],
+        "https://media0.giphy.com/media/cb9aF9tDyiRkY/giphy.gif", // Goku real
+        "https://media4.giphy.com/media/11S6Y63U8OAsGk/giphy.gif"  // Shinobu real
+     ],
     temas: [
         { nombre: "Space Gold", fondo: "#000", acento: "#ffd700", imagen: "" },
         // Eliminamos las URLs "your-goku-bg" que no existen y causan error
@@ -2025,7 +2024,7 @@ async function abrirTiendaMultimedia(tipo) {
             
             // Extraemos las URLs de los GIFs (usamos 'fixed_width_small' para que carguen rápido en el móvil)
             // En abrirTiendaMultimedia
-const gifs = data.data.map(g => g.images.fixed_width_small.url); 
+const gifs = data.data.map(g => g.images.fixed_height.url);
 // Esto crea un array de TEXTOS (URLs), no de objetos.
 renderizarItems(gifs, 'gif');
         } catch (e) {
