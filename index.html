@@ -1658,83 +1658,36 @@ async function cargarProto() {
 // Variable necesaria para que el menú sepa a qué mensaje le diste clic
 let mensajeSeleccionado = null;
  
- function pintarMensaje(texto, clase, hora = null, estado = 'enviado', msgId = null, tipo = 'texto') {
+ function pintarMensaje(contenido, clase, hora, status, id, tipo = 'texto') {
     const box = document.getElementById('chat-box');
     if (!box) return;
 
+    // Si por error llega un objeto, extraemos el texto para que no salga [object Object]
+    let textoReal = (typeof contenido === 'object') ? (contenido.texto || "") : contenido;
+    
     const div = document.createElement('div');
-    div.className = 'msg-burbuja ' + clase;
-    
-    if (msgId) div.id = 'msg-' + msgId; 
+    div.className = `mensaje ${clase}`;
+    div.id = id;
 
-    const tiempo = hora || new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
-    
-    let checkHTML = "";
-    if (clase.includes('derecha')) {
-        const color = (estado === 'recibido') ? '#34B7F1' : '#8696a0';
-        const icon = (estado === 'recibido') ? '✓✓' : '✓';
-        checkHTML = `<span class="icono-check" style="color: ${color}; margin-left: 5px; font-weight: bold;">${icon}</span>`;
+    // Lógica para renderizar según el TIPO
+    let cuerpoMensaje = "";
+    if (tipo === 'foto' || tipo === 'sticker') {
+        cuerpoMensaje = `<img src="${textoReal}" style="max-width:200px; border-radius:10px; display:block; margin-bottom:5px;" onerror="this.src='https://via.placeholder.com/150?text=Error+Imagen'">`;
+    } else if (tipo === 'video') {
+        cuerpoMensaje = `<video src="${textoReal}" controls style="max-width:200px; border-radius:10px;"></video>`;
+    } else {
+        cuerpoMensaje = `<span class="texto-msg">${textoReal}</span>`;
     }
 
-    // --- FILTRO DE CONTENIDO AMPLIADO ---
-    let contenidoFinal = "";
-
-    // 1. Detectar si es Imagen (URL, Base64, Giphy o Sticker)
-    const esImagen = texto.startsWith('data:image') || 
-                     texto.includes('giphy.com') || 
-                     texto.includes('.jpg') || 
-                     texto.includes('.png') || 
-                     texto.includes('.gif') ||
-                     tipo === 'foto' || tipo === 'sticker' || tipo === 'gif';
-
-    // 2. Detectar si es Video
-    const esVideo = texto.startsWith('data:video') || 
-                    texto.includes('.mp4') || 
-                    tipo === 'video';
-
-    if (esVideo) {
-        contenidoFinal = `<video src="${texto}" controls style="max-width:250px; border-radius:10px; display:block; margin-bottom:5px;"></video>`;
-    } 
-    else if (esImagen) {
-        // Estilo especial si es sticker (más pequeño y sin fondo si quieres)
-        const styleSticker = (tipo === 'sticker') ? "width:120px;" : "max-width:250px;";
-        contenidoFinal = `<img src="${texto}" style="${styleSticker} border-radius:10px; display:block; margin-bottom:5px; cursor:pointer;" onclick="window.open('${texto}')">`;
-    } 
-    else if (texto && texto.includes("Resp >")) {
-        // Lógica de Cita (Mantenida igual)
-        const partes = texto.split("\n— ");
-        const cabezalCita = partes[0].replace("Resp >", "").trim();
-        const mensajeReal = partes[1] || "";
-        contenidoFinal = `
-            <div style="font-size: 11px; opacity: 0.6; border-left: 3px solid #ffd700; padding-left: 5px; margin-bottom: 5px; font-style: italic;">
-                Resp: ${cabezalCita}
-            </div>
-            <div>${mensajeReal}</div>
-        `;
-    } 
-    else {
-        contenidoFinal = `<span>${texto}</span>`;
-    }
+    const checkHTML = clase === 'msg-derecha' ? `<span class="check-v" style="margin-left:5px;">${status === 'leido' ? '✓✓' : '✓'}</span>` : '';
+    const horaFinal = hora || new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
 
     div.innerHTML = `
-        ${contenidoFinal} 
-        <div class="msg-info" style="display: flex; justify-content: flex-end; align-items: center; gap: 5px; font-size: 10px; opacity: 0.7; margin-top: 3px;">
-            <span class="tiempo">${tiempo}</span>
-            ${checkHTML}
+        ${cuerpoMensaje}
+        <div style="font-size:10px; opacity:0.7; text-align:right; margin-top:3px;">
+            ${horaFinal} ${checkHTML}
         </div>
     `;
-
-    // Lógica de menú de acciones (Mantenida igual)
-    div.onclick = (e) => {
-        mensajeSeleccionado = div; 
-        const menu = document.getElementById('menu-acciones');
-        if(menu) {
-            menu.style.display = 'block';
-            menu.style.top = e.pageY + "px";
-            menu.style.left = (e.pageX > 200 ? e.pageX - 150 : e.pageX) + "px";
-        }
-        e.stopPropagation(); 
-    };
 
     box.appendChild(div);
     box.scrollTop = box.scrollHeight;
