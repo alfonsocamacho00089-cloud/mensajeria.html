@@ -2022,8 +2022,10 @@ async function abrirTiendaMultimedia(tipo) {
             const data = await res.json();
             
             // Extraemos las URLs de los GIFs (usamos 'fixed_width_small' para que carguen rápido en el móvil)
-            const gifs = data.data.map(g => g.images.fixed_width_small.url);
-            renderizarItems(gifs, 'gif');
+            // En abrirTiendaMultimedia
+const gifs = data.data.map(g => g.images.fixed_width_small.url); 
+// Esto crea un array de TEXTOS (URLs), no de objetos.
+renderizarItems(gifs, 'gif');
         } catch (e) {
             console.error("Error GIPHY:", e);
             contenedor.innerHTML = "<p style='color:red;'>Error al conectar con el satélite de GIFs</p>";
