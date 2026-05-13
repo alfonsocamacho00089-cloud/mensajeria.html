@@ -2037,24 +2037,17 @@ async function abrirTiendaMultimedia(tipo) {
 
 
 
-function renderizarItems(listaUrls, tipo) {
+function renderizarItems(urls, tipoEnvio) {
     const contenedor = document.getElementById('contenedor-items-tienda');
-    contenedor.innerHTML = ""; 
-
-    listaUrls.forEach(url => {
+    contenedor.innerHTML = "";
+    urls.forEach(url => {
         const img = document.createElement('img');
-        img.src = url; 
-        img.style.width = "120px";
-        img.style.margin = "10px";
-        img.style.borderRadius = "8px";
-        img.style.cursor = "pointer";
-
-        // CAMBIA 'nombreDeTuFuncionReal' por la que usas para enviar mensajes
+        img.src = url;
+        img.style = "width:30%; margin:5px; border-radius:8px; cursor:pointer; background:#111;";
         img.onclick = () => {
-            nombreDeTuFuncionReal(url); 
+            enviarMediaPorURL(url, tipoEnvio);
             document.getElementById('modal-tienda').style.display = 'none';
         };
-
         contenedor.appendChild(img);
     });
      }
