@@ -2039,42 +2039,33 @@ renderizarItems(gifs, 'gif');
     }
      }
 
-
 function renderizarItems(urls, tipoEnvio) {
     const contenedor = document.getElementById('contenedor-items-tienda');
     contenedor.innerHTML = "";
 
-    if (!urls || urls.length === 0) {
-        contenedor.innerHTML = "<p style='color:gray;'>No hay energía multimedia disponible...</p>";
-        return;
-    }
+    // Si no hay URLs, intentamos recargar desde la biblioteca local por si la API falla
+    const listaFinal = (urls && urls.length > 0) ? urls : bibliotecaSpaceChat.stickers;
 
-    urls.forEach(url => {
-        // Solo ignoramos si es un enlace de ImgBB que sabemos que no sirve
-        if (typeof url === 'string' && url.includes('ibb.co') && url.includes('your-')) {
-            return; 
-        }
+    listaFinal.forEach(item => {
+        // Obtenemos la URL real: si es objeto buscamos la propiedad, si no, usamos el string
+        const urlReal = (typeof item === 'object') ? (item.url || item.fondo) : item;
+        
+        // Filtro de seguridad: si la URL sigue siendo un ejemplo roto, no la pongas
+        if (urlReal.includes('your-goku-bg')) return;
 
         const img = document.createElement('img');
-        
-        // EXTRACCIÓN REAL: Si la API manda un objeto, sacamos la URL. 
-        // Si manda un string (como tu .map de Giphy), lo usamos directo.
-        const urlFinal = (typeof url === 'object') ? (url.url || url.fixed_width_small.url) : url;
-        
-        img.src = urlFinal; 
+        img.src = urlReal;
         img.style = "width:30%; margin:5px; border-radius:8px; cursor:pointer; background:#111; min-height:50px;";
         
-        // Si la imagen falla al cargar, la quitamos para que no ocupe espacio
-        img.onerror = () => img.style.display = 'none';
-
         img.onclick = () => {
-            enviarMediaPorURL(urlFinal, tipoEnvio);
+            // ENVIAR SOLO EL STRING: Esto evita el [object Object]
+            enviarMediaPorURL(String(urlReal), tipoEnvio);
             document.getElementById('modal-tienda').style.display = 'none';
         };
+        
         contenedor.appendChild(img);
     });
      }
-
 
 // FUNCIÓN PARA CAMBIAR EL TEMA (FONDOS)
 function renderizarTemas() {
