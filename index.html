@@ -626,28 +626,21 @@ margin: 0;
 
 
 <div class="contenedor-flotante">
-    
     <div class="input-wrapper">
-        <button class="icon-btn" onclick="toggleStickers()">
+        <button class="icon-btn" onclick="document.getElementById('modal-tienda').style.display='block'">
             <span>😊</span>
         </button>
         
-        <textarea 
-    id="msg-text" 
-    placeholder="Mensaje" 
-    inputmode="text" 
-    enterkeyhint="send"
-    autocomplete="off"
-    oninput="this.style.height='40px'; this.style.height=this.scrollHeight+'px';"></textarea>
+        <textarea id="msg-text" placeholder="Mensaje" inputmode="text" enterkeyhint="send" oninput="this.style.height='40px'; this.style.height=this.scrollHeight+'px';"></textarea>
     
         <label class="icon-btn" for="input-archivo">
             <span>📎</span>
-            <input type="file" id="input-archivo" style="display: none;" onchange="prepararEnvioArchivo(this)">
+            <input type="file" id="input-archivo" style="display: none;" onchange="prepararEnvioMedia(this, 'archivo')">
         </label>
 
         <label class="icon-btn" for="input-foto">
             <span>📷</span>
-            <input type="file" id="input-foto" accept="image/*" style="display: none;" onchange="prepararEnvioFoto(this)">
+            <input type="file" id="input-foto" accept="image/*" style="display: none;" onchange="prepararEnvioMedia(this, 'foto')">
         </label>
     </div>
     
@@ -1987,7 +1980,26 @@ function previsualizarMiFoto(input) {
 
 }
 
-     
+     async function prepararEnvioMedia(input, tipoSugerido) {
+    if (!input.files || !input.files[0]) return;
+    const archivo = input.files[0];
+    
+    try {
+        // Convertimos el archivo pesado en una "URL de texto" (Base64)
+        const urlBase64 = await subirArchivoAFirebase(archivo);
+        
+        // Detectar si es video o foto si no viene definido
+        let tipo = tipoSugerido;
+        if (archivo.type.includes('video')) tipo = 'video';
+        if (archivo.type.includes('image')) tipo = 'foto';
+
+        await enviarMediaPorURL(urlBase64, tipo);
+        
+        input.value = ""; // Limpiar input
+    } catch (e) {
+        alert("H.A.R.V.I.S.: Error al convertir el archivo.");
+    }
+     }
     
 
      // --- 1. PROCESADOR MULTIMEDIA (SIN FIREBASE STORAGE) ---
@@ -2085,12 +2097,16 @@ function renderizarTemas() {
     bibliotecaSpaceChat.temas.forEach(tema => {
         const btn = document.createElement('div');
         btn.innerHTML = tema.nombre;
-        btn.style = `padding:15px; margin:10px; background:${tema.acento}; color:#000; font-weight:bold; border-radius:8px; cursor:pointer; text-align:center;`;
+        // Estilo Black & Gold dinámico
+        btn.style = `padding:15px; margin:10px; background:#111; color:${tema.acento}; border:1px solid ${tema.acento}; font-weight:bold; border-radius:8px; cursor:pointer; text-align:center;`;
+        
         btn.onclick = () => {
-            // Aplicamos el fondo al body o al contenedor del chat
+            // Aplicar cambios visuales
             document.body.style.background = tema.fondo;
             document.body.style.backgroundSize = "cover";
-            // Guardamos el tema preferido en el teléfono
+            document.body.style.backgroundAttachment = "fixed";
+            
+            // Guardar para la próxima vez que abra la app
             localStorage.setItem('tema_preferido', JSON.stringify(tema));
             document.getElementById('modal-tienda').style.display = 'none';
         };
@@ -2098,88 +2114,40 @@ function renderizarTemas() {
     });
      }
      
-async function manejarEnvioFoto(archivo) {
-    // 1. Mostrar un pequeño aviso de "Subiendo..." para que el usuario no se desespere
-    console.log("Subiendo imagen al satélite...");
+// FUNCIÓN MAESTRA: Todo lo que se envía (Gifs, Fotos, Stickers) pasa por aquí
+async function enviarMediaPorURL(url, tipo) {
+    console.log(`H.A.R.V.I.S.: Procesando envío de ${tipo}...`);
+    
+    // 1. Creamos el objeto del mensaje
+    const nuevoMensaje = {
+        texto: url, // La URL o el Base64
+        tipo: tipo, // 'foto', 'video', 'sticker', 'gif', 'archivo'
+        clase: 'msg-derecha',
+        hora: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        ts: Date.now()
+    };
 
     try {
-        // 2. Aquí va tu lógica de subida a Firebase Storage o Cloudinary
-        // Supongamos que esta función te devuelve el link:
-        const urlFoto = await subirArchivoAFirebase(archivo);
-
-        // 3. REUTILIZAMOS tu función maestra de envío
-        // Enviamos el link como si fuera un mensaje de texto
-        await enviarMensajeSatelital(urlFoto);
-        
-        console.log("✅ Foto enviada con éxito");
-    } catch (e) {
-        alert("Error al subir la foto");
-    }
-     }
-     
-     
-async function manejarSeleccionImagen(event) {
-    const archivo = event.target.files[0];
-    if (!archivo) return;
-
-    try {
-        // Usamos Base64 para evitar el plan de pago de Firebase Storage
-        const urlImagen = await subirArchivoAFirebase(archivo); 
-        
-        const idDestino = document.querySelector('#target-id').value;
-        const nuevoMensaje = {
-            contactoId: idDestino,
-            texto: urlImagen,
-            clase: 'msg-derecha',
-            hora: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-            status: 'enviado',
-            ts: Date.now()
-        };
-        
-        await guardarLocal('mensajes', nuevoMensaje); // Optimización con IndexedDB
-        await enviarMensajeSatelital(urlImagen);
-        event.target.value = "";
-    } catch (e) {
-        console.error("❌ Error en la subida:", e);
-        alert("Fallo al lanzar la imagen al espacio.");
-    }
-     }
-
-// . Modificación a toggleStickers para que funcione con el botón 😊
-function toggleStickers() {
-    const panel = document.getElementById('panel-stickers'); // Asegúrate de que tu HTML tenga este ID
-    if (!panel) return;
-
-    if (panel.style.display === 'none' || panel.style.transform === 'translateY(100%)') {
-        panel.style.display = 'block';
-        panel.style.transform = 'translateY(0)';
-        // CAMBIO AQUÍ: Debe ser el mismo nombre que definiste arriba
-        abrirTiendaMultimedia('stickers'); 
-    } else {
-        panel.style.transform = 'translateY(100%)';
-        setTimeout(() => { panel.style.display = 'none'; }, 300);
-    }
-     }
-
-     async function prepararEnvioVideo(input) {
-    if (input.files && input.files[0]) {
-        const archivo = input.files[0];
-        console.log("H.A.R.V.I.S.: Lanzando video al espacio..."); // Un toque de personalidad
-
-        try {
-            // Convierte a Base64 para ahorro de costos
-            const urlDescarga = await subirArchivoAFirebase(archivo); 
-            
-            // Envía con el tipo correcto para que el chat lo reconozca
-            await enviarMediaPorURL(urlDescarga, 'video');
-            
-            input.value = ""; 
-        } catch (e) {
-            console.error("Error al subir vídeo:", e);
-            alert("No se pudo enviar el vídeo");
+        // 2. Guardar en IndexedDB (para que no se pierda al recargar)
+        if (typeof guardarLocal === "function") {
+            await guardarLocal('mensajes', nuevoMensaje);
         }
+
+        // 3. Enviar a Firebase Realtime Database
+        // Aquí asegúrate de que enviarMensajeSatelital acepte un parámetro opcional
+        await enviarMensajeSatelital(nuevoMensaje); 
+        
+        console.log("✅ Lanzamiento exitoso");
+    } catch (e) {
+        console.error("❌ Error en la transmisión:", e);
     }
      }
+     
+     
+     
+
+
+     
 
 
 
