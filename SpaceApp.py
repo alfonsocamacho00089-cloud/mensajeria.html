@@ -82,4 +82,4 @@ if st.button("📦 Generar JSON para la App"):
         "gifs": final_gifs,
         "tema": {"nombre": "Space Gold", "fondo": "#000000", "acento": "#ffd700"}
     }
-    st.code(p2p_json, language="json")
+    st.code(space_tienda.json, language="json")
