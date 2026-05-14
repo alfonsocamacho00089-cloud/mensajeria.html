@@ -73,13 +73,21 @@ if 'ver_mas' in st.session_state:
             st.image(url_extra)
 
 # Generar JSON final para SpaceChat
+# --- CORRECCIÓN DEL FINAL DEL CÓDIGO ---
+
 if st.button("📦 Generar JSON para la App"):
     final_gifs = buscar_giphy("gifs", tema, 10)
     final_stickers = buscar_giphy("stickers", tema, 10)
     
-    p2p_json = {
+    # Esta es la variable correcta
+    archivo_final = {
         "stickers": final_stickers,
         "gifs": final_gifs,
-        "tema": {"nombre": "Space Gold", "fondo": "#000000", "acento": "#ffd700"}
+        "temas": [
+            {"nombre": "Space Gold", "fondo": "#000000", "acento": "#ffd700"}
+        ]
     }
-    st.code(space_tienda.json, language="json")
+    
+    # Mostramos el contenido de la variable 'archivo_final'
+    # Usamos st.json para que se vea ordenado
+    st.json(archivo_final)
