@@ -2,65 +2,56 @@ import streamlit as st
 import requests
 import json
 
-# Configuración de la página con los colores de SpaceChat
 st.set_page_config(page_title="Space Tienda - Previsualización", layout="wide")
 
-st.markdown("""
-    <style>
-    .main { background-color: #000000; color: #ffd700; }
-    .stButton>button { background-color: #ffd700; color: black; border-radius: 20px; }
-    </style>
-    """, unsafe_allow_html=True)
+# Estilo Black & Gold
+st.markdown("<style>.main { background-color: #000000; color: #ffd700; }</style>", unsafe_allow_html=True)
+st.title("🛰️ Satélite SpaceChat: Verificador")
 
-st.title("🛰️ Satélite SpaceChat: Verificador de Media")
+API_KEY = "y04S2YI56Z8Rz8Xp05f6e87h66v98mS2"
+terminos = st.text_input("Buscar:", "anime goku")
 
-# Configuración de búsqueda
-API_KEY = "y04S2YI56Z8Rz8Xp05f6e87h66v98mS2" 
-terminos = st.text_input("Términos de búsqueda (ej: anime goku, shinobu kocho):", "anime goku")
+# --- CABECERA PARA EVITAR BLOQUEOS ---
+headers = {
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
+}
 
-if st.button("🚀 Verificar y Cargar Tienda"):
-    url_api = f"https://api.giphy.com/v1/gifs/search?api_key={API_KEY}&q={terminos}&limit=20"
+if st.button("🚀 Verificar y Cargar"):
+    url_api = f"https://api.giphy.com/v1/gifs/search?api_key={API_KEY}&q={terminos}&limit=10"
     
     try:
-        respuesta = requests.get(url_api).json()
+        # 1. Pedimos los datos a Giphy
+        respuesta = requests.get(url_api, headers=headers).json()
         urls_verificadas = []
         
-        st.subheader("Resultados del Escaneo:")
-        
-        cols = st.columns(4)
-        col_idx = 0
+        cols = st.columns(3)
+        idx = 0
         
         for item in respuesta['data']:
             url_gif = item['images']['fixed_height']['url']
             
-            # --- BLOQUE CORREGIDO ---
             try:
-                # Ahora sí tiene los espacios necesarios hacia adentro
-                chequeo = requests.get(url_gif, stream=True, timeout=5)
+                # 2. Verificamos con el nuevo Header y un timeout más largo
+                chequeo = requests.get(url_gif, headers=headers, stream=True, timeout=10)
+                
                 if chequeo.status_code == 200:
                     urls_verificadas.append(url_gif)
-                    
-                    with cols[col_idx % 4]:
-                        st.image(url_gif, caption="✅ Verificado")
-                    col_idx += 1
+                    with cols[idx % 3]:
+                        st.image(url_gif)
+                    idx += 1
                 else:
-                    st.error(f"❌ Rota: {url_gif[:30]}...")
+                    st.warning(f"Salto: Código {chequeo.status_code}")
             except Exception as e:
-                st.warning(f"Error de conexión con un GIF: {e}")
-                continue
+                st.error(f"Fallo de red: {e}")
 
-        # Generar el JSON de prueba
-        datos_tienda = {
+        # 3. Resultado final
+        datos = {
             "stickers": urls_verificadas,
-            "temas": [
-                {"nombre": "Space Gold", "fondo": "#000000", "acento": "#ffd700"}
-            ]
+            "temas": [{"nombre": "Space Gold", "fondo": "#000000", "acento": "#ffd700"}]
         }
         
-        st.success(f"¡Listo! Se verificaron {len(urls_verificadas)} imágenes correctamente.")
-        
-        st.subheader("Archivo JSON resultante (p2p.json):")
-        st.json(datos_tienda)
+        st.success(f"✅ ¡Satélite activado! {len(urls_verificadas)} imágenes listas.")
+        st.json(datos)
         
     except Exception as e:
-        st.error(f"Error crítico en la API: {e}") # Corregido también el espacio aquí
+        st.error(f"Error crítico: {e}")
