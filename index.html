@@ -2028,23 +2028,42 @@ async function abrirTiendaMultimedia(tipo) {
 
 // FUNCIÓN PARA MOSTRAR LOS STICKERS Y GIFS
 
-function renderizarItems(items, tipoEnvio) {
+
+function renderizarItems(urls, tipoEnvio) {
     const contenedor = document.getElementById('contenedor-items-tienda');
     contenedor.innerHTML = "";
-    
-    items.forEach(item => {
-        // CORRECCIÓN: Verificamos si 'item' es un objeto o solo la URL
-        const urlFinal = (typeof item === 'object') ? item.url : item;
+
+    urls.forEach(item => {
+        // 1. FORZAMOS LA EXTRACCIÓN: 
+        // Si es un objeto de Giphy, sacamos la URL. Si es un string, lo dejamos igual.
+        let urlFinal = "";
+        
+        if (typeof item === 'object' && item !== null) {
+            // Buscamos en las propiedades comunes de Giphy
+            urlFinal = item.url || (item.images && item.images.fixed_height.url) || "";
+        } else {
+            urlFinal = item;
+        }
+
+        // Si después de todo no hay URL o es basura, saltamos
+        if (!urlFinal || typeof urlFinal !== 'string' || urlFinal.includes('[object')) return;
 
         const img = document.createElement('img');
-        img.src = urlFinal; // Aquí ponemos la URL limpia
-        img.style = "width:30%; margin:5px; border-radius:8px; cursor:pointer; background:#111;";
+        img.src = urlFinal;
+        img.style = "width:30%; margin:5px; border-radius:8px; cursor:pointer; background:#111; min-height:80px; object-fit:cover;";
         
         img.onclick = () => {
-            // Enviamos la URL limpia, no el objeto
-            enviarMediaPorURL(urlFinal, tipoEnvio);
+            // 2. LA PRUEBA DE FUEGO:
+            // Antes de enviar, verificamos en consola qué estamos mandando
+            console.log("H.A.R.V.I.S. verificando envío:", urlFinal);
+            
+            // Enviamos asegurando que sea un String limpio
+            enviarMediaPorURL(String(urlFinal).trim(), tipoEnvio);
+            
             document.getElementById('modal-tienda').style.display = 'none';
         };
+        
+        img.onerror = () => img.style.display = 'none';
         contenedor.appendChild(img);
     });
      }
