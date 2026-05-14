@@ -2052,13 +2052,14 @@ function renderizarItems(items, tipoEnvio) {
         img.style = "width:30%; margin:5px; border-radius:8px; cursor:pointer; background:#111; border: 1px solid #ffd700;";
         
         img.onclick = () => {
-            // IMPORTANTE: Enviamos urlFinal (el texto), no 'item' (el objeto)
-            enviarMediaPorURL(urlFinal, tipoEnvio);
+            // Si el tipo es 'gifs', lo renombramos a 'stickers' para que el chat lo pinte como imagen
+            // Si ya es 'stickers', se queda igual.
+            const tipoSeguro = (tipoEnvio === 'gifs') ? 'stickers' : tipoEnvio;
+            
+            enviarMediaPorURL(urlFinal, tipoSeguro);
+            
             document.getElementById('modal-tienda').style.display = 'none';
         };
-        contenedor.appendChild(img);
-    });
-     }
 
 // FUNCIÓN PARA APLICAR TEMAS (Goku, Shinobu, etc.)
 function renderizarTemas() {
