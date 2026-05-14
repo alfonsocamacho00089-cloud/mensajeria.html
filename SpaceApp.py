@@ -15,7 +15,7 @@ st.markdown("""
 st.title("🛰️ Satélite SpaceChat: Verificador de Media")
 
 # Configuración de búsqueda
-API_KEY = "y04S2YI56Z8Rz8Xp05f6e87h66v98mS2" # Tu API Key
+API_KEY = "y04S2YI56Z8Rz8Xp05f6e87h66v98mS2" 
 terminos = st.text_input("Términos de búsqueda (ej: anime goku, shinobu kocho):", "anime goku")
 
 if st.button("🚀 Verificar y Cargar Tienda"):
@@ -27,27 +27,26 @@ if st.button("🚀 Verificar y Cargar Tienda"):
         
         st.subheader("Resultados del Escaneo:")
         
-        # Columnas para mostrar las imágenes
         cols = st.columns(4)
         col_idx = 0
         
         for item in respuesta['data']:
             url_gif = item['images']['fixed_height']['url']
             
-            # Verificación técnica: ¿La imagen carga realmente?
+            # --- BLOQUE CORREGIDO ---
             try:
-                # POR ESTO (es más seguro):
-chequeo = requests.get(url_gif, stream=True, timeout=5)
+                # Ahora sí tiene los espacios necesarios hacia adentro
+                chequeo = requests.get(url_gif, stream=True, timeout=5)
                 if chequeo.status_code == 200:
                     urls_verificadas.append(url_gif)
                     
-                    # Mostrar en Streamlit si es válida
                     with cols[col_idx % 4]:
                         st.image(url_gif, caption="✅ Verificado")
                     col_idx += 1
                 else:
                     st.error(f"❌ Rota: {url_gif[:30]}...")
-            except:
+            except Exception as e:
+                st.warning(f"Error de conexión con un GIF: {e}")
                 continue
 
         # Generar el JSON de prueba
@@ -60,9 +59,8 @@ chequeo = requests.get(url_gif, stream=True, timeout=5)
         
         st.success(f"¡Listo! Se verificaron {len(urls_verificadas)} imágenes correctamente.")
         
-        # Mostrar el JSON que se enviaría a GitHub
         st.subheader("Archivo JSON resultante (p2p.json):")
         st.json(datos_tienda)
         
     except Exception as e:
-    st.error(f"Error con esta imagen: {e}") # Esto te dirá el motivo exacto en pantalla
+        st.error(f"Error crítico en la API: {e}") # Corregido también el espacio aquí
