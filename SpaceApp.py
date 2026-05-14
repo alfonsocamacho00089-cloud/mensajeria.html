@@ -91,3 +91,52 @@ if st.button("📦 Generar JSON para la App"):
     # Mostramos el contenido de la variable 'archivo_final'
     # Usamos st.json para que se vea ordenado
     st.json(archivo_final)
+
+    import base64
+import json
+
+# --- CONFIGURACIÓN DE CONEXIÓN ---
+TOKEN_GITHUB = "PEGA_AQUI_TU_TOKEN_DE_PASO_1"
+USUARIO = "TuUsuarioDeGitHub"
+REPO = "ElNombreDeTuRepositorio"
+RUTA_ARCHIVO = "tienda_space.json"
+
+def enviar_a_github(datos_json):
+    url = f"https://api.github.com/repos/{USUARIO}/{REPO}/contents/{RUTA_ARCHIVO}"
+    headers = {
+        "Authorization": f"token {TOKEN_GITHUB}",
+        "Accept": "application/vnd.github.v3+json"
+    }
+
+    # 1. Verificamos si el archivo existe para obtener su SHA (huella digital)
+    res_get = requests.get(url, headers=headers)
+    sha = res_get.json().get('sha') if res_get.status_code == 200 else None
+
+    # 2. Convertimos los datos a formato que GitHub entiende (Base64)
+    contenido_b64 = base64.b64encode(json.dumps(datos_json, indent=4).encode()).decode()
+    
+    payload = {
+        "message": "🛰️ Actualización automática desde Satélite SpaceChat",
+        "content": contenido_b64,
+        "sha": sha
+    }
+
+    # 3. Subimos el archivo
+    res_put = requests.put(url, headers=headers, json=payload)
+    return res_put.status_code
+
+# --- BOTÓN DE LANZAMIENTO ---
+if st.button("🚀 PUBLICAR TIENDA EN GITHUB"):
+    # Preparamos la maleta con los stickers y gifs que ya buscaste
+    paquete_datos = {
+        "stickers": stickers, 
+        "gifs": gifs,
+        "temas": [{"nombre": "Space Gold", "fondo": "#000000", "acento": "#ffd700"}]
+    }
+    
+    with st.spinner("Sincronizando con YouSpace..."):
+        resultado = enviar_a_github(paquete_datos)
+        if resultado in [200, 201]:
+            st.success("✅ ¡ÉXITO! tienda_space.json actualizado en GitHub.")
+        else:
+            st.error(f"❌ Error de conexión: Código {resultado}")
