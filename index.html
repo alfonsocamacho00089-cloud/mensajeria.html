@@ -1992,130 +1992,104 @@ inputMensaje.addEventListener('paste', async (event) => {
     }
 });
 
+// 1. Ya no hay llaves de API aquí, ¡más seguro!
+let bibliotecaSpaceChat = { stickers: [], gifs: [], temas: [] };
 
+// 2. FUNCIÓN PARA SINCRONIZAR CON GITHUB (El nuevo corazón automático)
+async function actualizarDesdeSatelite() {
+    try {
+        // Streamlit actualizará este archivo 'p2p.json' en tu GitHub
+        const res = await fetch('p2p.json'); 
+        bibliotecaSpaceChat = await res.json();
+        console.log("🛰️ Datos sincronizados con el satélite");
+    } catch (e) {
+        console.error("Error al sincronizar con GitHub:", e);
+    }
+}
 
-// CONFIGURACIÓN DE LA TIENDA
-const API_KEY_GIPHY = "y04S2YI56Z8Rz8Xp05f6e87h66v98mS2"; // <--- Tu llave activa
-
-const bibliotecaSpaceChat = {
-    stickers: [
-        "https://media0.giphy.com/media/cb9aF9tDyiRkY/giphy.gif", // Goku real
-        "https://media4.giphy.com/media/11S6Y63U8OAsGk/giphy.gif"  // Shinobu real
-     ],
-    temas: [
-        { nombre: "Space Gold", fondo: "#000", acento: "#ffd700", imagen: "" },
-        // Eliminamos las URLs "your-goku-bg" que no existen y causan error
-        { nombre: "Goku Ultra", fondo: "url('https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExNHJueXZueXpueXpueXpueXpueXpueXpueXpueXpueXpueXpueSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/cb9aF9tDyiRkY/giphy.gif')", acento: "#ff4500" },
-        { nombre: "Shinobu Butterfly", fondo: "url('https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExNHJueXZueXpueXpueXpueXpueXpueXpueXpueXpueXpueXpueSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/11S6Y63U8OAsGk/giphy.gif')", acento: "#da70d6" }
-    ]
-};
-
-// FUNCIÓN PARA CARGAR LA TIENDA
+// 3. FUNCIÓN PARA CARGAR LA TIENDA (Limpia y rápida)
 async function abrirTiendaMultimedia(tipo) {
     const contenedor = document.getElementById('contenedor-items-tienda');
-    contenedor.innerHTML = "<p style='color:white;'>Cargando energía...</p>";
-    
+    contenedor.innerHTML = "<p style='color:#ffd700;'>Cargando energía de YouSpace...</p>";
+
+    // Primero nos aseguramos de tener los datos más recientes
+    await actualizarDesdeSatelite();
+
     if (tipo === 'gifs') {
-        try {
-            // Ahora usamos GIPHY con tu llave. Buscamos 'anime' para empezar.
-            const urlGiphy = `https://api.giphy.com/v1/gifs/search?api_key=${API_KEY_GIPHY}&q=anime&limit=15&rating=g`;
-            const res = await fetch(urlGiphy);
-            const data = await res.json();
-            
-            // Extraemos las URLs de los GIFs (usamos 'fixed_width_small' para que carguen rápido en el móvil)
-            // En abrirTiendaMultimedia
-const gifs = data.data.map(g => g.images.fixed_height.url);
-// Esto crea un array de TEXTOS (URLs), no de objetos.
-renderizarItems(gifs, 'gif');
-        } catch (e) {
-            console.error("Error GIPHY:", e);
-            contenedor.innerHTML = "<p style='color:red;'>Error al conectar con el satélite de GIFs</p>";
-        }
+        // Ahora cargamos lo que Streamlit envió a la carpeta 'gifs'
+        renderizarItems(bibliotecaSpaceChat.gifs, 'gif');
     } else if (tipo === 'stickers') {
+        // Ahora cargamos lo que Streamlit envió a 'stickers'
         renderizarItems(bibliotecaSpaceChat.stickers, 'sticker');
     } else if (tipo === 'temas') {
         renderizarTemas();
     }
      }
 
+// FUNCIÓN PARA MOSTRAR LOS STICKERS Y GIFS
 function renderizarItems(urls, tipoEnvio) {
     const contenedor = document.getElementById('contenedor-items-tienda');
     contenedor.innerHTML = "";
 
-    // Si no hay URLs, intentamos recargar desde la biblioteca local por si la API falla
-    const listaFinal = (urls && urls.length > 0) ? urls : bibliotecaSpaceChat.stickers;
-
-    listaFinal.forEach(item => {
-        // Obtenemos la URL real: si es objeto buscamos la propiedad, si no, usamos el string
-        const urlReal = (typeof item === 'object') ? (item.url || item.fondo) : item;
-        
-        // Filtro de seguridad: si la URL sigue siendo un ejemplo roto, no la pongas
-        if (urlReal.includes('your-goku-bg')) return;
-
+    // Usamos las URLs que llegaron del Satélite (GitHub)
+    urls.forEach(urlReal => {
         const img = document.createElement('img');
         img.src = urlReal;
-        img.style = "width:30%; margin:5px; border-radius:8px; cursor:pointer; background:#111; min-height:50px;";
+        // Estética SpaceChat: 3 por fila para móvil
+        img.style = "width:30%; margin:1%; border:1px solid #ffd700; border-radius:8px; cursor:pointer; background:#111;";
         
         img.onclick = () => {
-            // ENVIAR SOLO EL STRING: Esto evita el [object Object]
             enviarMediaPorURL(String(urlReal), tipoEnvio);
             document.getElementById('modal-tienda').style.display = 'none';
         };
-        
         contenedor.appendChild(img);
     });
-     }
+}
 
-// FUNCIÓN PARA CAMBIAR EL TEMA (FONDOS)
+// FUNCIÓN PARA APLICAR TEMAS (Goku, Shinobu, etc.)
 function renderizarTemas() {
     const contenedor = document.getElementById('contenedor-items-tienda');
     contenedor.innerHTML = "";
+
+    // Los temas ahora vienen del JSON automático
     bibliotecaSpaceChat.temas.forEach(tema => {
         const btn = document.createElement('div');
-        btn.innerHTML = tema.nombre;
-        // Estilo Black & Gold dinámico
-        btn.style = `padding:15px; margin:10px; background:#111; color:${tema.acento}; border:1px solid ${tema.acento}; font-weight:bold; border-radius:8px; cursor:pointer; text-align:center;`;
+        btn.innerHTML = `✨ ${tema.nombre}`;
+        btn.style = `padding:15px; margin:10px; background:#111; color:${tema.acento}; border:2px solid ${tema.acento}; font-weight:bold; border-radius:12px; cursor:pointer; text-align:center;`;
         
         btn.onclick = () => {
-            // Aplicar cambios visuales
-            document.body.style.background = tema.fondo;
+            document.body.style.background = tema.fondo; // Puede ser color o url('')
             document.body.style.backgroundSize = "cover";
             document.body.style.backgroundAttachment = "fixed";
             
-            // Guardar para la próxima vez que abra la app
+            // Guardamos tu preferencia en el móvil
             localStorage.setItem('tema_preferido', JSON.stringify(tema));
             document.getElementById('modal-tienda').style.display = 'none';
         };
         contenedor.appendChild(btn);
     });
-     }
-     
-// FUNCIÓN MAESTRA: Todo lo que se envía (Gifs, Fotos, Stickers) pasa por aquí
+}
+
+// LA FUNCIÓN MAESTRA NO CAMBIA (Es el puente con Firebase e IndexedDB)
 async function enviarMediaPorURL(url, tipo) {
-    console.log(`H.A.R.V.I.S.: Procesando envío de ${tipo}...`);
+    console.log(`H.A.R.V.I.S.: Lanzando ${tipo}...`);
     
-    // 1. Creamos el objeto del mensaje
     const nuevoMensaje = {
-        texto: url, // La URL o el Base64
-        tipo: tipo, // 'foto', 'video', 'sticker', 'gif', 'archivo'
+        texto: url,
+        tipo: tipo,
         clase: 'msg-derecha',
         hora: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
         ts: Date.now()
     };
 
     try {
-        // 2. Guardar en IndexedDB (para que no se pierda al recargar)
-        if (typeof guardarLocal === "function") {
-            await guardarLocal('mensajes', nuevoMensaje);
-        }
-
-        // 3. Enviar a Firebase Realtime Database
-        // Aquí asegúrate de que enviarMensajeSatelital acepte un parámetro opcional
+        // Guarda en el almacenamiento local del navegador (IndexedDB)
+        if (typeof guardarLocal === "function") await guardarLocal('mensajes', nuevoMensaje);
+        // Envía a la base de datos en tiempo real (Firebase)
         await enviarMensajeSatelital(nuevoMensaje); 
-        
-        console.log("✅ Lanzamiento exitoso");
+        console.log("✅ Transmisión completada");
     } catch (e) {
-        console.error("❌ Error en la transmisión:", e);
+        console.error("❌ Fallo en la antena:", e);
     }
      }
      
