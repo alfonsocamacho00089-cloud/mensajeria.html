@@ -13,7 +13,7 @@ st.markdown("""
 
 # --- CONFIGURACIÓN ---
 # Usamos tu nueva llave que ya dio código 200
-API_KEY = "8qg9l4A2jlKfefIpSwllK3Tt6XvdjxfD" 
+API_KEY = "8qg9l4A2jlKfefipSwIIK3Tt6XvdJxfD" 
 
 def buscar_giphy(tipo, query, limite=5):
     url = f"https://api.giphy.com/v1/{tipo}/search?api_key={API_KEY}&q={query}&limit={limite}"
