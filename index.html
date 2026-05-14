@@ -2032,30 +2032,28 @@ function renderizarItems(urls, tipoEnvio) {
     contenedor.innerHTML = "";
 
     if (!urls || urls.length === 0) {
-        contenedor.innerHTML = "<p style='color:gray;'>No hay energía multimedia disponible...</p>";
+        contenedor.innerHTML = "<p style='color:#ffd700;'>Buscando señales en el espacio...</p>";
         return;
     }
 
     urls.forEach(url => {
-        // Solo ignoramos si es un enlace de ImgBB que sabemos que no sirve
-        if (typeof url === 'string' && url.includes('ibb.co') && url.includes('your-')) {
-            return; 
-        }
+        // Ignorar enlaces de prueba o rotos
+        if (typeof url === 'string' && url.includes('your-')) return; 
 
         const img = document.createElement('img');
         
-        // EXTRACCIÓN REAL: Si la API manda un objeto, sacamos la URL. 
-        // Si manda un string (como tu .map de Giphy), lo usamos directo.
-        const urlFinal = (typeof url === 'object') ? (url.url || url.fixed_width_small.url) : url;
+        // ASEGURAMOS EL STRING: Aquí matamos el error [object Object]
+        const urlFinal = (typeof url === 'object') ? (url.url || url.fixed_height?.url) : url;
         
         img.src = urlFinal; 
-        img.style = "width:30%; margin:5px; border-radius:8px; cursor:pointer; background:#111; min-height:50px;";
+        // Estilo Black & Gold para la cuadrícula
+        img.style = "width:30%; margin:1.5%; border:1px solid #ffd700; border-radius:8px; cursor:pointer; background:#000; min-height:80px; object-fit:cover;";
         
-        // Si la imagen falla al cargar, la quitamos para que no ocupe espacio
         img.onerror = () => img.style.display = 'none';
 
         img.onclick = () => {
-            enviarMediaPorURL(urlFinal, tipoEnvio);
+            // Enviamos estrictamente el string de la URL
+            enviarMediaPorURL(String(urlFinal), tipoEnvio);
             document.getElementById('modal-tienda').style.display = 'none';
         };
         contenedor.appendChild(img);
