@@ -36,7 +36,8 @@ if st.button("🚀 Verificar y Cargar Tienda"):
             
             # Verificación técnica: ¿La imagen carga realmente?
             try:
-                chequeo = requests.head(url_gif, timeout=3)
+                # POR ESTO (es más seguro):
+chequeo = requests.get(url_gif, stream=True, timeout=5)
                 if chequeo.status_code == 200:
                     urls_verificadas.append(url_gif)
                     
@@ -64,4 +65,4 @@ if st.button("🚀 Verificar y Cargar Tienda"):
         st.json(datos_tienda)
         
     except Exception as e:
-        st.error(f"Error en la conexión: {e}")
+    st.error(f"Error con esta imagen: {e}") # Esto te dirá el motivo exacto en pantalla
