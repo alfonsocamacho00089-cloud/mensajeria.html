@@ -2086,10 +2086,13 @@ function renderizarTemas() {
 
 // LA FUNCIÓN MAESTRA NO CAMBIA (Es el puente con Firebase e IndexedDB)
 async function enviarMediaPorURL(url, tipo) {
+    // H.A.R.V.I.S. verifica que no enviemos basura al espacio
+    const urlSegura = (typeof url === 'object') ? (url.url || JSON.stringify(url)) : url;
+
     console.log(`H.A.R.V.I.S.: Lanzando ${tipo}...`);
     
     const nuevoMensaje = {
-        texto: url,
+        texto: String(urlSegura), // Forzamos String para evitar el [object Object]
         tipo: tipo,
         clase: 'msg-derecha',
         hora: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
@@ -2097,16 +2100,13 @@ async function enviarMediaPorURL(url, tipo) {
     };
 
     try {
-        // Guarda en el almacenamiento local del navegador (IndexedDB)
         if (typeof guardarLocal === "function") await guardarLocal('mensajes', nuevoMensaje);
-        // Envía a la base de datos en tiempo real (Firebase)
         await enviarMensajeSatelital(nuevoMensaje); 
         console.log("✅ Transmisión completada");
     } catch (e) {
         console.error("❌ Fallo en la antena:", e);
     }
      }
-     
      
      async function actualizarDesdeSatelite() {
     try {
