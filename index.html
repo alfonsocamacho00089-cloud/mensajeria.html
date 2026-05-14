@@ -2094,7 +2094,22 @@ async function enviarMediaPorURL(url, tipo) {
      }
      
      
-     
+     async function actualizarDesdeSatelite() {
+    try {
+        // Usamos el nombre que definimos: tienda_space.json
+        // Agregamos un número aleatorio al final para que no use la memoria vieja (caché)
+        const res = await fetch(`tienda_space.json?v=${Date.now()}`); 
+        
+        if (!res.ok) throw new Error("Archivo tienda_space.json no encontrado");
+
+        bibliotecaSpaceChat = await res.json();
+        console.log("🛰️ Satélite sincronizado: tienda_space.json cargado.");
+    } catch (e) {
+        console.error("Error al sincronizar con GitHub:", e);
+        // Si falla, evitamos que la app explote dejando la biblioteca vacía
+        bibliotecaSpaceChat = { stickers: [], gifs: [], temas: [] };
+    }
+     }
 
 
      
