@@ -1,57 +1,37 @@
 import streamlit as st
 import requests
-import json
 
-st.set_page_config(page_title="Space Tienda - Previsualización", layout="wide")
+st.set_page_config(page_title="Space Tienda - Buscador Libre", layout="wide")
 
 # Estilo Black & Gold
 st.markdown("<style>.main { background-color: #000000; color: #ffd700; }</style>", unsafe_allow_html=True)
-st.title("🛰️ Satélite SpaceChat: Verificador")
+st.title("🛰️ Buscador Global SpaceChat")
 
 API_KEY = "y04S2YI56Z8Rz8Xp05f6e87h66v98mS2"
-terminos = st.text_input("Buscar:", "anime goku")
 
-# --- CABECERA PARA EVITAR BLOQUEOS ---
-headers = {
-    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
-}
+# Aquí puedes escribir "carros", "messi", "explosiones", lo que quieras
+terminos = st.text_input("Escribe lo que quieras buscar en la tienda:", "funny cats")
 
-if st.button("🚀 Verificar y Cargar"):
-    url_api = f"https://api.giphy.com/v1/gifs/search?api_key={API_KEY}&q={terminos}&limit=10"
+if st.button("🔍 Cargar GIFs"):
+    # Buscamos en Giphy sin filtros pesados
+    url_api = f"https://api.giphy.com/v1/gifs/search?api_key={API_KEY}&q={terminos}&limit=12"
     
     try:
-        # 1. Pedimos los datos a Giphy
-        respuesta = requests.get(url_api, headers=headers).json()
-        urls_verificadas = []
+        respuesta = requests.get(url_api).json()
         
-        cols = st.columns(3)
-        idx = 0
-        
-        for item in respuesta['data']:
-            url_gif = item['images']['fixed_height']['url']
-            
-            try:
-                # 2. Verificamos con el nuevo Header y un timeout más largo
-                chequeo = requests.get(url_gif, headers=headers, stream=True, timeout=10)
+        if not respuesta['data']:
+            st.warning("No se encontró nada para esa búsqueda. Intenta con otra palabra.")
+        else:
+            cols = st.columns(3)
+            for idx, item in enumerate(respuesta['data']):
+                # Extraemos la URL directa
+                url_gif = item['images']['fixed_height']['url']
                 
-                if chequeo.status_code == 200:
-                    urls_verificadas.append(url_gif)
-                    with cols[idx % 3]:
-                        st.image(url_gif)
-                    idx += 1
-                else:
-                    st.warning(f"Salto: Código {chequeo.status_code}")
-            except Exception as e:
-                st.error(f"Fallo de red: {e}")
-
-        # 3. Resultado final
-        datos = {
-            "stickers": urls_verificadas,
-            "temas": [{"nombre": "Space Gold", "fondo": "#000000", "acento": "#ffd700"}]
-        }
-        
-        st.success(f"✅ ¡Satélite activado! {len(urls_verificadas)} imágenes listas.")
-        st.json(datos)
-        
+                # Lo mostramos directo sin preguntar
+                with cols[idx % 3]:
+                    st.image(url_gif, use_column_width=True)
+            
+            st.success(f"✅ Mostrando resultados para: {terminos}")
+            
     except Exception as e:
-        st.error(f"Error crítico: {e}")
+        st.error(f"Error de conexión: {e}")
