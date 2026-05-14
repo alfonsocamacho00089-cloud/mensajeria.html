@@ -1,8 +1,10 @@
 import streamlit as st
 import requests
+# PRUEBA CON ESTA LLAVE PÚBLICA (Cópiala tal cual)
+API_KEY_PRUEBA = "dc6zaTOxFJmzC" 
 
+url = f"https://api.giphy.com/v1/gifs/search?api_key={API_KEY_PRUEBA}&q=ironman&limit=1"
 # PEGA TU CLAVE AQUÍ OTRA VEZ
-tu_clave = "8qg9l4A2jlKfefIpSwllK3Tt6XvdjxfD"
 
 st.title("Prueba Maestra de Conexión")
 
