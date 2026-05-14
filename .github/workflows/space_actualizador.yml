@@ -1,0 +1,32 @@
+name: Satelite de Limpieza SpaceChat
+
+on:
+  schedule:
+    - cron: '0 9 * * *' 
+  workflow_dispatch: # Botón para ejecutarlo a mano en GitHub
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Descargando repositorio
+        uses: actions/checkout@v2
+
+      - name: Configurando Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.9'
+
+      - name: Instalando librerias
+        run: pip install -r requirements.txt
+
+      - name: Ejecutando script de limpieza
+        run: python SpaceApp.py # Nombre del script de Python
+
+      - name: Guardando cambios en la tienda
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add space_tienda.json
+          git commit -m "🚀 Tienda actualizada con imagenes verificadas" || exit 0
+          git push
