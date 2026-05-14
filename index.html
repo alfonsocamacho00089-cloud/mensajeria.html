@@ -2027,33 +2027,16 @@ async function abrirTiendaMultimedia(tipo) {
      }
 
 // FUNCIÓN PARA MOSTRAR LOS STICKERS Y GIFS
+
 function renderizarItems(urls, tipoEnvio) {
     const contenedor = document.getElementById('contenedor-items-tienda');
     contenedor.innerHTML = "";
-
-    if (!urls || urls.length === 0) {
-        contenedor.innerHTML = "<p style='color:#ffd700;'>Buscando señales en el espacio...</p>";
-        return;
-    }
-
     urls.forEach(url => {
-        // Ignorar enlaces de prueba o rotos
-        if (typeof url === 'string' && url.includes('your-')) return; 
-
         const img = document.createElement('img');
-        
-        // ASEGURAMOS EL STRING: Aquí matamos el error [object Object]
-        const urlFinal = (typeof url === 'object') ? (url.url || url.fixed_height?.url) : url;
-        
-        img.src = urlFinal; 
-        // Estilo Black & Gold para la cuadrícula
-        img.style = "width:30%; margin:1.5%; border:1px solid #ffd700; border-radius:8px; cursor:pointer; background:#000; min-height:80px; object-fit:cover;";
-        
-        img.onerror = () => img.style.display = 'none';
-
+        img.src = url;
+        img.style = "width:30%; margin:5px; border-radius:8px; cursor:pointer; background:#111;";
         img.onclick = () => {
-            // Enviamos estrictamente el string de la URL
-            enviarMediaPorURL(String(urlFinal), tipoEnvio);
+            enviarMediaPorURL(url, tipoEnvio);
             document.getElementById('modal-tienda').style.display = 'none';
         };
         contenedor.appendChild(img);
