@@ -2028,15 +2028,21 @@ async function abrirTiendaMultimedia(tipo) {
 
 // FUNCIÓN PARA MOSTRAR LOS STICKERS Y GIFS
 
-function renderizarItems(urls, tipoEnvio) {
+function renderizarItems(items, tipoEnvio) {
     const contenedor = document.getElementById('contenedor-items-tienda');
     contenedor.innerHTML = "";
-    urls.forEach(url => {
+    
+    items.forEach(item => {
+        // CORRECCIÓN: Verificamos si 'item' es un objeto o solo la URL
+        const urlFinal = (typeof item === 'object') ? item.url : item;
+
         const img = document.createElement('img');
-        img.src = url;
+        img.src = urlFinal; // Aquí ponemos la URL limpia
         img.style = "width:30%; margin:5px; border-radius:8px; cursor:pointer; background:#111;";
+        
         img.onclick = () => {
-            enviarMediaPorURL(url, tipoEnvio);
+            // Enviamos la URL limpia, no el objeto
+            enviarMediaPorURL(urlFinal, tipoEnvio);
             document.getElementById('modal-tienda').style.display = 'none';
         };
         contenedor.appendChild(img);
