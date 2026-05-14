@@ -2086,22 +2086,16 @@ function renderizarTemas() {
 
 // LA FUNCIÓN MAESTRA NO CAMBIA (Es el puente con Firebase e IndexedDB)
 async function enviarMediaPorURL(url, tipo) {
-    // H.A.R.V.I.S. verifica que no enviemos basura al espacio
-    const urlSegura = (typeof url === 'object') ? (url.url || JSON.stringify(url)) : url;
-
-    console.log(`H.A.R.V.I.S.: Lanzando ${tipo}...`);
+    // 1. Extraemos solo el texto de la URL para que no viajen objetos
+    const urlLimpia = (typeof url === 'object') ? (url.url || url.fixed_height?.url) : url;
     
-    const nuevoMensaje = {
-        texto: String(urlSegura), // Forzamos String para evitar el [object Object]
-        tipo: tipo,
-        clase: 'msg-derecha',
-        hora: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        ts: Date.now()
-    };
+    console.log(`H.A.R.V.I.S.: Lanzando ${tipo}...`);
 
     try {
-        if (typeof guardarLocal === "function") await guardarLocal('mensajes', nuevoMensaje);
-        await enviarMensajeSatelital(nuevoMensaje); 
+        // 2. LLAMADA CORRECTA: Pasamos los dos parámetros que espera la función
+        // En lugar de enviar 'nuevoMensaje' (el objeto), enviamos el texto y el tipo
+        await enviarMensajeSatelital(String(urlLimpia), tipo); 
+        
         console.log("✅ Transmisión completada");
     } catch (e) {
         console.error("❌ Fallo en la antena:", e);
