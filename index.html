@@ -2034,32 +2034,36 @@ function renderizarItems(items, tipoEnvio) {
     contenedor.innerHTML = "";
     
     items.forEach(item => {
-        // Buscamos la URL. Si 'item' es un objeto, extraemos la propiedad 'url'.
-        // Si ya es un texto, lo usamos directamente.
+        // 1. Extracción de URL segura
         let urlFinal = "";
-        
         if (typeof item === 'string') {
             urlFinal = item;
         } else if (item && item.url) {
             urlFinal = item.url;
         } else {
-            // Caso de seguridad por si el objeto viene muy anidado
             urlFinal = item; 
         }
 
         const img = document.createElement('img');
         img.src = urlFinal;
+        // Mantenemos tu estilo Black & Gold con el borde dorado
         img.style = "width:30%; margin:5px; border-radius:8px; cursor:pointer; background:#111; border: 1px solid #ffd700;";
         
         img.onclick = () => {
-            // Si el tipo es 'gifs', lo renombramos a 'stickers' para que el chat lo pinte como imagen
-            // Si ya es 'stickers', se queda igual.
+            // 2. EL TRUCO MAESTRO: Si es 'gifs', lo disfrazamos de 'stickers' 
+            // para que tu app lo pinte como imagen y no como URL.
             const tipoSeguro = (tipoEnvio === 'gifs') ? 'stickers' : tipoEnvio;
             
             enviarMediaPorURL(urlFinal, tipoSeguro);
             
             document.getElementById('modal-tienda').style.display = 'none';
         };
+
+        // Cerramos la carga de la imagen y la añadimos al contenedor
+        img.onerror = () => img.style.display = 'none';
+        contenedor.appendChild(img);
+    }); // Aquí se cierra el forEach
+} // Aquí se cierra la función
 
 // FUNCIÓN PARA APLICAR TEMAS (Goku, Shinobu, etc.)
 function renderizarTemas() {
