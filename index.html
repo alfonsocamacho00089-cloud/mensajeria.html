@@ -572,18 +572,30 @@ margin: 0;
  
 <div class="header" id="chat-header">
     <div class="header-content" onclick="abrirPerfilContacto()" style="cursor: pointer;">
-        <!-- StopPropagation evita que al darle atrás se abra el perfil -->
         <button onclick="manejarBotonIdentidad(); event.stopPropagation();" class="btn-back-clean">
-    <span style="display: inline-block; transform: scaleX(-1);">➔</span>
-</button>
+            <span style="display: inline-block; transform: scaleX(-1);">➔</span>
+        </button>
         <img src="https://via.placeholder.com/40" id="foto-perfil-header" class="foto-perfil">
         
         <div class="user-info">
             <h1 id="nombre-dueño-header">SpaceChat</h1>
-          
         </div>
     </div>
+
+    <div style="display: flex; align-items: center; gap: 15px; flex-shrink: 0;">
+        <button onclick="iniciarLlamadaSatelital('voz')" 
+                style="background: none; border: none; color: #ffd700; font-size: 20px; cursor: pointer; padding: 5px; transition: transform 0.2s;"
+                onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
+            📞
+        </button>
+        <button onclick="iniciarLlamadaSatelital('video')" 
+                style="background: none; border: none; color: #ffd700; font-size: 22px; cursor: pointer; padding: 5px; transition: transform 0.2s;"
+                onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
+            📹
+        </button>
+    </div>
 </div>
+
  <div id="chat-box">
  </div>
  <div id="aviso-seguridad" class="encriptado-box">
@@ -1671,7 +1683,7 @@ let mensajeSeleccionado = null;
 
     let textoReal = (typeof contenido === 'object') ? (contenido.texto || "") : contenido;
     
-    // 1. Auto-detección inteligente de tipo
+    // 1. Auto-detección de tipos (Imágenes y Videos nativos)
     if (textoReal.includes('i.ibb.co') || textoReal.includes('firebasestorage') || textoReal.includes('.gif') || textoReal.includes('giphy.com')) {
         tipo = 'foto';
     } else if (textoReal.startsWith('data:video/') || tipo === 'video') {
@@ -1682,21 +1694,69 @@ let mensajeSeleccionado = null;
     div.className = `mensaje ${clase}`;
     div.id = id;
 
-    // 2. Proyección Multimedia Avanzada
     let cuerpoHTML = "";
     
-    if (tipo === 'foto' || tipo === 'sticker' || tipo === 'stickers') {
-        // Render para imágenes, stickers y GIFs
+    // --- NUEVA LÓGICA: DETECCIÓN DE REDES SOCIALES ---
+    if (textoReal.includes('youtube.com/') || textoReal.includes('youtu.be/')) {
+        // Extraemos el ID del video de YouTube
+        let videoId = "";
+        if (textoReal.includes('youtu.be/')) {
+            videoId = textoReal.split('youtu.be/')[1].split(/[?#]/)[0];
+        } else {
+            videoId = textoReal.split('v=')[1]?.split('&')[0];
+        }
+        
+        cuerpoHTML = `
+            <div style="max-width:260px;">
+                <iframe src="https://www.youtube.com/embed/${videoId}" frameborder="0" allowfullscreen
+                        style="width:100%; height:150px; border-radius:12px; border: 2px solid #ffd700; background:#000;">
+                </iframe>
+                <a href="${textoReal}" target="_blank" rel="noopener noreferrer"
+                   style="display:flex; align-items:center; justify-content:center; margin-top:6px; padding:6px; background:#111; border: 1px solid #ffd700; border-radius:8px; color:#ffd700; font-size:11px; text-decoration:none; font-weight:bold; gap:6px;">
+                   🛑 Abrir en YouTube
+                </a>
+            </div>
+        `;
+    } 
+    else if (textoReal.includes('tiktok.com/')) {
+        // Para TikTok, los iframes directos a veces se bloquean por seguridad en móviles,
+        // así que estructuramos un reproductor web optimizado o su tarjeta de redirección estética
+        cuerpoHTML = `
+            <div style="max-width:240px; background:#111; border: 2px solid #ffd700; border-radius:12px; padding:10px; text-align:center;">
+                <div style="font-size:24px; margin-bottom:5px;">🎵</div>
+                <span style="font-size:12px; color:#fff; display:block; margin-bottom:8px; word-break:break-all;">${textoReal}</span>
+                <a href="${textoReal}" target="_blank" rel="noopener noreferrer"
+                   style="display:block; padding:6px; background:#000; border: 1px solid #ffd700; border-radius:8px; color:#ffd700; font-size:11px; text-decoration:none; font-weight:bold;">
+                   ⚫ Abrir en TikTok
+                </a>
+            </div>
+        `;
+    } 
+    else if (textoReal.includes('facebook.com/')) {
+        // Tarjeta estética para enlaces de Facebook
+        cuerpoHTML = `
+            <div style="max-width:240px; background:#111; border: 2px solid #ffd700; border-radius:12px; padding:10px; text-align:center;">
+                <div style="font-size:24px; margin-bottom:5px;">🔵</div>
+                <span style="font-size:12px; color:#fff; display:block; margin-bottom:8px; word-break:break-all;">Enlace de Facebook</span>
+                <a href="${textoReal}" target="_blank" rel="noopener noreferrer"
+                   style="display:block; padding:6px; background:#000; border: 1px solid #ffd700; border-radius:8px; color:#ffd700; font-size:11px; text-decoration:none; font-weight:bold;">
+                   🔷 Abrir en Facebook
+                </a>
+            </div>
+        `;
+    }
+    // --- FIN DE REDES SOCIALES ---
+    
+    // Mantenemos tus renders multimedia anteriores intactos
+    else if (tipo === 'foto' || tipo === 'sticker' || tipo === 'stickers') {
         cuerpoHTML = `<img src="${textoReal}" style="max-width:180px; border-radius:12px; display:block; border: 2px solid #ffd700;">`;
     } else if (tipo === 'video') {
-        // Render para videos nativos o en Base64 con estilo Black & Gold
         cuerpoHTML = `
             <video src="${textoReal}" controls playsinline
                    style="max-width:240px; max-height:320px; border-radius:12px; display:block; border: 2px solid #ffd700; background:#000;">
             </video>
         `;
     } else {
-        // Texto normal
         cuerpoHTML = `<span class="texto-msg">${textoReal}</span>`;
     }
 
@@ -2420,6 +2480,24 @@ function activarContactoEnChat(contacto) {
     cargarConversacionCon(contacto.id, contacto.nombre, contacto.foto);   
      }
 
+function iniciarLlamadaSatelital(tipoConexion) {
+    const inputTarget = document.querySelector('#target-id');
+    if (!inputTarget || !inputTarget.value) {
+        console.error("H.A.R.V.I.S.: No se puede llamar sin un satélite objetivo seleccionado.");
+        return;
+    }
+    
+    const targetID = inputTarget.value.trim();
+    const miID = localStorage.getItem('mi_dropis_id') || "ID_DESCONOCIDO";
+    
+    console.log(`H.A.R.V.I.S.: Solicitando enlace de ${tipoConexion} con el satélite: ${targetID}`);
+    
+    // Aquí pondremos el trigger de Firebase para que el teléfono de Arturo empiece a timbrar
+    // db.ref('llamadas/' + targetID).set({ ... });
+    
+    alert(`Llamando a ${targetID} por ${tipoConexion}... Preparando canales de WebRTC.`);
+     }
+     
      function cargarFotoInicial() {
     const fotoGuardada = localStorage.getItem('mi_foto');
     if (fotoGuardada && fotoGuardada !== "") {
