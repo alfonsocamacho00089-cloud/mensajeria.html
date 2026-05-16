@@ -2033,37 +2033,43 @@ function renderizarItems(items, tipoEnvio) {
     const contenedor = document.getElementById('contenedor-items-tienda');
     contenedor.innerHTML = "";
     
+    if (!items || items.length === 0) return;
+
     items.forEach(item => {
-        // 1. Extracción de URL segura
         let urlFinal = "";
+        
+        // --- EXTRACCIÓN INTELIGENTE DE URL ---
         if (typeof item === 'string') {
             urlFinal = item;
-        } else if (item && item.url) {
-            urlFinal = item.url;
-        } else {
-            urlFinal = item; 
+        } else if (item && typeof item === 'object') {
+            // Buscamos en todas las variantes posibles donde Giphy esconde el GIF animado
+            urlFinal = item.url || 
+                       (item.images && item.images.fixed_height && item.images.fixed_height.url) || 
+                       (item.images && item.images.original && item.images.original.url) || 
+                       "";
         }
+
+        // Si no encontramos ninguna URL válida, saltamos este elemento para no romper la grilla
+        if (!urlFinal || typeof urlFinal !== 'string' || urlFinal.includes('[object')) return;
 
         const img = document.createElement('img');
         img.src = urlFinal;
-        // Mantenemos tu estilo Black & Gold con el borde dorado
-        img.style = "width:30%; margin:5px; border-radius:8px; cursor:pointer; background:#111; border: 1px solid #ffd700;";
+        img.style = "width:30%; margin:5px; border-radius:8px; cursor:pointer; background:#111; border: 1px solid #ffd700; min-height:80px; object-fit:cover;";
         
         img.onclick = () => {
-            // 2. EL TRUCO MAESTRO: Si es 'gifs', lo disfrazamos de 'stickers' 
-            // para que tu app lo pinte como imagen y no como URL.
+            // Forzamos que se envíe como 'stickers' para usar tu lógica de dibujo que ya es exitosa
             const tipoSeguro = (tipoEnvio === 'gifs') ? 'stickers' : tipoEnvio;
             
+            console.log("H.A.R.V.I.S. enviando URL de GIF verificada:", urlFinal);
             enviarMediaPorURL(urlFinal, tipoSeguro);
             
             document.getElementById('modal-tienda').style.display = 'none';
         };
 
-        // Cerramos la carga de la imagen y la añadimos al contenedor
         img.onerror = () => img.style.display = 'none';
         contenedor.appendChild(img);
-    }); // Aquí se cierra el forEach
-} // Aquí se cierra la función
+    });
+     }
 
 // FUNCIÓN PARA APLICAR TEMAS (Goku, Shinobu, etc.)
 function renderizarTemas() {
