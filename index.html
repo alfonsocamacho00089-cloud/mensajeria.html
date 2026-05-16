@@ -863,7 +863,23 @@ margin: 0;
             </div>
     </div>
 </div>
-   
+   <div id="modal-llamada" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 15, 15, 0.85); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); z-index: 9999; flex-direction: column; align-items: center; justify-content: space-between; padding: 50px 20px; box-sizing: border-box; color: white;">
+    
+    <div style="text-align: center; margin-top: 40px;">
+        <div id="llamada-estado" style="font-size: 14px; color: #ffd700; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 10px;">Llamada Entrante...</div>
+        <h2 id="llamada-usuario" style="font-size: 28px; margin: 0; font-weight: 400;">Usuario Satelital</h2>
+    </div>
+
+    <div id="contenedor-videos-webrtc" style="display: none; width: 100%; flex: 1; margin: 20px 0; position: relative; justify-content: center; align-items: center; gap: 10px;">
+        <video id="video-remoto" autoplay playsinline style="width: 100%; height: 100%; background: #111; border-radius: 15px; border: 2px solid #ffd700; object-fit: cover;"></video>
+        <video id="video-local" autoplay playsinline muted style="position: absolute; bottom: 10px; right: 10px; width: 90px; height: 130px; background: #222; border-radius: 8px; border: 1px solid #ffd700; object-fit: cover;"></video>
+    </div>
+
+    <div style="display: flex; gap: 30px; margin-bottom: 40px; align-items: center;">
+        <button id="btn-aceptar-llamada" style="width: 65px; height: 65px; border-radius: 50%; background: #1b5e20; border: 2px solid #ffd700; color: white; font-size: 24px; cursor: pointer; display: none;">📞</button>
+        <button id="btn-colgar-llamada" style="width: 65px; height: 65px; border-radius: 50%; background: #b71c1c; border: 2px solid #b71c1c; color: white; font-size: 24px; cursor: pointer;">❌</button>
+    </div>
+   </div>
     
     <script>
      
@@ -2480,6 +2496,108 @@ function activarContactoEnChat(contacto) {
     cargarConversacionCon(contacto.id, contacto.nombre, contacto.foto);   
      }
 
+     // VARIABLES GLOBALES PARA CONTROL DE LLAMADA
+let llamadaRef = null;
+let miIdSatelital = localStorage.getItem('mi_dropis_id');
+
+// 1. EMISOR: Iniciar la llamada y timbrar en Firebase
+async function iniciarLlamadaSatelital(tipoConexion) {
+    const inputTarget = document.querySelector('#target-id');
+    if (!inputTarget || !inputTarget.value) return;
+    
+    const targetID = inputTarget.value.trim();
+    miIdSatelital = localStorage.getItem('mi_dropis_id') || "ID_DESCONOCIDO";
+    
+    console.log(`H.A.R.V.I.S.: Lanzando timbrado satelital de ${tipoConexion} hacia ${targetID}`);
+    
+    // Crear el nodo en Firebase para que el teléfono de Arturo empiece a sonar
+    llamadaRef = db.ref('llamadas_activas/' + targetID);
+    await llamadaRef.set({
+        from: miIdSatelital,
+        tipo: tipoConexion,
+        status: 'llamando',
+        ts: Date.now()
+    });
+
+    // Abrir la interfaz en modo "Llamando..."
+    mostrarInterfazLlamada(targetID, tipoConexion, 'saliendo');
+
+    // Escuchar si el receptor acepta, rechaza o cuelga la llamada
+    llamadaRef.on('value', snapshot => {
+        const data = snapshot.val();
+        if (!data) {
+            // Si el nodo desaparece, es porque colgaron o rechazaron
+            finalizarInterfazLlamada();
+        } else if (data.status === 'aceptada') {
+            document.getElementById('llamada-estado').innerText = "CONECTADO";
+            if (data.tipo === 'video') {
+                document.getElementById('contenedor-videos-webrtc').style.display = 'flex';
+                // Aquí se engancharán las cámaras nativas en el próximo paso
+            }
+        }
+    });
+}
+
+// 2. RECEPTOR: Escuchar la antena para detectar llamadas entrantes
+function activarAntenaDeLlamadas() {
+    if (!miIdSatelital) return;
+    
+    // Escuchamos si alguien escribe en nuestro ID dentro de llamadas_activas
+    db.ref('llamadas_activas/' + miIdSatelital).on('value', snapshot => {
+        const data = snapshot.val();
+        if (!data) {
+            finalizarInterfazLlamada();
+            return;
+        }
+
+        // Si el estado es 'llamando', significa que nos están timbrando en tiempo real
+        if (data.status === 'llamando') {
+            mostrarInterfazLlamada(data.from, data.tipo, 'entrante');
+            
+            // Configurar botón de Aceptar
+            const btnAceptar = document.getElementById('btn-aceptar-llamada');
+            btnAceptar.style.display = 'block';
+            btnAceptar.onclick = async () => {
+                await db.ref('llamadas_activas/' + miIdSatelital).update({ status: 'aceptada' });
+                document.getElementById('llamada-estado').innerText = "CONECTADO";
+                btnAceptar.style.display = 'none';
+                if (data.tipo === 'video') {
+                    document.getElementById('contenedor-videos-webrtc').style.display = 'flex';
+                }
+            };
+        }
+    });
+}
+
+// 3. CONTROL VISUAL: Mostrar u ocultar el modal de llamada
+function mostrarInterfazLlamada(usuario, tipo, direccion) {
+    const modal = document.getElementById('modal-llamada');
+    document.getElementById('llamada-usuario').innerText = usuario;
+    document.getElementById('llamada-estado').innerText = direccion === 'entrante' ? `Llamada de ${tipo} entrante...` : `Llamando por ${tipo}...`;
+    
+    document.getElementById('btn-aceptar-llamada').style.display = direccion === 'entrante' ? 'block' : 'none';
+    document.getElementById('contenedor-videos-webrtc').style.display = 'none';
+    
+    modal.style.display = 'flex';
+
+    // Configurar botón de Colgar/Rechazar
+    document.getElementById('btn-colgar-llamada').onclick = async () => {
+        const targetID = document.querySelector('#target-id')?.value?.trim();
+        // Borramos el nodo de Firebase para cortar la comunicación en ambos lados
+        await db.ref('llamadas_activas/' + miIdSatelital).remove();
+        if (targetID) await db.ref('llamadas_activas/' + targetID).remove();
+        finalizarInterfazLlamada();
+    };
+}
+
+function finalizarInterfazLlamada() {
+    document.getElementById('modal-llamada').style.display = 'none';
+    if (llamadaRef) llamadaRef.off();
+}
+
+// INICIALIZACIÓN: Activamos el radar de llamadas al cargar la app
+activarAntenaDeLlamadas();
+
 function iniciarLlamadaSatelital(tipoConexion) {
     const inputTarget = document.querySelector('#target-id');
     if (!inputTarget || !inputTarget.value) {
@@ -2497,6 +2615,8 @@ function iniciarLlamadaSatelital(tipoConexion) {
     
     alert(`Llamando a ${targetID} por ${tipoConexion}... Preparando canales de WebRTC.`);
      }
+
+
      
      function cargarFotoInicial() {
     const fotoGuardada = localStorage.getItem('mi_foto');
