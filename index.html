@@ -1241,9 +1241,16 @@ async function recuperarCuentaConID() {
             tipo: 0 
         });
         
-        const buffer = SuperAppPayload.encode(payload).finish();
-        const base64 = btoa(String.fromCharCode.apply(null, buffer));
-        
+        // POR ESTO (Forma ultra segura para archivos o textos grandes):
+const buffer = SuperAppPayload.encode(payload).finish();
+
+// Convertimos el buffer a string binario de forma segura paso a paso sin saturar el stack
+let binary = "";
+const len = buffer.byteLength;
+for (let i = 0; i < len; i++) {
+    binary += String.fromCharCode(buffer[i]);
+}
+const base64 = btoa(binary);
         // En Firebase lo dejamos con su tipo original si quieres, o con el validado. 
         // Es mejor dejarlo con tipoValidado para que el receptor tampoco tenga problemas.
         await db.ref('cola_satelital/' + targetID).push({
