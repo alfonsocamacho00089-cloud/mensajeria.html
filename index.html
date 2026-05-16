@@ -1671,21 +1671,32 @@ let mensajeSeleccionado = null;
 
     let textoReal = (typeof contenido === 'object') ? (contenido.texto || "") : contenido;
     
-    // Auto-detección mejorada: si incluye .gif o la URL de Giphy, se vuelve foto automáticamente
+    // 1. Auto-detección inteligente de tipo
     if (textoReal.includes('i.ibb.co') || textoReal.includes('firebasestorage') || textoReal.includes('.gif') || textoReal.includes('giphy.com')) {
         tipo = 'foto';
+    } else if (textoReal.startsWith('data:video/') || tipo === 'video') {
+        tipo = 'video';
     }
 
     const div = document.createElement('div');
     div.className = `mensaje ${clase}`;
     div.id = id;
 
+    // 2. Proyección Multimedia Avanzada
     let cuerpoHTML = "";
     
-    // CORRECCIÓN DE PALABRAS: Ahora acepta 'sticker', 'stickers' o 'foto'
     if (tipo === 'foto' || tipo === 'sticker' || tipo === 'stickers') {
+        // Render para imágenes, stickers y GIFs
         cuerpoHTML = `<img src="${textoReal}" style="max-width:180px; border-radius:12px; display:block; border: 2px solid #ffd700;">`;
+    } else if (tipo === 'video') {
+        // Render para videos nativos o en Base64 con estilo Black & Gold
+        cuerpoHTML = `
+            <video src="${textoReal}" controls playsinline
+                   style="max-width:240px; max-height:320px; border-radius:12px; display:block; border: 2px solid #ffd700; background:#000;">
+            </video>
+        `;
     } else {
+        // Texto normal
         cuerpoHTML = `<span class="texto-msg">${textoReal}</span>`;
     }
 
@@ -1702,7 +1713,6 @@ let mensajeSeleccionado = null;
     box.appendChild(div);
     box.scrollTop = box.scrollHeight;
      }
-
 
      
     async function marcarMensajeComoRecibido(msgId, emisorID) {
