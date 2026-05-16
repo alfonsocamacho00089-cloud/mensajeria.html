@@ -1662,11 +1662,10 @@ let mensajeSeleccionado = null;
     const box = document.getElementById('chat-box');
     if (!box) return;
 
-    // 1. Limpieza de seguridad: si llega el objeto, sacamos el texto
     let textoReal = (typeof contenido === 'object') ? (contenido.texto || "") : contenido;
     
-    // 2. Auto-detección: Si el texto empieza con http y termina en png/jpg/gif, es una foto
-    if (textoReal.includes('i.ibb.co') || textoReal.includes('firebasestorage')) {
+    // Auto-detección mejorada: si incluye .gif o la URL de Giphy, se vuelve foto automáticamente
+    if (textoReal.includes('i.ibb.co') || textoReal.includes('firebasestorage') || textoReal.includes('.gif') || textoReal.includes('giphy.com')) {
         tipo = 'foto';
     }
 
@@ -1674,9 +1673,10 @@ let mensajeSeleccionado = null;
     div.className = `mensaje ${clase}`;
     div.id = id;
 
-    // 3. Proyección Multimedia (El "Render")
     let cuerpoHTML = "";
-    if (tipo === 'foto' || tipo === 'sticker') {
+    
+    // CORRECCIÓN DE PALABRAS: Ahora acepta 'sticker', 'stickers' o 'foto'
+    if (tipo === 'foto' || tipo === 'sticker' || tipo === 'stickers') {
         cuerpoHTML = `<img src="${textoReal}" style="max-width:180px; border-radius:12px; display:block; border: 2px solid #ffd700;">`;
     } else {
         cuerpoHTML = `<span class="texto-msg">${textoReal}</span>`;
@@ -1694,7 +1694,7 @@ let mensajeSeleccionado = null;
 
     box.appendChild(div);
     box.scrollTop = box.scrollHeight;
- }
+     }
 
 
      
