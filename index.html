@@ -2572,23 +2572,32 @@ function activarAntenaDeLlamadas() {
 // 3. CONTROL VISUAL: Mostrar u ocultar el modal de llamada
 function mostrarInterfazLlamada(usuario, tipo, direccion) {
     const modal = document.getElementById('modal-llamada');
+    if (!modal) {
+        console.error("❌ H.A.R.V.I.S.: ¡El modal-llamada no existe en el HTML!");
+        return;
+    }
+    
     document.getElementById('llamada-usuario').innerText = usuario;
     document.getElementById('llamada-estado').innerText = direccion === 'entrante' ? `Llamada de ${tipo} entrante...` : `Llamando por ${tipo}...`;
     
     document.getElementById('btn-aceptar-llamada').style.display = direccion === 'entrante' ? 'block' : 'none';
     document.getElementById('contenedor-videos-webrtc').style.display = 'none';
     
-    modal.style.display = 'flex';
+    // --- FUERZA BRUTA VISUAL ---
+    modal.style.setProperty('display', 'flex', 'important');
+    modal.style.setProperty('z-index', '100000', 'important');
+    modal.style.position = 'fixed';
+    
+    console.log("🔔 H.A.R.V.I.S.: Interfaz de llamada activada en pantalla.");
 
     // Configurar botón de Colgar/Rechazar
     document.getElementById('btn-colgar-llamada').onclick = async () => {
         const targetID = document.querySelector('#target-id')?.value?.trim();
-        // Borramos el nodo de Firebase para cortar la comunicación en ambos lados
         await db.ref('llamadas_activas/' + miIdSatelital).remove();
         if (targetID) await db.ref('llamadas_activas/' + targetID).remove();
         finalizarInterfazLlamada();
     };
-}
+     }
 
 function finalizarInterfazLlamada() {
     document.getElementById('modal-llamada').style.display = 'none';
@@ -2598,23 +2607,6 @@ function finalizarInterfazLlamada() {
 // INICIALIZACIÓN: Activamos el radar de llamadas al cargar la app
 activarAntenaDeLlamadas();
 
-function iniciarLlamadaSatelital(tipoConexion) {
-    const inputTarget = document.querySelector('#target-id');
-    if (!inputTarget || !inputTarget.value) {
-        console.error("H.A.R.V.I.S.: No se puede llamar sin un satélite objetivo seleccionado.");
-        return;
-    }
-    
-    const targetID = inputTarget.value.trim();
-    const miID = localStorage.getItem('mi_dropis_id') || "ID_DESCONOCIDO";
-    
-    console.log(`H.A.R.V.I.S.: Solicitando enlace de ${tipoConexion} con el satélite: ${targetID}`);
-    
-    // Aquí pondremos el trigger de Firebase para que el teléfono de Arturo empiece a timbrar
-    // db.ref('llamadas/' + targetID).set({ ... });
-    
-    alert(`Llamando a ${targetID} por ${tipoConexion}... Preparando canales de WebRTC.`);
-     }
 
 
      
