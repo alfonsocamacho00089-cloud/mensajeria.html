@@ -1153,70 +1153,68 @@ async function recuperarCuentaConID() {
     window.listenerActivo = db.ref('cola_satelital/' + miID);
     
     window.listenerActivo.on('child_added', async (snapshot) => {
-    const data = snapshot.val();
-    if (!data || !data.p) return; 
+        const data = snapshot.val();
+        if (!data || !data.p) return; 
 
-    try {
-        const root = await cargarProto();
-        const SuperAppPayload = root.lookupType("SuperAppPayload");
-        const buffer = Uint8Array.from(atob(data.p), c => c.charCodeAt(0));
-        const decoded = SuperAppPayload.decode(buffer);
+        try {
+            const root = await cargarProto();
+            const SuperAppPayload = root.lookupType("SuperAppPayload");
+            const buffer = Uint8Array.from(atob(data.p), c => c.charCodeAt(0));
+            const decoded = SuperAppPayload.decode(buffer);
 
-        const emisorID = data.from; 
-        const tipoMediaRecibido = data.mediaType || 'texto'; // Leemos el tipo enviado
-        const chatAbiertoActualmente = document.querySelector('#target-id').value;
+            const emisorID = data.from; 
+            const tipoMediaRecibido = data.mediaType || 'texto'; 
+            const chatAbiertoActualmente = document.querySelector('#target-id').value;
 
-        // ... (Lógica de confirmación tipo 1 se mantiene igual) ...
+            const textoReal = decodeURIComponent(escape(atob(decoded.chatText)));
 
-        const textoReal = decodeURIComponent(escape(atob(decoded.chatText)));
+            // INTERCEPCIÓN MAESTRA: Si viene un gif, lo tratamos como sticker para que se dibuje como foto
+            const tipoValidado = (tipoMediaRecibido === 'gifs') ? 'stickers' : tipoMediaRecibido;
 
-        const nuevoMensaje = { 
-            id: decoded.msgId,
-            contactoId: emisorID,
-            texto: textoReal, 
-            tipo: tipoMediaRecibido, // Guardamos el tipo
-            clase: 'msg-izquierda',
-            status: 'recibido',
-            ts: Date.now(),
-            hora: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })
-        };
-       
-        await guardarLocal('mensajes', nuevoMensaje);
+            const nuevoMensaje = { 
+                id: decoded.msgId,
+                contactoId: emisorID,
+                texto: textoReal, 
+                tipo: tipoValidado, // Guardamos corregido en local
+                clase: 'msg-izquierda',
+                status: 'recibido',
+                ts: Date.now(),
+                hora: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })
+            };
+           
+            await guardarLocal('mensajes', nuevoMensaje);
 
-        if (emisorID === chatAbiertoActualmente) {
-            // Pasamos tipoMediaRecibido a pintarMensaje
-            pintarMensaje(textoReal, 'msg-izquierda', null, 'recibido', decoded.msgId, tipoMediaRecibido);
-        } else {
-            // Notificación (Si es media, podrías cambiar el cuerpo del mensaje)
-            const aviso = tipoMediaRecibido === 'texto' ? textoReal : "📷 Archivo multimedia";
-            
-            if ('serviceWorker' in navigator) {
-                navigator.serviceWorker.ready.then(reg => {
-                    reg.showNotification("Nuevo mensaje de " + emisorID, {
-                        body: aviso,
-                        icon: 'assets/logo-nuevo.png',
-                        data: { emisor: emisorID }
+            if (emisorID === chatAbiertoActualmente) {
+                // Pasamos el tipo validado para obligar al chat a dibujar la imagen
+                pintarMensaje(textoReal, 'msg-izquierda', null, 'recibido', decoded.msgId, tipoValidado);
+            } else {
+                const aviso = tipoValidado === 'texto' ? textoReal : "📷 Archivo multimedia";
+                
+                if ('serviceWorker' in navigator) {
+                    navigator.serviceWorker.ready.then(reg => {
+                        reg.showNotification("Nuevo mensaje de " + emisorID, {
+                            body: aviso,
+                            icon: 'assets/logo-nuevo.png',
+                            data: { emisor: emisorID }
+                        });
                     });
-                });
+                }
             }
-        }
 
-        if (typeof enviarEco === "function") enviarEco(decoded.msgId, emisorID);
-        snapshot.ref.remove(); 
+            if (typeof enviarEco === "function") enviarEco(decoded.msgId, emisorID);
+            snapshot.ref.remove(); 
 
-    } catch (e) { console.error("Error en Antena:", e); }
-});
-     }    
-// Agregamos parámetros opcionales: multimediaUrl y tipoMedia
+        } catch (e) { console.error("Error en Antena:", e); }
+    });
+     }
 
-        async function enviarMensajeSatelital(multimediaUrl = null, tipoMedia = 'texto') {
+        
+  async function enviarMensajeSatelital(multimediaUrl = null, tipoMedia = 'texto') {
     const inputMsg = document.querySelector('#msg-text');
     const inputTarget = document.querySelector('#target-id');
     
-    // Si multimediaUrl tiene datos, lo usamos. Si no, leemos el teclado.
     const msg = multimediaUrl ? multimediaUrl : (inputMsg ? inputMsg.value.trim() : "");
     
-    // Importante: Si no hay targetID, detenemos todo antes del error
     if (!inputTarget || !inputTarget.value) {
         console.error("H.A.R.V.I.S.: No hay un satélite de destino (ID vacío)");
         return;
@@ -1224,15 +1222,17 @@ async function recuperarCuentaConID() {
     const targetID = inputTarget.value.trim();
     const miID = localStorage.getItem('mi_dropis_id') || "ID_DESCONOCIDO";
 
-    if (!msg) return; // Evita enviar globos vacíos
+    if (!msg) return; 
 
     const msgId = "msg_" + Date.now();
+
+    // INTERCEPCIÓN MAESTRA: Si vas a enviar un gif, lo pintamos localmente como sticker
+    const tipoValidado = (tipoMedia === 'gifs') ? 'stickers' : tipoMedia;
 
     try {
         const root = await cargarProto();
         const SuperAppPayload = root.lookupType("SuperAppPayload");
         
-        // Protegemos el mensaje (sea texto o URL de foto)
         const msgProtegido = btoa(unescape(encodeURIComponent(msg))); 
         
         const payload = SuperAppPayload.create({ 
@@ -1244,17 +1244,18 @@ async function recuperarCuentaConID() {
         const buffer = SuperAppPayload.encode(payload).finish();
         const base64 = btoa(String.fromCharCode.apply(null, buffer));
         
-        // Lanzamiento a Firebase (Añadimos el campo mediaType para que no haya fallos)
+        // En Firebase lo dejamos con su tipo original si quieres, o con el validado. 
+        // Es mejor dejarlo con tipoValidado para que el receptor tampoco tenga problemas.
         await db.ref('cola_satelital/' + targetID).push({
             p: base64,
             from: miID,
             ts: Date.now(),
             msgId: msgId,
-            mediaType: tipoMedia 
+            mediaType: tipoValidado 
         });
 
-        // Pintamos y guardamos (pasando el tipoMedia)
-        pintarMensaje(msg, 'msg-derecha', null, 'enviado', msgId, tipoMedia);
+        // Pintamos y guardamos pasando el tipo corregido
+        pintarMensaje(msg, 'msg-derecha', null, 'enviado', msgId, tipoValidado);
         
         await guardarLocal('mensajes', { 
             id: msgId, 
@@ -1262,7 +1263,7 @@ async function recuperarCuentaConID() {
             texto: msg, 
             clase: 'msg-derecha', 
             status: 'enviado',
-            tipo: tipoMedia,
+            tipo: tipoValidado,
             ts: Date.now(),
             hora: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })
         });
@@ -1276,7 +1277,6 @@ async function recuperarCuentaConID() {
         console.error("❌ Fallo crítico en el lanzamiento:", e);
     }
      }
-  
             
         
 
