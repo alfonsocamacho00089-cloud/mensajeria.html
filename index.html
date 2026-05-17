@@ -2116,17 +2116,7 @@ inputMensaje.addEventListener('paste', async (event) => {
 // 1. Ya no hay llaves de API aquí, ¡más seguro!
 let bibliotecaSpaceChat = { stickers: [], gifs: [], temas: [] };
 
-// 2. FUNCIÓN PARA SINCRONIZAR CON GITHUB (El nuevo corazón automático)
-async function actualizarDesdeSatelite() {
-    try {
-        // Streamlit actualizará este archivo 'p2p.json' en tu GitHub
-        const res = await fetch('p2p.json'); 
-        bibliotecaSpaceChat = await res.json();
-        console.log("🛰️ Datos sincronizados con el satélite");
-    } catch (e) {
-        console.error("Error al sincronizar con GitHub:", e);
-    }
-}
+
 
 // 3. FUNCIÓN PARA CARGAR LA TIENDA (Limpia y rápida)
 async function abrirTiendaMultimedia(tipo) {
