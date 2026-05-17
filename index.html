@@ -1178,7 +1178,11 @@ async function activarAntena() {
     const miID = localStorage.getItem('mi_dropis_id');
     if (!miID) return;
 
-    if (window.listenerActivo) window.listenerActivo.off(); 
+    // 🔥 CONTROL TOTAL DE ANTENAS REPETIDAS: 
+    // Apagamos CUALQUIER rastro del listener anterior en Firebase antes de crear uno nuevo
+    if (window.listenerActivo) {
+        window.listenerActivo.off(); 
+    } 
 
     window.listenerActivo = db.ref('cola_satelital/' + miID);
     
@@ -1210,62 +1214,58 @@ async function activarAntena() {
                 hora: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })
             };
            
+            // [OPCIONAL] Aquí lo ideal sería que tu función 'guardarLocal' valide por 'id' antes de insertar
             await guardarLocal('mensajes', nuevoMensaje);
-// 🔊 INYECCIÓN DINÁMICA DE AUDIO (Desde tus archivos locales en MP3)
-const reproducirPingNativo = () => {
-    try {
-        const ping = new Audio('assets/ping-mensaje.mp3');
-        ping.volume = 1.0;
-        ping.play().catch(err => console.log("📡 H.A.R.V.I.S.: Chrome bloqueó el audio temporalmente hasta el próximo toque."));
-    } catch(e) {
-        console.error("Error al reproducir audio dinámico", e);
-    }
-};
 
-if (emisorID === chatAbiertoActualmente) {
-    pintarMensaje(textoReal, 'msg-izquierda', null, 'recibido', decoded.msgId, tipoValidado);
-    
-    // 🔥 SUENA DE UNA VEZ (Chat abierto)
-    reproducirPingNativo();
-} else {
-    const aviso = tipoValidado === 'texto' ? textoReal : "📷 Archivo multimedia";
-    
-    // 🔥 SUENA DE UNA VEZ (Chat en segundo plano)
-    reproducirPingNativo();
-    
-    try {
-        // 1. CONTROL DE NOTIFICACIONES NATIVAS (PWA)
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.ready.then(reg => {
-                reg.showNotification("Nuevo mensaje de " + emisorID, {
-                    body: aviso,
-                    icon: 'assets/logo-nuevo.png',
-                    badge: 'assets/logo-nuevo.png',
-                    vibrate: [200, 100, 200],
-                    sound: 'default',
-                    tag: emisorID, 
-                    renotify: true, 
-                    data: { emisor: emisorID }
-                });
-            });
+            const reproducirPingNativo = () => {
+                try {
+                    const ping = new Audio('assets/ping-mensaje.mp3');
+                    ping.volume = 1.0;
+                    ping.play().catch(err => console.log("📡 H.A.R.V.I.S.: Bloqueo temporal de audio."));
+                } catch(e) {
+                    console.error("Error al reproducir audio dinámico", e);
+                }
+            };
+
+            if (emisorID === chatAbiertoActualmente) {
+                pintarMensaje(textoReal, 'msg-izquierda', null, 'recibido', decoded.msgId, tipoValidado);
+                reproducirPingNativo();
+            } else {
+                const aviso = tipoValidado === 'texto' ? textoReal : "📷 Archivo multimedia";
+                reproducirPingNativo();
+                
+                try {
+                    if ('serviceWorker' in navigator) {
+                        navigator.serviceWorker.ready.then(reg => {
+                            reg.showNotification("Nuevo mensaje de " + emisorID, {
+                                body: aviso,
+                                icon: 'assets/logo-nuevo.png',
+                                badge: 'assets/logo-nuevo.png',
+                                vibrate: [200, 100, 200],
+                                sound: 'default',
+                                tag: emisorID, 
+                                renotify: true, 
+                                data: { emisor: emisorID }
+                            });
+                        });
+                    }
+                } catch (e) { 
+                    console.error("❌ H.A.R.V.I.S. detectó un error en notificación:", e); 
+                }
+            }
+
+            // 🔥 EL REMEDIO: La limpieza se ejecuta AQUÍ afuera. 
+            // No importa si el chat estaba abierto o cerrado, el mensaje ya se procesó de forma segura, 
+            // así que lo borramos de Firebase inmediatamente para que no se repita al reentrar.
+            if (typeof enviarEco === "function") {
+                enviarEco(decoded.msgId, emisorID);
+            }
+            snapshot.ref.remove(); 
+
+        } catch (e) { 
+            console.error("❌ H.A.R.V.I.S. detectó un error en Antena Principal:", e); 
         }
-
-        // 2. CONFIRMACIÓN Y LIMPIEZA EN FIREBASE
-        if (typeof enviarEco === "function") {
-            enviarEco(decoded.msgId, emisorID);
-        }
-        snapshot.ref.remove(); 
-
-    } catch (e) { 
-        console.error("❌ H.A.R.V.I.S. detectó un error en sub-antena:", e); 
-    }
-} // <-- Cierra el 'else'
-
-// === AQUÍ COMPLEMENTAS EL CIERRE SI ESTÁ EN TU ANTENA ===
-        } catch (e) {
-            console.error("❌ Error Antena Principal:", e);
-        }
-    });
+    }); 
      }
      
         
