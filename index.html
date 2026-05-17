@@ -2118,17 +2118,27 @@ let bibliotecaSpaceChat = { stickers: [], gifs: [], temas: [] };
 
 async function actualizarDesdeSatelite() {
     try {
-        // Usamos el nombre que definimos: tienda_space.json
-        // Agregamos un número aleatorio al final para que no use la memoria vieja (caché)
+        // Agregamos el timestamp para saltar la caché
         const res = await fetch(`tienda_space.json?v=${Date.now()}`); 
         
         if (!res.ok) throw new Error("Archivo tienda_space.json no encontrado");
 
-        bibliotecaSpaceChat = await res.json();
-        console.log("🛰️ Satélite sincronizado: tienda_space.json cargado.");
+        // 1. En vez de ir directo a .json(), leemos primero el archivo como texto plano
+        const textoPlano = await res.text();
+
+        // 2. Verificamos que el archivo de verdad tenga contenido antes de procesarlo
+        if (!textoPlano || textoPlano.trim() === "") {
+            throw new Error("El archivo tienda_space.json regresó completamente vacío.");
+        }
+
+        // 3. Si tiene texto, ahora sí lo convertimos a JSON de forma segura
+        bibliotecaSpaceChat = JSON.parse(textoPlano);
+        console.log("🛰️ Satélite sincronizado: tienda_space.json cargado con éxito.");
+
     } catch (e) {
-        console.error("Error al sincronizar con GitHub:", e);
-        // Si falla, evitamos que la app explote dejando la biblioteca vacía
+        console.error("❌ Error en la sincronización:", e.message);
+        
+        // El salvavidas: Si algo falla, dejamos la estructura limpia para que la app no explote
         bibliotecaSpaceChat = { stickers: [], gifs: [], temas: [] };
     }
      }
