@@ -2626,7 +2626,7 @@ async function iniciarLlamadaSatelital(tipoConexion) {
             }
         });
 
-    } catch (err) {
+    } catch (err) { // <-- Ahora sí el catch está en su lugar correcto después de cerrar el try
         console.error("❌ H.A.R.V.I.S.: Error al acceder a los periféricos:", err);
         alert("No se pudo acceder a la cámara o al micrófono.");
     }
@@ -2787,10 +2787,8 @@ function finalizarInterfazLlamada() {
 // 7. ARRANQUE AUTOMÁTICO
 activarAntenaDeLlamadas();
     
-    // TRUCO MAESTRO: Desbloquear el audio con el primer toque en la pantalla
+// TRUCO MAESTRO: Desbloquear el audio con el primer toque en la pantalla
 document.addEventListener('click', () => {
-    // Tocamos los audios en silencio (bajísimo volumen o en pausa inmediata) 
-    // solo para decirle al navegador: "¡Listo, el usuario ya interactuó!"
     if (typeof sonidoMensaje !== 'undefined') {
         sonidoMensaje.play().then(() => {
             sonidoMensaje.pause();
@@ -2804,9 +2802,7 @@ document.addEventListener('click', () => {
             sonidoLlamada.currentTime = 0;
         }).catch(e => console.log("Audio aún esperando..."));
     }
-}, { once: true }); // '{ once: true }' hace que este truco se ejecute SOLÓ una vez por recarga
-    
-
+}, { once: true });
 
 
 
