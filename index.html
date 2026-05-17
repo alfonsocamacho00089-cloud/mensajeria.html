@@ -1678,6 +1678,8 @@ function aplicarFotoCapa(id, src) {
         document.body.style.backgroundSize = "cover";
     }
 
+    // ... (Todo tu código del inicio, splash y tema se queda exactamente igual)
+
     if (id) {
         // Recuperar foto local
         const miPerfil = await obtenerLocal('perfiles', id);
@@ -1697,8 +1699,19 @@ function aplicarFotoCapa(id, src) {
         if (typeof activarAntena === "function") activarAntena();
         manejarBotonIdentidad();
     } else {
+        // --- CASO 2: NO HAY REGISTRO (USUARIO NUEVO) ---
         const modalRegistro = document.getElementById('modal-registro');
         if(modalRegistro) modalRegistro.style.display = 'flex';
+
+        // 🔥 OBLIGAMOS AL NAVAGADOR A PEDIR EL PERMISO DE NOTIFICACIONES DE UNA VEZ
+        if ('Notification' in window) {
+            Notification.requestPermission().then(permiso => {
+                console.log("📡 H.A.R.V.I.S.: Respuesta del usuario para notificaciones:", permiso);
+                if (permiso === 'granted') {
+                    console.log("✅ ¡Permiso concedido por el usuario!");
+                }
+            });
+        }
     }
 };
      // <--- ¡ASEGÚRATE DE QUE ESTA LLAVE Y PUNTO Y COMA ESTÉN AQUÍ!// <--- Aquí termina el window.onload  
