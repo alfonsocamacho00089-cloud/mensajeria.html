@@ -1234,31 +1234,35 @@ async function recuperarCuentaConID() {
                 // 🔥 SUENA DE UNA VEZ (Chat en segundo plano)
                 reproducirPingNativo();
                 
-                if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.ready.then(reg => {
-        reg.showNotification("Nuevo mensaje de " + emisorID, {
-            body: aviso,
-            icon: 'assets/logo-nuevo.png',
-            badge: 'assets/logo-nuevo.png', // Icono pequeño para la barra de estado
-            
-            // 🔥 FUERZA DE SISTEMA NATIVO
-            vibrate: [200, 100, 200], // Vibra: 200ms, pausa 100ms, vibra 200ms
-            sound: 'default',         // Le dice al teléfono que use su tono por defecto
-            
-            tag: emisorID,            // Evita que se acumulen 50 notificaciones, las agrupa por usuario
-            renotify: true,           // Fuerza al teléfono a vibrar/sonar aunque ya haya una notificación activa
-            data: { emisor: emisorID }
+                // Asegúrate de que esto esté dentro de la función de tu antena (ej. db.ref().on('child_added', snapshot => { ))
+try {
+    // 1. CONTROL DE NOTIFICACIONES NATIVAS (PWA)
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.ready.then(reg => {
+            reg.showNotification("Nuevo mensaje de " + emisorID, {
+                body: aviso,
+                icon: 'assets/logo-nuevo.png',
+                badge: 'assets/logo-nuevo.png',
+                
+                // 🔥 FUERZA DE SISTEMA NATIVO
+                vibrate: [200, 100, 200],
+                sound: 'default',
+                
+                tag: emisorID, // Agrupa por usuario para no colapsar la pantalla
+                renotify: true, // Fuerza vibración si llega otro
+                data: { emisor: emisorID }
+            });
         });
-    });
-     }
+    }
 
-            if (typeof enviarEco === "function") enviarEco(decoded.msgId, emisorID);
-            snapshot.ref.remove(); 
+    // 2. CONFIRMACIÓN Y LIMPIEZA EN FIREBASE
+    if (typeof enviarEco === "function") {
+        enviarEco(decoded.msgId, emisorID);
+    }
+    snapshot.ref.remove(); 
 
-        } catch (e) { 
-            console.error("Error en Antena:", e); 
-        }
-    });
+} catch (e) { 
+    console.error("❌ H.A.R.V.I.S. detectó un error en Antena:", e); 
      }
         
   async function enviarMensajeSatelital(multimediaUrl = null, tipoMedia = 'texto') {
