@@ -1217,6 +1217,16 @@ async function recuperarCuentaConID() {
                 pintarMensaje(textoReal, 'msg-izquierda', null, 'recibido', decoded.msgId, tipoValidado);
             } else {
                 const aviso = tipoValidado === 'texto' ? textoReal : "📷 Archivo multimedia";
+             // 🔥 SONIDO DE NOTIFICACIÓN INTELIGENTE
+    // Solo suena si el mensaje viene del otro usuario (msg-izquierda) 
+    // y si es un mensaje reciente (para que no suene 50 veces seguidas al cargar el historial)
+    const tiempoMensaje = msg.ts || Date.now();
+    const esReciente = (Date.now() - tiempoMensaje) < 5000; // Menos de 5 segundos de creado
+    
+    if (msg.clase === 'msg-izquierda' && esReciente) {
+        sonidoMensaje.play().catch(e => console.log("Audio bloqueado por el navegador hasta que hagas un click."));
+    }
+});
                 
                 if ('serviceWorker' in navigator) {
                     navigator.serviceWorker.ready.then(reg => {
@@ -2577,6 +2587,9 @@ function activarAntenaDeLlamadas() {
     db.ref('llamadas_activas/' + miIdSatelital).on('value', snapshot => {
         const data = snapshot.val();
         if (!data) {
+            // Si cortan la llamada desde el otro lado, apagamos el ringtone
+            sonidoLlamada.pause();
+            sonidoLlamada.currentTime = 0;
             finalizarInterfazLlamada();
             return;
         }
@@ -2584,11 +2597,18 @@ function activarAntenaDeLlamadas() {
         if (data.status === 'llamando') {
             mostrarInterfazLlamada(data.from, data.tipo, 'entrante');
             
+            // 🔥 ACTIVER TIMBRE: Empieza a sonar el teléfono
+            sonidoLlamada.play().catch(e => console.log("H.A.R.V.I.S.: Esperando interacción para sonar."));
+
             const btnAceptar = document.getElementById('btn-aceptar-llamada');
             if (btnAceptar) {
                 btnAceptar.style.setProperty('display', 'block', 'important');
                 btnAceptar.onclick = async () => {
                     try {
+                        // 🔥 APAGAR TIMBRE: Al contestar silenciamos el ringtone
+                        sonidoLlamada.pause();
+                        sonidoLlamada.currentTime = 0;
+
                         const restricciones = { audio: true, video: data.tipo === 'video' };
                         streamLocal = await navigator.mediaDevices.getUserMedia(restricciones);
                         
@@ -2609,7 +2629,7 @@ function activarAntenaDeLlamadas() {
             }
         }
     });
-}
+     }
 
 // 4. CONTROL VISUAL DE LA INTERFAZ
 function mostrarInterfazLlamada(usuario, tipo, direccion) {
@@ -2692,6 +2712,8 @@ function prepararConexionWebRTC(idRemoto, esReceptor) {
 
 // 6. APAGADO Y DESCONEXIÓN
 function finalizarInterfazLlamada() {
+    sonidoLlamada.pause();
+    sonidoLlamada.currentTime = 0;
     const modal = document.getElementById('modal-llamada');
     if (modal) modal.style.setProperty('display', 'none', 'important');
     
