@@ -2496,11 +2496,23 @@ function activarContactoEnChat(contacto) {
     cargarConversacionCon(contacto.id, contacto.nombre, contacto.foto);   
      }
 
-     // VARIABLES GLOBALES PARA CONTROL DE LLAMADA
-let llamadaRef = null;
-let miIdSatelital = localStorage.getItem('mi_dropis_id');
+     
 
-// 1. EMISOR: Iniciar la llamada y timbrar en Firebase
+
+
+// VARIABLES GLOBALES AMPLIADAS PARA WEBRTC
+let streamLocal = null;
+let peerConnection = null;
+
+// Configuración de servidores STUN públicos de Google (indispensables para que los tlf se encuentren en internet)
+const configuracionRTC = {
+    iceServers: [
+        { urls: 'stun:stun.l.google.com:19302' },
+        { urls: 'stun:stun1.l.google.com:19302' }
+    ]
+};
+
+// 1. MODIFICACIÓN: Iniciar Canales de Hardware al Llamar
 async function iniciarLlamadaSatelital(tipoConexion) {
     const inputTarget = document.querySelector('#target-id');
     if (!inputTarget || !inputTarget.value) return;
@@ -2508,41 +2520,53 @@ async function iniciarLlamadaSatelital(tipoConexion) {
     const targetID = inputTarget.value.trim();
     miIdSatelital = localStorage.getItem('mi_dropis_id') || "ID_DESCONOCIDO";
     
-    console.log(`H.A.R.V.I.S.: Lanzando timbrado satelital de ${tipoConexion} hacia ${targetID}`);
-    
-    // Crear el nodo en Firebase para que el teléfono de Arturo empiece a sonar
-    llamadaRef = db.ref('llamadas_activas/' + targetID);
-    await llamadaRef.set({
-        from: miIdSatelital,
-        tipo: tipoConexion,
-        status: 'llamando',
-        ts: Date.now()
-    });
-
-    // Abrir la interfaz en modo "Llamando..."
-    mostrarInterfazLlamada(targetID, tipoConexion, 'saliendo');
-
-    // Escuchar si el receptor acepta, rechaza o cuelga la llamada
-    llamadaRef.on('value', snapshot => {
-        const data = snapshot.val();
-        if (!data) {
-            // Si el nodo desaparece, es porque colgaron o rechazaron
-            finalizarInterfazLlamada();
-        } else if (data.status === 'aceptada') {
-            document.getElementById('llamada-estado').innerText = "CONECTADO";
-            if (data.tipo === 'video') {
-                document.getElementById('contenedor-videos-webrtc').style.display = 'flex';
-                // Aquí se engancharán las cámaras nativas en el próximo paso
-            }
+    try {
+        // Solicitamos acceso a la cámara y micro según el tipo de llamada
+        const restricciones = {
+            audio: true,
+            video: tipoConexion === 'video'
+        };
+        
+        streamLocal = await navigator.mediaDevices.getUserMedia(restricciones);
+        mostrarInterfazLlamada(targetID, tipoConexion, 'saliendo');
+        
+        // Si es video, pintamos nuestra propia cámara en el cuadro pequeño
+        if (tipoConexion === 'video') {
+            document.getElementById('contenedor-videos-webrtc').style.display = 'flex';
+            document.getElementById('video-local').srcObject = streamLocal;
         }
-    });
+
+        // Crear el timbrado en Firebase
+        llamadaRef = db.ref('llamadas_activas/' + targetID);
+        await llamadaRef.set({
+            from: miIdSatelital,
+            tipo: tipoConexion,
+            status: 'llamando',
+            ts: Date.now()
+        });
+
+        // Escuchar la respuesta del receptor
+        llamadaRef.on('value', async snapshot => {
+            const data = snapshot.val();
+            if (!data) {
+                finalizarInterfazLlamada();
+            } else if (data.status === 'aceptada' && !peerConnection) {
+                document.getElementById('llamada-estado').innerText = "CONECTADO";
+                // Inicializar la conexión de datos de video/audio mutuo
+                prepararConexionWebRTC(targetID, false);
+            }
+        });
+
+    } catch (err) {
+        console.error("❌ H.A.R.V.I.S.: Error al acceder a los periféricos:", err);
+        alert("No se pudo acceder a la cámara o al micrófono.");
+    }
 }
 
-// 2. RECEPTOR: Escuchar la antena para detectar llamadas entrantes
+// 2. MODIFICACIÓN: Modificar la Antena para Capturar Periféricos al Responder
 function activarAntenaDeLlamadas() {
     if (!miIdSatelital) return;
     
-    // Escuchamos si alguien escribe en nuestro ID dentro de llamadas_activas
     db.ref('llamadas_activas/' + miIdSatelital).on('value', snapshot => {
         const data = snapshot.val();
         if (!data) {
@@ -2550,60 +2574,107 @@ function activarAntenaDeLlamadas() {
             return;
         }
 
-        // Si el estado es 'llamando', significa que nos están timbrando en tiempo real
         if (data.status === 'llamando') {
             mostrarInterfazLlamada(data.from, data.tipo, 'entrante');
             
-            // Configurar botón de Aceptar
             const btnAceptar = document.getElementById('btn-aceptar-llamada');
             btnAceptar.style.display = 'block';
             btnAceptar.onclick = async () => {
-                await db.ref('llamadas_activas/' + miIdSatelital).update({ status: 'aceptada' });
-                document.getElementById('llamada-estado').innerText = "CONECTADO";
-                btnAceptar.style.display = 'none';
-                if (data.tipo === 'video') {
-                    document.getElementById('contenedor-videos-webrtc').style.display = 'flex';
+                try {
+                    // El receptor también activa sus componentes de hardware
+                    const restricciones = { audio: true, video: data.tipo === 'video' };
+                    streamLocal = await navigator.mediaDevices.getUserMedia(restricciones);
+                    
+                    if (data.tipo === 'video') {
+                        document.getElementById('contenedor-videos-webrtc').style.display = 'flex';
+                        document.getElementById('video-local').srcObject = streamLocal;
+                    }
+
+                    await db.ref('llamadas_activas/' + miIdSatelital).update({ status: 'aceptada' });
+                    document.getElementById('llamada-estado').innerText = "CONECTADO";
+                    btnAceptar.style.display = 'none';
+                    
+                    // Inicializar WebRTC en modo receptor
+                    prepararConexionWebRTC(data.from, true);
+
+                } catch (err) {
+                    console.error("Error al responder llamada:", err);
                 }
             };
         }
     });
 }
 
-// 3. CONTROL VISUAL: Mostrar u ocultar el modal de llamada
-function mostrarInterfazLlamada(usuario, tipo, direccion) {
-    const modal = document.getElementById('modal-llamada');
-    if (!modal) {
-        console.error("❌ H.A.R.V.I.S.: ¡El modal-llamada no existe en el HTML!");
-        return;
-    }
+// 3. FUNCIÓN MAESTRA: El puente WebRTC de teléfono a teléfono
+function prepararConexionWebRTC(idRemoto, esReceptor) {
+    peerConnection = new RTCPeerConnection(configuracionRTC);
     
-    document.getElementById('llamada-usuario').innerText = usuario;
-    document.getElementById('llamada-estado').innerText = direccion === 'entrante' ? `Llamada de ${tipo} entrante...` : `Llamando por ${tipo}...`;
-    
-    document.getElementById('btn-aceptar-llamada').style.display = direccion === 'entrante' ? 'block' : 'none';
-    document.getElementById('contenedor-videos-webrtc').style.display = 'none';
-    
-    // --- FUERZA BRUTA VISUAL ---
-    modal.style.setProperty('display', 'flex', 'important');
-    modal.style.setProperty('z-index', '100000', 'important');
-    modal.style.position = 'fixed';
-    
-    console.log("🔔 H.A.R.V.I.S.: Interfaz de llamada activada en pantalla.");
+    // Metemos nuestro flujo de audio/video en el canal de transmisión
+    streamLocal.getTracks().forEach(track => {
+        peerConnection.addTrack(track, streamLocal);
+    });
 
-    // Configurar botón de Colgar/Rechazar
-    document.getElementById('btn-colgar-llamada').onclick = async () => {
-        const targetID = document.querySelector('#target-id')?.value?.trim();
-        await db.ref('llamadas_activas/' + miIdSatelital).remove();
-        if (targetID) await db.ref('llamadas_activas/' + targetID).remove();
-        finalizarInterfazLlamada();
+    // Cuando nos llegue el flujo de audio/video del otro teléfono, lo enganchamos en la pantalla
+    peerConnection.ontrack = event => {
+        const videoRemoto = document.getElementById('video-remoto');
+        if (videoRemoto && event.streams[0]) {
+            videoRemoto.srcObject = event.streams[0];
+        }
     };
-     }
 
-function finalizarInterfazLlamada() {
-    document.getElementById('modal-llamada').style.display = 'none';
-    if (llamadaRef) llamadaRef.off();
+    // Intercambio de llaves de red (ICE Candidates) por Firebase para saltar firewalls
+    peerConnection.onicecandidate = event => {
+        if (event.candidate) {
+            db.ref(`llamadas_activas/${idRemoto}/candidatos`).push(event.candidate.toJSON());
+        }
+    };
+
+    // Escuchar candidatos del otro lado
+    db.ref(`llamadas_activas/${miIdSatelital}/candidatos`).on('child_added', snapshot => {
+        const cand = snapshot.val();
+        if (cand && peerConnection) {
+            peerConnection.addIceCandidate(new RTCIceCandidate(cand));
+        }
+    });
+
+    // Crear oferta o respuesta de conexión (Handshake)
+    if (!esReceptor) {
+        peerConnection.createOffer().then(async offer => {
+            await peerConnection.setLocalDescription(offer);
+            await db.ref(`llamadas_activas/${idRemoto}`).update({ sdp: offer });
+        });
+    } else {
+        db.ref(`llamadas_activas/${miIdSatelital}`).once('value', async snapshot => {
+            const data = snapshot.val();
+            if (data && data.sdp) {
+                await peerConnection.setRemoteDescription(new RTCSessionDescription(data.sdp));
+                const answer = await peerConnection.createAnswer();
+                await peerConnection.setLocalDescription(answer);
+                await db.ref(`llamadas_activas/${idRemoto}`).update({ sdp: answer });
+            }
+        });
+    }
 }
 
+// 4. MODIFICACIÓN: Apagar cámaras y micros al colgar para ahorrar batería
+function finalizarInterfazLlamada() {
+    document.getElementById('modal-llamada').style.display = 'none';
+    
+    // Apagamos los sensores físicos del teléfono (Cámara y Microfono se cierran)
+    if (streamLocal) {
+        streamLocal.getTracks().forEach(track => track.stop());
+        streamLocal = null;
+    }
+    
+    // Cerramos la conexión de datos de red peer-to-peer
+    if (peerConnection) {
+        peerConnection.close();
+        peerConnection = null;
+    }
+
+    if (llamadaRef) llamadaRef.off();
+    db.ref(`llamadas_activas/${miIdSatelital}/candidatos`).off();
+     }
 // INICIALIZACIÓN: Activamos el radar de llamadas al cargar la app
 activarAntenaDeLlamadas();
 
