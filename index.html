@@ -1209,63 +1209,57 @@ async function activarAntena() {
            
             await guardarLocal('mensajes', nuevoMensaje);
 
-            // 🔊 INYECCIÓN DINÁMICA DE AUDIO
-            const reproducirPingNativo = () => {
-                try {
-                    const ping = new Audio('https://assets.mixkit.co/active_storage/sfx/2357/2357-84.wav');
-                    ping.volume = 1.0;
-                    ping.play().catch(err => console.log("📡 H.A.R.V.I.S.: Chrome bloqueó el audio temporalmente hasta el próximo toque."));
-                } catch(e) {
-                    console.error("Error al reproducir audio dinámico", e);
-                }
-            };
+            
+            // 🔊 INYECCIÓN DINÁMICA DE AUDIO (Desde tus archivos locales en MP3)
+const reproducirPingNativo = () => {
+    try {
+        // Cambiado el enlace de internet por tu archivo local rápido que pesa menos
+        const ping = new Audio('assets/ping-mensaje.mp3');
+        ping.volume = 1.0;
+        ping.play().catch(err => console.log("📡 H.A.R.V.I.S.: Chrome bloqueó el audio temporalmente hasta el próximo toque."));
+    } catch(e) {
+        console.error("Error al reproducir audio dinámico", e);
+    }
+};
 
-            if (emisorID === chatAbiertoActualmente) {
-                pintarMensaje(textoReal, 'msg-izquierda', null, 'recibido', decoded.msgId, tipoValidado);
-                
-                // 🔥 SUENA DE UNA VEZ (Chat abierto)
-                reproducirPingNativo();
-            } else {
-                const aviso = tipoValidado === 'texto' ? textoReal : "📷 Archivo multimedia";
-                
-                // 🔥 SUENA DE UNA VEZ (Chat en segundo plano)
-                reproducirPingNativo();
-                
-                try {
-                    // 1. CONTROL DE NOTIFICACIONES NATIVAS (PWA)
-                    if ('serviceWorker' in navigator) {
-                        navigator.serviceWorker.ready.then(reg => {
-                            reg.showNotification("Nuevo mensaje de " + emisorID, {
-                                body: aviso,
-                                icon: 'assets/logo-nuevo.png',
-                                badge: 'assets/logo-nuevo.png',
-                                vibrate: [200, 100, 200],
-                                sound: 'default',
-                                tag: emisorID, 
-                                renotify: true, 
-                                data: { emisor: emisorID }
-                            });
-                        });
-                    }
-
-                    // 2. CONFIRMACIÓN Y LIMPIEZA EN FIREBASE
-                    if (typeof enviarEco === "function") {
-                        enviarEco(decoded.msgId, emisorID);
-                    }
-                    snapshot.ref.remove(); 
-
-                } catch (e) { 
-                    console.error("❌ H.A.R.V.I.S. detectó un error en sub-antena:", e); 
-                }
-            } // <-- AQUÍ SE CIERRA EL ELSE
-
-        } catch (e) { 
-            console.error("❌ H.A.R.V.I.S. detectó un error en Antena Principal:", e); 
+if (emisorID === chatAbiertoActualmente) {
+    pintarMensaje(textoReal, 'msg-izquierda', null, 'recibido', decoded.msgId, tipoValidado);
+    
+    // 🔥 SUENA DE UNA VEZ (Chat abierto)
+    reproducirPingNativo();
+} else {
+    const aviso = tipoValidado === 'texto' ? textoReal : "📷 Archivo multimedia";
+    
+    // 🔥 SUENA DE UNA VEZ (Chat en segundo plano)
+    reproducirPingNativo();
+    
+    try {
+        // 1. CONTROL DE NOTIFICACIONES NATIVAS (PWA)
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.ready.then(reg => {
+                reg.showNotification("Nuevo mensaje de " + emisorID, {
+                    body: aviso,
+                    icon: 'assets/logo-nuevo.png',
+                    badge: 'assets/logo-nuevo.png',
+                    vibrate: [200, 100, 200],
+                    sound: 'default',
+                    tag: emisorID, 
+                    renotify: true, 
+                    data: { emisor: emisorID }
+                });
+            });
         }
-    }); // <-- AQUÍ SE CIERRA EL LISTENER .on('child_added')
-} // <-- AQUÍ SE CIERRA LA FUNCIÓN activarAntena()
-     
 
+        // 2. CONFIRMACIÓN Y LIMPIEZA EN FIREBASE
+        if (typeof enviarEco === "function") {
+            enviarEco(decoded.msgId, emisorID);
+        }
+        snapshot.ref.remove(); 
+
+    } catch (e) { 
+        console.error("❌ H.A.R.V.I.S. detectó un error en sub-antena:", e); 
+    }
+     }         
      
         
   async function enviarMensajeSatelital(multimediaUrl = null, tipoMedia = 'texto') {
