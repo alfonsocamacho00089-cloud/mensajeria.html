@@ -2507,6 +2507,14 @@ function activarContactoEnChat(contacto) {
      }
 
      
+// ==========================================
+//    SISTEMA DE AUDIO-NOTIFICACIONES
+// ==========================================
+const sonidoMensaje = new Audio('https://assets.mixkit.co/active_storage/sfx/2357/2357-84.wav'); // Ping rápido
+const sonidoLlamada = new Audio('https://assets.mixkit.co/active_storage/sfx/1353/1353-84.wav'); // Ringtone
+
+// El tono de llamada se repite hasta que se atienda o se cuelgue
+sonidoLlamada.loop = true;
 
 // ==========================================
 //   SISTEMA DE COMUNICACIÓN SATELITAL (WEBRTC)
@@ -2629,9 +2637,8 @@ function activarAntenaDeLlamadas() {
             }
         }
     });
-} // <--- ESTA ES LA LLAVE QUE FALTA PARA CERRAR LA FUNCIÓN
+}
      
-
 // 4. CONTROL VISUAL DE LA INTERFAZ
 function mostrarInterfazLlamada(usuario, tipo, direccion) {
     const modal = document.getElementById('modal-llamada');
@@ -2734,7 +2741,9 @@ function finalizarInterfazLlamada() {
 
 // 7. ARRANQUE AUTOMÁTICO
 activarAntenaDeLlamadas();
-
+    
+    
+    
 
 
 
