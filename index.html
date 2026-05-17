@@ -1703,17 +1703,40 @@ function aplicarFotoCapa(id, src) {
         const modalRegistro = document.getElementById('modal-registro');
         if(modalRegistro) modalRegistro.style.display = 'flex';
 
-        // 🔥 OBLIGAMOS AL NAVAGADOR A PEDIR EL PERMISO DE NOTIFICACIONES DE UNA VEZ
         if ('Notification' in window) {
             Notification.requestPermission().then(permiso => {
                 console.log("📡 H.A.R.V.I.S.: Respuesta del usuario para notificaciones:", permiso);
+                
                 if (permiso === 'granted') {
-                    console.log("✅ ¡Permiso concedido por el usuario!");
+                    console.log("✅ ¡Permiso concedido! Generando token de enganche...");
+                    
+                    // 🔥 AQUÍ CORREGIMOS EL PUENTE DEL TOKEN
+                    // Revisa cómo tienes declarada tu variable de Firebase Messaging (puede ser 'messaging' o 'fcm')
+                    if (typeof messaging !== 'undefined') {
+                        messaging.getToken({ vapidKey: 'TU_LLAVE_PUBLICA_VAPID_DE_FIREBASE' })
+                        .then((tokenActual) => {
+                            if (tokenActual) {
+                                console.log("🔑 Token generado con éxito:", tokenActual);
+                                
+                                // Guardamos el token en LocalStorage para control interno
+                                localStorage.setItem('mi_token_push', tokenActual);
+                                
+                                // NOTA: Si el usuario es completamente nuevo, aún no tiene ID creado.
+                                // Lo ideal es que guardes este token en una variable temporal y lo subas 
+                                // a Firebase justo en la función donde el usuario escribe su nombre y le da al botón "Registrar".
+                                window.tokenTemporalPush = tokenActual; 
+                                
+                            } else {
+                                console.log('❌ No se pudo obtener el token de notificación.');
+                            }
+                        }).catch((err) => {
+                            console.error('❌ Error al recuperar token FCM:', err);
+                        });
+                    }
                 }
             });
         }
-    }
-};
+     }
      // <--- ¡ASEGÚRATE DE QUE ESTA LLAVE Y PUNTO Y COMA ESTÉN AQUÍ!// <--- Aquí termina el window.onload  
 async function cargarProto() {
     const schema = `
