@@ -1172,6 +1172,7 @@ async function recuperarCuentaConID() {
 
 // --- 4. ANTENA SATELITAL ---
 
+     
      async function activarAntena() {
     const miID = localStorage.getItem('mi_dropis_id');
     if (!miID) return;
@@ -1195,8 +1196,6 @@ async function recuperarCuentaConID() {
             const chatAbiertoActualmente = document.querySelector('#target-id').value;
 
             const textoReal = decodeURIComponent(escape(atob(decoded.chatText)));
-
-            // INTERCEPCIÓN MAESTRA: Si viene un gif, lo tratamos como sticker para que se dibuje como foto
             const tipoValidado = (tipoMediaRecibido === 'gifs') ? 'stickers' : tipoMediaRecibido;
 
             const nuevoMensaje = { 
@@ -1212,22 +1211,28 @@ async function recuperarCuentaConID() {
            
             await guardarLocal('mensajes', nuevoMensaje);
 
+            // 🔊 INYECCIÓN DINÁMICA DE AUDIO
+            // Creamos el audio "en caliente" justo cuando el usuario ya está interactuando
+            const reproducirPingNativo = () => {
+                try {
+                    const ping = new Audio('https://assets.mixkit.co/active_storage/sfx/2357/2357-84.wav');
+                    ping.volume = 1.0;
+                    ping.play().catch(err => console.log("📡 H.A.R.V.I.S.: Chrome bloqueó el audio temporalmente hasta el próximo toque."));
+                } catch(e) {
+                    console.error("Error al reproducir audio dinámico", e);
+                }
+            };
+
             if (emisorID === chatAbiertoActualmente) {
-                // Pintamos el mensaje en el chat abierto
                 pintarMensaje(textoReal, 'msg-izquierda', null, 'recibido', decoded.msgId, tipoValidado);
                 
-                // 🔥 SONIDO DE NOTIFICACIÓN INTELIGENTE EN CHAT ABIERTO
-                // Como ya validamos que es del otro usuario, hacemos sonar el ping de inmediato
-                if (typeof sonidoMensaje !== 'undefined') {
-                    sonidoMensaje.play().catch(e => console.log("Audio bloqueado por el navegador hasta que hagas un click."));
-                }
+                // 🔥 SUENA DE UNA VEZ (Chat abierto)
+                reproducirPingNativo();
             } else {
                 const aviso = tipoValidado === 'texto' ? textoReal : "📷 Archivo multimedia";
                 
-                // 🔥 SONIDO DE NOTIFICACIÓN INTELIGENTE EN CHAT SEGUNDO PLANO
-                if (typeof sonidoMensaje !== 'undefined') {
-                    sonidoMensaje.play().catch(e => console.log("Audio bloqueado por el navegador hasta que hagas un click."));
-                }
+                // 🔥 SUENA DE UNA VEZ (Chat en segundo plano)
+                reproducirPingNativo();
                 
                 if ('serviceWorker' in navigator) {
                     navigator.serviceWorker.ready.then(reg => {
@@ -2512,12 +2517,12 @@ function activarContactoEnChat(contacto) {
 // ==========================================
 //    SISTEMA DE AUDIO-NOTIFICACIONES
 // ==========================================
-const sonidoMensaje = new Audio('https://assets.mixkit.co/active_storage/sfx/2357/2357-84.wav'); // Ping rápido
+
 const sonidoLlamada = new Audio('https://assets.mixkit.co/active_storage/sfx/1353/1353-84.wav'); // Ringtone
 
 // El tono de llamada se repite hasta que se atienda o se cuelgue
 sonidoLlamada.loop = true;
-
+     
 // ==========================================
 //   SISTEMA DE COMUNICACIÓN SATELITAL (WEBRTC)
 // ==========================================
