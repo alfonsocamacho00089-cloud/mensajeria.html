@@ -1656,7 +1656,7 @@ function aplicarFotoCapa(id, src) {
    
  
 // Reemplaza el bloque final por este:
- window.onload = async () => {
+window.onload = async () => {
     // 1. EJECUCIÓN INMEDIATA DEL SPLASH (No espera a nadie)
     const splash = document.getElementById('pantalla-carga');
     if (splash) {
@@ -1665,7 +1665,7 @@ function aplicarFotoCapa(id, src) {
             splash.addEventListener('transitionend', () => {
                 splash.style.display = 'none';
             }, { once: true });
-        }, 100); // 100ms es suficiente para que el usuario vea el icono
+        }, 100); 
     }
 
     // 2. LÓGICA DE DATOS (Sigue corriendo de fondo)
@@ -1677,8 +1677,6 @@ function aplicarFotoCapa(id, src) {
         document.body.style.backgroundImage = `url('${configTema.urlFondo}')`;
         document.body.style.backgroundSize = "cover";
     }
-
-    // ... (Todo tu código del inicio, splash y tema se queda exactamente igual)
 
     if (id) {
         // Recuperar foto local
@@ -1710,22 +1708,13 @@ function aplicarFotoCapa(id, src) {
                 if (permiso === 'granted') {
                     console.log("✅ ¡Permiso concedido! Generando token de enganche...");
                     
-                    // 🔥 AQUÍ CORREGIMOS EL PUENTE DEL TOKEN
-                    // Revisa cómo tienes declarada tu variable de Firebase Messaging (puede ser 'messaging' o 'fcm')
                     if (typeof messaging !== 'undefined') {
                         messaging.getToken({ vapidKey: 'TU_LLAVE_PUBLICA_VAPID_DE_FIREBASE' })
                         .then((tokenActual) => {
                             if (tokenActual) {
                                 console.log("🔑 Token generado con éxito:", tokenActual);
-                                
-                                // Guardamos el token en LocalStorage para control interno
                                 localStorage.setItem('mi_token_push', tokenActual);
-                                
-                                // NOTA: Si el usuario es completamente nuevo, aún no tiene ID creado.
-                                // Lo ideal es que guardes este token en una variable temporal y lo subas 
-                                // a Firebase justo en la función donde el usuario escribe su nombre y le da al botón "Registrar".
                                 window.tokenTemporalPush = tokenActual; 
-                                
                             } else {
                                 console.log('❌ No se pudo obtener el token de notificación.');
                             }
@@ -1736,7 +1725,11 @@ function aplicarFotoCapa(id, src) {
                 }
             });
         }
-     }
+    } 
+}; // <--- ¡AQUÍ ESTÁ! Esta es la llave y el paréntesis que faltaban para cerrar el onload
+
+     
+ 
      // <--- ¡ASEGÚRATE DE QUE ESTA LLAVE Y PUNTO Y COMA ESTÉN AQUÍ!// <--- Aquí termina el window.onload  
 async function cargarProto() {
     const schema = `
