@@ -1211,11 +1211,9 @@ async function activarAntena() {
             };
            
             await guardarLocal('mensajes', nuevoMensaje);
-
-            // 🔊 INYECCIÓN DINÁMICA DE AUDIO (Desde tus archivos locales en MP3)
+// 🔊 INYECCIÓN DINÁMICA DE AUDIO (Desde tus archivos locales en MP3)
 const reproducirPingNativo = () => {
     try {
-        // Cambiado el enlace de internet por tu archivo local rápido que pesa menos
         const ping = new Audio('assets/ping-mensaje.mp3');
         ping.volume = 1.0;
         ping.play().catch(err => console.log("📡 H.A.R.V.I.S.: Chrome bloqueó el audio temporalmente hasta el próximo toque."));
@@ -1261,7 +1259,14 @@ if (emisorID === chatAbiertoActualmente) {
     } catch (e) { 
         console.error("❌ H.A.R.V.I.S. detectó un error en sub-antena:", e); 
     }
-     }         
+} // <-- Cierra el 'else'
+
+// === AQUÍ COMPLEMENTAS EL CIERRE SI ESTÁ EN TU ANTENA ===
+        } catch (e) {
+            console.error("❌ Error Antena Principal:", e);
+        }
+    });
+     }
      
         
   async function enviarMensajeSatelital(multimediaUrl = null, tipoMedia = 'texto') {
