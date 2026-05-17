@@ -883,7 +883,10 @@ margin: 0;
     
     <script>
      
- 
+ window.onerror = function(message, source, lineno, colno, error) {
+    alert("🚨 ERROR DETECTADO:\n\n" + message + "\n\nArchivo: " + source + "\nLínea: " + lineno);
+    return false;
+};
                 
 
         // 1. CONFIGURACIÓN Y REGISTRO DE ANTENA (INDISPENSABLE PARA EL TOKEN)
