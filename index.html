@@ -1171,9 +1171,7 @@ async function recuperarCuentaConID() {
                                       
 
 // --- 4. ANTENA SATELITAL ---
-
-     
-     async function activarAntena() {
+async function activarAntena() {
     const miID = localStorage.getItem('mi_dropis_id');
     if (!miID) return;
 
@@ -1212,7 +1210,6 @@ async function recuperarCuentaConID() {
             await guardarLocal('mensajes', nuevoMensaje);
 
             // 🔊 INYECCIÓN DINÁMICA DE AUDIO
-            // Creamos el audio "en caliente" justo cuando el usuario ya está interactuando
             const reproducirPingNativo = () => {
                 try {
                     const ping = new Audio('https://assets.mixkit.co/active_storage/sfx/2357/2357-84.wav');
@@ -1234,36 +1231,42 @@ async function recuperarCuentaConID() {
                 // 🔥 SUENA DE UNA VEZ (Chat en segundo plano)
                 reproducirPingNativo();
                 
-                // Asegúrate de que esto esté dentro de la función de tu antena (ej. db.ref().on('child_added', snapshot => { ))
-try {
-    // 1. CONTROL DE NOTIFICACIONES NATIVAS (PWA)
-    if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.ready.then(reg => {
-            reg.showNotification("Nuevo mensaje de " + emisorID, {
-                body: aviso,
-                icon: 'assets/logo-nuevo.png',
-                badge: 'assets/logo-nuevo.png',
-                
-                // 🔥 FUERZA DE SISTEMA NATIVO
-                vibrate: [200, 100, 200],
-                sound: 'default',
-                
-                tag: emisorID, // Agrupa por usuario para no colapsar la pantalla
-                renotify: true, // Fuerza vibración si llega otro
-                data: { emisor: emisorID }
-            });
-        });
-    }
+                try {
+                    // 1. CONTROL DE NOTIFICACIONES NATIVAS (PWA)
+                    if ('serviceWorker' in navigator) {
+                        navigator.serviceWorker.ready.then(reg => {
+                            reg.showNotification("Nuevo mensaje de " + emisorID, {
+                                body: aviso,
+                                icon: 'assets/logo-nuevo.png',
+                                badge: 'assets/logo-nuevo.png',
+                                vibrate: [200, 100, 200],
+                                sound: 'default',
+                                tag: emisorID, 
+                                renotify: true, 
+                                data: { emisor: emisorID }
+                            });
+                        });
+                    }
 
-    // 2. CONFIRMACIÓN Y LIMPIEZA EN FIREBASE
-    if (typeof enviarEco === "function") {
-        enviarEco(decoded.msgId, emisorID);
-    }
-    snapshot.ref.remove(); 
+                    // 2. CONFIRMACIÓN Y LIMPIEZA EN FIREBASE
+                    if (typeof enviarEco === "function") {
+                        enviarEco(decoded.msgId, emisorID);
+                    }
+                    snapshot.ref.remove(); 
 
-} catch (e) { 
-    console.error("❌ H.A.R.V.I.S. detectó un error en Antena:", e); 
-     }
+                } catch (e) { 
+                    console.error("❌ H.A.R.V.I.S. detectó un error en sub-antena:", e); 
+                }
+            } // <-- AQUÍ SE CIERRA EL ELSE
+
+        } catch (e) { 
+            console.error("❌ H.A.R.V.I.S. detectó un error en Antena Principal:", e); 
+        }
+    }); // <-- AQUÍ SE CIERRA EL LISTENER .on('child_added')
+} // <-- AQUÍ SE CIERRA LA FUNCIÓN activarAntena()
+     
+
+     
         
   async function enviarMensajeSatelital(multimediaUrl = null, tipoMedia = 'texto') {
     const inputMsg = document.querySelector('#msg-text');
