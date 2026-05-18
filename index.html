@@ -2810,58 +2810,40 @@ document.addEventListener('click', () => {
 }, { once: true });
 
 // ========================================================
-// INTERCEPTOR MAESTRO PARA GIFS Y STICKERS DEL TECLADO
+// ESCUDO GLOBAL PARA CAPTURAR STICKERS Y GIFS DEL TECLADO
 // ========================================================
-const miCuadroMensaje = document.getElementById('msg-text'); 
 
-if (miCuadroMensaje) {
-    
-    // Escuchador 1: Atrapa cuando tocas el GIF directo en el teclado de Android/iOS
-    miCuadroMensaje.addEventListener('input', async (e) => {
-        if (e.inputType === 'insertObject' || e.inputType === 'insertFromPaste') {
-            const dataTransfer = e.dataTransfer || e.clipboardData;
-            if (dataTransfer && dataTransfer.files.length > 0) {
-                const archivo = dataTransfer.files[0];
-                
-                // Si lo que metió el teclado es un GIF o un WebP animado
-                if (archivo.type.includes('image/gif') || archivo.type.includes('image/webp')) {
-                    e.preventDefault();
-                    miCuadroMensaje.value = ''; // Limpiamos el cuadro
-                    miCuadroMensaje.style.height = '40px'; // Reseteamos la altura
-                    
-                    console.log("🎯 H.A.R.V.I.S.: Interceptado GIF desde el teclado:", archivo.name);
-                    
-                    // 🔥 TRUCO MAESTRO: Convertimos el archivo del teclado en una URL temporal
-                    const urlTemporal = URL.createObjectURL(archivo);
-                    
-                    // Se lo pasamos directo a tu función utilizando el tipo 'stickers'
-                    if (typeof enviarMediaPorURL === "function") {
-                        await enviarMediaPorURL(urlTemporal, 'stickers');
-                    }
-                }
-            }
-        }
-    });
+// Captura si el teclado intenta "pegar" el archivo en la pantalla
+document.addEventListener('paste', async (e) => {
+    const elementos = (e.clipboardData || window.clipboardData)?.items;
+    if (!elementos) return;
 
-    // Escuchador 2: Por si copias un GIF y lo pegas en el cuadro (Doble escudo)
-    miCuadroMensaje.addEventListener('paste', async (e) => {
-        const elementos = (e.clipboardData || window.clipboardData).items;
-        for (let item of elementos) {
-            if (item.type.indexOf('image/gif') !== -1 || item.type.indexOf('image/webp') !== -1) {
-                e.preventDefault(); // Frenamos el cartel de error de Android
-                const archivo = item.getAsFile();
-                
-                console.log("🎯 H.A.R.V.I.S.: Interceptado GIF pegado");
-                
-                // Convertimos a URL temporal y enviamos
-                const urlTemporal = URL.createObjectURL(archivo);
-                if (typeof enviarMediaPorURL === "function") {
-                    await enviarMediaPorURL(urlTemporal, 'stickers');
-                }
+    for (let item of elementos) {
+        // Verificamos si es un GIF o imagen animada (Sticker)
+        if (item.type.indexOf('image/gif') !== -1 || item.type.indexOf('image/webp') !== -1) {
+            e.preventDefault(); // Detenemos el aviso de "Esta app no acepta..."
+            
+            const archivo = item.getAsFile();
+            console.log("🎯 H.A.R.V.I.S.: GIF capturado globalmente:", archivo.name);
+
+            // Convertimos el archivo a un enlace de texto temporal (Blob URL)
+            const urlTemporal = URL.createObjectURL(archivo);
+
+            // Se lo enviamos directo a tu función de satélite
+            if (typeof enviarMediaPorURL === "function") {
+                await enviarMediaPorURL(urlTemporal, 'stickers');
             }
+            
+            // Limpiamos el cuadro por si acaso
+            const cuadroText = document.getElementById('msg-text');
+            if (cuadroText) {
+                cuadroText.value = '';
+                cuadroText.style.height = '40px';
+            }
+            break;
         }
-    });
-     }
+    }
+});
 
      
      function cargarFotoInicial() {
