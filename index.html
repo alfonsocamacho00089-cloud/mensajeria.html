@@ -642,15 +642,17 @@ margin: 0;
         <button class="icon-btn" onclick="document.getElementById('modal-tienda').style.display='block'">
             <span>😊</span>
         </button>
-        <textarea 
-    id="msg-text" 
-    placeholder="Mensaje" 
-    inputmode="text" 
-    enterkeyhint="send"
-    contenteditable="true"
-    role="textbox"
-    oninput="this.style.height='40px'; this.style.height=this.scrollHeight+'px';"
-    style="user-select: text; -webkit-user-select: text;"></textarea>
+        
+        <div 
+            id="msg-text" 
+            contenteditable="true" 
+            role="textbox" 
+            aria-multiline="true"
+            placeholder="Mensaje"
+            inputmode="text" 
+            enterkeyhint="send"
+            style="width: 100%; min-height: 24px; max-height: 100px; padding: 8px; color: #fff; background: transparent; overflow-y: auto; outline: none; user-select: text; -webkit-user-select: text;"></div>
+
         <label class="icon-btn" for="input-archivo">
             <span>📎</span>
             <input type="file" id="input-archivo" style="display: none;" onchange="prepararEnvioMedia(this, 'archivo')">
@@ -2809,41 +2811,74 @@ document.addEventListener('click', () => {
     }
 }, { once: true });
 
+
+     // ========================================================
+// CAPTURADOR DE CONTENIDO ENRIQUECIDO (ESTILO WHATSAPP)
 // ========================================================
-// ESCUDO GLOBAL PARA CAPTURAR STICKERS Y GIFS DEL TECLADO
-// ========================================================
+const cuadroMensajeWhatsApp = document.getElementById('msg-text');
 
-// Captura si el teclado intenta "pegar" el archivo en la pantalla
-document.addEventListener('paste', async (e) => {
-    const elementos = (e.clipboardData || window.clipboardData)?.items;
-    if (!elementos) return;
-
-    for (let item of elementos) {
-        // Verificamos si es un GIF o imagen animada (Sticker)
-        if (item.type.indexOf('image/gif') !== -1 || item.type.indexOf('image/webp') !== -1) {
-            e.preventDefault(); // Detenemos el aviso de "Esta app no acepta..."
-            
-            const archivo = item.getAsFile();
-            console.log("🎯 H.A.R.V.I.S.: GIF capturado globalmente:", archivo.name);
-
-            // Convertimos el archivo a un enlace de texto temporal (Blob URL)
-            const urlTemporal = URL.createObjectURL(archivo);
-
-            // Se lo enviamos directo a tu función de satélite
-            if (typeof enviarMediaPorURL === "function") {
-                await enviarMediaPorURL(urlTemporal, 'stickers');
+if (cuadroMensajeWhatsApp) {
+    
+    // Evaluamos constantemente lo que entra al div editable
+    const MutationObserver = window.MutationObserver || window.WebKitMutationObserver;
+    const observador = new MutationObserver((mutations) => {
+        mutations.forEach(async (mutation) => {
+            // Si el teclado inyectó un elemento (como una imagen/gif)
+            if (mutation.addedNodes.length > 0) {
+                for (let nodo of mutation.addedNodes) {
+                    
+                    // Si el nodo es una imagen (un GIF del teclado)
+                    if (nodo.tagName === 'IMG') {
+                        const urlSrc = nodo.src;
+                        console.log("🎯 H.A.R.V.I.S.: ¡GIF inyectado desde el teclado con éxito!", urlSrc);
+                        
+                        // Frenamos la visualización en el cuadro de texto para que no se quede ahí metido
+                        nodo.remove(); 
+                        cuadroMensajeWhatsApp.innerHTML = ''; 
+                        
+                        // Si la URL viene como un archivo binario del teclado (Blob)
+                        if (urlSrc.startsWith('blob:') || urlSrc.startsWith('data:')) {
+                            if (typeof enviarMediaPorURL === "function") {
+                                await enviarMediaPorURL(urlSrc, 'stickers');
+                            }
+                        } else {
+                            // Si el teclado mandó una URL directa de internet
+                            if (typeof enviarMediaPorURL === "function") {
+                                await enviarMediaPorURL(urlSrc, 'stickers');
+                            }
+                        }
+                    }
+                }
             }
-            
-            // Limpiamos el cuadro por si acaso
-            const cuadroText = document.getElementById('msg-text');
-            if (cuadroText) {
-                cuadroText.value = '';
-                cuadroText.style.height = '40px';
+        });
+    });
+
+    // Activamos el observador sobre nuestro cuadro de mensajes
+    observador.observe(cuadroMensajeWhatsApp, {
+        childList: true,
+        subtree: true
+    });
+
+    // ⚡ RESPALDO: Si el teclado decide usar la función de pegado rápido al fallar el render
+    cuadroMensajeWhatsApp.addEventListener('paste', async (e) => {
+        const elementos = (e.clipboardData || window.clipboardData)?.items;
+        if (!elementos) return;
+
+        for (let item of elementos) {
+            if (item.type.indexOf('image/gif') !== -1 || item.type.indexOf('image/webp') !== -1) {
+                e.preventDefault();
+                const archivo = item.getAsFile();
+                const urlTemporal = URL.createObjectURL(archivo);
+
+                if (typeof enviarMediaPorURL === "function") {
+                    await enviarMediaPorURL(urlTemporal, 'stickers');
+                }
+                cuadroMensajeWhatsApp.innerHTML = '';
+                break;
             }
-            break;
         }
-    }
-});
+    });
+     }
 
      
      function cargarFotoInicial() {
