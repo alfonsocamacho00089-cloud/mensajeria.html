@@ -2856,62 +2856,118 @@ if (entradaMensaje) {
      }
 
 // ========================================================
-// CONTROL DEL BOTÓN MUTANTE (ESTILO WHATSAPP)
+// SISTERMA MAESTRO DE NOTAS DE VOZ Y BOTÓN MUTANTE (YouSpace)
 // ========================================================
+
+// Variables globales para el micrófono
+let grabadorAudio;
+let fragmentosAudio = [];
+
+// Elementos de la interfaz
 const cuadroTextoMutante = document.getElementById('msg-text');
 const botonAccion = document.getElementById('btn-accion-dinamica');
 const iconoAccion = document.getElementById('icono-accion');
 
+// 1. VIGILANTE DEL CUADRO DE TEXTO (Cambia entre micrófono y enviar)
 if (cuadroTextoMutante) {
-    // Escuchamos cada vez que el usuario escribe o borra letras
     cuadroTextoMutante.addEventListener('input', () => {
-        // Quitamos los espacios en blanco para saber si hay texto real escrito
         const textoLimpio = cuadroTextoMutante.value ? cuadroTextoMutante.value.trim() : cuadroTextoMutante.innerText.trim();
 
         if (textoLimpio.length > 0) {
-            // 🔥 SI HAY TEXTO: Se transforma en enviar
             iconoAccion.innerText = "➤";
-            botonAccion.style.background = "#ffd700"; // Tu dorado Black & Gold
         } else {
-            // 🎙️ SI ESTÁ VACÍO: Vuelve a ser el micrófono
-            iconoAccion.innerText = "🎙️";
-            botonAccion.style.background = "#ffd700"; 
+            // Solo vuelve a micrófono si no está grabando actualmente
+            if (!grabadorAudio || grabadorAudio.state === "inactive") {
+                iconoAccion.innerText = "🎙️";
+            }
         }
     });
 }
 
-// FUNCIÓN INTELIGENTE: Decide qué hacer al dar clic según el icono actual
+// 2. DISPARADOR INTELIGENTE (Decide si envía texto o graba audio)
 async function ejecutarAccionBoton() {
     const iconoActual = iconoAccion.innerText;
 
     if (iconoActual === "➤") {
-        // Acción 1: Enviar mensaje de texto nativo
         if (typeof enviarMensajeSatelital === "function") {
             await enviarMensajeSatelital();
-            
-            // Forzamos que vuelva a ser micrófono tras enviar el texto con éxito
-            iconoAccion.innerText = "🎙️"; 
+            iconoAccion.innerText = "🎙️"; // Resetea a micrófono tras enviar
         }
     } else {
-        // Acción 2: Controlar el flujo de la nota de voz (Grabar / Parar)
-        if (typeof manejarFlujoVoz === "function") {
-            manejarFlujoVoz();
-        }
+        // Si es 🎙️ o 🛑, controla el micrófono
+        manejarFlujoVoz();
     }
 }
 
-// MODIFICAMOS TU FUNCIÓN AUXILIAR DE GRABACIÓN PARA QUE USE EL NUEVO BOTÓN
+// 3. CONTROLADOR DEL FLUJO DEL MICRÓFONO
+function manejarFlujoVoz() {
+    if (!grabadorAudio || grabadorAudio.state === "inactive") {
+        iniciarGrabacionVoz();
+    } else {
+        detenerGrabacionVoz();
+    }
+}
+
+// 4. EMPEZAR A GRABAR DESDE EL TELÉFONO
+async function iniciarGrabacionVoz() {
+    fragmentosAudio = []; 
+    try {
+        // Pide permiso nativo para usar el micrófono
+        const flujoMicrofono = await navigator.mediaDevices.getUserMedia({ audio: true });
+        
+        grabadorAudio = new MediaRecorder(flujoMicrofono);
+        
+        grabadorAudio.ondataavailable = (e) => {
+            if (e.data.size > 0) fragmentosAudio.push(e.data);
+        };
+
+        // Qué pasa al darle STOP
+        grabadorAudio.onstop = async () => {
+            console.log("🎯 H.A.R.V.I.S.: Procesando nota de voz...");
+            
+            const audioBlob = new Blob(fragmentosAudio, { type: 'audio/webm' });
+            const urlAudioTemporal = URL.createObjectURL(audioBlob);
+
+            // Manda el enlace temporal a tu antena satelital
+            if (typeof enviarMediaPorURL === "function") {
+                await enviarMediaPorURL(urlAudioTemporal, 'audio');
+            }
+            
+            // Apaga el micrófono físico para ahorrar batería
+            flujoMicrofono.getTracks().forEach(track => track.stop());
+        };
+
+        grabadorAudio.start();
+        console.log("🎙️ H.A.R.V.I.S.: Grabando audio activo...");
+        actualizarUIUIGrabando(true);
+
+    } catch (err) {
+        console.error("❌ Error de acceso al micrófono:", err);
+        alert("Dale permisos de micrófono a la app para poder grabar notas de voz.");
+    }
+}
+
+// 5. DETENER GRABACIÓN
+function detenerGrabacionVoz() {
+    if (grabadorAudio && grabadorAudio.state !== "inactive") {
+        grabadorAudio.stop();
+        actualizarUIUIGrabando(false);
+    }
+}
+
+// 6. ANIMACIÓN VISUAL DEL BOTÓN MUTANTE
 function actualizarUIUIGrabando(estaGrabando) {
     if (botonAccion && iconoAccion) {
         if (estaGrabando) {
-            botonAccion.style.background = '#ff3b30'; // Rojo grabando
-            iconoAccion.innerText = '🛑'; // Icono de parar
+            botonAccion.style.background = '#ff3b30'; // Rojo de grabación
+            iconoAccion.innerText = '🛑';           // Cambia a icono de stop
         } else {
-            botonAccion.style.background = '#ffd700'; // Vuelve a dorado
-            iconoAccion.innerText = '🎙️'; // Vuelve a micrófono
+            botonAccion.style.background = '#ffd700'; // Vuelve a tu dorado
+            iconoAccion.innerText = '🎙️';           // Vuelve al micrófono
         }
     }
      }
+     
      
      function cargarFotoInicial() {
     const fotoGuardada = localStorage.getItem('mi_foto');
