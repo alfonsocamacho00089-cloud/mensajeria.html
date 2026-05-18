@@ -1773,77 +1773,13 @@ let mensajeSeleccionado = null;
     div.className = `mensaje ${clase}`;
     div.id = id;
 
-    let cuerpoHTML = "";
-    
-    // --- NUEVA LÓGICA: DETECCIÓN DE REDES SOCIALES ---
-    if (textoReal.includes('youtube.com/') || textoReal.includes('youtu.be/')) {
-        // Extraemos el ID del video de YouTube
-        let videoId = "";
-        if (textoReal.includes('youtu.be/')) {
-            videoId = textoReal.split('youtu.be/')[1].split(/[?#]/)[0];
-        } else {
-            videoId = textoReal.split('v=')[1]?.split('&')[0];
-        }
-        
-        cuerpoHTML = `
-            <div style="max-width:260px;">
-                <iframe src="https://www.youtube.com/embed/${videoId}" frameborder="0" allowfullscreen
-                        style="width:100%; height:150px; border-radius:12px; border: 2px solid #ffd700; background:#000;">
-                </iframe>
-                <a href="${textoReal}" target="_blank" rel="noopener noreferrer"
-                   style="display:flex; align-items:center; justify-content:center; margin-top:6px; padding:6px; background:#111; border: 1px solid #ffd700; border-radius:8px; color:#ffd700; font-size:11px; text-decoration:none; font-weight:bold; gap:6px;">
-                   🛑 Abrir en YouTube
-                </a>
-            </div>
-        `;
-    } 
-    else if (textoReal.includes('tiktok.com/')) {
-        // Para TikTok, los iframes directos a veces se bloquean por seguridad en móviles,
-        // así que estructuramos un reproductor web optimizado o su tarjeta de redirección estética
-        cuerpoHTML = `
-            <div style="max-width:240px; background:#111; border: 2px solid #ffd700; border-radius:12px; padding:10px; text-align:center;">
-                <div style="font-size:24px; margin-bottom:5px;">🎵</div>
-                <span style="font-size:12px; color:#fff; display:block; margin-bottom:8px; word-break:break-all;">${textoReal}</span>
-                <a href="${textoReal}" target="_blank" rel="noopener noreferrer"
-                   style="display:block; padding:6px; background:#000; border: 1px solid #ffd700; border-radius:8px; color:#ffd700; font-size:11px; text-decoration:none; font-weight:bold;">
-                   ⚫ Abrir en TikTok
-                </a>
-            </div>
-        `;
-    } 
-    else if (textoReal.includes('facebook.com/')) {
-        // Tarjeta estética para enlaces de Facebook
-        cuerpoHTML = `
-            <div style="max-width:240px; background:#111; border: 2px solid #ffd700; border-radius:12px; padding:10px; text-align:center;">
-                <div style="font-size:24px; margin-bottom:5px;">🔵</div>
-                <span style="font-size:12px; color:#fff; display:block; margin-bottom:8px; word-break:break-all;">Enlace de Facebook</span>
-                <a href="${textoReal}" target="_blank" rel="noopener noreferrer"
-                   style="display:block; padding:6px; background:#000; border: 1px solid #ffd700; border-radius:8px; color:#ffd700; font-size:11px; text-decoration:none; font-weight:bold;">
-                   🔷 Abrir en Facebook
-                </a>
-            </div>
-        `;
-    }
-    // --- FIN DE REDES SOCIALES ---
-    
-    // Mantenemos tus renders multimedia anteriores intactos
-    else if (tipo === 'foto' || tipo === 'sticker' || tipo === 'stickers') {
-        cuerpoHTML = `<img src="${textoReal}" style="max-width:180px; border-radius:12px; display:block; border: 2px solid #ffd700;">`;
-    } else if (tipo === 'video') {
-        cuerpoHTML = `
-            <video src="${textoReal}" controls playsinline
-                   style="max-width:240px; max-height:320px; border-radius:12px; display:block; border: 2px solid #ffd700; background:#000;">
-            </video>
-        `;
-    } else {
-        cuerpoHTML = `<span class="texto-msg">${textoReal}</span>`;
-    }
-
+    // 🔥 OPTIMIZACIÓN DE VELOCIDAD: Pintamos primero el esqueleto de la burbuja inmediatamente
     const horaFinal = hora || new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
     const checkHTML = clase === 'msg-derecha' ? `<span style="margin-left:5px; font-size:10px;">${status === 'leido' ? '✓✓' : '✓'}</span>` : '';
 
+    // Colocamos un contenedor interno temporal para el cuerpo del mensaje
     div.innerHTML = `
-        ${cuerpoHTML}
+        <div class="cuerpo-mensaje-dinamico"></div>
         <div style="font-size:10px; opacity:0.6; text-align:right; margin-top:4px;">
             ${horaFinal} ${checkHTML}
         </div>
@@ -1851,6 +1787,86 @@ let mensajeSeleccionado = null;
 
     box.appendChild(div);
     box.scrollTop = box.scrollHeight;
+
+    // 🔥 PROCESAMIENTO ASÍNCRONO INDEPENDIENTE: Evita que el renderizado de enlaces trabe el chat
+    requestAnimationFrame(() => {
+        const contenedorCuerpo = div.querySelector('.cuerpo-mensaje-dinamico');
+        if (!contenedorCuerpo) return;
+
+        let cuerpoHTML = "";
+        
+        // --- NUEVA LÓGICA: DETECCIÓN DE REDES SOCIALES ---
+        if (textoReal.includes('youtube.com/') || textoReal.includes('youtu.be/')) {
+            let videoId = "";
+            if (textoReal.includes('youtu.be/')) {
+                videoId = textoReal.split('youtu.be/')[1].split(/[?#]/)[0];
+            } else {
+                videoId = textoReal.split('v=')[1]?.split('&')[0];
+            }
+            
+            cuerpoHTML = `
+                <div style="max-width:260px;">
+                    <iframe src="https://www.youtube.com/embed/${videoId}" frameborder="0" allowfullscreen
+                            style="width:100%; height:150px; border-radius:12px; border: 2px solid #ffd700; background:#000;">
+                    </iframe>
+                    <a href="${textoReal}" target="_blank" rel="noopener noreferrer"
+                       style="display:flex; align-items:center; justify-content:center; margin-top:6px; padding:6px; background:#111; border: 1px solid #ffd700; border-radius:8px; color:#ffd700; font-size:11px; text-decoration:none; font-weight:bold; gap:6px;">
+                       🛑 Abrir en YouTube
+                    </a>
+                </div>
+            `;
+        } 
+        else if (textoReal.includes('tiktok.com/')) {
+            cuerpoHTML = `
+                <div style="max-width:240px; background:#111; border: 2px solid #ffd700; border-radius:12px; padding:10px; text-align:center;">
+                    <div style="font-size:24px; margin-bottom:5px;">🎵</div>
+                    <span style="font-size:12px; color:#fff; display:block; margin-bottom:8px; word-break:break-all;">${textoReal}</span>
+                    <a href="${textoReal}" target="_blank" rel="noopener noreferrer"
+                       style="display:block; padding:6px; background:#000; border: 1px solid #ffd700; border-radius:8px; color:#ffd700; font-size:11px; text-decoration:none; font-weight:bold;">
+                       ⚫ Abrir en TikTok
+                    </a>
+                </div>
+            `;
+        } 
+        else if (textoReal.includes('facebook.com/')) {
+            cuerpoHTML = `
+                <div style="max-width:240px; background:#111; border: 2px solid #ffd700; border-radius:12px; padding:10px; text-align:center;">
+                    <div style="font-size:24px; margin-bottom:5px;">🔵</div>
+                    <span style="font-size:12px; color:#fff; display:block; margin-bottom:8px; word-break:break-all;">Enlace de Facebook</span>
+                    <a href="${textoReal}" target="_blank" rel="noopener noreferrer"
+                       style="display:block; padding:6px; background:#000; border: 1px solid #ffd700; border-radius:8px; color:#ffd700; font-size:11px; text-decoration:none; font-weight:bold;">
+                       🔷 Abrir en Facebook
+                    </a>
+                </div>
+            `;
+        }
+        // --- FIN DE REDES SOCIALES ---
+        
+        // Mantenemos tus renders multimedia anteriores e inyectamos el nuevo tipo 'audio'
+        else if (tipo === 'foto' || tipo === 'sticker' || tipo === 'stickers') {
+            cuerpoHTML = `<img src="${textoReal}" style="max-width:180px; border-radius:12px; display:block; border: 2px solid #ffd700;">`;
+        } else if (tipo === 'video') {
+            cuerpoHTML = `
+                <video src="${textoReal}" controls playsinline
+                       style="max-width:240px; max-height:320px; border-radius:12px; display:block; border: 2px solid #ffd700; background:#000;">
+                </video>
+            `;
+        } 
+        // 🎙️ NUEVO RENDER: REPRODUCTOR NATIVO PARA NOTAS DE VOZ
+        else if (tipo === 'audio' || textoReal.startsWith('blob:') && textoReal.includes('/audio') || textoReal.includes('.webm')) {
+            cuerpoHTML = `
+                <audio src="${textoReal}" controls playsinline type="audio/webm"
+                       style="max-width:240px; display:block; margin-top:2px; border-radius:20px; outline:none;">
+                </audio>
+            `;
+        } else {
+            cuerpoHTML = `<span class="texto-msg">${textoReal}</span>`;
+        }
+
+        // Inyectamos el contenido final de forma aislada e independiente
+        contenedorCuerpo.innerHTML = cuerpoHTML;
+        box.scrollTop = box.scrollHeight;
+    });
      }
 
      
