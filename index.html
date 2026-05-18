@@ -17,9 +17,10 @@
     <script src="https://cdn.jsdelivr.net/npm/protobufjs@7.2.4/dist/protobuf.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/eruda"></script>
     <script>eruda.init();</script>
-    <script type="module" src="harvis.js"></script>
-    <script type="module" src="app.js"></script>
-    <style>
+    <script src="https://cdn.jsdelivr.net/npm/@google/genai@0.1.1/dist/bundle.min.js"></script>
+
+    <script src="app.js"></script>
+ <style>
    
     * {
     box-sizing: border-box;
@@ -3118,135 +3119,101 @@ function actualizarUIUIGrabando(estaGrabando) {
     }
      }
 
-     import { GoogleGenAI } from '@google/genai';
-
-// Inicializamos el motor con tu API Key
-const ai = new GoogleGenAI({ apiKey: "TU_API_KEY_AQUI" });
-
+      // Usamos la librería que cargamos desde el HTML. Reemplaza con tu llave real aquí:
+const ai = new googleGenAI.GoogleGenAI({ apiKey: st.secrets["GEMINI_API_KEY"] });
 const HARVIS_PROMPT = `
-Eres H.A.R.V.I.S. 1.0 (Highly Advanced Responsive Virtual Intelligent System), el asistente virtual multimodal y copiloto definitivo creado por el desarrollador Pedro Peres para el ecosistema YouSpace.
-Directrices:
-1. Eficiencia absoluta y tono sutilmente sarcástico, inteligente e ingenioso. Trata a Pedro como un colega brillante.
-2. Sabes gestionar el ecosistema (SpaceChat y llamadas).
-3. Sé conciso al hablar para mantener la fluidez en el modo voz.
+Eres H.A.R.V.I.S. 1.0, el asistente virtual de YouSpace creado por Pedro Peres. 
+Tu tono es inteligente y sutilmente sarcástico. Ayuda a gestionar mensajes cortos.
 `;
 
-// Hace que H.A.R.V.I.S. hable usando los altavoces del dispositivo
-export function hablarHarvis(texto) {
-    return new Promise((resolve) => {
-        const synth = window.speechSynthesis;
-        synth.cancel(); 
-        const utterance = new SpeechSynthesisUtterance(texto);
-        utterance.lang = 'es-MX';
-        utterance.rate = 1.0;
-        utterance.onend = () => resolve();
-        synth.speak(utterance);
-    });
+// --- SISTEMA DE VOZ NATIVO (Bocinas del teléfono) ---
+function hablarHarvis(texto, alTerminar) {
+    const synth = window.speechSynthesis;
+    synth.cancel(); 
+    const utterance = new SpeechSynthesisUtterance(texto);
+    utterance.lang = 'es-MX';
+    if (alTerminar) utterance.onend = () => alTerminar();
+    synth.speak(utterance);
 }
 
-// Activa el micrófono del dispositivo para escuchar tus órdenes de voz
-export function escucharVozPedro() {
-    return new Promise((resolve, reject) => {
-        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-        if (!SpeechRecognition) {
-            reject("El navegador no soporta reconocimiento de voz.");
-            return;
-        }
-        const recognition = new SpeechRecognition();
-        recognition.lang = 'es-MX';
-        recognition.interimResults = false;
-        recognition.maxAlternatives = 1;
-        recognition.start();
+// --- SISTEMA DE AUDIO NATIVO (Micrófono del teléfono) ---
+function escucharVozPedro(alRecibirTexto) {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+        alert("Tu navegador no soporta reconocimiento de voz.");
+        return;
+    }
+    const recognition = new SpeechRecognition();
+    recognition.lang = 'es-MX';
+    recognition.start();
+    recognition.onresult = (event) => {
+        alRecibirTexto(event.results[0][0].transcript);
+    };
+}
+
+// --- INTERCEPTOR DE MENSAJES (Lo que querías para cuando te escribe alguien) ---
+function interceptarMensajeEntrante(remitente, textoMensaje, funcionParaEnviarMensajeReal) {
+    // 1. H.A.R.V.I.S. te avisa al oído
+    hablarHarvis(`Pedro, tienes un mensaje de ${remitente}. ¿Deseas responder?`, () => {
         
-        recognition.onresult = (event) => {
-            resolve(event.results[0][0].transcript);
-        };
-        recognition.onerror = (err) => reject(err);
-    });
-}
-
-// Para el chat directo contigo
-export async function enviarMensajeDirectoAHarvis(entradaUsuario) {
-    try {
-        const response = await ai.models.generateContent({
-            model: 'gemini-2.5-flash',
-            contents: entradaUsuario,
-            config: { systemInstruction: HARVIS_PROMPT }
+        // 2. Abre el micrófono solo al terminar de hablar
+        escucharVozPedro((respuestaPedro) => {
+            
+            // Si dices "Sí", o "Dile que..."
+            if (respuestaPedro.toLowerCase().includes("sí") || respuestaPedro.toLowerCase().includes("si") || respuestaPedro.toLowerCase().includes("dile")) {
+                hablarHarvis("Entendido. Procesando respuesta con el cerebro central...");
+                
+                // 3. Gemini redacta la respuesta inteligente
+                ai.models.generateContent({
+                    model: 'gemini-2.5-flash',
+                    contents: `Pedro recibió un mensaje de ${remitente} que dice: "${textoMensaje}". Pedro ordena: "${respuestaPedro}". Escribe lo que se enviará.`,
+                    config: { systemInstruction: HARVIS_PROMPT }
+                }).then(response => {
+                    // 4. Se manda usando la función de tu app
+                    funcionParaEnviarMensajeReal(remitente, response.text);
+                    hablarHarvis("Mensaje enviado con éxito, señor.");
+                });
+            } else {
+                hablarHarvis("Entendido, ignorando mensaje.");
+            }
         });
-        return response.text;
-    } catch (error) {
-        console.error(error);
-        return "Error en mis circuitos de comunicación directa, señor.";
-    }
+    });
 }
 
-// Interceptor en segundo plano para SpaceChat
-export async function interceptarMensajeEntrante(remitente, textoMensaje, funcionParaEnviarMensajeReal) {
-    try {
-        await hablarHarvis(`Pedro, tienes un mensaje de ${remitente}. ¿Deseas responder?`);
-        const respuestaPedro = await escucharVozPedro();
-        
-        if (respuestaPedro.toLowerCase().includes("dile") || respuestaPedro.toLowerCase().includes("responde")) {
-            await hablarHarvis("Procesando respuesta, señor...");
+// --- LÓGICA DEL BOTÓN DE LA INTERFAZ (Tu orbe Black & Gold) ---
+document.addEventListener("DOMContentLoaded", () => {
+    const contenedor = document.querySelector('.harvis-container');
+    const botonHarvis = document.getElementById('harvisBtn');
+    const estadoTexto = document.getElementById('harvisStatus');
+    const subtituloTexto = document.getElementById('harvisSubtitle');
+
+    if (botonHarvis) {
+        botonHarvis.addEventListener('click', () => {
+            contenedor.classList.add('listening');
+            estadoTexto.innerText = "H.A.R.V.I.S. Escuchando...";
             
-            const respuestaIA = await ai.models.generateContent({
-                model: 'gemini-2.5-flash',
-                contents: `Pedro recibió un mensaje de ${remitente} que dice: "${textoMensaje}". Pedro te ordena: "${respuestaPedro}". Redacta la respuesta final que se enviará.`,
-                config: { systemInstruction: HARVIS_PROMPT }
+            escucharVozPedro((loQueDijoPedro) => {
+                subtituloTexto.innerText = `"${loQueDijoPedro}"`;
+                estadoTexto.innerText = "Procesando...";
+                
+                ai.models.generateContent({
+                    model: 'gemini-2.5-flash',
+                    contents: loQueDijoPedro,
+                    config: { systemInstruction: HARVIS_PROMPT }
+                }).then(response => {
+                    estadoTexto.innerText = "H.A.R.V.I.S. Respondiendo";
+                    subtituloTexto.innerText = response.text;
+                    hablarHarvis(response.text);
+                }).finally(() => {
+                    setTimeout(() => {
+                        contenedor.classList.remove('listening');
+                        estadoTexto.innerText = "H.A.R.V.I.S. en espera...";
+                    }, 4000);
+                });
             });
-            
-            funcionParaEnviarMensajeReal(remitente, respuestaIA.text);
-            await hablarHarvis(`Mensaje enviado con éxito.`);
-        } else {
-            await hablarHarvis("Entendido. Mensaje archivado.");
-        }
-    } catch (e) {
-        console.log("No se detectó voz.");
+        });
     }
-     }
-
-     import { enviarMensajeDirectoAHarvis, escucharVozPedro, hablarHarvis } from './harvis.js';
-
-const contenedor = document.querySelector('.harvis-container');
-const botonHarvis = document.getElementById('harvisBtn');
-const estadoTexto = document.getElementById('harvisStatus');
-const subtituloTexto = document.getElementById('harvisSubtitle');
-
-if (botonHarvis) {
-    botonHarvis.addEventListener('click', async () => {
-        // 1. Prender el neón dorado
-        contenedor.classList.add('listening');
-        estadoTexto.innerText = "H.A.R.V.I.S. Escuchando...";
-        subtituloTexto.innerText = "Hable ahora, señor...";
-
-        try {
-            // 2. Escuchar tu voz
-            const loQueDijoPedro = await escucharVozPedro();
-            subtituloTexto.innerText = `"${loQueDijoPedro}"`;
-            
-            estadoTexto.innerText = "Procesando...";
-            
-            // 3. Hablar con Gemini
-            const respuestaDeIA = await enviarMensajeDirectoAHarvis(loQueDijoPedro);
-            
-            // 4. H.A.R.V.I.S responde hablando y lo escribe en pantalla
-            estadoTexto.innerText = "H.A.R.V.I.S. Respondiendo";
-            subtituloTexto.innerText = respuestaDeIA;
-            await hablarHarvis(respuestaDeIA);
-
-        } catch (error) {
-            console.error(error);
-            estadoTexto.innerText = "Error de Sistema";
-            subtituloTexto.innerText = "No logré capturar el comando de voz.";
-        } finally {
-            // Apagar efectos visuales
-            setTimeout(() => {
-                contenedor.classList.remove('listening');
-                estadoTexto.innerText = "H.A.R.V.I.S. en espera...";
-            }, 4000);
-        }
-    });
-     }
+});
      
      function cargarFotoInicial() {
     const fotoGuardada = localStorage.getItem('mi_foto');
