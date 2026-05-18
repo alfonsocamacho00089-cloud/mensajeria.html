@@ -2809,9 +2809,8 @@ document.addEventListener('click', () => {
     }
 }, { once: true });
 
-
-                // ========================================================
-// INTERCEPTOR MAESTRO PARA GIFS Y STICKERS DEL TECLADO (YouSpace)
+// ========================================================
+// INTERCEPTOR MAESTRO PARA GIFS Y STICKERS DEL TECLADO
 // ========================================================
 const miCuadroMensaje = document.getElementById('msg-text'); 
 
@@ -2827,32 +2826,37 @@ if (miCuadroMensaje) {
                 // Si lo que metió el teclado es un GIF o un WebP animado
                 if (archivo.type.includes('image/gif') || archivo.type.includes('image/webp')) {
                     e.preventDefault();
-                    miCuadroMensaje.value = ''; // Limpiamos el cuadro para que no queden textos raros
-                    miCuadroMensaje.style.height = '40px'; // Reseteamos la altura del textarea
+                    miCuadroMensaje.value = ''; // Limpiamos el cuadro
+                    miCuadroMensaje.style.height = '40px'; // Reseteamos la altura
                     
                     console.log("🎯 H.A.R.V.I.S.: Interceptado GIF desde el teclado:", archivo.name);
                     
-                    // Se lo pasamos directo a tu función multimedia nativa como un sticker
-                    if (typeof prepararEnvioMedia === "function") {
-                        prepararEnvioMedia({ files: [archivo] }, 'stickers');
+                    // 🔥 TRUCO MAESTRO: Convertimos el archivo del teclado en una URL temporal
+                    const urlTemporal = URL.createObjectURL(archivo);
+                    
+                    // Se lo pasamos directo a tu función utilizando el tipo 'stickers'
+                    if (typeof enviarMediaPorURL === "function") {
+                        await enviarMediaPorURL(urlTemporal, 'stickers');
                     }
                 }
             }
         }
     });
 
-    // Escuchador 2: Por si copias un GIF de internet y lo pegas en el cuadro (Doble escudo)
+    // Escuchador 2: Por si copias un GIF y lo pegas en el cuadro (Doble escudo)
     miCuadroMensaje.addEventListener('paste', async (e) => {
         const elementos = (e.clipboardData || window.clipboardData).items;
         for (let item of elementos) {
             if (item.type.indexOf('image/gif') !== -1 || item.type.indexOf('image/webp') !== -1) {
-                e.preventDefault(); // Frenamos el cartel de error del navegador
+                e.preventDefault(); // Frenamos el cartel de error de Android
                 const archivo = item.getAsFile();
                 
-                console.log("🎯 H.A.R.V.I.S.: Interceptado GIF pegado desde el portapapeles");
+                console.log("🎯 H.A.R.V.I.S.: Interceptado GIF pegado");
                 
-                if (typeof prepararEnvioMedia === "function") {
-                    prepararEnvioMedia({ files: [archivo] }, 'stickers');
+                // Convertimos a URL temporal y enviamos
+                const urlTemporal = URL.createObjectURL(archivo);
+                if (typeof enviarMediaPorURL === "function") {
+                    await enviarMediaPorURL(urlTemporal, 'stickers');
                 }
             }
         }
