@@ -1344,9 +1344,13 @@ const base64 = btoa(binary);
             hora: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })
         });
 
+     
+            
+     
         if (inputMsg && !multimediaUrl) {
             inputMsg.value = "";
             inputMsg.style.height = '36px';
+            inputMsg.focus(); 
         }
 
     } catch (e) {
