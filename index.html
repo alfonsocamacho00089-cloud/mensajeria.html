@@ -554,97 +554,84 @@ margin: 0;
     text-decoration: underline;
     cursor: pointer;
      }
-/* Contenedor principal */
+
+  /* Contenedor flotante de H.A.R.V.I.S. */
 .harvis-container {
     background: #000000;
-    padding: 30px;
-    border-radius: 20px;
+    padding: 20px;
+    border-radius: 15px;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 0 30px rgba(0, 0, 0, 0.9);
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    box-shadow: 0 0 25px rgba(0, 0, 0, 0.9);
+    font-family: sans-serif;
+    max-width: 300px;
+    margin: 20px auto;
+    border: 1px solid #333;
 }
 
-/* El aura de neón dorado alrededor del botón */
+/* El aura dorada */
 .harvis-orb-glow {
     position: relative;
-    width: 100px;
-    height: 100px;
+    width: 90px;
+    height: 90px;
     border-radius: 50%;
-    background: transparent;
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 0 20px rgba(255, 215, 0, 0.2);
+    box-shadow: 0 0 15px rgba(255, 215, 0, 0.2);
     transition: all 0.5s ease;
 }
 
-/* El botón central (Orbe) */
+/* El botón central */
 .harvis-ball {
-    width: 80px;
-    height: 80px;
+    width: 75px;
+    height: 75px;
     border-radius: 50%;
-    background: linear-gradient(145deg, #111111, #000000);
+    background: #111111;
     border: 2px solid #FFD700;
     color: #FFD700;
-    font-size: 32px;
+    font-size: 28px;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: inset 0 0 10px rgba(255, 215, 0, 0.3), 0 0 15px rgba(255, 215, 0, 0.4);
+    box-shadow: 0 0 15px rgba(255, 215, 0, 0.3);
     outline: none;
     transition: all 0.3s ease;
 }
 
-.harvis-ball:hover {
-    transform: scale(1.05);
-    box-shadow: inset 0 0 15px rgba(255, 215, 0, 0.5), 0 0 25px rgba(255, 215, 0, 0.8);
-}
-
-/* --- ANIMACIÓN CUANDO H.A.R.V.I.S. ESTÁ ESCUCHANDO (Modo Pulso) --- */
+/* Animación cuando lo tocas y está escuchando */
 .harvis-container.listening .harvis-orb-glow {
-    box-shadow: 0 0 40px #FFD700, 0 0 80px rgba(255, 215, 0, 0.6);
-    animation: pulseGlow 1.5s infinite ease-in-out;
+    box-shadow: 0 0 35px #FFD700, 0 0 60px rgba(255, 215, 0, 0.4);
+    animation: pulsoHarvis 1.5s infinite ease-in-out;
 }
 
-.harvis-container.listening .harvis-ball {
-    border-color: #FFFFFF;
-    text-shadow: 0 0 10px #FFD700;
+@keyframes pulsoHarvis {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
 }
 
-@keyframes pulseGlow {
-    0% { transform: scale(1); opacity: 0.9; }
-    50% { transform: scale(1.08); opacity: 1; }
-    100% { transform: scale(1); opacity: 0.9; }
-}
-
-/* Textos informativos */
+/* Textos de la interfaz */
 .harvis-status {
     color: #B8860B;
-    font-size: 14px;
-    margin-top: 15px;
-    letter-spacing: 2px;
+    font-size: 12px;
+    margin-top: 12px;
+    letter-spacing: 1px;
     text-transform: uppercase;
     font-weight: bold;
 }
 
-.harvis-container.listening .harvis-status {
-    color: #FFD700;
-    text-shadow: 0 0 8px rgba(255, 215, 0, 0.5);
-}
-
 .harvis-subtitle {
     color: #FFFFFF;
-    font-size: 16px;
-    margin-top: 10px;
+    font-size: 14px;
+    margin-top: 8px;
     text-align: center;
     font-style: italic;
-    min-height: 24px;
-    max-width: 80%;
-}
+    min-height: 20px;
+  }
 
 
     </style>
@@ -3117,66 +3104,32 @@ function actualizarUIUIGrabando(estaGrabando) {
     }
      }
 
-// --- 1. SÍNTESIS DE VOZ NATIVA (El teléfono habla solo) ---
+// --- SISTEMA DE VOZ NATIVO (Bocinas) ---
 function hablarHarvis(texto, alTerminar) {
     const synth = window.speechSynthesis;
-    synth.cancel(); // Evita que se atropellen los audios
-    
+    synth.cancel(); 
     const utterance = new SpeechSynthesisUtterance(texto);
-    utterance.lang = 'es-MX'; // Configura la voz en español
-    utterance.rate = 1.0;     // Velocidad normal
-    
-    if (alTerminar) {
-        utterance.onend = () => alTerminar();
-    }
+    utterance.lang = 'es-MX';
+    if (alTerminar) utterance.onend = () => alTerminar();
     synth.speak(utterance);
 }
 
-// --- 2. RECONOCIMIENTO DE VOZ NATIVO (El teléfono escucha tu micrófono) ---
+// --- SISTEMA DE AUDIO NATIVO (Micrófono) ---
 function escucharVozPedro(alRecibirTexto) {
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const SpeechRecognition = window.webkitSpeechRecognition || window.SpeechRecognition;
     if (!SpeechRecognition) {
-        console.log("Este dispositivo no soporta control por voz.");
+        alert("El navegador no soporta reconocimiento de voz.");
         return;
     }
     const recognition = new SpeechRecognition();
     recognition.lang = 'es-MX';
     recognition.start();
-    
     recognition.onresult = (event) => {
-        const loQueDijiste = event.results[0][0].transcript;
-        alRecibirTexto(loQueDijiste);
+        alRecibirTexto(event.results[0][0].transcript);
     };
 }
 
-// --- 3. EL INTERCEPTOR AUTOMÁTICO DE MENSAJES (Para cuando te escriban) ---
-function interceptarMensajeEntrante(remitente, textoMensaje, funcionParaEnviarMensajeReal) {
-    // H.A.R.V.I.S. te interrumpe al oído usando la bocina nativa del cel
-    hablarHarvis(`Pedro, tienes un mensaje de ${remitente}. ¿Deseas responder?`, () => {
-        
-        // Al terminar de hablar, abre tu micrófono para escuchar tu orden
-        escucharVozPedro((respuestaPedro) => {
-            
-            // Si le dices "sí", o "dile que..."
-            if (respuestaPedro.toLowerCase().includes("sí") || respuestaPedro.toLowerCase().includes("si") || respuestaPedro.toLowerCase().includes("dile")) {
-                hablarHarvis("Entendido, señor. ¿Qué le respondo?");
-                
-                setTimeout(() => {
-                    escucharVozPedro((mensajeFinalPedro) => {
-                        hablarHarvis("Enviando respuesta.");
-                        // Aquí llamas a la función que ya usas para mandar tus mensajes en la app
-                        funcionParaEnviarMensajeReal(remitente, mensajeFinalPedro);
-                    });
-                }, 1500);
-            } else {
-                hablarHarvis("Mensaje archivado.");
-            }
-        });
-    });
-}
-
-// --- 4. CONTROL DEL BOTÓN DE TU INTERFAZ (Tu orbe Black & Gold) ---
-// --- LÓGICA DEL BOTÓN DE LA INTERFAZ (Tu orbe Black & Gold) ---
+// --- LOGICA PARA HACER APARECER Y ACTIVAR A HARVIS ---
 document.addEventListener("DOMContentLoaded", () => {
     const contenedor = document.querySelector('.harvis-container');
     const botonHarvis = document.getElementById('harvisBtn');
@@ -3185,41 +3138,23 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (botonHarvis) {
         botonHarvis.addEventListener('click', () => {
+            // 1. Enciende el efecto visual dorado
             contenedor.classList.add('listening');
             estadoTexto.innerText = "H.A.R.V.I.S. Escuchando...";
+            subtituloTexto.innerText = "Hable ahora, señor...";
             
-            // 1. Escucha lo que dices en tu teléfono
+            // 2. Te escucha por el micrófono
             escucharVozPedro((loQueDijoPedro) => {
                 subtituloTexto.innerText = `"${loQueDijoPedro}"`;
                 estadoTexto.innerText = "Procesando...";
                 
-                // 2. EL PUENTE: Le manda tu voz en texto directo a tu Streamlit
-                // REEMPLAZA ESTE LINK POR TU LINK REAL DE STREAMLIT (ejemplo: https://harvis1-0.streamlit.app/api)
-                fetch('https://harvis1-0.streamlit.app/api', { 
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ pregunta: loQueDijoPedro })
-                })
-                .then(res => res.json())
-                .then(data => {
-                    // 3. Recibe la respuesta inteligente de H.A.R.V.I.S. desde Streamlit
-                    estadoTexto.innerText = "H.A.R.V.I.S. Respondiendo";
-                    subtituloTexto.innerText = data.respuesta;
-                    
-                    // 4. Tu teléfono la reproduce por la bocina
-                    hablarHarvis(data.respuesta);
-                })
-                .catch(err => {
-                    console.error(err);
-                    estadoTexto.innerText = "Error de conexión";
-                    subtituloTexto.innerText = "No logré conectar con el servidor de Streamlit.";
-                })
-                .finally(() => {
-                    setTimeout(() => {
-                        contenedor.classList.remove('listening');
-                        estadoTexto.innerText = "H.A.R.V.I.S. en espera...";
-                    }, 4000);
-                });
+                // 3. Te responde directamente al oído
+                setTimeout(() => {
+                    estadoTexto.innerText = "H.A.R.V.I.S. Activo";
+                    const saludo = "Sistemas en línea, señor Peres. H.A.R.V.I.S. ha sido desplegado con éxito en su aplicación.";
+                    subtituloTexto.innerText = saludo;
+                    hablarHarvis(saludo);
+                }, 1000);
             });
         });
     }
