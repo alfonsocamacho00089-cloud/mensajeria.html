@@ -642,7 +642,6 @@ margin: 0;
         <button class="icon-btn" onclick="document.getElementById('modal-tienda').style.display='block'">
             <span>😊</span>
         </button>
-        
         <textarea 
     id="msg-text" 
     placeholder="Mensaje" 
@@ -650,7 +649,8 @@ margin: 0;
     enterkeyhint="send"
     contenteditable="true"
     role="textbox"
-    oninput="this.style.height='40px'; this.style.height=this.scrollHeight+'px';"></textarea>
+    oninput="this.style.height='40px'; this.style.height=this.scrollHeight+'px';"
+    style="user-select: text; -webkit-user-select: text;"></textarea>
         <label class="icon-btn" for="input-archivo">
             <span>📎</span>
             <input type="file" id="input-archivo" style="display: none;" onchange="prepararEnvioMedia(this, 'archivo')">
