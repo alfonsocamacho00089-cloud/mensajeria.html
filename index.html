@@ -2946,12 +2946,11 @@ function manejarFlujoVoz() {
 // Asegúrate de tener esta variable declarada arriba junto a las otras globales
 let flujoMicrofonoGlobal; 
 
+
 async function iniciarGrabacionVoz() {
     fragmentosAudio = []; 
     try {
-        // Guardamos el flujo en la variable global para poder apagarlo desde cualquier lado
         flujoMicrofonoGlobal = await navigator.mediaDevices.getUserMedia({ audio: true });
-        
         grabadorAudio = new MediaRecorder(flujoMicrofonoGlobal);
         
         grabadorAudio.ondataavailable = (e) => {
@@ -2959,30 +2958,36 @@ async function iniciarGrabacionVoz() {
         };
 
         grabadorAudio.onstop = async () => {
-            console.log("🎯 H.A.R.V.I.S.: Procesando nota de voz...");
+            console.log("🎯 H.A.R.V.I.S.: Procesando archivo de audio...");
             
+            // 1. Creamos el archivo binario real del audio
             const audioBlob = new Blob(fragmentosAudio, { type: 'audio/webm' });
-            const urlAudioTemporal = URL.createObjectURL(audioBlob);
+            
+            // 2. Lo convertimos en un archivo con nombre y extensión para que Firebase lo acepte
+            const archivoAudioReal = new File([audioBlob], `nota_voz_${Date.now()}.webm`, { type: 'audio/webm' });
 
-            if (typeof enviarMediaPorURL === "function") {
-                await enviarMediaPorURL(urlAudioTemporal, 'audio');
+            // 3. 🔥 ENVIAMOS EL ARCHIVO REAL A TU FUNCIÓN DE MEDIA
+            // Usamos 'prepararEnvioMedia' porque ella ya sabe cómo subir archivos a Firebase Storage
+            if (typeof prepararEnvioMedia === "function") {
+                // Simulamos la estructura del input file que tu función espera: { files: [ ... ] }
+                prepararEnvioMedia({ files: [archivoAudioReal] }, 'audio');
             }
             
-            // 🔥 APAGADO INMEDIATO Y ESTRICTO DEL CANAL NATIVO
+            // 4. Apagamos el punto verde de Android al instante
             if (flujoMicrofonoGlobal) {
                 flujoMicrofonoGlobal.getTracks().forEach(track => {
-                    track.stop(); // Detiene la grabación física
-                    track.enabled = false; // Desactiva el canal
+                    track.stop();
+                    track.enabled = false;
                 });
             }
         };
 
         grabadorAudio.start();
-        console.log("🎙️ H.A.R.V.I.S.: Grabando audio activo...");
+        console.log("🎙️ H.A.R.V.I.S.: Grabando...");
         actualizarUIUIGrabando(true);
 
     } catch (err) {
-        console.error("❌ Error de acceso al micrófono:", err);
+        console.error("❌ Error en micrófono:", err);
     }
      }
 
