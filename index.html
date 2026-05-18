@@ -3147,30 +3147,27 @@ function escucharVozPedro(alRecibirTexto) {
     const campoTexto = document.getElementById('msg-text');
     const textoMensaje = campoTexto.value.trim();
     
-    // Supongamos que tu variable con el ID del chat abierto se llama 'idContactoActivo'
-    // (Cambia 'idContactoActivo' por el nombre real de tu variable)
+    // Evaluamos con quién estás hablando según el placeholder actual del textarea
+    const esChatHarvis = campoTexto.placeholder.includes("Ordene"); 
     
-    if (idContactoActivo === "harvis_user_system") {
+    if (esChatHarvis) {
         // --- CASO A: ES EL CHAT DE HARVIS ---
         if (textoMensaje === "") {
-            // Si el cuadro está vacío, usamos el micrófono nativo
             escucharVozPedro((loQueDijoPedro) => {
                 campoTexto.value = loQueDijoPedro;
-                // Aquí usas TU FUNCIÓN NATIVA de pintar el mensaje en la pantalla
-                // ejemplo: insertarMensajeEnPantalla("Pedro", loQueDijoPedro);
                 
+                // Si tienes una función para renderizar/pintar el mensaje del usuario en pantalla, ponla aquí.
                 procesarRespuestaHarvis(loQueDijoPedro);
             });
         } else {
-            // Si escribiste texto en el teclado y le diste enviar
-            // ejemplo: insertarMensajeEnPantalla("Pedro", textoMensaje);
             procesarRespuestaHarvis(textoMensaje);
         }
     } else {
         // --- CASO B: CUALQUIER OTRO CONTACTO NORMAL ---
-        // Aquí dejas TU CÓDIGO ORIGINAL de enviar mensajes, tal cual lo tenías antes
-        // Ese que lee el Firebase o IndexedDB y que ya te funcionaba fino.
-        enviarMensajeNormalAContactos(textoMensaje); 
+        // !!! Aquí pones el nombre exacto de tu función original que envía tus mensajes !!!
+        // (Por ejemplo, si antes usabas una función llamada enviarMensaje(), ponla aquí abajo):
+        
+        // enviarMensaje(); 
     }
      }
      
