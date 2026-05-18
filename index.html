@@ -857,17 +857,21 @@ margin: 0;
         </button>
 
  <div class="barra-flotante-premium">
-            <div class="btn-nav" onclick="abrirAgendaCompleta()">
-                <span>👥</span><span>Contactos</span>
-            </div>
-            <div class="btn-nav active" onclick="document.getElementById('modal-agenda-completa').style.display='none'">
-                <span>💬</span><span>Chat</span>
-            </div>
-            <div class="btn-nav" onclick="abrirAjustes()">
-                <span>⚙️</span><span>Ajustes</span>
-            </div>
- </div>
+    <div class="btn-nav" onclick="abrirAgendaCompleta()">
+        <span>👥</span><span>Contactos</span>
+    </div>
+    
+    <div class="btn-nav" id="btn-nav-harvis" onclick="activarChatHarvis()">
+        <span style="text-shadow: 0 0 8px #ffd700;">🤖</span><span style="color: #ffd700;">H.A.R.V.I.S.</span>
+    </div>
 
+    <div class="btn-nav active" onclick="document.getElementById('modal-agenda-completa').style.display='none'">
+        <span>💬</span><span>Chat</span>
+    </div>
+    <div class="btn-nav" onclick="abrirAjustes()">
+        <span>⚙️</span><span>Ajustes</span>
+    </div>
+ </div>
  
      
  <div id="modal-nuevocontacto" class="modal" style="display: none; align-items: center; justify-content: center; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #1e222b; z-index: 30000;">
@@ -3104,61 +3108,103 @@ function actualizarUIUIGrabando(estaGrabando) {
     }
      }
 
-// --- SISTEMA DE VOZ NATIVO (Bocinas) ---
-function hablarHarvis(texto, alTerminar) {
-    const synth = window.speechSynthesis;
-    synth.cancel(); 
-    const utterance = new SpeechSynthesisUtterance(texto);
-    utterance.lang = 'es-MX';
-    if (alTerminar) utterance.onend = () => alTerminar();
-    synth.speak(utterance);
+     // Variable para saber si estamos hablando con el asistente
+let hablandoConHarvis = false;
+
+// 1. FUNCIÓN QUE SE ACTIVA AL TOCAR EL BOTÓN 🤖 DE LA BARRA O CONTACTO
+function activarChatHarvis() {
+    hablandoConHarvis = true;
+    
+    // Cambiamos visualmente el título del chat activo en tu app
+    const chatTitle = document.getElementById('chat-title-actual'); // Asegúrate de usar el ID de tu título
+    if (chatTitle) chatTitle.innerText = "H.A.R.V.I.S. 1.0";
+
+    // Forzamos a que el botón dinámico de abajo muestre el micrófono de voz
+    const iconoAccion = document.getElementById('icono-accion');
+    if (iconoAccion) iconoAccion.innerText = "🎙️";
+    
+    // Limpiamos el input de texto por si acaso
+    document.getElementById('msg-text').value = "";
+    document.getElementById('msg-text').placeholder = "Ordene, señor Peres...";
 }
 
-// --- SISTEMA DE AUDIO NATIVO (Micrófono) ---
-function escucharVozPedro(alRecibirTexto) {
-    const SpeechRecognition = window.webkitSpeechRecognition || window.SpeechRecognition;
-    if (!SpeechRecognition) {
-        alert("El navegador no soporta reconocimiento de voz.");
+// 2. REEMPLAZA TU FUNCIÓN DEL BOTÓN DINÁMICO
+// Esta función controla qué pasa cuando pisas el botón amarillo de enviar/grabar
+function ejecutarAccionBoton() {
+    const campoTexto = document.getElementById('msg-text');
+    const textoMensaje = campoTexto.value.trim();
+
+    // Si NO estamos en el chat de HARVIS, corre tu lógica normal de SpaceChat
+    if (!hablandoConHarvis) {
+        // Aquí pones tu función vieja para enviar mensajes normales a tus contactos
+        // enviarMensajeNormalAUnAmigo(); 
         return;
     }
+
+    // SI ESTAMOS EN EL CHAT DE HARVIS:
+    if (textoMensaje === "") {
+        // Si el cuadro está vacío, actúa como Micrófono Inteligente
+        iniciarVozHarvis();
+    } else {
+        // Si escribiste algo en el teclado, procesa el texto enviado
+        procesarTextoHarvis(textoMensaje);
+    }
+}
+
+// 3. CAPTURA DE VOZ NATIVA
+function iniciarVozHarvis() {
+    const SpeechRecognition = window.webkitRecognition || window.SpeechRecognition;
+    if (!SpeechRecognition) {
+        alert("El navegador no soporta reconocimiento de voz nativo.");
+        return;
+    }
+
     const recognition = new SpeechRecognition();
     recognition.lang = 'es-MX';
+    
+    const iconoAccion = document.getElementById('icono-accion');
+    iconoAccion.innerText = "🛑"; // Cambia a Stop mientras te escucha
+
     recognition.start();
+
     recognition.onresult = (event) => {
-        alRecibirTexto(event.results[0][0].transcript);
+        const loQueDijoPedro = event.results[0][0].transcript;
+        document.getElementById('msg-text').value = loQueDijoPedro;
+        iconoAccion.innerText = "🚀"; // Icono de enviar listo
+        
+        // Lo envía automáticamente tras escuchar tu voz
+        procesarTextoHarvis(loQueDijoPedro);
+    };
+
+    recognition.onerror = () => {
+        iconoAccion.innerText = "🎙️";
     };
 }
 
-// --- LOGICA PARA HACER APARECER Y ACTIVAR A HARVIS ---
-document.addEventListener("DOMContentLoaded", () => {
-    const contenedor = document.querySelector('.harvis-container');
-    const botonHarvis = document.getElementById('harvisBtn');
-    const estadoTexto = document.getElementById('harvisStatus');
-    const subtituloTexto = document.getElementById('harvisSubtitle');
+// 4. RESPUESTA LOCAL DE HARVIS (Simulada en lo que conectas el backend)
+function procesarTextoHarvis(ordenPedro) {
+    // Aquí puedes pintar el mensaje en la pantalla usando tu función nativa de renderizar mensajes
+    // ejemplo: pintarMensajeEnPantalla("Pedro", ordenPedro);
 
-    if (botonHarvis) {
-        botonHarvis.addEventListener('click', () => {
-            // 1. Enciende el efecto visual dorado
-            contenedor.classList.add('listening');
-            estadoTexto.innerText = "H.A.R.V.I.S. Escuchando...";
-            subtituloTexto.innerText = "Hable ahora, señor...";
-            
-            // 2. Te escucha por el micrófono
-            escucharVozPedro((loQueDijoPedro) => {
-                subtituloTexto.innerText = `"${loQueDijoPedro}"`;
-                estadoTexto.innerText = "Procesando...";
-                
-                // 3. Te responde directamente al oído
-                setTimeout(() => {
-                    estadoTexto.innerText = "H.A.R.V.I.S. Activo";
-                    const saludo = "Sistemas en línea, señor Peres. H.A.R.V.I.S. ha sido desplegado con éxito en su aplicación.";
-                    subtituloTexto.innerText = saludo;
-                    hablarHarvis(saludo);
-                }, 1000);
-            });
-        });
-    }
-});
+    document.getElementById('msg-text').value = ""; // Limpia el input
+    document.getElementById('icono-accion').innerText = "🎙️"; // Regresa al micro
+
+    // H.A.R.V.I.S. procesa y te responde hablando de vuelta de forma local
+    const respuesta = "Entendido señor Peres, procesando comando en YouSpace de forma local.";
+    
+    // Hace que el teléfono te hable
+    const synth = window.speechSynthesis;
+    synth.cancel();
+    const utterance = new SpeechSynthesisUtterance(respuesta);
+    utterance.lang = 'es-MX';
+    
+    // Al terminar de hablar, pinta la respuesta en la caja de chat como un mensaje del robot
+    utterance.onend = () => {
+        // ejemplo: pintarMensajeEnPantalla("H.A.R.V.I.S.", respuesta);
+    };
+    
+    synth.speak(utterance);
+     }
      
      function cargarFotoInicial() {
     const fotoGuardada = localStorage.getItem('mi_foto');
