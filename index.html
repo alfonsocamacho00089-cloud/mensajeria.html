@@ -17,8 +17,6 @@
     <script src="https://cdn.jsdelivr.net/npm/protobufjs@7.2.4/dist/protobuf.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/eruda"></script>
     <script>eruda.init();</script>
-    <script src="https://cdn.jsdelivr.net/npm/@google/genai@0.1.1/dist/bundle.min.js"></script>
-
     <script src="app.js"></script>
  <style>
    
@@ -3119,68 +3117,65 @@ function actualizarUIUIGrabando(estaGrabando) {
     }
      }
 
-      // Usamos la librería que cargamos desde el HTML. Reemplaza con tu llave real aquí:
-const ai = new googleGenAI.GoogleGenAI({ apiKey: st.secrets["GEMINI_API_KEY"] });
-const HARVIS_PROMPT = `
-Eres H.A.R.V.I.S. 1.0, el asistente virtual de YouSpace creado por Pedro Peres. 
-Tu tono es inteligente y sutilmente sarcástico. Ayuda a gestionar mensajes cortos.
-`;
-
-// --- SISTEMA DE VOZ NATIVO (Bocinas del teléfono) ---
+// --- 1. SÍNTESIS DE VOZ NATIVA (El teléfono habla solo) ---
 function hablarHarvis(texto, alTerminar) {
     const synth = window.speechSynthesis;
-    synth.cancel(); 
+    synth.cancel(); // Evita que se atropellen los audios
+    
     const utterance = new SpeechSynthesisUtterance(texto);
-    utterance.lang = 'es-MX';
-    if (alTerminar) utterance.onend = () => alTerminar();
+    utterance.lang = 'es-MX'; // Configura la voz en español
+    utterance.rate = 1.0;     // Velocidad normal
+    
+    if (alTerminar) {
+        utterance.onend = () => alTerminar();
+    }
     synth.speak(utterance);
 }
 
-// --- SISTEMA DE AUDIO NATIVO (Micrófono del teléfono) ---
+// --- 2. RECONOCIMIENTO DE VOZ NATIVO (El teléfono escucha tu micrófono) ---
 function escucharVozPedro(alRecibirTexto) {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognition) {
-        alert("Tu navegador no soporta reconocimiento de voz.");
+        console.log("Este dispositivo no soporta control por voz.");
         return;
     }
     const recognition = new SpeechRecognition();
     recognition.lang = 'es-MX';
     recognition.start();
+    
     recognition.onresult = (event) => {
-        alRecibirTexto(event.results[0][0].transcript);
+        const loQueDijiste = event.results[0][0].transcript;
+        alRecibirTexto(loQueDijiste);
     };
 }
 
-// --- INTERCEPTOR DE MENSAJES (Lo que querías para cuando te escribe alguien) ---
+// --- 3. EL INTERCEPTOR AUTOMÁTICO DE MENSAJES (Para cuando te escriban) ---
 function interceptarMensajeEntrante(remitente, textoMensaje, funcionParaEnviarMensajeReal) {
-    // 1. H.A.R.V.I.S. te avisa al oído
+    // H.A.R.V.I.S. te interrumpe al oído usando la bocina nativa del cel
     hablarHarvis(`Pedro, tienes un mensaje de ${remitente}. ¿Deseas responder?`, () => {
         
-        // 2. Abre el micrófono solo al terminar de hablar
+        // Al terminar de hablar, abre tu micrófono para escuchar tu orden
         escucharVozPedro((respuestaPedro) => {
             
-            // Si dices "Sí", o "Dile que..."
+            // Si le dices "sí", o "dile que..."
             if (respuestaPedro.toLowerCase().includes("sí") || respuestaPedro.toLowerCase().includes("si") || respuestaPedro.toLowerCase().includes("dile")) {
-                hablarHarvis("Entendido. Procesando respuesta con el cerebro central...");
+                hablarHarvis("Entendido, señor. ¿Qué le respondo?");
                 
-                // 3. Gemini redacta la respuesta inteligente
-                ai.models.generateContent({
-                    model: 'gemini-2.5-flash',
-                    contents: `Pedro recibió un mensaje de ${remitente} que dice: "${textoMensaje}". Pedro ordena: "${respuestaPedro}". Escribe lo que se enviará.`,
-                    config: { systemInstruction: HARVIS_PROMPT }
-                }).then(response => {
-                    // 4. Se manda usando la función de tu app
-                    funcionParaEnviarMensajeReal(remitente, response.text);
-                    hablarHarvis("Mensaje enviado con éxito, señor.");
-                });
+                setTimeout(() => {
+                    escucharVozPedro((mensajeFinalPedro) => {
+                        hablarHarvis("Enviando respuesta.");
+                        // Aquí llamas a la función que ya usas para mandar tus mensajes en la app
+                        funcionParaEnviarMensajeReal(remitente, mensajeFinalPedro);
+                    });
+                }, 1500);
             } else {
-                hablarHarvis("Entendido, ignorando mensaje.");
+                hablarHarvis("Mensaje archivado.");
             }
         });
     });
 }
 
-// --- LÓGICA DEL BOTÓN DE LA INTERFAZ (Tu orbe Black & Gold) ---
+// --- 4. CONTROL DEL BOTÓN DE TU INTERFAZ (Tu orbe Black & Gold) ---
 document.addEventListener("DOMContentLoaded", () => {
     const contenedor = document.querySelector('.harvis-container');
     const botonHarvis = document.getElementById('harvisBtn');
@@ -3196,24 +3191,19 @@ document.addEventListener("DOMContentLoaded", () => {
                 subtituloTexto.innerText = `"${loQueDijoPedro}"`;
                 estadoTexto.innerText = "Procesando...";
                 
-                ai.models.generateContent({
-                    model: 'gemini-2.5-flash',
-                    contents: loQueDijoPedro,
-                    config: { systemInstruction: HARVIS_PROMPT }
-                }).then(response => {
-                    estadoTexto.innerText = "H.A.R.V.I.S. Respondiendo";
-                    subtituloTexto.innerText = response.text;
-                    hablarHarvis(response.text);
-                }).finally(() => {
-                    setTimeout(() => {
-                        contenedor.classList.remove('listening');
-                        estadoTexto.innerText = "H.A.R.V.I.S. en espera...";
-                    }, 4000);
-                });
+                // Muestra tu orden en la pantalla y te confirma por voz que el sistema está listo
+                setTimeout(() => {
+                    estadoTexto.innerText = "H.A.R.V.I.S. Activo";
+                    const confirmacion = "Sistemas en línea, señor Peres. Esperando eventos de SpaceChat.";
+                    subtituloTexto.innerText = confirmacion;
+                    hablarHarvis(confirmacion);
+                }, 1200);
             });
         });
     }
 });
+
+     
      
      function cargarFotoInicial() {
     const fotoGuardada = localStorage.getItem('mi_foto');
