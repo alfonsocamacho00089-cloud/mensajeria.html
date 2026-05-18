@@ -3176,6 +3176,7 @@ function interceptarMensajeEntrante(remitente, textoMensaje, funcionParaEnviarMe
 }
 
 // --- 4. CONTROL DEL BOTÓN DE TU INTERFAZ (Tu orbe Black & Gold) ---
+// --- LÓGICA DEL BOTÓN DE LA INTERFAZ (Tu orbe Black & Gold) ---
 document.addEventListener("DOMContentLoaded", () => {
     const contenedor = document.querySelector('.harvis-container');
     const botonHarvis = document.getElementById('harvisBtn');
@@ -3187,23 +3188,42 @@ document.addEventListener("DOMContentLoaded", () => {
             contenedor.classList.add('listening');
             estadoTexto.innerText = "H.A.R.V.I.S. Escuchando...";
             
+            // 1. Escucha lo que dices en tu teléfono
             escucharVozPedro((loQueDijoPedro) => {
                 subtituloTexto.innerText = `"${loQueDijoPedro}"`;
                 estadoTexto.innerText = "Procesando...";
                 
-                // Muestra tu orden en la pantalla y te confirma por voz que el sistema está listo
-                setTimeout(() => {
-                    estadoTexto.innerText = "H.A.R.V.I.S. Activo";
-                    const confirmacion = "Sistemas en línea, señor Peres. Esperando eventos de SpaceChat.";
-                    subtituloTexto.innerText = confirmacion;
-                    hablarHarvis(confirmacion);
-                }, 1200);
+                // 2. EL PUENTE: Le manda tu voz en texto directo a tu Streamlit
+                // REEMPLAZA ESTE LINK POR TU LINK REAL DE STREAMLIT (ejemplo: https://harvis1-0.streamlit.app/api)
+                fetch('https://harvis1-0.streamlit.app/api', { 
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ pregunta: loQueDijoPedro })
+                })
+                .then(res => res.json())
+                .then(data => {
+                    // 3. Recibe la respuesta inteligente de H.A.R.V.I.S. desde Streamlit
+                    estadoTexto.innerText = "H.A.R.V.I.S. Respondiendo";
+                    subtituloTexto.innerText = data.respuesta;
+                    
+                    // 4. Tu teléfono la reproduce por la bocina
+                    hablarHarvis(data.respuesta);
+                })
+                .catch(err => {
+                    console.error(err);
+                    estadoTexto.innerText = "Error de conexión";
+                    subtituloTexto.innerText = "No logré conectar con el servidor de Streamlit.";
+                })
+                .finally(() => {
+                    setTimeout(() => {
+                        contenedor.classList.remove('listening');
+                        estadoTexto.innerText = "H.A.R.V.I.S. en espera...";
+                    }, 4000);
+                });
             });
         });
     }
 });
-
-     
      
      function cargarFotoInicial() {
     const fotoGuardada = localStorage.getItem('mi_foto');
