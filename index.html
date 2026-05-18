@@ -2809,67 +2809,55 @@ document.addEventListener('click', () => {
     }
 }, { once: true });
 
-const selectorMensaje = document.getElementById('txt-mensaje'); // <-- Pon el ID real de tu cuadro de texto
 
-if (selectorMensaje) {
-    // Interceptamos el evento 'input' antes de que el navegador lo rechace
-    selectorMensaje.addEventListener('input', async (e) => {
-        // Buscamos si el teclado inyectó datos multimedia (Input Content API)
-        const inputType = e.inputType;
-        
-        // Si el teclado intenta meter un objeto o contenido enriquecido
-        if (inputType === 'insertObject' || inputType === 'insertFromPaste') {
-            const dataTransfer = e.dataTransfer || (e.clipboardData);
-            
+                // ========================================================
+// INTERCEPTOR MAESTRO PARA GIFS Y STICKERS DEL TECLADO (YouSpace)
+// ========================================================
+const miCuadroMensaje = document.getElementById('msg-text'); 
+
+if (miCuadroMensaje) {
+    
+    // Escuchador 1: Atrapa cuando tocas el GIF directo en el teclado de Android/iOS
+    miCuadroMensaje.addEventListener('input', async (e) => {
+        if (e.inputType === 'insertObject' || e.inputType === 'insertFromPaste') {
+            const dataTransfer = e.dataTransfer || e.clipboardData;
             if (dataTransfer && dataTransfer.files.length > 0) {
                 const archivo = dataTransfer.files[0];
                 
-                // Validamos si es un GIF o un Sticker/Imagen animada
+                // Si lo que metió el teclado es un GIF o un WebP animado
                 if (archivo.type.includes('image/gif') || archivo.type.includes('image/webp')) {
-                    console.log("🎯 H.A.R.V.I.S.: Se detectó un GIF/Sticker desde el teclado:", archivo.name);
+                    e.preventDefault();
+                    miCuadroMensaje.value = ''; // Limpiamos el cuadro para que no queden textos raros
+                    miCuadroMensaje.style.height = '40px'; // Reseteamos la altura del textarea
                     
-                    // Limpiamos el input por si acaso dejó algún rastro de texto raro
-                    selectorMensaje.value = '';
+                    console.log("🎯 H.A.R.V.I.S.: Interceptado GIF desde el teclado:", archivo.name);
                     
-                    // Convertimos el GIF a Base64 para pasarlo por Protobuf como hacías antes
-                    const reader = new FileReader();
-                    reader.onload = async (eventoReader) => {
-                        const base64Media = eventoReader.target.result;
-                        
-                        // 🚀 AQUÍ LLAMAS A TU FUNCIÓN DE ENVIAR MENSAJE MULTIMEDIA
-                        // Le pasas la data en base64 y el tipo 'stickers' o 'gifs'
-                        if (typeof enviarMensajeSatelital === "function") {
-                            // Cambia 'enviarMensajeSatelital' por el nombre real de tu función de envío
-                            await enviarMensajeSatelital(base64Media, 'stickers'); 
-                        }
-                    };
-                    reader.readAsDataURL(archivo);
+                    // Se lo pasamos directo a tu función multimedia nativa como un sticker
+                    if (typeof prepararEnvioMedia === "function") {
+                        prepararEnvioMedia({ files: [archivo] }, 'stickers');
+                    }
                 }
             }
         }
     });
 
-    // ⚡ Truco extra para navegadores Chromium (Pegado directo)
-    selectorMensaje.addEventListener('paste', async (e) => {
+    // Escuchador 2: Por si copias un GIF de internet y lo pegas en el cuadro (Doble escudo)
+    miCuadroMensaje.addEventListener('paste', async (e) => {
         const elementos = (e.clipboardData || window.clipboardData).items;
         for (let item of elementos) {
             if (item.type.indexOf('image/gif') !== -1 || item.type.indexOf('image/webp') !== -1) {
-                e.preventDefault(); // Evitamos el mensaje de error de la app
+                e.preventDefault(); // Frenamos el cartel de error del navegador
                 const archivo = item.getAsFile();
                 
-                const reader = new FileReader();
-                reader.onload = async (eventoReader) => {
-                    const base64Media = eventoReader.target.result;
-                    if (typeof enviarMensajeSatelital === "function") {
-                        await enviarMensajeSatelital(base64Media, 'stickers');
-                    }
-                };
-                reader.readAsDataURL(archivo);
+                console.log("🎯 H.A.R.V.I.S.: Interceptado GIF pegado desde el portapapeles");
+                
+                if (typeof prepararEnvioMedia === "function") {
+                    prepararEnvioMedia({ files: [archivo] }, 'stickers');
+                }
             }
         }
     });
      }
-
 
      
      function cargarFotoInicial() {
