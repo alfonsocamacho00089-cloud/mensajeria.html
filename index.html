@@ -2943,32 +2943,38 @@ function manejarFlujoVoz() {
 }
 
 // 4. EMPEZAR A GRABAR DESDE EL TELÉFONO
+// Asegúrate de tener esta variable declarada arriba junto a las otras globales
+let flujoMicrofonoGlobal; 
+
 async function iniciarGrabacionVoz() {
     fragmentosAudio = []; 
     try {
-        // Pide permiso nativo para usar el micrófono
-        const flujoMicrofono = await navigator.mediaDevices.getUserMedia({ audio: true });
+        // Guardamos el flujo en la variable global para poder apagarlo desde cualquier lado
+        flujoMicrofonoGlobal = await navigator.mediaDevices.getUserMedia({ audio: true });
         
-        grabadorAudio = new MediaRecorder(flujoMicrofono);
+        grabadorAudio = new MediaRecorder(flujoMicrofonoGlobal);
         
         grabadorAudio.ondataavailable = (e) => {
             if (e.data.size > 0) fragmentosAudio.push(e.data);
         };
 
-        // Qué pasa al darle STOP
         grabadorAudio.onstop = async () => {
             console.log("🎯 H.A.R.V.I.S.: Procesando nota de voz...");
             
             const audioBlob = new Blob(fragmentosAudio, { type: 'audio/webm' });
             const urlAudioTemporal = URL.createObjectURL(audioBlob);
 
-            // Manda el enlace temporal a tu antena satelital
             if (typeof enviarMediaPorURL === "function") {
                 await enviarMediaPorURL(urlAudioTemporal, 'audio');
             }
             
-            // Apaga el micrófono físico para ahorrar batería
-            flujoMicrofono.getTracks().forEach(track => track.stop());
+            // 🔥 APAGADO INMEDIATO Y ESTRICTO DEL CANAL NATIVO
+            if (flujoMicrofonoGlobal) {
+                flujoMicrofonoGlobal.getTracks().forEach(track => {
+                    track.stop(); // Detiene la grabación física
+                    track.enabled = false; // Desactiva el canal
+                });
+            }
         };
 
         grabadorAudio.start();
@@ -2977,9 +2983,8 @@ async function iniciarGrabacionVoz() {
 
     } catch (err) {
         console.error("❌ Error de acceso al micrófono:", err);
-        alert("Dale permisos de micrófono a la app para poder grabar notas de voz.");
     }
-}
+     }
 
 // 5. DETENER GRABACIÓN
 function detenerGrabacionVoz() {
