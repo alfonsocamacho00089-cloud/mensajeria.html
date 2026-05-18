@@ -664,8 +664,8 @@ margin: 0;
         </label>
     </div>
     
-    <button id="btn-enviar" onclick="enviarMensajeSatelital()" style="flex-shrink: 0; background: #ffd700; border: none; width: 40px; height: 40px; border-radius: 50%;">
-        <span style="color: #000; font-weight: bold;">➤</span>
+    <button id="btn-accion-dinamica" onclick="ejecutarAccionBoton()" style="flex-shrink: 0; background: #ffd700; border: none; width: 40px; height: 40px; border-radius: 50%; transition: all 0.2s ease;">
+    <span id="icono-accion" style="color: #000; font-weight: bold; font-size: 16px;">🎙️</span>
     </button>
 </div>
    
@@ -2853,6 +2853,64 @@ if (entradaMensaje) {
             }
         }, 50);
     });
+     }
+
+// ========================================================
+// CONTROL DEL BOTÓN MUTANTE (ESTILO WHATSAPP)
+// ========================================================
+const cuadroTextoMutante = document.getElementById('msg-text');
+const botonAccion = document.getElementById('btn-accion-dinamica');
+const iconoAccion = document.getElementById('icono-accion');
+
+if (cuadroTextoMutante) {
+    // Escuchamos cada vez que el usuario escribe o borra letras
+    cuadroTextoMutante.addEventListener('input', () => {
+        // Quitamos los espacios en blanco para saber si hay texto real escrito
+        const textoLimpio = cuadroTextoMutante.value ? cuadroTextoMutante.value.trim() : cuadroTextoMutante.innerText.trim();
+
+        if (textoLimpio.length > 0) {
+            // 🔥 SI HAY TEXTO: Se transforma en enviar
+            iconoAccion.innerText = "➤";
+            botonAccion.style.background = "#ffd700"; // Tu dorado Black & Gold
+        } else {
+            // 🎙️ SI ESTÁ VACÍO: Vuelve a ser el micrófono
+            iconoAccion.innerText = "🎙️";
+            botonAccion.style.background = "#ffd700"; 
+        }
+    });
+}
+
+// FUNCIÓN INTELIGENTE: Decide qué hacer al dar clic según el icono actual
+async function ejecutarAccionBoton() {
+    const iconoActual = iconoAccion.innerText;
+
+    if (iconoActual === "➤") {
+        // Acción 1: Enviar mensaje de texto nativo
+        if (typeof enviarMensajeSatelital === "function") {
+            await enviarMensajeSatelital();
+            
+            // Forzamos que vuelva a ser micrófono tras enviar el texto con éxito
+            iconoAccion.innerText = "🎙️"; 
+        }
+    } else {
+        // Acción 2: Controlar el flujo de la nota de voz (Grabar / Parar)
+        if (typeof manejarFlujoVoz === "function") {
+            manejarFlujoVoz();
+        }
+    }
+}
+
+// MODIFICAMOS TU FUNCIÓN AUXILIAR DE GRABACIÓN PARA QUE USE EL NUEVO BOTÓN
+function actualizarUIUIGrabando(estaGrabando) {
+    if (botonAccion && iconoAccion) {
+        if (estaGrabando) {
+            botonAccion.style.background = '#ff3b30'; // Rojo grabando
+            iconoAccion.innerText = '🛑'; // Icono de parar
+        } else {
+            botonAccion.style.background = '#ffd700'; // Vuelve a dorado
+            iconoAccion.innerText = '🎙️'; // Vuelve a micrófono
+        }
+    }
      }
      
      function cargarFotoInicial() {
