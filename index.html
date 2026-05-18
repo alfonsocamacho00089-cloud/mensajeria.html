@@ -3110,51 +3110,68 @@ function actualizarUIUIGrabando(estaGrabando) {
 
 
 
-// Variable para saber si estamos con el robot o con un contacto normal
-let hablandoConHarvis = false;
+function procesarRespuestaHarvis(ordenPedro) {
+    const campoTexto = document.getElementById('msg-text');
+    campoTexto.value = ""; // Limpia el input
+    campoTexto.style.height = '40px'; // Resetea la altura del textarea
 
-// 🤖 Activa el modo robot
-function activarChatHarvis() {
-    hablandoConHarvis = true;
-    
-    const chatTitle = document.getElementById('chat-title-actual'); 
-    if (chatTitle) chatTitle.innerText = "H.A.R.V.I.S. 1.0";
+    const respuestaTextual = "Entendido señor Peres, procesando comando en YouSpace de forma local.";
 
-    const iconoAccion = document.getElementById('icono-accion');
-    if (iconoAccion) iconoAccion.innerText = "🎙️";
+    // 1. El teléfono te habla la respuesta por el altavoz
+    const synth = window.speechSynthesis;
+    synth.cancel();
+    const utterance = new SpeechSynthesisUtterance(respuestaTextual);
+    utterance.lang = 'es-MX';
     
-    document.getElementById('msg-text').value = "";
-    document.getElementById('msg-text').placeholder = "Ordene, señor Peres...";
+    utterance.onend = () => {
+        // 2. Cuando termine de hablar, pintas la respuesta del robot en el chat
+        // Usa tu función nativa para pintar mensajes del remitente "H.A.R.V.I.S."
+        // ejemplo: insertarMensajeEnPantalla("H.A.R.V.I.S.", respuestaTextual);
+    };
+    
+    synth.speak(utterance);
 }
 
-// 👤 Apaga el modo robot (Devuelve la app a la normalidad)
-function desactivarHarvis() {
-    hablandoConHarvis = false;
-    
-    const iconoAccion = document.getElementById('icono-accion');
-    if (iconoAccion) iconoAccion.innerText = "🎙️"; // O el icono que tengas por defecto
-    
-    document.getElementById('msg-text').placeholder = "Mensaje";
-}
+// Función auxiliar nativa para escuchar por micrófono
+function escucharVozPedro(alRecibirTexto) {
+    const SpeechRecognition = window.webkitSpeechRecognition || window.SpeechRecognition;
+    if (!SpeechRecognition) return;
+    const recognition = new SpeechRecognition();
+    recognition.lang = 'es-MX';
+    recognition.start();
+    recognition.onresult = (event) => {
+        alRecibirTexto(event.results[0][0].transcript);
+    };
+     }
 
-// 🚀 REPARACIÓN DEL BOTÓN AMARILLO NATIVO
-function ejecutarAccionBoton() {
+     function ejecutarAccionBoton() {
     const campoTexto = document.getElementById('msg-text');
     const textoMensaje = campoTexto.value.trim();
-
-    // SI NO ESTÁS CON HARVIS: Ejecuta tu función de enviar de toda la vida
-    if (!hablandoConHarvis) {
-        // !!! AQUÍ BUSCA TU FUNCIÓN ORIGINAL Y CAMBIA ESTE NOMBRE POR EL TUYO !!!
-        // Por ejemplo, si tu función se llamaba enviarMensaje(), ponla aquí:
-        enviarMensaje(); 
-        return;
-    }
-
-    // SI ESTÁS CON HARVIS: Lógica del robot
-    if (textoMensaje === "") {
-        iniciarVozHarvis(); // Si está vacío, usa el micrófono
+    
+    // Supongamos que tu variable con el ID del chat abierto se llama 'idContactoActivo'
+    // (Cambia 'idContactoActivo' por el nombre real de tu variable)
+    
+    if (idContactoActivo === "harvis_user_system") {
+        // --- CASO A: ES EL CHAT DE HARVIS ---
+        if (textoMensaje === "") {
+            // Si el cuadro está vacío, usamos el micrófono nativo
+            escucharVozPedro((loQueDijoPedro) => {
+                campoTexto.value = loQueDijoPedro;
+                // Aquí usas TU FUNCIÓN NATIVA de pintar el mensaje en la pantalla
+                // ejemplo: insertarMensajeEnPantalla("Pedro", loQueDijoPedro);
+                
+                procesarRespuestaHarvis(loQueDijoPedro);
+            });
+        } else {
+            // Si escribiste texto en el teclado y le diste enviar
+            // ejemplo: insertarMensajeEnPantalla("Pedro", textoMensaje);
+            procesarRespuestaHarvis(textoMensaje);
+        }
     } else {
-        procesarTextoHarvis(textoMensaje); // Si escribiste, procesa la orden
+        // --- CASO B: CUALQUIER OTRO CONTACTO NORMAL ---
+        // Aquí dejas TU CÓDIGO ORIGINAL de enviar mensajes, tal cual lo tenías antes
+        // Ese que lee el Firebase o IndexedDB y que ya te funcionaba fino.
+        enviarMensajeNormalAContactos(textoMensaje); 
     }
      }
      
