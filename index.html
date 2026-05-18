@@ -1191,18 +1191,25 @@ async function activarAntena() {
     window.listenerActivo.on('child_added', async (snapshot) => {
         const data = snapshot.val();
         if (!data || !data.p) return; 
-
-        try {
+try {
             const root = await cargarProto();
             const SuperAppPayload = root.lookupType("SuperAppPayload");
             const buffer = Uint8Array.from(atob(data.p), c => c.charCodeAt(0));
             const decoded = SuperAppPayload.decode(buffer);
 
             const emisorID = data.from; 
-            const tipoMediaRecibido = data.mediaType || 'texto'; 
             const chatAbiertoActualmente = document.querySelector('#target-id').value;
-
             const textoReal = decodeURIComponent(escape(atob(decoded.chatText)));
+
+            // 🔥 NUEVA DETECCIÓN MAESTRA DE AUDIO EN LA RECEPCIÓN
+            let tipoMediaRecibido = data.mediaType || data.tipo || decoded.mediaType || decoded.tipo || 'texto';
+            if (textoReal.startsWith('blob:') || textoReal.includes('.webm') || textoReal.includes('.ogg')) {
+                // Si el texto trae señas de ser un archivo de audio, lo marcamos correctamente
+                if (textoReal.includes('audio') || tipoMediaRecibido === 'audio') {
+                    tipoMediaRecibido = 'audio';
+                }
+            }
+
             const tipoValidado = (tipoMediaRecibido === 'gifs') ? 'stickers' : tipoMediaRecibido;
 
             const nuevoMensaje = { 
@@ -1756,7 +1763,7 @@ async function cargarProto() {
 // Variable necesaria para que el menú sepa a qué mensaje le diste clic
 let mensajeSeleccionado = null;
  
- function pintarMensaje(contenido, clase, hora, status, id, tipo = 'texto') {
+function pintarMensaje(contenido, clase, hora, status, id, tipo = 'texto') {
     const box = document.getElementById('chat-box');
     if (!box) return;
 
@@ -1773,14 +1780,25 @@ let mensajeSeleccionado = null;
     div.className = `mensaje ${clase}`;
     div.id = id;
 
-    // 🔥 OPTIMIZACIÓN DE VELOCIDAD: Pintamos primero el esqueleto de la burbuja inmediatamente
+    // 🔥 INDEPENDENCIA VISUAL: Si es multimedia, le quitamos el fondo y estilos de burbuja de texto
+    const esMultimedia = ['foto', 'sticker', 'stickers', 'video', 'audio'].includes(tipo) || 
+                         (textoReal.startsWith('blob:') && (textoReal.includes('audio') || textoReal.includes('video')));
+    
+    if (esMultimedia) {
+        div.style.background = 'transparent';
+        div.style.backgroundColor = 'transparent';
+        div.style.boxShadow = 'none';
+        div.style.border = 'none';
+        div.style.padding = '4px'; // Un padding mínimo para que no se pegue al borde
+    }
+
     const horaFinal = hora || new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
     const checkHTML = clase === 'msg-derecha' ? `<span style="margin-left:5px; font-size:10px;">${status === 'leido' ? '✓✓' : '✓'}</span>` : '';
 
-    // Colocamos un contenedor interno temporal para el cuerpo del mensaje
+    // Contenedor interno temporal para el cuerpo
     div.innerHTML = `
         <div class="cuerpo-mensaje-dinamico"></div>
-        <div style="font-size:10px; opacity:0.6; text-align:right; margin-top:4px;">
+        <div style="font-size:10px; opacity:0.6; text-align:right; margin-top:4px; color: #fff;">
             ${horaFinal} ${checkHTML}
         </div>
     `;
@@ -1788,7 +1806,7 @@ let mensajeSeleccionado = null;
     box.appendChild(div);
     box.scrollTop = box.scrollHeight;
 
-    // 🔥 PROCESAMIENTO ASÍNCRONO INDEPENDIENTE: Evita que el renderizado de enlaces trabe el chat
+    // Procesamiento asíncrono rápido
     requestAnimationFrame(() => {
         const contenedorCuerpo = div.querySelector('.cuerpo-mensaje-dinamico');
         if (!contenedorCuerpo) return;
@@ -1842,7 +1860,7 @@ let mensajeSeleccionado = null;
         }
         // --- FIN DE REDES SOCIALES ---
         
-        // Mantenemos tus renders multimedia anteriores e inyectamos el nuevo tipo 'audio'
+        // Mantenemos tus renders multimedia anteriores y el tipo 'audio' sin caja de burbuja
         else if (tipo === 'foto' || tipo === 'sticker' || tipo === 'stickers') {
             cuerpoHTML = `<img src="${textoReal}" style="max-width:180px; border-radius:12px; display:block; border: 2px solid #ffd700;">`;
         } else if (tipo === 'video') {
@@ -1852,18 +1870,18 @@ let mensajeSeleccionado = null;
                 </video>
             `;
         } 
-        // 🎙️ NUEVO RENDER: REPRODUCTOR NATIVO PARA NOTAS DE VOZ
-        else if (tipo === 'audio' || textoReal.startsWith('blob:') && textoReal.includes('/audio') || textoReal.includes('.webm')) {
+        // 🎙️ RENDER DE AUDIO INDEPENDIENTE
+        else if (tipo === 'audio' || (textoReal.startsWith('blob:') && textoReal.includes('audio')) || textoReal.includes('.webm') || textoReal.includes('.ogg')) {
             cuerpoHTML = `
                 <audio src="${textoReal}" controls playsinline type="audio/webm"
-                       style="max-width:240px; display:block; margin-top:2px; border-radius:20px; outline:none;">
+                       style="max-width:240px; display:block; margin-top:2px; outline:none;">
                 </audio>
             `;
         } else {
+            // El texto normal sí conserva todo el estilo intacto de su CSS
             cuerpoHTML = `<span class="texto-msg">${textoReal}</span>`;
         }
 
-        // Inyectamos el contenido final de forma aislada e independiente
         contenedorCuerpo.innerHTML = cuerpoHTML;
         box.scrollTop = box.scrollHeight;
     });
