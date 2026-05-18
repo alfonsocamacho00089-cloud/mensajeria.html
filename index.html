@@ -637,22 +637,22 @@ margin: 0;
  </div>
 
 
+
+
 <div class="contenedor-flotante">
     <div class="input-wrapper">
         <button class="icon-btn" onclick="document.getElementById('modal-tienda').style.display='block'">
             <span>😊</span>
         </button>
         
-        <div 
-            id="msg-text" 
-            contenteditable="true" 
-            role="textbox" 
-            aria-multiline="true"
-            placeholder="Mensaje"
-            inputmode="text" 
-            enterkeyhint="send"
-            style="width: 100%; min-height: 24px; max-height: 100px; padding: 8px; color: #fff; background: transparent; overflow-y: auto; outline: none; user-select: text; -webkit-user-select: text;"></div>
-
+        <textarea 
+    id="msg-text" 
+    placeholder="Mensaje" 
+    inputmode="text" 
+    enterkeyhint="send"
+    contenteditable="true"
+    role="textbox"
+    oninput="this.style.height='40px'; this.style.height=this.scrollHeight+'px';"></textarea>
         <label class="icon-btn" for="input-archivo">
             <span>📎</span>
             <input type="file" id="input-archivo" style="display: none;" onchange="prepararEnvioMedia(this, 'archivo')">
@@ -2813,73 +2813,47 @@ document.addEventListener('click', () => {
 
 
      // ========================================================
-// CAPTURADOR DE CONTENIDO ENRIQUECIDO (ESTILO WHATSAPP)
+// ESCUCO DE EMERGENCIA - CAPTURA DE PORTAPAPELES EN CALIENTE
 // ========================================================
-const cuadroMensajeWhatsApp = document.getElementById('msg-text');
+const entradaMensaje = document.getElementById('msg-text');
 
-if (cuadroMensajeWhatsApp) {
-    
-    // Evaluamos constantemente lo que entra al div editable
-    const MutationObserver = window.MutationObserver || window.WebKitMutationObserver;
-    const observador = new MutationObserver((mutations) => {
-        mutations.forEach(async (mutation) => {
-            // Si el teclado inyectó un elemento (como una imagen/gif)
-            if (mutation.addedNodes.length > 0) {
-                for (let nodo of mutation.addedNodes) {
+if (entradaMensaje) {
+    // Escuchamos cuando el teclado presiona CUALQUIER tecla o acción de soltar contenido
+    entradaMensaje.addEventListener('keydown', async (e) => {
+        // Gboard a veces emite un comando de pegado silencioso.
+        // Esperamos un milisegundo y revisamos el portapapeles del teléfono a la fuerza.
+        setTimeout(async () => {
+            try {
+                const elementosPortapapeles = await navigator.clipboard.read();
+                
+                for (const elemento of elementosPortapapeles) {
+                    // Buscamos si hay un GIF o WebP guardado en la memoria del teléfono
+                    const tipoGif = elemento.types.find(type => type.includes('image/gif') || type.includes('image/webp'));
                     
-                    // Si el nodo es una imagen (un GIF del teclado)
-                    if (nodo.tagName === 'IMG') {
-                        const urlSrc = nodo.src;
-                        console.log("🎯 H.A.R.V.I.S.: ¡GIF inyectado desde el teclado con éxito!", urlSrc);
+                    if (tipoGif) {
+                        console.log("🛰️ H.A.R.V.I.S. detectó un GIF en la memoria del teclado:", tipoGif);
                         
-                        // Frenamos la visualización en el cuadro de texto para que no se quede ahí metido
-                        nodo.remove(); 
-                        cuadroMensajeWhatsApp.innerHTML = ''; 
+                        const blob = await elemento.getType(tipoGif);
+                        const urlTemporal = URL.createObjectURL(blob);
                         
-                        // Si la URL viene como un archivo binario del teclado (Blob)
-                        if (urlSrc.startsWith('blob:') || urlSrc.startsWith('data:')) {
-                            if (typeof enviarMediaPorURL === "function") {
-                                await enviarMediaPorURL(urlSrc, 'stickers');
-                            }
-                        } else {
-                            // Si el teclado mandó una URL directa de internet
-                            if (typeof enviarMediaPorURL === "function") {
-                                await enviarMediaPorURL(urlSrc, 'stickers');
-                            }
+                        // Limpiamos la pantalla
+                        if (entradaMensaje.tagName === 'TEXTAREA') entradaMensaje.value = '';
+                        else entradaMensaje.innerHTML = '';
+
+                        // Lo mandamos al satélite
+                        if (typeof enviarMediaPorURL === "function") {
+                            await enviarMediaPorURL(urlTemporal, 'stickers');
                         }
+                        break;
                     }
                 }
+            } catch (err) {
+                // Si el navegador bloquea el acceso al portapapeles en silencio, salta aquí
+                console.log("Fallo silencioso de lectura de Gboard");
             }
-        });
-    });
-
-    // Activamos el observador sobre nuestro cuadro de mensajes
-    observador.observe(cuadroMensajeWhatsApp, {
-        childList: true,
-        subtree: true
-    });
-
-    // ⚡ RESPALDO: Si el teclado decide usar la función de pegado rápido al fallar el render
-    cuadroMensajeWhatsApp.addEventListener('paste', async (e) => {
-        const elementos = (e.clipboardData || window.clipboardData)?.items;
-        if (!elementos) return;
-
-        for (let item of elementos) {
-            if (item.type.indexOf('image/gif') !== -1 || item.type.indexOf('image/webp') !== -1) {
-                e.preventDefault();
-                const archivo = item.getAsFile();
-                const urlTemporal = URL.createObjectURL(archivo);
-
-                if (typeof enviarMediaPorURL === "function") {
-                    await enviarMediaPorURL(urlTemporal, 'stickers');
-                }
-                cuadroMensajeWhatsApp.innerHTML = '';
-                break;
-            }
-        }
+        }, 50);
     });
      }
-
      
      function cargarFotoInicial() {
     const fotoGuardada = localStorage.getItem('mi_foto');
