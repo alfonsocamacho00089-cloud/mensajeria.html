@@ -1437,44 +1437,30 @@ const base64 = btoa(binary);
         }
 
 
-     // === CONEXIÓN DIRECTA E INVISIBLE VÍA VERCEL API ===
+// === CONEXIÓN DIRECTA AL CEREBRO CENTRAL EN STREAMLIT ===
 if (targetID === "harvis_user_system") {
     try {
-        // 1. Guardamos tu mensaje en la memoria del chat
+        // 1. Guardamos tu mensaje en la memoria local por si acaso
         historialHarvisVercel.push({ role: "user", parts: [{ text: msg }] });
 
-        // 2. Filtro de sanitización para que Gemini no rebote el historial
-        let historialLimpio = [];
-        for (let i = 0; i < historialHarvisVercel.length; i++) {
-            const actual = historialHarvisVercel[i];
-            const ultimoAgregado = historialLimpio[historialLimpio.length - 1];
-            if (!ultimoAgregado || ultimoAgregado.role !== actual.role) {
-                if (actual.parts && actual.parts[0] && actual.parts[0].text.trim() !== "") {
-                    historialLimpio.push(actual);
-                }
-            } else if (actual.role === "user") {
-                ultimoAgregado.parts[0].text += " " + actual.parts[0].text;
-            }
-        }
-
-        if (historialLimpio.length > 0 && historialLimpio[historialLimpio.length - 1].role !== "user") {
-            historialLimpio.push({ role: "user", parts: [{ text: msg }] });
-        }
-
-        // 3. Le pegamos a tu servidor mandándole el historial acumulado
-        const respuestaServidor = await fetch('/api/chat', {
+        // 2. Apuntamos directamente a tu servidor de Streamlit en lugar de Vercel
+        // CORRECCIÓN: Cambia 'tu-app.streamlit.app' por la URL real de tu panel de Streamlit
+        const respuestaServidor = await fetch('https://tu-app.streamlit.app/v1/chat', { 
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ chatHistory: historialLimpio })
+            body: JSON.stringify({ 
+                // Aquí mandamos el mensaje o el formato que tu script de Python ya procesaba con éxito
+                message: msg 
+            })
         });
 
         const datos = await respuestaServidor.json();
         const respuestaIA = datos.respuesta || "Sistemas listos, Pedro.";
         const harvisMsgId = "msg_harvis_" + Date.now();
         
-        // 4. Guardamos la respuesta real de H.A.R.V.I.S. en la memoria
         historialHarvisVercel.push({ role: "model", parts: [{ text: respuestaIA }] });
 
+        // 3. Activamos la voz nativa y pintamos en pantalla
         if (typeof hablarHarvis === "function") {
             hablarHarvis(respuestaIA);
         }
@@ -1497,9 +1483,9 @@ if (targetID === "harvis_user_system") {
         }
 
     } catch (errorCentral) {
-        console.error("❌ Error en el enlace con el servidor de Vercel:", errorCentral);
+        console.error("❌ Error en el enlace directo con Streamlit:", errorCentral);
     }
-} // <-- Asegúrate de que esta llave cierre el bloque 'if (targetID === "harvis_user_system")'
+     }
      
      
         if (inputMsg && !multimediaUrl) {
