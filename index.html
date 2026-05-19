@@ -3109,29 +3109,16 @@ function actualizarUIUIGrabando(estaGrabando) {
 
 
 
-function procesarRespuestaHarvis(ordenPedro) {
-    const campoTexto = document.getElementById('msg-text');
-    campoTexto.value = ""; // Limpia el input
-    campoTexto.style.height = '40px'; // Resetea la altura del textarea
-
-    const respuestaTextual = "Entendido señor Peres, procesando comando en YouSpace de forma local.";
-
-    // 1. El teléfono te habla la respuesta por el altavoz
+// --- SISTEMA DE VOZ NATIVO PARA EL ASISTENTE ---
+function hablarHarvis(texto) {
     const synth = window.speechSynthesis;
-    synth.cancel();
-    const utterance = new SpeechSynthesisUtterance(respuestaTextual);
+    synth.cancel(); 
+    const utterance = new SpeechSynthesisUtterance(texto);
     utterance.lang = 'es-MX';
-    
-    utterance.onend = () => {
-        // 2. Cuando termine de hablar, pintas la respuesta del robot en el chat
-        // Usa tu función nativa para pintar mensajes del remitente "H.A.R.V.I.S."
-        // ejemplo: insertarMensajeEnPantalla("H.A.R.V.I.S.", respuestaTextual);
-    };
-    
     synth.speak(utterance);
 }
 
-// Función auxiliar nativa para escuchar por micrófono
+// --- ESCUCHAR AL SEÑOR PERES ---
 function escucharVozPedro(alRecibirTexto) {
     const SpeechRecognition = window.webkitSpeechRecognition || window.SpeechRecognition;
     if (!SpeechRecognition) return;
@@ -3141,35 +3128,38 @@ function escucharVozPedro(alRecibirTexto) {
     recognition.onresult = (event) => {
         alRecibirTexto(event.results[0][0].transcript);
     };
-     }
+}
 
-     function ejecutarAccionBoton() {
-    const campoTexto = document.getElementById('msg-text');
-    const textoMensaje = campoTexto.value.trim();
+// Interceptamos cuando el usuario interactúa en la app, pero aislado del código principal
+document.addEventListener("click", (e) => {
+    // Si el usuario hace clic en el botón amarillo MIENTRAS está el chat de HARVIS abierto
+    const tituloChat = document.getElementById('chat-title-actual')?.innerText || "";
     
-    // Evaluamos con quién estás hablando según el placeholder actual del textarea
-    const esChatHarvis = campoTexto.placeholder.includes("Ordene"); 
-    
-    if (esChatHarvis) {
-        // --- CASO A: ES EL CHAT DE HARVIS ---
-        if (textoMensaje === "") {
-            escucharVozPedro((loQueDijoPedro) => {
-                campoTexto.value = loQueDijoPedro;
-                
-                // Si tienes una función para renderizar/pintar el mensaje del usuario en pantalla, ponla aquí.
-                procesarRespuestaHarvis(loQueDijoPedro);
-            });
-        } else {
-            procesarRespuestaHarvis(textoMensaje);
-        }
-    } else {
-        // --- CASO B: CUALQUIER OTRO CONTACTO NORMAL ---
-        // !!! Aquí pones el nombre exacto de tu función original que envía tus mensajes !!!
-        // (Por ejemplo, si antes usabas una función llamada enviarMensaje(), ponla aquí abajo):
+    if (tituloChat === "H.A.R.V.I.S. 1.0") {
+        const botonAmarillo = e.target.closest("#btn-accion-dinamica");
         
-        // enviarMensaje(); 
+        if (botonAmarillo) {
+            // Evitamos que choque con cualquier otra cosa
+            e.preventDefault();
+            e.stopPropagation();
+            
+            const campoTexto = document.getElementById('msg-text');
+            
+            if (campoTexto && campoTexto.value.trim() === "") {
+                // Si el campo está vacío, activa el micrófono de Harvis
+                escucharVozPedro((loQueDijoPedro) => {
+                    campoTexto.value = loQueDijoPedro;
+                    hablarHarvis("Entendido señor Peres, procesando de forma local.");
+                    campoTexto.value = ""; // Limpia después de procesar
+                });
+            } else if (campoTexto) {
+                // Si escribió texto por teclado
+                hablarHarvis("Comando de texto recibido en el sistema local.");
+                campoTexto.value = "";
+            }
+        }
     }
-     }
+});
      
      function cargarFotoInicial() {
     const fotoGuardada = localStorage.getItem('mi_foto');
