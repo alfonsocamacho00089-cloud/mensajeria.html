@@ -3221,52 +3221,44 @@ function procesarRespuestaHarvis(mensajeRecibidoDePedro) {
 // =================================================================
 // Busca tu función nativa de envío (la que activas con el Enter o tu evento)
 
+
 function funcionDeEnvioRealDeTuApp(textoDelMensaje) {
     
-    // CAPTURA REAL DE SPACECHAT: Leemos el elemento target-id de tu HTML
     const inputTarget = document.getElementById('target-id');
     const usuarioEnPantalla = inputTarget ? inputTarget.value : ""; 
-    const targetID = usuarioEnPantalla; // Para que coincida con tu lógica de Vercel
+    const targetID = usuarioEnPantalla; 
 
     if (usuarioEnPantalla === "harvis_user_system") {
-        // ---------------------------------------------------------
-        // CASO A: ESTÁS DENTRO DEL CHAT DE HARVIS
-        // ---------------------------------------------------------
         
-        // 1. Limpia tu textarea msg-text como hace siempre tu app
         const campoTexto = document.getElementById('msg-text');
         if (campoTexto) {
             campoTexto.value = "";
-            campoTexto.style.height = '40px'; // Resetea la altura
+            campoTexto.style.height = '40px'; 
         }
 
-        // 2. Activa el modo manos libres estilo Alexa mientras estás aquí
         if (typeof activarEscuchaAtentaHarvis === "function") {
             activarEscuchaAtentaHarvis();
         }
 
-        // 🛠️ CONTROL DE ENTRADA: Si lo que llega no es texto (es un archivo o evento de audio)
-        // activamos tu función nativa para escuchar y extraer las palabras.
-        if (!textoDelMensaje || typeof textoDelMensaje !== "string" || textoDelMensaje.trim() === "") {
+        // 🛠️ FILTRO DE AUDIOS NATIVOS: Si llega un audio en Base64 o vacío, forzamos transcripción
+        if (!textoDelMensaje || typeof textoDelMensaje !== "string" || textoDelMensaje.includes("data:audio") || textoDelMensaje.startsWith("GkXf")) {
             if (typeof escucharVozPedro === "function") {
-                console.log("🎙️ Detectada entrada de audio. Transcribiendo...");
+                console.log("🎙️ Filtro H.A.R.V.I.S.: Forzando transcripción nativa...");
                 escucharVozPedro((textoConvertido) => {
-                    if (textoConvertido) {
-                        // Re-ejecuta la función pero ahora pasándole el texto limpio dictado
+                    if (textoConvertido && textoConvertido.trim() !== "") {
+                        if (campoTexto) campoTexto.value = textoConvertido;
                         funcionDeEnvioRealDeTuApp(textoConvertido);
                     }
                 });
             }
-            return; // Frenamos la ejecución aquí hasta que tengamos el texto transcripto
+            return; 
         }
 
-        // 3. === CONEXIÓN DIRECTA E INVISIBLE VÍA VERCEL API (CON MEMORIA FLUIDA) ===
+        // === CONEXIÓN CON VERCEL (TEXTO, HISTORIAL E IMÁGENES) ===
         (async () => {
             try {
-                // Guardamos tu mensaje en la memoria del chat
                 historialHarvisVercel.push({ role: "user", parts: [{ text: textoDelMensaje }] });
 
-                // Le pegamos a tu servidor mandándole TODO el historial acumulado
                 const respuestaServidor = await fetch('/api/chat', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -3277,22 +3269,39 @@ function funcionDeEnvioRealDeTuApp(textoDelMensaje) {
                 const respuestaIA = datos.respuesta || "Sistemas listos, Pedro.";
                 const harvisMsgId = "msg_harvis_" + Date.now();
                 
-                // Guardamos la respuesta de H.A.R.V.I.S. en la memoria para el próximo mensaje
                 historialHarvisVercel.push({ role: "model", parts: [{ text: respuestaIA }] });
 
-                if (typeof hablarHarvis === "function") {
-                    hablarHarvis(respuestaIA);
-                }
+                // A) Si el servidor nos devolvió una imagen generada por IA
+                if (datos.imagenUrl) {
+                    // 1. H.A.R.V.I.S. te avisa hablando por los parlantes
+                    if (typeof hablarHarvis === "function") hablarHarvis(respuestaIA);
+                    
+                    // 2. Pintamos su respuesta de texto
+                    if (typeof pintarMensaje === "function") {
+                        pintarMensaje(respuestaIA, 'msg-izquierda', null, 'leido', harvisMsgId + "_t", 'texto');
+                    }
 
-                if (typeof pintarMensaje === "function") {
-                    pintarMensaje(respuestaIA, 'msg-izquierda', null, 'leido', harvisMsgId, 'texto');
+                    // 3. ¡PINTAMOS LA IMAGEN REAL EN EL CHAT! 
+                    // Nota: Si tu función pintarMensaje soporta tipo 'imagen', cámbiale el último parámetro.
+                    if (typeof pintarMensaje === "function") {
+                        const estructuraImagenHtml = `<img src="${datos.imagenUrl}" style="width:100%; border-radius:12px; border: 2px solid #FFD700; box-shadow: 0 0 15px rgba(255,217,0,0.5); margin-top:8px;" alt="IA Art">`;
+                        pintarMensaje(estructuraImagenHtml, 'msg-izquierda', null, 'leido', harvisMsgId + "_img", 'texto');
+                    }
+
+                } else {
+                    // B) Flujo normal si es solo texto regular de Gemini
+                    if (typeof hablarHarvis === "function") hablarHarvis(respuestaIA);
+                    if (typeof pintarMensaje === "function") {
+                        pintarMensaje(respuestaIA, 'msg-izquierda', null, 'leido', harvisMsgId, 'texto');
+                    }
                 }
                 
+                // Guardado Local en IndexedDB
                 if (typeof guardarLocal === "function") {
                     await guardarLocal('mensajes', { 
                         id: harvisMsgId, 
                         contactoId: targetID,
-                        texto: respuestaIA, 
+                        texto: datos.imagenUrl ? `${respuestaIA} [Imagen Generada]` : respuestaIA, 
                         clase: 'msg-izquierda', 
                         status: 'leido',
                         tipo: 'texto',
@@ -3307,17 +3316,9 @@ function funcionDeEnvioRealDeTuApp(textoDelMensaje) {
         })();
 
     } else {
-        // ---------------------------------------------------------
-        // CASO B: CHATS NORMALES CON TUS CONTACTOS
-        // ---------------------------------------------------------
-        
-        // Apaga el micrófono continuo para que no espíe tus chats normales
         if (typeof desactivarEscuchaAtentaHarvis === "function") {
             desactivarEscuchaAtentaHarvis();
         }
-
-        // Aquí dejas tus líneas de código nativas originales de SpaceChat 
-        // para guardar/enviar mensajes a tus contactos por Firebase o IndexedDB
     }
      }
 
