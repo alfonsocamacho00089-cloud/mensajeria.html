@@ -1439,34 +1439,42 @@ const base64 = btoa(binary);
 
         // === INTERCEPCIÓN EN CALIENTE PARA H.A.R.V.I.S. ===
         // === CONEXIÓN DIRECTA CON TU ENTORNO DE STREAMLIT ===
+        // === CONEXIÓN DIRECTA Y SIN TRABAS CON GOOGLE GEMINI ===
         if (targetID === "harvis_user_system") {
             try {
-                // Cambia esta URL por la dirección real donde corre tu app de Streamlit
-                const urlStreamlit = "https://tu-app-harvis.streamlit.app:5000/api/chat";
-             
-                const respuestaServidor = await fetch(urlStreamlit, {
+                // Coloca tu API Key real de Google aquí entre las comillas
+                const miLlaveSecreta = "AIzaSyDlniGKLH0TxZFOXR8SuvVfXGKab7gxYfo"; 
+                const urlGemini = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${miLlaveSecreta}`;
+
+                // El prompt de personalidad que ya tenías en Python, directo al JS
+                const harvisPromptSystem = "Eres H.A.R.V.I.S. 1.0, el asistente virtual e ingenioso creado por Pedro Peres para YouSpace. Sé experto, conciso y con un sutil toque de sarcasmo e ironía. Mantén las respuestas cortas.";
+
+                const respuestaServidor = await fetch(urlGemini, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ 
-                        mensaje: msg,
-                        usuario: miID
+                    body: JSON.stringify({
+                        contents: [{ parts: [{ text: msg }] }],
+                        systemInstruction: { parts: [{ text: harvisPromptSystem }] },
+                        generationConfig: { temperature: 0.75 }
                     })
                 });
 
-                const datosHarvis = await respuestaServidor.json();
-                const respuestaIA = datosHarvis.respuesta || "Señor Peres, el sistema local de Streamlit no responde.";
+                const datosGemini = await respuestaServidor.json();
+                
+                // Estructura exacta de respuesta que devuelve la API de Google
+                const respuestaIA = datosGemini.candidates[0].content.parts[0].text || "Sistemas listos, Pedro.";
 
                 const harvisMsgId = "msg_harvis_" + Date.now();
                 
-                // 1. El teléfono te canta la respuesta por los altavoces
+                // 1. El teléfono te canta la respuesta por los altavoces nativos
                 if (typeof hablarHarvis === "function") {
                     hablarHarvis(respuestaIA);
                 }
 
-                // 2. Pintamos la respuesta interactiva real en tu pantalla
+                // 2. Pintamos la respuesta real en tu pantalla Black & Gold
                 pintarMensaje(respuestaIA, 'msg-izquierda', null, 'leido', harvisMsgId, 'texto');
                 
-                // 3. Guardado local inmediato en tu IndexedDB
+                // 3. Guardado local inmediato en tu IndexedDB para mantener el historial
                 await guardarLocal('mensajes', { 
                     id: harvisMsgId, 
                     contactoId: targetID,
@@ -1478,11 +1486,11 @@ const base64 = btoa(binary);
                     hora: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })
                 });
 
-            } catch (errorStreamlit) {
-                console.error("❌ Error de comunicación con Streamlit:", errorStreamlit);
-                if (typeof hablarHarvis === "function") hablarHarvis("Señor, no logré enlazar con el entorno de Streamlit.");
+            } catch (errorGemini) {
+                console.error("❌ Error directo con la API de Google:", errorGemini);
+                if (typeof hablarHarvis === "function") hablarHarvis("Señor, hubo un problema en los servidores de Google.");
             }
-        }
+     }
      
         if (inputMsg && !multimediaUrl) {
             inputMsg.value = "";
