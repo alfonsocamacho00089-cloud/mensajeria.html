@@ -1437,54 +1437,56 @@ const base64 = btoa(binary);
         }
 
 
-// === CONEXIÓN DIRECTA AL CEREBRO CENTRAL EN STREAMLIT ===
-if (targetID === "harvis_user_system") {
-    try {
-        // 1. Guardamos tu mensaje en la memoria local por si acaso
-        historialHarvisVercel.push({ role: "user", parts: [{ text: msg }] });
+// === CONEXIÓN DIRECTA POR ENLACE CRUDO (SIN LIBRERÍAS QUE ROMPAN LA APP) ===
+        if (targetID === "harvis_user_system") {
+            try {
+                const miLlaveSecreta = "h"; 
+                const urlGemini = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${miLlaveSecreta}`;
 
-        // 2. Apuntamos directamente a tu servidor de Streamlit en lugar de Vercel
-        // CORRECCIÓN: Cambia 'tu-app.streamlit.app' por la URL real de tu panel de Streamlit
-        const respuestaServidor = await fetch('https://tu-app.streamlit.app/v1/chat', { 
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ 
-                // Aquí mandamos el mensaje o el formato que tu script de Python ya procesaba con éxito
-                message: msg 
-            })
-        });
+                const harvisPromptSystem = "Eres H.A.R.V.I.S. 1.0, el asistente virtual e ingenioso creado por Pedro Peres para YouSpace. Sé experto, conciso y con un sutil toque de sarcasmo e ironía. Mantén las respuestas cortas.";
 
-        const datos = await respuestaServidor.json();
-        const respuestaIA = datos.respuesta || "Sistemas listos, Pedro.";
-        const harvisMsgId = "msg_harvis_" + Date.now();
-        
-        historialHarvisVercel.push({ role: "model", parts: [{ text: respuestaIA }] });
+                const respuestaServidor = await fetch(urlGemini, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: [{ parts: [{ text: msg }] }],
+                        systemInstruction: { parts: [{ text: harvisPromptSystem }] },
+                        generationConfig: { temperature: 0.75 }
+                    })
+                });
 
-        // 3. Activamos la voz nativa y pintamos en pantalla
-        if (typeof hablarHarvis === "function") {
-            hablarHarvis(respuestaIA);
-        }
+                const datosGemini = await respuestaServidor.json();
+                
+                // 🛡️ REVISIÓN DETALLADA: Nos aseguramos de que Google traiga texto antes de leerlo
+                let respuestaIA = "Sistemas listos, Pedro.";
+                if (datosGemini && datosGemini.candidates && datosGemini.candidates[0] && datosGemini.candidates[0].content) {
+                    respuestaIA = datosGemini.candidates[0].content.parts[0].text;
+                } else {
+                    console.warn("⚠️ Google respondió con un formato extraño o vacío:", datosGemini);
+                }
 
-        if (typeof pintarMensaje === "function") {
-            pintarMensaje(respuestaIA, 'msg-izquierda', null, 'leido', harvisMsgId, 'texto');
-        }
-        
-        if (typeof guardarLocal === "function") {
-            await guardarLocal('mensajes', { 
-                id: harvisMsgId, 
-                contactoId: targetID,
-                texto: respuestaIA, 
-                clase: 'msg-izquierda', 
-                status: 'leido',
-                tipo: 'texto',
-                ts: Date.now(),
-                hora: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })
-            });
-        }
+                const harvisMsgId = "msg_harvis_" + Date.now();
+                
+                if (typeof hablarHarvis === "function") {
+                    hablarHarvis(respuestaIA);
+                }
 
-    } catch (errorCentral) {
-        console.error("❌ Error en el enlace directo con Streamlit:", errorCentral);
-    }
+                pintarMensaje(respuestaIA, 'msg-izquierda', null, 'leido', harvisMsgId, 'texto');
+                
+                await guardarLocal('mensajes', { 
+                    id: harvisMsgId, 
+                    contactoId: targetID,
+                    texto: respuestaIA, 
+                    clase: 'msg-izquierda', 
+                    status: 'leido',
+                    tipo: 'texto',
+                    ts: Date.now(),
+                    hora: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })
+                });
+
+            } catch (errorGemini) {
+                console.error("❌ Error en la conexión directa:", errorGemini);
+            }
      }
      
      
