@@ -3240,10 +3240,10 @@ function funcionDeEnvioRealDeTuApp(textoDelMensaje) {
             activarEscuchaAtentaHarvis();
         }
 
-        // 🛠️ FILTRO DE AUDIOS NATIVOS: Si llega un audio en Base64 o vacío, forzamos transcripción
+        // 1. 🛡️ LÍNEA DEFENSIVA PARA AUDIOS
         if (!textoDelMensaje || typeof textoDelMensaje !== "string" || textoDelMensaje.includes("data:audio") || textoDelMensaje.startsWith("GkXf")) {
             if (typeof escucharVozPedro === "function") {
-                console.log("🎙️ Filtro H.A.R.V.I.S.: Forzando transcripción nativa...");
+                console.log("🎙️ Filtro H.A.R.V.I.S.: Detectado archivo de audio. Forzando transcripción nativa...");
                 escucharVozPedro((textoConvertido) => {
                     if (textoConvertido && textoConvertido.trim() !== "") {
                         if (campoTexto) campoTexto.value = textoConvertido;
@@ -3254,7 +3254,69 @@ function funcionDeEnvioRealDeTuApp(textoDelMensaje) {
             return; 
         }
 
-        // === CONEXIÓN CON VERCEL (TEXTO, HISTORIAL E IMÁGENES) ===
+        // Convertimos a minúsculas para evaluar la intención de Pedro
+        const textoMinuscula = textoDelMensaje.toLowerCase();
+        const esPeticionImagen = textoMinuscula.includes("genera una imagen") || 
+                                 textoMinuscula.includes("hazme una imagen") || 
+                                 textoMinuscula.includes("dibuja") || 
+                                 textoMinuscula.includes("crea una imagen") ||
+                                 textoMinuscula.includes("hazme un dibujo");
+
+        // 2. 🎨 CASO ESPECIAL: PEDISTE UNA IMAGEN (Va a api/imagen.js)
+        if (esPeticionImagen) {
+            (async () => {
+                try {
+                    // Pegamos a la nueva ruta independiente
+                    const respuestaServidor = await fetch('/api/imagen', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ prompt: textoDelMensaje })
+                    });
+
+                    const datos = await respuestaServidor.json();
+                    const respuestaIA = datos.respuesta || "Diseño listo, señor Peres.";
+                    const harvisMsgId = "msg_harvis_" + Date.now();
+
+                    // Guardamos la petición en el historial simulado para que Gemini no pierda el hilo después
+                    historialHarvisVercel.push({ role: "user", parts: [{ text: textoDelMensaje }] });
+                    historialHarvisVercel.push({ role: "model", parts: [{ text: respuestaIA + " [Imagen enviada a pantalla]" }] });
+
+                    // H.A.R.V.I.S. habla por la bocina
+                    if (typeof hablarHarvis === "function") hablarHarvis(respuestaIA);
+
+                    // Pintamos el texto de H.A.R.V.I.S.
+                    if (typeof pintarMensaje === "function") {
+                        pintarMensaje(respuestaIA, 'msg-izquierda', null, 'leido', harvisMsgId + "_t", 'texto');
+                    }
+
+                    // ¡Renderizamos la imagen con el diseño Black & Gold de YouSpace!
+                    if (typeof pintarMensaje === "function") {
+                        const estructuraImagenHtml = `<img src="${datos.imagenUrl}" style="width:100%; border-radius:12px; border: 2px solid #FFD700; box-shadow: 0 0 15px rgba(255,217,0,0.5); margin-top:8px;" alt="Nano-Banano Art">`;
+                        pintarMensaje(estructuraImagenHtml, 'msg-izquierda', null, 'leido', harvisMsgId + "_img", 'texto');
+                    }
+
+                    // Guardado local
+                    if (typeof guardarLocal === "function") {
+                        await guardarLocal('mensajes', { 
+                            id: harvisMsgId, 
+                            contactoId: targetID,
+                            texto: `${respuestaIA} [Imagen Arte]`, 
+                            clase: 'msg-izquierda', 
+                            status: 'leido',
+                            tipo: 'texto',
+                            ts: Date.now(),
+                            hora: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })
+                        });
+                    }
+
+                } catch (errorImg) {
+                    console.error("❌ Error en el generador de arte:", errorImg);
+                }
+            })();
+            return; // Detiene el código aquí para que no ejecute el Gemini normal de abajo
+        }
+
+        // 3. 🧠 CASO NORMAL: CONEXIÓN FLUIDA CON GEMINI (api/chat.js)
         (async () => {
             try {
                 historialHarvisVercel.push({ role: "user", parts: [{ text: textoDelMensaje }] });
@@ -3271,37 +3333,16 @@ function funcionDeEnvioRealDeTuApp(textoDelMensaje) {
                 
                 historialHarvisVercel.push({ role: "model", parts: [{ text: respuestaIA }] });
 
-                // A) Si el servidor nos devolvió una imagen generada por IA
-                if (datos.imagenUrl) {
-                    // 1. H.A.R.V.I.S. te avisa hablando por los parlantes
-                    if (typeof hablarHarvis === "function") hablarHarvis(respuestaIA);
-                    
-                    // 2. Pintamos su respuesta de texto
-                    if (typeof pintarMensaje === "function") {
-                        pintarMensaje(respuestaIA, 'msg-izquierda', null, 'leido', harvisMsgId + "_t", 'texto');
-                    }
-
-                    // 3. ¡PINTAMOS LA IMAGEN REAL EN EL CHAT! 
-                    // Nota: Si tu función pintarMensaje soporta tipo 'imagen', cámbiale el último parámetro.
-                    if (typeof pintarMensaje === "function") {
-                        const estructuraImagenHtml = `<img src="${datos.imagenUrl}" style="width:100%; border-radius:12px; border: 2px solid #FFD700; box-shadow: 0 0 15px rgba(255,217,0,0.5); margin-top:8px;" alt="IA Art">`;
-                        pintarMensaje(estructuraImagenHtml, 'msg-izquierda', null, 'leido', harvisMsgId + "_img", 'texto');
-                    }
-
-                } else {
-                    // B) Flujo normal si es solo texto regular de Gemini
-                    if (typeof hablarHarvis === "function") hablarHarvis(respuestaIA);
-                    if (typeof pintarMensaje === "function") {
-                        pintarMensaje(respuestaIA, 'msg-izquierda', null, 'leido', harvisMsgId, 'texto');
-                    }
+                if (typeof hablarHarvis === "function") hablarHarvis(respuestaIA);
+                if (typeof pintarMensaje === "function") {
+                    pintarMensaje(respuestaIA, 'msg-izquierda', null, 'leido', harvisMsgId, 'texto');
                 }
                 
-                // Guardado Local en IndexedDB
                 if (typeof guardarLocal === "function") {
                     await guardarLocal('mensajes', { 
                         id: harvisMsgId, 
                         contactoId: targetID,
-                        texto: datos.imagenUrl ? `${respuestaIA} [Imagen Generada]` : respuestaIA, 
+                        texto: respuestaIA, 
                         clase: 'msg-izquierda', 
                         status: 'leido',
                         tipo: 'texto',
@@ -3321,8 +3362,6 @@ function funcionDeEnvioRealDeTuApp(textoDelMensaje) {
         }
     }
      }
-
-
             
      
 
