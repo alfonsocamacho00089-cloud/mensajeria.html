@@ -3108,59 +3108,113 @@ function actualizarUIUIGrabando(estaGrabando) {
      }
 
 
+// =================================================================
+// 1. REGISTRO FIJO DE H.A.R.V.I.S. COMO UN CONTACTO NORMAL
+// =================================================================
+// Recuerda registrar este ID exacto en tu IndexedDB o array de contactos
+const contactoHarvisFijo = {
+    id: "harvis_user_system",
+    nombre: "H.A.R.V.I.S. 1.0",
+    avatar: "🤖",
+    estado: "Copiloto YouSpace en línea"
+};
 
-// --- SISTEMA DE VOZ NATIVO PARA EL ASISTENTE ---
-function hablarHarvis(texto) {
+
+// =================================================================
+// 2. SISTEMAS NATIVOS DE VOZ (Audio y Altavoz del Teléfono)
+// =================================================================
+
+// Hace que el teléfono hable (Bocina)
+function hablarHarvis(texto, alTerminar) {
     const synth = window.speechSynthesis;
-    synth.cancel(); 
+    synth.cancel(); // Evita que se solapen los audios
+    
     const utterance = new SpeechSynthesisUtterance(texto);
-    utterance.lang = 'es-MX';
+    utterance.lang = 'es-MX'; // Voz en español
+    utterance.rate = 1.0;     // Velocidad normal
+    
+    if (alTerminar) {
+        utterance.onend = () => alTerminar();
+    }
     synth.speak(utterance);
 }
 
-// --- ESCUCHAR AL SEÑOR PERES ---
+// Hace que el teléfono escuche (Micrófono nativo)
 function escucharVozPedro(alRecibirTexto) {
     const SpeechRecognition = window.webkitSpeechRecognition || window.SpeechRecognition;
-    if (!SpeechRecognition) return;
+    if (!SpeechRecognition) {
+        console.log("El dispositivo no soporta reconocimiento de voz nativo.");
+        return;
+    }
     const recognition = new SpeechRecognition();
     recognition.lang = 'es-MX';
     recognition.start();
+    
     recognition.onresult = (event) => {
-        alRecibirTexto(event.results[0][0].transcript);
+        const resultadoTexto = event.results[0][0].transcript;
+        alRecibirTexto(resultadoTexto);
     };
 }
 
-// Interceptamos cuando el usuario interactúa en la app, pero aislado del código principal
-document.addEventListener("click", (e) => {
-    // Si el usuario hace clic en el botón amarillo MIENTRAS está el chat de HARVIS abierto
-    const tituloChat = document.getElementById('chat-title-actual')?.innerText || "";
-    
-    if (tituloChat === "H.A.R.V.I.S. 1.0") {
-        const botonAmarillo = e.target.closest("#btn-accion-dinamica");
+
+// =================================================================
+// 3. CEREBRO RESPONDEDOR LOCAL DE H.A.R.V.I.S.
+// =================================================================
+function procesarRespuestaHarvis(mensajeRecibidoDePedro) {
+    setTimeout(() => {
+        const respuestaRobot = "Entendido señor Peres, procesando comando en YouSpace de forma local.";
         
-        if (botonAmarillo) {
-            // Evitamos que choque con cualquier otra cosa
-            e.preventDefault();
-            e.stopPropagation();
-            
-            const campoTexto = document.getElementById('msg-text');
-            
-            if (campoTexto && campoTexto.value.trim() === "") {
-                // Si el campo está vacío, activa el micrófono de Harvis
-                escucharVozPedro((loQueDijoPedro) => {
-                    campoTexto.value = loQueDijoPedro;
-                    hablarHarvis("Entendido señor Peres, procesando de forma local.");
-                    campoTexto.value = ""; // Limpia después de procesar
-                });
-            } else if (campoTexto) {
-                // Si escribió texto por teclado
-                hablarHarvis("Comando de texto recibido en el sistema local.");
-                campoTexto.value = "";
-            }
+        // A) H.A.R.V.I.S. te responde hablando por los altavoces del celular
+        hablarHarvis(respuestaRobot);
+        
+        // B) PINTAR EN PANTALLA: Aquí usas tu función nativa para renderizar 
+        // el mensaje en el chat (por ejemplo, enviándolo a tu contenedor de mensajes).
+
+    }, 1000);
+}
+
+
+// =================================================================
+// 4. INTEGRACIÓN REAL EN TU FUNCIÓN DE ENVIAR MENSAJES
+// =================================================================
+// Busca tu función nativa de envío (la que activas con el Enter o tu evento)
+// e integra este control exacto:
+
+function funcionDeEnvioRealDeTuApp(textoDelMensaje) {
+    
+    // CAPTURA REAL DE SPACECHAT: Leemos el elemento target-id de tu HTML
+    const inputTarget = document.getElementById('target-id');
+    const usuarioEnPantalla = inputTarget ? inputTarget.value : ""; 
+
+    if (usuarioEnPantalla === "harvis_user_system") {
+        // ---------------------------------------------------------
+        // CASO A: ESTÁS DENTRO DEL CHAT DE HARVIS
+        // ---------------------------------------------------------
+        
+        // Limpia tu textarea msg-text como hace siempre tu app
+        const campoTexto = document.getElementById('msg-text');
+        if (campoTexto) {
+            campoTexto.value = "";
+            campoTexto.style.height = '40px'; // Resetea la altura
         }
+
+        // Se lo mandas al cerebro de H.A.R.V.I.S.
+        procesarRespuestaHarvis(textoDelMensaje);
+
+    } else {
+        // ---------------------------------------------------------
+        // CASO B: CHATS NORMALES CON TUS CONTACTOS
+        // ---------------------------------------------------------
+        // Aquí no se toca absolutamente nada. Tu aplicación ejecutará 
+        // tu lógica original de Firebase o IndexedDB de forma tradicional.
+        
+        // (Pon aquí tus líneas de código nativas para guardar/enviar mensajes a tus amigos)
     }
-});
-     
+     }
+
+
+
+
      function cargarFotoInicial() {
     const fotoGuardada = localStorage.getItem('mi_foto');
     if (fotoGuardada && fotoGuardada !== "") {
