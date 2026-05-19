@@ -3173,7 +3173,7 @@ function hablarHarvis(texto, alTerminar) {
     
     const utterance = new SpeechSynthesisUtterance(texto);
     utterance.lang = 'es-MX'; // Voz en español
-    utterance.rate = 1.0;     // Velocidad normal
+    utterance.rate = 1.2;     // Velocidad normal
     
     if (alTerminar) {
         utterance.onend = () => alTerminar();
