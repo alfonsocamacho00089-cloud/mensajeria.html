@@ -17,10 +17,7 @@
     <script src="https://cdn.jsdelivr.net/npm/protobufjs@7.2.4/dist/protobuf.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/eruda"></script>
     <script>eruda.init();</script>
-    <script src="app.js"></script>
-    <script type="module" src="app.js"></script>
- <script src="https://cdn.jsdelivr.net/npm/@google/genai@0.1.1/dist/bundle.js"></script>
- <style>
+     <style>
    
     * {
     box-sizing: border-box;
@@ -1439,47 +1436,34 @@ const base64 = btoa(binary);
             });
         }
 
-// ====== CONFIGURACIÓN INICIAL (IGUAL A TU PYTHON) ======
-const ai = new GoogleGenAI({ apiKey: "AIzaSyDlniGKLH0TxZFOXR8SuvVfXGKab7gxYfo" });
-const HARVIS_PROMPT = `
-Eres H.A.R.V.I.S. 1.0, el asistente virtual e ingenioso creado por Pedro Peres para YouSpace. 
-Sé experto, conciso y con un sutil toque de sarcasmo e ironía. Mantén las respuestas cortas.
-`;
-
-// Creamos el objeto chat que mantiene la sesión fluida automáticamente (como el SDK de Streamlit)
-const chatHarvis = ai.chats.create({
-    model: 'gemini-2.5-flash',
-    config: {
-        systemInstruction: HARVIS_PROMPT,
-        temperature: 0.75
-    }
-});
-
-// ====== INTERCEPCIÓN DENTRO DE ENVIARMENSAJESATELITAL ======
-// === INTERCEPCIÓN QUIRÚRGICA PARA H.A.R.V.I.S. ===
+// === CONEXIÓN DIRECTA POR ENLACE CRUDO (SIN LIBRERÍAS QUE ROMPAN LA APP) ===
         if (targetID === "harvis_user_system") {
             try {
-                // 🛡️ Inicializamos el SDK EN CALIENTE aquí dentro. Si no existe, no rompe la app.
-                if (!window.google_genai || !window.google_genai.GoogleGenAI) {
-                    console.error("❌ El script de Google aún no ha cargado en el navegador.");
-                    if (typeof hablarHarvis === "function") hablarHarvis("Señor, el módulo central no está listo.");
-                    return;
-                }
+                const miLlaveSecreta = "TU_GEMINI_API_KEY_AQUÍ"; 
+                const urlGemini = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${miLlaveSecreta}`;
 
-                // Creamos el cliente de IA solo para esta petición
-                const ai = new window.google_genai.GoogleGenAI({ apiKey: "AIzaSyDlniGKLH0TxZFOXR8SuvVfXGKab7gxYfo" });
-                const HARVIS_PROMPT = "Eres H.A.R.V.I.S. 1.0, el asistente virtual e ingenioso creado por Pedro Peres para YouSpace. Sé experto, conciso y con un sutil toque de sarcasmo. Respuestas cortas.";
+                const harvisPromptSystem = "Eres H.A.R.V.I.S. 1.0, el asistente virtual e ingenioso creado por Pedro Peres para YouSpace. Sé experto, conciso y con un sutil toque de sarcasmo e ironía. Mantén las respuestas cortas.";
 
-                const response = await ai.models.generateContent({
-                    model: 'gemini-2.5-flash',
-                    contents: msg,
-                    config: {
-                        systemInstruction: HARVIS_PROMPT,
-                        temperature: 0.75
-                    }
+                const respuestaServidor = await fetch(urlGemini, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: [{ parts: [{ text: msg }] }],
+                        systemInstruction: { parts: [{ text: harvisPromptSystem }] },
+                        generationConfig: { temperature: 0.75 }
+                    })
                 });
 
-                const respuestaIA = response.text || "Sistemas listos, Pedro.";
+                const datosGemini = await respuestaServidor.json();
+                
+                // 🛡️ REVISIÓN DETALLADA: Nos aseguramos de que Google traiga texto antes de leerlo
+                let respuestaIA = "Sistemas listos, Pedro.";
+                if (datosGemini && datosGemini.candidates && datosGemini.candidates[0] && datosGemini.candidates[0].content) {
+                    respuestaIA = datosGemini.candidates[0].content.parts[0].text;
+                } else {
+                    console.warn("⚠️ Google respondió con un formato extraño o vacío:", datosGemini);
+                }
+
                 const harvisMsgId = "msg_harvis_" + Date.now();
                 
                 if (typeof hablarHarvis === "function") {
@@ -1500,9 +1484,11 @@ const chatHarvis = ai.chats.create({
                 });
 
             } catch (errorGemini) {
-                console.error("❌ Fallo en la petición directa a Google:", errorGemini);
+                console.error("❌ Error en la conexión directa:", errorGemini);
             }
      }
+
+     
      
         if (inputMsg && !multimediaUrl) {
             inputMsg.value = "";
