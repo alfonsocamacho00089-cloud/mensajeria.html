@@ -1436,49 +1436,7 @@ const base64 = btoa(binary);
             });
         }
 
-// === CONEXIÓN DIRECTA POR ENLACE CRUDO (SIN LIBRERÍAS QUE ROMPAN LA APP) ===
-        // === CONEXIÓN DIRECTA E INVISIBLE VÍA VERCEL API ===
-        // === CONEXIÓN DIRECTA E INVISIBLE VÍA VERCEL API (CON MEMORIA FLUIDA) ===
-        if (targetID === "harvis_user_system") {
-            try {
-                // 1. Guardamos tu mensaje en la memoria del chat
-                historialHarvisVercel.push({ role: "user", parts: [{ text: msg }] });
 
-                // 2. Le pegamos a tu servidor mandándole TODO el historial acumulado
-                const respuestaServidor = await fetch('/api/chat', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ chatHistory: historialHarvisVercel }) // <-- Enviamos la memoria
-                });
-
-                const datos = await respuestaServidor.json();
-                const respuestaIA = datos.respuesta || "Sistemas listos, Pedro.";
-                const harvisMsgId = "msg_harvis_" + Date.now();
-                
-                // 3. Guardamos la respuesta de H.A.R.V.I.S. en la memoria para el próximo mensaje
-                historialHarvisVercel.push({ role: "model", parts: [{ text: respuestaIA }] });
-
-                if (typeof hablarHarvis === "function") {
-                    hablarHarvis(respuestaIA);
-                }
-
-                pintarMensaje(respuestaIA, 'msg-izquierda', null, 'leido', harvisMsgId, 'texto');
-                
-                await guardarLocal('mensajes', { 
-                    id: harvisMsgId, 
-                    contactoId: targetID,
-                    texto: respuestaIA, 
-                    clase: 'msg-izquierda', 
-                    status: 'leido',
-                    tipo: 'texto',
-                    ts: Date.now(),
-                    hora: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })
-                });
-
-            } catch (errorCentral) {
-                console.error("❌ Error en el enlace con el servidor de Vercel:", errorCentral);
-            }
-     }
      
      
         if (inputMsg && !multimediaUrl) {
