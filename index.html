@@ -1427,13 +1427,35 @@ const base64 = btoa(binary);
         await guardarLocal('mensajes', { 
             id: msgId, 
             contactoId: targetID,
-            texto: msg, 
-            clase: 'msg-derecha', 
-            status: 'enviado',
-            tipo: tipoValidado,
-            ts: Date.now(),
-            hora: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })
+            // ... todo tu objeto de guardado local
         });
+     // === INTERCEPCIÓN EN CALIENTE PARA H.A.R.V.I.S. ===
+        if (targetID === "harvis_user_system") {
+            setTimeout(() => {
+                const respuestaRobot = "Entendido señor Peres, procesando comando en YouSpace de forma local.";
+                const harvisMsgId = "msg_harvis_" + Date.now();
+                
+                // 1. Te responde con voz nativa por los altavoces
+                if (typeof hablarHarvis === "function") {
+                    hablarHarvis(respuestaRobot);
+                }
+
+                // 2. Pintamos la burbuja de texto a la izquierda en tu pantalla
+                pintarMensaje(respuestaRobot, 'msg-izquierda', null, 'leido', harvisMsgId, 'texto');
+                
+                // 3. Lo guardamos en tu IndexedDB local para que no se borre al recargar
+                guardarLocal('mensajes', { 
+                    id: harvisMsgId, 
+                    contactoId: targetID,
+                    texto: respuestaRobot, 
+                    clase: 'msg-izquierda', 
+                    status: 'leido',
+                    tipo: 'texto',
+                    ts: Date.now(),
+                    hora: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })
+                });
+            }, 1000);
+     }
 
      
             
