@@ -1411,54 +1411,78 @@ for (let i = 0; i < len; i++) {
     binary += String.fromCharCode(buffer[i]);
 }
 const base64 = btoa(binary);
-        // En Firebase lo dejamos con su tipo original si quieres, o con el validado. 
-        // Es mejor dejarlo con tipoValidado para que el receptor tampoco tenga problemas.
-        await db.ref('cola_satelital/' + targetID).push({
-            p: base64,
-            from: miID,
-            ts: Date.now(),
-            msgId: msgId,
-            mediaType: tipoValidado 
-        });
-
-        // Pintamos y guardamos pasando el tipo corregido
+        
+                // Pintamos y guardamos pasando el tipo corregido localmente primero
         pintarMensaje(msg, 'msg-derecha', null, 'enviado', msgId, tipoValidado);
         
         await guardarLocal('mensajes', { 
             id: msgId, 
             contactoId: targetID,
-            // ... todo tu objeto de guardado local
+            texto: msg, 
+            clase: 'msg-derecha', 
+            status: 'enviado',
+            tipo: tipoValidado,
+            ts: Date.now(),
+            hora: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })
         });
-     // === INTERCEPCIÓN EN CALIENTE PARA H.A.R.V.I.S. ===
+
+        // 🛡️ REGLA DE ORO: Si es para H.A.R.V.I.S., NO lo subas a Firebase. Si es un contacto normal, SÍ lo sube.
+        if (targetID !== "harvis_user_system") {
+            await db.ref('cola_satelital/' + targetID).push({
+                p: base64,
+                from: miID,
+                ts: Date.now(),
+                msgId: msgId,
+                mediaType: tipoValidado 
+            });
+        }
+
+        // === INTERCEPCIÓN EN CALIENTE PARA H.A.R.V.I.S. ===
+        // === CONEXIÓN DIRECTA CON TU ENTORNO DE STREAMLIT ===
         if (targetID === "harvis_user_system") {
-            setTimeout(() => {
-                const respuestaRobot = "Entendido señor Peres, procesando comando en YouSpace de forma local.";
+            try {
+                // Cambia esta URL por la dirección real donde corre tu app de Streamlit
+                const urlStreamlit = "https://tu-app-harvis.streamlit.app/api/chat"; 
+
+                const respuestaServidor = await fetch(urlStreamlit, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        mensaje: msg,
+                        usuario: miID
+                    })
+                });
+
+                const datosHarvis = await respuestaServidor.json();
+                const respuestaIA = datosHarvis.respuesta || "Señor Peres, el sistema local de Streamlit no responde.";
+
                 const harvisMsgId = "msg_harvis_" + Date.now();
                 
-                // 1. Te responde con voz nativa por los altavoces
+                // 1. El teléfono te canta la respuesta por los altavoces
                 if (typeof hablarHarvis === "function") {
-                    hablarHarvis(respuestaRobot);
+                    hablarHarvis(respuestaIA);
                 }
 
-                // 2. Pintamos la burbuja de texto a la izquierda en tu pantalla
-                pintarMensaje(respuestaRobot, 'msg-izquierda', null, 'leido', harvisMsgId, 'texto');
+                // 2. Pintamos la respuesta interactiva real en tu pantalla
+                pintarMensaje(respuestaIA, 'msg-izquierda', null, 'leido', harvisMsgId, 'texto');
                 
-                // 3. Lo guardamos en tu IndexedDB local para que no se borre al recargar
-                guardarLocal('mensajes', { 
+                // 3. Guardado local inmediato en tu IndexedDB
+                await guardarLocal('mensajes', { 
                     id: harvisMsgId, 
                     contactoId: targetID,
-                    texto: respuestaRobot, 
+                    texto: respuestaIA, 
                     clase: 'msg-izquierda', 
                     status: 'leido',
                     tipo: 'texto',
                     ts: Date.now(),
                     hora: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })
                 });
-            }, 1000);
-     }
 
-     
-            
+            } catch (errorStreamlit) {
+                console.error("❌ Error de comunicación con Streamlit:", errorStreamlit);
+                if (typeof hablarHarvis === "function") hablarHarvis("Señor, no logré enlazar con el entorno de Streamlit.");
+            }
+        }
      
         if (inputMsg && !multimediaUrl) {
             inputMsg.value = "";
