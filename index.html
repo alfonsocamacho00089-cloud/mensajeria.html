@@ -3221,7 +3221,6 @@ function procesarRespuestaHarvis(mensajeRecibidoDePedro) {
 // =================================================================
 // Busca tu función nativa de envío (la que activas con el Enter o tu evento)
 
-
 function funcionDeEnvioRealDeTuApp(textoDelMensaje) {
     
     // CAPTURA REAL DE SPACECHAT: Leemos el elemento target-id de tu HTML
@@ -3244,6 +3243,21 @@ function funcionDeEnvioRealDeTuApp(textoDelMensaje) {
         // 2. Activa el modo manos libres estilo Alexa mientras estás aquí
         if (typeof activarEscuchaAtentaHarvis === "function") {
             activarEscuchaAtentaHarvis();
+        }
+
+        // 🛠️ CONTROL DE ENTRADA: Si lo que llega no es texto (es un archivo o evento de audio)
+        // activamos tu función nativa para escuchar y extraer las palabras.
+        if (!textoDelMensaje || typeof textoDelMensaje !== "string" || textoDelMensaje.trim() === "") {
+            if (typeof escucharVozPedro === "function") {
+                console.log("🎙️ Detectada entrada de audio. Transcribiendo...");
+                escucharVozPedro((textoConvertido) => {
+                    if (textoConvertido) {
+                        // Re-ejecuta la función pero ahora pasándole el texto limpio dictado
+                        funcionDeEnvioRealDeTuApp(textoConvertido);
+                    }
+                });
+            }
+            return; // Frenamos la ejecución aquí hasta que tengamos el texto transcripto
         }
 
         // 3. === CONEXIÓN DIRECTA E INVISIBLE VÍA VERCEL API (CON MEMORIA FLUIDA) ===
@@ -3306,6 +3320,10 @@ function funcionDeEnvioRealDeTuApp(textoDelMensaje) {
         // para guardar/enviar mensajes a tus contactos por Firebase o IndexedDB
     }
      }
+
+
+            
+     
 
 // =================================================================
 // 5. MOTOR DE ACTIVACIÓN POR VOZ INFINITA (ESTILO ALEXA)
