@@ -3316,53 +3316,75 @@ function funcionDeEnvioRealDeTuApp(textoDelMensaje) {
             return; // Detiene el código aquí para que no ejecute el Gemini normal de abajo
         }
 
-        // 3. 🧠 CASO NORMAL: CONEXIÓN FLUIDA CON GEMINI (api/chat.js)
-        (async () => {
-            try {
-                historialHarvisVercel.push({ role: "user", parts: [{ text: textoDelMensaje }] });
+        
+     // 3. 🧠 CASO NORMAL: CONEXIÓN FLUIDA CON GEMINI (api/chat.js)
+(async () => {
+    try {
+        // Aseguramos que el mensaje actual de Pedro entre limpio
+        historialHarvisVercel.push({ role: "user", parts: [{ text: textoDelMensaje }] });
 
-                const respuestaServidor = await fetch('/api/chat', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ chatHistory: historialHarvisVercel })
-                });
+        // 🛡️ FILTRO DE SEGURIDAD PARA EL HISTORIAL:
+        // Eliminamos duplicados seguidos y aseguramos que solo viajen pares 'user' -> 'model'
+        let historialLimpio = [];
+        for (let i = 0; i < historialHarvisVercel.length; i++) {
+            const actual = historialHarvisVercel[i];
+            const ultimoAgregado = historialLimpio[historialLimpio.length - 1];
 
-                const datos = await respuestaServidor.json();
-                const respuestaIA = datos.respuesta || "Sistemas listos, Pedro.";
-                const harvisMsgId = "msg_harvis_" + Date.now();
-                
-                historialHarvisVercel.push({ role: "model", parts: [{ text: respuestaIA }] });
-
-                if (typeof hablarHarvis === "function") hablarHarvis(respuestaIA);
-                if (typeof pintarMensaje === "function") {
-                    pintarMensaje(respuestaIA, 'msg-izquierda', null, 'leido', harvisMsgId, 'texto');
+            // Si el historial está vacío o el rol es diferente al anterior, pasa
+            if (!ultimoAgregado || ultimoAgregado.role !== actual.role) {
+                // Forzamos que la estructura interna tenga obligatoriamente el campo 'text'
+                if (actual.parts && actual.parts[0] && actual.parts[0].text.trim() !== "") {
+                    historialLimpio.push(actual);
                 }
-                
-                if (typeof guardarLocal === "function") {
-                    await guardarLocal('mensajes', { 
-                        id: harvisMsgId, 
-                        contactoId: targetID,
-                        texto: respuestaIA, 
-                        clase: 'msg-izquierda', 
-                        status: 'leido',
-                        tipo: 'texto',
-                        ts: Date.now(),
-                        hora: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })
-                    });
+            } else {
+                // Si Pedro mandó dos mensajes seguidos sin respuesta de la IA, los unimos en uno solo
+                if (actual.role === "user") {
+                    ultimoAgregado.parts[0].text += " " + actual.parts[0].text;
                 }
-
-            } catch (errorCentral) {
-                console.error("❌ Error en el enlace con el servidor de Vercel:", errorCentral);
             }
-        })();
-
-    } else {
-        if (typeof desactivarEscuchaAtentaHarvis === "function") {
-            desactivarEscuchaAtentaHarvis();
         }
+
+        // Si por alguna razón el último mensaje del historial limpio no es del usuario, Gemini fallará.
+        if (historialLimpio.length > 0 && historialLimpio[historialLimpio.length - 1].role !== "user") {
+            historialLimpio.push({ role: "user", parts: [{ text: textoDelMensaje }] });
+        }
+
+        const respuestaServidor = await fetch('/api/chat', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ chatHistory: historialLimpio }) // <-- Mandamos el historial sanitizado
+        });
+
+        const datos = await respuestaServidor.json();
+        const respuestaIA = datos.respuesta || "Sistemas listos, Pedro.";
+        const harvisMsgId = "msg_harvis_" + Date.now();
+        
+        // Guardamos la respuesta real que vino de la IA en tu memoria local
+        historialHarvisVercel.push({ role: "model", parts: [{ text: respuestaIA }] });
+
+        if (typeof hablarHarvis === "function") hablarHarvis(respuestaIA);
+        if (typeof pintarMensaje === "function") {
+            pintarMensaje(respuestaIA, 'msg-izquierda', null, 'leido', harvisMsgId, 'texto');
+        }
+        
+        if (typeof guardarLocal === "function") {
+            await guardarLocal('mensajes', { 
+                id: harvisMsgId, 
+                contactoId: targetID,
+                texto: respuestaIA, 
+                clase: 'msg-izquierda', 
+                status: 'leido',
+                tipo: 'texto',
+                ts: Date.now(),
+                hora: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })
+            });
+        }
+
+    } catch (errorCentral) {
+        console.error("❌ Error en el enlace con el servidor de Vercel:", errorCentral);
     }
-     }
-            
+})();
+          
      
 
 // =================================================================
