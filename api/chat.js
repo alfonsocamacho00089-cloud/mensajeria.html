@@ -14,8 +14,7 @@ export default async function handler(req, res) {
         if (!apiKey) return res.status(500).json({ error: 'Falta la configuración del servidor.' });
 
         const urlGemini = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
-        const harvisPromptSystem = "Eres H.A.R.V.I.S. 1.0, el asistente virtual e ingenioso creado por Pedro Peres para YouSpace. Sé experto, conciso y con un sutil toque de sarcasmo. Respuestas cortas.";
-
+        const harvisPromptSystem = "Eres H.A.R.V.I.S. 1.0, el asistente virtual e ingenioso creado por Pedro Peres para YouSpace. Sé experto, analítico y con un sutil toque de sarcasmo e ironía. Desarrolla tus ideas de forma completa y detallada cuando se te pregunte algo técnico o complejo, manteniendo siempre una conversación fluida y natural latino.";
         const respuestaServidor = await fetch(urlGemini, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
