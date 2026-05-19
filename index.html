@@ -1438,72 +1438,60 @@ const base64 = btoa(binary);
             });
         }
 
-        // === INTERCEPCIÓN EN CALIENTE PARA H.A.R.V.I.S. ===
-        // === CONEXIÓN DIRECTA CON TU ENTORNO DE STREAMLIT ===
-        // === CONEXIÓN DIRECTA Y SIN TRABAS CON GOOGLE GEMINI ===
-        // === CONEXIÓN DIRECTA CON HISTORIAL EN VIVO (ESTILO STREAMLIT) ===
-        if (targetID === "harvis_user_system") {
-            try {
-                const miLlaveSecreta = "AIzaSyDlniGKLH0TxZFOXR8SuvVfXGKab7gxYfo"; 
-                const urlGemini = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${miLlaveSecreta}`;
+// ====== CONFIGURACIÓN INICIAL (IGUAL A TU PYTHON) ======
+const ai = new GoogleGenAI({ apiKey: "TU_GEMINI_API_KEY_AQUÍ" });
+const HARVIS_PROMPT = `
+Eres H.A.R.V.I.S. 1.0, el asistente virtual e ingenioso creado por Pedro Peres para YouSpace. 
+Sé experto, conciso y con un sutil toque de sarcasmo e ironía. Mantén las respuestas cortas.
+`;
 
-                const harvisPromptSystem = "Eres H.A.R.V.I.S. 1.0, el asistente virtual e ingenioso creado por Pedro Peres para YouSpace. Sé experto, conciso y con un sutil toque de sarcasmo e ironía. Mantén las respuestas cortas.";
+// Creamos el objeto chat que mantiene la sesión fluida automáticamente (como el SDK de Streamlit)
+const chatHarvis = ai.chats.create({
+    model: 'gemini-2.5-flash',
+    config: {
+        systemInstruction: HARVIS_PROMPT,
+        temperature: 0.75
+    }
+});
 
-                // 1. Guardamos lo que acabas de escribir en el historial de la API
-                historialHarvis.push({ role: "user", parts: [{ text: msg }] });
+// ====== INTERCEPCIÓN DENTRO DE ENVIARMENSAJESATELITAL ======
+if (targetID === "harvis_user_system") {
+    try {
+        // Envía el contenido de forma directa y fluida (Igual que en Streamlit)
+        const response = await chatHarvis.sendMessage({ message: msg });
+        
+        // Obtenemos el texto limpio de forma directa
+        const respuestaIA = response.text || "Sistemas listos, Pedro.";
+        const harvisMsgId = "msg_harvis_" + Date.now();
+        
+        // 1. El teléfono te canta la respuesta por los altavoces
+        if (typeof hablarHarvis === "function") {
+            hablarHarvis(respuestaIA);
+        }
 
-                // 2. Le enviamos a Google TODA la conversación acumulada hasta el momento
-                const respuestaServidor = await fetch(urlGemini, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        contents: historialHarvis, // <--- Aquí va la memoria viva
-                        systemInstruction: { parts: [{ text: harvisPromptSystem }] },
-                        generationConfig: { temperature: 0.75 }
-                    })
-                });
+        // 2. Pintamos la respuesta interactiva real en tu pantalla Black & Gold
+        pintarMensaje(respuestaIA, 'msg-izquierda', null, 'leido', harvisMsgId, 'texto');
+        
+        // 3. Guardado local inmediato en tu IndexedDB para el historial visual
+        await guardarLocal('mensajes', { 
+            id: harvisMsgId, 
+            contactoId: targetID,
+            texto: respuestaIA, 
+            clase: 'msg-izquierda', 
+            status: 'leido',
+            tipo: 'texto',
+            ts: Date.now(),
+            hora: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })
+        });
 
-                const datosGemini = await respuestaServidor.json();
-                
-                // Validación de seguridad por si la estructura viene vacía
-                if (!datosGemini.candidates || !datosGemini.candidates[0].content) {
-                    console.error("Respuesta inesperada de Google:", datosGemini);
-                    if (typeof hablarHarvis === "function") hablarHarvis("Señor, mis filtros de seguridad bloquearon esa respuesta.");
-                    return;
-                }
-
-                const respuestaIA = datosGemini.candidates[0].content.parts[0].text;
-
-                // 3. Guardamos la respuesta del robot en el historial para que la recuerde en el próximo mensaje
-                historialHarvis.push({ role: "model", parts: [{ text: respuestaIA }] });
-
-                const harvisMsgId = "msg_harvis_" + Date.now();
-                
-                // El teléfono te canta la respuesta por los altavoces
-                if (typeof hablarHarvis === "function") {
-                    hablarHarvis(respuestaIA);
-                }
-
-                // Pintamos la burbuja interactiva a la izquierda
-                pintarMensaje(respuestaIA, 'msg-izquierda', null, 'leido', harvisMsgId, 'texto');
-                
-                // Guardado local inmediato en IndexedDB para tu interfaz
-                await guardarLocal('mensajes', { 
-                    id: harvisMsgId, 
-                    contactoId: targetID,
-                    texto: respuestaIA, 
-                    clase: 'msg-izquierda', 
-                    status: 'leido',
-                    tipo: 'texto',
-                    ts: Date.now(),
-                    hora: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })
-                });
-
-            } catch (errorGemini) {
-                console.error("❌ Error en la corriente de la API:", errorGemini);
-                if (typeof hablarHarvis === "function") hablarHarvis("Señor, perdí la continuidad del flujo.");
-            }
+    } catch (errorCentral) {
+        console.error("❌ Error en el procesamiento central de H.A.R.V.I.S.:", errorCentral);
+        if (typeof hablarHarvis === "function") {
+            hablarHarvis("Señor, hubo un error en los módulos de conexión.");
+        }
+    }
      }
+     
         if (inputMsg && !multimediaUrl) {
             inputMsg.value = "";
             inputMsg.style.height = '36px';
@@ -3172,7 +3160,7 @@ function actualizarUIUIGrabando(estaGrabando) {
         }
     }
      }
-
+import { GoogleGenAI } from 'https://esm.run/@google/genai';
 
 // =================================================================
 // 1. REGISTRO FIJO DE H.A.R.V.I.S. COMO UN CONTACTO NORMAL
