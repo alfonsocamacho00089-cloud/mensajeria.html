@@ -3220,41 +3220,183 @@ function procesarRespuestaHarvis(mensajeRecibidoDePedro) {
 // 4. INTEGRACIÓN REAL EN TU FUNCIÓN DE ENVIAR MENSAJES
 // =================================================================
 // Busca tu función nativa de envío (la que activas con el Enter o tu evento)
-// e integra este control exacto:
+
 
 function funcionDeEnvioRealDeTuApp(textoDelMensaje) {
     
     // CAPTURA REAL DE SPACECHAT: Leemos el elemento target-id de tu HTML
     const inputTarget = document.getElementById('target-id');
     const usuarioEnPantalla = inputTarget ? inputTarget.value : ""; 
+    const targetID = usuarioEnPantalla; // Para que coincida con tu lógica de Vercel
 
     if (usuarioEnPantalla === "harvis_user_system") {
         // ---------------------------------------------------------
         // CASO A: ESTÁS DENTRO DEL CHAT DE HARVIS
         // ---------------------------------------------------------
         
-        // Limpia tu textarea msg-text como hace siempre tu app
+        // 1. Limpia tu textarea msg-text como hace siempre tu app
         const campoTexto = document.getElementById('msg-text');
         if (campoTexto) {
             campoTexto.value = "";
             campoTexto.style.height = '40px'; // Resetea la altura
         }
 
-        // Se lo mandas al cerebro de H.A.R.V.I.S.
-        procesarRespuestaHarvis(textoDelMensaje);
+        // 2. Activa el modo manos libres estilo Alexa mientras estás aquí
+        if (typeof activarEscuchaAtentaHarvis === "function") {
+            activarEscuchaAtentaHarvis();
+        }
+
+        // 3. === CONEXIÓN DIRECTA E INVISIBLE VÍA VERCEL API (CON MEMORIA FLUIDA) ===
+        (async () => {
+            try {
+                // Guardamos tu mensaje en la memoria del chat
+                historialHarvisVercel.push({ role: "user", parts: [{ text: textoDelMensaje }] });
+
+                // Le pegamos a tu servidor mandándole TODO el historial acumulado
+                const respuestaServidor = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ chatHistory: historialHarvisVercel })
+                });
+
+                const datos = await respuestaServidor.json();
+                const respuestaIA = datos.respuesta || "Sistemas listos, Pedro.";
+                const harvisMsgId = "msg_harvis_" + Date.now();
+                
+                // Guardamos la respuesta de H.A.R.V.I.S. en la memoria para el próximo mensaje
+                historialHarvisVercel.push({ role: "model", parts: [{ text: respuestaIA }] });
+
+                if (typeof hablarHarvis === "function") {
+                    hablarHarvis(respuestaIA);
+                }
+
+                if (typeof pintarMensaje === "function") {
+                    pintarMensaje(respuestaIA, 'msg-izquierda', null, 'leido', harvisMsgId, 'texto');
+                }
+                
+                if (typeof guardarLocal === "function") {
+                    await guardarLocal('mensajes', { 
+                        id: harvisMsgId, 
+                        contactoId: targetID,
+                        texto: respuestaIA, 
+                        clase: 'msg-izquierda', 
+                        status: 'leido',
+                        tipo: 'texto',
+                        ts: Date.now(),
+                        hora: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })
+                    });
+                }
+
+            } catch (errorCentral) {
+                console.error("❌ Error en el enlace con el servidor de Vercel:", errorCentral);
+            }
+        })();
 
     } else {
         // ---------------------------------------------------------
         // CASO B: CHATS NORMALES CON TUS CONTACTOS
         // ---------------------------------------------------------
-        // Aquí no se toca absolutamente nada. Tu aplicación ejecutará 
-        // tu lógica original de Firebase o IndexedDB de forma tradicional.
         
-        // (Pon aquí tus líneas de código nativas para guardar/enviar mensajes a tus amigos)
+        // Apaga el micrófono continuo para que no espíe tus chats normales
+        if (typeof desactivarEscuchaAtentaHarvis === "function") {
+            desactivarEscuchaAtentaHarvis();
+        }
+
+        // Aquí dejas tus líneas de código nativas originales de SpaceChat 
+        // para guardar/enviar mensajes a tus contactos por Firebase o IndexedDB
     }
      }
 
+// =================================================================
+// 5. MOTOR DE ACTIVACIÓN POR VOZ INFINITA (ESTILO ALEXA)
+// =================================================================
+let modoAlexaActivo = false;
+let reconocimientoContinuo = null;
 
+function activarEscuchaAtentaHarvis() {
+    const SpeechRecognition = window.webkitSpeechRecognition || window.SpeechRecognition;
+    if (!SpeechRecognition) return;
+
+    if (modoAlexaActivo) return; // Evita duplicar el proceso
+    modoAlexaActivo = true;
+
+    reconocimientoContinuo = new SpeechRecognition();
+    reconocimientoContinuo.lang = 'es-MX';
+    reconocimientoContinuo.interimResults = false; // Solo procesa frases completas
+    reconocimientoContinuo.continuous = false;     // Se apaga al pausar para analizar la frase
+
+    reconocimientoContinuo.onstart = () => {
+        console.log("🎙️ H.A.R.V.I.S. está atento en segundo plano buscando su nombre...");
+    };
+
+    reconocimientoContinuo.onresult = async (event) => {
+        let fraseCompleta = event.results[0][0].transcript.toLowerCase().trim();
+        const palabraClave = "harvis";
+
+        // Si la persona dice "Harvis, cómo estás", se activa solo
+        if (fraseCompleta.startsWith(palabraClave)) {
+            const ordenLimpia = fraseCompleta.replace(palabraClave, "").trim();
+            if (ordenLimpia.length > 0) {
+                // Reutiliza tu input de SpaceChat para pintar el texto capturado
+                const inputTexto = document.getElementById('msg-text');
+                if (inputTexto) inputTexto.value = ordenLimpia;
+                
+                // Envía el texto directamente a tu condicional de Vercel que ya funciona
+                if (typeof funcionDeEnvioRealDeTuApp === "function") {
+                    funcionDeEnvioRealDeTuApp(ordenLimpia);
+                }
+            }
+        }
+    };
+
+    // Al apagarse por el silencio del ambiente, se vuelve a encender solo (Bucle infinito)
+    reconocimientoContinuo.onend = () => {
+        if (modoAlexaActivo) {
+            reconocimientoContinuo.start();
+        }
+    };
+
+    reconocimientoContinuo.onerror = (error) => {
+        // Ignoramos errores de silencio para no saturar el Eruda
+    };
+
+    reconocimientoContinuo.start();
+}
+
+// Apaga el micrófono de fondo si te sales del chat del robot
+function desactivarEscuchaAtentaHarvis() {
+    modoAlexaActivo = false;
+    if (reconocimientoContinuo) {
+        reconocimientoContinuo.stop();
+    }
+}
+
+// =================================================================
+// 6. CONTROLADORES DE EVENTOS (Tu botón de micrófono actual)
+// =================================================================
+
+// Corre esto al iniciar tu app para enlazar tu botón de micrófono actual
+function inicializarEventosVozHarvis() {
+    // Busca el botón de micrófono que ya tienes en tu interfaz (Cambia 'btn-microfono' por el ID real de tu botón)
+    const miBotonMicrofono = document.getElementById('btn-microfono'); 
+    
+    if (miBotonMicrofono) {
+        miBotonMicrofono.addEventListener('click', () => {
+            // Cuando tocas el botón, fuerza la escucha instantánea usando tu función nativa
+            escucharVozPedro((textoDetectado) => {
+                const inputTexto = document.getElementById('msg-text');
+                if (inputTexto) inputTexto.value = textoDetectado;
+                
+                if (typeof funcionDeEnvioRealDeTuApp === "function") {
+                    funcionDeEnvioRealDeTuApp(textoDetectado);
+                }
+            });
+        });
+    }
+}
+
+// Ejecutar el enlazador de botones apenas cargue la app
+document.addEventListener("DOMContentLoaded", inicializarEventosVozHarvis);
 
 
      function cargarFotoInicial() {
