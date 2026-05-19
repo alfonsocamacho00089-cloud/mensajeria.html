@@ -1456,50 +1456,52 @@ const chatHarvis = ai.chats.create({
 });
 
 // ====== INTERCEPCIÓN DENTRO DE ENVIARMENSAJESATELITAL ======
-// ====== INTERCEPCIÓN AISLADA DE H.A.R.V.I.S. ======
-if (targetID === "harvis_user_system") {
-    try {
-        // 🛡️ Solo llamamos a la librería si estamos hablando con el robot
-        if (!window.google_genai || !window.google_genai.GoogleGenAI) {
-            console.error("❌ El SDK de Google no está listo en el HTML.");
-            return;
-        }
+// === INTERCEPCIÓN QUIRÚRGICA PARA H.A.R.V.I.S. ===
+        if (targetID === "harvis_user_system") {
+            try {
+                // 🛡️ Inicializamos el SDK EN CALIENTE aquí dentro. Si no existe, no rompe la app.
+                if (!window.google_genai || !window.google_genai.GoogleGenAI) {
+                    console.error("❌ El script de Google aún no ha cargado en el navegador.");
+                    if (typeof hablarHarvis === "function") hablarHarvis("Señor, el módulo central no está listo.");
+                    return;
+                }
 
-        const ai = new window.google_genai.GoogleGenAI({ apiKey: "AIzaSyDlniGKLH0TxZFOXR8SuvVfXGKab7gxYfo" });
-        const HARVIS_PROMPT = "Eres H.A.R.V.I.S. 1.0, el asistente virtual e ingenioso creado por Pedro Peres para YouSpace. Sé experto, conciso y con un sutil toque de sarcasm e ironía. Mantén las respuestas cortas.";
+                // Creamos el cliente de IA solo para esta petición
+                const ai = new window.google_genai.GoogleGenAI({ apiKey: "AIzaSyDlniGKLH0TxZFOXR8SuvVfXGKab7gxYfo" });
+                const HARVIS_PROMPT = "Eres H.A.R.V.I.S. 1.0, el asistente virtual e ingenioso creado por Pedro Peres para YouSpace. Sé experto, conciso y con un sutil toque de sarcasmo. Respuestas cortas.";
 
-        const response = await ai.models.generateContent({
-            model: 'gemini-2.5-flash',
-            contents: msg,
-            config: {
-                systemInstruction: HARVIS_PROMPT,
-                temperature: 0.75
+                const response = await ai.models.generateContent({
+                    model: 'gemini-2.5-flash',
+                    contents: msg,
+                    config: {
+                        systemInstruction: HARVIS_PROMPT,
+                        temperature: 0.75
+                    }
+                });
+
+                const respuestaIA = response.text || "Sistemas listos, Pedro.";
+                const harvisMsgId = "msg_harvis_" + Date.now();
+                
+                if (typeof hablarHarvis === "function") {
+                    hablarHarvis(respuestaIA);
+                }
+
+                pintarMensaje(respuestaIA, 'msg-izquierda', null, 'leido', harvisMsgId, 'texto');
+                
+                await guardarLocal('mensajes', { 
+                    id: harvisMsgId, 
+                    contactoId: targetID,
+                    texto: respuestaIA, 
+                    clase: 'msg-izquierda', 
+                    status: 'leido',
+                    tipo: 'texto',
+                    ts: Date.now(),
+                    hora: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })
+                });
+
+            } catch (errorGemini) {
+                console.error("❌ Fallo en la petición directa a Google:", errorGemini);
             }
-        });
-
-        const respuestaIA = response.text || "Sistemas listos, Pedro.";
-        const harvisMsgId = "msg_harvis_" + Date.now();
-
-        if (typeof hablarHarvis === "function") {
-            hablarHarvis(respuestaIA);
-        }
-
-        pintarMensaje(respuestaIA, 'msg-izquierda', null, 'leido', harvisMsgId, 'texto');
-
-        await guardarLocal('mensajes', { 
-            id: harvisMsgId, 
-            contactoId: targetID,
-            texto: respuestaIA, 
-            clase: 'msg-izquierda', 
-            status: 'leido',
-            tipo: 'texto',
-            ts: Date.now(),
-            hora: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })
-        });
-
-    } catch (errorCentral) {
-        console.error("❌ Error en el procesamiento central de H.A.R.V.I.S.:", errorCentral);
-    }
      }
      
         if (inputMsg && !multimediaUrl) {
