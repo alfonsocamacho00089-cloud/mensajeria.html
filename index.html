@@ -1437,33 +1437,18 @@ const base64 = btoa(binary);
         }
 
 // === CONEXIÓN DIRECTA POR ENLACE CRUDO (SIN LIBRERÍAS QUE ROMPAN LA APP) ===
+        // === CONEXIÓN DIRECTA E INVISIBLE VÍA VERCEL API ===
         if (targetID === "harvis_user_system") {
             try {
-                const miLlaveSecreta = "h"; 
-                const urlGemini = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${miLlaveSecreta}`;
-
-                const harvisPromptSystem = "Eres H.A.R.V.I.S. 1.0, el asistente virtual e ingenioso creado por Pedro Peres para YouSpace. Sé experto, conciso y con un sutil toque de sarcasmo e ironía. Mantén las respuestas cortas.";
-
-                const respuestaServidor = await fetch(urlGemini, {
+                // Le pega a tu propio servidor en Vercel, de forma relativa e instantánea
+                const respuestaServidor = await fetch('/api/chat', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        contents: [{ parts: [{ text: msg }] }],
-                        systemInstruction: { parts: [{ text: harvisPromptSystem }] },
-                        generationConfig: { temperature: 0.75 }
-                    })
+                    body: JSON.stringify({ msg: msg })
                 });
 
-                const datosGemini = await respuestaServidor.json();
-                
-                // 🛡️ REVISIÓN DETALLADA: Nos aseguramos de que Google traiga texto antes de leerlo
-                let respuestaIA = "Sistemas listos, Pedro.";
-                if (datosGemini && datosGemini.candidates && datosGemini.candidates[0] && datosGemini.candidates[0].content) {
-                    respuestaIA = datosGemini.candidates[0].content.parts[0].text;
-                } else {
-                    console.warn("⚠️ Google respondió con un formato extraño o vacío:", datosGemini);
-                }
-
+                const datos = await respuestaServidor.json();
+                const respuestaIA = datos.respuesta || "Sistemas listos, Pedro.";
                 const harvisMsgId = "msg_harvis_" + Date.now();
                 
                 if (typeof hablarHarvis === "function") {
@@ -1483,11 +1468,10 @@ const base64 = btoa(binary);
                     hora: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })
                 });
 
-            } catch (errorGemini) {
-                console.error("❌ Error en la conexión directa:", errorGemini);
+            } catch (errorCentral) {
+                console.error("❌ Error en el enlace con el servidor de Vercel:", errorCentral);
             }
      }
-
      
      
         if (inputMsg && !multimediaUrl) {
