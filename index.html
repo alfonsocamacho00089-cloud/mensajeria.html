@@ -3324,72 +3324,86 @@ function funcionDeEnvioRealDeTuApp(textoDelMensaje) {
         }
 
         // 3. 🧠 CASO NORMAL: CONEXIÓN FLUIDA CON GEMINI (api/chat.js)
-(async () => {
-    try {
-        // Aseguramos que el mensaje actual de Pedro entre limpio
-        historialHarvisVercel.push({ role: "user", parts: [{ text: textoDelMensaje }] });
+        (async () => {
+            try {
+                // Insertamos el nuevo mensaje de Pedro en la memoria global
+                historialHarvisVercel.push({ role: "user", parts: [{ text: textoDelMensaje }] });
 
-        // 🛡️ FILTRO DE SEGURIDAD PARA EL HISTORIAL:
-        // Eliminamos duplicados seguidos y aseguramos que solo viajen pares 'user' -> 'model'
-        let historialLimpio = [];
-        for (let i = 0; i < historialHarvisVercel.length; i++) {
-            const actual = historialHarvisVercel[i];
-            const ultimoAgregado = historialLimpio[historialLimpio.length - 1];
+                // 🛡️ FILTRO DE SEGURIDAD: Creamos un historial sanitizado sin alterar el original por referencia
+                let historialLimpio = [];
+                
+                for (let i = 0; i < historialHarvisVercel.length; i++) {
+                    const actual = historialHarvisVercel[i];
+                    
+                    // Validamos que la estructura interna sea correcta
+                    if (!actual.parts || !actual.parts[0] || !actual.parts[0].text) continue;
 
-            // Si el historial está vacío o el rol es diferente al anterior, pasa
-            if (!ultimoAgregado || ultimoAgregado.role !== actual.role) {
-                // Forzamos que la estructura interna tenga obligatoriamente el campo 'text'
-                if (actual.parts && actual.parts[0] && actual.parts[0].text.trim() !== "") {
-                    historialLimpio.push(actual);
+                    const ultimoAgregado = historialLimpio[historialLimpio.length - 1];
+
+                    if (!ultimoAgregado || ultimoAgregado.role !== actual.role) {
+                        // Clonamos el objeto para romper la referencia en memoria
+                        historialLimpio.push({
+                            role: actual.role,
+                            parts: [{ text: actual.parts[0].text }]
+                        });
+                    } else {
+                        // Si se repite el rol 'user', los unimos limpiamente
+                        if (actual.role === "user") {
+                            ultimoAgregado.parts[0].text += " " + actual.parts[0].text;
+                        }
+                    }
                 }
-            } else {
-                // Si Pedro mandó dos mensajes seguidos sin respuesta de la IA, los unimos en uno solo
-                if (actual.role === "user") {
-                    ultimoAgregado.parts[0].text += " " + actual.parts[0].text;
+
+                // Forzar que el último mensaje de la cola sea estrictamente del 'user'
+                if (historialLimpio.length > 0 && historialLimpio[historialLimpio.length - 1].role !== "user") {
+                    historialLimpio.push({ role: "user", parts: [{ text: textoDelMensaje }] });
+                }
+
+                // Realizamos la petición al backend configurado
+                const respuestaServidor = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ chatHistory: historialLimpio }) 
+                });
+
+                // Control defensivo: si no responde 200, no intentamos parsear JSON
+                if (!respuestaServidor.ok) {
+                    throw new Error(`Servidor respondió con estatus: ${respuestaServidor.status}`);
+                }
+
+                const datos = await respuestaServidor.json();
+                const respuestaIA = datos.respuesta || "Sistemas listos, Pedro.";
+                const harvisMsgId = "msg_harvis_" + Date.now();
+                
+                // Guardamos la respuesta del modelo en la memoria global estable
+                historialHarvisVercel.push({ role: "model", parts: [{ text: respuestaIA }] });
+
+                // Subrutinas de interfaz y salida de audio
+                if (typeof hablarHarvis === "function") hablarHarvis(respuestaIA);
+                if (typeof pintarMensaje === "function") {
+                    pintarMensaje(respuestaIA, 'msg-izquierda', null, 'leido', harvisMsgId, 'texto');
+                }
+                
+                if (typeof guardarLocal === "function") {
+                    await guardarLocal('mensajes', { 
+                        id: harvisMsgId, 
+                        contactoId: targetID,
+                        texto: respuestaIA, 
+                        clase: 'msg-izquierda', 
+                        status: 'leido',
+                        tipo: 'texto',
+                        ts: Date.now(),
+                        hora: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })
+                    });
+                }
+
+            } catch (errorCentral) {
+                console.error("❌ Error en el enlace con el servidor:", errorCentral);
+                if (typeof pintarMensaje === "function") {
+                    pintarMensaje("Módulo de comunicación intermitente, señor Peres.", 'msg-izquierda', null, 'leido', "err_" + Date.now(), 'texto');
                 }
             }
-        }
-
-        // Si por alguna razón el último mensaje del historial limpio no es del usuario, Gemini fallará.
-        if (historialLimpio.length > 0 && historialLimpio[historialLimpio.length - 1].role !== "user") {
-            historialLimpio.push({ role: "user", parts: [{ text: textoDelMensaje }] });
-        }
-
-        const respuestaServidor = await fetch('/api/chat', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ chatHistory: historialLimpio }) // <-- Mandamos el historial sanitizado
-        });
-
-        const datos = await respuestaServidor.json();
-        const respuestaIA = datos.respuesta || "Sistemas listos, Pedro.";
-        const harvisMsgId = "msg_harvis_" + Date.now();
-        
-        // Guardamos la respuesta real que vino de la IA en tu memoria local
-        historialHarvisVercel.push({ role: "model", parts: [{ text: respuestaIA }] });
-
-        if (typeof hablarHarvis === "function") hablarHarvis(respuestaIA);
-        if (typeof pintarMensaje === "function") {
-            pintarMensaje(respuestaIA, 'msg-izquierda', null, 'leido', harvisMsgId, 'texto');
-        }
-        
-        if (typeof guardarLocal === "function") {
-            await guardarLocal('mensajes', { 
-                id: harvisMsgId, 
-                contactoId: targetID,
-                texto: respuestaIA, 
-                clase: 'msg-izquierda', 
-                status: 'leido',
-                tipo: 'texto',
-                ts: Date.now(),
-                hora: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })
-            });
-        }
-
-    } catch (errorCentral) {
-        console.error("❌ Error en el enlace con el servidor de Vercel:", errorCentral);
-    }
-})();
+        })();
      
 
 // =================================================================
