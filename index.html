@@ -1367,7 +1367,7 @@ try {
     }); 
      }
      
-        
+      let historialHarvisVercel = [];  
   async function enviarMensajeSatelital(multimediaUrl = null, tipoMedia = 'texto') {
     const inputMsg = document.querySelector('#msg-text');
     const inputTarget = document.querySelector('#target-id');
@@ -1438,19 +1438,26 @@ const base64 = btoa(binary);
 
 // === CONEXIÓN DIRECTA POR ENLACE CRUDO (SIN LIBRERÍAS QUE ROMPAN LA APP) ===
         // === CONEXIÓN DIRECTA E INVISIBLE VÍA VERCEL API ===
+        // === CONEXIÓN DIRECTA E INVISIBLE VÍA VERCEL API (CON MEMORIA FLUIDA) ===
         if (targetID === "harvis_user_system") {
             try {
-                // Le pega a tu propio servidor en Vercel, de forma relativa e instantánea
+                // 1. Guardamos tu mensaje en la memoria del chat
+                historialHarvisVercel.push({ role: "user", parts: [{ text: msg }] });
+
+                // 2. Le pegamos a tu servidor mandándole TODO el historial acumulado
                 const respuestaServidor = await fetch('/api/chat', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ msg: msg })
+                    body: JSON.stringify({ chatHistory: historialHarvisVercel }) // <-- Enviamos la memoria
                 });
 
                 const datos = await respuestaServidor.json();
                 const respuestaIA = datos.respuesta || "Sistemas listos, Pedro.";
                 const harvisMsgId = "msg_harvis_" + Date.now();
                 
+                // 3. Guardamos la respuesta de H.A.R.V.I.S. en la memoria para el próximo mensaje
+                historialHarvisVercel.push({ role: "model", parts: [{ text: respuestaIA }] });
+
                 if (typeof hablarHarvis === "function") {
                     hablarHarvis(respuestaIA);
                 }
