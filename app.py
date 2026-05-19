@@ -1,11 +1,8 @@
 import streamlit as st
 import io
-import threading
-from flask import Flask, request, jsonify
-from flask_cors import CORS
 from google import genai
 from google.genai import types
-from gtts import gTTS
+from gtts import gTTS  # Con esto generamos la voz gratis sin usar la API de pago
 
 # Configuración de la página en Streamlit (Estilo oscuro)
 st.set_page_config(
@@ -31,6 +28,7 @@ st.subheader("Highly Advanced Responsive Virtual Intelligent System")
 # Inicializar el cliente de Gemini usando tus secretos guardados
 @st.cache_resource
 def get_ai_client():
+    # Busca la llave en tus secretos de Streamlit de forma segura
     api_key = st.secrets.get("GEMINI_API_KEY")
     if not api_key:
         st.error("Falta la API Key en tus secretos (.streamlit/secrets.toml)")
@@ -53,58 +51,11 @@ Directrices de personalidad y comportamiento:
 3. Formato para audio: Tus textos serán convertidos a voz. Sé fluido, natural y evita leer bloques de código gigantescos a menos que Pedro te lo pida. Mantén las respuestas cortas.
 """
 
-# =================================================================
-# 🚪 PUENTE RECEPTOR (API FLASK EN SEGUNDO PLANO)
-# =================================================================
-# Creamos una mini API interna que solo SpaceChat puede activar
-app = Flask(__name__)
-CORS(app) # 🛡️ Esto elimina por completo el error "Failed to fetch" de tu Eruda
-
-@app.route('/api/chat', methods=['POST'])
-def api_chat():
-    try:
-        data = request.json
-        mensaje_pedro = data.get("mensaje", "")
-        
-        if not mensaje_pedro:
-            return jsonify({"respuesta": "No recibí ningún comando, señor."}), 400
-
-        # Procesamos el texto con tu Gemini y tu prompt de personalidad
-        response = client.models.generate_content(
-            model='gemini-2.5-flash',
-            contents=mensaje_pedro,
-            config=types.GenerateContentConfig(
-                system_instruction=HARVIS_PROMPT,
-                temperature=0.75
-            )
-        )
-        
-        harvis_text = response.text if response.text else "Sistemas listos, Pedro."
-        
-        # Devolvemos la respuesta limpia en formato JSON que tu JS de Vercel entiende perfectamente
-        return jsonify({"respuesta": harvis_text})
-
-    except Exception as err:
-        return jsonify({"respuesta": f"Fallo en los sistemas centrales: {str(err)}"}), 500
-
-# Función para arrancar el servidor oculto sin congelar la pantalla de Streamlit
-def iniciar_api():
-    # Escucha en el puerto 8501 o uno secundario si Streamlit usa el principal. 
-    # Para despliegues en la nube, Flask puede correr en el puerto 5000 de forma interna.
-    app.run(host='0.0.0.0', port=5000, threaded=True)
-
-# Levantar el hilo secundario solo una vez para que no se duplique al recargar la página
-if "api_iniciada" not in st.session_state:
-    threading.Thread(target=iniciar_api, daemon=True).start()
-    st.session_state.api_iniciada = True
-
-
-# =================================================================
-# LÓGICA DE LA INTERFAZ TRADICIONAL DE STREAMLIT (Sigue igual)
-# =================================================================
+# Inicializar el historial del chat en la sesión si no existe
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
+# Renderizar los mensajes del historial en la pantalla
 for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         st.markdown(message["content"])
@@ -121,6 +72,7 @@ with col1:
 contenido_entrada = None
 tipo_entrada = None
 
+# Captura de audio desde la interfaz
 if audio_file is not None:
     audio_bytes = audio_file.read()
     contenido_entrada = [
@@ -129,10 +81,12 @@ if audio_file is not None:
     ]
     tipo_entrada = "audio"
 
+# Captura de texto desde la interfaz
 if user_input := st.chat_input("Escribe una orden en texto..."):
     contenido_entrada = user_input
     tipo_entrada = "texto"
 
+# Procesamiento de la interacción
 if contenido_entrada is not None:
     with st.chat_message("user"):
         if tipo_entrada == "texto":
@@ -147,6 +101,7 @@ if contenido_entrada is not None:
         
         try:
             with st.spinner("H.A.R.V.I.S. está pensando..."):
+                # Aquí pedimos solo TEXTO para que no falle con la cuenta gratis
                 response = client.models.generate_content(
                     model='gemini-2.5-flash',
                     contents=contenido_entrada,
@@ -159,13 +114,17 @@ if contenido_entrada is not None:
             harvis_text = response.text if response.text else "Sistemas listos, Pedro."
             response_placeholder.markdown(harvis_text)
             
+            # Convertimos el texto a voz de forma local usando gTTS
             with st.spinner("Generando respuesta de voz..."):
-                tts = gTTS(text=harvis_text, lang='es', tld='com.mx')
+                tts = gTTS(text=harvis_text, lang='es', tld='com.mx') # Voz en español fluida
                 fp = io.BytesIO()
                 tts.write_to_fp(fp)
                 audio_bytes_output = fp.getvalue()
+                
+                # Reproducir el audio resultante en la app
                 st.audio(audio_bytes_output, format="audio/mp3")
             
+            # Guardar la respuesta y el audio en el historial
             historial_item = {"role": "assistant", "content": harvis_text, "audio": audio_bytes_output}
             st.session_state.messages.append(historial_item)
             
