@@ -1442,8 +1442,8 @@ const base64 = btoa(binary);
         if (targetID === "harvis_user_system") {
             try {
                 // Cambia esta URL por la dirección real donde corre tu app de Streamlit
-                const urlStreamlit = "https://tu-app-harvis.streamlit.app/api/chat"; 
-
+                const urlStreamlit = "https://tu-app-harvis.streamlit.app:5000/api/chat";
+             
                 const respuestaServidor = await fetch(urlStreamlit, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
