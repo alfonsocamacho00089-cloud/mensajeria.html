@@ -1440,20 +1440,23 @@ const base64 = btoa(binary);
         // === INTERCEPCIÓN EN CALIENTE PARA H.A.R.V.I.S. ===
         // === CONEXIÓN DIRECTA CON TU ENTORNO DE STREAMLIT ===
         // === CONEXIÓN DIRECTA Y SIN TRABAS CON GOOGLE GEMINI ===
+        // === CONEXIÓN DIRECTA CON HISTORIAL EN VIVO (ESTILO STREAMLIT) ===
         if (targetID === "harvis_user_system") {
             try {
-                // Coloca tu API Key real de Google aquí entre las comillas
-                const miLlaveSecreta = "AIzaSyDlniGKLH0TxZFOXR8SuvVfXGKab7gxYfo"; 
+                const miLlaveSecreta = "TU_GEMINI_API_KEY_AQUÍ"; 
                 const urlGemini = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${miLlaveSecreta}`;
 
-                // El prompt de personalidad que ya tenías en Python, directo al JS
                 const harvisPromptSystem = "Eres H.A.R.V.I.S. 1.0, el asistente virtual e ingenioso creado por Pedro Peres para YouSpace. Sé experto, conciso y con un sutil toque de sarcasmo e ironía. Mantén las respuestas cortas.";
 
+                // 1. Guardamos lo que acabas de escribir en el historial de la API
+                historialHarvis.push({ role: "user", parts: [{ text: msg }] });
+
+                // 2. Le enviamos a Google TODA la conversación acumulada hasta el momento
                 const respuestaServidor = await fetch(urlGemini, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        contents: [{ parts: [{ text: msg }] }],
+                        contents: historialHarvis, // <--- Aquí va la memoria viva
                         systemInstruction: { parts: [{ text: harvisPromptSystem }] },
                         generationConfig: { temperature: 0.75 }
                     })
@@ -1461,20 +1464,29 @@ const base64 = btoa(binary);
 
                 const datosGemini = await respuestaServidor.json();
                 
-                // Estructura exacta de respuesta que devuelve la API de Google
-                const respuestaIA = datosGemini.candidates[0].content.parts[0].text || "Sistemas listos, Pedro.";
+                // Validación de seguridad por si la estructura viene vacía
+                if (!datosGemini.candidates || !datosGemini.candidates[0].content) {
+                    console.error("Respuesta inesperada de Google:", datosGemini);
+                    if (typeof hablarHarvis === "function") hablarHarvis("Señor, mis filtros de seguridad bloquearon esa respuesta.");
+                    return;
+                }
+
+                const respuestaIA = datosGemini.candidates[0].content.parts[0].text;
+
+                // 3. Guardamos la respuesta del robot en el historial para que la recuerde en el próximo mensaje
+                historialHarvis.push({ role: "model", parts: [{ text: respuestaIA }] });
 
                 const harvisMsgId = "msg_harvis_" + Date.now();
                 
-                // 1. El teléfono te canta la respuesta por los altavoces nativos
+                // El teléfono te canta la respuesta por los altavoces
                 if (typeof hablarHarvis === "function") {
                     hablarHarvis(respuestaIA);
                 }
 
-                // 2. Pintamos la respuesta real en tu pantalla Black & Gold
+                // Pintamos la burbuja interactiva a la izquierda
                 pintarMensaje(respuestaIA, 'msg-izquierda', null, 'leido', harvisMsgId, 'texto');
                 
-                // 3. Guardado local inmediato en tu IndexedDB para mantener el historial
+                // Guardado local inmediato en IndexedDB para tu interfaz
                 await guardarLocal('mensajes', { 
                     id: harvisMsgId, 
                     contactoId: targetID,
@@ -1487,11 +1499,10 @@ const base64 = btoa(binary);
                 });
 
             } catch (errorGemini) {
-                console.error("❌ Error directo con la API de Google:", errorGemini);
-                if (typeof hablarHarvis === "function") hablarHarvis("Señor, hubo un problema en los servidores de Google.");
+                console.error("❌ Error en la corriente de la API:", errorGemini);
+                if (typeof hablarHarvis === "function") hablarHarvis("Señor, perdí la continuidad del flujo.");
             }
      }
-     
         if (inputMsg && !multimediaUrl) {
             inputMsg.value = "";
             inputMsg.style.height = '36px';
