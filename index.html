@@ -19,7 +19,7 @@
     <script>eruda.init();</script>
     <script src="app.js"></script>
     <script type="module" src="app.js"></script>
- 
+ <script src="https://cdn.jsdelivr.net/npm/@google/genai@0.1.1/dist/bundle.js"></script>
  <style>
    
     * {
@@ -1456,15 +1456,27 @@ const chatHarvis = ai.chats.create({
 });
 
 // ====== INTERCEPCIÓN DENTRO DE ENVIARMENSAJESATELITAL ======
+// ====== INTERCEPCIÓN DIRECTA CON SDK GLOBAL (ESTILO STREAMLIT) ======
 if (targetID === "harvis_user_system") {
     try {
-        // Envía el contenido de forma directa y fluida (Igual que en Streamlit)
-        const response = await chatHarvis.sendMessage({ message: msg });
-        
-        // Obtenemos el texto limpio de forma directa
+        // Inicializamos el cliente usando la ventana global del navegador
+        const ai = new window.googleGenAI.GoogleGenAI({ apiKey: "TU_GEMINI_API_KEY_AQUÍ" });
+        const HARVIS_PROMPT = "Eres H.A.R.V.I.S. 1.0, el asistente virtual e ingenioso creado por Pedro Peres para YouSpace. Sé experto, conciso y con un sutil toque de sarcasmo e ironía. Mantén las respuestas cortas.";
+
+        // Le enviamos el mensaje directo a la IA de forma idéntica a tu Python
+        const response = await ai.models.generateContent({
+            model: 'gemini-2.5-flash',
+            contents: msg,
+            config: {
+                systemInstruction: HARVIS_PROMPT,
+                temperature: 0.75
+            }
+        });
+
+        // Captura directa y limpia del texto de respuesta
         const respuestaIA = response.text || "Sistemas listos, Pedro.";
         const harvisMsgId = "msg_harvis_" + Date.now();
-        
+
         // 1. El teléfono te canta la respuesta por los altavoces
         if (typeof hablarHarvis === "function") {
             hablarHarvis(respuestaIA);
@@ -1472,8 +1484,8 @@ if (targetID === "harvis_user_system") {
 
         // 2. Pintamos la respuesta interactiva real en tu pantalla Black & Gold
         pintarMensaje(respuestaIA, 'msg-izquierda', null, 'leido', harvisMsgId, 'texto');
-        
-        // 3. Guardado local inmediato en tu IndexedDB para el historial visual
+
+        // 3. Guardado local inmediato en tu IndexedDB para mantener el chat vivo
         await guardarLocal('mensajes', { 
             id: harvisMsgId, 
             contactoId: targetID,
@@ -1488,7 +1500,7 @@ if (targetID === "harvis_user_system") {
     } catch (errorCentral) {
         console.error("❌ Error en el procesamiento central de H.A.R.V.I.S.:", errorCentral);
         if (typeof hablarHarvis === "function") {
-            hablarHarvis("Señor, hubo un error en los módulos de conexión.");
+            hablarHarvis("Señor, hubo un error en los módulos de conexión de la API.");
         }
     }
      }
@@ -3161,7 +3173,6 @@ function actualizarUIUIGrabando(estaGrabando) {
         }
     }
      }
-import { GoogleGenAI } from 'https://esm.run/@google/genai';
 
 // =================================================================
 // 1. REGISTRO FIJO DE H.A.R.V.I.S. COMO UN CONTACTO NORMAL
