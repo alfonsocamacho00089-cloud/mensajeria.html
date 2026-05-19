@@ -3316,54 +3316,29 @@ function funcionDeEnvioRealDeTuApp(textoDelMensaje) {
             return; // Detiene el código aquí para que no ejecute el Gemini normal de abajo
         }
 
-        
-     // 3. 🧠 CASO NORMAL: CONEXIÓN FLUIDA CON GEMINI (api/chat.js)
+        // 3. 🧠 CASO NORMAL: CONEXIÓN FLUIDA CON GEMINI (api/chat.js)
 (async () => {
     try {
-        // Aseguramos que el mensaje actual de Pedro entre limpio
-        historialHarvisVercel.push({ role: "user", parts: [{ text: textoDelMensaje }] });
-
-        // 🛡️ FILTRO DE SEGURIDAD PARA EL HISTORIAL:
-        let historialLimpio = [];
-        for (let i = 0; i < historialHarvisVercel.length; i++) {
-            const actual = historialHarvisVercel[i];
-            const ultimoAgregado = historialLimpio[historialLimpio.length - 1];
-
-            if (!ultimoAgregado || ultimoAgregado.role !== actual.role) {
-                if (actual.parts && actual.parts[0] && actual.parts[0].text.trim() !== "") {
-                    historialLimpio.push(actual);
-                }
-            } else {
-                if (actual.role === "user") {
-                    ultimoAgregado.parts[0].text += " " + actual.parts[0].text;
-                }
-            }
-        }
-
-        if (historialLimpio.length > 0 && historialLimpio[historialLimpio.length - 1].role !== "user") {
-            historialLimpio.push({ role: "user", parts: [{ text: textoDelMensaje }] });
-        }
+        // Estructura nativa original que tu API de Vercel sí reconoce
+        historialHarvisVercel.push({ role: "user", text: textoDelMensaje });
 
         const respuestaServidor = await fetch('/api/chat', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ chatHistory: historialLimpio })
+            body: JSON.stringify({ chatHistory: historialHarvisVercel }) // Envío directo original
         });
 
-        // Verificación de seguridad si el servidor responde vacío
+        // Si Vercel responde vacío o mal, frena antes de romper la consola
         if (!respuestaServidor.ok) {
-            throw new Error("El servidor de Vercel devolvió un estado de error.");
+            throw new Error("Respuesta vacía o error en el servidor de Vercel.");
         }
 
         const datos = await respuestaServidor.json();
         const respuestaIA = datos.respuesta || "Sistemas listos, Pedro.";
         const harvisMsgId = "msg_harvis_" + Date.now();
         
-        // 🔄 ¡PASO CLAVE AQUÍ!: 
-        // Agregamos la respuesta al historial limpio y sobreescribimos el historial global 
-        // para que la próxima petición empiece desde una base perfectamente estructurada.
-        historialLimpio.push({ role: "model", parts: [{ text: respuestaIA }] });
-        historialHarvisVercel = [...historialLimpio]; 
+        // Guardamos la respuesta en el formato original
+        historialHarvisVercel.push({ role: "model", text: respuestaIA });
 
         if (typeof hablarHarvis === "function") hablarHarvis(respuestaIA);
         if (typeof pintarMensaje === "function") {
