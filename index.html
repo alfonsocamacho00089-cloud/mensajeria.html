@@ -1436,11 +1436,8 @@ const base64 = btoa(binary);
             });
         }
 
-// === CONEXIÓN DIRECTA POR ENLACE CRUDO (SIN LIBRERÍAS QUE ROMPAN LA APP) ===
-        // === CONEXIÓN DIRECTA E INVISIBLE VÍA VERCEL API ===
-        // === CONEXIÓN DIRECTA E INVISIBLE VÍA VERCEL API (CON MEMORIA FLUIDA) ===
-        
-if (targetID === "harvis_user_system") {
+// === CONEXIÓN DIRECTA E INVISIBLE VÍA VERCEL API (CON MEMORIA FLUIDA) ===
+        if (targetID === "harvis_user_system") {
             try {
                 // 1. Guardamos tu mensaje en la memoria del chat
                 historialHarvisVercel.push({ role: "user", parts: [{ text: msg }] });
