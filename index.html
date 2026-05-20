@@ -3224,7 +3224,7 @@ function procesarRespuestaHarvis(mensajeRecibidoDePedro) {
 async function funcionDeEnvioRealDeTuApp(textoDelMensaje) {
     
     // CAPTURA REAL DE SPACECHAT: Leemos el elemento target-id de tu HTML
-    const inputTarget = document.getElementById('target-id');
+    const inputTarget = document.getElementById('targetID'); // <-- Con 'ID' en mayúsculas y sin guion
     const usuarioEnPantalla = inputTarget ? inputTarget.value : ""; 
 
     if (usuarioEnPantalla === "harvis_user_system") {
