@@ -11,8 +11,7 @@ export default async function handler(req, res) {
 
         // 💥 CORTE DE CIRCUITO: Pegamos la llave real directo aquí dentro de las comillas
         // Usa exactamente la misma que te funciona en Streamlit.
-        const api_key = st.secrets["GEMINI_API_KEY"]
-
+        const apiKey = process.env.GEMINI_API_KEY;
         // Quitamos los diagnósticos de Vercel porque ya no importan.
         const urlGemini = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
         const harvisPromptSystem = "Eres H.A.R.V.I.S. 1.0, el asistente virtual e ingenioso creado por Pedro Peres para YouSpace. Sé experto, conciso y con un sutil toque de sarcasmo. Respuestas cortas.";
