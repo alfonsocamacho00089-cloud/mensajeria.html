@@ -3221,90 +3221,37 @@ function procesarRespuestaHarvis(mensajeRecibidoDePedro) {
 // 4. INTEGRACIÓN REAL EN TU FUNCIÓN DE ENVIAR MENSAJES
 // =================================================================
 // Busca tu función nativa de envío (la que activas con el Enter o tu evento)
-
+// e integra este control exacto:
 
 function funcionDeEnvioRealDeTuApp(textoDelMensaje) {
     
     // CAPTURA REAL DE SPACECHAT: Leemos el elemento target-id de tu HTML
     const inputTarget = document.getElementById('target-id');
     const usuarioEnPantalla = inputTarget ? inputTarget.value : ""; 
-    const targetID = usuarioEnPantalla; // Para que coincida con tu lógica de Vercel
 
     if (usuarioEnPantalla === "harvis_user_system") {
         // ---------------------------------------------------------
         // CASO A: ESTÁS DENTRO DEL CHAT DE HARVIS
         // ---------------------------------------------------------
         
-        // 1. Limpia tu textarea msg-text como hace siempre tu app
+        // Limpia tu textarea msg-text como hace siempre tu app
         const campoTexto = document.getElementById('msg-text');
         if (campoTexto) {
             campoTexto.value = "";
             campoTexto.style.height = '40px'; // Resetea la altura
         }
 
-        // 2. Activa el modo manos libres estilo Alexa mientras estás aquí
-        if (typeof activarEscuchaAtentaHarvis === "function") {
-            activarEscuchaAtentaHarvis();
-        }
-
-        // 3. === CONEXIÓN DIRECTA E INVISIBLE VÍA VERCEL API (CON MEMORIA FLUIDA) ===
-        (async () => {
-            try {
-                // Guardamos tu mensaje en la memoria del chat
-                historialHarvisVercel.push({ role: "user", parts: [{ text: textoDelMensaje }] });
-
-                // Le pegamos a tu servidor mandándole TODO el historial acumulado
-                const respuestaServidor = await fetch('/api/chat', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ chatHistory: historialHarvisVercel })
-                });
-
-                const datos = await respuestaServidor.json();
-                const respuestaIA = datos.respuesta || "Sistemas listos, Pedro.";
-                const harvisMsgId = "msg_harvis_" + Date.now();
-                
-                // Guardamos la respuesta de H.A.R.V.I.S. en la memoria para el próximo mensaje
-                historialHarvisVercel.push({ role: "model", parts: [{ text: respuestaIA }] });
-
-                if (typeof hablarHarvis === "function") {
-                    hablarHarvis(respuestaIA);
-                }
-
-                if (typeof pintarMensaje === "function") {
-                    pintarMensaje(respuestaIA, 'msg-izquierda', null, 'leido', harvisMsgId, 'texto');
-                }
-                
-                if (typeof guardarLocal === "function") {
-                    await guardarLocal('mensajes', { 
-                        id: harvisMsgId, 
-                        contactoId: targetID,
-                        texto: respuestaIA, 
-                        clase: 'msg-izquierda', 
-                        status: 'leido',
-                        tipo: 'texto',
-                        ts: Date.now(),
-                        hora: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })
-                    });
-                }
-
-            } catch (errorCentral) {
-                console.error("❌ Error en el enlace con el servidor de Vercel:", errorCentral);
-            }
-        })();
+        // Se lo mandas al cerebro de H.A.R.V.I.S.
+        procesarRespuestaHarvis(textoDelMensaje);
 
     } else {
         // ---------------------------------------------------------
         // CASO B: CHATS NORMALES CON TUS CONTACTOS
         // ---------------------------------------------------------
+        // Aquí no se toca absolutamente nada. Tu aplicación ejecutará 
+        // tu lógica original de Firebase o IndexedDB de forma tradicional.
         
-        // Apaga el micrófono continuo para que no espíe tus chats normales
-        if (typeof desactivarEscuchaAtentaHarvis === "function") {
-            desactivarEscuchaAtentaHarvis();
-        }
-
-        // Aquí dejas tus líneas de código nativas originales de SpaceChat 
-        // para guardar/enviar mensajes a tus contactos por Firebase o IndexedDB
+        // (Pon aquí tus líneas de código nativas para guardar/enviar mensajes a tus amigos)
     }
      }
 
