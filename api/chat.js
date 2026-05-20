@@ -13,37 +13,31 @@ export default async function handler(req, res) {
     }
 
     try {
-        const { msg } = req.body;
-        // Vercel tomará la API KEY de sus variables ocultas del sistema
-        const apiKey = process.env.GEMINI_API_KEY; 
+        // Recibimos el historial completo que envía tu Frontend en SpaceChat
+        const { chatHistory } = req.body;
 
-        if (!apiKey) {
-            return res.status(500).json({ error: 'Falta la configuración del servidor.' });
-        }
+        // ⚠️ REEMPLAZA ESTA URL POR EL ENDPOINT DE TU APP REAL EN STREAMLIT
+        const urlStreamlit = "https://tu-app-de-streamlit.streamlit.app/api/harvis";
 
-        const urlGemini = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
-        const harvisPromptSystem = "Eres H.A.R.V.I.S. 1.0, el asistente virtual e ingenioso creado por Pedro Peres para YouSpace. Sé experto, conciso y con un sutil toque de sarcasmo e ironía. Respuestas cortas.";
-
-        const respuestaServidor = await fetch(urlGemini, {
+        // Vercel actúa como pasarela invisible y le pasa el paquete de datos a Streamlit
+        const respuestaServidor = await fetch(urlStreamlit, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                contents: [{ parts: [{ text: msg }] }],
-                systemInstruction: { parts: [{ text: harvisPromptSystem }] },
-                generationConfig: { temperature: 0.75 }
-            })
+            body: JSON.stringify({ chatHistory: chatHistory })
         });
 
-        const datosGemini = await respuestaServidor.json();
+        const datosStreamlit = await respuestaServidor.json();
         
+        // Extraemos la respuesta que generó Streamlit usando su API Key interna
         let respuestaIA = "Sistemas listos, Pedro.";
-        if (datosGemini && datosGemini.candidates && datosGemini.candidates[0]?.content) {
-            respuestaIA = datosGemini.candidates[0].content.parts[0].text;
+        if (datosStreamlit && datosStreamlit.respuesta) {
+            respuestaIA = datosStreamlit.respuesta;
         }
 
         return res.status(200).json({ respuesta: respuestaIA });
 
     } catch (error) {
-        return res.status(500).json({ error: 'Fallo en la conexión central.' });
+        console.error("❌ Fallo en el puente central hacia Streamlit:", error);
+        return res.status(500).json({ respuesta: "Sistemas en mantenimiento central, Pedro." });
     }
 }
