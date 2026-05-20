@@ -1441,7 +1441,7 @@ if (targetID === "harvis_user_system") {
     try {
         // 🚀 YA NO HAY LLAVES AQUÍ. Le pegamos a tu propio backend de Vercel
         // Usamos la ruta relativa de tu servidor
-        const urlBackend = "/api/chat"; 
+        const apiKey = process.env.GEMINI_API_KEY; 
 
         // Tu api/chat.js espera recibir un objeto con 'chatHistory'
         // Lo armamos exactamente en el formato que Gemini entiende
