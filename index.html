@@ -3213,14 +3213,11 @@ function procesarRespuestaHarvis(mensajeRecibidoDePedro) {
     }, 1000);
 }
 
-
+     // =================================================================
+// 4. INTEGRACIÓN REAL Y CORRECCIÓN DEL FLUJO UNIFICADO
 // =================================================================
-// 4. INTEGRACIÓN REAL EN TU FUNCIÓN DE ENVIAR MENSAJES
-// =================================================================
-// Busca tu función nativa de envío (la que activas con el Enter o tu evento)
-// e integra este control exacto:
 
-function funcionDeEnvioRealDeTuApp(textoDelMensaje) {
+async function funcionDeEnvioRealDeTuApp(textoDelMensaje) {
     
     // CAPTURA REAL DE SPACECHAT: Leemos el elemento target-id de tu HTML
     const inputTarget = document.getElementById('target-id');
@@ -3228,29 +3225,68 @@ function funcionDeEnvioRealDeTuApp(textoDelMensaje) {
 
     if (usuarioEnPantalla === "harvis_user_system") {
         // ---------------------------------------------------------
-        // CASO A: ESTÁS DENTRO DEL CHAT DE HARVIS
+        // CASO A: ESTÁS DENTRO DEL CHAT DE HARVIS (CONEXIÓN VERCEL)
         // ---------------------------------------------------------
         
         // Limpia tu textarea msg-text como hace siempre tu app
         const campoTexto = document.getElementById('msg-text');
         if (campoTexto) {
             campoTexto.value = "";
-            campoTexto.style.height = '40px'; // Resetea la altura
+            campoTexto.style.height = '40px'; 
         }
 
-        // Se lo mandas al cerebro de H.A.R.V.I.S.
-        procesarRespuestaHarvis(textoDelMensaje);
+        try {
+            // 1. Guardamos tu mensaje en la memoria del chat en el formato que espera tu api/chat.js
+            historialHarvisVercel.push({ role: "user", parts: [{ text: textoDelMensaje }] });
+
+            // 2. Le pegamos a tu servidor de Vercel mandándole TODO el historial acumulado
+            const respuestaServidor = await fetch('/api/chat', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ chatHistory: historialHarvisVercel }) 
+            });
+
+            const datos = await respuestaServidor.json();
+            const respuestaIA = datos.respuesta || "Sistemas listos, Pedro.";
+            const harvisMsgId = "msg_harvis_" + Date.now();
+            
+            // 3. Guardamos la respuesta de H.A.R.V.I.S. en la memoria para el próximo mensaje
+            historialHarvisVercel.push({ role: "model", parts: [{ text: respuestaIA }] });
+
+            // 4. Activamos los sistemas nativos (Voz y Pantalla)
+            if (typeof hablarHarvis === "function") {
+                hablarHarvis(respuestaIA);
+            }
+
+            if (typeof pintarMensaje === "function") {
+                pintarMensaje(respuestaIA, 'msg-izquierda', null, 'leido', harvisMsgId, 'texto');
+            }
+            
+            if (typeof guardarLocal === "function") {
+                await guardarLocal('mensajes', { 
+                    id: harvisMsgId, 
+                    contactoId: usuarioEnPantalla,
+                    texto: respuestaIA, 
+                    clase: 'msg-izquierda', 
+                    status: 'leido',
+                    tipo: 'texto',
+                    ts: Date.now(),
+                    hora: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })
+                });
+            }
+
+        } catch (errorCentral) {
+            console.error("❌ Error en el enlace con el servidor de Vercel:", errorCentral);
+        }
 
     } else {
         // ---------------------------------------------------------
         // CASO B: CHATS NORMALES CON TUS CONTACTOS
         // ---------------------------------------------------------
-        // Aquí no se toca absolutamente nada. Tu aplicación ejecutará 
-        // tu lógica original de Firebase o IndexedDB de forma tradicional.
-        
-        // (Pon aquí tus líneas de código nativas para guardar/enviar mensajes a tus amigos)
+        // Aquí pones tus líneas de código nativas para Firebase o chat normal
     }
      }
+
 
 // =================================================================
 // 5. MOTOR DE ACTIVACIÓN POR VOZ INFINITA (ESTILO ALEXA)
