@@ -11,7 +11,7 @@ export default async function handler(req, res) {
 
         // 💥 CORTE DE CIRCUITO: Pegamos la llave real directo aquí dentro de las comillas
         // Usa exactamente la misma que te funciona en Streamlit.
-        const apiKey = "AIzaSyC338rzB_dHaIHtowOym9u3z7rhWZG8Is8"; 
+        const api_key = st.secrets["GEMINI_API_KEY"]
 
         // Quitamos los diagnósticos de Vercel porque ya no importan.
         const urlGemini = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
