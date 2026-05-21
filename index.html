@@ -17,7 +17,7 @@
     <script src="https://cdn.jsdelivr.net/npm/protobufjs@7.2.4/dist/protobuf.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/eruda"></script>
     <script>eruda.init();</script>
-    <script src="js/app.js"></script>
+    
      <style>
    
     * {
@@ -1446,11 +1446,16 @@ if (targetID === "harvis_user_system") {
      
         // Tu api/chat.js espera recibir un objeto con 'chatHistory'
         // Lo armamos exactamente en el formato que Gemini entiende
-        const cuerpoPeticion = {
-            chatHistory: [
-                { role: "user", parts: [{ text: msg }] }
-            ]
-        };
+        // 🚀 Recuperamos la llave local de tu teléfono
+const llaveLocal = localStorage.getItem('spacechat_crypto_key') || "";
+
+const cuerpoPeticion = {
+    chatHistory: [
+        { role: "user", parts: [{ text: msg }] }
+    ],
+    // Enviamos la llave de forma segura en el cuerpo del mensaje hacia Vercel
+    userKey: llaveLocal 
+};
 
         const respuestaServidor = await fetch(urlBackend, {
             method: 'POST',
