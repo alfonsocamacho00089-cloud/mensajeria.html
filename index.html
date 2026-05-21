@@ -3310,68 +3310,50 @@ const contactoHarvisFijo = {
 // =================================================================
 
 // Hace que el teléfono hable (Bocina)
-function hablarHarvis(texto, alTerminar) {
 
+
+        function hablarHarvis(texto, alTerminar) {
     const synth = window.speechSynthesis;
+    synth.cancel(); // Limpia cualquier audio trabado
 
-    synth.cancel(); // Limpia cualquier audio en cola
-
-    
-
-    // 1. Limpieza de emergencia por si Gemini llega a mandar Markdown
-
+    // 1. Limpieza estricta de Markdown
     let textoLimpio = texto
-
-        .replace(/\*/g, '')        // Elimina asteriscos de negritas/itálicas
-
-        .replace(/#/g, '')         // Elimina almohadillas de títulos
-
-        .replace(/-/g, '')         // Elimina guiones de listas
-
-        .replace(/[\uE000-\uF8FF]|\uD83C[\uDC00-\uDFFF]|\uD83D[\uDC00-\uDFFF]|[\u2011-\u26FF]|\uD83E[\uDC00-\uDFFF]/g, ''); // Quita emojis si los lee raro
-
-
+        .replace(/\*/g, '')
+        .replace(/#/g, '')
+        .replace(/-/g, '')
+        .replace(/[\uE000-\uF8FF]|\uD83C[\uDC00-\uDFFF]|\uD83D[\uDC00-\uDFFF]|[\u2011-\u26FF]|\uD83E[\uDC00-\uDFFF]/g, '');
 
     const utterance = new SpeechSynthesisUtterance(textoLimpio);
-
     
-
-    // 2. Configuración de idioma y dinámica
-
-    utterance.lang = 'es-MX'; 
-
-    utterance.rate = 1.05; // Un toque apenas más rápido ayuda a que suene menos "robot cansado"
-
-    utterance.pitch = 0.95; // Un tono ligeramente más grave le da ese estilo "H.A.R.V.I.S." de IA elegante
-
-
-
-    // 3. Intentar seleccionar una voz más natural si está disponible en el navegador
-
+    // 2. Traer todas las voces instaladas en tu Xiaomi
     const voces = synth.getVoices();
 
-    // Busca voces de Google o Microsoft en español que suelen ser más fluidas
+    // 3. BUSCADOR AUTOMÁTICO DE TU VOZ DE HOMBRE
+    // Filtramos las voces en español buscando las palabras clave de los paquetes masculinos de Google
+    const vozDeHombre = voces.find(v => 
+        v.lang.includes('es') && 
+        (v.name.includes('Google') || v.name.includes('Natural')) &&
+        (v.name.includes('Voz 2') || v.name.includes('Voz 3') || v.name.includes('male') || v.name.includes('B') || v.name.includes('C'))
+    );
 
-    const mejorVoz = voces.find(v => v.lang.includes('es-MX') && (v.name.includes('Google') || v.name.includes('Natural')));
-
-    if (mejorVoz) {
-
-        utterance.voice = mejorVoz;
-
+    // Si encontró la voz de hombre descargada, se la asignamos a HARVIS
+    if (vozDeHombre) {
+        utterance.voice = vozDeHombre;
+        console.log("¡H.A.R.V.I.S está usando la voz local montada!: " + vozDeHombre.name);
+    } else {
+        // Si no la encuentra, usa el respaldo por defecto de tu idioma
+        utterance.lang = 'es-MX';
     }
 
-    
+    // 4. Configuración de estilo elegante para tu asistente
+    utterance.rate = 1.02; // Un toque sutil de velocidad
+    utterance.pitch = 0.88; // Bajamos el tono para que suene más grave, imponente y con estilo "JARVIS"
 
     if (alTerminar) {
-
         utterance.onend = () => alTerminar();
-
     }
-
     
-
     synth.speak(utterance);
-
      }
 
 
@@ -3847,6 +3829,14 @@ if (window.visualViewport) {
     vv.addEventListener('resize', ajustarInterfaz);
     vv.addEventListener('scroll', ajustarInterfaz);
     ajustarInterfaz();
+     }
+
+     // Esto fuerza al navegador a precargar las voces de tu Xiaomi en memoria
+if (typeof window !== "undefined" && window.speechSynthesis) {
+    window.speechSynthesis.getVoices();
+    window.speechSynthesis.onvoiceschanged = () => {
+        window.speechSynthesis.getVoices();
+    };
      }
      
 </script>
