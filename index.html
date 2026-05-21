@@ -861,7 +861,7 @@ margin: 0;
         <span>👥</span><span>Contactos</span>
     </div>
     
-    <div class="btn-nav" id="btn-nav-harvis" onclick="cargarConversacionCon('harvis_user_system')">
+    <div class="btn-nav" id="btn-nav-harvis" onclick="cargarConversacionCon('uo4kb3tGHH7J')">
         <span style="text-shadow: 0 0 8px #ffd700;">🤖</span><span style="color: #ffd700;">H.A.R.V.I.S.</span>
     </div>
 
@@ -1427,7 +1427,7 @@ const base64 = btoa(binary);
         });
 
         // 🛡️ REGLA DE ORO: Si es para H.A.R.V.I.S., NO lo subas a Firebase. Si es un contacto normal, SÍ lo sube.
-        if (targetID !== "harvis_user_system") {
+        if (targetID !== "uo4kb3tGHH7J") {
             await db.ref('cola_satelital/' + targetID).push({
                 p: base64,
                 from: miID,
@@ -1438,7 +1438,7 @@ const base64 = btoa(binary);
         }
 
 // === CONEXIÓN SEGURA RUTA HACIA EL BACKEND EN VERCEL ===
-if (targetID === "harvis_user_system") {
+if (targetID === "uo4kb3tGHH7J") {
     try {
         // 🚀 YA NO HAY LLAVES AQUÍ. Le pegamos a tu propio backend de Vercel
         // Usamos la ruta relativa de tu servidor
@@ -3176,7 +3176,7 @@ function actualizarUIUIGrabando(estaGrabando) {
 // =================================================================
 // Recuerda registrar este ID exacto en tu IndexedDB o array de contactos
 const contactoHarvisFijo = {
-    id: "harvis_user_system",
+    id: "uo4kb3tGHH7J",
     nombre: "H.A.R.V.I.S. 1.0",
     avatar: "🤖",
     estado: "Copiloto YouSpace en línea"
