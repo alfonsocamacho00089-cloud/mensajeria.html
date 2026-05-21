@@ -1,5 +1,5 @@
 export default async function handler(req, res) {
-    // Configuración de Cabeceras CORS de forma segura
+    // Cabeceras CORS para conectar con tu entorno móvil
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
     res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
@@ -8,49 +8,47 @@ export default async function handler(req, res) {
     if (req.method !== 'POST') return res.status(405).json({ respuesta: 'Método no permitido' });
 
     try {
-        // Recibimos de forma dinámica el historial y la llave enviada desde tu móvil
+        // Recibimos el historial de la sesión y la llave dinámica de tu teléfono
         const { chatHistory, userKey } = req.body;
         const apiKey = userKey; 
 
         if (!apiKey || apiKey.trim() === "") {
-            return res.status(200).json({ respuesta: "🔑 H.A.R.V.I.S.: No detecto ninguna clave local en su dispositivo. Por favor, regístrela en la consola." });
+            return res.status(200).json({ respuesta: "🔑 H.A.R.V.I.S.: Falta la clave local en el almacenamiento de su dispositivo." });
         }
 
         // =================================================================
-        // FILTRO DETECTOR DE IMÁGENES (Bifurcación Inteligente)
+        // TRADUCTOR MULTIMEDIA: Convertimos Base64 a Oídos Nativos de Google
         // =================================================================
-        const ultimoMensaje = chatHistory[chatHistory.length - 1]?.parts[0]?.text || "";
-        const textoMinuscula = ultimoMensaje.toLowerCase();
-        const esPeticionImagen = textoMinuscula.includes("genera una imagen") || 
-                                 textoMinuscula.includes("hazme una imagen") || 
-                                 textoMinuscula.includes("dibuja") || 
-                                 textoMinuscula.includes("crea una imagen") ||
-                                 textoMinuscula.includes("hazme un dibujo");
+        const historialFormateado = chatHistory.map(mensaje => {
+            // Evaluamos solo los mensajes que tú envías
+            if (mensaje.role === "user") {
+                const contenidoTexto = mensaje.parts[0]?.text || "";
 
-        if (esPeticionImagen) {
-            // Limpiamos el texto para dejar solo la descripción pura del arte que quieres crear
-            const promptLimpio = encodeURIComponent(ultimoMensaje.replace(/(genera|hazme|crea|una|imagen|dibuja|un|dibujo|por|favor)/gi, "").trim());
-            
-            // Renderizador libre de Pollinations AI acoplado a YouSpace
-            const urlImagenGenerada = `https://image.pollinations.ai/p/${promptLimpio}?width=512&height=512&seed=${Date.now()}&nologo=true`;
+                // ¿Es un archivo de audio en Base64 de SpaceChat?
+                if (contenidoTexto.includes("data:audio/webm;base64,") || contenidoTexto.startsWith("GkXf") || contenidoTexto.includes("base64,")) {
+                    
+                    // Extraemos limpiamente el Base64 puro quitando el encabezado "data:audio/...;base64,"
+                    const partesData = contenidoTexto.split("base64,");
+                    const base64Puro = partesData[1] || partesData[0];
 
-            // Diálogos de H.A.R.V.I.S. con su toque irónico característico
-            const respuestasSarcasticas = [
-                "Entendido, señor Peres. Activando mis subrutinas artísticas y consumiendo ciclos de procesamiento en su creación visual:",
-                "Procesando su ráfaga de creatividad, Pedro. He renderizado la imagen solicitada en nano-segundos. Contemple el resultado:",
-                "H.A.R.V.I.S. 1.0 modo artista activado. Aquí tiene el resultado gráfico de sus órdenes, señor:"
-            ];
-            const respuestaFalsaIA = respuestasSarcasticas[Math.floor(Math.random() * respuestasSarcasticas.length)];
-
-            // Retornamos la respuesta combinada (Texto irónico + URL de la imagen)
-            return res.status(200).json({ 
-                respuesta: respuestaFalsaIA,
-                imagenUrl: urlImagenGenerada 
-            });
-        }
+                    // 🚀 Transformamos el mensaje en un bloque de datos binarios para Gemini
+                    return {
+                        role: "user",
+                        parts: [{
+                            inlineData: {
+                                mimeType: "audio/webm", // Formato nativo de grabación móvil
+                                data: base64Puro.trim()
+                            }
+                        }]
+                    };
+                }
+            }
+            // Si es texto normal tuyo o respuestas previas de H.A.R.V.I.S., se quedan idénticos
+            return mensaje;
+        });
 
         // =================================================================
-        // FLUJO NORMAL DE TEXTO CON GEMINI 2.5 FLASH
+        // CONEXIÓN CON GEMINI 2.5 FLASH (Misma URL y misma respuesta de siempre)
         // =================================================================
         const urlGemini = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
         const harvisPromptSystem = "Eres H.A.R.V.I.S. 1.0, el asistente virtual e ingenioso creado por Pedro Peres para YouSpace. Sé experto, analítico y con un sutil toque de sarcasmo e ironía. Desarrolla tus ideas de forma completa, explicando en detalle cuando sea necesario, pero manteniendo la fluidez natural de una conversación.";
@@ -59,7 +57,7 @@ export default async function handler(req, res) {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                contents: chatHistory,
+                contents: historialFormateado, // <── Pasamos el historial ya digerido con los audios listos
                 systemInstruction: { parts: [{ text: harvisPromptSystem }] },
                 generationConfig: { temperature: 0.75 }
             })
@@ -78,9 +76,10 @@ export default async function handler(req, res) {
             respuestaIA = datosGemini.candidates[0].content.parts[0].text;
         }
 
+        // Devolvemos el texto con el formato exacto que tu front ya sabe pintar
         return res.status(200).json({ respuesta: respuestaIA });
 
     } catch (error) {
-        return res.status(200).json({ respuesta: `💥 Fallo crítico en el servidor central: ${error.message}` });
+        return res.status(200).json({ respuesta: `💥 Fallo en la traducción central del audio: ${error.message}` });
     }
 }
