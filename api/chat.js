@@ -11,11 +11,11 @@ export default async function handler(req, res) {
 
         // 💥 CORTE DE CIRCUITO: Pegamos la llave real directo aquí dentro de las comillas
         // Usa exactamente la misma que te funciona en Streamlit.
-        const apiKey = process.env.GEMINI_API_KEY;
-        // Quitamos los diagnósticos de Vercel porque ya no importan.
-        const urlGemini = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
-        const harvisPromptSystem = "Eres H.A.R.V.I.S. 1.0, el asistente virtual e ingenioso creado por Pedro Peres para YouSpace. Sé experto, conciso y con un sutil toque de sarcasmo. Respuestas cortas.";
+        const URL_SECRETA_IA = "https://tu-url-privada-de-streamlit.com/api/v1/chat"; 
+        const urlStreamlit = "https://tu-app-harvis.streamlit.app:5000/api/chat";
 
+        
+        const harvisPromptSystem = "Eres H.A.R.V.I.S. 1.0, el asistente virtual e ingenioso creado por Pedro Peres para YouSpace. Sé experto, analítico y con un sutil toque de sarcasmo e ironía. Desarrolla tus ideas de forma completa, explicando en detalle cuando sea necesario, pero manteniendo la fluidez natural de una conversación.";
         const respuestaServidor = await fetch(urlGemini, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
