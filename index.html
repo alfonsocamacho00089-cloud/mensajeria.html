@@ -3569,11 +3569,25 @@ async function procesarRespuestaHarvis(msg, targetID) {
         }
         
         // Si la respuesta fue limpia, continuamos el flujo original
+        // ... (Tu código de Fetch y procesamiento de respuestaIA se queda exactamente igual) ...
+
+        // 1. Guardamos la respuesta del modelo en el historial de sesión de forma normal
         historialHarvisVercel.push({ role: "model", parts: [{ text: respuestaIA }] });
 
+        // 🛡️ FILTRO RODANTE DE MEMORIA: Mantenemos el historial ligero para la API
+        // Si el historial supera los 8 elementos (4 preguntas y 4 respuestas), eliminamos lo más viejo
+        if (historialHarvisVercel.length > 8) {
+            console.log("✂️ Optimizando memoria de H.A.R.V.I.S.: Recortando mensajes antiguos del buffer activo.");
+            // Removemos los 2 elementos más antiguos (una pregunta y su respuesta) para mantener el hilo coherente
+            historialHarvisVercel.splice(0, 2); 
+        }
+
+        // H.A.R.V.I.S. habla por la bocina del teléfono
         if (typeof hablarHarvis === "function") {
             hablarHarvis(respuestaIA);
         }
+
+// ... (Tu lógica de pintarMensaje y el guardado masivo en IndexedDB continúan abajo intactos) ...
 
         if (typeof pintarMensaje === "function") {
             pintarMensaje(respuestaIA, 'msg-izquierda', null, 'leido', harvisMsgId, 'texto');
