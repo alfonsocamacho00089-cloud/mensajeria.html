@@ -3457,9 +3457,19 @@ function funcionDeEnvioRealDeTuApp(textoDelMensaje) {
 // =================================================================
 // 2. CONEXIÓN SEGURA Y PROCESAMIENTO CON TU BACKEND EN VERCEL
 // =================================================================
+ // =================================================================
+// 🌟 VARIABLE GLOBAL (DEBE IR AQUÍ: FUERA Y ARRIBA DE LA FUNCIÓN)
+// =================================================================
+let mensajePendientePorSaturacion = null;
+
+// =================================================================
+// CONEXIÓN SEGURA Y PROCESAMIENTO CON TU BACKEND EN VERCEL
+// =================================================================
 async function procesarRespuestaHarvis(msg, targetID) {
     // 🌟 MONITOR: Activamos el estado de carga visual
-    actualizarMonitorAPI(0, 'loading');
+    if (typeof actualizarMonitorAPI === "function") {
+        actualizarMonitorAPI(0, 'loading');
+    }
 
     try {
         const urlBackend = "/api/chat"; 
@@ -3523,21 +3533,17 @@ async function procesarRespuestaHarvis(msg, targetID) {
             });
         }
 
-        // 🌟 LA VARIABLE GLOBAL SE DECLARA AQUÍ (AFUERA Y ARRIBA DE TODO TU ARCHIVO)
-let mensajePendientePorSaturacion = null;
-
-// ... (Aquí viene el inicio de tu función procesarRespuestaHarvis y tu código normal) ...
-
         // 🌟 MONITOR: Éxito en la transacción de red.
-        const tokensUtilizados = (datosBackend.usage && datosBackend.usage.totalTokenCount) ? datosBackend.usage.totalTokenCount : 0;
-        actualizarMonitorAPI(tokensUtilizados, 'success');
+        if (typeof actualizarMonitorAPI === "function") {
+            const tokensUtilizados = (datosBackend.usage && datosBackend.usage.totalTokenCount) ? datosBackend.usage.totalTokenCount : 0;
+            actualizarMonitorAPI(tokensUtilizados, 'success');
+        }
 
-    } // <--- ¡AQUÍ SE CIERRA EL TRY QUE FALTABA!
-    catch (errorBackend) {
+    } catch (errorBackend) {
         console.error("❌ Error en la ruta del backend:", errorBackend);
         const harvisMsgId = "msg_harvis_err_" + Date.now();
         
-        // 🌟 GUARDAMOS EL MENSAJE: Tu texto no se pierde
+        // 🌟 GUARDAMOS EL MENSAJE: Tu texto no se pierde, se va a la cola de espera
         mensajePendientePorSaturacion = msg; 
 
         if (typeof pintarMensaje === "function") {
@@ -3552,9 +3558,11 @@ let mensajePendientePorSaturacion = null;
             mensajeFallo = 'Error 429: Rate Limit';
         }
         
-        actualizarMonitorAPI(0, 'error', mensajeFallo);
+        if (typeof actualizarMonitorAPI === "function") {
+            actualizarMonitorAPI(0, 'error', mensajeFallo);
+        }
         
-        // 🌟 INYECCIÓN EN EL WIDGET: Botón de acción en el monitor flotante
+        // 🌟 INYECCIÓN EN EL WIDGET: Botón de acción con texto corregido
         const txtStatus = document.getElementById('widget-status-text');
         if (txtStatus) {
             txtStatus.innerHTML = `
@@ -3564,7 +3572,8 @@ let mensajePendientePorSaturacion = null;
                 </button>
             `;
         }
-    } // <--- Aquí cierra el catch correctamente
+    }
+     }
 
 
 
