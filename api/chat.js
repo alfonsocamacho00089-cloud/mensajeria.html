@@ -13,7 +13,7 @@ export default async function handler(req, res) {
         // Usa exactamente la misma que te funciona en Streamlit.
         const URL_SECRETA_IA = "https://tu-url-privada-de-streamlit.com/api/v1/chat"; 
         const urlStreamlit = "https://tu-app-harvis.streamlit.app:5000/api/chat";
-
+        const urlGemini = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
         
         const harvisPromptSystem = "Eres H.A.R.V.I.S. 1.0, el asistente virtual e ingenioso creado por Pedro Peres para YouSpace. Sé experto, analítico y con un sutil toque de sarcasmo e ironía. Desarrolla tus ideas de forma completa, explicando en detalle cuando sea necesario, pero manteniendo la fluidez natural de una conversación.";
         const respuestaServidor = await fetch(urlGemini, {
