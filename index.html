@@ -975,6 +975,126 @@ margin: 0;
     <div id="harvisStatus" class="harvis-status">H.A.R.V.I.S. en espera...</div>
     <div id="harvisSubtitle" class="harvis-subtitle"></div>
   </div>
+
+<!-- Widget Flotante de Consumo API -->
+<div id="api-monitor-widget">
+  <div class="widget-header">
+    <span class="widget-title">GEMINI MONITOR</span>
+    <span class="status-dot online"></span>
+  </div>
+  <div class="widget-body">
+    <div class="metric-row">
+      <span>Tokens Último:</span>
+      <span id="tokens-last" class="gold-text">0</span>
+    </div>
+    <div class="metric-row">
+      <span>Total Sesión:</span>
+      <span id="tokens-total" class="gold-text">0</span>
+    </div>
+    <div class="progress-container">
+      <div id="quota-bar" class="progress-bar"></div>
+    </div>
+    <div id="widget-status-text">Listo para pruebas</div>
+  </div>
+</div>
+
+<style>
+/* Estilos con estética Glassmorphic Oscura y Oro */
+#api-monitor-widget {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 180px;
+  background: rgba(15, 15, 15, 0.75);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid #d4af37; /* Borde dorado */
+  border-radius: 12px;
+  padding: 12px;
+  font-family: 'Segoe UI', Roboto, sans-serif;
+  color: #ffffff;
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37), 0 0 10px rgba(212, 175, 55, 0.2);
+  z-index: 9999;
+  font-size: 11px;
+  transition: all 0.3s ease;
+}
+
+.widget-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+  border-bottom: 1px solid rgba(212, 175, 55, 0.3);
+  padding-bottom: 4px;
+}
+
+.widget-title {
+  font-weight: bold;
+  letter-spacing: 1px;
+  color: #d4af37;
+}
+
+.status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #00ffcc;
+  box-shadow: 0 0 6px #00ffcc;
+}
+
+.status-dot.loading {
+  background: #ffcc00;
+  box-shadow: 0 0 6px #ffcc00;
+  animation: pulse 1s infinite alternate;
+}
+
+.status-dot.error {
+  background: #ff3333;
+  box-shadow: 0 0 6px #ff3333;
+}
+
+.metric-row {
+  display: flex;
+  justify-content: space-between;
+  margin: 4px 0;
+}
+
+.gold-text {
+  color: #f3e5ab;
+  font-family: monospace;
+  font-size: 12px;
+  text-shadow: 0 0 4px rgba(212, 175, 55, 0.4);
+}
+
+.progress-container {
+  background: rgba(255, 255, 255, 0.1);
+  height: 4px;
+  border-radius: 2px;
+  margin-top: 8px;
+  overflow: hidden;
+}
+
+.progress-bar {
+  background: linear-gradient(90deg, #d4af37, #f3e5ab);
+  width: 0%;
+  height: 100%;
+  transition: width 0.4s ease;
+}
+
+#widget-status-text {
+  font-size: 9px;
+  color: #aaaaaa;
+  margin-top: 6px;
+  text-align: center;
+  font-style: italic;
+}
+
+@keyframes pulse {
+  from { opacity: 0.5; }
+  to { opacity: 1; }
+}
+</style>
+  
     
     <script>
      
