@@ -3249,45 +3249,87 @@ function procesarRespuestaHarvis(mensajeRecibidoDePedro) {
 // 1. CONFIGURACIÓN INICIAL Y FILTRO DE ENVÍO NATIVO
 // =================================================================
 
+// =================================================================
+// CONFIGURACIÓN DEL MONITOR DE CONTROL DE FLUJO Y TOKENS
+// =================================================================
+const CONFIG_MONITOR = {
+  limiteEstimadoDiario: 50000, // Ajusta este techo según tu cuota libre en AI Studio
+  totalTokensConsumidos: 0
+};
+
+function actualizarMonitorAPI(tokensAcumuladosEnPeticion, estado = 'success', mensajeError = '') {
+  const txtLast = document.getElementById('tokens-last');
+  const txtTotal = document.getElementById('tokens-total');
+  const barraCuota = document.getElementById('quota-bar');
+  const txtStatus = document.getElementById('widget-status-text');
+  const indicadorEstado = document.querySelector('.status-dot');
+
+  if (!txtLast || !txtTotal || !barraCuota || !txtStatus || !indicadorEstado) return;
+
+  if (estado === 'loading') {
+    indicadorEstado.className = 'status-dot loading';
+    txtStatus.innerText = 'Consultando a Gemini...';
+    return;
+  }
+
+  if (estado === 'error') {
+    indicadorEstado.className = 'status-dot error';
+    txtStatus.innerText = mensajeError || 'Error de conexión';
+    console.error(`[API Monitor] Fallo en procesamiento: ${mensajeError}`);
+    return;
+  }
+
+  // Flujo exitoso: Renderizado de consumo real
+  indicadorEstado.className = 'status-dot online';
+  txtLast.innerText = tokensAcumuladosEnPeticion;
+  CONFIG_MONITOR.totalTokensConsumidos += tokensAcumuladosEnPeticion;
+  txtTotal.innerText = CONFIG_MONITOR.totalTokensConsumidos;
+
+  const porcentaje = Math.min((CONFIG_MONITOR.totalTokensConsumidos / CONFIG_MONITOR.limiteEstimadoDiario) * 100, 100);
+  barraCuota.style.width = `${porcentaje}%`;
+  txtStatus.innerText = `Consumo: ${porcentaje.toFixed(1)}% del límite`;
+
+  // Salida limpia para Eruda en tu teléfono
+  console.log(`%c[H.A.R.V.I.S. 1.0] +${tokensAcumuladosEnPeticion} tokens | Total acumulado: ${CONFIG_MONITOR.totalTokensConsumidos}`, 'color: #d4af37; font-weight: bold;');
+}
+
+// =================================================================
+// 1. CONTROLADOR DE ENVÍO DE MENSAJES (FLUX PRINCIPAL)
+// =================================================================
 function funcionDeEnvioRealDeTuApp(textoDelMensaje) {
-    // CAPTURA REAL DE SPACECHAT: Leemos tu elemento HTML (ajustado a targetID)
     const inputTarget = document.getElementById('targetID') || document.getElementById('target-id');
     const usuarioEnPantalla = inputTarget ? inputTarget.value : ""; 
     const targetID = usuarioEnPantalla;
 
     if (usuarioEnPantalla === "harvis_user_system") {
         
-        // Limpiamos tu textarea msg-text como hace siempre tu app
         const campoTexto = document.getElementById('msg-text');
         if (campoTexto) {
             campoTexto.value = "";
             campoTexto.style.height = '40px'; 
         }
 
-        // Activamos la escucha atenta de fondo para que siga el bucle estilo Alexa
         if (typeof activarEscuchaAtentaHarvis === "function") {
             activarEscuchaAtentaHarvis();
         }
 
-        // 🎙️ FILTRO DEFENSIVO PARA AUDIOS (Evita mandar Base64 a Gemini como texto)
         if (!textoDelMensaje || typeof textoDelMensaje !== "string" || textoDelMensaje.includes("data:audio") || textoDelMensaje.startsWith("GkXf")) {
             if (typeof escucharVozPedro === "function") {
                 console.log("🎙️ Filtro H.A.R.V.I.S.: Detectado archivo de audio. Forzando transcripción nativa...");
                 escucharVozPedro((textoConvertido) => {
                     if (textoConvertido && textoConvertido.trim() !== "") {
                         if (campoTexto) campoTexto.value = textoConvertido;
-                        funcionDeEnvioRealDeTuApp(textoConvertido); // Re-dispara con el texto ya convertido
+                        funcionDeEnvioRealDeTuApp(textoConvertido); 
                     }
                 });
             }
-            return; // Detiene el envío del audio plano
+            return; 
         }
 
-        // 🧠 DISPARO HACIA EL CEREBRO DE H.A.R.V.I.S. (Vercel)
+        // Ejecutar procesamiento con el Asistente
         procesarRespuestaHarvis(textoDelMensaje, targetID);
 
     } else {
-        // CHATS NORMALES: Tu lógica original de Firebase o IndexedDB se queda aquí quieta
         console.log("Mensaje enviado a contacto regular vía Firebase/IndexedDB:", textoDelMensaje);
     }
 }
@@ -3296,11 +3338,13 @@ function funcionDeEnvioRealDeTuApp(textoDelMensaje) {
 // 2. CONEXIÓN SEGURA Y PROCESAMIENTO CON TU BACKEND EN VERCEL
 // =================================================================
 async function procesarRespuestaHarvis(msg, targetID) {
+    // 🌟 MONITOR: Activamos el estado de carga visual
+    actualizarMonitorAPI(0, 'loading');
+
     try {
         const urlBackend = "/api/chat"; 
         const llaveLocal = localStorage.getItem('spacechat_crypto_key') || "";
 
-        // Guardamos lo que dijo Pedro en el historial de memoria local
         historialHarvisVercel.push({ role: "user", parts: [{ text: msg }] });
 
         const cuerpoPeticion = {
@@ -3314,6 +3358,11 @@ async function procesarRespuestaHarvis(msg, targetID) {
             body: JSON.stringify(cuerpoPeticion)
         });
 
+        // Verificación defensiva antes de parsear por si el backend se cae
+        if (!respuestaServidor.ok) {
+            throw new Error(`Código de respuesta de red: ${respuestaServidor.status}`);
+        }
+
         const datosBackend = await respuestaServidor.json();
         const harvisMsgId = "msg_harvis_" + Date.now();
         
@@ -3326,27 +3375,21 @@ async function procesarRespuestaHarvis(msg, targetID) {
             respuestaIA = "⚠️ H.A.R.V.I.S. no pudo procesar el formato del backend.";
         }
         
-        // Guardamos la respuesta del modelo en el historial de sesión para mantener el hilo
         historialHarvisVercel.push({ role: "model", parts: [{ text: respuestaIA }] });
 
-        // H.A.R.V.I.S. habla por la bocina del teléfono
         if (typeof hablarHarvis === "function") {
             hablarHarvis(respuestaIA);
         }
 
-        // 🎨 RENDERIZADO INTELIGENTE EN PANTALLA
         if (typeof pintarMensaje === "function") {
-            // Pintamos el texto del asistente
             pintarMensaje(respuestaIA, 'msg-izquierda', null, 'leido', harvisMsgId, 'texto');
             
-            // ¡Si el backend adjuntó una imagen, la pintamos abajo con tu diseño Black & Gold!
             if (datosBackend.imagenUrl) {
                 const estructuraImagenHtml = `<img src="${datosBackend.imagenUrl}" style="width:100%; border-radius:12px; border: 2px solid #FFD700; box-shadow: 0 0 15px rgba(255,217,0,0.5); margin-top:8px;" alt="YouSpace Art">`;
                 pintarMensaje(estructuraImagenHtml, 'msg-izquierda', null, 'leido', harvisMsgId + "_img", 'texto');
             }
         }
         
-        // Guardado persistente local en tu IndexedDB
         if (typeof guardarLocal === "function") {
             await guardarLocal('mensajes', { 
                 id: harvisMsgId, 
@@ -3360,14 +3403,52 @@ async function procesarRespuestaHarvis(msg, targetID) {
             });
         }
 
-    } catch (errorBackend) {
+        // 🌟 LA VARIABLE GLOBAL SE DECLARA AQUÍ (AFUERA Y ARRIBA DE TODO TU ARCHIVO)
+let mensajePendientePorSaturacion = null;
+
+// ... (Aquí viene el inicio de tu función procesarRespuestaHarvis y tu código normal) ...
+
+        // 🌟 MONITOR: Éxito en la transacción de red.
+        const tokensUtilizados = (datosBackend.usage && datosBackend.usage.totalTokenCount) ? datosBackend.usage.totalTokenCount : 0;
+        actualizarMonitorAPI(tokensUtilizados, 'success');
+
+    } // <--- ¡AQUÍ SE CIERRA EL TRY QUE FALTABA!
+    catch (errorBackend) {
         console.error("❌ Error en la ruta del backend:", errorBackend);
         const harvisMsgId = "msg_harvis_err_" + Date.now();
+        
+        // 🌟 GUARDAMOS EL MENSAJE: Tu texto no se pierde
+        mensajePendientePorSaturacion = msg; 
+
         if (typeof pintarMensaje === "function") {
-            pintarMensaje(`💥 Error al conectar con el servidor: ${errorBackend.message}`, 'msg-izquierda', null, 'leido', harvisMsgId, 'texto');
+            pintarMensaje(`💥 Error de conexión. Mensaje guardado en cola.`, 'msg-izquierda', null, 'leido', harvisMsgId, 'texto');
         }
-    }
-}
+
+        // MONITOR: Detectamos el tipo de error para avisar en el Widget
+        let mensajeFallo = 'Fallo de Red';
+        if (errorBackend.message && errorBackend.message.includes("503")) {
+            mensajeFallo = 'Error 503: Saturation';
+        } else if (errorBackend.message && errorBackend.message.includes("429")) {
+            mensajeFallo = 'Error 429: Rate Limit';
+        }
+        
+        actualizarMonitorAPI(0, 'error', mensajeFallo);
+        
+        // 🌟 INYECCIÓN EN EL WIDGET: Botón de acción en el monitor flotante
+        const txtStatus = document.getElementById('widget-status-text');
+        if (txtStatus) {
+            txtStatus.innerHTML = `
+                <span style="color:#ff3333; display:block; margin-bottom:4px;">${mensajeFallo}</span>
+                <button onclick="DespacharMensajeEnCola()" style="background:transparent; border:1px solid #d4af37; color:#d4af37; border-radius:4px; font-size:9px; padding:2px 6px; cursor:pointer; box-shadow: 0 0 5px rgba(212,175,55,0.3);">
+                    🔄 Reintentar Mensaje
+                </button>
+            `;
+        }
+    } // <--- Aquí cierra el catch correctamente
+
+
+
+// El resto de tus funciones de inicialización y eventos de voz continúan abajo intactas...
 
 // =================================================================
 // 3. MOTOR DE ACTIVACIÓN POR VOZ INFINITA (ESTILO ALEXA)
@@ -3440,8 +3521,26 @@ function inicializarEventosVozHarvis() {
 
 document.addEventListener("DOMContentLoaded", inicializarEventosVozHarvis);
 
+// 🌟 FUNCIÓN PARA EXPULSAR EL MENSAJE RETENIDO CUANDO PASA EL TIEMPO
+function DespacharMensajeEnCola() {
+    if (mensajePendientePorSaturacion) {
+        console.log("🚀 Despachando mensaje retenido desde la cola de espera:", mensajePendientePorSaturacion);
+        
+        // Limpiamos el estado del texto del widget para que vuelva a decir que está procesando
+        const txtStatus = document.getElementById('widget-status-text');
+        if (txtStatus) txtStatus.innerText = "Reintentando...";
 
+        // Volvemos a disparar tu flujo real con el mensaje recuperado
+        procesarRespuestaHarvis(mensajePendientePorSaturacion, document.getElementById('targetID')?.value || "harvis_user_system");
+        
+        // Una vez enviado, vaciamos la cola
+        mensajePendientePorSaturacion = null;
+    } else {
+        console.log("No hay mensajes pendientes en la cola.");
+    }
+     }
 
+ 
      function cargarFotoInicial() {
     const fotoGuardada = localStorage.getItem('mi_foto');
     if (fotoGuardada && fotoGuardada !== "") {
@@ -3454,9 +3553,12 @@ document.addEventListener("DOMContentLoaded", inicializarEventosVozHarvis);
         if (imgPrevia) imgPrevia.src = fotoGuardada;
     }
 }
+ 
 
 // Llama a esta función al final de tu código o en el onload
 cargarFotoInicial();
+
+     
      
 function inicializarInterfaz() {
     const fotoLocal = localStorage.getItem('mi_foto');
