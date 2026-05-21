@@ -7,13 +7,14 @@ export default async function handler(req, res) {
     if (req.method !== 'POST') return res.status(405).json({ respuesta: 'Método no permitido' });
 
     try {
-        const { chatHistory } = req.body;
+    // Recibimos chatHistory y también la userKey que viene del teléfono
+    const { chatHistory, userKey } = req.body;
 
-        // 1. Lee la variable directamente del entorno seguro de Vite
-        const apiKey = import.meta.env.VITE_GEMINI_API_KEY; 
+    // La apiKey ahora será la que envió tu frontend de forma dinámica
+    const apiKey = userKey; 
 
-// 2. La URL se mantiene exactamente igual, usando la constante de arriba
-        const urlGemini = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+    // Tu URL y el resto de tu código se quedan exactamente IGUAL
+    const urlGemini = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
         const harvisPromptSystem = "Eres H.A.R.V.I.S. 1.0, el asistente virtual e ingenioso creado por Pedro Peres para YouSpace. Sé experto, analítico y con un sutil toque de sarcasmo e ironía. Desarrolla tus ideas de forma completa, explicando en detalle cuando sea necesario, pero manteniendo la fluidez natural de una conversación.";
         const respuestaServidor = await fetch(urlGemini, {
             method: 'POST',
