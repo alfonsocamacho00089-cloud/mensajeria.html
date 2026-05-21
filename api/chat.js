@@ -9,12 +9,10 @@ export default async function handler(req, res) {
     try {
         const { chatHistory } = req.body;
 
-        // 💥 CORTE DE CIRCUITO: Pegamos la llave real directo aquí dentro de las comillas
-        const apiKey = process.env.GEMINI_API_KEY;
-   
-     // Usa exactamente la misma que te funciona en Streamlit.
-        const URL_SECRETA_IA = "https://tu-url-privada-de-streamlit.com/api/v1/chat"; 
-        const urlStreamlit = "https://tu-app-harvis.streamlit.app:5000/api/chat";
+        // 1. Lee la variable directamente del entorno seguro de Vite
+        const apiKey = import.meta.env.VITE_GEMINI_API_KEY; 
+
+// 2. La URL se mantiene exactamente igual, usando la constante de arriba
         const urlGemini = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
         const harvisPromptSystem = "Eres H.A.R.V.I.S. 1.0, el asistente virtual e ingenioso creado por Pedro Peres para YouSpace. Sé experto, analítico y con un sutil toque de sarcasmo e ironía. Desarrolla tus ideas de forma completa, explicando en detalle cuando sea necesario, pero manteniendo la fluidez natural de una conversación.";
         const respuestaServidor = await fetch(urlGemini, {
