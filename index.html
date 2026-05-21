@@ -3243,38 +3243,200 @@ function procesarRespuestaHarvis(mensajeRecibidoDePedro) {
 // Busca tu función nativa de envío (la que activas con el Enter o tu evento)
 // e integra este control exacto:
 
+// =================================================================
+// 1. CONFIGURACIÓN INICIAL Y FILTRO DE ENVÍO NATIVO
+// =================================================================
+
 function funcionDeEnvioRealDeTuApp(textoDelMensaje) {
-    
-    // CAPTURA REAL DE SPACECHAT: Leemos el elemento target-id de tu HTML
-    const inputTarget = document.getElementById('targetID'); // <-- Con 'ID' en mayúsculas y sin guion
+    // CAPTURA REAL DE SPACECHAT: Leemos tu elemento HTML (ajustado a targetID)
+    const inputTarget = document.getElementById('targetID') || document.getElementById('target-id');
     const usuarioEnPantalla = inputTarget ? inputTarget.value : ""; 
+    const targetID = usuarioEnPantalla;
 
     if (usuarioEnPantalla === "harvis_user_system") {
-        // ---------------------------------------------------------
-        // CASO A: ESTÁS DENTRO DEL CHAT DE HARVIS
-        // ---------------------------------------------------------
         
-        // Limpia tu textarea msg-text como hace siempre tu app
+        // Limpiamos tu textarea msg-text como hace siempre tu app
         const campoTexto = document.getElementById('msg-text');
         if (campoTexto) {
             campoTexto.value = "";
-            campoTexto.style.height = '40px'; // Resetea la altura
+            campoTexto.style.height = '40px'; 
         }
 
-        // Se lo mandas al cerebro de H.A.R.V.I.S.
-        procesarRespuestaHarvis(textoDelMensaje);
+        // Activamos la escucha atenta de fondo para que siga el bucle estilo Alexa
+        if (typeof activarEscuchaAtentaHarvis === "function") {
+            activarEscuchaAtentaHarvis();
+        }
+
+        // 🎙️ FILTRO DEFENSIVO PARA AUDIOS (Evita mandar Base64 a Gemini como texto)
+        if (!textoDelMensaje || typeof textoDelMensaje !== "string" || textoDelMensaje.includes("data:audio") || textoDelMensaje.startsWith("GkXf")) {
+            if (typeof escucharVozPedro === "function") {
+                console.log("🎙️ Filtro H.A.R.V.I.S.: Detectado archivo de audio. Forzando transcripción nativa...");
+                escucharVozPedro((textoConvertido) => {
+                    if (textoConvertido && textoConvertido.trim() !== "") {
+                        if (campoTexto) campoTexto.value = textoConvertido;
+                        funcionDeEnvioRealDeTuApp(textoConvertido); // Re-dispara con el texto ya convertido
+                    }
+                });
+            }
+            return; // Detiene el envío del audio plano
+        }
+
+        // 🧠 DISPARO HACIA EL CEREBRO DE H.A.R.V.I.S. (Vercel)
+        procesarRespuestaHarvis(textoDelMensaje, targetID);
 
     } else {
-        // ---------------------------------------------------------
-        // CASO B: CHATS NORMALES CON TUS CONTACTOS
-        // ---------------------------------------------------------
-        // Aquí no se toca absolutamente nada. Tu aplicación ejecutará 
-        // tu lógica original de Firebase o IndexedDB de forma tradicional.
-        
-        // (Pon aquí tus líneas de código nativas para guardar/enviar mensajes a tus amigos)
+        // CHATS NORMALES: Tu lógica original de Firebase o IndexedDB se queda aquí quieta
+        console.log("Mensaje enviado a contacto regular vía Firebase/IndexedDB:", textoDelMensaje);
     }
-     }
+}
 
+// =================================================================
+// 2. CONEXIÓN SEGURA Y PROCESAMIENTO CON TU BACKEND EN VERCEL
+// =================================================================
+async function procesarRespuestaHarvis(msg, targetID) {
+    try {
+        const urlBackend = "/api/chat"; 
+        const llaveLocal = localStorage.getItem('spacechat_crypto_key') || "";
+
+        // Guardamos lo que dijo Pedro en el historial de memoria local
+        historialHarvisVercel.push({ role: "user", parts: [{ text: msg }] });
+
+        const cuerpoPeticion = {
+            chatHistory: historialHarvisVercel,
+            userKey: llaveLocal 
+        };
+
+        const respuestaServidor = await fetch(urlBackend, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(cuerpoPeticion)
+        });
+
+        const datosBackend = await respuestaServidor.json();
+        const harvisMsgId = "msg_harvis_" + Date.now();
+        
+        let respuestaIA = "Sistemas listos, Pedro.";
+
+        if (datosBackend && datosBackend.respuesta) {
+            respuestaIA = datosBackend.respuesta;
+        } else {
+            console.warn("⚠️ El backend no devolvió la propiedad 'respuesta':", datosBackend);
+            respuestaIA = "⚠️ H.A.R.V.I.S. no pudo procesar el formato del backend.";
+        }
+        
+        // Guardamos la respuesta del modelo en el historial de sesión para mantener el hilo
+        historialHarvisVercel.push({ role: "model", parts: [{ text: respuestaIA }] });
+
+        // H.A.R.V.I.S. habla por la bocina del teléfono
+        if (typeof hablarHarvis === "function") {
+            hablarHarvis(respuestaIA);
+        }
+
+        // 🎨 RENDERIZADO INTELIGENTE EN PANTALLA
+        if (typeof pintarMensaje === "function") {
+            // Pintamos el texto del asistente
+            pintarMensaje(respuestaIA, 'msg-izquierda', null, 'leido', harvisMsgId, 'texto');
+            
+            // ¡Si el backend adjuntó una imagen, la pintamos abajo con tu diseño Black & Gold!
+            if (datosBackend.imagenUrl) {
+                const estructuraImagenHtml = `<img src="${datosBackend.imagenUrl}" style="width:100%; border-radius:12px; border: 2px solid #FFD700; box-shadow: 0 0 15px rgba(255,217,0,0.5); margin-top:8px;" alt="YouSpace Art">`;
+                pintarMensaje(estructuraImagenHtml, 'msg-izquierda', null, 'leido', harvisMsgId + "_img", 'texto');
+            }
+        }
+        
+        // Guardado persistente local en tu IndexedDB
+        if (typeof guardarLocal === "function") {
+            await guardarLocal('mensajes', { 
+                id: harvisMsgId, 
+                contactoId: targetID,
+                texto: datosBackend.imagenUrl ? `${respuestaIA} [Imagen Arte]` : respuestaIA, 
+                clase: 'msg-izquierda', 
+                status: 'leido',
+                tipo: 'texto',
+                ts: Date.now(),
+                hora: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })
+            });
+        }
+
+    } catch (errorBackend) {
+        console.error("❌ Error en la ruta del backend:", errorBackend);
+        const harvisMsgId = "msg_harvis_err_" + Date.now();
+        if (typeof pintarMensaje === "function") {
+            pintarMensaje(`💥 Error al conectar con el servidor: ${errorBackend.message}`, 'msg-izquierda', null, 'leido', harvisMsgId, 'texto');
+        }
+    }
+}
+
+// =================================================================
+// 3. MOTOR DE ACTIVACIÓN POR VOZ INFINITA (ESTILO ALEXA)
+// =================================================================
+let modoAlexaActivo = false;
+let reconocimientoContinuo = null;
+
+function activarEscuchaAtentaHarvis() {
+    const SpeechRecognition = window.webkitSpeechRecognition || window.SpeechRecognition;
+    if (!SpeechRecognition) return;
+
+    if (modoAlexaActivo) return; 
+    modoAlexaActivo = true;
+
+    reconocimientoContinuo = new SpeechRecognition();
+    reconocimientoContinuo.lang = 'es-MX';
+    reconocimientoContinuo.interimResults = false; 
+    reconocimientoContinuo.continuous = false;     
+
+    reconocimientoContinuo.onstart = () => {
+        console.log("🎙️ H.A.R.V.I.S. está atento en segundo plano buscando su nombre...");
+    };
+
+    reconocimientoContinuo.onresult = async (event) => {
+        let fraseCompleta = event.results[0][0].transcript.toLowerCase().trim();
+        const palabraClave = "harvis";
+
+        if (fraseCompleta.startsWith(palabraClave)) {
+            const ordenLimpia = fraseCompleta.replace(palabraClave, "").trim();
+            if (ordenLimpia.length > 0) {
+                const inputTexto = document.getElementById('msg-text');
+                if (inputTexto) inputTexto.value = ordenLimpia;
+                
+                funcionDeEnvioRealDeTuApp(ordenLimpia);
+            }
+        }
+    };
+
+    reconocimientoContinuo.onend = () => {
+        if (modoAlexaActivo) {
+            reconocimientoContinuo.start(); // Bucle infinito de escucha activa
+        }
+    };
+
+    reconocimientoContinuo.onerror = () => { /* Previene alertas molestas en silencio */ };
+    reconocimientoContinuo.start();
+}
+
+function desactivarEscuchaAtentaHarvis() {
+    modoAlexaActivo = false;
+    if (reconocimientoContinuo) {
+        reconocimientoContinuo.stop();
+    }
+}
+
+function inicializarEventosVozHarvis() {
+    const miBotonMicrofono = document.getElementById('btn-microfono'); 
+    if (miBotonMicrofono) {
+        miBotonMicrofono.addEventListener('click', () => {
+            if (typeof escucharVozPedro === "function") {
+                escucharVozPedro((textoDetectado) => {
+                    const inputTexto = document.getElementById('msg-text');
+                    if (inputTexto) inputTexto.value = textoDetectado;
+                    funcionDeEnvioRealDeTuApp(textoDetectado);
+                });
+            }
+        });
+    }
+}
+
+document.addEventListener("DOMContentLoaded", inicializarEventosVozHarvis);
 
 
 
