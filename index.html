@@ -3479,13 +3479,30 @@ function funcionDeEnvioRealDeTuApp(textoDelMensaje) {
  // =================================================================
 // 🌟 VARIABLE GLOBAL (DEBE IR AQUÍ: FUERA Y ARRIBA DE LA FUNCIÓN)
 // =================================================================
-let mensajePendientePorSaturacion = null;
+
 
 // =================================================================
 // CONEXIÓN SEGURA Y PROCESAMIENTO CON TU BACKEND EN VERCEL
 // =================================================================
+// =================================================================
+// 🔒 CONTROLADORES GLOBALES (Ponlos al inicio de tu archivo de scripts)
+// =================================================================
+let harvisProcesandoPeticion = false;       // El cerrojo contra ráfagas de voz
+let mensajePendientePorSaturacion = null;   // El buzón de mensajes en cola
+
+// =================================================================
+// 🧠 CEREBRO DE H.A.R.V.I.S.: CONEXIÓN Y PROCESAMIENTO CON VERCEL
+// =================================================================
 async function procesarRespuestaHarvis(msg, targetID) {
-    // 🌟 MONITOR: Activamos el estado de carga visual
+    
+    // 🛡️ CERROJO: Si el micrófono manda ráfagas repetidas en el mismo segundo, rebotan aquí
+    if (harvisProcesandoPeticion) {
+        console.warn("⚠️ H.A.R.V.I.S. bloqueó una petición duplicada por ráfaga de voz.");
+        return;
+    }
+
+    // Cerramos el cerrojo y encendemos el monitor visual
+    harvisProcesandoPeticion = true;
     if (typeof actualizarMonitorAPI === "function") {
         actualizarMonitorAPI(0, 'loading');
     }
@@ -3494,6 +3511,7 @@ async function procesarRespuestaHarvis(msg, targetID) {
         const urlBackend = "/api/chat"; 
         const llaveLocal = localStorage.getItem('spacechat_crypto_key') || "";
 
+        // Guardamos lo que dijo Pedro en el historial de memoria local
         historialHarvisVercel.push({ role: "user", parts: [{ text: msg }] });
 
         const cuerpoPeticion = {
@@ -3507,7 +3525,7 @@ async function procesarRespuestaHarvis(msg, targetID) {
             body: JSON.stringify(cuerpoPeticion)
         });
 
-        // Verificación defensiva antes de parsear por si el backend se cae
+        // Verificación defensiva de red
         if (!respuestaServidor.ok) {
             throw new Error(`Código de respuesta de red: ${respuestaServidor.status}`);
         }
@@ -3519,11 +3537,38 @@ async function procesarRespuestaHarvis(msg, targetID) {
 
         if (datosBackend && datosBackend.respuesta) {
             respuestaIA = datosBackend.respuesta;
+            
+            // 🛡️ DETECTOR DEFENSIVO PARA EL TEXTO DE ERROR (Captura de pantalla)
+            if (respuestaIA.includes("GOOGLE API ERROR") || respuestaIA.includes("[Código 429]") || respuestaIA.includes("[Código 503]")) {
+                
+                mensajePendientePorSaturacion = msg; // Guardamos tu mensaje original en el buzón
+                
+                if (typeof pintarMensaje === "function") {
+                    pintarMensaje(`💥 Servidor saturado (Límite 429). Mensaje guardado en cola.`, 'msg-izquierda', null, 'leido', harvisMsgId, 'texto');
+                }
+                
+                if (typeof actualizarMonitorAPI === "function") {
+                    actualizarMonitorAPI(0, 'error', 'Error 429: Rate Limit');
+                }
+                
+                const txtStatus = document.getElementById('widget-status-text');
+                if (txtStatus) {
+                    txtStatus.innerHTML = `
+                        <span style="color:#ff3333; display:block; margin-bottom:4px;">Límite Excedido</span>
+                        <button onclick="DespacharMensajeEnCola()" style="background:transparent; border:1px solid #d4af37; color:#d4af37; border-radius:4px; font-size:9px; padding:2px 6px; cursor:pointer; box-shadow: 0 0 5px rgba(212,175,55,0.3);">
+                            🔄 Reintentar Mensaje
+                        </button>
+                    `;
+                }
+                return; // Cortamos el flujo aquí para que no hable el error ni gaste tokens
+            }
+            
         } else {
             console.warn("⚠️ El backend no devolvió la propiedad 'respuesta':", datosBackend);
             respuestaIA = "⚠️ H.A.R.V.I.S. no pudo procesar el formato del backend.";
         }
         
+        // Si la respuesta fue limpia, continuamos el flujo original
         historialHarvisVercel.push({ role: "model", parts: [{ text: respuestaIA }] });
 
         if (typeof hablarHarvis === "function") {
@@ -3552,7 +3597,7 @@ async function procesarRespuestaHarvis(msg, targetID) {
             });
         }
 
-        // 🌟 MONITOR: Éxito en la transacción de red.
+        // MONITOR: Éxito en la transacción, sumamos los tokens reales
         if (typeof actualizarMonitorAPI === "function") {
             const tokensUtilizados = (datosBackend.usage && datosBackend.usage.totalTokenCount) ? datosBackend.usage.totalTokenCount : 0;
             actualizarMonitorAPI(tokensUtilizados, 'success');
@@ -3562,14 +3607,12 @@ async function procesarRespuestaHarvis(msg, targetID) {
         console.error("❌ Error en la ruta del backend:", errorBackend);
         const harvisMsgId = "msg_harvis_err_" + Date.now();
         
-        // 🌟 GUARDAMOS EL MENSAJE: Tu texto no se pierde, se va a la cola de espera
-        mensajePendientePorSaturacion = msg; 
+        mensajePendientePorSaturacion = msg; // Guardamos tu texto ante caídas de red duras
 
         if (typeof pintarMensaje === "function") {
             pintarMensaje(`💥 Error de conexión. Mensaje guardado en cola.`, 'msg-izquierda', null, 'leido', harvisMsgId, 'texto');
         }
 
-        // MONITOR: Detectamos el tipo de error para avisar en el Widget
         let mensajeFallo = 'Fallo de Red';
         if (errorBackend.message && errorBackend.message.includes("503")) {
             mensajeFallo = 'Error 503: Saturation';
@@ -3581,7 +3624,6 @@ async function procesarRespuestaHarvis(msg, targetID) {
             actualizarMonitorAPI(0, 'error', mensajeFallo);
         }
         
-        // 🌟 INYECCIÓN EN EL WIDGET: Botón de acción con texto corregido
         const txtStatus = document.getElementById('widget-status-text');
         if (txtStatus) {
             txtStatus.innerHTML = `
@@ -3591,9 +3633,12 @@ async function procesarRespuestaHarvis(msg, targetID) {
                 </button>
             `;
         }
+        
+    } finally {
+        // 🔓 FINALITY: Ocurra un éxito o un error, el cerrojo se abre para la siguiente orden de voz
+        harvisProcesandoPeticion = false;
     }
      }
-
 
 
 // El resto de tus funciones de inicialización y eventos de voz continúan abajo intactas...
