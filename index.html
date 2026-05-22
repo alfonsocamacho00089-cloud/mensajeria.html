@@ -2055,7 +2055,9 @@ function pintarMensaje(contenido, clase, hora, status, id, tipo = 'texto') {
     }
 
     const div = document.createElement('div');
-    div.className = `msg-burbuja ${clase}`;
+    div.className = "msg-burbuja " + clase;
+ 
+   
     div.id = id;
 
     // 🔥 INDEPENDENCIA VISUAL: Si es multimedia, le quitamos el fondo y estilos de burbuja de texto
