@@ -2100,12 +2100,11 @@ function pintarMensaje(contenido, clase, hora, status, id, tipo = 'texto') {
 // CORRECCIÓN: Cambiamos el div por un span para que el texto mande sobre el ancho
 // CORRECCIÓN 2: Inyectar el contenido real directamente en lugar del cascarón vacío
     div.innerHTML = `
-        ${contenidoFinal} 
-        <div class="msg-info" style="display: flex; justify-content: flex-end; align-items: center; gap: 5px; font-size: 10px; opacity: 0.7; margin-top: 3px;">
-            <span class="tiempo">${horaFinal}</span>
-            ${checkHTML}
-        </div>
-    `;
+    <span class="cuerpo-mensaje-dinamico"></span>
+    <div style="font-size:10px; opacity:0.6; text-align:right; margin-top:4px; color: #fff;">
+        ${horaFinal} ${checkHTML}
+    </div>
+`;
     box.appendChild(div);
     box.scrollTop = box.scrollHeight;
 
