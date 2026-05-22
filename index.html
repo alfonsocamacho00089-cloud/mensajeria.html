@@ -2076,16 +2076,36 @@ function pintarMensaje(contenido, clase, hora, status, id, tipo = 'texto') {
 
     const horaFinal = hora || new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
     const checkHTML = clase === 'msg-derecha' ? `<span style="margin-left:5px; font-size:10px;">${status === 'leido' ? '✓✓' : '✓'}</span>` : '';
+// CORRECCIÓN 1: Agregar el filtro de contenido que calcula el tamaño real al instante
+    let contenidoFinal = "";
 
+    if (textoReal.startsWith('http') && (textoReal.includes('firebasestorage') || textoReal.includes('.jpg') || textoReal.includes('.png'))) {
+        contenidoFinal = `<img src="${textoReal}" style="max-width:250px; border-radius:10px; display:block; margin-bottom:5px; cursor:pointer;" onclick="window.open('${textoReal}')">`;
+    } else if (textoReal && textoReal.includes("Resp >")) {
+        const partes = textoReal.split("\n— ");
+        const cabezalCita = partes[0].replace("Resp >", "").trim();
+        const mensajeReal = partes[1] || "";
+        contenidoFinal = `
+            <div style="font-size: 11px; opacity: 0.6; border-left: 3px solid #ffd700; padding-left: 5px; margin-bottom: 5px; font-style: italic;">
+                Resp: ${cabezalCita}
+            </div>
+            <div>${mensajeReal}</div>
+        `;
+    } else {
+        // Esto es lo que hace que la burbuja sea elástica y no se estire
+        contenidoFinal = `<span>${textoReal}</span>`;
+     }
     // 🔥 ÚNICO CAMBIO EN JS: Colocamos la hora con posición absoluta para que no deforme el tamaño del texto
     // CORRECCIÓN: Usamos span pero le añadimos "display: block" para que la hora no se salga volando
 // CORRECCIÓN: Cambiamos el div por un span para que el texto mande sobre el ancho
-div.innerHTML = `
-    <span class="cuerpo-mensaje-dinamico"></span>
-    <div style="font-size:10px; opacity:0.6; text-align:right; margin-top:4px; color: #fff;">
-        ${horaFinal} ${checkHTML}
-    </div>
-`;
+// CORRECCIÓN 2: Inyectar el contenido real directamente en lugar del cascarón vacío
+    div.innerHTML = `
+        ${contenidoFinal} 
+        <div class="msg-info" style="display: flex; justify-content: flex-end; align-items: center; gap: 5px; font-size: 10px; opacity: 0.7; margin-top: 3px;">
+            <span class="tiempo">${horaFinal}</span>
+            ${checkHTML}
+        </div>
+    `;
     box.appendChild(div);
     box.scrollTop = box.scrollHeight;
 
