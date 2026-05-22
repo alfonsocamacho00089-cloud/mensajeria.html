@@ -2064,19 +2064,28 @@ function pintarMensaje(contenido, clase, hora, status, id, tipo = 'texto') {
         div.style.padding = '4px'; // Un padding mínimo para que no se pegue al borde
     }
 
-    const horaFinal = hora || new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
-    const checkHTML = clase === 'msg-derecha' ? `<span style="margin-left:5px; font-size:10px;">${status === 'leido' ? '✓✓' : '✓'}</span>` : '';
+    // ... Tu código anterior de la función se queda exactamente igual ...
 
-    // Contenedor interno temporal para el cuerpo
+    const horaFinal = hora || new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
+    
+    // Cambiamos el color de la hora de los checks para que combine con el diseño oscuro/verde de WhatsApp
+    const colorHora = clase === 'msg-derecha' ? '#a6dfd5' : '#8696a0'; 
+    const checkHTML = clase === 'msg-derecha' ? `<span style="margin-left:3px; color:#53bdeb; font-size:11px;">${status === 'leido' ? '✓✓' : '✓'}</span>` : '';
+
+    // 🔥 SOLUCIÓN: Metemos todo en una estructura flexible para que la hora no rompa el tamaño de la burbuja
     div.innerHTML = `
-        <div class="cuerpo-mensaje-dinamico"></div>
-        <div style="font-size:10px; opacity:0.6; text-align:right; margin-top:4px; color: #fff;">
-            ${horaFinal} ${checkHTML}
+        <div style="display: flex; flex-direction: column; position: relative;">
+            <div class="cuerpo-mensaje-dinamico" style="display: inline; padding-right: 50px; min-width: 40px;"></div>
+            <div style="font-size: 10px; color: ${colorHora}; position: absolute; bottom: -4px; right: 0; display: flex; align-items: center; white-space: nowrap; user-select: none;">
+                ${horaFinal} ${checkHTML}
+            </div>
         </div>
     `;
 
     box.appendChild(div);
     box.scrollTop = box.scrollHeight;
+
+    // ... El resto de tu requestAnimationFrame y detecciones se queda exactamente igual ...
 
     // Procesamiento asíncrono rápido
     requestAnimationFrame(() => {
