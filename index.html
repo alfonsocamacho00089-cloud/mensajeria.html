@@ -277,33 +277,47 @@ button#btn-enviar:active {
     line-height: 1.2;
 }
  
-.msg-derecha { 
-    align-self: flex-end; 
-    background: linear-gradient(135deg, rgba(0, 92, 75, 0.8) 0%, rgba(0, 77, 64, 0.8) 100%);
-    color: #ffffff; 
+/* ==========================================
+   RABITOS DE LAS BURBUJAS (ESTILO WHATSAPP)
+   ========================================== */
 
-    border-bottom-right-radius: 7.5px; /* Ajustado para mantener la simetría de la forma */
-    border-top-right-radius: 2px;
+/* Rabito para el primer mensaje de la DERECHA */
+.msg-derecha::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    right: -8px; /* Lo saca justo al borde derecho */
+    width: 0;
+    height: 0;
+    /* Crea el triángulo con el mismo degradado/color de tu fondo */
+    border-top: 10px solid rgba(0, 77, 64, 0.8); 
+    border-right: 10px solid transparent;
+    border-left: 0px solid transparent;
 }
 
-.msg-izquierda { 
-    align-self: flex-start; 
-    background: rgba(32, 44, 51, 0.6); 
-    color: #ffffff; 
-    border-bottom-left-radius: 7.5px; /* Ajustado para mantener la simetría de la forma */
-    
-    border-top-left-radius: 2px;
+/* Rabito para el primer mensaje de la IZQUIERDA */
+.msg-izquierda::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -8px; /* Lo saca justo al borde izquierdo */
+    width: 0;
+    height: 0;
+    /* Crea el triángulo con el mismo color gris translúcido de tu fondo */
+    border-top: 10px solid rgba(32, 44, 51, 0.6); 
+    border-left: 10px solid transparent;
+    border-right: 0px solid transparent;
 }
 
-/* Si el mensaje de la izquierda va seguido de otro de la izquierda */
-.msg-izquierda + .msg-izquierda {
-    border-top-left-radius: 4px; 
+/* --- QUITAR EL RABITO EN MENSAJES CONSECUTIVOS --- */
+/* Si un mensaje va seguido de otro del mismo tipo, le ocultamos el rabito al segundo */
+.msg-derecha + .msg-derecha::after {
+    display: none;
 }
 
-/* Si el mensaje de la derecha va seguido de otro de la derecha */
-.msg-derecha + .msg-derecha {
-    border-top-right-radius: 4px;
-}
+.msg-izquierda + .msg-izquierda::after {
+    display: none;
+ }
 
 
 
