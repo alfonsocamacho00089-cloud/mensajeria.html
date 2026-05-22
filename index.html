@@ -259,44 +259,51 @@ button#btn-enviar:active {
 }
 
 
+/* ==========================================
+   DISEÑO ESTILO WHATSAPP CON TUS COLORES ORIGINALES
+   ========================================== */
+
 .msg-burbuja { 
-    max-width: 75%; /* Ajustado para que no ocupe casi toda la pantalla en móviles */
-    width: fit-content; 
-    padding: 6px 7px 8px 9px !important; /* WhatsApp usa paddings asimétricos muy sutiles */
-    border-radius: 7.5px; /* WhatsApp es más cuadrado de lo que parece */
-    font-size: 14.2px !important; /* Tamaño estándar de WhatsApp */
+    max-width: 75% !important; /* Estilo WhatsApp para que no ocupe todo el ancho en móviles */
+    width: fit-content !important; /* Para que la burbuja se encoja si el texto es corto (como "Hola") */
+    padding: 8px 15px 8px 15px !important; 
+    border-radius: 7.5px !important; /* La forma más cuadrada característica de WhatsApp */
+    font-size: 16px !important; 
     
     position: relative; 
     word-wrap: break-word; 
     margin-bottom: 2px;
-    display: inline-block; 
-    line-height: 1.4; /* Un poco más de espacio entre líneas mejora la lectura */
+    display: inline-block; /* Mantiene tu cambio a block/inline-block */
+    line-height: 1.2;
 }
  
-/* El PRIMER mensaje de la derecha (lleva la esquina en punta) */
 .msg-derecha { 
     align-self: flex-end; 
-    background: #005c4b; /* El verde clásico de WhatsApp Web oscuro */
-    color: #e9edef; 
-    border-top-right-radius: 0px; /* Esquina completamente recta para simular la colita */
+    background: linear-gradient(135deg, rgba(0, 92, 75, 0.8) 0%, rgba(0, 77, 64, 0.8) 100%);
+    color: #ffffff; 
+
+    border-bottom-right-radius: 7.5px; /* Ajustado para mantener la simetría de la forma */
+    border-top-right-radius: 2px;
 }
 
-/* El PRIMER mensaje de la izquierda (lleva la esquina en punta) */
 .msg-izquierda { 
     align-self: flex-start; 
-    background: #202c33; /* El gris clásico de WhatsApp Web oscuro */
-    color: #e9edef; 
-    border-top-left-radius: 0px; /* Esquina completamente recta para simular la colita */
+    background: rgba(32, 44, 51, 0.6); 
+    color: #ffffff; 
+    border-bottom-left-radius: 7.5px; /* Ajustado para mantener la simetría de la forma */
+    
+    border-top-left-radius: 2px;
 }
 
-/* Mensajes CONSECUTIVOS: Si envías varios seguidos, pierden la punta recta y se redondean */
+/* Si el mensaje de la izquierda va seguido de otro de la izquierda */
 .msg-izquierda + .msg-izquierda {
-    border-top-left-radius: 7.5px; 
+    border-top-left-radius: 4px; 
 }
 
+/* Si el mensaje de la derecha va seguido de otro de la derecha */
 .msg-derecha + .msg-derecha {
-    border-top-right-radius: 7.5px;
- }
+    border-top-right-radius: 4px;
+}
 
 
 
@@ -2049,7 +2056,7 @@ function pintarMensaje(contenido, clase, hora, status, id, tipo = 'texto') {
     }
 
     const div = document.createElement('div');
-    div.className = `mensaje ${clase}`;
+    div.className = `msg-burbuja ${clase}`;
     div.id = id;
 
     // 🔥 INDEPENDENCIA VISUAL: Si es multimedia, le quitamos el fondo y estilos de burbuja de texto
@@ -2066,17 +2073,16 @@ function pintarMensaje(contenido, clase, hora, status, id, tipo = 'texto') {
 
     // ... Tu código anterior de la función se queda exactamente igual ...
 
-    const horaFinal = hora || new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
-    
-    // Cambiamos el color de la hora de los checks para que combine con el diseño oscuro/verde de WhatsApp
-    const colorHora = clase === 'msg-derecha' ? '#a6dfd5' : '#8696a0'; 
-    const checkHTML = clase === 'msg-derecha' ? `<span style="margin-left:3px; color:#53bdeb; font-size:11px;">${status === 'leido' ? '✓✓' : '✓'}</span>` : '';
+    // ... Todo tu código de arriba se queda EXACTAMENTE igual ...
 
-    // 🔥 SOLUCIÓN: Metemos todo en una estructura flexible para que la hora no rompa el tamaño de la burbuja
+    const horaFinal = hora || new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
+    const checkHTML = clase === 'msg-derecha' ? `<span style="margin-left:5px; font-size:10px;">${status === 'leido' ? '✓✓' : '✓'}</span>` : '';
+
+    // 🔥 ÚNICO CAMBIO EN JS: Colocamos la hora con posición absoluta para que no deforme el tamaño del texto
     div.innerHTML = `
-        <div style="display: flex; flex-direction: column; position: relative;">
-            <div class="cuerpo-mensaje-dinamico" style="display: inline; padding-right: 50px; min-width: 40px;"></div>
-            <div style="font-size: 10px; color: ${colorHora}; position: absolute; bottom: -4px; right: 0; display: flex; align-items: center; white-space: nowrap; user-select: none;">
+        <div style="position: relative; padding-right: 55px;">
+            <div class="cuerpo-mensaje-dinamico"></div>
+            <div style="font-size:10px; opacity:0.6; position: absolute; bottom: -4px; right: 0; white-space: nowrap; color: #fff;">
                 ${horaFinal} ${checkHTML}
             </div>
         </div>
@@ -2085,6 +2091,7 @@ function pintarMensaje(contenido, clase, hora, status, id, tipo = 'texto') {
     box.appendChild(div);
     box.scrollTop = box.scrollHeight;
 
+    // ... Todo tu requestAnimationFrame y detecciones se quedan EXACTAMENTE igual ...
     // ... El resto de tu requestAnimationFrame y detecciones se queda exactamente igual ...
 
     // Procesamiento asíncrono rápido
