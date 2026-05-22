@@ -2078,14 +2078,13 @@ function pintarMensaje(contenido, clase, hora, status, id, tipo = 'texto') {
     const checkHTML = clase === 'msg-derecha' ? `<span style="margin-left:5px; font-size:10px;">${status === 'leido' ? '✓✓' : '✓'}</span>` : '';
 
     // 🔥 ÚNICO CAMBIO EN JS: Colocamos la hora con posición absoluta para que no deforme el tamaño del texto
-    div.innerHTML = `
-        <div style="position: relative; padding-right: 55px;">
-            <div class="cuerpo-mensaje-dinamico"></div>
-            <div style="font-size:10px; opacity:0.6; position: absolute; bottom: -4px; right: 0; white-space: nowrap; color: #fff;">
-                ${horaFinal} ${checkHTML}
-            </div>
-        </div>
-    `;
+    // CORRECCIÓN: Estructura limpia para mantener el texto arriba y la hora abajo de forma natural
+div.innerHTML = `
+    <div class="cuerpo-mensaje-dinamico"></div>
+    <div style="font-size:10px; opacity:0.6; text-align:right; margin-top:4px; color: #fff;">
+        ${horaFinal} ${checkHTML}
+    </div>
+`;
 
     box.appendChild(div);
     box.scrollTop = box.scrollHeight;
