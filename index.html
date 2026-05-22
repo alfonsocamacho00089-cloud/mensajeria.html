@@ -2079,13 +2079,12 @@ function pintarMensaje(contenido, clase, hora, status, id, tipo = 'texto') {
 
     // 🔥 ÚNICO CAMBIO EN JS: Colocamos la hora con posición absoluta para que no deforme el tamaño del texto
     // CORRECCIÓN: Usamos span pero le añadimos "display: block" para que la hora no se salga volando
+// CORRECCIÓN: Cambiamos el div por un span para que el texto mande sobre el ancho
 div.innerHTML = `
-    <span style="display: block; position: relative; padding-right: 55px;">
-        <span class="cuerpo-mensaje-dinamico" style="display: block;"></span>
-        <div style="font-size:10px; opacity:0.6; position: absolute; bottom: -4px; right: 0; white-space: nowrap; color: #fff;">
-            ${horaFinal} ${checkHTML}
-        </div>
-    </span>
+    <span class="cuerpo-mensaje-dinamico"></span>
+    <div style="font-size:10px; opacity:0.6; text-align:right; margin-top:4px; color: #fff;">
+        ${horaFinal} ${checkHTML}
+    </div>
 `;
     box.appendChild(div);
     box.scrollTop = box.scrollHeight;
