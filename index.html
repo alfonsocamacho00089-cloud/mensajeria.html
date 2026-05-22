@@ -278,47 +278,45 @@ button#btn-enviar:active {
 }
  
 /* ==========================================
-   RABITOS DE LAS BURBUJAS (ESTILO WHATSAPP)
+   RABITOS REALES (ESTILO WHATSAPP) - CORREGIDO
    ========================================== */
 
-/* Rabito para el primer mensaje de la DERECHA */
+/* Rabito para la DERECHA (Mensaje enviado) */
 .msg-derecha::after {
     content: "";
     position: absolute;
     top: 0;
-    right: -8px; /* Lo saca justo al borde derecho */
+    right: -4px; /* Pegado justo en la esquina superior derecha */
     width: 0;
     height: 0;
-    /* Crea el triángulo con el mismo degradado/color de tu fondo */
-    border-top: 10px solid rgba(0, 77, 64, 0.8); 
-    border-right: 10px solid transparent;
-    border-left: 0px solid transparent;
+    /* Triángulo que apunta hacia la esquina para rellenar el rabito */
+    border-top: 0px solid transparent;
+    border-bottom: 10px solid transparent;
+    border-left: 8px solid rgba(0, 77, 64, 0.8); /* Tu color verde */
 }
 
-/* Rabito para el primer mensaje de la IZQUIERDA */
+/* Rabito para la IZQUIERDA (Mensaje recibido) */
 .msg-izquierda::after {
     content: "";
     position: absolute;
     top: 0;
-    left: -8px; /* Lo saca justo al borde izquierdo */
+    left: -4px; /* Pegado justo en la esquina superior izquierda */
     width: 0;
     height: 0;
-    /* Crea el triángulo con el mismo color gris translúcido de tu fondo */
-    border-top: 10px solid rgba(32, 44, 51, 0.6); 
-    border-left: 10px solid transparent;
-    border-right: 0px solid transparent;
+    /* Triángulo que apunta hacia la esquina izquierda */
+    border-top: 0px solid transparent;
+    border-bottom: 10px solid transparent;
+    border-right: 8px solid rgba(32, 44, 51, 0.6); /* Tu color gris oscuro */
 }
 
-/* --- QUITAR EL RABITO EN MENSAJES CONSECUTIVOS --- */
-/* Si un mensaje va seguido de otro del mismo tipo, le ocultamos el rabito al segundo */
+/* --- LOGICA DE MENSAJES SEGUIDOS (Ocultar rabito) --- */
 .msg-derecha + .msg-derecha::after {
-    display: none;
+    display: none !important;
 }
 
 .msg-izquierda + .msg-izquierda::after {
-    display: none;
- }
-
+    display: none !important;
+}
 
 
 
