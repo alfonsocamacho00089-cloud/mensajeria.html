@@ -2070,26 +2070,25 @@ function pintarMensaje(contenido, clase, hora, status, id, tipo = 'texto') {
         div.style.padding = '4px'; // Un padding mínimo para que no se pegue al borde
     }
 
-    // ... Tu código anterior de la función se queda exactamente igual ...
-
-    // ... Todo tu código de arriba se queda EXACTAMENTE igual ...
+   // ... Todo tu código de arriba se queda EXACTAMENTE igual ...
 
     const horaFinal = hora || new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
     const checkHTML = clase === 'msg-derecha' ? `<span style="margin-left:5px; font-size:10px;">${status === 'leido' ? '✓✓' : '✓'}</span>` : '';
 
-    // 🔥 ALINEADO: Eliminamos bloques verticales duros y asignamos la clase .msg-info que ya programaste
+    // 🔥 ÚNICO CAMBIO EN JS: Colocamos la hora con posición absoluta para que no deforme el tamaño del texto
     div.innerHTML = `
-        <span class="cuerpo-mensaje-dinamico" style="display: inline;"></span>
-        <div class="msg-info">
-            ${horaFinal} ${checkHTML}
+        <div style="position: relative; padding-right: 55px;">
+            <div class="cuerpo-mensaje-dinamico"></div>
+            <div style="font-size:10px; opacity:0.6; position: absolute; bottom: -4px; right: 0; white-space: nowrap; color: #fff;">
+                ${horaFinal} ${checkHTML}
+            </div>
         </div>
     `;
 
     box.appendChild(div);
     box.scrollTop = box.scrollHeight;
-    // ... Todo tu requestAnimationFrame y detecciones se quedan EXACTAMENTE igual ...
-    // ... El resto de tu requestAnimationFrame y detecciones se queda exactamente igual ...
 
+    // ... Todo tu requestAnimationFrame y detecciones se quedan EXACTAMENTE igual ...
     // Procesamiento asíncrono rápido
     requestAnimationFrame(() => {
         const contenedorCuerpo = div.querySelector('.cuerpo-mensaje-dinamico');
