@@ -2081,7 +2081,7 @@ function pintarMensaje(contenido, clase, hora, status, id, tipo = 'texto') {
     // CORRECCIÓN 1: Cambiar 'div' por 'span'
 // CORRECCIÓN: Usamos span pero le añadimos "display: block" para que la hora no se salga volando
 div.innerHTML = `
-    <span style="display: block; position: relative; padding-right: 55px;">
+    <span style="position: relative; padding-right: 55px;">
         <span class="cuerpo-mensaje-dinamico" style="display: block;"></span>
         <div style="font-size:10px; opacity:0.6; position: absolute; bottom: -4px; right: 0; white-space: nowrap; color: #fff;">
             ${horaFinal} ${checkHTML}
