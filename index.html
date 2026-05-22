@@ -2040,137 +2040,156 @@ async function cargarProto() {
 // --- 5. LÓGICA DE INTERFAZ CORREGIDA ---
 // Variable necesaria para que el menú sepa a qué mensaje le diste clic
 let mensajeSeleccionado = null;
- 
+
 function pintarMensaje(contenido, clase, hora, status, id, tipo = 'texto') {
     const box = document.getElementById('chat-box');
     if (!box) return;
 
     let textoReal = (typeof contenido === 'object') ? (contenido.texto || "") : contenido;
     
-    // 1. Auto-detección de tipos (Imágenes y Videos nativos)
+    // Auto-detección básica (Igual que en la antigua)
     if (textoReal.includes('i.ibb.co') || textoReal.includes('firebasestorage') || textoReal.includes('.gif') || textoReal.includes('giphy.com')) {
         tipo = 'foto';
-    } else if (textoReal.startsWith('data:video/') || tipo === 'video') {
-        tipo = 'video';
     }
 
     const div = document.createElement('div');
     div.className = "msg-burbuja " + clase;
- 
-   
     div.id = id;
-
-    // 🔥 INDEPENDENCIA VISUAL: Si es multimedia, le quitamos el fondo y estilos de burbuja de texto
-    const esMultimedia = ['foto', 'sticker', 'stickers', 'video', 'audio'].includes(tipo) || 
-                         (textoReal.startsWith('blob:') && (textoReal.includes('audio') || textoReal.includes('video')));
-    
-    if (esMultimedia) {
-        div.style.background = 'transparent';
-        div.style.backgroundColor = 'transparent';
-        div.style.boxShadow = 'none';
-        div.style.border = 'none';
-        div.style.padding = '4px'; // Un padding mínimo para que no se pegue al borde
-    }
-
-   // ... Todo tu código de arriba se queda EXACTAMENTE igual ...
 
     const horaFinal = hora || new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
     const checkHTML = clase === 'msg-derecha' ? `<span style="margin-left:5px; font-size:10px;">${status === 'leido' ? '✓✓' : '✓'}</span>` : '';
 
-    // 🔥 ÚNICO CAMBIO EN JS: Colocamos la hora con posición absoluta para que no deforme el tamaño del texto
-    // CORRECCIÓN: Usamos span pero le añadimos "display: block" para que la hora no se salga volando
-// CORRECCIÓN: Cambiamos el div por un span para que el texto mande sobre el ancho
-// CORRECCIÓN 2: Inyectar el contenido real directamente en lugar del cascarón vacío
-    div.innerHTML = `
-    <span class="cuerpo-mensaje-dinamico"></span>
-    <div style="font-size:10px; opacity:0.6; text-align:right; margin-top:4px; color: #fff;">
-        ${horaFinal} ${checkHTML}
-    </div>
-`;
-    box.appendChild(div);
-    box.scrollTop = box.scrollHeight;
+    // ========================================================
+    // 🔥 EL DIVISOR: ¿Es un enlace externo o archivo pesado?
+    // ========================================================
+    const esCosaNueva = textoReal.includes('youtube.com/') || textoReal.includes('youtu.be/') || 
+                        textoReal.includes('tiktok.com/') || textoReal.includes('facebook.com/') || 
+                        tipo === 'video' || tipo === 'audio' || textoReal.startsWith('blob:');
 
-    // ... Todo tu requestAnimationFrame y detecciones se quedan EXACTAMENTE igual ...
-    // Procesamiento asíncrono rápido
-    requestAnimationFrame(() => {
-        const contenedorCuerpo = div.querySelector('.cuerpo-mensaje-dinamico');
-        if (!contenedorCuerpo) return;
+    if (esCosaNueva) {
+        
+        // ----------------------------------------------------
+        // CAMINO 1: LAS COSAS NUEVAS (Redes y Multimedia pesada)
+        // ----------------------------------------------------
+        
+        // Quitamos el fondo para que el iframe o el video no se vean encerrados
+        div.style.background = 'transparent';
+        div.style.backgroundColor = 'transparent';
+        div.style.boxShadow = 'none';
+        div.style.border = 'none';
+        div.style.padding = '4px';
 
+        div.innerHTML = `
+            <div class="cuerpo-mensaje-dinamico"></div>
+            <div style="font-size:10px; opacity:0.6; text-align:right; margin-top:4px; color: #fff;">
+                ${horaFinal} ${checkHTML}
+            </div>
+        `;
+        
+        box.appendChild(div);
+        box.scrollTop = box.scrollHeight;
+
+        // Render asíncrono para no trabar el chat
+        requestAnimationFrame(() => {
+            const contenedorCuerpo = div.querySelector('.cuerpo-mensaje-dinamico');
+            if (!contenedorCuerpo) return;
+
+            let cuerpoHTML = "";
+            
+            if (textoReal.includes('youtube.com/') || textoReal.includes('youtu.be/')) {
+                let videoId = textoReal.includes('youtu.be/') ? textoReal.split('youtu.be/')[1].split(/[?#]/)[0] : textoReal.split('v=')[1]?.split('&')[0];
+                cuerpoHTML = `
+                    <div style="max-width:260px;">
+                        <iframe src="https://www.youtube.com/embed/${videoId}" frameborder="0" allowfullscreen
+                                style="width:100%; height:150px; border-radius:12px; border: 2px solid #ffd700; background:#000;">
+                        </iframe>
+                        <a href="${textoReal}" target="_blank" rel="noopener noreferrer"
+                           style="display:flex; align-items:center; justify-content:center; margin-top:6px; padding:6px; background:#111; border: 1px solid #ffd700; border-radius:8px; color:#ffd700; font-size:11px; text-decoration:none; font-weight:bold; gap:6px;">
+                           🛑 Abrir en YouTube
+                        </a>
+                    </div>
+                `;
+            } else if (textoReal.includes('tiktok.com/')) {
+                cuerpoHTML = `
+                    <div style="max-width:240px; background:#111; border: 2px solid #ffd700; border-radius:12px; padding:10px; text-align:center;">
+                        <div style="font-size:24px; margin-bottom:5px;">🎵</div>
+                        <span style="font-size:12px; color:#fff; display:block; margin-bottom:8px; word-break:break-all;">${textoReal}</span>
+                        <a href="${textoReal}" target="_blank" rel="noopener noreferrer"
+                           style="display:block; padding:6px; background:#000; border: 1px solid #ffd700; border-radius:8px; color:#ffd700; font-size:11px; text-decoration:none; font-weight:bold;">
+                           ⚫ Abrir en TikTok
+                        </a>
+                    </div>
+                `;
+            } else if (textoReal.includes('facebook.com/')) {
+                cuerpoHTML = `
+                    <div style="max-width:240px; background:#111; border: 2px solid #ffd700; border-radius:12px; padding:10px; text-align:center;">
+                        <div style="font-size:24px; margin-bottom:5px;">🔵</div>
+                        <span style="font-size:12px; color:#fff; display:block; margin-bottom:8px; word-break:break-all;">Enlace de Facebook</span>
+                        <a href="${textoReal}" target="_blank" rel="noopener noreferrer"
+                           style="display:block; padding:6px; background:#000; border: 1px solid #ffd700; border-radius:8px; color:#ffd700; font-size:11px; text-decoration:none; font-weight:bold;">
+                           🔷 Abrir en Facebook
+                        </a>
+                    </div>
+                `;
+            } else if (tipo === 'video') {
+                cuerpoHTML = `
+                    <video src="${textoReal}" controls playsinline
+                           style="max-width:240px; max-height:320px; border-radius:12px; display:block; border: 2px solid #ffd700; background:#000;">
+                    </video>
+                `;
+            } else if (tipo === 'audio' || (textoReal.startsWith('blob:') && textoReal.includes('audio')) || textoReal.includes('.webm') || textoReal.includes('.ogg')) {
+                cuerpoHTML = `
+                    <audio src="${textoReal}" controls playsinline type="audio/webm"
+                           style="max-width:240px; display:block; margin-top:2px; outline:none;">
+                    </audio>
+                `;
+            }
+
+            contenedorCuerpo.innerHTML = cuerpoHTML;
+            box.scrollTop = box.scrollHeight;
+        });
+
+    } else {
+
+        // ----------------------------------------------------
+        // CAMINO 2: EL CHAT NORMAL (Estructura Antigua Intacta)
+        // ----------------------------------------------------
+        
         let cuerpoHTML = "";
         
-        // --- NUEVA LÓGICA: DETECCIÓN DE REDES SOCIALES ---
-        if (textoReal.includes('youtube.com/') || textoReal.includes('youtu.be/')) {
-            let videoId = "";
-            if (textoReal.includes('youtu.be/')) {
-                videoId = textoReal.split('youtu.be/')[1].split(/[?#]/)[0];
-            } else {
-                videoId = textoReal.split('v=')[1]?.split('&')[0];
-            }
-            
-            cuerpoHTML = `
-                <div style="max-width:260px;">
-                    <iframe src="https://www.youtube.com/embed/${videoId}" frameborder="0" allowfullscreen
-                            style="width:100%; height:150px; border-radius:12px; border: 2px solid #ffd700; background:#000;">
-                    </iframe>
-                    <a href="${textoReal}" target="_blank" rel="noopener noreferrer"
-                       style="display:flex; align-items:center; justify-content:center; margin-top:6px; padding:6px; background:#111; border: 1px solid #ffd700; border-radius:8px; color:#ffd700; font-size:11px; text-decoration:none; font-weight:bold; gap:6px;">
-                       🛑 Abrir en YouTube
-                    </a>
-                </div>
-            `;
-        } 
-        else if (textoReal.includes('tiktok.com/')) {
-            cuerpoHTML = `
-                <div style="max-width:240px; background:#111; border: 2px solid #ffd700; border-radius:12px; padding:10px; text-align:center;">
-                    <div style="font-size:24px; margin-bottom:5px;">🎵</div>
-                    <span style="font-size:12px; color:#fff; display:block; margin-bottom:8px; word-break:break-all;">${textoReal}</span>
-                    <a href="${textoReal}" target="_blank" rel="noopener noreferrer"
-                       style="display:block; padding:6px; background:#000; border: 1px solid #ffd700; border-radius:8px; color:#ffd700; font-size:11px; text-decoration:none; font-weight:bold;">
-                       ⚫ Abrir en TikTok
-                    </a>
-                </div>
-            `;
-        } 
-        else if (textoReal.includes('facebook.com/')) {
-            cuerpoHTML = `
-                <div style="max-width:240px; background:#111; border: 2px solid #ffd700; border-radius:12px; padding:10px; text-align:center;">
-                    <div style="font-size:24px; margin-bottom:5px;">🔵</div>
-                    <span style="font-size:12px; color:#fff; display:block; margin-bottom:8px; word-break:break-all;">Enlace de Facebook</span>
-                    <a href="${textoReal}" target="_blank" rel="noopener noreferrer"
-                       style="display:block; padding:6px; background:#000; border: 1px solid #ffd700; border-radius:8px; color:#ffd700; font-size:11px; text-decoration:none; font-weight:bold;">
-                       🔷 Abrir en Facebook
-                    </a>
-                </div>
-            `;
-        }
-        // --- FIN DE REDES SOCIALES ---
-        
-        // Mantenemos tus renders multimedia anteriores y el tipo 'audio' sin caja de burbuja
-        else if (tipo === 'foto' || tipo === 'sticker' || tipo === 'stickers') {
+        if (tipo === 'foto' || tipo === 'sticker' || tipo === 'stickers') {
             cuerpoHTML = `<img src="${textoReal}" style="max-width:180px; border-radius:12px; display:block; border: 2px solid #ffd700;">`;
-        } else if (tipo === 'video') {
-            cuerpoHTML = `
-                <video src="${textoReal}" controls playsinline
-                       style="max-width:240px; max-height:320px; border-radius:12px; display:block; border: 2px solid #ffd700; background:#000;">
-                </video>
-            `;
-        } 
-        // 🎙️ RENDER DE AUDIO INDEPENDIENTE
-        else if (tipo === 'audio' || (textoReal.startsWith('blob:') && textoReal.includes('audio')) || textoReal.includes('.webm') || textoReal.includes('.ogg')) {
-            cuerpoHTML = `
-                <audio src="${textoReal}" controls playsinline type="audio/webm"
-                       style="max-width:240px; display:block; margin-top:2px; outline:none;">
-                </audio>
-            `;
         } else {
-    // CORRECCIÓN 2: Envolver el texto en un span en lugar de dejarlo suelto
-    cuerpoHTML = `<span>${textoReal}</span>`;
-     }
+            // El texto normal se envuelve en tu span de siempre
+            cuerpoHTML = `<span class="texto-msg">${textoReal}</span>`;
+        }
 
-        contenedorCuerpo.innerHTML = cuerpoHTML;
+        // Aquí usamos exactamente tu maquetación vieja con la clase msg-info que tienes en el CSS
+        div.innerHTML = `
+            ${cuerpoHTML}
+            <div class="msg-info">
+                <span>${horaFinal}</span>
+                ${checkHTML}
+            </div>
+        `;
+
+        box.appendChild(div);
         box.scrollTop = box.scrollHeight;
-    });
+    }
+
+    // El menú de acciones (se aplica sin importar qué camino tomó)
+    div.onclick = (e) => {
+        mensajeSeleccionado = div; 
+        const menu = document.getElementById('menu-acciones');
+        if(menu) {
+            menu.style.display = 'block';
+            menu.style.top = e.pageY + "px";
+            menu.style.left = (e.pageX > 200 ? e.pageX - 150 : e.pageX) + "px";
+        }
+        e.stopPropagation(); 
+    };
      }
+ 
 
      
     async function marcarMensajeComoRecibido(msgId, emisorID) {
