@@ -2167,9 +2167,8 @@ function pintarMensaje(contenido, clase, hora, status, id, tipo = 'texto') {
         // Aquí usamos exactamente tu maquetación vieja con la clase msg-info que tienes en el CSS
         div.innerHTML = `
             ${cuerpoHTML}
-            <div class="msg-info">
-                <span>${horaFinal}</span>
-                ${checkHTML}
+            <div style="font-size:10px; opacity:0.6; text-align:right; margin-top:4px;">
+                ${horaFinal} ${checkHTML}
             </div>
         `;
 
