@@ -2039,7 +2039,8 @@ async function cargarProto() {
      
 // --- 5. LÓGICA DE INTERFAZ CORREGIDA ---
 // Variable necesaria para que el menú sepa a qué mensaje le diste clic
-let mensajeSeleccionado = null;
+
+         let mensajeSeleccionado = null;
 
 function pintarMensaje(contenido, clase, hora, status, id, tipo = 'texto') {
     const box = document.getElementById('chat-box');
@@ -2047,20 +2048,21 @@ function pintarMensaje(contenido, clase, hora, status, id, tipo = 'texto') {
 
     let textoReal = (typeof contenido === 'object') ? (contenido.texto || "") : contenido;
     
-    // Auto-detección básica (Igual que en la antigua)
-    if (textoReal.includes('i.ibb.co') || textoReal.includes('firebasestorage') || textoReal.includes('.gif') || textoReal.includes('giphy.com')) {
-        tipo = 'foto';
-    }
-
     const div = document.createElement('div');
     div.className = "msg-burbuja " + clase;
-    div.id = id;
+    if (id) div.id = id;
 
     const horaFinal = hora || new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
-    const checkHTML = clase === 'msg-derecha' ? `<span style="margin-left:5px; font-size:10px;">${status === 'leido' ? '✓✓' : '✓'}</span>` : '';
+    
+    // Adaptamos tu check original
+    let checkHTML = "";
+    if (clase.includes('derecha')) {
+        const icon = (status === 'leido') ? '✓✓' : '✓';
+        checkHTML = `<span style="margin-left: 5px; font-weight: bold; font-size:10px;">${icon}</span>`;
+    }
 
     // ========================================================
-    // 🔥 EL DIVISOR: ¿Es un enlace externo o archivo pesado?
+    // 🔥 EL DIVISOR: ¿Es una red social o archivo pesado asíncrono?
     // ========================================================
     const esCosaNueva = textoReal.includes('youtube.com/') || textoReal.includes('youtu.be/') || 
                         textoReal.includes('tiktok.com/') || textoReal.includes('facebook.com/') || 
@@ -2072,7 +2074,6 @@ function pintarMensaje(contenido, clase, hora, status, id, tipo = 'texto') {
         // CAMINO 1: LAS COSAS NUEVAS (Redes y Multimedia pesada)
         // ----------------------------------------------------
         
-        // Quitamos el fondo para que el iframe o el video no se vean encerrados
         div.style.background = 'transparent';
         div.style.backgroundColor = 'transparent';
         div.style.boxShadow = 'none';
@@ -2089,7 +2090,6 @@ function pintarMensaje(contenido, clase, hora, status, id, tipo = 'texto') {
         box.appendChild(div);
         box.scrollTop = box.scrollHeight;
 
-        // Render asíncrono para no trabar el chat
         requestAnimationFrame(() => {
             const contenedorCuerpo = div.querySelector('.cuerpo-mensaje-dinamico');
             if (!contenedorCuerpo) return;
@@ -2131,12 +2131,6 @@ function pintarMensaje(contenido, clase, hora, status, id, tipo = 'texto') {
                         </a>
                     </div>
                 `;
-            } else if (tipo === 'video') {
-                cuerpoHTML = `
-                    <video src="${textoReal}" controls playsinline
-                           style="max-width:240px; max-height:320px; border-radius:12px; display:block; border: 2px solid #ffd700; background:#000;">
-                    </video>
-                `;
             } else if (tipo === 'audio' || (textoReal.startsWith('blob:') && textoReal.includes('audio')) || textoReal.includes('.webm') || textoReal.includes('.ogg')) {
                 cuerpoHTML = `
                     <audio src="${textoReal}" controls playsinline type="audio/webm"
@@ -2152,31 +2146,42 @@ function pintarMensaje(contenido, clase, hora, status, id, tipo = 'texto') {
     } else {
 
         // ----------------------------------------------------
-        // CAMINO 2: EL CHAT NORMAL (Estructura Antigua Intacta)
+        // CAMINO 2: TU CÓDIGO ANTIGUO PERFECTO (Texto, Fotos, Respuestas)
         // ----------------------------------------------------
         
-        let cuerpoHTML = "";
-        
-        if (tipo === 'foto' || tipo === 'sticker' || tipo === 'stickers') {
-            cuerpoHTML = `<img src="${textoReal}" style="max-width:180px; border-radius:12px; display:block; border: 2px solid #ffd700;">`;
+        let contenidoFinal = "";
+
+        if (textoReal.startsWith('http') && (textoReal.includes('firebasestorage') || textoReal.includes('.jpg') || textoReal.includes('.png'))) {
+            contenidoFinal = `<img src="${textoReal}" style="max-width:250px; border-radius:10px; display:block; margin-bottom:5px; cursor:pointer;" onclick="window.open('${textoReal}')">`;
+        } else if (textoReal && textoReal.includes("Resp >")) {
+            const partes = textoReal.split("\n— ");
+            const cabezalCita = partes[0].replace("Resp >", "").trim();
+            const mensajeReal = partes[1] || "";
+            contenidoFinal = `
+                <div style="font-size: 11px; opacity: 0.6; border-left: 3px solid #ffd700; padding-left: 5px; margin-bottom: 5px; font-style: italic;">
+                    Resp: ${cabezalCita}
+                </div>
+                <div>${mensajeReal}</div>
+            `;
         } else {
-            // El texto normal se envuelve en tu span de siempre
-            cuerpoHTML = `<span class="texto-msg">${textoReal}</span>`;
+            // El texto normal, tal cual lo tenías
+            contenidoFinal = `<span>${textoReal}</span>`;
         }
 
-        // Aquí usamos exactamente tu maquetación vieja con la clase msg-info que tienes en el CSS
+        // Tu HTML original con el Flexbox que arregla la hora
         div.innerHTML = `
-        ${cuerpoMensaje}
-        <div style="font-size:10px; opacity:0.7; text-align:right; margin-top:3px;">
-            ${horaFinal} ${checkHTML}
-        </div>
-    `;
+            ${contenidoFinal} 
+            <div class="msg-info" style="display: flex; justify-content: flex-end; align-items: center; gap: 5px; font-size: 10px; opacity: 0.7; margin-top: 3px;">
+                <span class="tiempo">${horaFinal}</span>
+                ${checkHTML}
+            </div>
+        `;
 
         box.appendChild(div);
         box.scrollTop = box.scrollHeight;
     }
 
-    // El menú de acciones (se aplica sin importar qué camino tomó)
+    // Tu menú de acciones intocable
     div.onclick = (e) => {
         mensajeSeleccionado = div; 
         const menu = document.getElementById('menu-acciones');
