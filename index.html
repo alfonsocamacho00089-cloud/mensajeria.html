@@ -264,10 +264,10 @@ button#btn-enviar:active {
    ========================================== */
 
 .msg-burbuja { 
-    max-width: 75% !important; /* Estilo WhatsApp para que no ocupe todo el ancho en móviles */
+    max-width: 85% !important; /* Estilo WhatsApp para que no ocupe todo el ancho en móviles */
     width: fit-content !important; /* Para que la burbuja se encoja si el texto es corto (como "Hola") */
     padding: 8px 15px 8px 15px !important; 
-    border-radius: 7.5px !important; /* La forma más cuadrada característica de WhatsApp */
+    border-radius: 12px !important; /* La forma más cuadrada característica de WhatsApp */
     font-size: 16px !important; 
     
     position: relative; 
@@ -277,46 +277,33 @@ button#btn-enviar:active {
     line-height: 1.2;
 }
  
-/* ==========================================
-   RABITOS REALES (ESTILO WHATSAPP) - CORREGIDO
-   ========================================== */
+.msg-derecha { 
+    align-self: flex-end; 
+    background: linear-gradient(135deg, rgba(0, 92, 75, 0.8) 0%, rgba(0, 77, 64, 0.8) 100%);
+    color: #ffffff; 
 
-/* Rabito para la DERECHA (Mensaje enviado) */
-.msg-derecha::after {
-    content: "";
-    position: absolute;
-    top: 0;
-    right: -4px; /* Pegado justo en la esquina superior derecha */
-    width: 0;
-    height: 0;
-    /* Triángulo que apunta hacia la esquina para rellenar el rabito */
-    border-top: 0px solid transparent;
-    border-bottom: 10px solid transparent;
-    border-left: 8px solid rgba(0, 77, 64, 0.8); /* Tu color verde */
+    border-bottom-right-radius: 15px; 
+    border-top-right-radius: 2px;
 }
 
-/* Rabito para la IZQUIERDA (Mensaje recibido) */
-.msg-izquierda::after {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: -4px; /* Pegado justo en la esquina superior izquierda */
-    width: 0;
-    height: 0;
-    /* Triángulo que apunta hacia la esquina izquierda */
-    border-top: 0px solid transparent;
-    border-bottom: 10px solid transparent;
-    border-right: 8px solid rgba(32, 44, 51, 0.6); /* Tu color gris oscuro */
+.msg-izquierda { 
+    align-self: flex-start; 
+    background: rgba(32, 44, 51, 0.6); 
+    color: #ffffff; 
+    border-bottom-left-radius: 20px; 
+    
+     border-top-left-radius: 2px;
 }
 
-/* --- LOGICA DE MENSAJES SEGUIDOS (Ocultar rabito) --- */
-.msg-derecha + .msg-derecha::after {
-    display: none !important;
+/* Si el mensaje de la izquierda va seguido de otro de la izquierda */
+.msg-izquierda + .msg-izquierda {
+    border-top-left-radius: 4px; /* Hace que la esquina de arriba sea más cuadrada */
 }
 
-.msg-izquierda + .msg-izquierda::after {
-    display: none !important;
-}
+/* Si el mensaje de la derecha va seguido de otro de la derecha */
+.msg-derecha + .msg-derecha {
+    border-top-right-radius: 4px;
+      }
 
 
 
@@ -2090,19 +2077,16 @@ function pintarMensaje(contenido, clase, hora, status, id, tipo = 'texto') {
     const horaFinal = hora || new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
     const checkHTML = clase === 'msg-derecha' ? `<span style="margin-left:5px; font-size:10px;">${status === 'leido' ? '✓✓' : '✓'}</span>` : '';
 
-    // 🔥 ÚNICO CAMBIO EN JS: Colocamos la hora con posición absoluta para que no deforme el tamaño del texto
+    // 🔥 ALINEADO: Eliminamos bloques verticales duros y asignamos la clase .msg-info que ya programaste
     div.innerHTML = `
-        <div style="position: relative; padding-right: 55px;">
-            <div class="cuerpo-mensaje-dinamico"></div>
-            <div style="font-size:10px; opacity:0.6; position: absolute; bottom: -4px; right: 0; white-space: nowrap; color: #fff;">
-                ${horaFinal} ${checkHTML}
-            </div>
+        <span class="cuerpo-mensaje-dinamico" style="display: inline;"></span>
+        <div class="msg-info">
+            ${horaFinal} ${checkHTML}
         </div>
     `;
 
     box.appendChild(div);
     box.scrollTop = box.scrollHeight;
-
     // ... Todo tu requestAnimationFrame y detecciones se quedan EXACTAMENTE igual ...
     // ... El resto de tu requestAnimationFrame y detecciones se queda exactamente igual ...
 
