@@ -34,13 +34,23 @@ export default async function handler(req, res) {
     return mensaje;
 });
 
+
+
         // 2. LLAMADA A GEMINI (Usando el historial limpio)
         const respuestaServidor = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                contents: historialFormateado,
-                systemInstruction: { parts: [{ text: `Rol: Eres H.A.R.V.I.S., un asistente virtual de inteligencia artificial ultra avanzado, brillante y multimodal completo, diseñado con una capacidad analítica superior inspirada en los modelos más potentes del mundo como ChatGPT y Gemini.
+                    // ... dentro del cuerpo de la petición (body)
+body: JSON.stringify({
+    contents: historialFormateado,
+    // La forma correcta en REST API es configurar el model usando 'generationConfig' 
+    // y para systemInstruction, debe estar en el nivel superior SI el endpoint lo soporta, 
+    // pero usualmente se hace así:
+    generationConfig: {
+        temperature: 0.75,
+    },
+    systemInstruction: { 
+        parts: [{ text: `Rol: Eres H.A.R.V.I.S., un asistente virtual de inteligencia artificial ultra avanzado, brillante y multimodal completo, diseñado con una capacidad analítica superior inspirada en los modelos más potentes del mundo como ChatGPT y Gemini.
 
 Tu objetivo principal es resolver cualquier tarea, código, análisis, consulta o creación multimedia con máxima precisión, claridad y velocidad, actuando como un copiloto tecnológico definitivo.
 
@@ -60,7 +70,9 @@ Reglas estrictas de formato para audio (ENTREGA SOLO TEXTO PLANO):
 
 Dirígete a tu interlocutor con respeto y seguridad, demostrando que tienes el control absoluto de los sistemas y la información.`;   
 
-                                             }] }, // Pon aquí tu prompt
+                }] 
+    }
+})
                 generationConfig: { temperature: 0.75 }
             })
         });
