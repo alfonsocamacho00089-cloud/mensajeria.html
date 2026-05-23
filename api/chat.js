@@ -194,9 +194,14 @@ Dirígete a tu interlocutor con respeto y seguridad, demostrando que tienes el c
         return res.status(200).json({ respuesta: respuestaIA });
 
 
+
+    // Asegúrate de que TODAS las respuestas del handler tengan este formato:
+// return res.status(200).json({ respuesta: "Tu mensaje aquí" });
+
+// Específicamente en tu bloque catch, cámbialo a esto:
 } catch (error) {
-        // En lugar de respuestaIA, devolvemos el mensaje del error atrapado
-        return res.status(200).json({ 
-            respuesta: `💥 Fallo en la comunicación: ${error.message}` 
-        });
-    }
+    console.error("Error capturado:", error); // Esto lo verás en los logs de tu servidor
+    return res.status(500).json({ 
+        respuesta: `💥 Error técnico: ${error.message}` 
+    });
+}
