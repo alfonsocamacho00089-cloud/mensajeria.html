@@ -2048,7 +2048,6 @@ function pintarMensaje(contenido, clase, hora, status, id, tipo = 'texto') {
 
     let textoReal = (typeof contenido === 'object') ? (contenido.texto || "") : contenido;
     
-    // Auto-detección básica (Igual que en la antigua)
     if (textoReal.includes('i.ibb.co') || textoReal.includes('firebasestorage') || textoReal.includes('.gif') || textoReal.includes('giphy.com')) {
         tipo = 'foto';
     }
@@ -2060,37 +2059,25 @@ function pintarMensaje(contenido, clase, hora, status, id, tipo = 'texto') {
     const horaFinal = hora || new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
     const checkHTML = clase === 'msg-derecha' ? `<span style="margin-left:5px; font-size:10px;">${status === 'leido' ? '✓✓' : '✓'}</span>` : '';
 
-    // ========================================================
-    // 🔥 EL DIVISOR: ¿Es un enlace externo o archivo pesado?
-    // ========================================================
     const esCosaNueva = textoReal.includes('youtube.com/') || textoReal.includes('youtu.be/') || 
                         textoReal.includes('tiktok.com/') || textoReal.includes('facebook.com/') || 
                         tipo === 'video' || tipo === 'audio' || textoReal.startsWith('blob:');
 
     if (esCosaNueva) {
         
-        // ----------------------------------------------------
-        // CAMINO 1: LAS COSAS NUEVAS (Redes y Multimedia pesada)
-        // ----------------------------------------------------
-        
-        // Quitamos el fondo para que el iframe o el video no se vean encerrados
-        div.style.background = 'transparent';
-        div.style.backgroundColor = 'transparent';
-        div.style.boxShadow = 'none';
-        div.style.border = 'none';
-        div.style.padding = '4px';
+        // Se removió el vaciado de background/border para que mantenga la burbuja y pinte el rabito
 
         div.innerHTML = `
             <div class="cuerpo-mensaje-dinamico"></div>
-            <div style="font-size:10px; opacity:0.6; text-align:right; margin-top:4px; color: #fff;">
-                ${horaFinal} ${checkHTML}
+            <div class="msg-info" style="margin-top:4px;">
+                <span>${horaFinal}</span>
+                ${checkHTML}
             </div>
         `;
         
         box.appendChild(div);
         box.scrollTop = box.scrollHeight;
 
-        // Render asíncrono para no trabar el chat
         requestAnimationFrame(() => {
             const contenedorCuerpo = div.querySelector('.cuerpo-mensaje-dinamico');
             if (!contenedorCuerpo) return;
@@ -2151,21 +2138,15 @@ function pintarMensaje(contenido, clase, hora, status, id, tipo = 'texto') {
         });
 
     } else {
-
-        // ----------------------------------------------------
-        // CAMINO 2: EL CHAT NORMAL (Estructura Antigua Intacta)
-        // ----------------------------------------------------
         
         let cuerpoHTML = "";
         
         if (tipo === 'foto' || tipo === 'sticker' || tipo === 'stickers') {
             cuerpoHTML = `<img src="${textoReal}" style="max-width:180px; border-radius:12px; display:block; border: 2px solid #ffd700;">`;
         } else {
-            // El texto normal se envuelve en tu span de siempre
             cuerpoHTML = `<span class="texto-msg">${textoReal}</span>`;
         }
 
-        // Aquí usamos exactamente tu maquetación vieja con la clase msg-info que tienes en el CSS
         div.innerHTML = `
             ${cuerpoHTML}
             <div class="msg-info">
@@ -2178,7 +2159,6 @@ function pintarMensaje(contenido, clase, hora, status, id, tipo = 'texto') {
         box.scrollTop = box.scrollHeight;
     }
 
-    // El menú de acciones (se aplica sin importar qué camino tomó)
     div.onclick = (e) => {
         mensajeSeleccionado = div; 
         const menu = document.getElementById('menu-acciones');
@@ -2190,6 +2170,7 @@ function pintarMensaje(contenido, clase, hora, status, id, tipo = 'texto') {
         e.stopPropagation(); 
     };
      }
+     
  
 
      
