@@ -2159,24 +2159,25 @@ function pintarMensaje(contenido, clase, hora, status, id, tipo = 'texto') {
         let cuerpoHTML = "";
         
         if (tipo === 'foto' || tipo === 'sticker' || tipo === 'stickers') {
-            cuerpoHTML = `<img src="${textoReal}" style="max-width:180px; border-radius:12px; display:block; border: 2px solid #ffd700;">`;
+            cuerpoHTML = `<img src="${textoReal}" style="max-width:180px; border-radius:12px; display:block; border: none;">`;
         } else {
             // El texto normal se envuelve en tu span de siempre
-            cuerpoHTML = `<span class="texto-msg">${textoReal}</span>`;
+            cuerpoHTML = `<span class="texto-msg"${textoReal}"style="display: block;"></span>
+            <div style="font-size:10px; opacity:0.6; text-align:right; margin-top:4px; color: #fff;">
+           
         }
 
         // Aquí usamos exactamente tu maquetación vieja con la clase msg-info que tienes en el CSS
-        // CORRECCIÓN: Cambiamos el div por un span para que el texto mande sobre el ancho
-// CONGELADO: La hora se queda abajo y el texto arriba. Solo cambiamos la etiqueta para que no estire la burbuja.
-div.innerHTML = `
-    <span style="display: block; position: relative;">
-        <span class="cuerpo-mensaje-dinamico" style="display: block;"></span>
-        <div style="font-size:10px; opacity:0.6; text-align:right; margin-top:4px; color: #fff;">
-            ${horaFinal} ${checkHTML}
-        </div>
-    </span>
-`;
+        div.innerHTML = `
+            ${cuerpoHTML}
+            <div class="msg-info">
+                <span>${horaFinal}</span>
+                ${checkHTML}
+            </div>
+        `;
+     
 
+     
         box.appendChild(div);
         box.scrollTop = box.scrollHeight;
     }
