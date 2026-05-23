@@ -1,61 +1,66 @@
 export default async function handler(req, res) {
-    // ... (tus cabeceras CORS)
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+    res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+
+    if (req.method === 'OPTIONS') return res.status(200).end();
+    if (req.method !== 'POST') return res.status(405).json({ respuesta: 'Método no permitido' });
 
     try {
         const { chatHistory, userKey } = req.body;
         const apiKey = userKey;
 
-        // Memoria volátil para gestionar el borrado de archivos en esta sesión
-        const archivosEnUso = [];
+        // 1. PROCESAMIENTO INTELIGENTE DEL HISTORIAL
+        const historialFormateado = await Promise.all(chatHistory.map(async (msg) => {
+            if (msg.role === "user" && msg.parts[0]?.text && 
+               (msg.parts[0].text.includes("base64,") || msg.parts[0].text.startsWith("GkXf"))) {
+                
+                // Si ya tiene fileData, no procesar (ahorro de tokens)
+                if (msg.parts[0].fileData) return msg;
 
-        const historialFormateado = await Promise.all(chatHistory.map(async (mensaje) => {
-            
-            // 1. Si es mensaje de IA o texto simple (sin Base64), pasar
-            if (mensaje.role !== "user" || !mensaje.parts[0]?.text || 
-                (!mensaje.parts[0].text.includes("base64,") && !mensaje.parts[0].text.startsWith("GkXf"))) {
-                return mensaje;
-            }
-
-            // 2. Si ya tiene fileData, lo consideramos procesado
-            if (mensaje.parts[0].fileData) {
-                if (archivosEnUso.length < 4) archivosEnUso.push(mensaje.parts[0].fileData.fileUri);
-                return mensaje;
-            }
-
-            // 3. Procesar archivo NUEVO
-            const subida = await fetch(`https://generativelanguage.googleapis.com/upload/v1beta/files?key=${apiKey}`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ file: { mimeType: 'audio/webm', displayName: 'audio_sesion' } })
-            });
-            
-            const datosSubida = await subida.json();
-
-            // Lógica de borrado automático (Si llega a 4, borra el más viejo)
-            if (archivosEnUso.length >= 4) {
-                const uriABorrar = archivosEnUso.shift();
-                const fileId = uriABorrar.split('/').pop();
-                await fetch(`https://generativelanguage.googleapis.com/v1beta/files/${fileId}?key=${apiKey}`, {
-                    method: 'DELETE'
+                // Subir a Google File API
+                const subida = await fetch(`https://generativelanguage.googleapis.com/upload/v1beta/files?key=${apiKey}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ file: { mimeType: 'audio/webm', displayName: 'audio_sesion' } })
                 });
+                const datos = await subida.json();
+
+                // RETORNO CON TEXTO Y ARCHIVO: Esto evita que tu App se quede en blanco
+                return { 
+                    role: "user", 
+                    parts: [
+                        { text: "Audio procesado" }, 
+                        { fileData: { mimeType: "audio/webm", fileUri: datos.file.uri } }
+                    ] 
+                };
             }
-
-            archivosEnUso.push(datosSubida.file.uri);
-
-            // 4. RETORNO CON TEXTO PRESERVADO (Para que tu App pinte el mensaje)
-            return {
-                role: "user",
-                parts: [
-                    { text: "Audio procesado" }, 
-                    { fileData: { mimeType: "audio/webm", fileUri: datosSubida.file.uri } }
-                ]
-            };
+            return msg;
         }));
 
-        // ... (Tu llamada a Gemini con 'historialFormateado') ...
-        // (El resto de tu lógica de respuesta permanece igual)
+        // 2. LLAMADA A GEMINI (Usando el historial limpio)
+        const respuestaServidor = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                contents: historialFormateado,
+                systemInstruction: { parts: [{ text: "Eres H.A.R.V.I.S...." }] }, // Pon aquí tu prompt
+                generationConfig: { temperature: 0.75 }
+            })
+        });
+
+        const datosGemini = await respuestaServidor.json();
+        
+        // 3. RESPUESTA SEGURA (Blindaje contra errores de texto plano)
+        if (datosGemini.error) {
+            return res.status(200).json({ respuesta: `Error API: ${datosGemini.error.message}` });
+        }
+
+        const respuestaIA = datosGemini.candidates?.[0]?.content?.parts?.[0]?.text || "Sistemas listos.";
+        return res.status(200).json({ respuesta: respuestaIA });
 
     } catch (error) {
-        return res.status(200).json({ respuesta: "💥 Error: " + error.message });
+        // CUALQUIER error se convierte en JSON para que tu app móvil no explote
+        return res.status(200).json({ respuesta: "Error crítico: " + error.message });
     }
 }
