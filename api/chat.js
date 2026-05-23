@@ -11,32 +11,28 @@ export default async function handler(req, res) {
         const apiKey = userKey;
 
         // 1. PROCESAMIENTO INTELIGENTE DEL HISTORIAL
-        const historialFormateado = await Promise.all(chatHistory.map(async (msg) => {
-            if (msg.role === "user" && msg.parts[0]?.text && 
-               (msg.parts[0].text.includes("base64,") || msg.parts[0].text.startsWith("GkXf"))) {
-                
-                // Si ya tiene fileData, no procesar (ahorro de tokens)
-                if (msg.parts[0].fileData) return msg;
+        const historialFormateado = chatHistory.map(mensaje => {
+    // Si es audio, lo formateamos estrictamente como Google pide
+    if (mensaje.role === "user" && mensaje.parts[0]?.text && 
+        (mensaje.parts[0].text.includes("base64,") || mensaje.parts[0].text.startsWith("GkXf"))) {
+        
+        const partesData = mensaje.parts[0].text.split("base64,");
+        const base64Puro = partesData[1] || partesData[0];
 
-                // Subir a Google File API
-                const subida = await fetch(`https://generativelanguage.googleapis.com/upload/v1beta/files?key=${apiKey}`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ file: { mimeType: 'audio/webm', displayName: 'audio_sesion' } })
-                });
-                const datos = await subida.json();
-
-                // RETORNO CON TEXTO Y ARCHIVO: Esto evita que tu App se quede en blanco
-                return { 
-                    role: "user", 
-                    parts: [
-                        { text: "Audio procesado" }, 
-                        { fileData: { mimeType: "audio/webm", fileUri: datos.file.uri } }
-                    ] 
-                };
-            }
-            return msg;
-        }));
+        // ESTRUCTURA BLINDADA PARA GEMINI
+        return {
+            role: "user",
+            parts: [{
+                inlineData: {
+                    mimeType: "audio/webm",
+                    data: base64Puro.trim()
+                }
+            }]
+        };
+    }
+    // Si es texto, pasa normal
+    return mensaje;
+});
 
         // 2. LLAMADA A GEMINI (Usando el historial limpio)
         const respuestaServidor = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
