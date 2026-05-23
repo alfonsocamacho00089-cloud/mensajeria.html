@@ -2058,10 +2058,11 @@ const esImagen = textoReal.match(/\.(jpeg|jpg|gif|png|webp|bmp)$/i) ||
         tipo = 'foto';
     }
 
-    // 2. Si es texto normal, pero detectamos que el mensaje es SÓLO una URL de imagen:
-    if (textoReal.trim().startsWith('http') && esImagen) {
-        // Aquí forzamos que se trate como foto
-        tipo = 'foto';
+    // En tu función pintarMensaje:
+if (textoReal.includes('[IMAGEN_GENERADA]')) {
+    tipo = 'foto';
+    // Limpiamos el texto para que no se vea el tag en el chat
+    textoReal = textoReal.replace('[IMAGEN_GENERADA]', '').trim();
      }
 
     const div = document.createElement('div');
