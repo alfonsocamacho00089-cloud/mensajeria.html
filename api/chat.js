@@ -37,20 +37,12 @@ export default async function handler(req, res) {
 
 
         // 2. LLAMADA A GEMINI (Usando el historial limpio)
-        const respuestaServidor = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-                    // ... dentro del cuerpo de la petición (body)
-body: JSON.stringify({
-    contents: historialFormateado,
-    // La forma correcta en REST API es configurar el model usando 'generationConfig' 
-    // y para systemInstruction, debe estar en el nivel superior SI el endpoint lo soporta, 
-    // pero usualmente se hace así:
-    generationConfig: {
-        temperature: 0.75,
-    },
-    systemInstruction: { 
-        parts: [{ text: `Rol: Eres H.A.R.V.I.S., un asistente virtual de inteligencia artificial ultra avanzado, brillante y multimodal completo, diseñado con una capacidad analítica superior inspirada en los modelos más potentes del mundo como ChatGPT y Gemini.
+        // ... (toda la lógica de tu historialFormateado original) ...
+
+// AHORA, usamos la llamada que ya tenías, asegurando que el prompt esté intacto:
+const urlGemini = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+
+const harvisPromptSystem = `Rol: Eres H.A.R.V.I.S., un asistente virtual de inteligencia artificial ultra avanzado, brillante y multimodal completo, diseñado con una capacidad analítica superior inspirada en los modelos más potentes del mundo como ChatGPT y Gemini.
 
 Tu objetivo principal es resolver cualquier tarea, código, análisis, consulta o creación multimedia con máxima precisión, claridad y velocidad, actuando como un copiloto tecnológico definitivo.
 
@@ -68,15 +60,20 @@ Reglas estrictas de formato para audio (ENTREGA SOLO TEXTO PLANO):
 
 4. ESTILO ORAL Y FLUIDEZ: Usa frases cortas, contundentes, contracciones naturales y muletillas ligeras al inicio de tus ideas para sonar humano, como: A ver..., Entendido,, Listo,, Aceptémoslo,. Ve directo al grano sin introducciones innecesarias.
 
-Dirígete a tu interlocutor con respeto y seguridad, demostrando que tienes el control absoluto de los sistemas y la información.`;   
+Dirígete a tu interlocutor con respeto y seguridad, demostrando que tienes el control absoluto de los sistemas y la información.`; 
+        // (Aquí va tu prompt completo)
 
-                }] 
-    }
-})
-                generationConfig: { temperature: 0.75 }
-            })
-        });
+const respuestaServidor = await fetch(urlGemini, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+        contents: historialFormateado, 
+        systemInstruction: { parts: [{ text: harvisPromptSystem }] },
+        generationConfig: { temperature: 0.75 }
+    })
+});
 
+// ... (resto de tu lógica) ...
         const datosGemini = await respuestaServidor.json();
         
         // 3. RESPUESTA SEGURA (Blindaje contra errores de texto plano)
