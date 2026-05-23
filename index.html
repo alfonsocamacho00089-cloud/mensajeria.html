@@ -2040,13 +2040,15 @@ async function cargarProto() {
 // Variable necesaria para que el menú sepa a qué mensaje le diste clic
 
           let mensajeSeleccionado = null;
-
 function pintarMensaje(contenido, clase, hora, status, id, tipo = 'texto') {
-    const box = document.getElementById('chat-box');
-    if (!box) return;
-
     let textoReal = (typeof contenido === 'object') ? (contenido.texto || "") : contenido;
-    // ... dentro de tu función pintarMensaje ...
+    
+    // --- ESTO TE AYUDARÁ A VER QUÉ ESTÁ LLEGANDO ---
+    console.log("Contenido recibido por la función:", textoReal);
+    // ------------------------------------------------
+    
+    const box = document.getElementById('chat-box');
+    // ... sigue el resto
 
 // 🔥 MODIFICA ESTA LÓGICA DE DETECCIÓN (Añade patrones de imágenes comunes)
 const esImagen = textoReal.match(/\.(jpeg|jpg|gif|png|webp|bmp)$/i) || 
