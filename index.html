@@ -240,23 +240,24 @@ button#btn-enviar:active {
     transform: scale(0.9);
 }
      
-
 .msg-info {
   
     display: flex;
     align-items: center;
     white-space: nowrap;
-    justify-content: flex-end; /* Esto reemplaza al float: right */
-    
+ 
   
          
-    font-size: 12px !important;
+    float: right !important; /* <--- Esto la manda a la derecha del texto */
+    font-size: 10px !important;
     opacity: 0.7;
-    margin-top:2px !important; /* Ajusta para que baje un poquito y quede a nivel de la última línea */
+    margin-top:4px !important; /* Ajusta para que baje un poquito y quede a nivel de la última línea */
     margin-left: 12px; /* Separación del texto */
     gap: 3px;
  
-      }
+}
+
+
 /* ==========================================
    DISEÑO ESTILO WHATSAPP CON TUS COLORES ORIGINALES
    ========================================== */
@@ -2157,7 +2158,7 @@ function pintarMensaje(contenido, clase, hora, status, id, tipo = 'texto') {
         let cuerpoHTML = "";
         
         if (tipo === 'foto' || tipo === 'sticker' || tipo === 'stickers') {
-            cuerpoHTML = `<img src="${textoReal}" style="max-width:180px; border-radius:12px; display:block; border: 2px solid #ffd700;">`;
+            cuerpoHTML = `<img src="${textoReal}" style="max-width:180px; border-radius:12px; display:block; border: none;">`;
         } else {
             // El texto normal se envuelve en tu span de siempre
             cuerpoHTML = `<span class="texto-msg">${textoReal}</span>`;
