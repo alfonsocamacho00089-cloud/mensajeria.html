@@ -2166,13 +2166,13 @@ function pintarMensaje(contenido, clase, hora, status, id, tipo = 'texto') {
         }
 
         // Aquí usamos exactamente tu maquetación vieja con la clase msg-info que tienes en el CSS
-        div.innerHTML = `
-            ${cuerpoHTML}
-            <div class="msg-info">
-                <span>${horaFinal}</span>
-                ${checkHTML}
-            </div>
-        `;
+        // CORRECCIÓN: Cambiamos el div por un span para que el texto mande sobre el ancho
+div.innerHTML = `
+    <span class="cuerpo-mensaje-dinamico"></span>
+    <div style="font-size:10px; opacity:0.6; text-align:right; margin-top:4px; color: #fff;">
+        ${horaFinal} ${checkHTML}
+    </div>
+`;
 
         box.appendChild(div);
         box.scrollTop = box.scrollHeight;
