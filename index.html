@@ -2046,7 +2046,18 @@ function pintarMensaje(contenido, clase, hora, status, id, tipo = 'texto') {
     if (!box) return;
 
     let textoReal = (typeof contenido === 'object') ? (contenido.texto || "") : contenido;
-    
+    // ... dentro de tu función pintarMensaje ...
+
+// 🔥 MODIFICA ESTA LÓGICA DE DETECCIÓN (Añade patrones de imágenes comunes)
+const esImagen = textoReal.match(/\.(jpeg|jpg|gif|png|webp|bmp)$/i) || 
+                 textoReal.includes('googleusercontent.com') || 
+                 textoReal.includes('firebasestorage') || 
+                 textoReal.includes('i.ibb.co') ||
+                 textoReal.includes('giphy.com');
+
+if (esImagen) {
+    tipo = 'foto';
+     }
     // Auto-detección básica (Igual que en la antigua)
     if (textoReal.includes('i.ibb.co') || textoReal.includes('firebasestorage') || textoReal.includes('.gif') || textoReal.includes('giphy.com')) {
         tipo = 'foto';
