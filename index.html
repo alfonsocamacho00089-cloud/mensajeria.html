@@ -2167,11 +2167,14 @@ function pintarMensaje(contenido, clase, hora, status, id, tipo = 'texto') {
 
         // Aquí usamos exactamente tu maquetación vieja con la clase msg-info que tienes en el CSS
         // CORRECCIÓN: Cambiamos el div por un span para que el texto mande sobre el ancho
+// CONGELADO: La hora se queda abajo y el texto arriba. Solo cambiamos la etiqueta para que no estire la burbuja.
 div.innerHTML = `
-    <span class="cuerpo-mensaje-dinamico"></span>
-    <div style="font-size:10px; opacity:0.6; text-align:right; margin-top:4px; color: #fff;">
-        ${horaFinal} ${checkHTML}
-    </div>
+    <span style="display: block; position: relative;">
+        <span class="cuerpo-mensaje-dinamico" style="display: block;"></span>
+        <div style="font-size:10px; opacity:0.6; text-align:right; margin-top:4px; color: #fff;">
+            ${horaFinal} ${checkHTML}
+        </div>
+    </span>
 `;
 
         box.appendChild(div);
