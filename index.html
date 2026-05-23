@@ -2050,18 +2050,17 @@ function pintarMensaje(contenido, clase, hora, status, id, tipo = 'texto') {
 
 // 🔥 MODIFICA ESTA LÓGICA DE DETECCIÓN (Añade patrones de imágenes comunes)
 const esImagen = textoReal.match(/\.(jpeg|jpg|gif|png|webp|bmp)$/i) || 
-                 textoReal.includes('googleusercontent.com') || 
-                 textoReal.includes('firebasestorage') || 
-                 textoReal.includes('i.ibb.co') ||
-                 textoReal.includes('giphy.com');
+                     textoReal.includes('googleusercontent.com/image_generation_content');
 
-if (esImagen) {
-    tipo = 'foto';
-     }
-    // Auto-detección básica (Igual que en la antigua)
-    if (textoReal.includes('i.ibb.co') || textoReal.includes('firebasestorage') || textoReal.includes('.gif') || textoReal.includes('giphy.com')) {
+    if (esImagen) {
         tipo = 'foto';
     }
+
+    // 2. Si es texto normal, pero detectamos que el mensaje es SÓLO una URL de imagen:
+    if (textoReal.trim().startsWith('http') && esImagen) {
+        // Aquí forzamos que se trate como foto
+        tipo = 'foto';
+     }
 
     const div = document.createElement('div');
     div.className = "msg-burbuja " + clase;
