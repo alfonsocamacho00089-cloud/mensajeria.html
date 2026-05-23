@@ -2158,7 +2158,7 @@ function pintarMensaje(contenido, clase, hora, status, id, tipo = 'texto') {
         let cuerpoHTML = "";
         
         if (tipo === 'foto' || tipo === 'sticker' || tipo === 'stickers') {
-            cuerpoHTML = `<img src="${textoReal}" style="max-width:180px; border-radius:12px; display:block; border: none;">`;
+            cuerpoHTML = `<img src="${textoReal}" style="max-width:180px; border-radius:12px; display:block; border: none; background:#000">`;
         } else {
             // El texto normal se envuelve en tu span de siempre
             cuerpoHTML = `<span class="texto-msg">${textoReal}</span>`;
