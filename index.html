@@ -3654,7 +3654,14 @@ async function procesarRespuestaHarvis(msg, targetID) {
 
         if (typeof pintarMensaje === "function") {
             pintarMensaje(respuestaIA, 'msg-izquierda', null, 'leido', harvisMsgId, 'texto');
-            
+
+         // 2. NUEVO: Pintamos la nota de voz (reproductor)
+    // Pasamos el tipo 'audio' o un identificador nuevo para que tu función 
+    // pintarMensaje sepa que debe mostrar el reproductor de voz
+    pintarMensaje(null, 'msg-izquierda', null, 'leido', harvisMsgId + "_audio", 'audio', {
+        duracion: "auto", // O podrías calcularla si tu TTS te da ese dato
+        src: "reproductor_nativo" 
+    });
             if (datosBackend.imagenUrl) {
                 const estructuraImagenHtml = `<img src="${datosBackend.imagenUrl}" style="width:100%; border-radius:12px; border: 2px solid #FFD700; box-shadow: 0 0 15px rgba(255,217,0,0.5); margin-top:8px;" alt="YouSpace Art">`;
                 pintarMensaje(estructuraImagenHtml, 'msg-izquierda', null, 'leido', harvisMsgId + "_img", 'texto');
