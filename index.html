@@ -3663,11 +3663,14 @@ if (typeof pintarMensaje === "function") {
     // Si tienes audio del servidor (datosBackend.audioBase64), usa ese.
     // Si no tienes, le pasamos el texto a 'pintarMensaje' para que sepa que debe mostrar el botón 
     // de "reproducir con hablarHarvis".
+    // Solo intenta pintar si los datos realmente existen
+if (datosBackend) {
     const fuenteAudio = datosBackend.audioBase64 || respuestaIA; 
     const tipoAudio = datosBackend.audioBase64 ? 'audio_servidor' : 'audio';
-
     pintarMensaje(fuenteAudio, 'msg-izquierda', null, 'leido', harvisMsgId + "_audio", tipoAudio);
-            
+    
+    // Solo pinta imagen si existe la URL
+    
     // 3. Imagen (tu lógica existente)
     
             if (datosBackend.imagenUrl) {
