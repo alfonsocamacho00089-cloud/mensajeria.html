@@ -89,19 +89,21 @@ const respuestaServidor = await fetch(urlGemini, {
 });
     
 // 1. Obtienes la respuesta de Gemini
-const datosGemini = await respuestaServidor.json();
-const respuestaIA = datosGemini.candidates?.[0]?.content?.parts?.[0]?.text || "Sistemas listos.";
+// 1. Obtener la respuesta cruda primero
+const textoRespuesta = await respuestaServidor.text();
 
-// 2. Aquí preparas el objeto de respuesta
-let respuestaFinal = { respuesta: respuestaIA };
-
-// 3. AQUÍ IRÍA LA MAGIA (Condicional)
+let datosGemini;
 try {
-    // Si tienes el audio generado (ejemplo: audioBase64), lo agregas
-    // respuestaFinal.audioBase64 = await generarAudioTTS(respuestaIA); 
+    // 2. Intentar convertir a JSON
+    datosGemini = JSON.parse(textoRespuesta);
 } catch (e) {
-    console.error("Fallo al generar audio, pero enviamos el texto igual");
+    // 3. SI FALLA, significa que el servidor te envió un error HTML, no un JSON
+    console.error("❌ ERROR DEL SERVIDOR (No es JSON):", textoRespuesta);
+    return res.status(500).json({ 
+        respuesta: "Error interno del servidor: Gemini no respondió correctamente.",
+        errorDetallado: textoRespuesta.substring(0, 100) // Te muestra el inicio del error real
+    });
 }
 
-// 4. Retornas UNA SOLA VEZ al final de todo
-return res.status(200).json(respuestaFinal);
+// Ahora sí, seguimos con la lógica normal si el JSON es válido
+const respuestaIA = datosGemini.candidates?.[0]?.content?.parts?.[0]?.text || "Sistemas listos.";
