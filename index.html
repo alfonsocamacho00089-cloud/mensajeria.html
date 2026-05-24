@@ -2041,25 +2041,27 @@ async function cargarProto() {
 
           let mensajeSeleccionado = null;
 function pintarMensaje(contenido, clase, hora, status, id, tipo = 'texto') {
+ const box = document.getElementById('chat-box');
+    if (!box) return;
+ 
     let textoReal = (typeof contenido === 'object') ? (contenido.texto || "") : contenido;
-    
-    // --- ESTO TE AYUDARÁ A VER QUÉ ESTÁ LLEGANDO ---
-    console.log("Contenido recibido por la función:", textoReal);
-    // ------------------------------------------------
-    
-    const box = document.getElementById('chat-box');
-    // ... sigue el resto
-    // Extraemos la URL si viene con el formato IMAGEN:[URL]
-    // Antes del match, elimina los saltos de línea que H.A.R.V.I.S. pueda haber puesto
-// En tu función pintarMensaje, antes de buscar la URL:
+ // Antes del match, elimina los saltos de línea que H.A.R.V.I.S. pueda haber puesto
+textoReal = textoReal.replace(/[\r\n]+/g, '');
+ // En tu función pintarMensaje, antes de buscar la URL:
+if (typeof contenido === 'string' && contenido.startsWith("Error API:")) {
+    // Si es un error, lo forzamos a que sea texto normal para que se lea el mensaje de Google
+    tipo = 'texto';
+}
 
 // ... después sigue tu código de match de IMAGEN:
+    // --- EXTRACCIÓN ROBUSTA DE LA URL ---
+    // Usamos 's' para que el punto incluya saltos de línea y 'i' para ignorar mayúsculas
+    const match = textoReal.match(/IMAGEN:(https?:\/\/[^\s\]]+)/i);
     
-    // ... resto de tu código
-    // --------------------------
-
-    // ... el resto de tu código sigue igual
-
+    if (match) {
+        tipo = 'foto';
+        textoReal = match[1]; // Esto captura la URL limpia después de IMAGEN:
+     }
     const div = document.createElement('div');
     div.className = "msg-burbuja " + clase;
     div.id = id;
