@@ -90,9 +90,20 @@ const respuestaServidor = await fetch(urlGemini, {
     // ... (resto de tu lógica) ...
         // ... dentro de tu función en api/chat.js ...
 // ... dentro de tu función en api/chat.js ...
+// 1. PRIMERO: Verifica si la respuesta HTTP es correcta (status 200)
+if (!respuestaServidor.ok) {
+    // Si no es 200, lee como texto para no romper el parser JSON
+    const textoError = await respuestaServidor.text();
+    console.error("Error del servidor:", textoError);
+    return res.status(200).json({ 
+        respuesta: "Error en el servidor: " + textoError 
+    });
+}
+
+// 2. SEGUNDO: Ahora sí, convierte a JSON sabiendo que es un JSON válido
 const datosGemini = await respuestaServidor.json();
 
-// 3. RESPUESTA SEGURA
+// 3. TERCERO: Tu lógica actual de blindaje
 if (datosGemini.error) {
     return res.status(200).json({ respuesta: `Error API: ${datosGemini.error.message}` });
 }
@@ -102,8 +113,6 @@ const respuestaIA = datosGemini.candidates?.[0]?.content?.parts?.[0]?.text || "S
 // PREPARAMOS EL PAQUETE DE RESPUESTA
 let respuestaFinal = { respuesta: respuestaIA };
 
-// AÑADIMOS AUDIO SOLO SI LO LOGRASTE GENERAR (Mantiene tu código original intacto si no hay audio)
-// Si no tienes lógica de audio aún, esto simplemente no hace nada y tu app sigue igual de estable.
 if (typeof generarAudioTTS !== 'undefined') {
     try {
         respuestaFinal.audioBase64 = await generarAudioTTS(respuestaIA);
