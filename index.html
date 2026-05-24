@@ -2041,16 +2041,19 @@ async function cargarProto() {
 
           let mensajeSeleccionado = null;
 function pintarMensaje(contenido, clase, hora, status, id, tipo = 'texto') {
-    const box = document.getElementById('chat-box');
-    if (!box) return;
-
     let textoReal = (typeof contenido === 'object') ? (contenido.texto || "") : contenido;
     
-    // --- AQUÍ ESTÁ LA MAGIA ---
-    // Detectamos si el texto contiene un enlace de pollinations
-    if (textoReal.includes('pollinations.ai')) {
+    // Extraemos la URL si viene con el formato IMAGEN:[URL]
+    const match = textoReal.match(/IMAGEN:\[(https?:\/\/[^\]]+)\]/);
+    
+    if (match) {
         tipo = 'foto';
+        textoReal = match[1]; // Nos quedamos solo con la URL limpia
+    } else if (textoReal.includes('pollinations.ai')) {
+        tipo = 'foto'; // Respaldo por si acaso llega el link directo
     }
+    
+    // ... resto de tu código
     // --------------------------
 
     // ... el resto de tu código sigue igual
