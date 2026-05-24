@@ -1582,41 +1582,43 @@ const cuerpoPeticion = {
         });
 
         const datosBackend = await respuestaServidor.json();
-        const harvisMsgId = "msg_harvis_" + Date.now();
-        
-        let respuestaIA = "Sistemas listos, Pedro.";
+        // ... (después de obtener datosBackend) ...
 
-        // REVISIÓN DEL SVE: Tu backend devuelve { respuesta: "Texto de la IA" }
-        if (datosBackend && datosBackend.respuesta) {
-            respuestaIA = datosBackend.respuesta;
-        } else {
-            console.warn("⚠️ El backend no devolvió la propiedad 'respuesta':", datosBackend);
-            respuestaIA = "⚠️ H.A.R.V.I.S. no pudo procesar el formato del backend.";
-        }
-        
-        if (typeof hablarHarvis === "function") {
-            hablarHarvis(respuestaIA);
-        }
+const harvisMsgId = "msg_harvis_" + Date.now();
 
-        // Pintamos el mensaje final en tu pantalla
-        pintarMensaje(respuestaIA, 'msg-izquierda', null, 'leido', harvisMsgId, 'texto');
+if (datosBackend && datosBackend.respuesta) {
+    // A. PINTAR TEXTO: Harvis aparece hablando en texto
+    pintarMensaje(datosBackend.respuesta, 'msg-izquierda', null, 'leido', harvisMsgId, 'texto');
+    
+    // B. REPRODUCCIÓN AUTOMÁTICA Y NOTA DE VOZ
+    if (datosBackend && datosBackend.respuesta) {
+    // A. PINTAR TEXTO
+    pintarMensaje(datosBackend.respuesta, 'msg-izquierda', null, 'leido', harvisMsgId, 'texto');
+    
+    // B. REPRODUCCIÓN AUTOMÁTICA Y NOTA DE VOZ
+    if (datosBackend.audioBase64) {
+        const audioHarvis = new Audio(datosBackend.audioBase64);
+        audioHarvis.play().catch(e => console.log("Autoplay bloqueado."));
         
-        await guardarLocal('mensajes', { 
-            id: harvisMsgId, 
-            contactoId: targetID,
-            texto: respuestaIA, 
-            clase: 'msg-izquierda', 
-            status: 'leido',
-            tipo: 'texto',
-            ts: Date.now(),
-            hora: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })
-        });
-
-    } catch (errorBackend) {
-        console.error("❌ Error en la ruta del backend:", errorBackend);
-        const harvisMsgId = "msg_harvis_err_" + Date.now();
-        pintarMensaje(`💥 Error al conectar con el servidor: ${errorBackend.message}`, 'msg-izquierda', null, 'leido', harvisMsgId, 'texto');
+        pintarMensaje(datosBackend.audioBase64, 'msg-izquierda', null, 'leido', harvisMsgId + "_audio", 'audio');
     }
+    
+    // C. GUARDAR LOCAL
+    await guardarLocal('mensajes', { 
+        id: harvisMsgId, 
+        contactoId: targetID,
+        texto: datosBackend.respuesta, 
+        clase: 'msg-izquierda', 
+        status: 'leido',
+        tipo: 'texto',
+        ts: Date.now(),
+        hora: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })
+    });
+
+} else {
+    // Si no hubo respuesta válida, manejamos el error visualmente
+    const harvisMsgIdErr = "msg_harvis_err_" + Date.now();
+    pintarMensaje("⚠️ Error: El servidor no devolvió una respuesta válida.", 'msg-izquierda', null, 'leido', harvisMsgIdErr, 'texto');
      }
      
      
