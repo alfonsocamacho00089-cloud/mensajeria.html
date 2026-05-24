@@ -3653,16 +3653,26 @@ async function procesarRespuestaHarvis(msg, targetID) {
 
 // ... (Tu lógica de pintarMensaje y el guardado masivo en IndexedDB continúan abajo intactos) ...
 
-        if (typeof pintarMensaje === "function") {
-            pintarMensaje(respuestaIA, 'msg-izquierda', null, 'leido', harvisMsgId, 'texto');
+        // ... (dentro de procesarRespuestaHarvis) ...
 
-         // 2. NUEVO: Pintamos la nota de voz (reproductor)
-    // Pasamos el tipo 'audio' o un identificador nuevo para que tu función 
-    // pintarMensaje sepa que debe mostrar el reproductor de voz
-    pintarMensaje(respuestaIA, 'msg-izquierda', null, 'leido', harvisMsgId + "_audio", 'audio', {
-        duracion: "auto", // O podrías calcularla si tu TTS te da ese dato
-        src: "reproductor_nativo" 
-    });
+if (typeof pintarMensaje === "function") {
+    // 1. Siempre pintamos el texto
+    pintarMensaje(respuestaIA, 'msg-izquierda', null, 'leido', harvisMsgId, 'texto');
+    
+    // 2. Pintamos la nota de voz:
+    // Si tienes audio del servidor (datosBackend.audioBase64), usa ese.
+    // Si no tienes, le pasamos el texto a 'pintarMensaje' para que sepa que debe mostrar el botón 
+    // de "reproducir con hablarHarvis".
+    const fuenteAudio = datosBackend.audioBase64 || respuestaIA; 
+    const tipoAudio = datosBackend.audioBase64 ? 'audio_servidor' : 'audio';
+
+    pintarMensaje(fuenteAudio, 'msg-izquierda', null, 'leido', harvisMsgId + "_audio", tipoAudio);
+            
+    // 3. Imagen (tu lógica existente)
+    if (datosBackend.imagenUrl) {
+        // ... (tu código de imagen) ...
+    }
+ }
             if (datosBackend.imagenUrl) {
                 const estructuraImagenHtml = `<img src="${datosBackend.imagenUrl}" style="width:100%; border-radius:12px; border: 2px solid #FFD700; box-shadow: 0 0 15px rgba(255,217,0,0.5); margin-top:8px;" alt="YouSpace Art">`;
                 pintarMensaje(estructuraImagenHtml, 'msg-izquierda', null, 'leido', harvisMsgId + "_img", 'texto');
