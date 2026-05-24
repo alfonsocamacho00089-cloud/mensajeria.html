@@ -37,15 +37,15 @@ export default async function handler(req, res) {
         const respuestaServidor = await fetch(urlGemini, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                contents: historialFormateado,
-                systemInstruction: { 
-                    parts: [{ text: `${harvisPromptSystem}\n\nFECHA ACTUAL: ${fechaActual}.` }] 
-                },
-                tools: [{ google_search: {} }, { codeExecution: {} }],
-                generationConfig: { temperature: 0.75 }
-            })
-        });
+            // ... dentro de tu fetch ...
+body: JSON.stringify({
+    contents: historialFormateado,
+    systemInstruction: { 
+        parts: [{ text: `${harvisPromptSystem}\n\nFECHA ACTUAL: ${fechaActual}.` }] 
+    },
+    //tools: [{ google_search: {} }, { codeExecution: {} }], // <-- COMENTA ESTA LÍNEA
+    generationConfig: { temperature: 0.75 }
+})
 
         if (!respuestaServidor.ok) {
             const textoError = await respuestaServidor.text();
