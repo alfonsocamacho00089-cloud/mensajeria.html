@@ -88,19 +88,20 @@ const respuestaServidor = await fetch(urlGemini, {
     })
 });
     
-// ... (resto de tu lógica) ...
-        const datosGemini = await respuestaServidor.json();
-        
-        // 3. RESPUESTA SEGURA (Blindaje contra errores de texto plano)
-        if (datosGemini.error) {
-            return res.status(200).json({ respuesta: `Error API: ${datosGemini.error.message}` });
-        }
+// 1. Obtienes la respuesta de Gemini
+const datosGemini = await respuestaServidor.json();
+const respuestaIA = datosGemini.candidates?.[0]?.content?.parts?.[0]?.text || "Sistemas listos.";
 
-        const respuestaIA = datosGemini.candidates?.[0]?.content?.parts?.[0]?.text || "Sistemas listos.";
-        return res.status(200).json({ respuesta: respuestaIA });
+// 2. Aquí preparas el objeto de respuesta
+let respuestaFinal = { respuesta: respuestaIA };
 
-    } catch (error) {
-        // CUALQUIER error se convierte en JSON para que tu app móvil no explote
-        return res.status(200).json({ respuesta: "Error crítico: " + error.message });
-    }
+// 3. AQUÍ IRÍA LA MAGIA (Condicional)
+try {
+    // Si tienes el audio generado (ejemplo: audioBase64), lo agregas
+    // respuestaFinal.audioBase64 = await generarAudioTTS(respuestaIA); 
+} catch (e) {
+    console.error("Fallo al generar audio, pero enviamos el texto igual");
 }
+
+// 4. Retornas UNA SOLA VEZ al final de todo
+return res.status(200).json(respuestaFinal);
