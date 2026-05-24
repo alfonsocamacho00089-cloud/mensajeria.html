@@ -89,9 +89,9 @@ const respuestaServidor = await fetch(urlGemini, {
 });
     // ... (resto de tu lógica) ...
         // ... dentro de tu función en api/chat.js ...
-const respuestaCruda = await respuestaServidor.text();
-console.log("Respuesta real del servidor:", respuestaCruda); // Revisa esto en los logs de Vercel
-const datosGemini = JSON.parse(respuestaCruda);
+// ... dentro de tu función en api/chat.js ...
+const datosGemini = await respuestaServidor.json();
+
 // 3. RESPUESTA SEGURA
 if (datosGemini.error) {
     return res.status(200).json({ respuesta: `Error API: ${datosGemini.error.message}` });
