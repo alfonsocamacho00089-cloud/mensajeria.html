@@ -2178,26 +2178,11 @@ if (typeof contenido === 'string' && contenido.startsWith("Error API:")) {
         
         let cuerpoHTML = "";
         
-        // ----------------------------------------------------
-        // CAMINO 2: EL CHAT NORMAL
-        // ----------------------------------------------------
-        
-        // --- SUSTITUYE TU BLOQUE DE FOTO POR ESTE ---
-if (tipo === 'foto' || tipo === 'sticker' || textoReal.includes('googleusercontent.com')) {
-    
-    // Intentamos extraer cualquier link que empiece por https y tenga googleusercontent
-    const match = textoReal.match(/(https?:\/\/[^\s]+googleusercontent\.com[^\s]+)/i);
-
-    if (match) {
-        // Si encontramos el link, lo pintamos
-        const urlLimpia = match[1].replace(/[\]]/g, ''); // Limpiamos corchetes por si acaso
-        cuerpoHTML = `<img src="${urlLimpia}" style="max-width:100%; border-radius:12px; display:block; border: 2px solid #ffd700;">`;
-    } else {
-        // Si no es una foto válida, lo tratamos como texto para no ver burbujas negras
-        cuerpoHTML = `<span class="texto-msg">${textoReal}</span>`;
-    }
-} else {
-    cuerpoHTML = `<span class="texto-msg">${textoReal}</span>`;
+        if (tipo === 'foto' || tipo === 'sticker' || tipo === 'stickers') {
+            cuerpoHTML = `<img src="${textoReal}" style="max-width:180px; border-radius:12px; display:block; border: none; background:#000">`;
+        } else {
+            // El texto normal se envuelve en tu span de siempre
+            cuerpoHTML = `<span class="texto-msg">${textoReal}</span>`;
      }
      
 
