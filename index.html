@@ -3654,27 +3654,26 @@ async function procesarRespuestaHarvis(msg, targetID) {
 // ... (Tu lógica de pintarMensaje y el guardado masivo en IndexedDB continúan abajo intactos) ...
 
         // ... (dentro de procesarRespuestaHarvis) ...
-
 if (typeof pintarMensaje === "function") {
-    // 1. Siempre pintamos el texto
+    // 1. Pintamos el texto (lo que el usuario lee al instante)
     pintarMensaje(respuestaIA, 'msg-izquierda', null, 'leido', harvisMsgId, 'texto');
         
-    // 2. Pintamos la nota de voz:
-    // Si tienes audio del servidor (datosBackend.audioBase64), usa ese.
-    // Si no tienes, le pasamos el texto a 'pintarMensaje' para que sepa que debe mostrar el botón 
-    // de "reproducir con hablarHarvis".
-    const fuenteAudio = datosBackend.audioBase64 || respuestaIA; 
-    const tipoAudio = datosBackend.audioBase64 ? 'audio_servidor' : 'audio';
+    // 2. Lógica de audio: Reproducción automática y persistencia
+    if (datosBackend.audioBase64) {
+        // A. Reproducción automática (Harvis habla)
+        const audioHarvis = new Audio(datosBackend.audioBase64);
+        audioHarvis.play().catch(e => console.log("Autoplay bloqueado: requiere interacción previa."));
+        
+        // B. Pintamos la nota de voz en el chat (el registro visual)
+        pintarMensaje(datosBackend.audioBase64, 'msg-izquierda', null, 'leido', harvisMsgId + "_audio", 'audio');
+    }
+}
 
-    pintarMensaje(fuenteAudio, 'msg-izquierda', null, 'leido', harvisMsgId + "_audio", tipoAudio);
-     }    
-    // 3. Imagen (tu lógica existente)
-    
-            if (datosBackend.imagenUrl) {
-                const estructuraImagenHtml = `<img src="${datosBackend.imagenUrl}" style="width:100%; border-radius:12px; border: 2px solid #FFD700; box-shadow: 0 0 15px rgba(255,217,0,0.5); margin-top:8px;" alt="YouSpace Art">`;
-                pintarMensaje(estructuraImagenHtml, 'msg-izquierda', null, 'leido', harvisMsgId + "_img", 'texto');
-            }
-     }
+// 3. Imagen (tu lógica existente se mantiene igual)
+if (datosBackend.imagenUrl) {
+    const estructuraImagenHtml = `<img src="${datosBackend.imagenUrl}" style="width:100%; border-radius:12px; border: 2px solid #FFD700; box-shadow: 0 0 15px rgba(255,217,0,0.5); margin-top:8px;" alt="YouSpace Art">`;
+    pintarMensaje(estructuraImagenHtml, 'msg-izquierda', null, 'leido', harvisMsgId + "_img", 'texto');
+ }
     
     
         
