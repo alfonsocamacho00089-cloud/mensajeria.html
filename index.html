@@ -2160,15 +2160,22 @@ function pintarMensaje(contenido, clase, hora, status, id, tipo = 'texto') {
         
         let cuerpoHTML = "";
         
-        // En tu CAMINO 2, donde renderizas la foto:
-if (tipo === 'foto') {
-    // Si detectamos que es un link de pollinations, lo ponemos en una etiqueta img
-    if (textoReal.includes('pollinations.ai')) {
-        cuerpoHTML = `<img src="${textoReal}" style="max-width:100%; border-radius:12px; display:block; border: 2px solid #ffd700;">`;
-    } else {
-        cuerpoHTML = `<img src="${textoReal}" style="max-width:180px; border-radius:12px; display:block; border: none; background:#000">`;
-    }
+        // ----------------------------------------------------
+        // CAMINO 2: EL CHAT NORMAL
+        // ----------------------------------------------------
+        
+        if (tipo === 'foto' || tipo === 'sticker' || tipo === 'stickers') {
+            // Aquí entra tanto para fotos normales como para pollinations
+            if (textoReal.includes('pollinations.ai')) {
+                cuerpoHTML = `<img src="${textoReal}" style="max-width:100%; border-radius:12px; display:block; border: 2px solid #ffd700;">`;
+            } else {
+                cuerpoHTML = `<img src="${textoReal}" style="max-width:180px; border-radius:12px; display:block; border: none; background:#000">`;
+            }
+        } else {
+            // El texto normal se envuelve en tu span de siempre
+            cuerpoHTML = `<span class="texto-msg">${textoReal}</span>`;
      }
+     
 
         // Aquí usamos exactamente tu maquetación vieja con la clase msg-info que tienes en el CSS
         div.innerHTML = `
