@@ -3669,10 +3669,7 @@ if (typeof pintarMensaje === "function") {
     pintarMensaje(fuenteAudio, 'msg-izquierda', null, 'leido', harvisMsgId + "_audio", tipoAudio);
             
     // 3. Imagen (tu lógica existente)
-    if (datosBackend.imagenUrl) {
-        // ... (tu código de imagen) ...
-    }
- }
+    
             if (datosBackend.imagenUrl) {
                 const estructuraImagenHtml = `<img src="${datosBackend.imagenUrl}" style="width:100%; border-radius:12px; border: 2px solid #FFD700; box-shadow: 0 0 15px rgba(255,217,0,0.5); margin-top:8px;" alt="YouSpace Art">`;
                 pintarMensaje(estructuraImagenHtml, 'msg-izquierda', null, 'leido', harvisMsgId + "_img", 'texto');
