@@ -2048,12 +2048,11 @@ function pintarMensaje(contenido, clase, hora, status, id, tipo = 'texto') {
     // Extraemos la URL si viene con el formato IMAGEN:[URL]
     const match = textoReal.match(/IMAGEN:\[(https?:\/\/[^\]]+)\]/);
     
-    if (match) {
+    if (typeof contenido === 'object' && (contenido.inlineData || contenido.image_url)) {
         tipo = 'foto';
-        textoReal = match[1]; // Nos quedamos solo con la URL limpia
-    } else if (textoReal.includes('pollinations.ai')) {
-        tipo = 'foto'; // Respaldo por si acaso llega el link directo
-    }
+        // Aquí extraes la URL de Google
+        textoReal = contenido.image_url || `data:image/jpeg;base64,${contenido.inlineData.data}`;
+ }
     
     // ... resto de tu código
     // --------------------------
@@ -2170,15 +2169,17 @@ function pintarMensaje(contenido, clase, hora, status, id, tipo = 'texto') {
         // ----------------------------------------------------
         
         if (tipo === 'foto' || tipo === 'sticker' || tipo === 'stickers') {
-            // Aquí entra tanto para fotos normales como para pollinations
-            if (textoReal.includes('pollinations.ai')) {
-                cuerpoHTML = `<img src="${textoReal}" style="max-width:100%; border-radius:12px; display:block; border: 2px solid #ffd700;">`;
-            } else {
-                cuerpoHTML = `<img src="${textoReal}" style="max-width:180px; border-radius:12px; display:block; border: none; background:#000">`;
-            }
-        } else {
-            // El texto normal se envuelve en tu span de siempre
-            cuerpoHTML = `<span class="texto-msg">${textoReal}</span>`;
+    // CAMBIO: Ahora verificamos si es Pollinations O si es una URL de Google/Base64
+    if (textoReal.includes('pollinations.ai')) {
+        // Estilo especial para Pollinations (borde amarillo)
+        const urlLimpia = textoReal.split(' ')[0];
+        cuerpoHTML = `<img src="${urlLimpia}" style="max-width:100%; border-radius:12px; display:block; border: 2px solid #ffd700;">`;
+    } else {
+        // Estilo para TODO LO DEMÁS (incluye Googleusercontent y Base64)
+        cuerpoHTML = `<img src="${textoReal}" style="max-width:100%; border-radius:12px; display:block; border: none; background:#000">`;
+    }
+} else {
+    cuerpoHTML = `<span class="texto-msg">${textoReal}</span>`;
      }
      
 
