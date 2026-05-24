@@ -87,6 +87,7 @@ const respuestaServidor = await fetch(urlGemini, {
         generationConfig: { temperature: 0.75 }
     })
 });
+        
     
 // ... (resto de tu lógica) ...
         const datosGemini = await respuestaServidor.json();
@@ -96,11 +97,34 @@ const respuestaServidor = await fetch(urlGemini, {
             return res.status(200).json({ respuesta: `Error API: ${datosGemini.error.message}` });
         }
 
-        const respuestaIA = datosGemini.candidates?.[0]?.content?.parts?.[0]?.text || "Sistemas listos.";
-        return res.status(200).json({ respuesta: respuestaIA });
+// ... dentro de tu handler en /api/chat.js ...
 
-    } catch (error) {
-        // CUALQUIER error se convierte en JSON para que tu app móvil no explote
-        return res.status(200).json({ respuesta: "Error crítico: " + error.message });
-    }
-    }
+const respuestaIA = datosGemini.candidates?.[0]?.content?.parts?.[0]?.text || "Sistemas listos.";
+
+// 1. PREPARAMOS EL OBJETO RESPUESTA
+let respuestaFinal = { respuesta: respuestaIA };
+
+// 2. GENERAMOS EL AUDIO AUTOMÁTICO (Más nada, solo esto)
+try {
+    // Usamos el servicio de voz gratuito de Google (TTS) que es estable y rápido
+    const ttsUrl = `https://translate.google.com/translate_tts?ie=UTF-8&tl=es&client=tw-ob&q=${encodeURIComponent(respuestaIA)}`;
+    
+    // Convertimos la respuesta de voz a Base64 para enviarla al chat
+    const audioRes = await fetch(ttsUrl);
+    const audioBuffer = await audioRes.arrayBuffer();
+    const base64Audio = Buffer.from(audioBuffer).toString('base64');
+    
+    // Lo asignamos al objeto que el chat ya sabe recibir
+    respuestaFinal.audioBase64 = `data:audio/mp3;base64,${base64Audio}`;
+} catch (e) {
+    console.error("Error generando voz:", e);
+    // Si falla el audio, el chat seguirá funcionando solo con texto
+}
+
+// 3. RETORNAMOS TODO JUNTO
+return res.status(200).json(respuestaFinal);
+
+
+
+        
+        
