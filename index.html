@@ -2044,15 +2044,19 @@ function pintarMensaje(contenido, clase, hora, status, id, tipo = 'texto') {
  const box = document.getElementById('chat-box');
     if (!box) return;
     let textoReal = (typeof contenido === 'object') ? (contenido.texto || "") : contenido;
+ // Antes del match, elimina los saltos de línea que H.A.R.V.I.S. pueda haber puesto
+textoReal = textoReal.replace(/[\r\n]+/g, '');
+    // --- EXTRACCIÓN ROBUSTA DE LA URL ---
+    // Usamos 's' para que el punto incluya saltos de línea y 'i' para ignorar mayúsculas
+    const match = textoReal.match(/IMAGEN:(https?:\/\/[^\s\]]+)/i);
     
-    // Extraemos la URL si viene con el formato IMAGEN:[URL]
-    const match = textoReal.match(/IMAGEN:\[(https?:\/\/[^\]]+)\]/);
-    
-    if (typeof contenido === 'object' && (contenido.inlineData || contenido.image_url)) {
+    if (match) {
         tipo = 'foto';
-        // Aquí extraes la URL de Google
-        textoReal = contenido.image_url || `data:image/jpeg;base64,${contenido.inlineData.data}`;
- }
+        textoReal = match[1]; // Esto captura la URL limpia después de IMAGEN:
+     }
+    // Extraemos la URL si viene con el formato IMAGEN:[URL]
+    // Antes del match, elimina los saltos de línea que H.A.R.V.I.S. pueda haber puesto
+
     
     // ... resto de tu código
     // --------------------------
