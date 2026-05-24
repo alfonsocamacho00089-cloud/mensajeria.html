@@ -2069,7 +2069,8 @@ textoReal = textoReal.replace(/[\r\n]+/g, '');
 
     const horaFinal = hora || new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
     const checkHTML = clase === 'msg-derecha' ? `<span style="margin-left:5px; font-size:10px;">${status === 'leido' ? '✓✓' : '✓'}</span>` : '';
-
+// Dentro de pintarMensaje
+console.log("Intentando pintar tipo:", tipo, "con contenido:", contenido);
     // ========================================================
     // 🔥 EL DIVISOR: ¿Es un enlace externo o archivo pesado?
     // ========================================================
