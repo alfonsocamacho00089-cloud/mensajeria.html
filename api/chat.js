@@ -76,16 +76,18 @@ const respuestaServidor = await fetch(urlGemini, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-    contents: historialFormateado,
-    systemInstruction: { 
-        parts: [{ text: `${harvisPromptSystem}\n\nFECHA ACTUAL: ${new Date().toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}. Usa esta fecha como base absoluta para cualquier referencia temporal.` }] 
-    },
-    // AQUÍ ESTÁ EL CAMBIO CLAVE:
-    tools: [
-        { google_search: {} } 
-    ],
-    generationConfig: { temperature: 0.75 }
-})
+        contents: historialFormateado,
+        systemInstruction: { 
+            parts: [{ text: `${harvisPromptSystem}\n\nFECHA ACTUAL: ${fechaActual}. Usa esta fecha como base absoluta para cualquier referencia temporal.` }] 
+        },
+        tools: [
+            { google_search: {} }, // Buscador
+            { codeExecution: {} }          // Calculadora lógica
+        ],
+        generationConfig: { temperature: 0.75 }
+    })
+});
+    
 // ... (resto de tu lógica) ...
         const datosGemini = await respuestaServidor.json();
         
