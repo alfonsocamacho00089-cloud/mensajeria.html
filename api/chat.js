@@ -88,18 +88,27 @@ const respuestaServidor = await fetch(urlGemini, {
     })
 });
     // ... (resto de tu lógica) ...
-        const datosGemini = await respuestaServidor.json();
-        
-        // 3. RESPUESTA SEGURA (Blindaje contra errores de texto plano)
-        if (datosGemini.error) {
-            return res.status(200).json({ respuesta: `Error API: ${datosGemini.error.message}` });
-        }
+        // ... dentro de tu función en api/chat.js ...
+const datosGemini = await respuestaServidor.json();
 
-        const respuestaIA = datosGemini.candidates?.[0]?.content?.parts?.[0]?.text || "Sistemas listos.";
-        return res.status(200).json({ respuesta: respuestaIA });
+// 3. RESPUESTA SEGURA
+if (datosGemini.error) {
+    return res.status(200).json({ respuesta: `Error API: ${datosGemini.error.message}` });
+}
 
-    } catch (error) {
-        // CUALQUIER error se convierte en JSON para que tu app móvil no explote
-        return res.status(200).json({ respuesta: "Error crítico: " + error.message });
+const respuestaIA = datosGemini.candidates?.[0]?.content?.parts?.[0]?.text || "Sistemas listos.";
+
+// PREPARAMOS EL PAQUETE DE RESPUESTA
+let respuestaFinal = { respuesta: respuestaIA };
+
+// AÑADIMOS AUDIO SOLO SI LO LOGRASTE GENERAR (Mantiene tu código original intacto si no hay audio)
+// Si no tienes lógica de audio aún, esto simplemente no hace nada y tu app sigue igual de estable.
+if (typeof generarAudioTTS !== 'undefined') {
+    try {
+        respuestaFinal.audioBase64 = await generarAudioTTS(respuestaIA);
+    } catch (e) {
+        console.error("No se pudo generar el audio, pero enviamos el texto.");
     }
 }
+
+return res.status(200).json(respuestaFinal);
