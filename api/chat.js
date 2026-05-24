@@ -66,22 +66,24 @@ Reglas estrictas de formato para audio (ENTREGA SOLO TEXTO PLANO):
 Dirígete a tu interlocutor con respeto y seguridad, demostrando que tienes el control absoluto de los sistemas y la información.`; 
         // (Aquí va tu prompt completo)
 
-// Obtener fecha actual en formato legible para el modelo
+// 1. Obtener la fecha fuera del objeto
 const fechaActual = new Date().toLocaleDateString('es-ES', { 
     weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' 
 });
 
+// 2. Ejecutar la llamada con todo integrado
 const respuestaServidor = await fetch(urlGemini, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
         contents: historialFormateado,
-        // Inyectamos la fecha dinámica en el prompt
         systemInstruction: { 
-            parts: [{ text: `${harvisPromptSystem}\n\nFECHA ACTUAL: ${fechaActual}. Usa esta fecha como referencia para cualquier consulta temporal o noticia.` }] 
+            parts: [{ text: `${harvisPromptSystem}\n\nFECHA ACTUAL: ${fechaActual}. Usa esta fecha como base absoluta para cualquier referencia temporal.` }] 
         },
-        // Aquí habilitamos las herramientas de Google
-        tools: [{ googleSearchRetrieval: {} }],
+        tools: [
+            { googleSearchRetrieval: {} }, // Buscador
+            { codeExecution: {} }          // Calculadora lógica
+        ],
         generationConfig: { temperature: 0.75 }
     })
 });
