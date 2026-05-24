@@ -3707,22 +3707,87 @@ try {
         mensajeFallo = 'Error 429: Rate Limit';
     }
     
-    if (typeof actualizarMonitorAPI === "function") {
-        actualizarMonitorAPI(0, 'error', mensajeFallo);
-    }
+
+// ... (Tu lógica de pintarMensaje y el guardado masivo en IndexedDB continúan abajo intactos) ...
+
+        // ... (dentro de procesarRespuestaHarvis) ...
+
+if (typeof pintarMensaje === "function") {
+    // 1. Siempre pintamos el texto
+    pintarMensaje(respuestaIA, 'msg-izquierda', null, 'leido', harvisMsgId, 'texto');
     
-    const txtStatus = document.getElementById('widget-status-text');
-    if (txtStatus) {
-        txtStatus.innerHTML = `
-            <span style="color:#ff3333; display:block; margin-bottom:4px;">${mensajeFallo}</span>
-            <button onclick="DespacharMensajeEnCola()" style="background:transparent; border:1px solid #d4af37; color:#d4af37; border-radius:4px; font-size:9px; padding:2px 6px; cursor:pointer; box-shadow: 0 0 5px rgba(212,175,55,0.3);">
-                🔄 Reintentar Mensaje
-            </button>
-        `;
+    // 2. Pintamos la nota de voz:
+    // Si tienes audio del servidor (datosBackend.audioBase64), usa ese.
+    // Si no tienes, le pasamos el texto a 'pintarMensaje' para que sepa que debe mostrar el botón 
+    // de "reproducir con hablarHarvis".
+    const fuenteAudio = datosBackend.audioBase64 || respuestaIA; 
+    const tipoAudio = datosBackend.audioBase64 ? 'audio_servidor' : 'audio';
+
+    pintarMensaje(fuenteAudio, 'msg-izquierda', null, 'leido', harvisMsgId + "_audio", tipoAudio);
+            
+    // 3. Imagen (tu lógica existente)
+    
+            if (datosBackend.imagenUrl) {
+                const estructuraImagenHtml = `<img src="${datosBackend.imagenUrl}" style="width:100%; border-radius:12px; border: 2px solid #FFD700; box-shadow: 0 0 15px rgba(255,217,0,0.5); margin-top:8px;" alt="YouSpace Art">`;
+                pintarMensaje(estructuraImagenHtml, 'msg-izquierda', null, 'leido', harvisMsgId + "_img", 'texto');
+            }
+        }
+        
+        if (typeof guardarLocal === "function") {
+            await guardarLocal('mensajes', { 
+                id: harvisMsgId, 
+                contactoId: targetID,
+                texto: datosBackend.imagenUrl ? `${respuestaIA} [Imagen Arte]` : respuestaIA, 
+                clase: 'msg-izquierda', 
+                status: 'leido',
+                tipo: 'texto',
+                ts: Date.now(),
+                hora: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })
+            });
+        }
+
+        // MONITOR: Éxito en la transacción, sumamos los tokens reales
+        if (typeof actualizarMonitorAPI === "function") {
+            const tokensUtilizados = (datosBackend.usage && datosBackend.usage.totalTokenCount) ? datosBackend.usage.totalTokenCount : 0;
+            actualizarMonitorAPI(tokensUtilizados, 'success');
+        }
+
+    } catch (errorBackend) {
+        console.error("❌ Error en la ruta del backend:", errorBackend);
+        const harvisMsgId = "msg_harvis_err_" + Date.now();
+        
+        mensajePendientePorSaturacion = msg; // Guardamos tu texto ante caídas de red duras
+
+        if (typeof pintarMensaje === "function") {
+            pintarMensaje(`💥 Error de conexión. Mensaje guardado en cola.`, 'msg-izquierda', null, 'leido', harvisMsgId, 'texto');
+        }
+
+        let mensajeFallo = 'Fallo de Red';
+        if (errorBackend.message && errorBackend.message.includes("503")) {
+            mensajeFallo = 'Error 503: Saturation';
+        } else if (errorBackend.message && errorBackend.message.includes("429")) {
+            mensajeFallo = 'Error 429: Rate Limit';
+        }
+        
+        if (typeof actualizarMonitorAPI === "function") {
+            actualizarMonitorAPI(0, 'error', mensajeFallo);
+        }
+        
+        const txtStatus = document.getElementById('widget-status-text');
+        if (txtStatus) {
+            txtStatus.innerHTML = `
+                <span style="color:#ff3333; display:block; margin-bottom:4px;">${mensajeFallo}</span>
+                <button onclick="DespacharMensajeEnCola()" style="background:transparent; border:1px solid #d4af37; color:#d4af37; border-radius:4px; font-size:9px; padding:2px 6px; cursor:pointer; box-shadow: 0 0 5px rgba(212,175,55,0.3);">
+                    🔄 Reintentar Mensaje
+                </button>
+            `;
+        }
+        
+    } finally {
+        // 🔓 FINALITY: Ocurra un éxito o un error, el cerrojo se abre para la siguiente orden de voz
+        harvisProcesandoPeticion = false;
     }
-} finally {
-    harvisProcesandoPeticion = false;
- }
+     }
 // El resto de tus funciones de inicialización y eventos de voz continúan abajo intactas...
 
 // =================================================================
