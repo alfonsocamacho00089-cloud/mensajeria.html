@@ -3658,7 +3658,7 @@ async function procesarRespuestaHarvis(msg, targetID) {
          // 2. NUEVO: Pintamos la nota de voz (reproductor)
     // Pasamos el tipo 'audio' o un identificador nuevo para que tu función 
     // pintarMensaje sepa que debe mostrar el reproductor de voz
-    pintarMensaje(null, 'msg-izquierda', null, 'leido', harvisMsgId + "_audio", 'audio', {
+    pintarMensaje(respuestaIA, 'msg-izquierda', null, 'leido', harvisMsgId + "_audio", 'audio', {
         duracion: "auto", // O podrías calcularla si tu TTS te da ese dato
         src: "reproductor_nativo" 
     });
