@@ -87,23 +87,19 @@ const respuestaServidor = await fetch(urlGemini, {
         generationConfig: { temperature: 0.75 }
     })
 });
-    
-// 1. Obtienes la respuesta de Gemini
-// 1. Obtener la respuesta cruda primero
-const textoRespuesta = await respuestaServidor.text();
+    // ... (resto de tu lógica) ...
+        const datosGemini = await respuestaServidor.json();
+        
+        // 3. RESPUESTA SEGURA (Blindaje contra errores de texto plano)
+        if (datosGemini.error) {
+            return res.status(200).json({ respuesta: `Error API: ${datosGemini.error.message}` });
+        }
 
-let datosGemini;
-try {
-    // 2. Intentar convertir a JSON
-    datosGemini = JSON.parse(textoRespuesta);
-} catch (e) {
-    // 3. SI FALLA, significa que el servidor te envió un error HTML, no un JSON
-    console.error("❌ ERROR DEL SERVIDOR (No es JSON):", textoRespuesta);
-    return res.status(500).json({ 
-        respuesta: "Error interno del servidor: Gemini no respondió correctamente.",
-        errorDetallado: textoRespuesta.substring(0, 100) // Te muestra el inicio del error real
-    });
+        const respuestaIA = datosGemini.candidates?.[0]?.content?.parts?.[0]?.text || "Sistemas listos.";
+        return res.status(200).json({ respuesta: respuestaIA });
+
+    } catch (error) {
+        // CUALQUIER error se convierte en JSON para que tu app móvil no explote
+        return res.status(200).json({ respuesta: "Error crítico: " + error.message });
+    }
 }
-
-// Ahora sí, seguimos con la lógica normal si el JSON es válido
-const respuestaIA = datosGemini.candidates?.[0]?.content?.parts?.[0]?.text || "Sistemas listos.";
