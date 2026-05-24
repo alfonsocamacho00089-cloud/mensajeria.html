@@ -2041,6 +2041,8 @@ async function cargarProto() {
 
           let mensajeSeleccionado = null;
 function pintarMensaje(contenido, clase, hora, status, id, tipo = 'texto') {
+ const box = document.getElementById('chat-box');
+    if (!box) return;
     let textoReal = (typeof contenido === 'object') ? (contenido.texto || "") : contenido;
     
     // Extraemos la URL si viene con el formato IMAGEN:[URL]
