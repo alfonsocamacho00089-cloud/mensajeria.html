@@ -92,23 +92,24 @@ if (!respuestaServidor.ok) {
     return res.status(200).json({ respuesta: "Error en el servidor: " + textoError });
 }
 
-const datosGemini = await respuestaServidor.json();
+// 1. Recibes el JSON del servidor
+const data = await respuestaServidor.json();
 
-if (datosGemini.error) {
-    return res.status(200).json({ respuesta: `Error API: ${datosGemini.error.message}` });
+// 2. Primero: Mostrar el texto (Esto lo haces siempre)
+mostrarEnChat(data.respuesta);
+
+// 3. PRIORIDAD 1: Voz Nativa (Lo que ya tienes funcionando)
+// Se dispara instantáneamente para que el usuario no espere
+hablarConVozNativa(data.respuesta); 
+
+// 4. PRIORIDAD 2: El "regalo" (La nota de voz)
+// Si el servidor logró generar el audio, lo guardamos o mostramos el botón
+if (data.audioBase64) {
+    console.log("Nota de voz generada con éxito, disponible para el usuario.");
+    
+    // Aquí puedes hacer que aparezca un botón de "Reproducir Nota de Voz"
+    // o un icono de audio junto a la burbuja del chat
+    prepararBotonDeAudio(data.audioBase64);
+} else {
+    console.log("No se pudo generar nota de voz, solo texto disponible.");
 }
-
-const respuestaIA = datosGemini.candidates?.[0]?.content?.parts?.[0]?.text || "Sistemas listos.";
-
-let respuestaFinal = { respuesta: respuestaIA };
-
-// --- LA INTEGRACIÓN "APARTE" ---
-// Esto solo intenta añadir el audio si es posible, si no, lo ignora.
-try {
-    respuestaFinal.audioBase64 = await generarAudioTTS(respuestaIA);
-} catch (e) {
-    console.log("Nota de voz no generada, se usará voz nativa del TLF.");
-}
-
-return res.status(200).json(respuestaFinal);
-// ... resto de tu catch final
