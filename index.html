@@ -1555,69 +1555,60 @@ const base64 = btoa(binary);
             });
         }
 
-// === CONEXIÓN SEGURA RUTA HACIA EL BACKEND EN VERCEL ===
-// === CONEXIÓN SEGURA RUTA HACIA EL BACKEND EN VERCEL ===
+     
+     // === CONEXIÓN SEGURA AISLADA ===
 if (targetID === "uo4kb3tGHH7J") {
-    try {
-        const urlBackend = "/api/chat"; 
-        const llaveLocal = localStorage.getItem('spacechat_crypto_key') || "";
-        const cuerpoPeticion = {
-            chatHistory: [{ role: "user", parts: [{ text: msg }] }],
-            userKey: llaveLocal 
-        };
+    (async () => {
+        try {
+            const urlBackend = "/api/chat"; 
+            const llaveLocal = localStorage.getItem('spacechat_crypto_key') || "";
+            const cuerpoPeticion = {
+                chatHistory: [{ role: "user", parts: [{ text: msg }] }],
+                userKey: llaveLocal 
+            };
 
-        const respuestaServidor = await fetch(urlBackend, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(cuerpoPeticion)
-        });
-
-        const datosBackend = await respuestaServidor.json();
-        const harvisMsgId = "msg_harvis_" + Date.now(); // 👈 ESTA ES LA VARIABLE QUE FALTABA
-
-        if (datosBackend && datosBackend.respuesta) {
-            // A. PINTAR TEXTO: Harvis aparece hablando
-            pintarMensaje(datosBackend.respuesta, 'msg-izquierda', null, 'leido', harvisMsgId, 'texto');
-            
-            // B. REPRODUCCIÓN AUTOMÁTICA Y NOTA DE VOZ
-            if (datosBackend.audioBase64) {
-                const audioHarvis = new Audio(datosBackend.audioBase64);
-                audioHarvis.play().catch(e => console.log("Autoplay bloqueado."));
-                
-                // Pintamos la nota de voz en el chat
-                pintarMensaje(datosBackend.audioBase64, 'msg-izquierda', null, 'leido', harvisMsgId + "_audio", 'audio');
-            }
-            
-            // C. GUARDAR LOCAL
-            await guardarLocal('mensajes', { 
-                id: harvisMsgId, 
-                contactoId: targetID,
-                texto: datosBackend.respuesta, 
-                clase: 'msg-izquierda', 
-                status: 'leido',
-                tipo: 'texto',
-                ts: Date.now(),
-                hora: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })
+            const respuestaServidor = await fetch(urlBackend, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(cuerpoPeticion)
             });
 
-        } else {
-            // Manejo de respuesta vacía o error del backend
-            const harvisMsgIdErr = "msg_harvis_err_" + Date.now();
-            pintarMensaje("⚠️ Error: El servidor no devolvió una respuesta válida.", 'msg-izquierda', null, 'leido', harvisMsgIdErr, 'texto');
-        }
-        
-        // Limpieza del input después de recibir respuesta
-        if (inputMsg && !multimediaUrl) {
-            inputMsg.value = "";
-            inputMsg.style.height = '36px';
-            inputMsg.focus(); 
-        }
+            const datosBackend = await respuestaServidor.json();
+            const msgIdHarvis = "msg_harvis_" + Date.now(); // Cambié el nombre de la variable para evitar colisiones
 
-    } catch (errorBackend) {
-        console.error("❌ Fallo crítico en el lanzamiento:", errorBackend);
-        const harvisMsgIdErr = "msg_harvis_err_" + Date.now();
-        pintarMensaje(`💥 Error al conectar: ${errorBackend.message}`, 'msg-izquierda', null, 'leido', harvisMsgIdErr, 'texto');
-    }
+            if (datosBackend && datosBackend.respuesta) {
+                pintarMensaje(datosBackend.respuesta, 'msg-izquierda', null, 'leido', msgIdHarvis, 'texto');
+                
+                if (datosBackend.audioBase64) {
+                    const audioHarvis = new Audio(datosBackend.audioBase64);
+                    audioHarvis.play().catch(e => console.log("Autoplay bloqueado."));
+                    pintarMensaje(datosBackend.audioBase64, 'msg-izquierda', null, 'leido', msgIdHarvis + "_audio", 'audio');
+                }
+                
+                await guardarLocal('mensajes', { 
+                    id: msgIdHarvis, 
+                    contactoId: targetID,
+                    texto: datosBackend.respuesta, 
+                    clase: 'msg-izquierda', 
+                    status: 'leido',
+                    tipo: 'texto',
+                    ts: Date.now(),
+                    hora: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })
+                });
+            } else {
+                pintarMensaje("⚠️ Error: El servidor no devolvió una respuesta válida.", 'msg-izquierda', null, 'leido', "err_" + Date.now(), 'texto');
+            }
+            
+            if (inputMsg && !multimediaUrl) {
+                inputMsg.value = "";
+                inputMsg.style.height = '36px';
+                inputMsg.focus(); 
+            }
+        } catch (errorBackend) {
+            console.error("❌ Fallo crítico:", errorBackend);
+            pintarMensaje(`💥 Error al conectar: ${errorBackend.message}`, 'msg-izquierda', null, 'leido', "err_" + Date.now(), 'texto');
+        }
+    })(); // <--- Estas llaves ejecutan el bloque de forma aislada
      }
             
         
@@ -3417,7 +3408,7 @@ function escucharVozPedro(alRecibirTexto) {
 // =================================================================
 // 3. CEREBRO RESPONDEDOR LOCAL DE H.A.R.V.I.S.
 // =================================================================
-function procesarRespuestaHarvi(mensajeRecibidoDePedro) {
+function procesarRespuestaHarvis(mensajeRecibidoDePedro) {
     setTimeout(() => {
         const respuestaRobot = "Entendido señor Peres, procesando comando en YouSpace de forma local.";
         
