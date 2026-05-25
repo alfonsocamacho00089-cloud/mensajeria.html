@@ -6,20 +6,32 @@ async function getEdgeTTS() {
 
 // Modificamos tu función generarAudioTTS para que sea así:
 async function generarAudioTTS(texto) {
+    const ELEVENLABS_API_KEY = "TU_API_KEY_AQUI";
+    const VOICE_ID = "21m00Tcm4TlvDq8ikWAM"; // Esta es la voz de 'Rachel', puedes cambiarla
+
     try {
-        const { tts } = await import("edge-tts");
-        
-        // Configuramos la voz y forzamos el formato para que parezca una petición de navegador
-        const audioBuffer = await tts(texto, { 
-            voice: "es-ES-AlvaroNeural",
-            // A veces el bloqueo 403 se evita reduciendo la complejidad de la petición
-            outputFormat: "audio-24khz-48kbitrate-mono-mp3"
+        const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${VOICE_ID}`, {
+            method: 'POST',
+            headers: {
+                'xi-api-key': ELEVENLABS_API_KEY,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                text: texto,
+                model_id: "eleven_multilingual_v2",
+                voice_settings: { stability: 0.5, similarity_boost: 0.75 }
+            })
         });
-        
-        return audioBuffer.toString("base64");
+
+        if (!response.ok) throw new Error("Error en ElevenLabs: " + response.statusText);
+
+        // Convertimos el buffer a base64 para tu Frontend
+        const arrayBuffer = await response.arrayBuffer();
+        const buffer = Buffer.from(arrayBuffer);
+        return buffer.toString("base64");
+
     } catch (error) {
-        // Si sigue saliendo 403, lamentablemente Microsoft bloqueó a Vercel
-        console.error("Error definitivo en Edge-TTS:", error);
+        console.error("Error definitivo en ElevenLabs:", error);
         return null;
     }
 }
