@@ -73,6 +73,7 @@ export default async function handler(req, res) {
         
 // ... (dentro de tu handler)
 
+// --- TU CÓDIGO ACTUAL (FUNCIONANDO) ---
 const respuestaServidor = await fetch(urlGemini, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -91,23 +92,23 @@ if (!respuestaServidor.ok) {
     return res.status(200).json({ respuesta: "Error en el servidor: " + textoError });
 }
 
-// ... dentro de tu handler
 const datosGemini = await respuestaServidor.json();
-const respuestaIA = datosGemini.candidates?.[0]?.content?.parts?.[0]?.text || "Sistemas listos.";
 
-// Preparamos la respuesta base
-let respuestaFinal = { respuesta: respuestaIA };
-
-// INTENTO DE NOTA DE VOZ (Independiente)
-// Si generarAudioTTS falla, el catch evita que el servidor se caiga.
-try {
-    if (typeof generarAudioTTS !== 'undefined') {
-        respuestaFinal.audioBase64 = await generarAudioTTS(respuestaIA);
-    }
-} catch (e) {
-    console.error("Nota de voz fallida, el chat seguirá por texto:", e);
-    // No ponemos nada más, para que el frontend no reciba un audio dañado
+if (datosGemini.error) {
+    return res.status(200).json({ respuesta: `Error API: ${datosGemini.error.message}` });
 }
 
-// RETORNAMOS TODO
+const respuestaIA = datosGemini.candidates?.[0]?.content?.parts?.[0]?.text || "Sistemas listos.";
+
+let respuestaFinal = { respuesta: respuestaIA };
+
+// --- LA INTEGRACIÓN "APARTE" ---
+// Esto solo intenta añadir el audio si es posible, si no, lo ignora.
+try {
+    respuestaFinal.audioBase64 = await generarAudioTTS(respuestaIA);
+} catch (e) {
+    console.log("Nota de voz no generada, se usará voz nativa del TLF.");
+}
+
 return res.status(200).json(respuestaFinal);
+// ... resto de tu catch final
