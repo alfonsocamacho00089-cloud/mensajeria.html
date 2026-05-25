@@ -7,13 +7,20 @@ async function getEdgeTTS() {
 // Modificamos tu función generarAudioTTS para que sea así:
 async function generarAudioTTS(texto) {
     try {
-        const EdgeTTS = await getEdgeTTS();
-        const tts = new EdgeTTS({ voice: "es-ES-AlvaroNeural" });
+        // Importación dinámica
+        const module = await import("edge-tts");
+        
+        // Probamos acceder a la exportación por defecto o a la propiedad nombrada
+        const EdgeTTSClass = module.EdgeTTS || module.default || module;
+        
+        // Creamos la instancia
+        const tts = new EdgeTTSClass({ voice: "es-ES-AlvaroNeural" });
+        
         const audioBuffer = await tts.tts(texto);
         return audioBuffer.toString("base64");
     } catch (error) {
-        console.error("Error en Edge-TTS:", error);
-        return null; 
+        console.error("Error detallado en Edge-TTS:", error);
+        return null;
     }
 }
 
