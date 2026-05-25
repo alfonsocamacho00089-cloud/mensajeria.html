@@ -426,73 +426,36 @@ let respuestaFinal = { respuesta: respuestaIA };
 
 
 
+// Asegúrate de que fragmentarTexto esté definida antes
 try {
+    const fragmentos = fragmentarTexto(respuestaIA);
+    const buffersAudio = [];
 
+    // Procesamos secuencialmente para mantener el orden, 
+    // pero añadimos un pequeño retraso (delay) para no saturar a Google
+    for (const texto of fragmentos) {
+        const ttsUrl = `https://translate.google.com/translate_tts?ie=UTF-8&tl=es&client=tw-ob&q=${encodeURIComponent(texto)}`;
+        
+        const audioRes = await fetch(ttsUrl);
+        
+        if (audioRes.ok) {
+            const buffer = await audioRes.arrayBuffer();
+            buffersAudio.push(Buffer.from(buffer));
+            
+            // Pausa de 100ms para evitar bloqueos por parte de Google (Rate Limiting)
+            await new Promise(resolve => setTimeout(resolve, 100)); 
+        } else {
+            console.error(`Fallo en fragmento: ${texto.substring(0, 20)}...`);
+        }
+    }
 
-
-    // Usamos el servicio de voz gratuito de Google (TTS) que es estable y rápido
-
-
-
-    const ttsUrl = `https://translate.google.com/translate_tts?ie=UTF-8&tl=es&client=tw-ob&q=${encodeURIComponent(respuestaIA)}`;
-
-
-
-    
-
-
-
-    // Convertimos la respuesta de voz a Base64 para enviarla al chat
-// ... dentro de tu try catch de voz
-const audioRes = await fetch(ttsUrl);
-
-// 1. Verificamos que sea realmente audio
-const contentType = audioRes.headers.get("content-type");
-if (!contentType || !contentType.includes("audio")) {
-    console.error("Google bloqueó la petición o devolvió error.");
-    return; // No intentamos convertir, así el chat sigue vivo con texto
-}
-
-const audioBuffer = await audioRes.arrayBuffer();
-// ... resto del código
-
-
-
-
-    const base64Audio = Buffer.from(audioBuffer).toString('base64');
-
-
-
-    
-
-
-
-    // Lo asignamos al objeto que el chat ya sabe recibir
-
-
-
-    respuestaFinal.audioBase64 = `data:audio/mp3;base64,${base64Audio}`;
-
-
-
+    if (buffersAudio.length > 0) {
+        const audioFinal = Buffer.concat(buffersAudio);
+        respuestaFinal.audioBase64 = `data:audio/mp3;base64,${audioFinal.toString('base64')}`;
+    }
 } catch (e) {
-
-
-
     console.error("Error generando voz:", e);
-
-
-
-    // Si falla el audio, el chat seguirá funcionando solo con texto
-
-
-
 }
-
-
-
-
-
 
 
 // 3. RETORNAMOS TODO JUNTO
