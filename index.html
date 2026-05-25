@@ -1606,7 +1606,7 @@ const cuerpoPeticion = {
         // 🚀 INYECCIÓN SEGURA DE AUDIO (Sin nuevas funciones)
         if (datosBackend && datosBackend.audioBase64) {
             const audioObj = new Audio(datosBackend.audioBase64);
-            audioObj.play().catch(e => console.log("Autoplay bloqueado"));
+            audioObj.play().catch(e => console.log("Autoplay"));
             
             // Pintamos el audio en el chat
             pintarMensaje(datosBackend.audioBase64, 'msg-izquierda', null, 'leido', harvisMsgId + "_audio", 'audio');
@@ -3701,12 +3701,9 @@ if (datosBackend.audioBase64) {
     const audioSrc = `data:audio/mp3;base64,${datosBackend.audioBase64}`;
     
     // B. Reproducción automática
-    // A. Creamos el objeto Audio, pero NO hacemos .play() todavía
 const audioHarvis = new Audio(audioSrc);
-
-// B. Esto obliga al navegador a cargar los metadatos del audio
-audioHarvis.load(); 
-
+    audioHarvis.play().catch(e => console.log("Autoplay:", e));
+    
 // C. Pintamos la nota de voz en el chat
 pintarMensaje(audioSrc, 'msg-izquierda', null, 'leido', harvisMsgId + "_audio", 'audio');
 
