@@ -1555,60 +1555,62 @@ const base64 = btoa(binary);
             });
         }
 
-     
-     // === CONEXIÓN SEGURA AISLADA ===
+     // === CONEXIÓN DIRECTA (SIN NUEVAS FUNCIONES, SOLO EJECUCIÓN) ===
 if (targetID === "uo4kb3tGHH7J") {
-    (async () => {
-        try {
-            const urlBackend = "/api/chat"; 
-            const llaveLocal = localStorage.getItem('spacechat_crypto_key') || "";
-            const cuerpoPeticion = {
-                chatHistory: [{ role: "user", parts: [{ text: msg }] }],
-                userKey: llaveLocal 
-            };
+    // Ya no usamos IIFE, esto corre dentro de tu función actual
+    const urlBackend = "/api/chat"; 
+    const llaveLocal = localStorage.getItem('spacechat_crypto_key') || "";
+    
+    // Usamos nombres de variables que NO existen en ninguna otra parte de tu archivo
+    const cuerpoReq = {
+        chatHistory: [{ role: "user", parts: [{ text: msg }] }],
+        userKey: llaveLocal 
+    };
 
-            const respuestaServidor = await fetch(urlBackend, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(cuerpoPeticion)
-            });
+    try {
+        const respServ = await fetch(urlBackend, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(cuerpoReq)
+        });
 
-            const datosBackend = await respuestaServidor.json();
-            const msgIdHarvis = "msg_harvis_" + Date.now(); // Cambié el nombre de la variable para evitar colisiones
+        const datos = await respServ.json();
+        const idH = "msg_harvis_" + Date.now();
 
-            if (datosBackend && datosBackend.respuesta) {
-                pintarMensaje(datosBackend.respuesta, 'msg-izquierda', null, 'leido', msgIdHarvis, 'texto');
-                
-                if (datosBackend.audioBase64) {
-                    const audioHarvis = new Audio(datosBackend.audioBase64);
-                    audioHarvis.play().catch(e => console.log("Autoplay bloqueado."));
-                    pintarMensaje(datosBackend.audioBase64, 'msg-izquierda', null, 'leido', msgIdHarvis + "_audio", 'audio');
-                }
-                
-                await guardarLocal('mensajes', { 
-                    id: msgIdHarvis, 
-                    contactoId: targetID,
-                    texto: datosBackend.respuesta, 
-                    clase: 'msg-izquierda', 
-                    status: 'leido',
-                    tipo: 'texto',
-                    ts: Date.now(),
-                    hora: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })
-                });
-            } else {
-                pintarMensaje("⚠️ Error: El servidor no devolvió una respuesta válida.", 'msg-izquierda', null, 'leido', "err_" + Date.now(), 'texto');
+        if (datos && datos.respuesta) {
+            pintarMensaje(datos.respuesta, 'msg-izquierda', null, 'leido', idH, 'texto');
+            
+            if (datos.audioBase64) {
+                const audH = new Audio(datos.audioBase64);
+                audH.play().catch(e => console.log("Autoplay bloqueado."));
+                pintarMensaje(datos.audioBase64, 'msg-izquierda', null, 'leido', idH + "_audio", 'audio');
             }
             
-            if (inputMsg && !multimediaUrl) {
-                inputMsg.value = "";
-                inputMsg.style.height = '36px';
-                inputMsg.focus(); 
-            }
-        } catch (errorBackend) {
-            console.error("❌ Fallo crítico:", errorBackend);
-            pintarMensaje(`💥 Error al conectar: ${errorBackend.message}`, 'msg-izquierda', null, 'leido', "err_" + Date.now(), 'texto');
+            await guardarLocal('mensajes', { 
+                id: idH, 
+                contactoId: targetID,
+                texto: datos.respuesta, 
+                clase: 'msg-izquierda', 
+                status: 'leido',
+                tipo: 'texto',
+                ts: Date.now(),
+                hora: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })
+            });
+
+        } else {
+            console.warn("Backend devolvió formato inválido");
         }
-    })(); // <--- Estas llaves ejecutan el bloque de forma aislada
+        
+        // Limpieza final
+        if (typeof inputMsg !== 'undefined' && inputMsg && !multimediaUrl) {
+            inputMsg.value = "";
+            inputMsg.style.height = '36px';
+            inputMsg.focus(); 
+        }
+
+    } catch (err) {
+        console.error("Error en conexión:", err);
+    }
      }
             
         
