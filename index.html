@@ -3665,7 +3665,7 @@ async function procesarRespuestaHarvis(msg, targetID) {
         // H.A.R.V.I.S. habla por la bocina del teléfono
         if (typeof hablarHarvis === "function") {
             hablarHarvis(respuestaIA);
-        }
+        
 
         // [AQUÍ VA EL BLOQUE]
         if (typeof pintarMensaje === "function") {
@@ -3676,7 +3676,7 @@ async function procesarRespuestaHarvis(msg, targetID) {
             if (datosBackend.audioBase64) {
                 // A. Reproducción automática
                 const audioHarvis = new Audio(datosBackend.audioBase64);
-                audioHarvis.play().catch(e => console.log("Autoplay bloqueado."));
+                audioHarvis.play().catch(e => console.log("Autoplay bloqueado: requiere interacción previa."));
                 
                 // B. Pintamos la nota de voz en el chat
                 pintarMensaje(datosBackend.audioBase64, 'msg-izquierda', null, 'leido', harvisMsgId + "_audio", 'audio');
@@ -3684,10 +3684,14 @@ async function procesarRespuestaHarvis(msg, targetID) {
         }
         // [FIN DEL BLOQUE]
 
-        // 3. Imagen (tu lógica existente sigue aquí abajo)
-        if (datosBackend.imagenUrl) {
-            // ... resto de tu código
-        
+        // 3. Imagen (tu lógica existente se mantiene igual)
+if (datosBackend.imagenUrl) {
+    const estructuraImagenHtml = `<img src="${datosBackend.imagenUrl}" style="width:100%; border-radius:12px; border: 2px solid #FFD700; box-shadow: 0 0 15px rgba(255,217,0,0.5); margin-top:8px;" alt="YouSpace Art">`;
+    pintarMensaje(estructuraImagenHtml, 'msg-izquierda', null, 'leido', harvisMsgId + "_img", 'texto');
+ }
+    
+     }
+
         if (typeof guardarLocal === "function") {
             await guardarLocal('mensajes', { 
                 id: harvisMsgId, 
