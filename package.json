@@ -1,0 +1,7 @@
+{
+  "name": "spacechat",
+  "version": "1.0.0",
+  "dependencies": {
+    "edge-tts": "^1.0.0"
+  }
+}
