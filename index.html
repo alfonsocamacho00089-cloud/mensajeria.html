@@ -3659,37 +3659,34 @@ async function procesarRespuestaHarvis(msg, targetID) {
             historialHarvisVercel.splice(0, 2); 
         }
 
+        
+// ... (Tu código anterior: Pintar texto, manejo de errores, etc.)
+
         // H.A.R.V.I.S. habla por la bocina del teléfono
         if (typeof hablarHarvis === "function") {
             hablarHarvis(respuestaIA);
-        
+        }
 
+        // [AQUÍ VA EL BLOQUE]
+        if (typeof pintarMensaje === "function") {
+            // 1. Pintamos el texto (lo que el usuario lee al instante)
+            pintarMensaje(respuestaIA, 'msg-izquierda', null, 'leido', harvisMsgId, 'texto');
+                
+            // 2. Lógica de audio: Reproducción automática y persistencia
+            if (datosBackend.audioBase64) {
+                // A. Reproducción automática
+                const audioHarvis = new Audio(datosBackend.audioBase64);
+                audioHarvis.play().catch(e => console.log("Autoplay bloqueado."));
+                
+                // B. Pintamos la nota de voz en el chat
+                pintarMensaje(datosBackend.audioBase64, 'msg-izquierda', null, 'leido', harvisMsgId + "_audio", 'audio');
+            }
+        }
+        // [FIN DEL BLOQUE]
 
-// ... (Tu lógica de pintarMensaje y el guardado masivo en IndexedDB continúan abajo intactos) ...
-
-        // ... (dentro de procesarRespuestaHarvis) ...
-if (typeof pintarMensaje === "function") {
-    // 1. Pintamos el texto (lo que el usuario lee al instante)
-    pintarMensaje(respuestaIA, 'msg-izquierda', null, 'leido', harvisMsgId, 'texto');
-        
-    // 2. Lógica de audio: Reproducción automática y persistencia
-    if (datosBackend.audioBase64) {
-        // A. Reproducción automática (Harvis habla)
-        const audioHarvis = new Audio(datosBackend.audioBase64);
-        audioHarvis.play().catch(e => console.log("Autoplay bloqueado: requiere interacción previa."));
-        
-        // B. Pintamos la nota de voz en el chat (el registro visual)
-        pintarMensaje(datosBackend.audioBase64, 'msg-izquierda', null, 'leido', harvisMsgId + "_audio", 'audio');
-    }
-}
-
-// 3. Imagen (tu lógica existente se mantiene igual)
-if (datosBackend.imagenUrl) {
-    const estructuraImagenHtml = `<img src="${datosBackend.imagenUrl}" style="width:100%; border-radius:12px; border: 2px solid #FFD700; box-shadow: 0 0 15px rgba(255,217,0,0.5); margin-top:8px;" alt="YouSpace Art">`;
-    pintarMensaje(estructuraImagenHtml, 'msg-izquierda', null, 'leido', harvisMsgId + "_img", 'texto');
- }
-    
-     }
+        // 3. Imagen (tu lógica existente sigue aquí abajo)
+        if (datosBackend.imagenUrl) {
+            // ... resto de tu código
         
         if (typeof guardarLocal === "function") {
             await guardarLocal('mensajes', { 
