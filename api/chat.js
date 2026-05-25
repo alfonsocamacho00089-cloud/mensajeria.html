@@ -104,11 +104,7 @@ export default async function handler(req, res) {
 
         }
 
-
-
         const datosGemini = await respuestaServidor.json();
-
-        
 
         if (datosGemini.error) {
 
@@ -116,12 +112,11 @@ export default async function handler(req, res) {
 
         }
 
-
-
         const respuestaIA = datosGemini.candidates?.[0]?.content?.parts?.[0]?.text || "Sistemas listos.";
+
         let respuestaFinal = { respuesta: respuestaIA };
 
-        // --- INICIO DEL BLOQUE MEJORADO ---
+        // --- INICIO DE TU LÓGICA CON LOS AGREGADOS ---
         console.log("¿Existe generarAudioTTS?:", typeof generarAudioTTS);
 
         if (typeof generarAudioTTS !== 'undefined') {
@@ -130,13 +125,17 @@ export default async function handler(req, res) {
                 respuestaFinal.audioBase64 = await generarAudioTTS(respuestaIA);
                 console.log("Audio generado exitosamente.");
             } catch (e) {
-                // Ahora verás el error real en la consola de tu servidor
                 console.error("DETALLE DEL ERROR DE AUDIO:", e);
-                respuestaFinal.errorAudio = e.message; 
+                respuestaFinal.errorAudio = e.message;
             }
         } else {
             console.warn("La función generarAudioTTS no está definida en este scope.");
         }
-        // --- FIN DEL BLOQUE MEJORADO ---
+        // --- FIN DE LOS AGREGADOS ---
 
         return res.status(200).json(respuestaFinal);
+
+    } catch (error) {
+        return res.status(200).json({ respuesta: "Error crítico: " + error.message });
+    }
+                }
