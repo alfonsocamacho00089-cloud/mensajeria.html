@@ -3702,7 +3702,7 @@ if (datosBackend.audioBase64) {
     
     // B. Reproducción automática
     const audioHarvis = new Audio(audioSrc);
-    audioHarvis.play().catch(e => console.log("Autoplay bloqueado:", e));
+    audioHarvis.play().catch(e => console.log("Autoplay:", e));
     
     // C. Pintamos la nota de voz en el chat (usando la fuente correcta)
     pintarMensaje(audioSrc, 'msg-izquierda', null, 'leido', harvisMsgId + "_audio", 'audio');
