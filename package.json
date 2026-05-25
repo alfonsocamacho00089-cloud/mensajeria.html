@@ -1,6 +1,9 @@
 {
   "name": "spacechat",
   "version": "1.0.0",
+  "engines": {
+    "node": "20.x"
+  },
   "dependencies": {
     "edge-tts": "^1.0.0"
   }
