@@ -1,5 +1,18 @@
-export default async function handler(req, res) {
+const { EdgeTTS } = require("edge-tts"); // <--- PON ESTO EN LA LÍNEA 1
 
+async function generarAudioTTS(texto) { // <--- PON ESTO A CONTINUACIÓN
+    try {
+        const tts = new EdgeTTS({ voice: "es-ES-AlvaroNeural" });
+        const audioBuffer = await tts.tts(texto);
+        return audioBuffer.toString("base64");
+    } catch (error) {
+        console.error("Error en Edge-TTS:", error);
+        throw new Error("Fallo en la síntesis de voz");
+    }
+}
+
+export default async function handler(req, res) { // <--- ESTO ESTABA EN TU LÍNEA 1
+    // ... resto de tu código
     res.setHeader('Access-Control-Allow-Origin', '*');
 
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
