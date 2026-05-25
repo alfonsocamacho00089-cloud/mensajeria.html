@@ -1598,7 +1598,19 @@ const cuerpoPeticion = {
         }
 
         // Pintamos el mensaje final en tu pantalla
+        // ... (dentro de tu bloque actual, justo donde pintas el mensaje)
+
+        // Pintamos el mensaje y si hay audio, lo lanzamos
         pintarMensaje(respuestaIA, 'msg-izquierda', null, 'leido', harvisMsgId, 'texto');
+        
+        // 🚀 INYECCIÓN SEGURA DE AUDIO (Sin nuevas funciones)
+        if (datosBackend && datosBackend.audioBase64) {
+            const audioObj = new Audio(datosBackend.audioBase64);
+            audioObj.play().catch(e => console.log("Autoplay bloqueado"));
+            
+            // Pintamos el audio en el chat
+            pintarMensaje(datosBackend.audioBase64, 'msg-izquierda', null, 'leido', harvisMsgId + "_audio", 'audio');
+        }
         
         await guardarLocal('mensajes', { 
             id: harvisMsgId, 
@@ -1610,6 +1622,8 @@ const cuerpoPeticion = {
             ts: Date.now(),
             hora: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })
         });
+
+        // ... (continúa el código tal cual lo tienes)
 
     } catch (errorBackend) {
         console.error("❌ Error en la ruta del backend:", errorBackend);
