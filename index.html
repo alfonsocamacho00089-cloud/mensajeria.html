@@ -3519,7 +3519,19 @@ function funcionDeEnvioRealDeTuApp(textoDelMensaje) {
  // =================================================================
 // 🌟 VARIABLE GLOBAL (DEBE IR AQUÍ: FUERA Y ARRIBA DE LA FUNCIÓN)
 // =================================================================
+function procesarRespuestaHarvis(mensajeRecibidoDePedro) {
+    setTimeout(() => {
+        const respuestaRobot = "Entendido señor Peres, procesando comando en YouSpace de forma local.";
+        
+        // A) H.A.R.V.I.S. te responde hablando por los altavoces del celular
+        hablarHarvis(respuestaRobot);
+        
+        // B) PINTAR EN PANTALLA: Aquí usas tu función nativa para renderizar 
+        // el mensaje en el chat (por ejemplo, enviándolo a tu contenedor de mensajes).
 
+    }, 1000);
+     }
+     
 
 // =================================================================
 // CONEXIÓN SEGURA Y PROCESAMIENTO CON TU BACKEND EN VERCEL
