@@ -2161,15 +2161,17 @@ console.log("Intentando pintar tipo:", tipo, "con contenido:", contenido);
                            style="max-width:240px; max-height:320px; border-radius:12px; display:block; border: 2px solid #ffd700; background:#000;">
                     </video>
                 `;
-            } else if (tipo === 'audio' || textoReal.startsWith('data:audio') || textoReal.startsWith('blob:') || ...) {
-    cuerpoHTML = `
-        <audio src="${textoReal}" controls playsinline
-               style="max-width:240px; display:block; margin-top:2px; outline:none;">
-        </audio>
-    `;
-     }
+            
                 
             
+            } else if (tipo === 'audio' || textoReal.startsWith('data:audio') || (textoReal.startsWith('blob:') && textoReal.includes('audio')) || textoReal.includes('.webm') || textoReal.includes('.ogg')) {
+                cuerpoHTML = `
+                    <audio src="${textoReal}" controls playsinline type="audio/webm"
+                           style="max-width:240px; display:block; margin-top:2px; outline:none;">
+                    </audio>
+                `;
+     }
+     
 
             contenedorCuerpo.innerHTML = cuerpoHTML;
             box.scrollTop = box.scrollHeight;
