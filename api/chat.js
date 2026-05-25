@@ -7,24 +7,23 @@ async function getEdgeTTS() {
 // Modificamos tu función generarAudioTTS para que sea así:
 async function generarAudioTTS(texto) {
     try {
-        const module = await import("edge-tts");
-        const { tts } = module;
+        const { tts } = await import("edge-tts");
         
-        // Configuramos opciones para hacernos pasar por un navegador real
-        const options = {
+        // Configuramos la voz y forzamos el formato para que parezca una petición de navegador
+        const audioBuffer = await tts(texto, { 
             voice: "es-ES-AlvaroNeural",
-            // Esto ayuda a evitar el error 403
-            proxy: undefined 
-        };
-
-        // Llamada directa a la función tts
-        const audioBuffer = await tts(texto, options);
+            // A veces el bloqueo 403 se evita reduciendo la complejidad de la petición
+            outputFormat: "audio-24khz-48kbitrate-mono-mp3"
+        });
+        
         return audioBuffer.toString("base64");
     } catch (error) {
+        // Si sigue saliendo 403, lamentablemente Microsoft bloqueó a Vercel
         console.error("Error definitivo en Edge-TTS:", error);
         return null;
     }
 }
+
 export default async function handler(req, res) { // <--- ESTO ESTABA EN TU LÍNEA 1
     // ... resto de tu código
     res.setHeader('Access-Control-Allow-Origin', '*');
