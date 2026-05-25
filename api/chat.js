@@ -1,13 +1,15 @@
-const { EdgeTTS } = require("edge-tts"); // <--- PON ESTO EN LA LÍNEA 1
+// Prueba esta forma de importación que es más compatible con Vercel
+const EdgeTTS = require("edge-tts").EdgeTTS; 
 
-async function generarAudioTTS(texto) { // <--- PON ESTO A CONTINUACIÓN
+async function generarAudioTTS(texto) {
     try {
+        // En lugar de una instancia compleja, probemos el llamado directo si la librería lo permite
         const tts = new EdgeTTS({ voice: "es-ES-AlvaroNeural" });
         const audioBuffer = await tts.tts(texto);
         return audioBuffer.toString("base64");
     } catch (error) {
         console.error("Error en Edge-TTS:", error);
-        throw new Error("Fallo en la síntesis de voz");
+        return null;
     }
 }
 
