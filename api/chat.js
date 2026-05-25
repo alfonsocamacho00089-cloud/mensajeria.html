@@ -9,8 +9,8 @@ async function getEdgeTTS() {
 async function generarAudioTTS(texto) {
     // PEGA AQUÍ TU API KEY ENTRE LAS COMILLAS
     const ELEVENLABS_API_KEY = "sk_5a353527b37f2f0ef7f78b9b91a6a5824ea83e6a1901c2d8"; 
-    const VOICE_ID = "21m00Tcm4TlvDq8ikWAM"; 
-
+    // Cambia esta línea en tu función generarAudioTTS
+const VOICE_ID = "EXAVITQu4vr4xnSDxMaL"; // Esta es la voz 'Bella' (voz estándar gratuita)
     try {
         const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${VOICE_ID}`, {
             method: 'POST',
