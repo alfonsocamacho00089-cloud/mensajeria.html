@@ -91,34 +91,23 @@ if (!respuestaServidor.ok) {
     return res.status(200).json({ respuesta: "Error en el servidor: " + textoError });
 }
 
+// ... dentro de tu handler
 const datosGemini = await respuestaServidor.json();
-
-if (datosGemini.error) {
-    return res.status(200).json({ respuesta: `Error API: ${datosGemini.error.message}` });
-}
-
 const respuestaIA = datosGemini.candidates?.[0]?.content?.parts?.[0]?.text || "Sistemas listos.";
 
-let respuestaFinal = { 
-    respuesta: respuestaIA,
-    audioBase64: null,
-    usoVozNativa: true // Por defecto activamos la nativa
-};
+// Preparamos la respuesta base
+let respuestaFinal = { respuesta: respuestaIA };
 
-// Intentamos generar el audio del servidor
-if (typeof generarAudioTTS !== 'undefined') {
-    try {
-        const audio = await generarAudioTTS(respuestaIA);
-        respuestaFinal.audioBase64 = audio;
-        respuestaFinal.usoVozNativa = false; // Si hay audio, no usamos la nativa
-    } catch (e) {
-        console.error("No se pudo generar el audio:", e);
-        respuestaFinal.usoVozNativa = true; // Forzamos el uso de voz nativa si falla
+// INTENTO DE NOTA DE VOZ (Independiente)
+// Si generarAudioTTS falla, el catch evita que el servidor se caiga.
+try {
+    if (typeof generarAudioTTS !== 'undefined') {
+        respuestaFinal.audioBase64 = await generarAudioTTS(respuestaIA);
     }
+} catch (e) {
+    console.error("Nota de voz fallida, el chat seguirá por texto:", e);
+    // No ponemos nada más, para que el frontend no reciba un audio dañado
 }
 
+// RETORNAMOS TODO
 return res.status(200).json(respuestaFinal);
-
-} catch (error) {
-    return res.status(200).json({ respuesta: "Error crítico: " + error.message });
-    }
