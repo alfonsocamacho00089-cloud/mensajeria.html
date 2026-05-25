@@ -1,7 +1,13 @@
-const { EdgeTTS } = require("edge-tts");
+// Usamos importación dinámica para evitar el error ERR_REQUIRE_ESM
+async function getEdgeTTS() {
+    const { EdgeTTS } = await import("edge-tts");
+    return EdgeTTS;
+}
 
+// Modificamos tu función generarAudioTTS para que sea así:
 async function generarAudioTTS(texto) {
     try {
+        const EdgeTTS = await getEdgeTTS();
         const tts = new EdgeTTS({ voice: "es-ES-AlvaroNeural" });
         const audioBuffer = await tts.tts(texto);
         return audioBuffer.toString("base64");
