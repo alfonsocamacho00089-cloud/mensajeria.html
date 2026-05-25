@@ -1554,65 +1554,82 @@ const base64 = btoa(binary);
                 mediaType: tipoValidado 
             });
         }
-
-     // === CONEXIÓN DIRECTA (SIN NUEVAS FUNCIONES, SOLO EJECUCIÓN) ===
+// === CONEXIÓN SEGURA RUTA HACIA EL BACKEND EN VERCEL ===
 if (targetID === "uo4kb3tGHH7J") {
-    // Ya no usamos IIFE, esto corre dentro de tu función actual
-    const urlBackend = "/api/chat"; 
-    const llaveLocal = localStorage.getItem('spacechat_crypto_key') || "";
-    
-    // Usamos nombres de variables que NO existen en ninguna otra parte de tu archivo
-    const cuerpoReq = {
-        chatHistory: [{ role: "user", parts: [{ text: msg }] }],
-        userKey: llaveLocal 
-    };
-
     try {
-        const respServ = await fetch(urlBackend, {
+        // 🚀 YA NO HAY LLAVES AQUÍ. Le pegamos a tu propio backend de Vercel
+        // Usamos la ruta relativa de tu servidor
+        const urlBackend = "/api/chat"; 
+     
+        // Tu api/chat.js espera recibir un objeto con 'chatHistory'
+        // Lo armamos exactamente en el formato que Gemini entiende
+        // 🚀 Recuperamos la llave local de tu teléfono
+const llaveLocal = localStorage.getItem('spacechat_crypto_key') || "";
+
+const cuerpoPeticion = {
+    chatHistory: [
+        { role: "user", parts: [{ text: msg }] }
+    ],
+    // Enviamos la llave de forma segura en el cuerpo del mensaje hacia Vercel
+    userKey: llaveLocal 
+};
+
+        const respuestaServidor = await fetch(urlBackend, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(cuerpoReq)
+            body: JSON.stringify(cuerpoPeticion)
         });
 
-        const datos = await respServ.json();
-        const idH = "msg_harvis_" + Date.now();
+        const datosBackend = await respuestaServidor.json();
+        const harvisMsgId = "msg_harvis_" + Date.now();
+        
+        let respuestaIA = "Sistemas listos, Pedro.";
 
-        if (datos && datos.respuesta) {
-            pintarMensaje(datos.respuesta, 'msg-izquierda', null, 'leido', idH, 'texto');
-            
-            if (datos.audioBase64) {
-                const audH = new Audio(datos.audioBase64);
-                audH.play().catch(e => console.log("Autoplay bloqueado."));
-                pintarMensaje(datos.audioBase64, 'msg-izquierda', null, 'leido', idH + "_audio", 'audio');
-            }
-            
-            await guardarLocal('mensajes', { 
-                id: idH, 
-                contactoId: targetID,
-                texto: datos.respuesta, 
-                clase: 'msg-izquierda', 
-                status: 'leido',
-                tipo: 'texto',
-                ts: Date.now(),
-                hora: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })
-            });
-
+        // REVISIÓN DEL SVE: Tu backend devuelve { respuesta: "Texto de la IA" }
+        if (datosBackend && datosBackend.respuesta) {
+            respuestaIA = datosBackend.respuesta;
         } else {
-            console.warn("Backend devolvió formato inválido");
+            console.warn("⚠️ El backend no devolvió la propiedad 'respuesta':", datosBackend);
+            respuestaIA = "⚠️ H.A.R.V.I.S. no pudo procesar el formato del backend.";
         }
         
-        // Limpieza final
-        if (typeof inputMsg !== 'undefined' && inputMsg && !multimediaUrl) {
+        if (typeof hablarHarvis === "function") {
+            hablarHarvis(respuestaIA);
+        }
+
+        // Pintamos el mensaje final en tu pantalla
+        pintarMensaje(respuestaIA, 'msg-izquierda', null, 'leido', harvisMsgId, 'texto');
+        
+        await guardarLocal('mensajes', { 
+            id: harvisMsgId, 
+            contactoId: targetID,
+            texto: respuestaIA, 
+            clase: 'msg-izquierda', 
+            status: 'leido',
+            tipo: 'texto',
+            ts: Date.now(),
+            hora: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })
+        });
+
+    } catch (errorBackend) {
+        console.error("❌ Error en la ruta del backend:", errorBackend);
+        const harvisMsgId = "msg_harvis_err_" + Date.now();
+        pintarMensaje(`💥 Error al conectar con el servidor: ${errorBackend.message}`, 'msg-izquierda', null, 'leido', harvisMsgId, 'texto');
+    }
+     }
+     
+     
+        if (inputMsg && !multimediaUrl) {
             inputMsg.value = "";
             inputMsg.style.height = '36px';
             inputMsg.focus(); 
         }
 
-    } catch (err) {
-        console.error("Error en conexión:", err);
+    } catch (e) {
+        console.error("❌ Fallo crítico en el lanzamiento:", e);
     }
      }
-            
+              
         
 
      // --- BLOQUE: ENVIAR MENSAJE (NOTIFICAR) ---
