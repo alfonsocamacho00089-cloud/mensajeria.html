@@ -8,23 +8,23 @@ async function getEdgeTTS() {
 async function generarAudioTTS(texto) {
     try {
         const module = await import("edge-tts");
-        
-        // La librería edge-tts moderna suele exportar una función llamada 'tts'
-        // o requiere crear el objeto de esta forma:
         const { tts } = module;
         
-        // Si 'tts' es una función directa, se llama así:
-        const audioBuffer = await tts(texto, { voice: "es-ES-AlvaroNeural" });
-        
+        // Configuramos opciones para hacernos pasar por un navegador real
+        const options = {
+            voice: "es-ES-AlvaroNeural",
+            // Esto ayuda a evitar el error 403
+            proxy: undefined 
+        };
+
+        // Llamada directa a la función tts
+        const audioBuffer = await tts(texto, options);
         return audioBuffer.toString("base64");
     } catch (error) {
-        // Para depurar, vamos a ver qué hay realmente dentro del módulo
-        console.error("DEBUG - Estructura del módulo:", Object.keys(await import("edge-tts")));
-        console.error("Error detallado en Edge-TTS:", error);
+        console.error("Error definitivo en Edge-TTS:", error);
         return null;
     }
 }
-
 export default async function handler(req, res) { // <--- ESTO ESTABA EN TU LÍNEA 1
     // ... resto de tu código
     res.setHeader('Access-Control-Allow-Origin', '*');
