@@ -3675,15 +3675,18 @@ async function procesarRespuestaHarvis(msg, targetID) {
             pintarMensaje(respuestaIA, 'msg-izquierda', null, 'leido', harvisMsgId, 'texto');
                 
             // 2. Lógica de audio: Reproducción automática y persistencia
-            if (datosBackend.audioBase64) {
-                // A. Reproducción automática
-                const audioHarvis = new Audio(datosBackend.audioBase64);
-                audioHarvis.play().catch(e => console.log("Autoplay bloqueado: requiere interacción previa."));
-                
-                // B. Pintamos la nota de voz en el chat
-                pintarMensaje(datosBackend.audioBase64, 'msg-izquierda', null, 'leido', harvisMsgId + "_audio", 'audio');
-            }
-        }
+            // 2. Lógica de audio: Reproducción y persistencia
+if (datosBackend.audioBase64) {
+    // A. Necesitamos añadir el prefijo para que el navegador sepa que es audio/mp3
+    const audioSrc = `data:audio/mp3;base64,${datosBackend.audioBase64}`;
+    
+    // B. Reproducción automática
+    const audioHarvis = new Audio(audioSrc);
+    audioHarvis.play().catch(e => console.log("Autoplay bloqueado:", e));
+    
+    // C. Pintamos la nota de voz en el chat (usando la fuente correcta)
+    pintarMensaje(audioSrc, 'msg-izquierda', null, 'leido', harvisMsgId + "_audio", 'audio');
+ }
         // [FIN DEL BLOQUE]
 
         // 3. Imagen (tu lógica existente se mantiene igual)
