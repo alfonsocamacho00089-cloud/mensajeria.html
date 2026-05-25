@@ -60,7 +60,7 @@ export default async function handler(req, res) {
 
 
 
-        const urlGemini = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${userKey}`;
+        const urlGemini = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${userKey}`;
 
         
 
@@ -70,46 +70,88 @@ export default async function handler(req, res) {
 
 
 
+        const respuestaServidor = await fetch(urlGemini, {
+
+            method: 'POST',
+
+            headers: { 'Content-Type': 'application/json' },
+
+            body: JSON.stringify({
+
+                contents: historialFormateado,
+
+                systemInstruction: { 
+
+                    parts: [{ text: `${harvisPromptSystem}\n\nFECHA ACTUAL: ${fechaActual}.` }] 
+
+                },
+
+                tools: [{ google_search: {} }, { codeExecution: {} }],
+
+                generationConfig: { temperature: 0.75 }
+
+            })
+
+        });
+
+
+
+        if (!respuestaServidor.ok) {
+
+            const textoError = await respuestaServidor.text();
+
+            return res.status(200).json({ respuesta: "Error en el servidor: " + textoError });
+
+        }
+
+
+
+        const datosGemini = await respuestaServidor.json();
+
         
-// ... (dentro de tu handler)
 
-// --- TU CÓDIGO ACTUAL (FUNCIONANDO) ---
-const respuestaServidor = await fetch(urlGemini, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-        contents: historialFormateado,
-        systemInstruction: { 
-            parts: [{ text: `${harvisPromptSystem}\n\nFECHA ACTUAL: ${fechaActual}.` }] 
-        },
-        tools: [{ google_search: {} }, { codeExecution: {} }],
-        generationConfig: { temperature: 0.75 }
-    })
-});
+        if (datosGemini.error) {
 
-if (!respuestaServidor.ok) {
-    const textoError = await respuestaServidor.text();
-    return res.status(200).json({ respuesta: "Error en el servidor: " + textoError });
-}
+            return res.status(200).json({ respuesta: `Error API: ${datosGemini.error.message}` });
 
-// 1. Recibes el JSON del servidor
-const data = await respuestaServidor.json();
+        }
 
-// 2. Primero: Mostrar el texto (Esto lo haces siempre)
-mostrarEnChat(data.respuesta);
 
-// 3. PRIORIDAD 1: Voz Nativa (Lo que ya tienes funcionando)
-// Se dispara instantáneamente para que el usuario no espere
-hablarConVozNativa(data.respuesta); 
 
-// 4. PRIORIDAD 2: El "regalo" (La nota de voz)
-// Si el servidor logró generar el audio, lo guardamos o mostramos el botón
-if (data.audioBase64) {
-    console.log("Nota de voz generada con éxito, disponible para el usuario.");
-    
-    // Aquí puedes hacer que aparezca un botón de "Reproducir Nota de Voz"
-    // o un icono de audio junto a la burbuja del chat
-    prepararBotonDeAudio(data.audioBase64);
-} else {
-    console.log("No se pudo generar nota de voz, solo texto disponible.");
+        const respuestaIA = datosGemini.candidates?.[0]?.content?.parts?.[0]?.text || "Sistemas listos.";
+
+        
+
+        let respuestaFinal = { respuesta: respuestaIA };
+
+        
+
+        // Solo intenta generar audio si la función existe
+
+        if (typeof generarAudioTTS !== 'undefined') {
+
+            try {
+
+                respuestaFinal.audioBase64 = await generarAudioTTS(respuestaIA);
+
+            } catch (e) {
+
+                console.error("No se pudo generar el audio.");
+
+            }
+
+        }
+
+
+
+        return res.status(200).json(respuestaFinal);
+
+
+
+    } catch (error) {
+
+        return res.status(200).json({ respuesta: "Error crítico: " + error.message });
+
+    }
+
 }
