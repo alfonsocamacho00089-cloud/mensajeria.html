@@ -5,9 +5,11 @@ async function getEdgeTTS() {
 }
 
 // Modificamos tu función generarAudioTTS para que sea así:
+// En tu api/chat.js
 async function generarAudioTTS(texto) {
-    const ELEVENLABS_API_KEY = "TU_API_KEY_AQUI";
-    const VOICE_ID = "21m00Tcm4TlvDq8ikWAM"; // Esta es la voz de 'Rachel', puedes cambiarla
+    // PEGA AQUÍ TU API KEY ENTRE LAS COMILLAS
+    const ELEVENLABS_API_KEY = "sk_5a353527b37f2f0ef7f78b9b91a6a5824ea83e6a1901c2d8"; 
+    const VOICE_ID = "21m00Tcm4TlvDq8ikWAM"; 
 
     try {
         const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${VOICE_ID}`, {
@@ -23,12 +25,14 @@ async function generarAudioTTS(texto) {
             })
         });
 
-        if (!response.ok) throw new Error("Error en ElevenLabs: " + response.statusText);
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error("Detalle del error de ElevenLabs:", errorText);
+            throw new Error("Error en ElevenLabs: " + response.statusText);
+        }
 
-        // Convertimos el buffer a base64 para tu Frontend
         const arrayBuffer = await response.arrayBuffer();
-        const buffer = Buffer.from(arrayBuffer);
-        return buffer.toString("base64");
+        return Buffer.from(arrayBuffer).toString("base64");
 
     } catch (error) {
         console.error("Error definitivo en ElevenLabs:", error);
