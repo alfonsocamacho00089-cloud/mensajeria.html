@@ -3676,7 +3676,24 @@ async function procesarRespuestaHarvis(msg, targetID) {
         if (typeof pintarMensaje === "function") {
             // 1. Pintamos el texto (lo que el usuario lee al instante)
             pintarMensaje(respuestaIA, 'msg-izquierda', null, 'leido', harvisMsgId, 'texto');
-                
+                // DEBUG MEJORADO
+console.log("DEBUG: Respuesta completa:", datosBackend);
+
+if (datosBackend && datosBackend.audioBase64) {
+    const audioData = datosBackend.audioBase64;
+    
+    // Verificamos el tipo de dato y los primeros caracteres
+    console.log("DEBUG: Tipo de dato de audioBase64:", typeof audioData);
+    console.log("DEBUG: Primeros 50 caracteres del audio:", audioData.substring(0, 50));
+    console.log("DEBUG: Longitud total de la cadena:", audioData.length);
+    
+    // Si la longitud es muy pequeña (ej. menos de 100), algo está mal en el servidor
+    if (audioData.length < 100) {
+        console.warn("⚠️ ALERTA: La cadena de audio parece demasiado corta para ser un audio real.");
+    }
+} else {
+    console.error("❌ ERROR: El campo audioBase64 no existe o está vacío en el JSON:", datosBackend);
+     }
             // 2. Lógica de audio: Reproducción automática y persistencia
             // 2. Lógica de audio: Reproducción y persistencia
 if (datosBackend.audioBase64) {
