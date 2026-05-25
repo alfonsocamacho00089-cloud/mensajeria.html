@@ -7,18 +7,19 @@ async function getEdgeTTS() {
 // Modificamos tu función generarAudioTTS para que sea así:
 async function generarAudioTTS(texto) {
     try {
-        // Importación dinámica
         const module = await import("edge-tts");
         
-        // Probamos acceder a la exportación por defecto o a la propiedad nombrada
-        const EdgeTTSClass = module.EdgeTTS || module.default || module;
+        // La librería edge-tts moderna suele exportar una función llamada 'tts'
+        // o requiere crear el objeto de esta forma:
+        const { tts } = module;
         
-        // Creamos la instancia
-        const tts = new EdgeTTSClass({ voice: "es-ES-AlvaroNeural" });
+        // Si 'tts' es una función directa, se llama así:
+        const audioBuffer = await tts(texto, { voice: "es-ES-AlvaroNeural" });
         
-        const audioBuffer = await tts.tts(texto);
         return audioBuffer.toString("base64");
     } catch (error) {
+        // Para depurar, vamos a ver qué hay realmente dentro del módulo
+        console.error("DEBUG - Estructura del módulo:", Object.keys(await import("edge-tts")));
         console.error("Error detallado en Edge-TTS:", error);
         return null;
     }
