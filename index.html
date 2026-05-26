@@ -3663,8 +3663,7 @@ async function procesarRespuestaHarvis(msg, targetID) {
 
         // 1. Pintamos el texto
         if (typeof pintarMensaje === "function") {
-            pintarMensaje(respuestaIA, 'msg-izquierda', null, 'leido', harvisMsgId, 'texto');
-        }
+               }
 
 
 // ... dentro de procesarRespuestaHarvis ...
@@ -3681,7 +3680,6 @@ if (datosBackend && datosBackend.audioBase64) {
 const harvisMsgId = "msg_harvis_" + Date.now();
 
 // 1. Pintamos el texto primero
-pintarMensaje(respuestaIA, 'msg-izquierda', null, 'leido', harvisMsgId, 'texto');
 
 // 2. Esperamos un breve momento (o detectamos que el elemento existe)
 // Esto da tiempo a que el navegador dibuje el texto antes de intentar poner el audio
