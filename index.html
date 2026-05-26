@@ -3686,19 +3686,13 @@ async function procesarRespuestaHarvis(msg, targetID) {
 // 2. Procesamos el audio como un mensaje persistente
 // En tu lógica de procesarRespuestaHarvis
 if (datosBackend && datosBackend.audioBase64) {
-    const byteCharacters = atob(datosBackend.audioBase64);
-    const byteNumbers = new Uint8Array(byteCharacters.length);
-    for (let i = 0; i < byteCharacters.length; i++) {
-        byteNumbers[i] = byteCharacters.charCodeAt(i);
-    }
+    // 1. Añade el prefijo necesario para que el navegador lo reconozca
+    const srcAudio = "data:audio/mpeg;base64," + datosBackend.audioBase64;
     
-    // Crear el archivo
-    const archivoHarvis = new File([byteNumbers], `harvis_voz_${Date.now()}.mp3`, { type: 'audio/mpeg' });
-
-    // 🚀 AQUÍ ESTÁ EL CAMBIO:
-    // En lugar de usar URL.createObjectURL, usa tu función que sube a Firebase
-    // Si 'prepararEnvioMedia' sube a Firebase y devuelve la URL, úsala así:
-    
+    // 2. Pintamos el mensaje usando este nuevo src
+    // Asegúrate de que tu función pintarMensaje acepte este string
+    pintarMensaje(srcAudio, 'msg-izquierda', null, 'leido', harvisMsgId + "_audio", 'audio');
+}
     if (typeof prepararEnvioMedia === "function") {
         // Al subir el archivo, obtendrás una URL permanente de Firebase (https://firebasestorage...)
         // Esa URL es la que debes guardar en tu base de datos (guardarLocal)
