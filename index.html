@@ -3684,28 +3684,27 @@ async function procesarRespuestaHarvis(msg, targetID) {
 // ... dentro de procesarRespuestaHarvis ...
 
 // 2. Procesamos el audio como un mensaje persistente
+// En tu lógica de procesarRespuestaHarvis
 if (datosBackend && datosBackend.audioBase64) {
-    // AQUÍ VA EL BLOQUE QUE ME PASASTE
     const byteCharacters = atob(datosBackend.audioBase64);
     const byteNumbers = new Uint8Array(byteCharacters.length);
     for (let i = 0; i < byteCharacters.length; i++) {
         byteNumbers[i] = byteCharacters.charCodeAt(i);
     }
     
+    // Crear el archivo
     const archivoHarvis = new File([byteNumbers], `harvis_voz_${Date.now()}.mp3`, { type: 'audio/mpeg' });
-    const audioUrl = URL.createObjectURL(archivoHarvis);
-    
-    const audioHarvis = new Audio(audioUrl);
-    audioHarvis.play().catch(e => console.log("Autoplay bloqueado:", e));
 
-    if (typeof pintarMensaje === "function") {
-        pintarMensaje(audioUrl, 'msg-izquierda', null, 'leido', harvisMsgId + "_audio", 'audio');
-    }
+    // 🚀 AQUÍ ESTÁ EL CAMBIO:
+    // En lugar de usar URL.createObjectURL, usa tu función que sube a Firebase
+    // Si 'prepararEnvioMedia' sube a Firebase y devuelve la URL, úsala así:
     
     if (typeof prepararEnvioMedia === "function") {
+        // Al subir el archivo, obtendrás una URL permanente de Firebase (https://firebasestorage...)
+        // Esa URL es la que debes guardar en tu base de datos (guardarLocal)
         prepararEnvioMedia({ files: [archivoHarvis] }, 'audio');
     }
-}
+     }
 // ... continúa el resto de la función ...
  
 
