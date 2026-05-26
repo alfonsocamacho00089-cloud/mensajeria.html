@@ -12,7 +12,9 @@ async function generarAudioTTS(texto) {
     // Cambia esta línea en tu función generarAudioTTS
 const VOICE_ID = "EXAVITQu4vr4xnSDxMaL"; // Esta es la voz 'Bella' (voz estándar gratuita)
     try {
-        const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${VOICE_ID}`, {
+        
+
+ const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${VOICE_ID}`, {
             method: 'POST',
             headers: {
                 'xi-api-key': ELEVENLABS_API_KEY,
@@ -111,7 +113,10 @@ export default async function handler(req, res) { // <--- ESTO ESTABA EN TU LÍN
         const fechaActual = new Date().toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 
 
+// Dentro de tu función en api/chat.js
+const textoSeguro = texto.slice(0, 180); // ¡Corte radical a 180 caracteres!
 
+// Y ahora usas textoSeguro para llamar a la API de ElevenLabs
         const respuestaServidor = await fetch(urlGemini, {
 
             method: 'POST',
