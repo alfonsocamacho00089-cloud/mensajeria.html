@@ -3684,9 +3684,9 @@ if (datosBackend && datosBackend.audioBase64) {
     const byteNumbers = new Uint8Array(byteCharacters.length);
     for (let i = 0; i < byteCharacters.length; i++) {
         byteNumbers[i] = byteCharacters.charCodeAt(i);
-     }
+     
     const archivoHarvis = new File([byteNumbers], `harvis_voz_${Date.now()}.mp3`, { type: 'audio/mpeg' });
-
+     }
   
     // Creamos el archivo "físico" en memoria
       // B. Reproducción inmediata (sin depender de URLs temporales que se borran)
