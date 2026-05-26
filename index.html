@@ -3382,50 +3382,30 @@ const contactoHarvisFijo = {
 // Hace que el teléfono hable (Bocina)
 
 
-        function hablarHarvis(texto, alTerminar) {
-    const synth = window.speechSynthesis;
-    synth.cancel(); // Limpia cualquier audio trabado
-
-    // 1. Limpieza estricta de Markdown
-    let textoLimpio = texto
-        .replace(/\*/g, '')
-        .replace(/#/g, '')
-        .replace(/-/g, '')
-        .replace(/[\uE000-\uF8FF]|\uD83C[\uDC00-\uDFFF]|\uD83D[\uDC00-\uDFFF]|[\u2011-\u26FF]|\uD83E[\uDC00-\uDFFF]/g, '');
-
-    const utterance = new SpeechSynthesisUtterance(textoLimpio);
+        async function hablarHarvis(texto) {
+    console.log("🚀 H.A.R.V.I.S. preparando voz premium...");
     
-    // 2. Traer todas las voces instaladas en tu Xiaomi
-    const voces = synth.getVoices();
-
-    // 3. BUSCADOR AUTOMÁTICO DE TU VOZ DE HOMBRE
-    // Filtramos las voces en español buscando las palabras clave de los paquetes masculinos de Google
-    const vozDeHombre = voces.find(v => 
-        v.lang.includes('es') && 
-        (v.name.includes('Google') || v.name.includes('Natural')) &&
-        (v.name.includes('Voz 2') || v.name.includes('Voz 3') || v.name.includes('male') || v.name.includes('B') || v.name.includes('C'))
-    );
-
-    // Si encontró la voz de hombre descargada, se la asignamos a HARVIS
-    if (vozDeHombre) {
-        utterance.voice = vozDeHombre;
-        console.log("¡H.A.R.V.I.S está usando la voz local montada!: " + vozDeHombre.name);
-    } else {
-        // Si no la encuentra, usa el respaldo por defecto de tu idioma
-        utterance.lang = 'es-Es';
+    try {
+        // 1. Llamamos a tu función de ElevenLabs (asegúrate de que sea accesible aquí)
+        // Nota: Si 'generarAudioTTS' está en el backend, deberás hacer un fetch a /api/chat o similar
+        const audioBase64 = await generarAudioTTS(texto); 
+        
+        if (audioBase64) {
+            // 2. Convertimos el base64 a un objeto de audio
+            const audioSrc = "data:audio/mpeg;base64," + audioBase64;
+            const audioPlayer = new Audio(audioSrc);
+            
+            // 3. Reproducimos
+            audioPlayer.play().catch(e => console.error("Error al reproducir audio:", e));
+            
+            console.log("¡H.A.R.V.I.S. hablando con voz premium!");
+        }
+    } catch (error) {
+        console.error("Falló ElevenLabs, cayendo a voz de sistema:", error);
+        // Fallback: Si falla ElevenLabs, usamos la voz robótica de tu función anterior
+        usarVozSistemaLocal(texto); 
     }
-
-    // 4. Configuración de estilo elegante para tu asistente
-    utterance.rate = 1.02; // Un toque sutil de velocidad
-    utterance.pitch = 1.0; // Bajamos el tono para que suene más grave, imponente y con estilo "JARVIS"
-
-    if (alTerminar) {
-        utterance.onend = () => alTerminar();
-    }
-    
-    synth.speak(utterance);
-     }
-
+ }
 
 // Hace que el teléfono escuche (Micrófono nativo)
 function escucharVozPedro(alRecibirTexto) {
