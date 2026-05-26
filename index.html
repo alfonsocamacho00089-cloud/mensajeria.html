@@ -3680,7 +3680,7 @@ async function procesarRespuestaHarvis(msg, targetID) {
         }
 
 
-     // H.A.R.V.I.S. responde
+// H.A.R.V.I.S. responde
 // ... (Tu código anterior de historialHarvisVercel.splice)
 
         // H.A.R.V.I.S. responde
@@ -3690,26 +3690,34 @@ async function procesarRespuestaHarvis(msg, targetID) {
 
         // 1. Pintamos el texto
         if (typeof pintarMensaje === "function") {
-            pintarMensaje(respuestaIA, 'msg-izquierda', null, 'leido', harvisMsgId, 'texto');
-        }
+         pintarMensaje(audioSrc, 'msg-izquierda', null, 'leido', harvisMsgId + "_audio", 'audio');
+        
+               }
 
 
 // ... dentro de procesarRespuestaHarvis ...
 
 // 2. Procesamos el audio como un mensaje persistente
-// En tu lógica de procesarRespuestaHarvis
+// ... dentro de tu función que recibe datosBackend ...
+
+// 1. Pintamos el texto (esto ya lo haces y está bien)
+pintarMensaje(respuestaIA, 'msg-izquierda', null, 'leido', harvisMsgId, 'texto');
+
+// 2. REPRODUCCIÓN SILENCIOSA (Sin burbuja vacía)
 if (datosBackend && datosBackend.audioBase64) {
-    // 1. Añade el prefijo necesario para que el navegador lo reconozca
-    const srcAudio = "data:audio/mpeg;base64," + datosBackend.audioBase64;
+    const audioSrc = "data:audio/mpeg;base64," + datosBackend.audioBase64;
+    const audioObj = new Audio(audioSrc);
     
-    // 2. Pintamos el mensaje usando este nuevo src
-    // Asegúrate de que tu función pintarMensaje acepte este string
-    // ... dentro de tu bloque donde recibes datosBackend
+    // Reproducimos sin crear elementos HTML en el chat
+    audioObj.play().catch(e => console.log("Autoplay bloqueado por el navegador"));
+    
+    console.log("✅ H.A.R.V.I.S. reproduciendo audio sin burbuja visual.");
+}que donde recibes datosBackend
 const harvisMsgId = "msg_harvis_" + Date.now();
 
 // 1. Pintamos el texto primero
-pintarMensaje(respuestaIA, 'msg-izquierda', null, 'leido', harvisMsgId, 'texto');
-
+pintarMensaje(audioSrc, 'msg-izquierda', null, 'leido', harvisMsgId + "_audio", 'audio');
+        
 // 2. Esperamos un breve momento (o detectamos que el elemento existe)
 // Esto da tiempo a que el navegador dibuje el texto antes de intentar poner el audio
 setTimeout(() => {
