@@ -3672,38 +3672,43 @@ if (typeof hablarHarvis === "function") {
     hablarHarvis(respuestaIA);
 }
 
-// 1. Pintamos el texto
+// 1. Pintamos el texto (independiente del audio)
 if (typeof pintarMensaje === "function") {
     pintarMensaje(respuestaIA, 'msg-izquierda', null, 'leido', harvisMsgId, 'texto');
 }
 
-// 2. Procesamos el audio
+// 2. Procesamos el audio como un mensaje persistente
 if (datosBackend && datosBackend.audioBase64) {
+    // A. Convertimos base64 a un objeto File (igual que haces al grabar tú)
     const byteCharacters = atob(datosBackend.audioBase64);
     const byteNumbers = new Uint8Array(byteCharacters.length);
     for (let i = 0; i < byteCharacters.length; i++) {
         byteNumbers[i] = byteCharacters.charCodeAt(i);
     }
     
+    // Creamos el archivo "físico" en memoria
     const archivoHarvis = new File([byteNumbers], `harvis_voz_${Date.now()}.mp3`, { type: 'audio/mpeg' });
-    const localAudioUrl = URL.createObjectURL(archivoHarvis);
-    
-    // Usamos una variable distinta para la instancia de Audio
-    const reproductorHarvis = new Audio(localAudioUrl);
-    reproductorHarvis.play().catch(e => console.log("Autoplay bloqueado:", e));
 
-    // C. PINTAMOS EL MENSAJE
+    // B. Reproducción inmediata (sin depender de URLs temporales que se borran)
+    const audioUrl = URL.createObjectURL(archivoHarvis);
+    const audioHarvis = new Audio(audioUrl);
+    audioHarvis.play().catch(e => console.log("Autoplay bloqueado:", e));
+
+    // C. PINTAMOS EL MENSAJE EN EL CHAT
+    // Aquí está el truco: usamos 'audioUrl' pero con el ID correcto 
+    // y llamamos a pintarMensaje igual que cuando tú envías tu nota de voz.
     if (typeof pintarMensaje === "function") {
-        pintarMensaje(localAudioUrl, 'msg-izquierda', null, 'leido', harvisMsgId + "_audio", 'audio');
+        pintarMensaje(audioUrl, 'msg-izquierda', null, 'leido', harvisMsgId + "_audio", 'audio');
     }
     
-    // D. GUARDADO
+    // D. IMPORTANTE: Aquí deberías llamar a tu función de guardado
+    // Si tu sistema de chat guarda en Firebase, envía 'archivoHarvis' a 'prepararEnvioMedia'
+    // para que la burbuja se quede guardada en la base de datos y no desaparezca.
     if (typeof prepararEnvioMedia === "function") {
+        // Esto subirá el audio de H.A.R.V.I.S. a tu Storage y lo hará persistente
         prepararEnvioMedia({ files: [archivoHarvis] }, 'audio');
     }
- }
-
-        
+     }
 
         // 3. Imagen (tu lógica existente se mantiene igual)
 if (datosBackend.imagenUrl) {
