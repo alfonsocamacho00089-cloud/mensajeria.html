@@ -4,52 +4,7 @@ async function getEdgeTTS() {
     return EdgeTTS;
 }
 
-// Modificamos tu función generarAudioTTS para que sea así:
-// En tu api/chat.js
-async function generarAudioTTS(texto) {
-    // PEGA AQUÍ TU API KEY ENTRE LAS COMILLAS
-    const ELEVENLABS_API_KEY = "sk_161f372298f70bd20ff6ae30e9d01f4fe5b27c3c259e473d"; 
-    // Cambia esta línea en tu función generarAudioTTS
-const VOICE_ID = "EXAVITQu4vr4xnSDxMaL"; // Esta es la voz 'Bella' (voz estándar gratuita)
-    try {
-    // --- AQUÍ ESTÁ EL CHIVATO ---
-console.log("--------------------------------------------------");
-console.log("DEBUG: Tamaño del texto antes de ElevenLabs:", texto.length);
-console.log("DEBUG: Contenido del texto:", texto);
-console.log("--------------------------------------------------");    
-// ... dentro de tu función generarAudioTTS ...
-const textoSeguro = texto.slice(0, 180); 
 
-
- const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${VOICE_ID}`, {
-            method: 'POST',
-            headers: {
-                'xi-api-key': ELEVENLABS_API_KEY,
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                text: textoSeguro,
-                model_id: "eleven_multilingual_v2",
-                voice_settings: { stability: 0.5, similarity_boost: 0.75 }
-            })
-        });
-
-        // ¡AQUÍ ESTÁ LA CLAVE!
-if (!response.ok) {
-    const errorData = await response.text(); // Leemos el error real
-    console.log("¡ERROR DE ELEVENLABS!: ", errorData);
-    throw new Error("ElevenLabs falló");
-}     
-// ANTES de hacer el buffer, revisa qué llegó:
-console.log("Tipo de contenido recibido:", response.headers.get("Content-Type"));
-        const arrayBuffer = await response.arrayBuffer();
-        return Buffer.from(arrayBuffer).toString("base64");
-
-    } catch (error) {
-        console.error("Error definitivo en ElevenLabs:", error);
-        return null;
-    }
-}
 
 export default async function handler(req, res) { // <--- ESTO ESTABA EN TU LÍNEA 1
     // ... resto de tu código
