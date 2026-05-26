@@ -3673,50 +3673,39 @@ async function procesarRespuestaHarvis(msg, targetID) {
 
         // H.A.R.V.I.S. habla por la bocina del teléfono
         if (typeof hablarHarvis === "function") {
-            hablarHarvis(respuestaIA);
-        
+    hablarHarvis(respuestaIA);
+}
 
-        // [AQUÍ VA EL BLOQUE]
-        if (typeof pintarMensaje === "function") {
-            // 1. Pintamos el texto (lo que el usuario lee al instante)
-            pintarMensaje(respuestaIA, 'msg-izquierda', null, 'leido', harvisMsgId, 'texto');
-                // DEBUG MEJORADO
-console.log("DEBUG: Respuesta completa:", datosBackend);
+// 1. Pintamos el texto
+if (typeof pintarMensaje === "function") {
+    pintarMensaje(respuestaIA, 'msg-izquierda', null, 'leido', harvisMsgId, 'texto');
+}
 
+// 2. Procesamos el audio correctamente
 if (datosBackend && datosBackend.audioBase64) {
-    const audioData = datosBackend.audioBase64;
-    
-    // Verificamos el tipo de dato y los primeros caracteres
-    console.log("DEBUG: Tipo de dato de audioBase64:", typeof audioData);
-    console.log("DEBUG: Primeros 50 caracteres del audio:", audioData.substring(0, 50));
-    console.log("DEBUG: Longitud total de la cadena:", audioData.length);
-    
-    // Si la longitud es muy pequeña (ej. menos de 100), algo está mal en el servidor
-    if (audioData.length < 100) {
-        console.warn("⚠️ ALERTA: La cadena de audio parece demasiado corta para ser un audio real.");
+    // Decodificar el base64 a un arreglo de bytes
+    const byteCharacters = atob(datosBackend.audioBase64);
+    const byteNumbers = new Array(byteCharacters.length);
+    for (let i = 0; i < byteCharacters.length; i++) {
+        byteNumbers[i] = byteCharacters.charCodeAt(i);
     }
-} else {
-    console.error("❌ ERROR: El campo audioBase64 no existe o está vacío en el JSON:", datosBackend);
-     }
-            // 2. Lógica de audio: Reproducción automática y persistencia
-            // 2. Lógica de audio: Reproducción y persistencia
-if (datosBackend.audioBase64) {
-    // A. Necesitamos añadir el prefijo para que el navegador sepa que es audio/mp3
-    const audioSrc = `data:audio/mp3;base64,${datosBackend.audioBase64}`;
     
-    // B. Reproducción automática
-const audioHarvis = new Audio(audioSrc);
-    audioHarvis.play().catch(e => console.log("Autoplay:", e));
-    
-// C. Pintamos la nota de voz en el chat
-pintarMensaje(audioSrc, 'msg-izquierda', null, 'leido', harvisMsgId + "_audio", 'audio');
+    // Crear el Blob y su URL
+    const blob = new Blob([new Uint8Array(byteNumbers)], { type: 'audio/mpeg' });
+    const audioUrl = URL.createObjectURL(blob);
 
-// ELIMINA O COMENTA la línea que hace: audioHarvis.play().catch(...)
-// Chrome ya no bloqueará nada porque no estamos intentando reproducir sin permiso.
-    // C. Pintamos la nota de voz en el chat (usando la fuente correcta)
-    
- }
-     }   // [FIN DEL BLOQUE]
+    // Reproducción automática
+    const audioHarvis = new Audio(audioUrl);
+    audioHarvis.play().catch(e => console.log("Autoplay:", e));
+
+    // Pintamos la nota de voz en el chat usando la URL del Blob
+    if (typeof pintarMensaje === "function") {
+        pintarMensaje(audioUrl, 'msg-izquierda', null, 'leido', harvisMsgId + "_audio", 'audio');
+    }
+} else if (datosBackend && !datosBackend.audioBase64) {
+    console.error("❌ ERROR: El campo audioBase64 no existe en el JSON.");
+}
+
 
         // 3. Imagen (tu lógica existente se mantiene igual)
 if (datosBackend.imagenUrl) {
