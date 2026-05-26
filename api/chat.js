@@ -8,7 +8,7 @@ async function getEdgeTTS() {
 // En tu api/chat.js
 async function generarAudioTTS(texto) {
     // PEGA AQUÍ TU API KEY ENTRE LAS COMILLAS
-    const ELEVENLABS_API_KEY = "sk_d52c02c186981e7d0bb9593b501529383430860b5bef6758"; 
+    const ELEVENLABS_API_KEY = "sk_161f372298f70bd20ff6ae30e9d01f4fe5b27c3c259e473d"; 
     // Cambia esta línea en tu función generarAudioTTS
 const VOICE_ID = "EXAVITQu4vr4xnSDxMaL"; // Esta es la voz 'Bella' (voz estándar gratuita)
     try {
