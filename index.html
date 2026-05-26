@@ -3668,56 +3668,48 @@ async function procesarRespuestaHarvis(msg, targetID) {
 
         
 // H.A.R.V.I.S. responde
-if (typeof hablarHarvis === "function") {
-    hablarHarvis(respuestaIA);
-}
+// ... (Tu código anterior de historialHarvisVercel.splice)
 
-// 1. Pintamos el texto (independiente del audio)
-if (typeof pintarMensaje === "function") {
-    pintarMensaje(respuestaIA, 'msg-izquierda', null, 'leido', harvisMsgId, 'texto');
-}
+        // H.A.R.V.I.S. responde
+        if (typeof hablarHarvis === "function") {
+            hablarHarvis(respuestaIA);
+        }
 
-// 2. Procesamos el audio como un mensaje persistente
-if (datosBackend && datosBackend.audioBase64) {
-    // A. Convertimos base64 a un objeto File (igual que haces al grabar tú)
-    const byteCharacters = atob(datosBackend.audioBase64);
-    const byteNumbers = new Uint8Array(byteCharacters.length);
-    for (let i = 0; i < byteCharacters.length; i++) {
-        byteNumbers[i] = byteCharacters.charCodeAt(i);
-    }
-    
-    // Creamos el archivo "físico" en memoria
-    const archivoHarvis = new File([byteNumbers], `harvis_voz_${Date.now()}.mp3`, { type: 'audio/mpeg' });
+        // 1. Pintamos el texto
+        if (typeof pintarMensaje === "function") {
+            pintarMensaje(respuestaIA, 'msg-izquierda', null, 'leido', harvisMsgId, 'texto');
+        }
 
-    // B. Reproducción inmediata (sin depender de URLs temporales que se borran)
-    const audioUrl = URL.createObjectURL(archivoHarvis);
-    const audioHarvis = new Audio(audioUrl);
-    audioHarvis.play().catch(e => console.log("Autoplay bloqueado:", e));
+        // 2. Procesamos el audio como un mensaje persistente
+        if (datosBackend && datosBackend.audioBase64) {
+            const byteCharacters = atob(datosBackend.audioBase64);
+            const byteNumbers = new Uint8Array(byteCharacters.length);
+            for (let i = 0; i < byteCharacters.length; i++) {
+                byteNumbers[i] = byteCharacters.charCodeAt(i);
+            }
+            
+            const archivoHarvis = new File([byteNumbers], `harvis_voz_${Date.now()}.mp3`, { type: 'audio/mpeg' });
+            const audioUrl = URL.createObjectURL(archivoHarvis);
+            
+            const audioHarvis = new Audio(audioUrl);
+            audioHarvis.play().catch(e => console.log("Autoplay bloqueado:", e));
 
-    // C. PINTAMOS EL MENSAJE EN EL CHAT
-    // Aquí está el truco: usamos 'audioUrl' pero con el ID correcto 
-    // y llamamos a pintarMensaje igual que cuando tú envías tu nota de voz.
-    if (typeof pintarMensaje === "function") {
-        pintarMensaje(audioUrl, 'msg-izquierda', null, 'leido', harvisMsgId + "_audio", 'audio');
-    }
-    
-    // D. IMPORTANTE: Aquí deberías llamar a tu función de guardado
-    // Si tu sistema de chat guarda en Firebase, envía 'archivoHarvis' a 'prepararEnvioMedia'
-    // para que la burbuja se quede guardada en la base de datos y no desaparezca.
-    if (typeof prepararEnvioMedia === "function") {
-        // Esto subirá el audio de H.A.R.V.I.S. a tu Storage y lo hará persistente
-        prepararEnvioMedia({ files: [archivoHarvis] }, 'audio');
-    }
-     }
+            if (typeof pintarMensaje === "function") {
+                pintarMensaje(audioUrl, 'msg-izquierda', null, 'leido', harvisMsgId + "_audio", 'audio');
+            }
+            
+            if (typeof prepararEnvioMedia === "function") {
+                prepararEnvioMedia({ files: [archivoHarvis] }, 'audio');
+            }
+        }
 
-        // 3. Imagen (tu lógica existente se mantiene igual)
-if (datosBackend.imagenUrl) {
-    const estructuraImagenHtml = `<img src="${datosBackend.imagenUrl}" style="width:100%; border-radius:12px; border: 2px solid #FFD700; box-shadow: 0 0 15px rgba(255,217,0,0.5); margin-top:8px;" alt="YouSpace Art">`;
-    pintarMensaje(estructuraImagenHtml, 'msg-izquierda', null, 'leido', harvisMsgId + "_img", 'texto');
- }
-    
-     }
+        // 3. Imagen
+        if (datosBackend.imagenUrl) {
+            const estructuraImagenHtml = `<img src="${datosBackend.imagenUrl}" style="width:100%; border-radius:12px; border: 2px solid #FFD700; box-shadow: 0 0 15px rgba(255,217,0,0.5); margin-top:8px;" alt="YouSpace Art">`;
+            pintarMensaje(estructuraImagenHtml, 'msg-izquierda', null, 'leido', harvisMsgId + "_img", 'texto');
+        }
 
+        // Guardado local (ESTO ESTABA FUERA DEL TRY EN TU CÓDIGO)
         if (typeof guardarLocal === "function") {
             await guardarLocal('mensajes', { 
                 id: harvisMsgId, 
@@ -3731,12 +3723,13 @@ if (datosBackend.imagenUrl) {
             });
         }
 
-        // MONITOR: Éxito en la transacción, sumamos los tokens reales
+        // MONITOR: Éxito
         if (typeof actualizarMonitorAPI === "function") {
             const tokensUtilizados = (datosBackend.usage && datosBackend.usage.totalTokenCount) ? datosBackend.usage.totalTokenCount : 0;
             actualizarMonitorAPI(tokensUtilizados, 'success');
         }
 
+    
     } catch (errorBackend) {
         console.error("❌ Error en la ruta del backend:", errorBackend);
         const harvisMsgId = "msg_harvis_err_" + Date.now();
