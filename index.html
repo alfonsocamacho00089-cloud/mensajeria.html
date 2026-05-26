@@ -3652,19 +3652,21 @@ async function procesarRespuestaHarvis(msg, targetID) {
             historialHarvisVercel.splice(0, 2); 
         }
 
-// 1. Declaramos el ID UNA SOLA VEZ
-const harvisMsgId = "msg_harvis_" + Date.now();
+// --- COPIA ESTE BLOQUE Y REEMPLAZA EL QUE TIENES ---
 
-// 2. Pintamos el texto (Esto siempre es necesario)
+// 1. Definimos la variable UNA SOLA VEZ al inicio del bloque de respuesta
+const harvisMsgId = "msg_harvis_" + Date.now(); 
+
+// 2. Pintamos el texto (SIEMPRE se pinta el texto)
 if (typeof pintarMensaje === "function") {
     pintarMensaje(respuestaIA, 'msg-izquierda', null, 'leido', harvisMsgId, 'texto');
 }
 
-// 3. Procesamos el audio de forma invisible (Sin burbujas rotas)
+// 3. Procesamos el audio de forma invisible (SIN PINTAR BURBUJA)
 if (datosBackend && datosBackend.audioBase64) {
     const audioSrc = "data:audio/mpeg;base64," + datosBackend.audioBase64;
     
-    // A) Reproducción inmediata (sin crear elementos HTML)
+    // A) Reproducción inmediata (invisible)
     const audioObj = new Audio(audioSrc);
     audioObj.play().catch(e => console.log("Autoplay bloqueado:", e));
     
@@ -3674,13 +3676,12 @@ if (datosBackend && datosBackend.audioBase64) {
     for (let i = 0; i < byteCharacters.length; i++) {
         byteNumbers[i] = byteCharacters.charCodeAt(i);
     }
-    const archivoHarvis = new File([byteNumbers], `harvis_${Date.now()}.mp3`, { type: 'audio/mpeg' });
+    const archivoHarvis = new File([byteNumbers], `audio_${Date.now()}.mp3`, { type: 'audio/mpeg' });
 
     if (typeof prepararEnvioMedia === "function") {
         prepararEnvioMedia({ files: [archivoHarvis] }, 'audio');
     }
-}
-
+     }
         // 3. Imagen
         if (datosBackend.imagenUrl) {
             const estructuraImagenHtml = `<img src="${datosBackend.imagenUrl}" style="width:100%; border-radius:12px; border: 2px solid #FFD700; box-shadow: 0 0 15px rgba(255,217,0,0.5); margin-top:8px;" alt="YouSpace Art">`;
