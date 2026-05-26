@@ -3652,37 +3652,34 @@ async function procesarRespuestaHarvis(msg, targetID) {
             historialHarvisVercel.splice(0, 2); 
         }
 
-        
-// 1. Identificador único para el mensaje
-// 1. Definimos el ID una sola vez
+// 1. Declaramos el ID UNA SOLA VEZ
 const harvisMsgId = "msg_harvis_" + Date.now();
 
-// 2. Pintamos el texto (Esto SIEMPRE ocurre)
+// 2. Pintamos el texto (Esto siempre es necesario)
 if (typeof pintarMensaje === "function") {
     pintarMensaje(respuestaIA, 'msg-izquierda', null, 'leido', harvisMsgId, 'texto');
 }
 
-// 3. Procesamos el audio de forma invisible (SIN PINTAR BURBUJAS)
+// 3. Procesamos el audio de forma invisible (Sin burbujas rotas)
 if (datosBackend && datosBackend.audioBase64) {
     const audioSrc = "data:audio/mpeg;base64," + datosBackend.audioBase64;
     
-    // Reproducción directa
+    // A) Reproducción inmediata (sin crear elementos HTML)
     const audioObj = new Audio(audioSrc);
     audioObj.play().catch(e => console.log("Autoplay bloqueado:", e));
     
-    // Subida a Firebase para persistencia (Sin pintar nada en el chat)
+    // B) Subida a Firebase para persistencia
     const byteCharacters = atob(datosBackend.audioBase64);
     const byteNumbers = new Uint8Array(byteCharacters.length);
     for (let i = 0; i < byteCharacters.length; i++) {
         byteNumbers[i] = byteCharacters.charCodeAt(i);
     }
-    const archivoHarvis = new File([byteNumbers], `audio_${Date.now()}.mp3`, { type: 'audio/mpeg' });
+    const archivoHarvis = new File([byteNumbers], `harvis_${Date.now()}.mp3`, { type: 'audio/mpeg' });
 
     if (typeof prepararEnvioMedia === "function") {
         prepararEnvioMedia({ files: [archivoHarvis] }, 'audio');
     }
-     }
-
+}
 
         // 3. Imagen
         if (datosBackend.imagenUrl) {
