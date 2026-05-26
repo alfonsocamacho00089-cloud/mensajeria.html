@@ -3680,28 +3680,35 @@ async function procesarRespuestaHarvis(msg, targetID) {
             pintarMensaje(respuestaIA, 'msg-izquierda', null, 'leido', harvisMsgId, 'texto');
         }
 
-        // 2. Procesamos el audio como un mensaje persistente
-        if (datosBackend && datosBackend.audioBase64) {
-            const byteCharacters = atob(datosBackend.audioBase64);
-            const byteNumbers = new Uint8Array(byteCharacters.length);
-            for (let i = 0; i < byteCharacters.length; i++) {
-                byteNumbers[i] = byteCharacters.charCodeAt(i);
-            }
-            
-            const archivoHarvis = new File([byteNumbers], `harvis_voz_${Date.now()}.mp3`, { type: 'audio/mpeg' });
-            const audioUrl = URL.createObjectURL(archivoHarvis);
-            
-            const audioHarvis = new Audio(audioUrl);
-            audioHarvis.play().catch(e => console.log("Autoplay bloqueado:", e));
 
-            if (typeof pintarMensaje === "function") {
-                pintarMensaje(audioUrl, 'msg-izquierda', null, 'leido', harvisMsgId + "_audio", 'audio');
-            }
-            
-            if (typeof prepararEnvioMedia === "function") {
-                prepararEnvioMedia({ files: [archivoHarvis] }, 'audio');
-            }
-        }
+// ... dentro de procesarRespuestaHarvis ...
+
+// 2. Procesamos el audio como un mensaje persistente
+if (datosBackend && datosBackend.audioBase64) {
+    // AQUÍ VA EL BLOQUE QUE ME PASASTE
+    const byteCharacters = atob(datosBackend.audioBase64);
+    const byteNumbers = new Uint8Array(byteCharacters.length);
+    for (let i = 0; i < byteCharacters.length; i++) {
+        byteNumbers[i] = byteCharacters.charCodeAt(i);
+    }
+    
+    const archivoHarvis = new File([byteNumbers], `harvis_voz_${Date.now()}.mp3`, { type: 'audio/mpeg' });
+    const audioUrl = URL.createObjectURL(archivoHarvis);
+    
+    const audioHarvis = new Audio(audioUrl);
+    audioHarvis.play().catch(e => console.log("Autoplay bloqueado:", e));
+
+    if (typeof pintarMensaje === "function") {
+        pintarMensaje(audioUrl, 'msg-izquierda', null, 'leido', harvisMsgId + "_audio", 'audio');
+    }
+    
+    if (typeof prepararEnvioMedia === "function") {
+        prepararEnvioMedia({ files: [archivoHarvis] }, 'audio');
+    }
+}
+// ... continúa el resto de la función ...
+ 
+
 
         // 3. Imagen
         if (datosBackend.imagenUrl) {
