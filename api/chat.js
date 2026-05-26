@@ -40,7 +40,8 @@ if (!response.ok) {
     console.log("¡ERROR DE ELEVENLABS!: ", errorData);
     throw new Error("ElevenLabs falló");
 }     
-
+// ANTES de hacer el buffer, revisa qué llegó:
+console.log("Tipo de contenido recibido:", response.headers.get("Content-Type"));
         const arrayBuffer = await response.arrayBuffer();
         return Buffer.from(arrayBuffer).toString("base64");
 
