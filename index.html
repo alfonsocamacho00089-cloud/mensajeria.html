@@ -3674,12 +3674,11 @@ async function procesarRespuestaHarvis(msg, targetID) {
         // H.A.R.V.I.S. habla por la bocina del teléfono
         if (typeof hablarHarvis === "function") {
     hablarHarvis(respuestaIA);
-}
 
 // 1. Pintamos el texto
 if (typeof pintarMensaje === "function") {
     pintarMensaje(respuestaIA, 'msg-izquierda', null, 'leido', harvisMsgId, 'texto');
-}
+
 
 // 2. Procesamos el audio correctamente
 if (datosBackend && datosBackend.audioBase64) {
@@ -3698,13 +3697,13 @@ if (datosBackend && datosBackend.audioBase64) {
     const audioHarvis = new Audio(audioUrl);
     audioHarvis.play().catch(e => console.log("Autoplay:", e));
 
-    // Pintamos la nota de voz en el chat usando la URL del Blob
-    if (typeof pintarMensaje === "function") {
-        pintarMensaje(audioUrl, 'msg-izquierda', null, 'leido', harvisMsgId + "_audio", 'audio');
-    }
-} else if (datosBackend && !datosBackend.audioBase64) {
-    console.error("❌ ERROR: El campo audioBase64 no existe en el JSON.");
-}
+    
+// C. Pintamos la nota de voz en el chat
+pintarMensaje(audioSrc, 'msg-izquierda', null, 'leido', harvisMsgId + "_audio", 'audio');
+
+
+ }
+     }   
 
 
         // 3. Imagen (tu lógica existente se mantiene igual)
