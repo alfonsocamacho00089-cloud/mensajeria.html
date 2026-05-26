@@ -34,11 +34,12 @@ const textoSeguro = texto.slice(0, 180);
             })
         });
 
-        if (!response.ok) {
-            const errorText = await response.text();
-            console.error("Detalle del error de ElevenLabs:", errorText);
-            throw new Error("Error en ElevenLabs: " + response.statusText);
-        }
+        // ¡AQUÍ ESTÁ LA CLAVE!
+if (!response.ok) {
+    const errorData = await response.text(); // Leemos el error real
+    console.log("¡ERROR DE ELEVENLABS!: ", errorData);
+    throw new Error("ElevenLabs falló");
+}     
 
         const arrayBuffer = await response.arrayBuffer();
         return Buffer.from(arrayBuffer).toString("base64");
