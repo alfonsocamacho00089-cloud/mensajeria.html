@@ -3678,7 +3678,9 @@ async function procesarRespuestaHarvis(msg, targetID) {
             // Removemos los 2 elementos más antiguos (una pregunta y su respuesta) para mantener el hilo coherente
             historialHarvisVercel.splice(0, 2); 
         }
-// H.A.R.V.I.S. responde
+
+
+     // H.A.R.V.I.S. responde
 // ... (Tu código anterior de historialHarvisVercel.splice)
 
         // H.A.R.V.I.S. responde
@@ -3702,8 +3704,27 @@ if (datosBackend && datosBackend.audioBase64) {
     
     // 2. Pintamos el mensaje usando este nuevo src
     // Asegúrate de que tu función pintarMensaje acepte este string
-    pintarMensaje(srcAudio, 'msg-izquierda', null, 'leido', harvisMsgId + "_audio", 'audio');
+    // ... dentro de tu bloque donde recibes datosBackend
+const harvisMsgId = "msg_harvis_" + Date.now();
 
+// 1. Pintamos el texto primero
+pintarMensaje(respuestaIA, 'msg-izquierda', null, 'leido', harvisMsgId, 'texto');
+
+// 2. Esperamos un breve momento (o detectamos que el elemento existe)
+// Esto da tiempo a que el navegador dibuje el texto antes de intentar poner el audio
+setTimeout(() => {
+    if (datosBackend && datosBackend.audioBase64) {
+        // Construimos el audio correctamente
+        const audioSrc = "data:audio/mpeg;base64," + datosBackend.audioBase64;
+        
+        // Lo pintamos como un mensaje nuevo debajo o dentro del mismo hilo
+        pintarMensaje(audioSrc, 'msg-izquierda', null, 'leido', harvisMsgId + "_audio", 'audio');
+        
+        // Intentar reproducir automáticamente
+        const audioObj = new Audio(audioSrc);
+        audioObj.play().catch(e => console.log("Autoplay bloqueado por navegador"));
+    }
+}, 500); // 500ms es suficiente para que el usuario sienta la fluidez sin el "instantáneo" que falla
     if (typeof prepararEnvioMedia === "function") {
         // Al subir el archivo, obtendrás una URL permanente de Firebase (https://firebasestorage...)
         // Esa URL es la que debes guardar en tu base de datos (guardarLocal)
