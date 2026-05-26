@@ -3693,14 +3693,16 @@ if (datosBackend && datosBackend.audioBase64) {
     const audioUrl = URL.createObjectURL(archivoHarvis);
     const audioHarvis = new Audio(audioUrl);
     audioHarvis.play().catch(e => console.log("Autoplay bloqueado:", e));
-
+     }
+     }
     // C. PINTAMOS EL MENSAJE EN EL CHAT
     // Aquí está el truco: usamos 'audioUrl' pero con el ID correcto 
     // y llamamos a pintarMensaje igual que cuando tú envías tu nota de voz.
     if (typeof pintarMensaje === "function") {
         pintarMensaje(audioUrl, 'msg-izquierda', null, 'leido', harvisMsgId + "_audio", 'audio');
     
-    
+     
+     
     // D. IMPORTANTE: Aquí deberías llamar a tu función de guardado
     // Si tu sistema de chat guarda en Firebase, envía 'archivoHarvis' a 'prepararEnvioMedia'
     // para que la burbuja se quede guardada en la base de datos y no desaparezca.
