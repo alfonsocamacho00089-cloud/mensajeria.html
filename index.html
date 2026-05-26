@@ -3386,26 +3386,32 @@ const contactoHarvisFijo = {
     console.log("🚀 H.A.R.V.I.S. preparando voz premium...");
     
     try {
-        // 1. Llamamos a tu función de ElevenLabs (asegúrate de que sea accesible aquí)
-        // Nota: Si 'generarAudioTTS' está en el backend, deberás hacer un fetch a /api/chat o similar
+        // 1. Intentamos obtener el audio desde tu backend
         const audioBase64 = await generarAudioTTS(texto); 
         
         if (audioBase64) {
-            // 2. Convertimos el base64 a un objeto de audio
+            // 2. Reproducimos de forma invisible (sin pintar el bloque 0:00)
             const audioSrc = "data:audio/mpeg;base64," + audioBase64;
             const audioPlayer = new Audio(audioSrc);
             
-            // 3. Reproducimos
-            audioPlayer.play().catch(e => console.error("Error al reproducir audio:", e));
-            
-            console.log("¡H.A.R.V.I.S. hablando con voz premium!");
+            // Esto evita que falle si el navegador bloquea el autoplay
+            audioPlayer.play().catch(e => console.log("Autoplay bloqueado, el usuario debe tocar algo"));
+            console.log("✅ Audio ElevenLabs ejecutado.");
+        } else {
+            throw new Error("No se generó audio");
         }
     } catch (error) {
-        console.error("Falló ElevenLabs, cayendo a voz de sistema:", error);
-        // Fallback: Si falla ElevenLabs, usamos la voz robótica de tu función anterior
-        usarVozSistemaLocal(texto); 
+        console.warn("⚠️ ElevenLabs falló, usando síntesis local:", error.message);
+        
+        // 3. AQUÍ ESTÁ EL CAMBIO: Llamamos a tu función original de voz de Android
+        // Asegúrate de que esta función tenga el nombre exacto que tú definiste
+        const synth = window.speechSynthesis;
+        synth.cancel();
+        const utterance = new SpeechSynthesisUtterance(texto);
+        utterance.lang = 'es-ES';
+        synth.speak(utterance);
     }
- }
+     }
 
 // Hace que el teléfono escuche (Micrófono nativo)
 function escucharVozPedro(alRecibirTexto) {
