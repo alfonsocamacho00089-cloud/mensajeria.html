@@ -12,7 +12,11 @@ async function generarAudioTTS(texto) {
     // Cambia esta línea en tu función generarAudioTTS
 const VOICE_ID = "EXAVITQu4vr4xnSDxMaL"; // Esta es la voz 'Bella' (voz estándar gratuita)
     try {
-        
+    // --- AQUÍ ESTÁ EL CHIVATO ---
+console.log("--------------------------------------------------");
+console.log("DEBUG: Tamaño del texto antes de ElevenLabs:", texto.length);
+console.log("DEBUG: Contenido del texto:", texto);
+console.log("--------------------------------------------------");    
 // ... dentro de tu función generarAudioTTS ...
 const textoSeguro = texto.slice(0, 180); 
 
