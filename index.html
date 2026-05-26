@@ -3778,33 +3778,7 @@ if (datosBackend.imagenUrl) {
     }
      }
 // El resto de tus funciones de inicialización y eventos de voz continúan abajo intactas...
-async function generarAudioTTS(texto) {
-    const limite = 190;
-    const fragmentos = [];
-    let resto = texto;
 
-    // Fragmentación inteligente
-    while (resto.length > limite) {
-        let corte = resto.lastIndexOf(' ', limite);
-        if (corte === -1) corte = limite;
-        fragmentos.push(resto.substring(0, corte));
-        resto = resto.substring(corte).trim();
-    }
-    fragmentos.push(resto);
-
-    const buffers = [];
-    for (const frag of fragmentos) {
-        const url = `https://translate.google.com/translate_tts?ie=UTF-8&tl=es&client=tw-ob&q=${encodeURIComponent(frag)}`;
-        const res = await fetch(url);
-        if (res.ok) {
-            buffers.push(await res.arrayBuffer());
-            await new Promise(r => setTimeout(r, 150));
-        }
-    }
-
-    if (buffers.length === 0) throw new Error("Fallo en TTS");
-    return `data:audio/mp3;base64,${Buffer.concat(buffers.map(b => Buffer.from(b))).toString('base64')}`;
-     }
 // =================================================================
 // 3. MOTOR DE ACTIVACIÓN POR VOZ INFINITA (ESTILO ALEXA)
 // =================================================================
