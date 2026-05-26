@@ -54,7 +54,7 @@ if user_input := st.chat_input("Escribe una orden..."):
 
         # PRUEBA ELEVENLABS
         with st.spinner("Generando voz con ElevenLabs..."):
-            ELEVENLABS_API_KEY = "sk_848f5dd7714757bd3d5773d2e1f883567836d0662fc9ac54"
+            ELEVENLABS_API_KEY = "k_848f5d5773d2e1f883567836d0662fc9ac54"
             VOICE_ID = "EXAVITQu4vr4xnSDxMaL"
             url = f"https://api.elevenlabs.io/v1/text-to-speech/{VOICE_ID}"
             
