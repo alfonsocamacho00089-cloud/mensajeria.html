@@ -2162,10 +2162,14 @@ console.log("Intentando pintar tipo:", tipo, "con contenido:", contenido);
                     </video>
                 `;
             
-                
+                } else if (tipo === 'audio' || textoReal.startsWith('data:audio') || (textoReal.startsWith('blob:') && textoReal.includes('audio')) || textoReal.includes('.webm') || textoReal.includes('.ogg')) {
+    
+    // Identificación completa de todos los tipos posibles
+    const tipoArchivo = textoReal.includes('webm') ? 'audio/webm' : 
+                        textoReal.includes('ogg') ? 'audio/ogg' : 
+                        textoReal.includes('mpeg') || textoReal.includes('mp3') ? 'audio/mpeg' : 'audio/mpeg';
             
-            } else if (tipo === 'audio' || textoReal.startsWith('data:audio') || (textoReal.startsWith('blob:') && textoReal.includes('audio')) || textoReal.includes('.webm') || textoReal.includes('.ogg')) {
-                cuerpoHTML = `
+            cuerpoHTML = `
                     <audio src="${textoReal}" controls playsinline type="audio/webm"
                            style="max-width:240px; display:block; margin-top:2px; outline:none;">
                     </audio>
