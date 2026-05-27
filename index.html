@@ -3614,122 +3614,140 @@ async function procesarRespuestaHarvis(msg, targetID) {
             throw new Error(`Código de respuesta de red: ${respuestaServidor.status}`);
         }
 
-        const datosBackend = await respuestaServidor.json();
-        const harvisMsgId = "msg_harvis_" + Date.now();
+
+
+
+const datosBackend = await respuestaServidor.json();
+const harvisMsgId = "msg_harvis_" + Date.now();
+let respuestaIA = "Sistemas listos, Pedro.";
+
+if (datosBackend && datosBackend.respuesta) {
+    respuestaIA = datosBackend.respuesta;
+    
+    // 🛡️ DETECTOR DEFENSIVO PARA EL TEXTO DE ERROR
+    if (respuestaIA.includes("GOOGLE API ERROR") || respuestaIA.includes("[Código 429]") || respuestaIA.includes("[Código 503]")) {
+        mensajePendientePorSaturacion = msg; 
         
-        let respuestaIA = "Sistemas listos, Pedro.";
-
-        if (datosBackend && datosBackend.respuesta) {
-            respuestaIA = datosBackend.respuesta;
-            
-            // 🛡️ DETECTOR DEFENSIVO PARA EL TEXTO DE ERROR (Captura de pantalla)
-            if (respuestaIA.includes("GOOGLE API ERROR") || respuestaIA.includes("[Código 429]") || respuestaIA.includes("[Código 503]")) {
-                
-                mensajePendientePorSaturacion = msg; // Guardamos tu mensaje original en el buzón
-                
-                if (typeof pintarMensaje === "function") {
-                    pintarMensaje(`💥 Servidor saturado (Límite 429). Mensaje guardado en cola.`, 'msg-izquierda', null, 'leido', harvisMsgId, 'texto');
-                }
-                
-                if (typeof actualizarMonitorAPI === "function") {
-                    actualizarMonitorAPI(0, 'error', 'Error 429: Rate Limit');
-                }
-                
-                const txtStatus = document.getElementById('widget-status-text');
-                if (txtStatus) {
-                    txtStatus.innerHTML = `
-                        <span style="color:#ff3333; display:block; margin-bottom:4px;">Límite Excedido</span>
-                        <button onclick="DespacharMensajeEnCola()" style="background:transparent; border:1px solid #d4af37; color:#d4af37; border-radius:4px; font-size:9px; padding:2px 6px; cursor:pointer; box-shadow: 0 0 5px rgba(212,175,55,0.3);">
-                            🔄 Reintentar Mensaje
-                        </button>
-                    `;
-                }
-             harvisProcesandoPeticion = false;
-return;
-                // Cortamos el flujo aquí para que no hable el error ni gaste tokens
-            }
-            
-        } else {
-            console.warn("⚠️ El backend no devolvió la propiedad 'respuesta':", datosBackend);
-            respuestaIA = "⚠️ H.A.R.V.I.S. no pudo procesar el formato del backend.";
-        }
-        
-        // Si la respuesta fue limpia, continuamos el flujo original
-        // ... (Tu código de Fetch y procesamiento de respuestaIA se queda exactamente igual) ...
-
-        // 1. Guardamos la respuesta del modelo en el historial de sesión de forma normal
-        historialHarvisVercel.push({ role: "model", parts: [{ text: respuestaIA }] });
-
-        // 🛡️ FILTRO RODANTE DE MEMORIA: Mantenemos el historial ligero para la API
-        // Si el historial supera los 8 elementos (4 preguntas y 4 respuestas), eliminamos lo más viejo
-        if (historialHarvisVercel.length > 8) {
-            console.log("✂️ Optimizando memoria de H.A.R.V.I.S.: Recortando mensajes antiguos del buffer activo.");
-            // Removemos los 2 elementos más antiguos (una pregunta y su respuesta) para mantener el hilo coherente
-            historialHarvisVercel.splice(0, 2); 
-        }
-
-        
-// H.A.R.V.I.S. responde
-// ... (Tu código anterior de historialHarvisVercel.splice)
-
-        // H.A.R.V.I.S. responde
-        if (typeof hablarHarvis === "function") {
-            hablarHarvis(respuestaIA);
-        }
-
-        // 1. Pintamos el texto
         if (typeof pintarMensaje === "function") {
-            pintarMensaje(respuestaIA, 'msg-izquierda', null, 'leido', harvisMsgId, 'texto');
+            pintarMensaje(`💥 Servidor saturado (Límite 429). Mensaje guardado en cola.`, 'msg-izquierda', null, 'leido', harvisMsgId, 'texto');
         }
-
-        // 2. Procesamos el audio como un mensaje persistente
-        if (datosBackend && datosBackend.audioBase64) {
-            const byteCharacters = atob(datosBackend.audioBase64);
-            const byteNumbers = new Uint8Array(byteCharacters.length);
-            for (let i = 0; i < byteCharacters.length; i++) {
-                byteNumbers[i] = byteCharacters.charCodeAt(i);
-            }
-            
-            const archivoHarvis = new File([byteNumbers], `harvis_voz_${Date.now()}.mp3`, { type: 'audio/mpeg' });
-            const audioUrl = URL.createObjectURL(archivoHarvis);
-            
-            const audioHarvis = new Audio(audioUrl);
-            audioHarvis.play().catch(e => console.log("Autoplay bloqueado:", e));
-
-            if (typeof pintarMensaje === "function") {
-                pintarMensaje(audioUrl, 'msg-izquierda', null, 'leido', harvisMsgId + "_audio", 'audio');
-            }
-            
-            if (typeof prepararEnvioMedia === "function") {
-                prepararEnvioMedia({ files: [archivoHarvis] }, 'audio');
-            }
-        }
-
-        // 3. Imagen
-        if (datosBackend.imagenUrl) {
-            const estructuraImagenHtml = `<img src="${datosBackend.imagenUrl}" style="width:100%; border-radius:12px; border: 2px solid #FFD700; box-shadow: 0 0 15px rgba(255,217,0,0.5); margin-top:8px;" alt="YouSpace Art">`;
-            pintarMensaje(estructuraImagenHtml, 'msg-izquierda', null, 'leido', harvisMsgId + "_img", 'texto');
-        }
-
-        // Guardado local (ESTO ESTABA FUERA DEL TRY EN TU CÓDIGO)
-        if (typeof guardarLocal === "function") {
-            await guardarLocal('mensajes', { 
-                id: harvisMsgId, 
-                contactoId: targetID,
-                texto: datosBackend.imagenUrl ? `${respuestaIA} [Imagen Arte]` : respuestaIA, 
-                clase: 'msg-izquierda', 
-                status: 'leido',
-                tipo: 'texto',
-                ts: Date.now(),
-                hora: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })
-            });
-        }
-
-        // MONITOR: Éxito
+        
         if (typeof actualizarMonitorAPI === "function") {
-            const tokensUtilizados = (datosBackend.usage && datosBackend.usage.totalTokenCount) ? datosBackend.usage.totalTokenCount : 0;
-            actualizarMonitorAPI(tokensUtilizados, 'success');
+            actualizarMonitorAPI(0, 'error', 'Error 429: Rate Limit');
         }
+        
+        const txtStatus = document.getElementById('widget-status-text');
+        if (txtStatus) {
+            txtStatus.innerHTML = `
+                <span style="color:#ff3333; display:block; margin-bottom:4px;">Límite Excedido</span>
+                <button onclick="DespacharMensajeEnCola()" style="background:transparent; border:1px solid #d4af37; color:#d4af37; border-radius:4px; font-size:9px; padding:2px 6px; cursor:pointer;">
+                    🔄 Reintentar Mensaje
+                </button>
+            `;
+        }
+        harvisProcesandoPeticion = false; // Liberamos cerrojo antes de salir
+        return; 
+    }
+} else {
+    console.warn("⚠️ El backend no devolvió la propiedad 'respuesta':", datosBackend);
+    respuestaIA = "⚠️ H.A.R.V.I.S. no pudo procesar el formato del backend.";
+}
+
+// 1. Historial de sesión en memoria
+historialHarvisVercel.push({ role: "model", parts: [{ text: respuestaIA }] });
+if (historialHarvisVercel.length > 8) {
+    historialHarvisVercel.splice(0, 2); 
+}
+
+// 2. Pintamos el texto en vivo de inmediato
+if (typeof pintarMensaje === "function") {
+    pintarMensaje(respuestaIA, 'msg-izquierda', null, 'leido', harvisMsgId, 'texto');
+}
+
+// 3. Procesamiento y Renderizado del Audio en Vivo
+let tieneAudioServer = false;
+let urlParaGuardar = null;
+
+if (datosBackend && datosBackend.audioBase64) {
+    try {
+        const byteCharacters = atob(datosBackend.audioBase64);
+        const byteNumbers = new Uint8Array(byteCharacters.length);
+        for (let i = 0; i < byteCharacters.length; i++) {
+            byteNumbers[i] = byteCharacters.charCodeAt(i);
+        }
+        
+        const archivoHarvis = new File([byteNumbers], `harvis_voz_${Date.now()}.mp3`, { type: 'audio/mpeg' });
+        urlParaGuardar = URL.createObjectURL(archivoHarvis);
+        
+        // Autoplay activo
+        const audioHarvis = new Audio(urlParaGuardar);
+        audioHarvis.play().catch(e => console.log("Autoplay bloqueado:", e));
+
+        // Pintamos el reproductor en vivo usando el blob fresco de la memoria
+        if (typeof pintarMensaje === "function") {
+            pintarMensaje(urlParaGuardar, 'msg-izquierda', null, 'leido', harvisMsgId + "_audio", 'audio');
+        }
+        
+        if (typeof prepararEnvioMedia === "function") {
+            prepararEnvioMedia({ files: [archivoHarvis] }, 'audio');
+        }
+        tieneAudioServer = true;
+    } catch (errAudio) {
+        console.error("Error procesando binario de audio de ElevenLabs:", errAudio);
+    }
+}
+
+// Respaldo nativo si falla ElevenLabs
+if (!tieneAudioServer && typeof hablarHarvis === "function") {
+    hablarHarvis(respuestaIA);
+}
+
+// 4. Renderizado de Imagen (Pollinations)
+if (datosBackend && datosBackend.imagenUrl) {
+    const estructuraImagenHtml = `<img src="${datosBackend.imagenUrl}" style="width:100%; border-radius:12px; border: 2px solid #FFD700; box-shadow: 0 0 15px rgba(255,217,0,0.5); margin-top:8px;" alt="YouSpace Art">`;
+    if (typeof pintarMensaje === "function") {
+        pintarMensaje(estructuraImagenHtml, 'msg-izquierda', null, 'leido', harvisMsgId + "_img", 'texto');
+    }
+}
+
+// 5. Guardado Inteligente en Base de Datos (IndexedDB)
+if (typeof guardarLocal === "function") {
+    // Guardamos el mensaje de texto principal
+    await guardarLocal('mensajes', { 
+        id: harvisMsgId, 
+        contactoId: targetID,
+        texto: datosBackend && datosBackend.imagenUrl ? `${respuestaIA} [Imagen Arte]` : respuestaIA, 
+        clase: 'msg-izquierda', 
+        status: 'leido',
+        tipo: 'texto',
+        ts: Date.now(),
+        hora: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })
+    });
+
+    // 🎙️ CLAVE DE LA BURBUJA PERSISTENTE: Guardamos el Base64 puro en el campo 'texto'
+    if (tieneAudioServer && datosBackend.audioBase64) {
+        await guardarLocal('mensajes', {
+            id: harvisMsgId + "_audio_db",
+            contactoId: targetID,
+            texto: `data:audio/mpeg;base64,${datosBackend.audioBase64}`, // 👈 Guardamos el Data URI completo, ¡este no caduca!
+            clase: 'msg-izquierda',
+            status: 'leido',
+            tipo: 'audio', // Le avisa a tu renderizador del historial que monte la burbuja de audio
+            ts: Date.now() + 1,
+            hora: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })
+        });
+    }
+}
+
+// 6. Monitor de API
+if (typeof actualizarMonitorAPI === "function") {
+    const tokensUtilizados = (datosBackend && datosBackend.usage && datosBackend.usage.totalTokenCount) ? datosBackend.usage.totalTokenCount : 0;
+    actualizarMonitorAPI(tokensUtilizados, 'success');
+     }
+
+ 
+        
+                
 
     
     } catch (errorBackend) {
