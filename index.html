@@ -3594,12 +3594,16 @@ async function procesarRespuestaHarvis(msg, targetID) {
             throw new Error(`Código de respuesta de red: ${respuestaServidor.status}`);
         }
 
+        
+
+        
+        
         const datosBackend = await respuestaServidor.json();
         const harvisMsgId = "msg_harvis_" + Date.now();
-        
-        let respuestaIA = "Sistemas listos, Pedro.";
+        let respuestaIA = datosBackend.respuesta || "Sistemas listos, Pedro.";
 
-        if (datosBackend && datosBackend.respuesta) {
+
+     if (datosBackend && datosBackend.respuesta) {
             respuestaIA = datosBackend.respuesta;
             
             // 🛡️ DETECTOR DEFENSIVO PARA EL TEXTO DE ERROR (Captura de pantalla)
@@ -3630,50 +3634,63 @@ async function procesarRespuestaHarvis(msg, targetID) {
         } else {
             console.warn("⚠️ El backend no devolvió la propiedad 'respuesta':", datosBackend);
             respuestaIA = "⚠️ H.A.R.V.I.S. no pudo procesar el formato del backend.";
-        }
-        
-        historialHarvisVercel.push({ role: "model", parts: [{ text: respuestaIA }] });
-
-// 🛡️ FILTRO RODANTE DE MEMORIA: Mantenemos el historial ligero para la API
-// Si el historial supera los 4 elementos (2 preguntas y 2 respuestas), eliminamos lo más viejo
-if (historialHarvisVercel.length > 4) {
-    console.log("✂️ Optimizando memoria de H.A.R.V.I.S.: Recortando mensajes antiguos.");
-    // .splice(0, 2) elimina los 2 elementos más viejos (1 par de usuario/modelo) 
-    // sin romper la variable 'const'
-    historialHarvisVercel.splice(0, 2); 
-}
-
-// H.A.R.V.I.S. habla por la bocina del teléfono
-if (typeof hablarHarvis === "function") {
-    hablarHarvis(respuestaIA);
      }
 
-// ... (Tu lógica de pintarMensaje y el guardado masivo en IndexedDB continúan abajo intactos) ...
+        // 1. Guardamos en el historial de sesión en memoria
+        historialHarvisVercel.push({ role: "model", parts: [{ text: respuestaIA }] });
 
-        // ... (dentro de procesarRespuestaHarvis) ...
+        if (historialHarvisVercel.length > 8) {
+            historialHarvisVercel.splice(0, 2); 
+        }
 
-if (typeof pintarMensaje === "function") {
-    // 1. Siempre pintamos el texto
-    pintarMensaje(respuestaIA, 'msg-izquierda', null, 'leido', harvisMsgId, 'texto');
-    
-    // 2. Pintamos la nota de voz:
-    // Si tienes audio del servidor (datosBackend.audioBase64), usa ese.
-    // Si no tienes, le pasamos el texto a 'pintarMensaje' para que sepa que debe mostrar el botón 
-    // de "reproducir con hablarHarvis".
-    const fuenteAudio = datosBackend.audioBase64 || respuestaIA; 
-    const tipoAudio = datosBackend.audioBase64 ? 'audio_servidor' : 'audio';
+        // 2. Pintamos primero el mensaje de texto en el chat
+        if (typeof pintarMensaje === "function") {
+            pintarMensaje(respuestaIA, 'msg-izquierda', null, 'leido', harvisMsgId, 'texto');
+        }
 
-    pintarMensaje(fuenteAudio, 'msg-izquierda', null, 'leido', harvisMsgId + "_audio", tipoAudio);
-            
-    // 3. Imagen (tu lógica existente)
-    
-            if (datosBackend.imagenUrl) {
-                const estructuraImagenHtml = `<img src="${datosBackend.imagenUrl}" style="width:100%; border-radius:12px; border: 2px solid #FFD700; box-shadow: 0 0 15px rgba(255,217,0,0.5); margin-top:8px;" alt="YouSpace Art">`;
-                pintarMensaje(estructuraImagenHtml, 'msg-izquierda', null, 'leido', harvisMsgId + "_img", 'texto');
+        // 3. 🎙️ GESTIÓN AVANZADA DE AUDIO (ElevenLabs vs Nativo)
+        let tieneAudioServer = false;
+        let urlParaGuardar = null;
+
+        if (datosBackend && datosBackend.audioBase64) {
+            try {
+                const byteCharacters = atob(datosBackend.audioBase64);
+                const byteNumbers = new Uint8Array(byteCharacters.length);
+                for (let i = 0; i < byteCharacters.length; i++) {
+                    byteNumbers[i] = byteCharacters.charCodeAt(i);
+                }
+                
+                const archivoHarvis = new File([byteNumbers], `harvis_voz_${Date.now()}.mp3`, { type: 'audio/mpeg' });
+                urlParaGuardar = URL.createObjectURL(archivoHarvis);
+                
+                // Reproducimos la nota de voz avanzada de ElevenLabs
+                const audioHarvis = new Audio(urlParaGuardar);
+                audioHarvis.play().catch(e => console.log("Autoplay bloqueado por el navegador:", e));
+
+                // Pintamos la nota de voz física en la pantalla para poder volver a oírla
+                if (typeof pintarMensaje === "function") {
+                    pintarMensaje(urlParaGuardar, 'msg-izquierda', null, 'leido', harvisMsgId + "_audio", 'audio');
+                }
+                tieneAudioServer = true;
+            } catch (errAudio) {
+                console.error("Error procesando binario de audio:", errAudio);
             }
         }
-        
+
+        // 🛡️ RESPALDO: Si ElevenLabs no vino o falló, usamos el motor del celular para que no se quede mudo
+        if (!tieneAudioServer && typeof hablarHarvis === "function") {
+            hablarHarvis(respuestaIA);
+        }
+
+        // 4. Imagen (Si Pollinations generó algo)
+        if (datosBackend.imagenUrl) {
+            const estructuraImagenHtml = `<img src="${datosBackend.imagenUrl}" style="width:100%; border-radius:12px; border: 2px solid #FFD700; box-shadow: 0 0 15px rgba(255,217,0,0.5); margin-top:8px;" alt="YouSpace Art">`;
+            pintarMensaje(estructuraImagenHtml, 'msg-izquierda', null, 'leido', harvisMsgId + "_img", 'texto');
+        }
+
+        // 5. Guardado persistente en base de datos local (IndexedDB)
         if (typeof guardarLocal === "function") {
+            // Guardamos el texto
             await guardarLocal('mensajes', { 
                 id: harvisMsgId, 
                 contactoId: targetID,
@@ -3684,13 +3701,29 @@ if (typeof pintarMensaje === "function") {
                 ts: Date.now(),
                 hora: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })
             });
+
+            // Si se generó audio de ElevenLabs, guardamos la nota de voz como mensaje independiente en tu IndexedDB
+            if (tieneAudioServer && urlParaGuardar) {
+                await guardarLocal('mensajes', {
+                    id: harvisMsgId + "_audio_db",
+                    contactoId: targetID,
+                    texto: urlParaGuardar, // La URL del blob persistirá durante la sesión
+                    clase: 'msg-izquierda',
+                    status: 'leido',
+                    tipo: 'audio', // 👈 Importante: Tipo audio para que tu app lo pinte como nota de voz al recargar
+                    ts: Date.now() + 1,
+                    hora: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })
+                });
+            }
         }
 
-        // MONITOR: Éxito en la transacción, sumamos los tokens reales
+        // MONITOR: Éxito en la transacción
         if (typeof actualizarMonitorAPI === "function") {
             const tokensUtilizados = (datosBackend.usage && datosBackend.usage.totalTokenCount) ? datosBackend.usage.totalTokenCount : 0;
             actualizarMonitorAPI(tokensUtilizados, 'success');
-        }
+     }
+
+        
 
     } catch (errorBackend) {
         console.error("❌ Error en la ruta del backend:", errorBackend);
