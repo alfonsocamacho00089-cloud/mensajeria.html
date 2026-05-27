@@ -1604,13 +1604,17 @@ const cuerpoPeticion = {
         pintarMensaje(respuestaIA, 'msg-izquierda', null, 'leido', harvisMsgId, 'texto');
         
         // 🚀 INYECCIÓN SEGURA DE AUDIO (Sin nuevas funciones)
-        if (datosBackend && datosBackend.audioBase64) {
-            const audioObj = new Audio(datosBackend.audioBase64);
-            audioObj.play().catch(e => console.log("Autoplay"));
-            
-            // Pintamos el audio en el chat
-            pintarMensaje(datosBackend.audioBase64, 'msg-izquierda', null, 'leido', harvisMsgId + "_audio", 'audio');
-        }
+        // 🚀 INYECCIÓN SEGURA DE AUDIO CORREGIDA
+if (datosBackend && datosBackend.audioBase64) {
+    // Para la reproducción inmediata en caliente, le pasamos el Data URI de tipo mpeg (MP3)
+    const audioDataUri = `data:audio/mpeg;base64,${datosBackend.audioBase64}`;
+    
+    const audioObj = new Audio(audioDataUri);
+    audioObj.play().catch(e => console.log("Autoplay bloqueado"));
+    
+    // 🎨 Pintamos la burbuja visual pasándole el Data URI formateado correctamente
+    pintarMensaje(audioDataUri, 'msg-izquierda', null, 'leido', harvisMsgId + "_audio", 'audio');
+     }
         
         await guardarLocal('mensajes', { 
             id: harvisMsgId, 
@@ -2164,16 +2168,17 @@ console.log("Intentando pintar tipo:", tipo, "con contenido:", contenido);
             
                 } else if (tipo === 'audio' || textoReal.startsWith('data:audio') || (textoReal.startsWith('blob:') && textoReal.includes('audio')) || textoReal.includes('.webm') || textoReal.includes('.ogg')) {
     
-    // Identificación completa de todos los tipos posibles
+    // Identificación completa de todos los tipos posibles (¡Esto ya lo tenías perfecto!)
     const tipoArchivo = textoReal.includes('webm') ? 'audio/webm' : 
                         textoReal.includes('ogg') ? 'audio/ogg' : 
                         textoReal.includes('mpeg') || textoReal.includes('mp3') ? 'audio/mpeg' : 'audio/mpeg';
             
-            cuerpoHTML = `
-                    <audio src="${textoReal}" controls playsinline type="audio/webm"
-                           style="max-width:240px; display:block; margin-top:2px; outline:none;">
-                    </audio>
-                `;
+    // 🔥 EL REMEDIO: Cambiamos type="audio/webm" por type="${tipoArchivo}"
+    cuerpoHTML = `
+            <audio src="${textoReal}" controls playsinline type="${tipoArchivo}"
+                   style="max-width:240px; display:block; margin-top:2px; outline:none;">
+            </audio>
+        `;
      }
      
 
