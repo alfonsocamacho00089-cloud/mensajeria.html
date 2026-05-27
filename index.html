@@ -3634,18 +3634,17 @@ async function procesarRespuestaHarvis(msg, targetID) {
         
         historialHarvisVercel.push({ role: "model", parts: [{ text: respuestaIA }] });
 
-// 🛡️ FILTRO RODANTE DE MEMORIA: Mantenemos el historial ligero para la API
-// Si el historial supera los 4 elementos (2 preguntas y 2 respuestas), eliminamos lo más viejo
-if (historialHarvisVercel.length > 4) {
-    console.log("✂️ Optimizando memoria de H.A.R.V.I.S.: Recortando mensajes antiguos.");
-    // .splice(0, 2) elimina los 2 elementos más viejos (1 par de usuario/modelo) 
-    // sin romper la variable 'const'
-    historialHarvisVercel.splice(0, 2); 
-}
+        // 🛡️ FILTRO RODANTE DE MEMORIA: Mantenemos el historial ligero para la API
+        // Si el historial supera los 8 elementos (4 preguntas y 4 respuestas), eliminamos lo más viejo
+        if (historialHarvisVercel.length > 8) {
+            console.log("✂️ Optimizando memoria de H.A.R.V.I.S.: Recortando mensajes antiguos del buffer activo.");
+            // Removemos los 2 elementos más antiguos (una pregunta y su respuesta) para mantener el hilo coherente
+            historialHarvisVercel.splice(0, 2); 
+        }
 
-// H.A.R.V.I.S. habla por la bocina del teléfono
-if (typeof hablarHarvis === "function") {
-    hablarHarvis(respuestaIA);
+        // H.A.R.V.I.S. habla por la bocina del teléfono
+        if (typeof hablarHarvis === "function") {
+            hablarHarvis(respuestaIA);
      }
 
 // ... (Tu lógica de pintarMensaje y el guardado masivo en IndexedDB continúan abajo intactos) ...
