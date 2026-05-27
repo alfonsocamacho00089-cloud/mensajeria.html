@@ -3644,7 +3644,9 @@ async function procesarRespuestaHarvis(msg, targetID) {
                         </button>
                     `;
                 }
-                return; // Cortamos el flujo aquí para que no hable el error ni gaste tokens
+             harvisProcesandoPeticion = false;
+return;
+                // Cortamos el flujo aquí para que no hable el error ni gaste tokens
             }
             
         } else {
