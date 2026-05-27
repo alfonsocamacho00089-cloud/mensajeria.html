@@ -3627,12 +3627,13 @@ async function procesarRespuestaHarvis(msg, targetID) {
             throw new Error(`Código de respuesta de red: ${respuestaServidor.status}`);
         }
 
-        const datosBackend = await respuestaServidor.json();
-        const harvisMsgId = "msg_harvis_" + Date.now();
         
-        let respuestaIA = "Sistemas listos, Pedro.";
+const datosBackend = await respuestaServidor.json();
+        const harvisMsgId = "msg_harvis_" + Date.now();
+        let respuestaIA = datosBackend.respuesta || "Sistemas listos, Pedro.";
 
-        if (datosBackend && datosBackend.respuesta) {
+
+     if (datosBackend && datosBackend.respuesta) {
             respuestaIA = datosBackend.respuesta;
             
             // 🛡️ DETECTOR DEFENSIVO PARA EL TEXTO DE ERROR (Captura de pantalla)
@@ -3663,68 +3664,63 @@ async function procesarRespuestaHarvis(msg, targetID) {
         } else {
             console.warn("⚠️ El backend no devolvió la propiedad 'respuesta':", datosBackend);
             respuestaIA = "⚠️ H.A.R.V.I.S. no pudo procesar el formato del backend.";
-        }
-        
-        // Si la respuesta fue limpia, continuamos el flujo original
-        // ... (Tu código de Fetch y procesamiento de respuestaIA se queda exactamente igual) ...
+     }
 
-        // 1. Guardamos la respuesta del modelo en el historial de sesión de forma normal
+        // 1. Guardamos en el historial de sesión en memoria
         historialHarvisVercel.push({ role: "model", parts: [{ text: respuestaIA }] });
 
-        // 🛡️ FILTRO RODANTE DE MEMORIA: Mantenemos el historial ligero para la API
-        // Si el historial supera los 8 elementos (4 preguntas y 4 respuestas), eliminamos lo más viejo
         if (historialHarvisVercel.length > 8) {
-            console.log("✂️ Optimizando memoria de H.A.R.V.I.S.: Recortando mensajes antiguos del buffer activo.");
-            // Removemos los 2 elementos más antiguos (una pregunta y su respuesta) para mantener el hilo coherente
             historialHarvisVercel.splice(0, 2); 
         }
 
+        // 2. Pintamos primero el mensaje de texto en el chat
+        if (typeof pintarMensaje === "function") {
+            pintarMensaje(respuestaIA, 'msg-izquierda', null, 'leido', harvisMsgId, 'texto');
+        }
 
-// ... (Tu código anterior: Pintar texto, manejo de errores, etc.)
+        // 3. 🎙️ GESTIÓN AVANZADA DE AUDIO (ElevenLabs vs Nativo)
+        let tieneAudioServer = false;
+        let urlParaGuardar = null;
 
-        // H.A.R.V.I.S. habla por la bocina del teléfono
-        if (typeof hablarHarvis === "function") {
-    hablarHarvis(respuestaIA);
+        if (datosBackend && datosBackend.audioBase64) {
+            try {
+                const byteCharacters = atob(datosBackend.audioBase64);
+                const byteNumbers = new Uint8Array(byteCharacters.length);
+                for (let i = 0; i < byteCharacters.length; i++) {
+                    byteNumbers[i] = byteCharacters.charCodeAt(i);
+                }
+                
+                const archivoHarvis = new File([byteNumbers], `harvis_voz_${Date.now()}.mp3`, { type: 'audio/mpeg' });
+                urlParaGuardar = URL.createObjectURL(archivoHarvis);
+                
+                // Reproducimos la nota de voz avanzada de ElevenLabs
+                const audioHarvis = new Audio(urlParaGuardar);
+                audioHarvis.play().catch(e => console.log("Autoplay bloqueado por el navegador:", e));
 
-// 1. Pintamos el texto
-if (typeof pintarMensaje === "function") {
-    pintarMensaje(respuestaIA, 'msg-izquierda', null, 'leido', harvisMsgId, 'texto');
+                // Pintamos la nota de voz física en la pantalla para poder volver a oírla
+                if (typeof pintarMensaje === "function") {
+                    pintarMensaje(urlParaGuardar, 'msg-izquierda', null, 'leido', harvisMsgId + "_audio", 'audio');
+                }
+                tieneAudioServer = true;
+            } catch (errAudio) {
+                console.error("Error procesando binario de audio:", errAudio);
+            }
+        }
 
+        // 🛡️ RESPALDO: Si ElevenLabs no vino o falló, usamos el motor del celular para que no se quede mudo
+        if (!tieneAudioServer && typeof hablarHarvis === "function") {
+            hablarHarvis(respuestaIA);
+        }
 
-// 2. Procesamos el audio correctamente
-if (datosBackend && datosBackend.audioBase64) {
-    // Decodificar el base64 a un arreglo de bytes
-    const byteCharacters = atob(datosBackend.audioBase64);
-    const byteNumbers = new Array(byteCharacters.length);
-    for (let i = 0; i < byteCharacters.length; i++) {
-        byteNumbers[i] = byteCharacters.charCodeAt(i);
-    }
-    
-    // Crear el Blob y su URL
-    const blob = new Blob([new Uint8Array(byteNumbers)], { type: 'audio/mpeg' });
-    const audioUrl = URL.createObjectURL(blob);
-
-    // Reproducción automática
-    const audioHarvis = new Audio(audioUrl);
-    audioHarvis.play().catch(e => console.log("Autoplay:", e));
-
-    
-// C. Pintamos la nota de voz en el chat
-pintarMensaje(audioSrc, 'msg-izquierda', null, 'leido', harvisMsgId + "_audio", 'audio');
-
-
- }
-     }   
-// ... continúa el resto de la función ...
- 
-        // 3. Imagen
+        // 4. Imagen (Si Pollinations generó algo)
         if (datosBackend.imagenUrl) {
             const estructuraImagenHtml = `<img src="${datosBackend.imagenUrl}" style="width:100%; border-radius:12px; border: 2px solid #FFD700; box-shadow: 0 0 15px rgba(255,217,0,0.5); margin-top:8px;" alt="YouSpace Art">`;
             pintarMensaje(estructuraImagenHtml, 'msg-izquierda', null, 'leido', harvisMsgId + "_img", 'texto');
         }
 
-        // Guardado local (ESTO ESTABA FUERA DEL TRY EN TU CÓDIGO)
+        // 5. Guardado persistente en base de datos local (IndexedDB)
         if (typeof guardarLocal === "function") {
+            // Guardamos el texto
             await guardarLocal('mensajes', { 
                 id: harvisMsgId, 
                 contactoId: targetID,
@@ -3735,13 +3731,27 @@ pintarMensaje(audioSrc, 'msg-izquierda', null, 'leido', harvisMsgId + "_audio", 
                 ts: Date.now(),
                 hora: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })
             });
+
+            // Si se generó audio de ElevenLabs, guardamos la nota de voz como mensaje independiente en tu IndexedDB
+            if (tieneAudioServer && urlParaGuardar) {
+                await guardarLocal('mensajes', {
+                    id: harvisMsgId + "_audio_db",
+                    contactoId: targetID,
+                    texto: urlParaGuardar, // La URL del blob persistirá durante la sesión
+                    clase: 'msg-izquierda',
+                    status: 'leido',
+                    tipo: 'audio', // 👈 Importante: Tipo audio para que tu app lo pinte como nota de voz al recargar
+                    ts: Date.now() + 1,
+                    hora: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })
+                });
+            }
         }
 
-        // MONITOR: Éxito
+        // MONITOR: Éxito en la transacción
         if (typeof actualizarMonitorAPI === "function") {
             const tokensUtilizados = (datosBackend.usage && datosBackend.usage.totalTokenCount) ? datosBackend.usage.totalTokenCount : 0;
             actualizarMonitorAPI(tokensUtilizados, 'success');
-        }
+     }
 
     
     } catch (errorBackend) {
