@@ -811,9 +811,10 @@ margin: 0;
 
 <div class="contenedor-flotante">
     <div class="input-wrapper">
-        <button class="icon-btn" onclick="document.getElementById('modal-tienda').style.display='block'">
-            <span>😊</span>
-        </button>
+        <!-- Busca este botón en tu HTML y cambia el onclick por este -->
+<button class="icon-btn" onclick="if(document.getElementById('modal-agenda-completa'))document.getElementById('modal-agenda-completa').style.display='none'; if(document.getElementById('modal-qr'))document.getElementById('modal-qr').style.display='none'; document.getElementById('modal-tienda').style.display='block'">
+    <span>😊</span>
+</button>
         
         <textarea 
     id="msg-text" 
@@ -3107,6 +3108,10 @@ function activarAntenaDeLlamadas() {
      
 // 4. CONTROL VISUAL DE LA INTERFAZ
 function mostrarInterfazLlamada(usuario, tipo, direccion) {
+    // 1. LÍNEA NUEVA: Oculta la agenda si está abierta para que no estorbe
+    if(document.getElementById('modal-agenda-completa')) document.getElementById('modal-agenda-completa').style.display = 'none';
+    if(document.getElementById('modal-qr')) document.getElementById('modal-qr').style.display = 'none';
+
     const modal = document.getElementById('modal-llamada');
     if (!modal) {
         console.error("❌ H.A.R.V.I.S.: El contenedor HTML 'modal-llamada' no existe.");
@@ -3122,9 +3127,8 @@ function mostrarInterfazLlamada(usuario, tipo, direccion) {
     }
     document.getElementById('contenedor-videos-webrtc').style.setProperty('display', 'none', 'important');
     
-    // Fuerza visual para que se monte encima de todo
     modal.style.setProperty('display', 'flex', 'important');
-    modal.style.setProperty('z-index', '300000', 'important');
+    modal.style.setProperty('z-index', '999999', 'important');
     modal.style.position = 'fixed';
     
     console.log("🔔 H.A.R.V.I.S.: Interfaz de llamada activa.");
@@ -3135,8 +3139,7 @@ function mostrarInterfazLlamada(usuario, tipo, direccion) {
         if (targetID) await db.ref('llamadas_activas/' + targetID).remove();
         finalizarInterfazLlamada();
     };
-}
-
+ }
 // 5. ENLACE TRANSMISIÓN PEER-TO-PEER
 function prepararConexionWebRTC(idRemoto, esReceptor) {
     if (!streamLocal) return;
