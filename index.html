@@ -3603,6 +3603,8 @@ async function procesarRespuestaHarvis(msg, targetID) {
         }
 
         
+
+
 const datosBackend = await respuestaServidor.json();
 const harvisMsgId = "msg_harvis_" + Date.now();
 let respuestaIA = "Sistemas listos, Pedro.";
@@ -3610,9 +3612,9 @@ let respuestaIA = "Sistemas listos, Pedro.";
 if (datosBackend && datosBackend.respuesta) {
     respuestaIA = datosBackend.respuesta;
     
-    // 🛡️ DETECTOR DEFENSIVO PARA EL TEXTO DE ERROR
+    // 🛡️ DETECTOR DEFENSIVO PARA EL TEXTO DE ERROR (Evita colapsos)
     if (respuestaIA.includes("GOOGLE API ERROR") || respuestaIA.includes("[Código 429]") || respuestaIA.includes("[Código 503]")) {
-        mensajePendientePorSaturacion = msg; // Guardamos tu mensaje original en el buzón
+        mensajePendientePorSaturacion = msg; 
         
         if (typeof pintarMensaje === "function") {
             pintarMensaje(`💥 Servidor saturado (Límite 429). Mensaje guardado en cola.`, 'msg-izquierda', null, 'leido', harvisMsgId, 'texto');
@@ -3626,12 +3628,12 @@ if (datosBackend && datosBackend.respuesta) {
         if (txtStatus) {
             txtStatus.innerHTML = `
                 <span style="color:#ff3333; display:block; margin-bottom:4px;">Límite Excedido</span>
-                <button onclick="DespacharMensajeEnCola()" style="background:transparent; border:1px solid #d4af37; color:#d4af37; border-radius:4px; font-size:9px; padding:2px 6px; cursor:pointer; box-shadow: 0 0 5px rgba(212,175,55,0.3);">
+                <button onclick="DespacharMensajeEnCola()" style="background:transparent; border:1px solid #d4af37; color:#d4af37; border-radius:4px; font-size:9px; padding:2px 6px; cursor:pointer;">
                     🔄 Reintentar Mensaje
                 </button>
             `;
         }
-        return; // Cortamos el flujo aquí
+        return; 
     }
 } else {
     console.warn("⚠️ El backend no devolvió la propiedad 'respuesta':", datosBackend);
@@ -3641,18 +3643,17 @@ if (datosBackend && datosBackend.respuesta) {
 // 1. Guardamos la respuesta limpia en el historial de sesión en memoria
 historialHarvisVercel.push({ role: "model", parts: [{ text: respuestaIA }] });
 
-// 🛡️ FILTRO RODANTE DE MEMORIA: Mantenemos el buffer ligero (máximo 4 pares de mensajes)
+// 🛡️ FILTRO RODANTE DE MEMORIA (Buffer ligero)
 if (historialHarvisVercel.length > 8) {
-    console.log("✂️ Optimizando memoria de H.A.R.V.I.S.: Recortando mensajes antiguos.");
     historialHarvisVercel.splice(0, 2); 
 }
 
-// 2. Pintamos primero el mensaje de texto en el chat
+// 2. 💬 PRIMER PASO: Pintamos de inmediato el mensaje de texto en el chat
 if (typeof pintarMensaje === "function") {
     pintarMensaje(respuestaIA, 'msg-izquierda', null, 'leido', harvisMsgId, 'texto');
 }
 
-// 3. 🎙️ GESTIÓN AVANZADA DE AUDIO (ElevenLabs con respaldo nativo)
+// 3. 🎙️ SEGUNDO PASO: Gestión de Audio (ElevenLabs + Pintar Burbuja)
 let tieneAudioServer = false;
 let urlParaGuardar = null;
 
@@ -3664,15 +3665,15 @@ if (datosBackend && datosBackend.audioBase64) {
             byteNumbers[i] = byteCharacters.charCodeAt(i);
         }
         
-        // Uso de File en lugar de Blob plano para mayor compatibilidad PWA en móviles
+        // Creamos el archivo de audio físico en memoria
         const archivoHarvis = new File([byteNumbers], `harvis_voz_${Date.now()}.mp3`, { type: 'audio/mpeg' });
         urlParaGuardar = URL.createObjectURL(archivoHarvis);
         
-        // Reproducción de la nota de voz avanzada de ElevenLabs
+        // 🔊 Reproducción automática de ElevenLabs
         const audioHarvis = new Audio(urlParaGuardar);
         audioHarvis.play().catch(e => console.log("Autoplay bloqueado por el navegador:", e));
 
-        // Pintamos la nota de voz interactiva en la pantalla
+        // 🎨 ¡AQUÍ SE PINTA! Pasamos la variable correcta (urlParaGuardar) y tipo 'audio'
         if (typeof pintarMensaje === "function") {
             pintarMensaje(urlParaGuardar, 'msg-izquierda', null, 'leido', harvisMsgId + "_audio", 'audio');
         }
@@ -3682,12 +3683,12 @@ if (datosBackend && datosBackend.audioBase64) {
     }
 }
 
-// 🛡️ RESPALDO: Si ElevenLabs no llegó o el try falló, el celular habla de forma nativa
+// 🛡️ RESPALDO: Si ElevenLabs falló o no vino, el teléfono habla de forma nativa
 if (!tieneAudioServer && typeof hablarHarvis === "function") {
     hablarHarvis(respuestaIA);
 }
 
-// 4. Renderizado de Imagen (Por si Pollinations generó contenido visual)
+// 4. Renderizado de Imagen (Pollinations)
 if (datosBackend && datosBackend.imagenUrl) {
     const estructuraImagenHtml = `<img src="${datosBackend.imagenUrl}" style="width:100%; border-radius:12px; border: 2px solid #FFD700; box-shadow: 0 0 15px rgba(255,217,0,0.5); margin-top:8px;" alt="YouSpace Art">`;
     if (typeof pintarMensaje === "function") {
@@ -3695,7 +3696,7 @@ if (datosBackend && datosBackend.imagenUrl) {
     }
 }
 
-// 5. Guardado persistente en base de datos local (IndexedDB)
+// 5. 💾 TERCER PASO: Guardado persistente local (IndexedDB)
 if (typeof guardarLocal === "function") {
     // Guardamos el mensaje de texto principal
     await guardarLocal('mensajes', { 
@@ -3709,26 +3710,28 @@ if (typeof guardarLocal === "function") {
         hora: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })
     });
 
-    // Si se generó audio de ElevenLabs con éxito, persistimos la nota de voz como un mensaje independiente
+    // Guardamos la nota de voz de ElevenLabs de forma independiente con su tipo correcto
     if (tieneAudioServer && urlParaGuardar) {
         await guardarLocal('mensajes', {
             id: harvisMsgId + "_audio_db",
             contactoId: targetID,
-            texto: urlParaGuardar, // El ObjectURL se mantendrá activo en el DOM durante esta sesión activa
+            texto: urlParaGuardar, 
             clase: 'msg-izquierda',
             status: 'leido',
-            tipo: 'audio', // 👈 Crucial para que el renderizador lo pinte como reproductor de audio al recargar
+            tipo: 'audio', // 👈 Crucial para que el filtro lo identifique como reproductor
             ts: Date.now() + 1,
             hora: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })
         });
     }
 }
 
-// 6. MONITOR DE API: Éxito en la transacción de tokens
+// 6. MONITOR DE API
 if (typeof actualizarMonitorAPI === "function") {
     const tokensUtilizados = (datosBackend && datosBackend.usage && datosBackend.usage.totalTokenCount) ? datosBackend.usage.totalTokenCount : 0;
     actualizarMonitorAPI(tokensUtilizados, 'success');
      }
+
+
         
         
    
