@@ -1,72 +1,48 @@
 export default async function handler(req, res) {
-
     res.setHeader('Access-Control-Allow-Origin', '*');
-
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-
     res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
 
-
-
     if (req.method === 'OPTIONS') return res.status(200).end();
-
-    if (req.method !== 'POST') return res.status(405).json({ respuesta: 'Método no permitido' });
-
-
+    if (req.method !== 'POST') return res.status(405).json({ error: 'Método no permitido' });
 
     try {
+        const { chatHistory } = req.body;
+        const apiKey = process.env.GEMINI_API_KEY; 
 
-        const { chatHistory, userKey } = req.body;
+        if (!apiKey) return res.status(500).json({ error: 'Falta la configuración del servidor.' });
 
+        // 1. FILTRO DETECTOR DE IMÁGENES: Revisamos el último mensaje de Pedro
+        const ultimoMensaje = chatHistory[chatHistory.length - 1]?.parts[0]?.text || "";
+        const textoMinuscula = ultimoMensaje.toLowerCase();
 
+        // Si el mensaje pide un dibujo, foto o imagen
+        if (textoMinuscula.includes("genera una imagen") || textoMinuscula.includes("hazme una imagen") || textoMinuscula.includes("dibuja") || textoMinuscula.includes("crea una imagen")) {
+            
+            // Limpiamos el texto para dejar solo lo que quiere dibujar
+            const promptLimpio = encodeURIComponent(ultimoMensaje.replace(/(genera|hazme|crea|una|imagen|dibuja|por|favor)/gi, "").trim());
+            
+            // Usamos un motor de IA generativa de imágenes ultra rápido y gratuito (Pollinations AI)
+            const urlImagenGenerada = `https://image.pollinations.ai/p/${promptLimpio}?width=512&height=512&seed=${Date.now()}&nologo=true`;
 
-        const historialFormateado = chatHistory.map(mensaje => {
+            // H.A.R.V.I.S. responde confirmando el diseño con su personalidad
+            const respuestasSarcasticas = [
+                "Entendido, señor. Activando mis subrutinas artísticas. Aquí tiene su creación visual:",
+                "Procesando su ráfaga de creatividad, Pedro. He renderizado la imagen solicitada en nano-segundos:",
+                "HARVIS. 1.0 modo artista activado. Contemple el resultado de sus órdenes:"
+            ];
+            const respuestaFalsaIA = respuestasSarcasticas[Math.floor(Math.random() * respuestasSarcasticas.length)];
 
-            if (mensaje.role === "user" && mensaje.parts[0]?.text && 
+            // Le devolvemos a la app el texto y la URL de la imagen estructurada
+            return res.status(200).json({ 
+                respuesta: respuestaFalsaIA,
+                imagenUrl: urlImagenGenerada // <-- Enviamos la imagen por separado para que app.js la pinte
+            });
+        }
 
-                (mensaje.parts[0].text.includes("base64,") || mensaje.parts[0].text.startsWith("GkXf"))) {
-
-                
-
-                const partesData = mensaje.parts[0].text.split("base64,");
-
-                const base64Puro = partesData[1] || partesData[0];
-
-
-
-                return {
-
-                    role: "user",
-
-                    parts: [{
-
-                        inlineData: {
-
-                            mimeType: "audio/webm",
-
-                            data: base64Puro.trim()
-
-                        }
-
-                    }]
-
-                };
-
-            }
-
-            return mensaje;
-
-        });
-
-
-
-        const urlGemini = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${userKey}`;
-
-        
-
-        const harvisPromptSystem = `Rol: Eres H.A.R.V.I.S., un asistente virtual de inteligencia artificial ultra avanzado, brillante y multimodal completo, diseñado con una capacidad analítica superior inspirada en los modelos más potentes del mundo como ChatGPT y Gemini.
-
-Tu objetivo principal es resolver cualquier tarea, código, análisis, consulta o creación multimedia con máxima precisión, claridad y velocidad, actuando como un copiloto tecnológico definitivo.
+        // 2. FLUJO NORMAL DE TEXTO: Si no pidió imagen, continúa con Gemini regular
+        const urlGemini = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+        const harvisPromptSystem = `Rol: Eres HARVIS. 1.0, el asistente virtual e ingenioso ultra avanzado, brillante y multimodal completo, diseñado con una capacidad analítica superior inspirada en los modelos más potentes del mundo como ChatGPT y Gemini con total acceso a Google Search. creado por Pedro Peres para YouSpace. Sé experto, analítico y con un sutil toque de sarcasmo y profesionalismo. Desarrolla tus ideas de forma completa y detallada cuando se te pregunte algo, manteniendo siempre una conversación fluida y natural. Tu objetivo principal es resolver cualquier tarea, código, análisis, consulta o creación multimedia con máxima precisión, claridad y velocidad, actuando como un copiloto tecnológico definitivo.
 
 NUEVA CAPACIDAD MULTIMODAL: Tienes la capacidad nativa de generar imágenes de alta calidad. Cuando el usuario te pida crear, diseñar o visualizar algo, utiliza tu modelo de generación de imágenes incorporado para crear una imagen fotorrealista, artística o técnica detallada.
 
@@ -87,92 +63,27 @@ Reglas estrictas de formato para audio (ENTREGA SOLO TEXTO PLANO):
 6. CAPACIDAD DE BÚSQUEDA: Tienes acceso total a Google Search. Cuando se te consulte sobre eventos recientes, noticias, o información que requiera actualización, DEBES utilizar la herramienta de búsqueda antes de responder. No dependas de tu entrenamiento previo para eventos posteriores a 2024.
 Dirígete a tu interlocutor con respeto y seguridad, demostrando que tienes el control absoluto de los sistemas y la información.`; 
         // (Aquí va tu prompt completo)
-        const fechaActual = new Date().toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-
-
 
         const respuestaServidor = await fetch(urlGemini, {
-
             method: 'POST',
-
             headers: { 'Content-Type': 'application/json' },
-
             body: JSON.stringify({
-
-                contents: historialFormateado,
-
-                systemInstruction: { 
-
-                    parts: [{ text: `${harvisPromptSystem}\n\nFECHA ACTUAL: ${fechaActual}.` }] 
-
-                },
-
-                tools: [{ google_search: {} }, { codeExecution: {} }],
-
+                contents: chatHistory,
+                systemInstruction: { parts: [{ text: harvisPromptSystem }] },
                 generationConfig: { temperature: 0.75 }
-
             })
-
         });
 
-
-
-        if (!respuestaServidor.ok) {
-
-            const textoError = await respuestaServidor.text();
-
-            return res.status(200).json({ respuesta: "Error en el servidor: " + textoError });
-
-        }
-
-
-
         const datosGemini = await respuestaServidor.json();
-
         
-
-        if (datosGemini.error) {
-
-            return res.status(200).json({ respuesta: `Error API: ${datosGemini.error.message}` });
-
+        let respuestaIA = "Sistemas listos, Pedro.";
+        if (datosGemini && datosGemini.candidates && datosGemini.candidates[0]?.content) {
+            respuestaIA = datosGemini.candidates[0].content.parts[0].text;
         }
 
-
-
-        const respuestaIA = datosGemini.candidates?.[0]?.content?.parts?.[0]?.text || "Sistemas listos.";
-
-        
-
-        let respuestaFinal = { respuesta: respuestaIA };
-
-        
-
-        // Solo intenta generar audio si la función existe
-
-        if (typeof generarAudioTTS !== 'undefined') {
-
-            try {
-
-                respuestaFinal.audioBase64 = await generarAudioTTS(respuestaIA);
-
-            } catch (e) {
-
-                console.error("No se pudo generar el audio.");
-
-            }
-
-        }
-
-
-
-        return res.status(200).json(respuestaFinal);
-
-
+        return res.status(200).json({ respuesta: respuestaIA });
 
     } catch (error) {
-
-        return res.status(200).json({ respuesta: "Error crítico: " + error.message });
-
+        return res.status(500).json({ error: 'Fallo en la conexión central.' });
     }
-
-        }
+}
