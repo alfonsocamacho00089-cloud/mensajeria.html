@@ -3606,6 +3606,34 @@ async function procesarRespuestaHarvis(msg, targetID) {
 
 
 const datosBackend = await respuestaServidor.json();
+
+
+// 🩺 BLOQUE DE DIAGNÓSTICO: Inspección de ElevenLabs
+console.group("🔍 AUDITORÍA DE RESPUESTA BACKEND (ElevenLabs)");
+console.log("1. ¿Existe objeto datosBackend?:", !!datosBackend);
+if (datosBackend) {
+    console.log("2. ¿Tiene propiedad 'respuesta'?:", !!datosBackend.respuesta);
+    console.log("3. ¿Tiene propiedad 'audioBase64'?:", !!datosBackend.audioBase64);
+    
+    if (datosBackend.audioBase64) {
+        console.log("4. Tipo de dato de 'audioBase64':", typeof datosBackend.audioBase64);
+        console.log("5. Longitud del string Base64:", datosBackend.audioBase64.length);
+        console.log("6. Primeros 50 caracteres del audio:", datosBackend.audioBase64.substring(0, 50) + "...");
+        
+        // Intento de validación rápida de cabecera Base64
+        if (datosBackend.audioBase64.startsWith("data:")) {
+            console.warn("⚠️ Alerta: El audio viene con prefijo Data URI (ej. data:audio/mp3;base64,). ¡Revisa si atob() se está confundiendo!");
+        } else {
+            console.log("✅ El audio viene como Base64 limpio (sin prefijos).");
+        }
+    } else {
+        console.error("❌ ERROR: 'audioBase64' llegó vacío, null o undefined desde el servidor.");
+    }
+}
+console.groupEnd();
+
+
+     
 const harvisMsgId = "msg_harvis_" + Date.now();
 let respuestaIA = "Sistemas listos, Pedro.";
 
