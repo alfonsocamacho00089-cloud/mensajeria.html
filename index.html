@@ -1605,29 +1605,51 @@ const cuerpoPeticion = {
         
         // 🚀 INYECCIÓN SEGURA DE AUDIO (Sin nuevas funciones)
         // 🚀 INYECCIÓN SEGURA DE AUDIO CORREGIDA
-if (datosBackend && datosBackend.audioBase64) {
-    // Para la reproducción inmediata en caliente, le pasamos el Data URI de tipo mpeg (MP3)
-    const audioDataUri = `data:audio/mpeg;base64,${datosBackend.audioBase64}`;
-    
-    const audioObj = new Audio(audioDataUri);
-    audioObj.play().catch(e => console.log("Autoplay bloqueado"));
-    
-    // 🎨 Pintamos la burbuja visual pasándole el Data URI formateado correctamente
-    pintarMensaje(audioDataUri, 'msg-izquierda', null, 'leido', harvisMsgId + "_audio", 'audio');
-     }
-        
-        await guardarLocal('mensajes', { 
-            id: harvisMsgId, 
-            contactoId: targetID,
-            texto: respuestaIA, 
-            clase: 'msg-izquierda', 
-            status: 'leido',
-            tipo: 'texto',
-            ts: Date.now(),
-            hora: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })
-        });
+     // Variable para capturar el formato correcto del audio si existe
+        let audioDataUri = null;
 
-        // ... (continúa el código tal cual lo tienes)
+        // 2. 🚀 PROCESAMOS Y PINTAMOS EL AUDIO EN VIVO
+        if (datosBackend && datosBackend.audioBase64) {
+            // Le inyectamos el prefijo correcto para que tu pintarMensaje y el navegador lo entiendan de una
+            audioDataUri = `data:audio/mpeg;base64,${datosBackend.audioBase64}`;
+            
+            const audioObj = new Audio(audioDataUri);
+            audioObj.play().catch(e => console.log("Autoplay bloqueado"));
+            
+            // Pintamos la burbuja de audio en el chat en vivo
+            pintarMensaje(audioDataUri, 'msg-izquierda', null, 'leido', harvisMsgId + "_audio", 'audio');
+     }
+
+
+     // 3. 💾 EL BLINDAJE: Guardado persistente en IndexedDB para que NO se borre al salir
+        if (typeof guardarLocal === "function") {
+            // Guardamos el registro del texto de H.A.R.V.I.S.
+            await guardarLocal('mensajes', { 
+                id: harvisMsgId, 
+                contactoId: targetID,
+                texto: respuestaIA, 
+                clase: 'msg-izquierda', 
+                status: 'leido',
+                tipo: 'texto',
+                ts: Date.now(),
+                hora: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })
+            });
+
+     // 🔥 SI HUBO AUDIO, creamos su registro independiente en IndexedDB
+            if (audioDataUri) {
+                await guardarLocal('mensajes', { 
+                    id: harvisMsgId + "_audio_db", 
+                    contactoId: targetID,
+                    texto: audioDataUri, // Guardamos el Data URI completo (este no vence al cerrar el chat)
+                    clase: 'msg-izquierda', 
+                    status: 'leido',
+                    tipo: 'audio', // 👈 Indispensable para que al reentrar, el renderizador monte un reproductor
+                    ts: Date.now() + 1, // Le sumamos un milisegundo para que quede justo debajo del texto
+                    hora: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })
+                });
+                console.log("✅ Nota de voz de H.A.R.V.I.S. respaldada con éxito en IndexedDB.");
+            }
+        }
 
     } catch (errorBackend) {
         console.error("❌ Error en la ruta del backend:", errorBackend);
@@ -1635,6 +1657,8 @@ if (datosBackend && datosBackend.audioBase64) {
         pintarMensaje(`💥 Error al conectar con el servidor: ${errorBackend.message}`, 'msg-izquierda', null, 'leido', harvisMsgId, 'texto');
     }
      }
+
+     
      
      
         if (inputMsg && !multimediaUrl) {
