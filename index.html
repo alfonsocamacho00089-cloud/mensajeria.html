@@ -2075,10 +2075,9 @@ console.log("Intentando pintar tipo:", tipo, "con contenido:", contenido);
     // 🔥 EL DIVISOR: ¿Es un enlace externo o archivo pesado?
     // ========================================================
     const esCosaNueva = textoReal.includes('youtube.com/') || textoReal.includes('youtu.be/') || 
-                        textoReal.includes('tiktok.com/') || textoReal.includes('facebook.com/') || 
-                        tipo === 'video' || tipo === 'audio' || textoReal.startsWith('blob:');
-
-    if (esCosaNueva) {
+                    textoReal.includes('tiktok.com/') || textoReal.includes('facebook.com/') || 
+                    tipo === 'video' || tipo === 'audio' || textoReal.startsWith('blob:') || textoReal.startsWith('data:audio');
+ if (esCosaNueva) {
         
         // ----------------------------------------------------
         // CAMINO 1: LAS COSAS NUEVAS (Redes y Multimedia pesada)
@@ -2149,14 +2148,23 @@ console.log("Intentando pintar tipo:", tipo, "con contenido:", contenido);
                            style="max-width:240px; max-height:320px; border-radius:12px; display:block; border: 2px solid #ffd700; background:#000;">
                     </video>
                 `;
-            } else if (tipo === 'audio' || (textoReal.startsWith('blob:') && textoReal.includes('audio')) || textoReal.includes('.webm') || textoReal.includes('.ogg')) {
-                cuerpoHTML = `
-                    <audio src="${textoReal}" controls playsinline type="audio/webm"
-                           style="max-width:240px; display:block; margin-top:2px; outline:none;">
-                    </audio>
-                `;
-            }
+            
 
+} else if (tipo === 'audio' || textoReal.startsWith('data:audio') || (textoReal.startsWith('blob:') && textoReal.includes('audio')) || textoReal.includes('.webm') || textoReal.includes('.ogg')) {
+    // Detectamos el mime-type real para que iOS y Android no tengan problemas al reproducir
+    const tipoMime = textoReal.includes('webm') ? 'audio/webm' : 
+                     textoReal.includes('ogg') ? 'audio/ogg' : 'audio/mpeg';
+
+    cuerpoHTML = `
+        <audio src="${textoReal}" controls playsinline type="${tipoMime}"
+               style="max-width:240px; display:block; margin-top:2px; outline:none;">
+        </audio>
+    `;
+     }
+
+     
+
+ 
             contenedorCuerpo.innerHTML = cuerpoHTML;
             box.scrollTop = box.scrollHeight;
         });
