@@ -62,7 +62,8 @@ Reglas estrictas de formato para audio (ENTREGA SOLO TEXTO PLANO):
 6. CAPACIDAD DE BÚSQUEDA: Tienes acceso total a Google Search. Cuando se te consulte sobre eventos recientes, noticias, o información que requiera actualización, DEBES utilizar la herramienta de búsqueda antes de responder. No dependas de tu entrenamiento previo para eventos posteriores a 2024.
 Dirígete a tu interlocutor con respeto y seguridad, demostrando que tienes el control absoluto de los sistemas y la información.`; 
         // (Aquí va tu prompt completo)
-
+        const fechaActual = new Date().toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+        
         const respuestaServidor = await fetch(urlGemini, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
