@@ -9,8 +9,16 @@ async function generarAudioTTS(texto) {
 console.log("--------------------------------------------------");
 console.log("DEBUG: Tamaño del texto antes de ElevenLabs:", texto.length);
 console.log("DEBUG: Contenido del texto:", texto);
-console.log("--------------------------------------------------");    
-        
+// Sumamos el tipo explícito para ver si IndexedDB lo está enviando bien
+console.log("DEBUG: Tipo de mensaje (tipo):", typeof tipo !== 'undefined' ? tipo : 'No definido'); 
+
+// Chivato de detección: Te avisa de inmediato si pasará el filtro de la burbuja
+const testCosaNueva = texto.includes('youtube.com/') || texto.includes('youtu.be/') || 
+                      texto.includes('tiktok.com/') || texto.includes('facebook.com/') || 
+                      (typeof tipo !== 'undefined' && (tipo === 'video' || tipo === 'audio')) || 
+                      texto.startsWith('blob:') || texto.startsWith('data:audio');
+console.log("DEBUG: ¿Pasará el filtro de CosaNueva (Audio/Video/Blob)?:", testCosaNueva ? "✅ SÍ" : "❌ NO (Se pintará como texto común)");
+console.log("--------------------------------------------------");
         // Cortamos el texto para no gastar de más tu cuota de ElevenLabs
         const textoSeguro = texto.slice(0, 180); 
 
