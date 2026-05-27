@@ -3678,15 +3678,29 @@ if (datosBackend && datosBackend.audioBase64) {
         
         const archivoHarvis = new File([byteNumbers], `harvis_voz_${Date.now()}.mp3`, { type: 'audio/mpeg' });
         urlParaGuardar = URL.createObjectURL(archivoHarvis);
-        
-        // Autoplay activo
-        const audioHarvis = new Audio(urlParaGuardar);
-        audioHarvis.play().catch(e => console.log("Autoplay bloqueado:", e));
 
-        // Pintamos el reproductor en vivo usando el blob fresco de la memoria
+        const idBurbujaAudio = harvisMsgId + "_audio";
+
+        // 🎨 PRIMERO: Pintamos el reproductor en el chat usando el blob fresco de memoria
         if (typeof pintarMensaje === "function") {
-            pintarMensaje(urlParaGuardar, 'msg-izquierda', null, 'leido', harvisMsgId + "_audio", 'audio');
+            pintarMensaje(urlParaGuardar, 'msg-izquierda', null, 'leido', idBurbujaAudio, 'audio');
         }
+        
+        // 🔊 SEGUNDO: Buscamos el reproductor recién pintado en la pantalla y le damos Play en vivo
+        // Le damos un mini "setTimeout" de 50ms para asegurar que el navegador ya dibujó el elemento en el DOM
+        setTimeout(() => {
+            const reproductorEnPantalla = document.getElementById(idBurbujaAudio) || document.querySelector(`[data-id="${idBurbujaAudio}"] audio`) || document.querySelector(`audio[src="${urlParaGuardar}"]`);
+            
+            if (reproductorEnPantalla) {
+                console.log("✅ H.A.R.V.I.S: Reproduciendo audio directamente desde la burbuja visual.");
+                reproductorEnPantalla.play().catch(e => console.log("Autoplay de burbuja bloqueado por el navegador:", e));
+            } else {
+                // Respaldo por si el DOM tardó más de la cuenta en renderizar la burbuja
+                console.warn("⚠️ No se encontró la burbuja en el DOM a tiempo, usando respaldo de audio invisible.");
+                const audioHarvis = new Audio(urlParaGuardar);
+                audioHarvis.play().catch(e => console.log("Autoplay de respaldo bloqueado:", e));
+            }
+        }, 50);
         
         if (typeof prepararEnvioMedia === "function") {
             prepararEnvioMedia({ files: [archivoHarvis] }, 'audio');
@@ -3697,11 +3711,10 @@ if (datosBackend && datosBackend.audioBase64) {
     }
 }
 
-// Respaldo nativo si falla ElevenLabs
+// Respaldo nativo si falla ElevenLabs o viene vacío
 if (!tieneAudioServer && typeof hablarHarvis === "function") {
     hablarHarvis(respuestaIA);
-}
-
+     }
 // 4. Renderizado de Imagen (Pollinations)
 if (datosBackend && datosBackend.imagenUrl) {
     const estructuraImagenHtml = `<img src="${datosBackend.imagenUrl}" style="width:100%; border-radius:12px; border: 2px solid #FFD700; box-shadow: 0 0 15px rgba(255,217,0,0.5); margin-top:8px;" alt="YouSpace Art">`;
