@@ -4,6 +4,13 @@ async function generarAudioTTS(texto) {
     const VOICE_ID = "EXAVITQu4vr4xnSDxMaL"; 
     
     try {
+
+        // --- AQUÍ ESTÁ EL CHIVATO ---
+console.log("--------------------------------------------------");
+console.log("DEBUG: Tamaño del texto antes de ElevenLabs:", texto.length);
+console.log("DEBUG: Contenido del texto:", texto);
+console.log("--------------------------------------------------");    
+        
         // Cortamos el texto para no gastar de más tu cuota de ElevenLabs
         const textoSeguro = texto.slice(0, 180); 
 
