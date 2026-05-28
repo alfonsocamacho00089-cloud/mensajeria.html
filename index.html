@@ -2256,20 +2256,32 @@ function pintarMensaje(contenido, clase, hora, status, id, tipo = 'texto') {
             } else if (tipo === 'sticker' || tipo === 'stickers') {
                 // Renderizador de Stickers/GIFs sin fondo
                 cuerpoHTML = `<img src="${textoReal}" style="max-width:180px; max-height:180px; display:block; border:none; background:transparent;">`;
-            } else if (tipo === 'audio' || textoReal.startsWith('data:audio') || (textoReal.startsWith('blob:') && textoReal.includes('audio')) || textoReal.includes('.webm') || textoReal.includes('.ogg')) {
-                
-                const tipoArchivo = textoReal.includes('webm') ? 'audio/webm' : 
-                                    textoReal.includes('ogg') ? 'audio/ogg' : 
-                                    textoReal.includes('mpeg') || textoReal.includes('mp3') ? 'audio/mpeg' : 'audio/mpeg';
-                        
-                // Nota de voz modificada: agregamos background transparent al reproductor
-                cuerpoHTML = `
-                    <audio src="${textoReal}" controls playsinline type="${tipoArchivo}"
-                           style="max-width:240px; display:block; margin-top:2px; outline:none; background:transparent;">
-                    </audio>
-                `;
-            }
 
+     } else if (tipo === 'audio' || textoReal.startsWith('data:audio') || (textoReal.startsWith('blob:') && textoReal.includes('audio')) || textoReal.includes('.webm') || textoReal.includes('.ogg')) {
+    
+    // Tu detector de archivos idéntico
+    const tipoArchivo = textoReal.includes('webm') ? 'audio/webm' : 
+                        textoReal.includes('ogg') ? 'audio/ogg' : 
+                        textoReal.includes('mpeg') || textoReal.includes('mp3') ? 'audio/mpeg' : 'audio/mpeg';
+            
+    // 🔥 EL TRUCO MULTIMEDIA: Quitamos la transparencia forzada del contenedor padre 
+    // para que use tu burbuja nativa del CSS (.msg-burbuja)
+    div.style.background = ''; 
+    div.style.backgroundColor = '';
+    div.style.boxShadow = '';
+    div.style.border = '';
+    div.style.padding = '10px'; // Le da espacio elegante a la nota de voz adentro
+
+    // Inyectamos el reproductor con filtros CSS para matar el color blanco nativo
+    cuerpoHTML = `
+        <audio src="${textoReal}" controls playsinline type="${tipoArchivo}"
+               style="max-width:240px; display:block; margin-top:2px; outline:none; 
+                      filter: invert(0.9) hue-rotate(180deg); mix-blend-mode: screen; background: transparent;">
+        </audio>
+    `;
+     }
+
+             
             contenedorCuerpo.innerHTML = cuerpoHTML;
             box.scrollTop = box.scrollHeight;
         });
