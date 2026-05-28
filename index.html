@@ -2272,22 +2272,26 @@ function pintarMensaje(contenido, clase, hora, status, id, tipo = 'texto') {
                         textoReal.includes('ogg') ? 'audio/ogg' : 
                         textoReal.includes('mpeg') || textoReal.includes('mp3') ? 'audio/mpeg' : 'audio/mpeg';
             
-    // 🔥 EL TRUCO MULTIMEDIA: Quitamos la transparencia forzada del contenedor padre 
-    // para que use tu burbuja nativa del CSS (.msg-burbuja)
-    div.style.background = ''; 
+// 🔥 EL NUEVO TRUCO: Mantenemos el contenedor padre transparente 
+    // Para que NO dibuje el bloque grande ni la colita de la burbuja
+    div.style.background = 'transparent'; 
     div.style.backgroundColor = 'transparent';
-    div.style.boxShadow = '';
-    div.style.border = '';
-    div.style.padding = '10px'; // Le da espacio elegante a la nota de voz adentro
+    div.style.boxShadow = 'none';
+    div.style.border = 'none';
+    div.style.padding = '0px'; // Eliminamos el padding para que no ocupe espacio extra
 
-    // Inyectamos el reproductor con filtros CSS para matar el color blanco nativo
+    // Determinamos el color exacto según la clase para ponérselo DIRECTO a la barra de audio
+    // Si es derecha usa tu verde de WhatsApp, si es izquierda usa tu gris oscuro
+    const colorBurbuja = clase === 'msg-derecha' ? 'rgba(0, 77, 64, 0.7)' : 'rgba(32, 44, 51, 0.7)';
+
+    // Inyectamos el reproductor aplicando el color directamente a su cuerpo
     cuerpoHTML = `
         <audio src="${textoReal}" controls playsinline type="${tipoArchivo}"
                style="max-width:240px; display:block; margin-top:2px; outline:none; 
-                      filter: invert(0.9) hue-rotate(180deg); mix-blend-mode: screen; background: transparent;">
+                      background: ${colorBurbuja}; border-radius: 30px; padding: 4px;
+                      filter: invert(0.9) hue-rotate(180deg); mix-blend-mode: screen;">
         </audio>
     `;
-     }
 
              
             contenedorCuerpo.innerHTML = cuerpoHTML;
