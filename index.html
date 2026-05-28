@@ -240,6 +240,25 @@ button#btn-enviar:active {
     transform: scale(0.9);
 }
      
+.msg-burbuja { 
+    max-width: 85%; 
+    width: fit-content; 
+    padding: 8px 15px 8px 15px !important; 
+    border-radius: 12px; 
+    font-size: 16px !important; 
+    
+    position: relative; 
+    word-wrap: break-word; 
+    margin-bottom: 2px;
+    display: inline-block; /* <--- CAMBIA flex por block */
+    line-height: 1.2;
+
+}
+
+
+
+
+
 .msg-info {
   
     display: flex;
@@ -248,38 +267,17 @@ button#btn-enviar:active {
  
   
          
-    float: right; /* <--- Esto la manda a la derecha del texto */
-    font-size: 10px !important;
+    float: right !important; /* <--- Esto la manda a la derecha del texto */
+    font-size: 12px !important;
     opacity: 0.7;
-    margin-top:4px !important; /* Ajusta para que baje un poquito y quede a nivel de la última línea */
-    margin-left: 12px; /* Separación del texto */
+    margin-top:2px !important; /* Ajusta para que baje un poquito y quede a nivel de la última línea */
+    margin-left: 10px; /* Separación del texto */
     gap: 3px;
  
 }
 
 
-/* ==========================================
-   DISEÑO ESTILO WHATSAPP CON TUS COLORES ORIGINALES
-   ========================================== */
 
-.msg-burbuja { 
-    max-width: 75% !important; /* Estilo WhatsApp para que no ocupe todo el ancho en móviles */
-    width: fit-content !important; /* Para que la burbuja se encoja si el texto es corto (como "Hola") */
-    padding: 8px 12px 6px 12px !important; /* Ajuste sutil de espacios internos */
-    
-    /* MODIFICACIÓN CLAVE PARA REDONDEAR */
-    border-radius: 14px !important; /* Bordes más curvos y estéticos, no tan cuadrados */
-    
-    position: relative; 
-    word-wrap: break-word; 
-    margin-bottom: 4px; /* Un pelín más de separación entre burbujas */
-    
-    /* EL REMEDIO PARA EVITAR LA FORMA RECTANGULAR FEA */
-    display: flex !important; 
-    flex-direction: column; /* Organiza el texto y la hora de forma limpia */
-    
-    line-height: 1.3;
-}
  
 .msg-derecha { 
     align-self: flex-end; 
@@ -307,7 +305,9 @@ button#btn-enviar:active {
 /* Si el mensaje de la derecha va seguido de otro de la derecha */
 .msg-derecha + .msg-derecha {
     border-top-right-radius: 4px;
-      }
+}
+      
+
 
 
 
