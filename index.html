@@ -1893,25 +1893,35 @@ try {
 } catch (e) {
     console.error("Error cargando mensajes de v10:", e);
      }
-// ... (Justo antes de la última llave '}' de la función cargarConversacionCon)
-    // ... Todo tu código de cargar mensajes de la base de datos (IndexedDB) ...
-    // ... Donde terminas de pintar las burbujas de texto ...
-
+// =========================================================
+    // EL AVISO CLONADO (Al final de cargarConversacionCon)
     // =========================================================
-    // EL AVISO VA AQUÍ (Asegúrate de que esté ANTES de la última llave)
-    // =========================================================
+    const chatBox = document.getElementById('chat-box');
+    const avisoOriginal = document.getElementById('aviso-seguridad');
     
+    if (chatBox && avisoOriginal) {
+        // 1. Eliminamos cualquier copia vieja que haya quedado por si acaso
+        const copiaVieja = chatBox.querySelector('.encriptado-box');
+        if (copiaVieja) copiaVieja.remove();
+
+        // 2. TRUCO DE ORO: clonamos el aviso original (true significa copiar también el texto de adentro)
+        const avisoClonado = avisoOriginal.cloneNode(true);
+        
+        // 3. Le aseguramos el display block por si acaso
+        avisoClonado.style.display = 'block'; 
+        
+        // 4. Lo inyectamos arriba de los mensajes
+        chatBox.prepend(avisoClonado);
+    }
+
+} // <-- Última llave de tu función async
 
 
      
     // 6. UI y Notificaciones
     localStorage.setItem('unread_' + idDestino, 0);
     if (typeof pintarAgendaContactos === "function") pintarAgendaContactos();
-    const chatBox = document.getElementById('chat-box');
-    const avisoSeguridad = document.getElementById('aviso-seguridad');
-    if (chatBox && avisoSeguridad) {
-        chatBox.prepend(avisoSeguridad);
-     }
+    
     // Cerrar modales (Agenda o QR)
     if (typeof cerrarModalQR === 'function') cerrarModalQR();
     const modalAgenda = document.getElementById('modal-agenda');
