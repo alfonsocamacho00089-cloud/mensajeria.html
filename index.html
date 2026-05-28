@@ -1836,11 +1836,7 @@ async function cargarConversacionCon(idDestino, nombreDestino, fotoDestino) {
 
     // 1. Limpiar pantalla
     box.innerHTML = ""; 
-    const avisoSeguridad = document.getElementById('aviso-seguridad');
-    if (chat-Box && avisoSeguridad) {
-    // El truco definitivo: prepend() mete el aviso al principio de la lista, ARRIBA de los mensajes
-    chatBox.prepend(avisoSeguridad);
-     }
+    
     // 2. Guardar el ID del contacto en el input oculto
     const targetInput = document.querySelector('#target-id');
     if (targetInput) targetInput.value = idDestino;
@@ -1867,6 +1863,14 @@ async function cargarConversacionCon(idDestino, nombreDestino, fotoDestino) {
             imgHeader.outerHTML = `<div id="foto-perfil-header" class="foto-perfil" style="width:40px; height:40px; border-radius:50%; background:#ffd700; color:#000; display:flex; align-items:center; justify-content:center; font-weight:900; border:2px solid #000; text-shadow: none !important;">${inicial}</div>`;
         }
     }
+ // Busca la función donde abres el chat o cargas los mensajes y pon esto:
+const chatBox = document.getElementById('chat-box');
+const avisoSeguridad = document.getElementById('aviso-seguridad');
+
+if (chatBox && avisoSeguridad) {
+    // El truco definitivo: prepend() mete el aviso al principio de la lista, ARRIBA de los mensajes
+    chatBox.prepend(avisoSeguridad);
+     }
 
 
     // 5. CARGA DESDE v10 (IndexedDB)
