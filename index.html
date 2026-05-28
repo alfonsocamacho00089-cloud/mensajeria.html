@@ -1894,12 +1894,20 @@ try {
     console.error("Error cargando mensajes de v10:", e);
      }
 // ... (Justo antes de la última llave '}' de la función cargarConversacionCon)
+    // ... Todo tu código de cargar mensajes de la base de datos (IndexedDB) ...
+    // ... Donde terminas de pintar las burbujas de texto ...
+
+    // =========================================================
+    // EL AVISO VA AQUÍ (Asegúrate de que esté ANTES de la última llave)
+    // =========================================================
     const chatBox = document.getElementById('chat-box');
     const avisoSeguridad = document.getElementById('aviso-seguridad');
     if (chatBox && avisoSeguridad) {
         chatBox.prepend(avisoSeguridad);
     }
-     }
+
+} // <--- ESTA ES LA ÚLTIMA LLAVE QUE CIERRA LA FUNCIÓN "async function cargarConversacionCon"
+     
     // 6. UI y Notificaciones
     localStorage.setItem('unread_' + idDestino, 0);
     if (typeof pintarAgendaContactos === "function") pintarAgendaContactos();
