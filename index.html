@@ -2069,6 +2069,18 @@ document.addEventListener("DOMContentLoaded", function() {
     if (modalLlamada) {
         document.body.appendChild(modalLlamada);
         modalLlamada.style.setProperty('z-index', '999999', 'important');
+     
+    // --- NUEVO: Mover el aviso de seguridad a la raíz global ---
+    const avisoSeguridad = document.getElementById('aviso-seguridad');
+    if (avisoSeguridad) {
+        document.body.appendChild(avisoSeguridad);
+        // Le das prioridad absoluta sobre el fondo
+        avisoSeguridad.style.setProperty('z-index', '20000', 'important');
+        avisoSeguridad.style.position = 'fixed'; // Para que flote en la pantalla
+        avisoSeguridad.style.top = '70px';       // Por ejemplo, justo debajo del header
+        avisoSeguridad.style.left = '50%';
+        avisoSeguridad.style.transform = 'translateX(-50%)';
+  
     }
 });
      
