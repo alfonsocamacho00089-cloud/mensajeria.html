@@ -2074,6 +2074,7 @@ document.addEventListener("DOMContentLoaded", function() {
      }
     if (avisoSeguridad) {
         document.body.appendChild(avisoSeguridad);
+        avisoSeguridad.style.display = 'block';
         // Le das prioridad absoluta sobre el fondo
         avisoSeguridad.style.setProperty('z-index', '20000', 'important');
         avisoSeguridad.style.position = 'fixed'; // Para que flote en la pantalla
