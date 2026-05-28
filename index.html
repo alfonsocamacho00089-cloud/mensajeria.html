@@ -528,18 +528,22 @@ margin: 0;
      }
 
 .encriptado-box {
-    background-color: rgba(28, 28, 28, 0.9);
+.encriptado-box {
+    background-color: rgba(28, 28, 28, 0.9); /* Negro elegante con transparencia */
     border-radius: 10px;
     padding: 12px;
-    /* 75px arriba para que libre el Header de 60px, auto a los lados, 20px abajo */
-    margin: 75px auto 20px auto; 
+    
+    /* MODIFICACIÓN CLAVE: */
+    margin: 70px auto 15px auto; /* 70px arriba empuja el aviso hacia abajo para que NO lo tape el Header de 60px */
     width: 90%;
     max-width: 400px;
     text-align: center;
-    border: 1px solid #d4af37;
-    display: block;
+    border: 1px solid #d4af37; /* Borde dorado fino */
+    
+    display: block; 
     position: relative;
- }
+    z-index: 1; /* Le da un nivel limpio dentro del chat */
+      }
 .encriptado-box p {
     color: #d4af37; /* Texto dorado */
     font-size: 0.85rem;
@@ -1847,14 +1851,7 @@ async function cargarConversacionCon(idDestino, nombreDestino, fotoDestino) {
     if (headerNombre) {
         headerNombre.innerText = nombreDestino;
     }
- // Busca la función donde abres el chat o cargas los mensajes y pon esto:
- const avisoSeguridad = document.getElementById('aviso-seguridad');
-    if (box && avisoSeguridad) {
-        // Al usar prepend() al final de la función, se asegura de ponerse
-        // arriba de TODOS los mensajes que se acaban de cargar.
-        box.prepend(avisoSeguridad);
-    }
-// <-- Aquí cierra tu función original
+
      
     // 4. Lógica de tu FOTO original (Mantiene el DIV con inicial o la IMG)
     const imgHeader = document.getElementById('foto-perfil-header');
@@ -1897,7 +1894,13 @@ try {
 } catch (e) {
     console.error("Error cargando mensajes de v10:", e);
      }
-
+// ... (Justo antes de la última llave '}' de la función cargarConversacionCon)
+    const chatBox = document.getElementById('chat-box');
+    const avisoSeguridad = document.getElementById('aviso-seguridad');
+    if (chatBox && avisoSeguridad) {
+        chatBox.prepend(avisoSeguridad);
+    }
+     }
     // 6. UI y Notificaciones
     localStorage.setItem('unread_' + idDestino, 0);
     if (typeof pintarAgendaContactos === "function") pintarAgendaContactos();
@@ -1914,6 +1917,8 @@ try {
      }
     // 3. Buscamos los mensajes de ESE contacto en LocalStorage
     // ... (final de la función cargarConversacionCon)
+
+     
   async function pintarAgendaContactos() {
     const lista = document.getElementById('lista-contactos');
     if (!lista) return;
