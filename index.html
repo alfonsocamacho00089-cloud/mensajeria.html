@@ -1847,13 +1847,13 @@ async function cargarConversacionCon(idDestino, nombreDestino, fotoDestino) {
         headerNombre.innerText = nombreDestino;
     }
  // Busca la función donde abres el chat o cargas los mensajes y pon esto:
-const chatBox = document.getElementById('chat-box');
-const avisoSeguridad = document.getElementById('aviso-seguridad');
-
-if (chatBox && avisoSeguridad) {
-    // El truco definitivo: prepend() mete el aviso al principio de la lista, ARRIBA de los mensajes
-    chatBox.prepend(avisoSeguridad);
-     }
+ const avisoSeguridad = document.getElementById('aviso-seguridad');
+    if (box && avisoSeguridad) {
+        // Al usar prepend() al final de la función, se asegura de ponerse
+        // arriba de TODOS los mensajes que se acaban de cargar.
+        box.prepend(avisoSeguridad);
+    }
+} // <-- Aquí cierra tu función original
      
     // 4. Lógica de tu FOTO original (Mantiene el DIV con inicial o la IMG)
     const imgHeader = document.getElementById('foto-perfil-header');
