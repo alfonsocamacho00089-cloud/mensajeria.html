@@ -527,34 +527,39 @@ margin: 0;
     
      }
 
+/* 1. La plantilla original SE QUEDA OCULTA para que no flote abajo */
 .encriptado-box {
-    background-color: rgba(28, 28, 28, 0.9); /* Negro elegante con transparencia */
+    background-color: rgba(28, 28, 28, 0.9);
     border-radius: 10px;
     padding: 12px;
-    
-    /* MODIFICACIÓN CLAVE: */
-    margin: 70px auto 15px auto; /* 70px arriba empuja el aviso hacia abajo para que NO lo tape el Header de 60px */
+    margin: 70px auto 15px auto;
     width: 90%;
     max-width: 400px;
     text-align: center;
-    border: 1px solid #d4af37; /* Borde dorado fino */
+    border: 1px solid #d4af37;
     
-    display: block; 
+    display: none; /* <-- CAMBIADO A NONE: El original no se debe ver */
     position: relative;
-    z-index: 1; /* Le da un nivel limpio dentro del chat */
+    z-index: 1;
 }
+
+/* 2. NUEVA REGLA: El clon que entre al chat sí se vuelve visible */
+#chat-box .encriptado-box {
+    display: block !important; /* Fuerza a que se muestre SOLO dentro del chat */
+}
+
+/* Conserva tus otros estilos igual */
 .encriptado-box p {
-    color: #d4af37; /* Texto dorado */
+    color: #d4af37;
     font-size: 0.85rem;
     margin: 0;
     line-height: 1.4;
 }
-
 .resaltado-oro {
     font-weight: bold;
     text-decoration: underline;
     cursor: pointer;
-     }
+}
 
   /* Contenedor flotante de H.A.R.V.I.S. */
 .harvis-container {
