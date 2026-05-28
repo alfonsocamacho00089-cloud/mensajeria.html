@@ -2139,16 +2139,22 @@ async function cargarProto() {
 function pintarMensaje(contenido, clase, hora, status, id, tipo = 'texto') {
  const box = document.getElementById('chat-box');
     if (!box) return;
-    let textoReal = (typeof contenido === 'object') ? (contenido.texto || "") : contenido;
- // Antes del match, elimina los saltos de línea que H.A.R.V.I.S. pueda haber puesto
-textoReal = textoReal.replace(/[\r\n]+/g, '');
-    // --- EXTRACCIÓN ROBUSTA DE LA URL ---
-    // Usamos 's' para que el punto incluya saltos de línea y 'i' para ignorar mayúsculas
+
+ let textoReal = (typeof contenido === 'object') ? (contenido.texto || "") : contenido;
+    // Antes del match, elimina los saltos de línea que H.A.R.V.I.S. pueda haber puesto
+    textoReal = textoReal.replace(/[\r\n]+/g, '');
+
+    // ========================================================
+    // 🔥 EL DETECTOR COMPLETO: Captura URLs de GIFs y Multimedia
+    // ========================================================
+    if (textoReal.includes('i.ibb.co') || textoReal.includes('firebasestorage') || textoReal.includes('.gif') || textoReal.includes('giphy.com')) {
+        tipo = 'foto';
+    }
+
     const match = textoReal.match(/IMAGEN:(https?:\/\/[^\s\]]+)/i);
-    
     if (match) {
         tipo = 'foto';
-        textoReal = match[1]; // Esto captura la URL limpia después de IMAGEN:
+        textoReal = match[1]; 
      }
     // Extraemos la URL si viene con el formato IMAGEN:[URL]
     // Antes del match, elimina los saltos de línea que H.A.R.V.I.S. pueda haber puesto
