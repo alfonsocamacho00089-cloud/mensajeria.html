@@ -531,13 +531,14 @@ margin: 0;
     background-color: rgba(28, 28, 28, 0.9); /* Negro elegante con transparencia */
     border-radius: 10px;
     padding: 12px;
-    margin: 10px auto;
+    margin: 10px auto 20px auto; /* Añadimos margen abajo para separar del primer mensaje */
     width: 90%;
+    max-width: 400px; /* Para que no se estire demasiado en pantallas grandes */
     text-align: center;
     border: 1px solid #d4af37; /* Borde dorado fino */
-    display: none; /* Se oculta por defecto */
+    display: block; /* <-- CAMBIADO A BLOCK para que se vea */
+    position: relative; /* <-- CAMBIADO A RELATIVE para que respete el flujo del chat */
 }
-
 .encriptado-box p {
     color: #d4af37; /* Texto dorado */
     font-size: 0.85rem;
@@ -1862,6 +1863,14 @@ async function cargarConversacionCon(idDestino, nombreDestino, fotoDestino) {
             imgHeader.outerHTML = `<div id="foto-perfil-header" class="foto-perfil" style="width:40px; height:40px; border-radius:50%; background:#ffd700; color:#000; display:flex; align-items:center; justify-content:center; font-weight:900; border:2px solid #000; text-shadow: none !important;">${inicial}</div>`;
         }
     }
+ // Busca la función donde abres el chat o cargas los mensajes y pon esto:
+const chatBox = document.getElementById('chat-box');
+const avisoSeguridad = document.getElementById('aviso-seguridad');
+
+if (chatBox && avisoSeguridad) {
+    // El truco definitivo: prepend() mete el aviso al principio de la lista, ARRIBA de los mensajes
+    chatBox.prepend(avisoSeguridad);
+     }
 
     // 5. CARGA DESDE v10 (IndexedDB)
     // 1. MATAMOS AL FANTASMA: Limpiamos la libreta vieja antes de leer la nueva
