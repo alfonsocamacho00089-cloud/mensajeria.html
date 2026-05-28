@@ -2060,7 +2060,7 @@ document.addEventListener("DOMContentLoaded", function() {
     // Seleccionamos los modales rebeldes
     const modalTienda = document.getElementById('modal-tienda');
     const modalLlamada = document.getElementById('modal-llamada');
-    
+    const avisoSeguridad = document.getElementById('aviso-seguridad');
     // Los movemos a la fuerza al final del BODY (fuera de cualquier otro div)
     if (modalTienda) {
         document.body.appendChild(modalTienda);
@@ -2071,7 +2071,7 @@ document.addEventListener("DOMContentLoaded", function() {
         modalLlamada.style.setProperty('z-index', '999999', 'important');
      
     // --- NUEVO: Mover el aviso de seguridad a la raíz global ---
-    const avisoSeguridad = document.getElementById('aviso-seguridad');
+     }
     if (avisoSeguridad) {
         document.body.appendChild(avisoSeguridad);
         // Le das prioridad absoluta sobre el fondo
