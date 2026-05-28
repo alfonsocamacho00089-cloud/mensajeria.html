@@ -2285,7 +2285,7 @@ console.log("Intentando pintar tipo:", tipo, "con contenido:", contenido);
         cuerpoHTML = `<img src="${urlLimpia}" style="max-width:100%; border-radius:12px; display:block; border: 2px solid #ffd700;">`;
     } else {
         // Estilo para TODO LO DEMÁS (incluye Googleusercontent y Base64)
-        cuerpoHTML = `<img src="${textoReal}" style="max-width:100%; border-radius:12px; display:block; border: none; background:#000">`;
+        cuerpoHTML = `<img src="${textoReal}" style="max-width:100%; border-radius:12px; display:block; border: none; background:transparent">`;
     }
 } else {
     cuerpoHTML = `<span class="texto-msg">${textoReal}</span>`;
