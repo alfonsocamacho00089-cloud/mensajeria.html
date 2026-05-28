@@ -1900,18 +1900,18 @@ try {
     // =========================================================
     // EL AVISO VA AQUÍ (Asegúrate de que esté ANTES de la última llave)
     // =========================================================
-    const chatBox = document.getElementById('chat-box');
-    const avisoSeguridad = document.getElementById('aviso-seguridad');
-    if (chatBox && avisoSeguridad) {
-        chatBox.prepend(avisoSeguridad);
-    }
+    
 
 
      
     // 6. UI y Notificaciones
     localStorage.setItem('unread_' + idDestino, 0);
     if (typeof pintarAgendaContactos === "function") pintarAgendaContactos();
-    
+    const chatBox = document.getElementById('chat-box');
+    const avisoSeguridad = document.getElementById('aviso-seguridad');
+    if (chatBox && avisoSeguridad) {
+        chatBox.prepend(avisoSeguridad);
+     }
     // Cerrar modales (Agenda o QR)
     if (typeof cerrarModalQR === 'function') cerrarModalQR();
     const modalAgenda = document.getElementById('modal-agenda');
