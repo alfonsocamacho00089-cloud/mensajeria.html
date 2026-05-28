@@ -2170,8 +2170,11 @@ function pintarMensaje(contenido, clase, hora, status, id, tipo = 'texto') {
 
     // ... el resto de tu código sigue igual
 
+    // ========================================================
+    // 🔥 EL REMEDIO: Le devolvemos la clase 'mensaje' original
+    // ========================================================
     const div = document.createElement('div');
-    div.className = "msg-burbuja " + clase;
+    div.className = "mensaje msg-burbuja " + clase; // <-- Agregamos 'mensaje' manteniendo tu clase nueva por si acaso
     div.id = id;
 
     const horaFinal = hora || new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
