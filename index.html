@@ -1463,32 +1463,34 @@ if (targetID === "uo4kb3tGHH7J") {
         const urlBackend = "/api/chat"; 
         const llaveLocal = localStorage.getItem('spacechat_crypto_key') || "";
 
-        // 🚀 UNA SOLA DECLARACIÓN: Extrae el texto si viene de IndexedDB, o usa el msg directo
-        let textoFinal = (typeof msg === 'object' && msg !== null) ? (msg.texto || "") : msg;
-
-        const cuerpoPeticion = {
-            chatHistory: [
-                // Aquí viaja impecable: tu texto, el detonador de imágenes o el Base64 de la voz
-                { role: "user", parts: [{ text: textoFinal || "Hola" }] }
-            ],
-            userKey: llaveLocal 
+        let cuerpoPeticion = {
+            chatHistory: [],
+            userKey: llaveLocal
         };
 
-        // 📡 ENVÍO UNIFICADO HACIA EL BACKEND
-        const respuestaServidor = await fetch(urlBackend, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(cuerpoPeticion)
-        });
+        // 🔥 DETECTOR DE AUDIO REAL: Si detectamos que es una nota de voz
+        if (typeof msg === 'string' && (msg.includes("data:audio") || msg.startsWith("blob:"))) {
+            
+            // 🚀 LIMPIEZA TOTAL: Si viene el archivo, usamos el texto limpio de tu interfaz
+            // Buscamos en las variables globales de tu chat o dejamos un comando seguro
+            let textoTranscrito = window.lastTranscription || "Ejecuta mi comando de voz";
 
-        // Aquí continúa tu lógica original para recibir la respuesta...
-        // ...
-
-    } catch (error) {
-        console.error("❌ Error en la ruta del backend:", error);
-    }
+            cuerpoPeticion.chatHistory = [
+                {
+                    role: "user",
+                    parts: [
+                        { text: textoTranscrito }
+                    ]
+                }
+            ];
+        } else {
+            // Si es un texto, imagen generada o link normal, se va por el canal de texto plano
+            let textoFinal = (typeof msg === 'object' && msg !== null) ? (msg.texto || "") : msg;
+            
+            cuerpoPeticion.chatHistory = [
+                { role: "user", parts: [{ text: textoFinal || "Hola" }] }
+            ];
      }
-     
 
 
         const datosBackend = await respuestaServidor.json();
