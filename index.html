@@ -3723,12 +3723,13 @@ if (!tieneAudioServer && typeof hablarHarvis === "function") {
     hablarHarvis(respuestaIA);
      }
 // 4. Renderizado de Imagen (Pollinations)
-if (datosBackend && datosBackend.imagenUrl) {
-    const estructuraImagenHtml = `<img src="${datosBackend.imagenUrl}" style="width:100%; border-radius:12px; border: 2px solid #FFD700; box-shadow: 0 0 15px rgba(255,217,0,0.5); margin-top:8px;" alt="YouSpace Art">`;
-    if (typeof pintarMensaje === "function") {
-        pintarMensaje(estructuraImagenHtml, 'msg-izquierda', null, 'leido', harvisMsgId + "_img", 'texto');
-    }
-}
+// 3. Imagen (tu lógica existente)
+    
+            if (datosBackend.imagenUrl) {
+                const estructuraImagenHtml = `<img src="${datosBackend.imagenUrl}" style="width:100%; border-radius:12px; border: 2px solid #FFD700; box-shadow: 0 0 15px rgba(255,217,0,0.5); margin-top:8px;" alt="YouSpace Art">`;
+                pintarMensaje(estructuraImagenHtml, 'msg-izquierda', null, 'leido', harvisMsgId + "_img", 'texto');
+            }
+ }
 
 // 5. Guardado Inteligente en Base de Datos (IndexedDB)
 if (typeof guardarLocal === "function") {
