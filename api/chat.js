@@ -1,4 +1,4 @@
-import Buffer from 'buffer'; // Asegurar el soporte de Buffer si estás en un entorno compatible
+import Buffer from 'buffer';
 
 // Función para generar el audio con ElevenLabs en Vercel
 async function generarAudioTTS(texto) {
@@ -103,7 +103,6 @@ export default async function handler(req, res) {
 
         const datosGemini = await respuestaServidor.json();
         
-        // Inclusión del manejo de error directo de la API de Gemini aportado del segundo bloque
         if (datosGemini.error) {
             return res.status(200).json({ respuesta: `Error API: ${datosGemini.error.message}` });
         }
@@ -112,7 +111,6 @@ export default async function handler(req, res) {
 
         let respuestaFinal = { respuesta: respuestaIA };
 
-        // Procesamos la voz con ElevenLabs de forma segura validando su existencia tal como el segundo bloque
         if (typeof generarAudioTTS !== 'undefined') {
             try {
                 const audioBase64 = await generarAudioTTS(respuestaIA);
