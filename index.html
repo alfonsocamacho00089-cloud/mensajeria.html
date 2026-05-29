@@ -1457,33 +1457,54 @@ const base64 = btoa(binary);
             });
         }
 
-// === CONEXIÓN SEGURA RUTA HACIA EL BACKEND EN VERCEL ===
+     // === CONEXIÓN SEGURA RUTA HACIA EL BACKEND EN VERCEL ===
 if (targetID === "uo4kb3tGHH7J") {
     try {
         const urlBackend = "/api/chat"; 
         const llaveLocal = localStorage.getItem('spacechat_crypto_key') || "";
 
-        // Si es objeto (como una foto de IndexedDB) extraemos el texto, si no, usamos msg directo
+        // 🚀 UNA SOLA DECLARACIÓN: Extrae el texto si viene de IndexedDB, o usa el msg directo (sea texto o Base64)
         let textoFinal = (typeof msg === 'object' && msg !== null) ? (msg.texto || "") : msg;
 
         const cuerpoPeticion = {
             chatHistory: [
-                // Aquí viaja limpio: sea el texto escrito, la imagen o el Base64 de tu micrófono
+                // Aquí viaja impecable: tu texto, el detonador de imágenes o el Base64 de la voz
                 { role: "user", parts: [{ text: textoFinal || "Hola" }] }
             ],
             userKey: llaveLocal 
         };
 
-        // Si es un texto, imagen generada o link normal, se va por el canal de texto plano
+        // 📡 ENVÍO UNIFICADO HACIA EL BACKEND
+        const respuestaServidor = await fetch(urlBackend, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(cuerpoPeticion)
+        });
+
+        // Aquí continúa tu lógica original para recibir la respuesta...
+        // ...
+     // Si es un texto, imagen generada o link normal, se va por el canal de texto plano
+
+
 
 let textoFinal = (typeof msg === 'object' && msg !== null) ? (msg.texto || "") : msg;
 
 
+
+
+
 cuerpoPeticion.chatHistory = [
+
+
 
 { role: "user", parts: [{ text: textoFinal || "Hola" }] }
 
+
+
 ];
+
+
+     
 
     } catch (error) {
         console.error("❌ Error en la ruta del backend:", error);
