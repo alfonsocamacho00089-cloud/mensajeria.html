@@ -2272,7 +2272,7 @@ function pintarMensaje(contenido, clase, hora, status, id, tipo = 'texto') {
                         textoReal.includes('ogg') ? 'audio/ogg' : 
                         textoReal.includes('mpeg') || textoReal.includes('mp3') ? 'audio/mpeg' : 'audio/mpeg';
 
-             // 1. Limpiamos por completo la burbuja exterior nativa del CSS
+             // 1. Matamos la burbuja exterior por completo (cero fondos, cero sombras feas)
     div.style.background = 'transparent'; 
     div.style.backgroundColor = 'transparent';
     div.style.boxShadow = 'none';
@@ -2280,17 +2280,17 @@ function pintarMensaje(contenido, clase, hora, status, id, tipo = 'texto') {
     div.style.padding = '0px'; 
     div.style.width = 'max-content';
 
-    // 2. Sacamos tu color exacto según el lado (Derecha = Verde, Izquierda = Gris)
-    const colorNativo = clase === 'msg-derecha' ? 'rgba(0, 92, 75, 1)' : 'rgba(32, 44, 51, 1)';
+    // 2. Definimos tus colores sólidos directos:
+    // Verde WhatsApp nítido para la derecha, Gris Slate pulido para la izquierda
+    const colorFijo = clase === 'msg-derecha' ? '#005c4b' : '#202c33';
 
-    // 3. Encapsulamos el reproductor en un contenedor limpio con tu color real
+    // 3. Pintamos DIRECTAMENTE la barra de audio con el color y limpiamos los filtros
     cuerpoHTML = `
-        <div style="background: ${colorNativo}; border-radius: 30px; padding: 5px 8px; display: flex; align-items: center; max-width: 250px;">
-            <audio src="${textoReal}" controls playsinline type="${tipoArchivo}"
-                   style="max-width: 240px; display: block; outline: none; 
-                          filter: invert(1) brightness(2); mix-blend-mode: download; background: transparent;">
-            </audio>
-        </div>
+        <audio src="${textoReal}" controls playsinline type="${tipoArchivo}"
+               style="max-width:240px; display:block; margin-top:2px; outline:none; 
+                      background: ${colorFijo}; border-radius: 30px; padding: 4px;
+                      filter: invert(1) hue-rotate(180deg); mix-blend-mode: normal;">
+        </audio>
     `;
      }
              
