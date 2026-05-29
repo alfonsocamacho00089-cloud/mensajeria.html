@@ -1457,20 +1457,18 @@ const base64 = btoa(binary);
             });
         }
 // === CONEXIÓN SEGURA RUTA HACIA EL BACKEND EN VERCEL ===
-
-     // === CONEXIÓN SEGURA RUTA HACIA EL BACKEND EN VERCEL ===
 if (targetID === "uo4kb3tGHH7J") {
     try {
         const urlBackend = "/api/chat"; 
         const llaveLocal = localStorage.getItem('spacechat_crypto_key') || "";
 
-        // Usamos el contenido real que entra a la función para extraer el texto
-        let textoAEnviar = (typeof contenido === 'object') ? (contenido.texto || "") : contenido;
+        // 🔥 FILTRO SEGURO DE TEXTO: Si msg es un objeto, extrae .texto. Si no, usa msg directo.
+        let textoFinal = (typeof msg === 'object') ? (msg.texto || "") : msg;
 
         const cuerpoPeticion = {
             chatHistory: [
-                // Cambiamos 'msg' por 'textoAEnviar' para que el audio mande su texto real
-                { role: "user", parts: [{ text: textoAEnviar }] }
+                // 🚀 Dejamos tu estructura idéntica, solo pasando textoFinal asegurado
+                { role: "user", parts: [{ text: textoFinal }] }
             ],
             userKey: llaveLocal 
         };
