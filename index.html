@@ -1456,35 +1456,21 @@ const base64 = btoa(binary);
                 mediaType: tipoValidado 
             });
         }
-// === CONEXIÓN SEGURA RUTA HACIA EL BACKEND EN VERCEL ===
+
 // === CONEXIÓN SEGURA RUTA HACIA EL BACKEND EN VERCEL ===
 if (targetID === "uo4kb3tGHH7J") {
     try {
         const urlBackend = "/api/chat"; 
         const llaveLocal = localStorage.getItem('spacechat_crypto_key') || "";
 
-        let cuerpoPeticion = {
-            chatHistory: [],
-            userKey: llaveLocal
+        const cuerpoPeticion = {
+            chatHistory: [
+                // Tu estructura original y limpia: msg ya trae el Base64 o el texto directo
+                { role: "user", parts: [{ text: msg }] }
+            ],
+            userKey: llaveLocal 
         };
-
-        // 🔥 DETECTOR DE AUDIO REAL: Si detectamos que es una nota de voz
-        if (typeof msg === 'string' && (msg.includes("data:audio") || msg.startsWith("blob:"))) {
-            
-            // 🚀 CAPTURA PERFECTA: Le pasamos el texto exacto que guardó la función escucharVozPedro
-            let textoTranscrito = window.ultimaVozPedro || "Hola Jarvis";
-
-            cuerpoPeticion.chatHistory = [
-                {
-                    role: "user",
-                    parts: [
-                        { text: textoTranscrito }
-                    ]
-                }
-            ];
-            
-            // Limpiamos la variable para el próximo audio
-            window.ultimaVozPedro = "";
+     
             
         } else {
             // Si es un texto, imagen generada o link normal, se va por el canal de texto plano
@@ -3347,24 +3333,30 @@ async function iniciarGrabacionVoz() {
             // 2. Lo convertimos en un archivo con nombre y extensión para Firebase
             const archivoAudioReal = new File([audioBlob], `nota_voz_${Date.now()}.webm`, { type: 'audio/webm' });
 
-            // 3. 🔥 ENVIAMOS EL ARCHIVO REAL A TU FUNCIÓN DE MEDIA (YouSpace normal)
+            // 3. Enviamos el archivo real a tu función de media (YouSpace normal)
             if (typeof prepararEnvioMedia === "function") {
                 prepararEnvioMedia({ files: [archivoAudioReal] }, 'audio');
             }
-
-            // ================================================================
-            // 🚀 NUEVO INTEGRADO PARA H.A.R.V.I.S. (EXTRACCIÓN DE TEXTO PLANO)
-            // ================================================================
-            if (typeof escucharVozPedro === "function") {
-                // Ejecutamos tu función nativa para capturar las palabras dictadas
-                escucharVozPedro((textoFinalConvertido) => {
-                    console.log("🎙️ Texto extraído para H.A.R.V.I.S:", textoFinalConvertido);
-                    // Guardamos la transcripción limpia en la memoria global
-                    window.ultimaVozPedro = textoFinalConvertido;
-                });
-            }
-            // ================================================================
             
+            // ================================================================
+            // 🚀 EL BLOQUE RECUPERADO: CONVIERTE EL AUDIO A BASE64 PARA H.A.R.V.I.S.
+            // ================================================================
+            const lectorArchivo = new FileReader();
+            lectorArchivo.readAsDataURL(audioBlob); // Convierte el Blob a data:audio/webm;base64,...
+            
+            lectorArchivo.onloadend = async () => {
+                // Seteamos el Base64 completo en la variable global msg
+                msg = lectorArchivo.result; 
+                
+                console.log("🎙️ Audio Base64 listo en variable msg para Vercel.");
+                
+                // Si tienes una función automática que dispara el envío tras grabar, la llamas aquí:
+                if (typeof enviarMensajeSatelital === "function") {
+                    await enviarMensajeSatelital();
+                }
+            };
+            // ================================================================
+
             // 4. Apagamos el punto verde de Android al instante
             if (flujoMicrofonoGlobal) {
                 flujoMicrofonoGlobal.getTracks().forEach(track => {
