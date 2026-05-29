@@ -1460,28 +1460,36 @@ const base64 = btoa(binary);
 // === CONEXIÓN SEGURA RUTA HACIA EL BACKEND EN VERCEL ===
 if (targetID === "uo4kb3tGHH7J") {
     try {
-        // 🚀 YA NO HAY LLAVES AQUÍ. Le pegamos a tu propio backend de Vercel
-        // Usamos la ruta relativa de tu servidor
         const urlBackend = "/api/chat"; 
-     
-        // Tu api/chat.js espera recibir un objeto con 'chatHistory'
-        // Lo armamos exactamente en el formato que Gemini entiende
-        // 🚀 Recuperamos la llave local de tu teléfono
-const llaveLocal = localStorage.getItem('spacechat_crypto_key') || "";
+        const llaveLocal = localStorage.getItem('spacechat_crypto_key') || "";
 
-const cuerpoPeticion = {
-    chatHistory: [
-        { role: "user", parts: [{ text: msg }] }
-    ],
-    // Enviamos la llave de forma segura en el cuerpo del mensaje hacia Vercel
-    userKey: llaveLocal 
-};
+        // Si es objeto (como una foto de IndexedDB) extraemos el texto, si no, usamos msg directo
+        let textoFinal = (typeof msg === 'object' && msg !== null) ? (msg.texto || "") : msg;
 
-        const respuestaServidor = await fetch(urlBackend, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(cuerpoPeticion)
-        });
+        const cuerpoPeticion = {
+            chatHistory: [
+                // Aquí viaja limpio: sea el texto escrito, la imagen o el Base64 de tu micrófono
+                { role: "user", parts: [{ text: textoFinal || "Hola" }] }
+            ],
+            userKey: llaveLocal 
+        };
+
+        // Si es un texto, imagen generada o link normal, se va por el canal de texto plano
+
+let textoFinal = (typeof msg === 'object' && msg !== null) ? (msg.texto || "") : msg;
+
+
+cuerpoPeticion.chatHistory = [
+
+{ role: "user", parts: [{ text: textoFinal || "Hola" }] }
+
+];
+
+    } catch (error) {
+        console.error("❌ Error en la ruta del backend:", error);
+    }
+     }
+
 
         const datosBackend = await respuestaServidor.json();
         const harvisMsgId = "msg_harvis_" + Date.now();
