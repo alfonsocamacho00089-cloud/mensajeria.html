@@ -78,128 +78,35 @@ export default async function handler(req, res) {
             return mensaje;
         });
 
+// 1. FILTRO DETECTOR DE IMÁGENES: Revisamos el último mensaje de Pedro
+        const ultimoMensaje = chatHistory[chatHistory.length - 1]?.parts[0]?.text || "";
+        const textoMinuscula = ultimoMensaje.toLowerCase();
 
-        // Función para generar el audio con ElevenLabs en Vercel
-async function generarAudioTTS(texto) {
-    const ELEVENLABS_API_KEY = "sk_161f372298f70bd20ff6ae30e9d01f4fe5b27c3c259e473d"; 
-    const VOICE_ID = "EXAVITQu4vr4xnSDxMaL"; 
-    
-    try {
+        // Si el mensaje pide un dibujo, foto o imagen
+        if (textoMinuscula.includes("genera una imagen") || textoMinuscula.includes("hazme una imagen") || textoMinuscula.includes("dibuja") || textoMinuscula.includes("crea una imagen")) {
+            
+            // Limpiamos el texto para dejar solo lo que quiere dibujar
+            const promptLimpio = encodeURIComponent(ultimoMensaje.replace(/(genera|hazme|crea|una|imagen|dibuja|por|favor)/gi, "").trim());
+            
+            // Usamos un motor de IA generativa de imágenes ultra rápido y gratuito (Pollinations AI)
+            const urlImagenGenerada = `https://image.pollinations.ai/p/${promptLimpio}?width=512&height=512&seed=${Date.now()}&nologo=true`;
 
-        // --- AQUÍ ESTÁ EL CHIVATO ---
-console.log("--------------------------------------------------");
-console.log("DEBUG: Tamaño del texto antes de ElevenLabs:", texto.length);
-console.log("DEBUG: Contenido del texto:", texto);
-// Sumamos el tipo explícito para ver si IndexedDB lo está enviando bien
-console.log("DEBUG: Tipo de mensaje (tipo):", typeof tipo !== 'undefined' ? tipo : 'No definido'); 
+            // H.A.R.V.I.S. responde confirmando el diseño con su personalidad
+            const respuestasSarcasticas = [
+                "Entendido, señor Peres. Activando mis subrutinas artísticas. Aquí tiene su creación visual:",
+                "Procesando su ráfaga de creatividad, Pedro. He renderizado la imagen solicitada en nano-segundos:",
+                "H.A.R.V.I.S. 1.0 modo artista activado. Contemple el resultado de sus órdenes:"
+            ];
+            const respuestaFalsaIA = respuestasSarcasticas[Math.floor(Math.random() * respuestasSarcasticas.length)];
 
-// Chivato de detección: Te avisa de inmediato si pasará el filtro de la burbuja
-const testCosaNueva = texto.includes('youtube.com/') || texto.includes('youtu.be/') || 
-                      texto.includes('tiktok.com/') || texto.includes('facebook.com/') || 
-                      (typeof tipo !== 'undefined' && (tipo === 'video' || tipo === 'audio')) || 
-                      texto.startsWith('blob:') || texto.startsWith('data:audio');
-console.log("DEBUG: ¿Pasará el filtro de CosaNueva (Audio/Video/Blob)?:", testCosaNueva ? "✅ SÍ" : "❌ NO (Se pintará como texto común)");
-console.log("--------------------------------------------------");
-        // Cortamos el texto para no gastar de más tu cuota de ElevenLabs
-        const textoSeguro = texto.slice(0, 180); 
-
-        const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${VOICE_ID}`, {
-            method: 'POST',
-            headers: {
-                'xi-api-key': ELEVENLABS_API_KEY,
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                text: textoSeguro,
-                model_id: "eleven_multilingual_v2",
-                voice_settings: { stability: 0.5, similarity_boost: 0.75 }
-            })
-        });
-
-        if (!response.ok) {
-            const errorData = await response.text();
-            console.error("¡ERROR DE ELEVENLABS!:", errorData);
-            return null;
-        }     
-
-        const arrayBuffer = await response.arrayBuffer();
-        return Buffer.from(arrayBuffer).toString("base64");
-
-    } catch (error) {
-        console.error("Error definitivo en ElevenLabs:", error);
-        return null;
-    }
-}
-
-export default async function handler(req, res) {
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-    res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-
-    if (req.method === 'OPTIONS') return res.status(200).end();
-    if (req.method !== 'POST') return res.status(405).json({ respuesta: 'Método no permitido' });
-
-    try {
-        const { chatHistory, userKey } = req.body;
-
-        const historialFormateado = chatHistory.map(mensaje => {
-            if (mensaje.role === "user" && mensaje.parts[0]?.text && 
-                (mensaje.parts[0].text.includes("base64,") || mensaje.parts[0].text.startsWith("GkXf"))) {
-                
-                const partesData = mensaje.parts[0].text.split("base64,");
-                const base64Puro = partesData[1] || partesData[0];
-
-                return {
-                    role: "user",
-                    parts: [{
-                        inlineData: { mimeType: "audio/webm", data: base64Puro.trim() }
-                    }]
-                };
-            }
-            return mensaje;
-        });
-
-        const urlGemini = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${userKey}`;
-        const harvisPromptSystem = `Rol: Eres H.A.R.V.I.S... (Tu prompt de siempre sin markdown)`; 
-        const fechaActual = new Date().toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-
-        const respuestaServidor = await fetch(urlGemini, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                contents: historialFormateado,
-                systemInstruction: { parts: [{ text: `${harvisPromptSystem}\n\nFECHA ACTUAL: ${fechaActual}.` }] },
-                tools: [{ google_search: {} }, { codeExecution: {} }],
-                generationConfig: { temperature: 0.75 }
-            })
-        });
-
-        if (!respuestaServidor.ok) {
-            const textoError = await respuestaServidor.text();
-            return res.status(200).json({ respuesta: "Error en el servidor: " + textoError });
+            // Le devolvemos a la app el texto y la URL de la imagen estructurada
+            return res.status(200).json({ 
+                respuesta: respuestaFalsaIA,
+                imagenUrl: urlImagenGenerada // <-- Enviamos la imagen por separado para que app.js la pinte
+            });
         }
 
-        const datosGemini = await respuestaServidor.json();
-        const respuestaIA = datosGemini.candidates?.[0]?.content?.parts?.[0]?.text || "Sistemas listos.";
-
-        let respuestaFinal = { respuesta: respuestaIA };
-
-        // Procesamos la voz con ElevenLabs de forma segura
-        try {
-            const audioBase64 = await generarAudioTTS(respuestaIA);
-            if (audioBase64) {
-                respuestaFinal.audioBase64 = audioBase64;
-            }
-        } catch (e) {
-            console.error("Fallo al empaquetar audio:", e);
-        }
-
-        return res.status(200).json(respuestaFinal);
-
-    } catch (error) {
-        return res.status(200).json({ respuesta: "Error crítico: " + error.message });
-    }
-            }
+        
         const urlGemini = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${userKey}`;
         const harvisPromptSystem = `Rol: Eres H.A.R.V.I.S., un asistente virtual de inteligencia artificial ultra avanzado, brillante y multimodal completo, diseñado con una capacidad analítica superior inspirada en los modelos más potentes del mundo como ChatGPT y Gemini.
 
@@ -227,7 +134,7 @@ Dirígete a tu interlocutor con respeto y seguridad, demostrando que tienes el c
 
 
 
-        // (Aquí va tu prompt completo) 
+        // (Aquí va tu prompt completo)
         const fechaActual = new Date().toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 
         const respuestaServidor = await fetch(urlGemini, {
@@ -266,6 +173,4 @@ Dirígete a tu interlocutor con respeto y seguridad, demostrando que tienes el c
     } catch (error) {
         return res.status(200).json({ respuesta: "Error crítico: " + error.message });
     }
-                        }
-
-        
+            }
