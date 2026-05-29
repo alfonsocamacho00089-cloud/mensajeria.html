@@ -2272,23 +2272,23 @@ function pintarMensaje(contenido, clase, hora, status, id, tipo = 'texto') {
                         textoReal.includes('ogg') ? 'audio/ogg' : 
                         textoReal.includes('mpeg') || textoReal.includes('mp3') ? 'audio/mpeg' : 'audio/mpeg';
 
-             // 1. Desactivamos por completo la burbuja nativa del chat (sin fondos, sin sombras)
-    div.style.background = 'transparet'; 
+// 1. Matamos la burbuja grande y sus sombras del CSS
+    div.style.background = 'transparent'; 
     div.style.backgroundColor = 'transparent';
     div.style.boxShadow = 'none';
     div.style.border = 'none';
     div.style.padding = '0px'; 
     div.style.width = 'max-content';
 
-    // 2. Definimos tus colores reales idénticos a tus textos (sin que pasen por filtros)
-    const colorReal = clase === 'msg-derecha' ? '#004d40' : '#202c33';
+    // 2. Color plano y limpio idéntico a tus textos
+    const colorFijo = clase === 'msg-derecha' ? '#005c4b' : '#202c33';
 
-    // 3. La mini-cápsula tiene tu color, y el audio adentro se vuelve transparente
+    // 3. Contenedor cápsula estricto que recorta los bordes rebeldes de Android
     cuerpoHTML = `
-        <div style="background: ${colorReal}; border-radius: 30px; padding: 4px 6px; display: flex; align-items: center; max-width: 245px; box-sizing: border-box;">
+        <div style="background: ${colorFijo}; border-radius: 30px; padding: 2px; display: inline-block; overflow: hidden; max-width: 242px;">
             <audio src="${textoReal}" controls playsinline type="${tipoArchivo}"
-                   style="max-width: 235px; display: block; outline: none; 
-                          filter: brightness(0) invert(1); background: transparent;">
+                   style="max-width: 240px; display: block; outline: none; 
+                          filter: invert(0.9) hue-rotate(180deg); background: transparent;">
             </audio>
         </div>
     `;
