@@ -2272,17 +2272,7 @@ function pintarMensaje(contenido, clase, hora, status, id, tipo = 'texto') {
                         textoReal.includes('ogg') ? 'audio/ogg' : 
                         textoReal.includes('mpeg') || textoReal.includes('mp3') ? 'audio/mpeg' : 'audio/mpeg';
 
-// 1. Matamos la burbuja grande y sus sombras del CSS
-    div.style.background = 'transparent'; 
-    div.style.backgroundColor = 'transparent';
-    div.style.boxShadow = 'none';
-    div.style.border = 'none';
-    div.style.padding = '0px'; 
-    div.style.width = 'max-content';
-
-    // 2. Color plano y limpio idéntico a tus textos
-    const colorFijo = clase === 'msg-derecha' ? '#005c4b' : '#202c33';
-
+    
     // 3. Contenedor cápsula estricto que recorta los bordes rebeldes de Android
     cuerpoHTML = `
         <div style="background: ${colorFijo}; border-radius: 30px; padding: 2px; display: inline-block; overflow: hidden; max-width: 242px;">
