@@ -2273,7 +2273,7 @@ function pintarMensaje(contenido, clase, hora, status, id, tipo = 'texto') {
                         textoReal.includes('mpeg') || textoReal.includes('mp3') ? 'audio/mpeg' : 'audio/mpeg';
 
              // 1. Desactivamos por completo la burbuja nativa del chat (sin fondos, sin sombras)
-    div.style.background = 'transparent'; 
+    div.style.background = 'transparet'; 
     div.style.backgroundColor = 'transparent';
     div.style.boxShadow = 'none';
     div.style.border = 'none';
@@ -2281,7 +2281,7 @@ function pintarMensaje(contenido, clase, hora, status, id, tipo = 'texto') {
     div.style.width = 'max-content';
 
     // 2. Definimos tus colores reales idénticos a tus textos (sin que pasen por filtros)
-    const colorReal = clase === 'msg-derecha' ? 'background: linear-gradient(135deg, rgba(0, 92, 75, 0.8) 0%, rgba(0, 77, 64, 0.8) 100%)' : 'background: rgba(32, 44, 51, 0.6)';
+    const colorReal = clase === 'msg-derecha' ? '#004d40' : '#202c33';
 
     // 3. La mini-cápsula tiene tu color, y el audio adentro se vuelve transparente
     cuerpoHTML = `
