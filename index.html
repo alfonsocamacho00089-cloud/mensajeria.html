@@ -2273,14 +2273,20 @@ function pintarMensaje(contenido, clase, hora, status, id, tipo = 'texto') {
                         textoReal.includes('mpeg') || textoReal.includes('mp3') ? 'audio/mpeg' : 'audio/mpeg';
 
     
-    // 3. Contenedor cápsula estricto que recorta los bordes rebeldes de Android
+    // 🔥 EL TRUCO MULTIMEDIA: Quitamos la transparencia forzada del contenedor padre 
+    // para que use tu burbuja nativa del CSS (.msg-burbuja)
+    div.style.background = 'transparent'; 
+    div.style.backgroundColor = '';
+    div.style.boxShadow = '';
+    div.style.border = '';
+    div.style.padding = '10px'; // Le da espacio elegante a la nota de voz adentro
+
+    // Inyectamos el reproductor con filtros CSS para matar el color blanco nativo
     cuerpoHTML = `
-        <div style="background: ${colorFijo}; border-radius: 30px; padding: 2px; display: inline-block; overflow: hidden; max-width: 242px;">
-            <audio src="${textoReal}" controls playsinline type="${tipoArchivo}"
-                   style="max-width: 240px; display: block; outline: none; 
-                          filter: invert(0.9) hue-rotate(180deg); background: transparent;">
-            </audio>
-        </div>
+        <audio src="${textoReal}" controls playsinline type="${tipoArchivo}"
+               style="max-width:240px; display:block; margin-top:2px; outline:none; 
+                      filter: invert(0.9) hue-rotate(180deg); mix-blend-mode: screen; background: transparent;">
+        </audio>
     `;
      }
              
