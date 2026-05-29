@@ -2275,11 +2275,11 @@ function pintarMensaje(contenido, clase, hora, status, id, tipo = 'texto') {
     
     // 🔥 EL TRUCO MULTIMEDIA: Quitamos la transparencia forzada del contenedor padre 
     // para que use tu burbuja nativa del CSS (.msg-burbuja)
-    div.style.background = 'transparent'; 
+    div.style.background = ''; 
     div.style.backgroundColor = '';
     div.style.boxShadow = '';
     div.style.border = '';
-    div.style.padding = '10px'; // Le da espacio elegante a la nota de voz adentro
+    div.style.padding = '-10px'; // Le da espacio elegante a la nota de voz adentro
 
     // Inyectamos el reproductor con filtros CSS para matar el color blanco nativo
     cuerpoHTML = `
