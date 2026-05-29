@@ -3338,20 +3338,32 @@ async function iniciarGrabacionVoz() {
         };
 
         grabadorAudio.onstop = async () => {
+        grabadorAudio.onstop = async () => {
             console.log("🎯 H.A.R.V.I.S.: Procesando archivo de audio...");
             
             // 1. Creamos el archivo binario real del audio
             const audioBlob = new Blob(fragmentosAudio, { type: 'audio/webm' });
             
-            // 2. Lo convertimos en un archivo con nombre y extensión para que Firebase lo acepte
+            // 2. Lo convertimos en un archivo con nombre y extensión para Firebase
             const archivoAudioReal = new File([audioBlob], `nota_voz_${Date.now()}.webm`, { type: 'audio/webm' });
 
-            // 3. 🔥 ENVIAMOS EL ARCHIVO REAL A TU FUNCIÓN DE MEDIA
-            // Usamos 'prepararEnvioMedia' porque ella ya sabe cómo subir archivos a Firebase Storage
+            // 3. 🔥 ENVIAMOS EL ARCHIVO REAL A TU FUNCIÓN DE MEDIA (YouSpace normal)
             if (typeof prepararEnvioMedia === "function") {
-                // Simulamos la estructura del input file que tu función espera: { files: [ ... ] }
                 prepararEnvioMedia({ files: [archivoAudioReal] }, 'audio');
             }
+
+            // ================================================================
+            // 🚀 NUEVO INTEGRADO PARA H.A.R.V.I.S. (EXTRACCIÓN DE TEXTO PLANO)
+            // ================================================================
+            if (typeof escucharVozPedro === "function") {
+                // Ejecutamos tu función nativa para capturar las palabras dictadas
+                escucharVozPedro((textoFinalConvertido) => {
+                    console.log("🎙️ Texto extraído para H.A.R.V.I.S:", textoFinalConvertido);
+                    // Guardamos la transcripción limpia en la memoria global
+                    window.ultimaVozPedro = textoFinalConvertido;
+                });
+            }
+            // ================================================================
             
             // 4. Apagamos el punto verde de Android al instante
             if (flujoMicrofonoGlobal) {
