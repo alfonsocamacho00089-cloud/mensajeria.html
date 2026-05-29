@@ -1463,32 +1463,35 @@ if (targetID === "uo4kb3tGHH7J") {
         const urlBackend = "/api/chat"; 
         const llaveLocal = localStorage.getItem('spacechat_crypto_key') || "";
 
-        // 🔥 FILTRO MULTIMEDIA AVANZADO:
+        // 🔥 FILTRO DE TRANSCRIPCIÓN:
         let textoFinal = "";
-        
+
         if (typeof msg === 'object' && msg !== null) {
-            // Si es un objeto de audio o archivo del chat, extrae el texto de la transcripción
             textoFinal = msg.texto || msg.message || "";
         } else if (typeof msg === 'string') {
-            // Si el mensaje es un string pero por alguna razón viene con metadatos de audio
-            if (msg.includes("data:audio") || msg.startsWith("blob:")) {
-                textoFinal = "Procesa este comando de voz"; 
+            // Si msg es el Base64 del audio o un blob, NO se lo mandamos a Gemini.
+            // Buscamos el texto plano de la transcripción que tu app guarda en la interfaz.
+            if (msg.startsWith("data:audio") || msg.startsWith("blob:") || msg.length > 500) {
+                // Rescatamos el texto que el usuario dictó desde el elemento de la burbuja o variables nativas
+                textoFinal = window.lastTranscription || contenido?.texto || contenido || "";
             } else {
                 textoFinal = msg;
             }
         }
 
-        // Si se quedó vacío por seguridad, rescatamos cualquier texto plano que ande en el flujo
-        if (!textoFinal && typeof contenido === 'string') textoFinal = contenido;
-        if (!textoFinal && typeof contenido === 'object' && contenido !== null) textoFinal = contenido.texto || "";
+        // Si por alguna razón sigue vacío, le ponemos un comodín para que no vaya vacío
+        if (!textoFinal.trim()) {
+            textoFinal = "Hola Jarvis, procesa mi última nota de voz.";
+        }
 
         const cuerpoPeticion = {
             chatHistory: [
-                // Enviamos estrictamente TEXTO para que Gemini no rebote el mime-type de audio
-                { role: "user", parts: [{ text: textoFinal || "Hola" }] }
+                // Enviamos ESTRICTAMENTE texto plano limpio para que Gemini lo lea al toque
+                { role: "user", parts: [{ text: textoFinal }] }
             ],
             userKey: llaveLocal 
         };
+     
         const respuestaServidor = await fetch(urlBackend, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
