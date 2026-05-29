@@ -1,4 +1,4 @@
-import Buffer from 'buffer';
+import Buffer from 'buffer'; // Asegurar el soporte de Buffer si estás en un entorno compatible
 
 // Función para generar el audio con ElevenLabs en Vercel
 async function generarAudioTTS(texto) {
@@ -8,19 +8,20 @@ async function generarAudioTTS(texto) {
     try {
 
         // --- AQUÍ ESTÁ EL CHIVATO ---
-console.log("--------------------------------------------------");
-console.log("DEBUG: Tamaño del texto antes de ElevenLabs:", texto.length);
-console.log("DEBUG: Contenido del texto:", texto);
-// Sumamos el tipo explícito para ver si IndexedDB lo está enviando bien
-console.log("DEBUG: Tipo de mensaje (tipo):", typeof tipo !== 'undefined' ? tipo : 'No definido'); 
+        console.log("--------------------------------------------------");
+        console.log("DEBUG: Tamaño del texto antes de ElevenLabs:", texto.length);
+        console.log("DEBUG: Contenido del texto:", texto);
+        // Sumamos el tipo explícito para ver si IndexedDB lo está enviando bien
+        console.log("DEBUG: Tipo de mensaje (tipo):", typeof tipo !== 'undefined' ? tipo : 'No definido'); 
 
-// Chivato de detección: Te avisa de inmediato si pasará el filtro de la burbuja
-const testCosaNueva = texto.includes('youtube.com/') || texto.includes('youtu.be/') || 
-                      texto.includes('tiktok.com/') || texto.includes('facebook.com/') || 
-                      (typeof tipo !== 'undefined' && (tipo === 'video' || tipo === 'audio')) || 
-                      texto.startsWith('blob:') || texto.startsWith('data:audio');
-console.log("DEBUG: ¿Pasará el filtro de CosaNueva (Audio/Video/Blob)?:", testCosaNueva ? "✅ SÍ" : "❌ NO (Se pintará como texto común)");
-console.log("--------------------------------------------------");
+        // Chivato de detección: Te avisa de inmediato si pasará el filtro de la burbuja
+        const testCosaNueva = texto.includes('youtube.com/') || texto.includes('youtu.be/') || 
+                              texto.includes('tiktok.com/') || texto.includes('facebook.com/') || 
+                              (typeof tipo !== 'undefined' && (tipo === 'video' || tipo === 'audio')) || 
+                              texto.startsWith('blob:') || texto.startsWith('data:audio');
+        console.log("DEBUG: ¿Pasará el filtro de CosaNueva (Audio/Video/Blob)?:", testCosaNueva ? "✅ SÍ" : "❌ NO (Se pintará como texto común)");
+        console.log("--------------------------------------------------");
+        
         // Cortamos el texto para no gastar de más tu cuota de ElevenLabs
         const textoSeguro = texto.slice(0, 180); 
 
@@ -81,10 +82,7 @@ export default async function handler(req, res) {
         });
 
         const urlGemini = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${userKey}`;
-        
-        // Aquí incluí todo lo que me pediste dentro del comportamiento del prompt del sistema de H.A.R.V.I.S.
-        const harvisPromptSystem = `Rol: Eres H.A.R.V.I.S... (Tu prompt de siempre sin markdown). Tienes la capacidad absoluta de interpretar imágenes, videos, audios y enlaces que te comparta el usuario. Cuando te sea solicitado, tienes la función de crear imágenes, proporcionar enlaces/links relevantes y generar de manera efectiva cualquier cosa, código o recurso que el usuario te pida.`; 
-        
+        const harvisPromptSystem = `Rol: Eres H.A.R.V.I.S... (Tu prompt de siempre sin markdown)`; 
         const fechaActual = new Date().toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 
         const respuestaServidor = await fetch(urlGemini, {
@@ -104,18 +102,26 @@ export default async function handler(req, res) {
         }
 
         const datosGemini = await respuestaServidor.json();
+        
+        // Inclusión del manejo de error directo de la API de Gemini aportado del segundo bloque
+        if (datosGemini.error) {
+            return res.status(200).json({ respuesta: `Error API: ${datosGemini.error.message}` });
+        }
+
         const respuestaIA = datosGemini.candidates?.[0]?.content?.parts?.[0]?.text || "Sistemas listos.";
 
         let respuestaFinal = { respuesta: respuestaIA };
 
-        // Procesamos la voz con ElevenLabs de forma segura
-        try {
-            const audioBase64 = await generarAudioTTS(respuestaIA);
-            if (audioBase64) {
-                respuestaFinal.audioBase64 = audioBase64;
+        // Procesamos la voz con ElevenLabs de forma segura validando su existencia tal como el segundo bloque
+        if (typeof generarAudioTTS !== 'undefined') {
+            try {
+                const audioBase64 = await generarAudioTTS(respuestaIA);
+                if (audioBase64) {
+                    respuestaFinal.audioBase64 = audioBase64;
+                }
+            } catch (e) {
+                console.error("Fallo al empaquetar audio:", e);
             }
-        } catch (e) {
-            console.error("Fallo al empaquetar audio:", e);
         }
 
         return res.status(200).json(respuestaFinal);
