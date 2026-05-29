@@ -1466,16 +1466,23 @@ if (targetID === "uo4kb3tGHH7J") {
         // Tu api/chat.js espera recibir un objeto con 'chatHistory'
         // Lo armamos exactamente en el formato que Gemini entiende
         // 🚀 Recuperamos la llave local de tu teléfono
-const llaveLocal = localStorage.getItem('spacechat_crypto_key') || "";
+// 🚀 RECUPERAMOS LA LLAVE LOCAL DE TU TELÉFONO
+        const llaveLocal = localStorage.getItem('spacechat_crypto_key') || "";
 
-const cuerpoPeticion = {
-    chatHistory: [
-        { role: "user", parts: [{ text: msg }] }
-    ],
-    // Enviamos la llave de forma segura en el cuerpo del mensaje hacia Vercel
-    userKey: llaveLocal 
-};
+        // 🔥 FILTRO PARA NOTAS DE VOZ: Extrae el texto si 'msg' o 'contenido' vienen como objeto multimedia
+        let textoLimpio = (typeof msg === 'object') ? (msg.texto || "") : msg;
+        if (!textoLimpio && typeof contenido === 'object') {
+            textoLimpio = contenido.texto || "";
+        }
 
+        const cuerpoPeticion = {
+            chatHistory: [
+                // Cambiamos 'msg' por 'textoLimpio' para que nunca viaje un [object Blob] roto
+                { role: "user", parts: [{ text: textoLimpio }] }
+            ],
+            // Enviamos la llave de forma segura en el cuerpo del mensaje hacia Vercel
+            userKey: llaveLocal 
+        };
         const respuestaServidor = await fetch(urlBackend, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
