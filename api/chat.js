@@ -1,6 +1,6 @@
 // Función para generar el audio con ElevenLabs en Vercel
 async function generarAudioTTS(texto) {
-    const ELEVENLABS_API_KEY = "sk_161f372298f70bd20ff6ae30e9d01f4fe5b27c3c259e473d"; 
+    const ELEVENLABS_API_KEY = "sk_4fd772b7602cfbe4af6ed6ad7663bd04b727cdfefcec667c"; 
     const VOICE_ID = "EXAVITQu4vr4xnSDxMaL"; 
     
     try {
