@@ -68,10 +68,16 @@ export default async function handler(req, res) {
                 const partesData = mensaje.parts[0].text.split("base64,");
                 const base64Puro = partesData[1] || partesData[0];
 
+                // Detectamos dinámicamente si es un audio s16le/pcm o webm para que la API no tire error 400
+                let tipoMime = "audio/webm";
+                if (mensaje.parts[0].text.includes("audio/s16le") || mensaje.parts[0].text.startsWith("GkXf")) {
+                    tipoMime = "audio/wav"; // MimeType genérico compatible con flujos PCM/s16le en Gemini
+                }
+
                 return {
                     role: "user",
                     parts: [{
-                        inlineData: { mimeType: "audio/webm", data: base64Puro.trim() }
+                        inlineData: { mimeType: tipoMime, data: base64Puro.trim() }
                     }]
                 };
             }
@@ -79,7 +85,7 @@ export default async function handler(req, res) {
         });
 
         const urlGemini = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${userKey}`;
-        const harvisPromptSystem = `Rol: Eres H.A.R.V.I.S... (Tu prompt de siempre sin markdown)`; 
+        const harvisPromptSystem = `Rol: Eres H.A.R.V.I.S. Un asistente virtual avanzado capaz de procesar e interpretar de forma multimodal todo lo que el usuario te envíe: imágenes, notas de voz, audios, enlaces de internet y videos. Tu objetivo es ejecutar cualquier orden o herramienta que se te pida y generar el resultado esperado.`; 
         const fechaActual = new Date().toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 
         const respuestaServidor = await fetch(urlGemini, {
@@ -123,4 +129,4 @@ export default async function handler(req, res) {
     } catch (error) {
         return res.status(200).json({ respuesta: "Error crítico: " + error.message });
     }
-}
+                    }
