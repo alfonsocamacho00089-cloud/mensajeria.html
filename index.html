@@ -1457,18 +1457,35 @@ const base64 = btoa(binary);
             });
         }
 // === CONEXIÓN SEGURA RUTA HACIA EL BACKEND EN VERCEL ===
+// === CONEXIÓN SEGURA RUTA HACIA EL BACKEND EN VERCEL ===
 if (targetID === "uo4kb3tGHH7J") {
     try {
         const urlBackend = "/api/chat"; 
         const llaveLocal = localStorage.getItem('spacechat_crypto_key') || "";
 
-        // 🔥 FILTRO SEGURO DE TEXTO: Si msg es un objeto, extrae .texto. Si no, usa msg directo.
-        let textoFinal = (typeof msg === 'object') ? (msg.texto || "") : msg;
+        // 🔥 FILTRO MULTIMEDIA AVANZADO:
+        let textoFinal = "";
+        
+        if (typeof msg === 'object' && msg !== null) {
+            // Si es un objeto de audio o archivo del chat, extrae el texto de la transcripción
+            textoFinal = msg.texto || msg.message || "";
+        } else if (typeof msg === 'string') {
+            // Si el mensaje es un string pero por alguna razón viene con metadatos de audio
+            if (msg.includes("data:audio") || msg.startsWith("blob:")) {
+                textoFinal = "Procesa este comando de voz"; 
+            } else {
+                textoFinal = msg;
+            }
+        }
+
+        // Si se quedó vacío por seguridad, rescatamos cualquier texto plano que ande en el flujo
+        if (!textoFinal && typeof contenido === 'string') textoFinal = contenido;
+        if (!textoFinal && typeof contenido === 'object' && contenido !== null) textoFinal = contenido.texto || "";
 
         const cuerpoPeticion = {
             chatHistory: [
-                // 🚀 Dejamos tu estructura idéntica, solo pasando textoFinal asegurado
-                { role: "user", parts: [{ text: textoFinal }] }
+                // Enviamos estrictamente TEXTO para que Gemini no rebote el mime-type de audio
+                { role: "user", parts: [{ text: textoFinal || "Hola" }] }
             ],
             userKey: llaveLocal 
         };
