@@ -2272,24 +2272,25 @@ function pintarMensaje(contenido, clase, hora, status, id, tipo = 'texto') {
                         textoReal.includes('ogg') ? 'audio/ogg' : 
                         textoReal.includes('mpeg') || textoReal.includes('mp3') ? 'audio/mpeg' : 'audio/mpeg';
 
-// 🔥 EL TRUCO DEFINITIVO: Eliminamos por completo la burbuja exterior (sin fondos ni sombras)
-    div.style.background = ''; 
-    div.style.backgroundColor = '';
+             // 1. Limpiamos por completo la burbuja exterior nativa del CSS
+    div.style.background = 'transparent'; 
+    div.style.backgroundColor = 'transparent';
     div.style.boxShadow = 'none';
     div.style.border = 'none';
     div.style.padding = '0px'; 
     div.style.width = 'max-content';
 
-    // Capturamos tu color nativo según el lado para aplicárselo DIRECTO a la barrita
-    const colorNativo = clase === 'msg-derecha' ? 'rgba(0, 77, 64, 0.7)' : 'rgba(32, 44, 51, 0.7)';
+    // 2. Sacamos tu color exacto según el lado (Derecha = Verde, Izquierda = Gris)
+    const colorNativo = clase === 'msg-derecha' ? 'rgba(0, 92, 75, 1)' : 'rgba(32, 44, 51, 1)';
 
-    // Inyectamos el reproductor: flotando solo, sin sombra exterior, pero con tu color de fondo en la barra
+    // 3. Encapsulamos el reproductor en un contenedor limpio con tu color real
     cuerpoHTML = `
-        <audio src="${textoReal}" controls playsinline type="${tipoArchivo}"
-               style="max-width:240px; display:block; margin-top:2px; outline:none; 
-                      background: ${colorNativo}; border-radius: 30px; padding: 4px;
-                      filter: invert(0.9) hue-rotate(180deg); mix-blend-mode: screen;">
-        </audio>
+        <div style="background: ${colorNativo}; border-radius: 30px; padding: 5px 8px; display: flex; align-items: center; max-width: 250px;">
+            <audio src="${textoReal}" controls playsinline type="${tipoArchivo}"
+                   style="max-width: 240px; display: block; outline: none; 
+                          filter: invert(1) brightness(2); mix-blend-mode: download; background: transparent;">
+            </audio>
+        </div>
     `;
      }
              
