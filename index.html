@@ -1481,27 +1481,7 @@ if (targetID === "uo4kb3tGHH7J") {
             body: JSON.stringify(cuerpoPeticion)
         });
 
-        // Aquí continúa tu lógica original para recibir la respuesta...
-        // ...
-     // Si es un texto, imagen generada o link normal, se va por el canal de texto plano
-
-
-
-let textoFinal = (typeof msg === 'object' && msg !== null) ? (msg.texto || "") : msg;
-
-
-
-
-
-cuerpoPeticion.chatHistory = [
-
-
-
-{ role: "user", parts: [{ text: textoFinal || "Hola" }] }
-
-
-
-];
+       
 
 
      
