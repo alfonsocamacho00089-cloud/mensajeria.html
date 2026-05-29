@@ -1460,38 +1460,46 @@ const base64 = btoa(binary);
 // === CONEXIÓN SEGURA RUTA HACIA EL BACKEND EN VERCEL ===
 if (targetID === "uo4kb3tGHH7J") {
     try {
-        const urlBackend = "/api/chat"; 
+        const urlBackend = "/api/chat";
         const llaveLocal = localStorage.getItem('spacechat_crypto_key') || "";
 
-        // 🔥 FILTRO MULTIMEDIA CORREGIDO:
-let textoFinal = "";
+        // 🔥 FILTRO MULTIMEDIA AVANZADO Y CORREGIDO (SIN VARIABLES EXTERNAS):
+        let textoFinal = "";
 
-if (typeof msg === 'object' && msg !== null) {
-    // Si viene del transcriptor de la base de datos o estado, extraemos el texto limpio
-    textoFinal = msg.texto || msg.message || "";
-} else if (typeof msg === 'string') {
-    // Si es un string directo, verificamos que no sea la data binaria cruda del audio
-    if (msg.startsWith("data:audio") || msg.startsWith("blob:")) {
-        // En vez de pisar el texto, intentamos rescatar el contenido si existe por fuera
-        textoFinal = (typeof contenido === 'string') ? contenido : (contenido?.texto || "");
-    } else {
-        textoFinal = msg; // Si es texto limpio, pasa directo
-    }
-}
+        if (typeof msg === 'object' && msg !== null) {
+            // Prioridad 1: Si es un objeto, extraemos el texto limpio (el transcriptor lo guarda aquí)
+            textoFinal = msg.texto || msg.message || "";
+        } else if (typeof msg === 'string') {
+            // Prioridad 2: Si es un string directo, verificamos que no sea la URL del audio crudo
+            if (msg.startsWith("data:audio") || msg.startsWith("blob:")) {
+                // Si es SOLO audio y NO tenemos texto de respaldo...
+                // ...avisamos que el audio está en proceso de transcripción o se grabó vacío.
+                // (Aquí podrías poner un mensaje de error o simplemente no enviar nada)
+                textoFinal = "Procesando audio (si no se genera nada, intenta grabar de nuevo o escribir el comando)."; 
+            } else {
+                textoFinal = msg; // Si es texto plano, pasa directo
+            }
+        }
 
-// Respaldo final si todo lo anterior falló
-if (!textoFinal && contenido) {
-    textoFinal = (typeof contenido === 'string') ? contenido : (contenido.texto || "");
-     }
-        
+        // Si el filtro no pudo extraer nada útil, le damos un saludo predeterminado
+        // para que la petición no se vaya vacía y el backend responda.
+        if (!textoFinal.trim()) {
+            textoFinal = "Hola"; // Mensaje por defecto si todo lo anterior falló
+        }
+
         const cuerpoPeticion = {
             chatHistory: [
-                // Enviamos estrictamente TEXTO para que Gemini no rebote el mime-type de audio
-                { role: "user", parts: [{ text: textoFinal || "Hola" }] }
+                // Enviamos estrictamente TEXTO limpio para que Gemini lo entienda
+                { role: "user", parts: [{ text: textoFinal }] }
             ],
             userKey: llaveLocal 
         };
 
+        // ... resto de tu lógica de fetch a '/api/chat' ...
+    } catch (error) {
+        console.error("Error en el envío:", error);
+    }
+     }
         // 📡 TU ENVÍO UNIFICADO
         const respuestaServidor = await fetch(urlBackend, {
             method: 'POST',
