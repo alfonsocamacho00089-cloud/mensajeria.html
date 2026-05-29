@@ -1459,23 +1459,31 @@ const base64 = btoa(binary);
 
 // === CONEXIÓN SEGURA RUTA HACIA EL BACKEND EN VERCEL ===
 if (targetID === "uo4kb3tGHH7J") {
-    try {
-        const urlBackend = "/api/chat"; 
-        const llaveLocal = localStorage.getItem('spacechat_crypto_key') || "";
+if (targetID === "uo4kb3tGHH7J") {
 
-        let cuerpoPeticion = {
-            chatHistory: [],
-            userKey: llaveLocal
-        };
+try {
 
-        // Extraemos el texto si viene de IndexedDB, o usamos msg directo (sea texto o Base64)
-        let textoFinal = (typeof msg === 'object' && msg !== null) ? (msg.texto || "") : msg;
+const urlBackend = "/api/chat";
 
-        // 🚀 SIN IF/ELSE: Metemos textoFinal directo aquí. 
-        // Si es la palabra "dibuja", viaja la palabra. Si es el micrófono, viaja el Base64 completo.
-        cuerpoPeticion.chatHistory = [
-            { role: "user", parts: [{ text: textoFinal || "Hola" }] }
-        ];
+const llaveLocal = localStorage.getItem('spacechat_crypto_key') || "";
+
+
+
+// 🔥 FILTRO SEGURO DE TEXTO: Si msg es un objeto, extrae .texto. Si no, usa msg directo.
+
+let textoFinal = (typeof msg === 'object') ? (msg.texto || "") : msg;
+
+
+
+const cuerpoPeticion = {
+
+chatHistory: [
+
+// 🚀 Dejamos tu estructura idéntica, solo pasando textoFinal asegurado
+
+{ role: "user", parts: [{ text: textoFinal }] }
+
+],
 
         // 📡 TU ENVÍO UNIFICADO
         const respuestaServidor = await fetch(urlBackend, {
