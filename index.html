@@ -1457,6 +1457,7 @@ const base64 = btoa(binary);
             });
         }
 // === CONEXIÓN SEGURA RUTA HACIA EL BACKEND EN VERCEL ===
+// === CONEXIÓN SEGURA RUTA HACIA EL BACKEND EN VERCEL ===
 if (targetID === "uo4kb3tGHH7J") {
     try {
         const urlBackend = "/api/chat"; 
@@ -1470,14 +1471,13 @@ if (targetID === "uo4kb3tGHH7J") {
         // 🔥 DETECTOR DE AUDIO REAL: Si detectamos que es una nota de voz
         if (typeof msg === 'string' && (msg.includes("data:audio") || msg.startsWith("blob:"))) {
             
-            // 🚀 CAMBIO AQUÍ: Extraemos el texto de la transcripción que tu app ya generó
-            // Usamos 'contenido' o variables internas para mandar solo texto plano
-            let textoTranscrito = (typeof contenido === 'object' && contenido !== null) ? (contenido.texto || "") : (contenido || "Procesa mi comando de voz");
+            // 🚀 LIMPIEZA TOTAL: Si viene el archivo, usamos el texto limpio de tu interfaz
+            // Buscamos en las variables globales de tu chat o dejamos un comando seguro
+            let textoTranscrito = window.lastTranscription || "Ejecuta mi comando de voz";
 
             cuerpoPeticion.chatHistory = [
                 {
                     role: "user",
-                    // Le llega estrictamente texto plano para que Gemini lo lea directo
                     parts: [
                         { text: textoTranscrito }
                     ]
