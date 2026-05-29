@@ -2271,25 +2271,22 @@ function pintarMensaje(contenido, clase, hora, status, id, tipo = 'texto') {
     const tipoArchivo = textoReal.includes('webm') ? 'audio/webm' : 
                         textoReal.includes('ogg') ? 'audio/ogg' : 
                         textoReal.includes('mpeg') || textoReal.includes('mp3') ? 'audio/mpeg' : 'audio/mpeg';
-            
-// 🔥 EL NUEVO TRUCO: Mantenemos el contenedor padre transparente 
-    // Para que NO dibuje el bloque grande ni la colita de la burbuja
-    div.style.background = 'transparent'; 
-    div.style.backgroundColor = 'transparent';
-    div.style.boxShadow = 'none';
-    div.style.border = 'none';
-    div.style.padding = '0px'; // Eliminamos el padding para que no ocupe espacio extra
+// 🔥 EL TRUCO MULTIMEDIA: Usamos tu burbuja nativa pero ajustada al tamaño exacto del reproductor
+    div.style.background = ''; 
+    div.style.backgroundColor = '';
+    div.style.boxShadow = '';
+    div.style.border = '';
+    div.style.padding = '8px 10px 6px 10px'; // Un padding balanceado estilo WhatsApp
+    
+    // ANCHO PERFECTO: Obliga a la burbuja a cerrarse justo donde termina el reproductor
+    div.style.width = 'max-content'; 
+    div.style.maxWidth = '100%';
 
-    // Determinamos el color exacto según la clase para ponérselo DIRECTO a la barra de audio
-    // Si es derecha usa tu verde de WhatsApp, si es izquierda usa tu gris oscuro
-    const colorBurbuja = clase === 'msg-derecha' ? 'rgba(0, 77, 64, 0.7)' : 'rgba(32, 44, 51, 0.7)';
-
-    // Inyectamos el reproductor aplicando el color directamente a su cuerpo
+    // Inyectamos el reproductor con filtros CSS (Tu versión anterior exacta)
     cuerpoHTML = `
         <audio src="${textoReal}" controls playsinline type="${tipoArchivo}"
                style="max-width:240px; display:block; margin-top:2px; outline:none; 
-                      background: ${colorBurbuja}; border-radius: 30px; padding: 4px;
-                      filter: invert(0.9) hue-rotate(180deg); mix-blend-mode: screen;">
+                      filter: invert(0.9) hue-rotate(180deg); mix-blend-mode: screen; background: transparent;">
         </audio>
     `;
      }
