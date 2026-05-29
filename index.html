@@ -3481,9 +3481,13 @@ function escucharVozPedro(alRecibirTexto) {
     
     recognition.onresult = (event) => {
         const resultadoTexto = event.results[0][0].transcript;
+        
+        // 🚀 GUARDAMOS LA TRANSCRIPCIÓN EN UNA VARIABLE GLOBAL
+        window.ultimaVozPedro = resultadoTexto;
+        
         alRecibirTexto(resultadoTexto);
     };
-}
+     }
 
 
 // =================================================================
