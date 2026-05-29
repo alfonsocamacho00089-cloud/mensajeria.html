@@ -1463,31 +1463,26 @@ if (targetID === "uo4kb3tGHH7J") {
         const urlBackend = "/api/chat"; 
         const llaveLocal = localStorage.getItem('spacechat_crypto_key') || "";
 
-        // 🚀 DETECTOR MULTIPROPÓSITO: Si viene de IndexedDB extrae el texto; si no, usa msg directo.
-        // Esto mantiene vivas tus imágenes, textos planos y el Base64 que genera la grabadora.
-        let textoFinal = (typeof msg === 'object' && msg !== null) ? (msg.texto || "") : msg;
-
-        const cuerpoPeticion = {
-            chatHistory: [
-                { role: "user", parts: [{ text: textoFinal || "Hola" }] }
-            ],
-            userKey: llaveLocal 
+        let cuerpoPeticion = {
+            chatHistory: [],
+            userKey: llaveLocal
         };
 
-        // 📡 DISPARO DIRECTO A VERCEL (Aquí se completa el ciclo que faltaba)
+        // Extraemos el texto si viene de IndexedDB, o usamos msg directo (sea texto o Base64)
+        let textoFinal = (typeof msg === 'object' && msg !== null) ? (msg.texto || "") : msg;
+
+        // 🚀 SIN IF/ELSE: Metemos textoFinal directo aquí. 
+        // Si es la palabra "dibuja", viaja la palabra. Si es el micrófono, viaja el Base64 completo.
+        cuerpoPeticion.chatHistory = [
+            { role: "user", parts: [{ text: textoFinal || "Hola" }] }
+        ];
+
+        // 📡 TU ENVÍO UNIFICADO
         const respuestaServidor = await fetch(urlBackend, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(cuerpoPeticion)
         });
-
-        // Aquí abajo sigue el resto de tu lógica original para procesar los datos de respuesta...
-        // ...
-
-    } catch (error) {
-        console.error("❌ Error en la ruta del backend:", error);
-    }
-     }
 
 
         const datosBackend = await respuestaServidor.json();
