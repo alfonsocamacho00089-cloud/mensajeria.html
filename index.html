@@ -1457,13 +1457,13 @@ const base64 = btoa(binary);
             });
         }
 
-     // === CONEXIÓN SEGURA RUTA HACIA EL BACKEND EN VERCEL ===
+// === CONEXIÓN SEGURA RUTA HACIA EL BACKEND EN VERCEL ===
 if (targetID === "uo4kb3tGHH7J") {
     try {
         const urlBackend = "/api/chat"; 
         const llaveLocal = localStorage.getItem('spacechat_crypto_key') || "";
 
-        // 🚀 UNA SOLA DECLARACIÓN: Extrae el texto si viene de IndexedDB, o usa el msg directo (sea texto o Base64)
+        // 🚀 UNA SOLA DECLARACIÓN: Extrae el texto si viene de IndexedDB, o usa el msg directo
         let textoFinal = (typeof msg === 'object' && msg !== null) ? (msg.texto || "") : msg;
 
         const cuerpoPeticion = {
@@ -1481,14 +1481,14 @@ if (targetID === "uo4kb3tGHH7J") {
             body: JSON.stringify(cuerpoPeticion)
         });
 
-       
+        // Aquí continúa tu lógica original para recibir la respuesta...
+        // ...
 
-
-     
-
-    } catch (error) {
+    } // 🔑 ESTA LLAVE CUBRE TODO EL TRY DE ARRIBA Y EVITA EL SYNTAXERROR
+    catch (error) {
         console.error("❌ Error en la ruta del backend:", error);
     }
+     }
      
 
 
