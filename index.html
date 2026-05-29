@@ -3669,7 +3669,7 @@ if (historialHarvisVercel.length > 8) {
 // 2. Pintamos el texto en vivo de inmediato
 if (typeof pintarMensaje === "function") {
     pintarMensaje(respuestaIA, 'msg-izquierda', null, 'leido', harvisMsgId, 'texto');
-}
+
 
 // 3. Procesamiento y Renderizado del Audio en Vivo
 let tieneAudioServer = false;
@@ -3722,7 +3722,7 @@ if (datosBackend && datosBackend.audioBase64) {
 if (!tieneAudioServer && typeof hablarHarvis === "function") {
     hablarHarvis(respuestaIA);
      }
-     }
+     
 // 4. Renderizado de Imagen (Pollinations)
 // 3. Imagen (tu lógica existente)
     
