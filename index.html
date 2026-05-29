@@ -2273,8 +2273,8 @@ function pintarMensaje(contenido, clase, hora, status, id, tipo = 'texto') {
                         textoReal.includes('mpeg') || textoReal.includes('mp3') ? 'audio/mpeg' : 'audio/mpeg';
 
 // 🔥 EL TRUCO DEFINITIVO: Eliminamos por completo la burbuja exterior (sin fondos ni sombras)
-    div.style.background = 'transparent'; 
-    div.style.backgroundColor = 'transparent';
+    div.style.background = ''; 
+    div.style.backgroundColor = '';
     div.style.boxShadow = 'none';
     div.style.border = 'none';
     div.style.padding = '0px'; 
