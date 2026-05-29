@@ -2028,10 +2028,11 @@ async function cargarProto() {
 
           let mensajeSeleccionado = null;
 function pintarMensaje(contenido, clase, hora, status, id, tipo = 'texto') {
- const box = document.getElementById('chat-box');
+    const box = document.getElementById('chat-box');
     if (!box) return;
 
- let textoReal = (typeof contenido === 'object') ? (contenido.texto || "") : contenido;
+    let textoReal = (typeof contenido === 'object') ? (contenido.texto || "") : contenido;
+    
     // Antes del match, elimina los saltos de línea que H.A.R.V.I.S. pueda haber puesto
     textoReal = textoReal.replace(/[\r\n]+/g, '');
 
@@ -2045,8 +2046,10 @@ function pintarMensaje(contenido, clase, hora, status, id, tipo = 'texto') {
     const match = textoReal.match(/IMAGEN:(https?:\/\/[^\s\]]+)/i);
     if (match) {
         tipo = 'foto';
-        textoReal = match[1]; 
-     }
+        textoReal = match[1]; // Extrae la URL limpia quitando el prefijo "IMAGEN:"
+    }
+
+    // A partir de aquí continúa tu segundo bloque (Creación del div, validación de tipo === 'foto', etc.)
     // Extraemos la URL si viene con el formato IMAGEN:[URL]
     // Antes del match, elimina los saltos de línea que H.A.R.V.I.S. pueda haber puesto
 
@@ -2210,7 +2213,7 @@ function pintarMensaje(contenido, clase, hora, status, id, tipo = 'texto') {
                 const urlLimpia = textoReal.split(' ')[0];
                 cuerpoHTML = `<img src="${urlLimpia}" style="max-width:100%; border-radius:12px; display:block; border: 2px solid #ffd700;">`;
             } else {
-                cuerpoHTML = `<img src="${textoReal}" style="max-width:100%; border-radius:12px; display:block; border: none; background:transparent">`;
+                cuerpoHTML = `<img src="${textoReal}" style="max-width:100%; border-radius:12px; display:block; border: none; background:transparent; onclick="window.open('${textoReal}', '_blank')">`;
             }
         } else {
             cuerpoHTML = `<span class="texto-msg">${textoReal}</span>`;
