@@ -1,5 +1,3 @@
-import Buffer from 'buffer';
-
 // Función para generar el audio con ElevenLabs en Vercel
 async function generarAudioTTS(texto) {
     const ELEVENLABS_API_KEY = "sk_161f372298f70bd20ff6ae30e9d01f4fe5b27c3c259e473d"; 
@@ -8,20 +6,19 @@ async function generarAudioTTS(texto) {
     try {
 
         // --- AQUÍ ESTÁ EL CHIVATO ---
-        console.log("--------------------------------------------------");
-        console.log("DEBUG: Tamaño del texto antes de ElevenLabs:", texto.length);
-        console.log("DEBUG: Contenido del texto:", texto);
-        // Sumamos el tipo explícito para ver si IndexedDB lo está enviando bien
-        console.log("DEBUG: Tipo de mensaje (tipo):", typeof tipo !== 'undefined' ? tipo : 'No definido'); 
+console.log("--------------------------------------------------");
+console.log("DEBUG: Tamaño del texto antes de ElevenLabs:", texto.length);
+console.log("DEBUG: Contenido del texto:", texto);
+// Sumamos el tipo explícito para ver si IndexedDB lo está enviando bien
+console.log("DEBUG: Tipo de mensaje (tipo):", typeof tipo !== 'undefined' ? tipo : 'No definido'); 
 
-        // Chivato de detección: Te avisa de inmediato si pasará el filtro de la burbuja
-        const testCosaNueva = texto.includes('youtube.com/') || texto.includes('youtu.be/') || 
-                              texto.includes('tiktok.com/') || texto.includes('facebook.com/') || 
-                              (typeof tipo !== 'undefined' && (tipo === 'video' || tipo === 'audio')) || 
-                              texto.startsWith('blob:') || texto.startsWith('data:audio');
-        console.log("DEBUG: ¿Pasará el filtro de CosaNueva (Audio/Video/Blob)?:", testCosaNueva ? "✅ SÍ" : "❌ NO (Se pintará como texto común)");
-        console.log("--------------------------------------------------");
-        
+// Chivato de detección: Te avisa de inmediato si pasará el filtro de la burbuja
+const testCosaNueva = texto.includes('youtube.com/') || texto.includes('youtu.be/') || 
+                      texto.includes('tiktok.com/') || texto.includes('facebook.com/') || 
+                      (typeof tipo !== 'undefined' && (tipo === 'video' || tipo === 'audio')) || 
+                      texto.startsWith('blob:') || texto.startsWith('data:audio');
+console.log("DEBUG: ¿Pasará el filtro de CosaNueva (Audio/Video/Blob)?:", testCosaNueva ? "✅ SÍ" : "❌ NO (Se pintará como texto común)");
+console.log("--------------------------------------------------");
         // Cortamos el texto para no gastar de más tu cuota de ElevenLabs
         const textoSeguro = texto.slice(0, 180); 
 
@@ -111,15 +108,14 @@ export default async function handler(req, res) {
 
         let respuestaFinal = { respuesta: respuestaIA };
 
-        if (typeof generarAudioTTS !== 'undefined') {
-            try {
-                const audioBase64 = await generarAudioTTS(respuestaIA);
-                if (audioBase64) {
-                    respuestaFinal.audioBase64 = audioBase64;
-                }
-            } catch (e) {
-                console.error("Fallo al empaquetar audio:", e);
+        // Procesamos la voz con ElevenLabs de forma segura
+        try {
+            const audioBase64 = await generarAudioTTS(respuestaIA);
+            if (audioBase64) {
+                respuestaFinal.audioBase64 = audioBase64;
             }
+        } catch (e) {
+            console.error("Fallo al empaquetar audio:", e);
         }
 
         return res.status(200).json(respuestaFinal);
