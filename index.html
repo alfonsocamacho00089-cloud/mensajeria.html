@@ -739,7 +739,25 @@ margin: 0;
   from { opacity: 0.5; }
   to { opacity: 1; }
 }
+/* Contenedor exclusivo para la nota de voz */
+.burbuja-audio {
+    padding: 2px 6px 2px 6px !important;
+    width: max-content !important;
+    max-width: 100% !important;
+    background: transparent !important; /* Mantiene el contenedor invisible si lo deseas */
+    box-shadow: none !important;
+}
 
+/* El reproductor optimizado dentro de su clase */
+.reproductor-chat {
+    max-width: 240px;
+    display: block;
+    margin: 0 !important;
+    outline: none;
+    filter: invert(0.9) hue-rotate(180deg);
+    mix-blend-mode: screen;
+    background: transparent;
+      }
 
     </style>
 
@@ -2272,26 +2290,13 @@ function pintarMensaje(contenido, clase, hora, status, id, tipo = 'texto') {
                         textoReal.includes('ogg') ? 'audio/ogg' : 
                         textoReal.includes('mpeg') || textoReal.includes('mp3') ? 'audio/mpeg' : 'audio/mpeg';
 
-    
-    // 🔥 EL TRUCO MULTIMEDIA: Quitamos la transparencia forzada del contenedor padre 
-    // para que use tu burbuja nativa del CSS (.msg-burbuja)
-    div.style.background = ''; 
-    div.style.backgroundColor = '';
-    div.style.boxShadow = '';
-    div.style.border = '';
-    
-    // REDUCCIÓN CLAVE: Bajamos el padding a los lados y casi a cero arriba/abajo
-    // Formato: arriba(2px) derecha(6px) abajo(2px) izquierda(6px)
-    div.style.padding = '2px 6px 2px 6px'; 
-    
-    // Forzamos a la burbuja a cerrarse justo donde termina el reproductor
-    div.style.width = 'max-content';
+    // 🔥 ASIGNACIÓN DE CLASE EXCLUSIVA
+    // Mantenemos 'mensaje' y la 'clase' (msg-derecha/izquierda) pero le sumamos nuestra clase limpia
+    div.className = `mensaje ${clase} burbuja-audio`;
 
-    // Inyectamos el reproductor con filtros CSS para matar el color blanco nativo
+    // Inyectamos el reproductor usando la nueva clase del CSS
     cuerpoHTML = `
-        <audio src="${textoReal}" controls playsinline type="${tipoArchivo}"
-               style="max-width:240px; display:block; margin-top:0px; outline:none; 
-                      filter: invert(0.9) hue-rotate(180deg); mix-blend-mode: screen; background: transparent;">
+        <audio src="${textoReal}" controls playsinline type="${tipoArchivo}" class="reproductor-chat">
         </audio>
     `;
      }
