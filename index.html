@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+osea<!DOCTYPE html>
 <html lang="es">
 <head>
  <meta name="apple-mobile-web-app-capable" content="yes">
@@ -1471,8 +1471,8 @@ if (targetID === "uo4kb3tGHH7J") {
         // 🔥 DETECTOR DE AUDIO REAL: Si detectamos que es una nota de voz
         if (typeof msg === 'string' && (msg.includes("data:audio") || msg.startsWith("blob:"))) {
             
-            // 🚀 CAPTURA REAL: Agarramos el texto plano del input o la última transcripción
-            let textoTranscrito = document.getElementById('chat-input')?.value || window.currentTranscription || "Hola Jarvis";
+            // 🚀 CAPTURA PERFECTA: Le pasamos el texto exacto que guardó la función escucharVozPedro
+            let textoTranscrito = window.ultimaVozPedro || "Hola Jarvis";
 
             cuerpoPeticion.chatHistory = [
                 {
@@ -1482,6 +1482,10 @@ if (targetID === "uo4kb3tGHH7J") {
                     ]
                 }
             ];
+            
+            // Limpiamos la variable para el próximo audio
+            window.ultimaVozPedro = "";
+            
         } else {
             // Si es un texto, imagen generada o link normal, se va por el canal de texto plano
             let textoFinal = (typeof msg === 'object' && msg !== null) ? (msg.texto || "") : msg;
