@@ -1464,60 +1464,42 @@ if (targetID === "uo4kb3tGHH7J") {
         const urlBackend = "/api/chat";
         const llaveLocal = localStorage.getItem('spacechat_crypto_key') || "";
 
-// =================================================================
-        // 🔥 CONTROL DE ENTRADA MULTIMEDIA NATIVA PARA H.A.R.V.I.S. (CORREGIDO)
+
+
+     // =================================================================
+        // 🔍 RASTREADOR DE DIAGNÓSTICO DE AUDIO
         // =================================================================
+        console.log("► [H.A.R.V.I.S. Debug] Contenido exacto de 'msg':", msg);
+        console.log("► [H.A.R.V.I.S. Debug] Tipo de dato:", typeof msg);
+
         let textoFinal = "";
 
         if (typeof msg === 'object' && msg !== null) {
             textoFinal = msg.texto || msg.message || "";
+            console.log("► Es un objeto. Texto extraído:", textoFinal);
         } else if (typeof msg === 'string') {
             textoFinal = msg;
+            console.log("► Es un string. Longitud:", msg.length);
         }
 
-        // CERROJO ESTRICTO: Evaluamos directamente 'textoFinal' o la raíz de 'msg'
-        if (!textoFinal || textoFinal.startsWith("data:audio") || textoFinal.startsWith("blob:") || textoFinal.startsWith("GkXf") || (typeof msg === 'string' && (msg.startsWith("data:audio") || msg.startsWith("blob:")))) {
+        // Si detectamos CUALQUIER indicio de que no es texto plano legible, disparamos la alerta
+        const esAudioEscondido = typeof msg === 'object' || !textoFinal || textoFinal.startsWith("data:") || textoFinal.startsWith("blob:") || textoFinal.startsWith("GkXf") || textoFinal.length > 500;
+
+        if (esAudioEscondido) {
+            // Mandamos una alerta directo a la pantalla de tu teléfono para ver qué es
+            alert("¡Atrapado! Tipo: " + (typeof msg) + " | Resumen: " + String(textoFinal).substring(0, 50));
             
             if (typeof escucharVozPedro === "function") {
-                console.log("🎙️ [H.A.R.V.I.S.] Filtro de Audio Activo: Deteniendo envío e iniciando micrófono local...");
-                
                 escucharVozPedro((textoConvertido) => {
                     if (textoConvertido && textoConvertido.trim() !== "") {
-                        // Forzamos el valor directo en tu caja de texto visual en el Xiaomi
                         const campoTexto = document.getElementById('msg-text');
                         if (campoTexto) campoTexto.value = textoConvertido;
-                        
-                        // Re-inyectamos el texto limpio volviendo a llamar la función matriz
                         enviarMensajeSatelital(textoConvertido);
                     }
                 });
-            } else {
-                console.warn("⚠️ La función 'escucharVozPedro' no está disponible en el entorno global.");
             }
-            return; // 🛑 ESCUDO ACTIVO: Frena el fetch a Vercel para que no mande datos rotos
-        }
-
-        // Si el filtro pasó limpiamente pero vino vacío por otra razón, el saludo de respaldo
-        if (!textoFinal.trim()) {
-            textoFinal = "Hola";
-        }
-
-        // =================================================================
-        // PREPARACIÓN DEL PAYLOAD CON TEXTO LIMPIO TRANSCRITO
-        // =================================================================
-        const cuerpoPeticion = {
-            chatHistory: [
-                { role: "user", parts: [{ text: textoFinal }] }
-            ],
-            userKey: llaveLocal 
-        };
-
-        // 📡 TU ENVÍO UNIFICADO
-        const respuestaServidor = await fetch(urlBackend, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(cuerpoPeticion)
-        });
+            return; // Freno de mano
+     }
 
 
         const datosBackend = await respuestaServidor.json();
