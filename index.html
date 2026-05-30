@@ -1549,7 +1549,7 @@ if (targetID === "uo4kb3tGHH7J") {
         if (!respuestaServidor.ok) {
             throw new Error(`Código de red: ${respuestaServidor.status}`);
         }
-
+     }
         const datosBackend = await respuestaServidor.json();
         const harvisMsgId = "msg_harvis_" + Date.now();
         
