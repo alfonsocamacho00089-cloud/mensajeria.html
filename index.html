@@ -1478,14 +1478,13 @@ const base64 = btoa(binary);
                 }
             }
 
-            // 2. BIFURCACIÓN INTELIGENTE (Fin del choque de trenes)
+            // 2. BIFURCACIÓN INTELIGENTE
             if (esNotaDeVoz || !textoParaHarvis || textoParaHarvis.trim() === "") {
                 if (typeof escucharVozPedro === "function") {
                     console.log("🎙️ [H.A.R.V.I.S.] Audio en pantalla. Extrayendo texto en silencio para la API...");
                     
                     escucharVozPedro((textoConvertido) => {
                         if (textoConvertido && textoConvertido.trim() !== "") {
-                            // Mandamos el texto directo al cerebro de la IA
                             procesarRespuestaHarvis(textoConvertido, targetID);
                         }
                     });
@@ -1493,20 +1492,18 @@ const base64 = btoa(binary);
                     console.warn("⚠️ La función 'escucharVozPedro' no está disponible.");
                 }
             } else {
-                // Si era un texto normal escrito con el teclado, va directo al cerebro
                 procesarRespuestaHarvis(textoParaHarvis, targetID);
             }
             
-            // 🛑 Cortamos la ejecución aquí. procesarRespuestaHarvis toma el control absoluto.
+            // 🛑 Cortamos la ejecución aquí para H.A.R.V.I.S.
             return;
         }
 
         // =================================================================
         // ✅ CERRANDO LA ANTENA GENERAL (SOLO PARA CONTACTOS REGULARES)
         // =================================================================
-        // Todo el bloque viejo de payload, fetch y catch(errorBackend) se eliminó de aquí
-        // porque ya vive perfectamente dentro de procesarRespuestaHarvis.
-
+        
+        // Esto limpia la caja de texto tras enviar a otros usuarios normales
         if (inputMsg && !multimediaUrl) {
             inputMsg.value = "";
             inputMsg.style.height = '36px';
