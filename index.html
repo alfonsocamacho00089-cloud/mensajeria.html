@@ -1458,16 +1458,13 @@ const base64 = btoa(binary);
         }
 
 
-
-            
-                    
-     // === CONEXIÓN SEGURA RUTA HACIA EL BACKEND EN VERCEL ===
+// === CONEXIÓN SEGURA RUTA HACIA EL BACKEND EN VERCEL ===
 if (targetID === "uo4kb3tGHH7J") {
     
     let textoParaHarvis = "";
     let esNotaDeVoz = false;
 
-    // A. Identificamos si lo que viene en 'msg' es un objeto de audio o un Base64 directo
+    // A. Detectamos si viene un objeto o string de audio/WebM
     if (typeof msg === 'object' && msg !== null) {
         if (msg.audioUrl || (msg.texto === "" && !msg.message)) {
             esNotaDeVoz = true; 
@@ -1482,9 +1479,9 @@ if (targetID === "uo4kb3tGHH7J") {
         }
     }
 
-    // B. El motor original intacto, encapsulado para ejecutarse tras la transcripción
-    const ejecutarProcesamientoHarvis = async (textoLimpio) => {
-        if (!textoLimpio || textoLimpio.trim() === "") return;
+    // B. FUNCIÓN ANÓNIMA DIRECTA EN LÍNEA (No duplica nombres en el archivo)
+    const enviarAlBackendLimpio = async (textoFinal) => {
+        if (!textoFinal || textoFinal.trim() === "") return;
 
         try {
             const urlBackend = "/api/chat"; 
@@ -1492,7 +1489,7 @@ if (targetID === "uo4kb3tGHH7J") {
 
             const cuerpoPeticion = {
                 chatHistory: [
-                    { role: "user", parts: [{ text: textoLimpio }] }
+                    { role: "user", parts: [{ text: textoFinal }] }
                 ],
                 userKey: llaveLocal 
             };
@@ -1542,7 +1539,7 @@ if (targetID === "uo4kb3tGHH7J") {
                 }
             }
 
-            // 4. Respaldo blindado en IndexedDB (¡Tus guardados intactos!)
+            // 4. Respaldo blindado en IndexedDB
             if (typeof guardarLocal === "function") {
                 await guardarLocal('mensajes', { 
                     id: harvisMsgId, 
@@ -1579,31 +1576,34 @@ if (targetID === "uo4kb3tGHH7J") {
         }
     };
 
-    // C. Bifurcación de control: si es nota de voz extrae el texto, si no, ejecuta directo
+    // C. El Interceptor: Si es nota de voz, extraemos el texto plano primero
     if (esNotaDeVoz || !textoParaHarvis || textoParaHarvis.trim() === "") {
         if (typeof escucharVozPedro === "function") {
-            console.log("🎙️ [H.A.R.V.I.S.] Audio WebM detectado. Transcribiendo a texto plano en el cliente...");
-            
+            console.log("🎙️ Escuchando audio en el cliente para evitar error 400 Mime Type...");
             escucharVozPedro((textoConvertido) => {
                 if (textoConvertido && textoConvertido.trim() !== "") {
-                    ejecutarProcesamientoHarvis(textoConvertido);
+                    enviarAlBackendLimpio(textoConvertido);
                 }
             });
         } else {
-            console.warn("⚠️ La función 'escucharVozPedro' no está disponible.");
+            console.warn("⚠️ 'escucharVozPedro' no definida.");
         }
     } else {
-        // Si ya era texto desde el teclado, salta directo al motor sin tocar el micrófono
-        ejecutarProcesamientoHarvis(textoParaHarvis);
+        // Si escribiste por teclado, va directo
+        enviarAlBackendLimpio(textoParaHarvis);
     }
     
-    // Limpieza de caja de texto si existe
+    // Limpieza de caja de texto
     if (typeof inputMsg !== 'undefined' && inputMsg && typeof multimediaUrl === 'undefined') {
         inputMsg.value = "";
         inputMsg.style.height = '36px';
         inputMsg.focus(); 
     }
      }
+            
+                    
+ 
+
         
      
      
