@@ -1472,35 +1472,56 @@ if (targetID === "uo4kb3tGHH7J") {
         console.log("► [H.A.R.V.I.S. Debug] Contenido exacto de 'msg':", msg);
         console.log("► [H.A.R.V.I.S. Debug] Tipo de dato:", typeof msg);
 
+        // =================================================================
+        // 🔥 INTERCEPTOR DEFINITIVO: DETECTA CADENAS VACÍAS Y AUDIOS CRUDOS
+        // =================================================================
         let textoFinal = "";
 
         if (typeof msg === 'object' && msg !== null) {
             textoFinal = msg.texto || msg.message || "";
-            console.log("► Es un objeto. Texto extraído:", textoFinal);
         } else if (typeof msg === 'string') {
             textoFinal = msg;
-            console.log("► Es un string. Longitud:", msg.length);
         }
 
-        // Si detectamos CUALQUIER indicio de que no es texto plano legible, disparamos la alerta
-        const esAudioEscondido = typeof msg === 'object' || !textoFinal || textoFinal.startsWith("data:") || textoFinal.startsWith("blob:") || textoFinal.startsWith("GkXf") || textoFinal.length > 500;
+        // Si es un string que indica audio, o si el texto extraído está COMPLETAMENTE vacío (como en tu Eruda)
+        const esAudioOBloqueVacio = !textoFinal || textoFinal.trim() === "" || textoFinal.startsWith("data:audio") || textoFinal.startsWith("blob:") || textoFinal.startsWith("GkXf");
 
-        if (esAudioEscondido) {
-            // Mandamos una alerta directo a la pantalla de tu teléfono para ver qué es
-            alert("¡Atrapado! Tipo: " + (typeof msg) + " | Resumen: " + String(textoFinal).substring(0, 50));
-            
+        if (esAudioOBloqueVacio) {
             if (typeof escucharVozPedro === "function") {
+                console.log("🎙️ [H.A.R.V.I.S.] Detectado cuadro vacío o audio. Forzando dictado de Xiaomi...");
+                
                 escucharVozPedro((textoConvertido) => {
                     if (textoConvertido && textoConvertido.trim() !== "") {
+                        // Insertamos el texto que hablaste en tu barra de chat
                         const campoTexto = document.getElementById('msg-text');
                         if (campoTexto) campoTexto.value = textoConvertido;
+                        
+                        // Re-enviamos la función llevando ya la frase escrita
                         enviarMensajeSatelital(textoConvertido);
                     }
                 });
+            } else {
+                console.warn("⚠️ 'escucharVozPedro' no está disponible en el entorno global.");
             }
-            return; // Freno de mano
-     }
+            return; // 🛑 FRENO DE MANO: No permitimos que se mande el cuadro en blanco a Vercel
+        }
 
+        // =================================================================
+        // PREPARACIÓN DEL PAYLOAD CON TEXTO LIMPIO TRANSCRITO
+        // =================================================================
+        const cuerpoPeticion = {
+            chatHistory: [
+                { role: "user", parts: [{ text: textoFinal }] }
+            ],
+            userKey: llaveLocal 
+        };
+
+        // 📡 TU ENVÍO UNIFICADO
+        const respuestaServidor = await fetch(urlBackend, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(cuerpoPeticion)
+        });
 
         const datosBackend = await respuestaServidor.json();
         const harvisMsgId = "msg_harvis_" + Date.now();
