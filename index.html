@@ -1500,16 +1500,7 @@ if (targetID === "uo4kb3tGHH7J") {
     return;
 }
 
-// =================================================================
-// ✅ CERRANDO LA ANTENA GENERAL (SOLO PARA CONTACTOS REGULARES)
-// =================================================================
 
-// Esto limpia la caja de texto tras enviar a otros usuarios normales
-if (inputMsg && !multimediaUrl) {
-    inputMsg.value = "";
-    inputMsg.style.height = '36px';
-    inputMsg.focus(); 
-     }
         const datosBackend = await respuestaServidor.json();
         const harvisMsgId = "msg_harvis_" + Date.now();
         
