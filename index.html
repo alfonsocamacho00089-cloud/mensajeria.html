@@ -1465,7 +1465,7 @@ if (targetID === "uo4kb3tGHH7J") {
         const llaveLocal = localStorage.getItem('spacechat_crypto_key') || "";
 
 // =================================================================
-        // 🔥 CONTROL DE ENTRADA MULTIMEDIA NATIVA PARA H.A.R.V.I.S.
+        // 🔥 CONTROL DE ENTRADA MULTIMEDIA NATIVA PARA H.A.R.V.I.S. (CORREGIDO)
         // =================================================================
         let textoFinal = "";
 
@@ -1475,28 +1475,29 @@ if (targetID === "uo4kb3tGHH7J") {
             textoFinal = msg;
         }
 
-        // CERROJO ESTRICTO: Si detecta que es un archivo de audio, blob o Base64, frena el envío inmediato
-        if (!textoFinal || textoFinal.startsWith("data:audio") || textoFinal.startsWith("blob:") || textoFinal.startsWith("GkXf")) {
+        // CERROJO ESTRICTO: Evaluamos directamente 'textoFinal' o la raíz de 'msg'
+        if (!textoFinal || textoFinal.startsWith("data:audio") || textoFinal.startsWith("blob:") || textoFinal.startsWith("GkXf") || (typeof msg === 'string' && (msg.startsWith("data:audio") || msg.startsWith("blob:")))) {
+            
             if (typeof escucharVozPedro === "function") {
-                console.log("🎙️ [H.A.R.V.I.S.] Filtro de Audio Activo: Deteniendo envío masivo e iniciando transcripción nativa...");
+                console.log("🎙️ [H.A.R.V.I.S.] Filtro de Audio Activo: Deteniendo envío e iniciando micrófono local...");
                 
                 escucharVozPedro((textoConvertido) => {
                     if (textoConvertido && textoConvertido.trim() !== "") {
-                        // Actualiza el campo de texto de tu interfaz para que veas lo que se transcribió
+                        // Forzamos el valor directo en tu caja de texto visual en el Xiaomi
                         const campoTexto = document.getElementById('msg-text');
                         if (campoTexto) campoTexto.value = textoConvertido;
                         
-                        // Re-inyecta el texto limpio relanzando la función de envío de forma segura
+                        // Re-inyectamos el texto limpio volviendo a llamar la función matriz
                         enviarMensajeSatelital(textoConvertido);
                     }
                 });
             } else {
                 console.warn("⚠️ La función 'escucharVozPedro' no está disponible en el entorno global.");
             }
-            return; // 🛑 CORTA EL FLUJO DE ENVÍO AQUÍ. No permite que se ejecute el fetch con datos rotos.
+            return; // 🛑 ESCUDO ACTIVO: Frena el fetch a Vercel para que no mande datos rotos
         }
 
-        // Si el filtro no pudo extraer nada útil después de pasar el audio, le damos un saludo predeterminado
+        // Si el filtro pasó limpiamente pero vino vacío por otra razón, el saludo de respaldo
         if (!textoFinal.trim()) {
             textoFinal = "Hola";
         }
