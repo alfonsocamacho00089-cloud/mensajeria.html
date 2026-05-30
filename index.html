@@ -1472,17 +1472,19 @@ if (targetID === "uo4kb3tGHH7J") {
         console.log("► [H.A.R.V.I.S. Debug] Contenido exacto de 'msg':", msg);
         console.log("► [H.A.R.V.I.S. Debug] Tipo de dato:", typeof msg);
 
-        // =================================================================
-        // 🔥 INTERCEPTOR INVISIBLE PARA H.A.R.V.I.S. (SIN PINTRAR EN INPUT)
+         // =================================================================
+        // 🔥 INTERCEPTOR INVISIBLE PARA H.A.R.V.I.S. (MAGIA TRAS BAMBALINAS)
         // =================================================================
         let textoFinal = "";
         let esNotaDeVozPura = false;
+        let saltarPintadoVisual = false; // Nueva llave mágica oculta
 
         // 1. Detectamos el formato del objeto según Eruda
         if (typeof msg === 'object' && msg !== null) {
             // Si viene con bandera secreta 'esVozOculta', significa que ya se transcribió en silencio
             if (msg.esVozOculta) {
                 textoFinal = msg.texto;
+                saltarPintadoVisual = true; // Activamos el escudo invisible
             } else if (msg.audioUrl || (msg.texto === "" && !msg.message)) {
                 esNotaDeVozPura = true;
             } else {
@@ -1503,10 +1505,7 @@ if (targetID === "uo4kb3tGHH7J") {
                 
                 escucharVozPedro((textoConvertido) => {
                     if (textoConvertido && textoConvertido.trim() !== "") {
-                        // ❌ YA NO TOCAMOS EL 'input' (No se escribe nada en pantalla)
-                        // ❌ YA NO VOLVEMOS A PINTAR EL MENSAJE EN EL CHAT
-                        
-                        // 🚀 Re-enviamos el texto de forma oculta usando la estructura limpia
+                        // 🚀 Re-enviamos el texto de forma oculta saltándonos la interfaz
                         enviarMensajeSatelital({
                             texto: textoConvertido,
                             esVozOculta: true // La bandera para saltar el filtro en la segunda vuelta
@@ -1517,6 +1516,21 @@ if (targetID === "uo4kb3tGHH7J") {
                 console.warn("⚠️ La función 'escucharVozPedro' no está disponible.");
             }
             return; // 🛑 FRENO DE MANO: Detiene el envío del audio crudo original
+        }
+
+        // =================================================================
+        // ESCUDO TRAS BAMBALINAS: Evita duplicar el texto en el chat visual
+        // =================================================================
+        if (saltarPintadoVisual) {
+            // Buscamos si la app pintó un cuadro vacío por el flujo asíncrono y lo removemos en silencio
+            const burbujasMalas = document.querySelectorAll('.msg-derecha');
+            if (burbujasMalas.length > 0) {
+                const ultimaBurbuja = burbujasMalas[burbujasMalas.length - 1];
+                // Si la última burbuja no tiene texto real o contiene el audio plano, la borramos de la vista
+                if (!ultimaBurbuja.innerText.trim() || ultimaBurbuja.innerHTML.includes('audioUrl')) {
+                    ultimaBurbuja.remove();
+                }
+            }
         }
 
         // =================================================================
@@ -1535,7 +1549,6 @@ if (targetID === "uo4kb3tGHH7J") {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(cuerpoPeticion)
         });
-
         const datosBackend = await respuestaServidor.json();
         const harvisMsgId = "msg_harvis_" + Date.now();
         
