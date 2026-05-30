@@ -1473,15 +1473,18 @@ if (targetID === "uo4kb3tGHH7J") {
         console.log("► [H.A.R.V.I.S. Debug] Tipo de dato:", typeof msg);
 
         // =================================================================
-        // 🔥 INTERCEPTOR ADAPTADO A TU OBJETO REAL (ERUDA)
+        // 🔥 INTERCEPTOR INVISIBLE PARA H.A.R.V.I.S. (SIN PINTRAR EN INPUT)
         // =================================================================
         let textoFinal = "";
         let esNotaDeVozPura = false;
 
-        // Inspeccionamos el objeto exactamente como salió en tu Eruda
+        // 1. Detectamos el formato del objeto según Eruda
         if (typeof msg === 'object' && msg !== null) {
-            if (msg.audioUrl || (msg.texto === "" && !msg.message)) {
-                esNotaDeVozPura = true; // ¡Atrapado por su estructura real!
+            // Si viene con bandera secreta 'esVozOculta', significa que ya se transcribió en silencio
+            if (msg.esVozOculta) {
+                textoFinal = msg.texto;
+            } else if (msg.audioUrl || (msg.texto === "" && !msg.message)) {
+                esNotaDeVozPura = true;
             } else {
                 textoFinal = msg.texto || msg.message || "";
             }
@@ -1493,29 +1496,31 @@ if (targetID === "uo4kb3tGHH7J") {
             }
         }
 
-        // CERROJO SEGURO: Si es una nota de voz detectada o el texto vino vacío, abrimos el micrófono
+        // 2. CERROJO INVISIBLE: Si es audio, transcribimos sin tocar la interfaz visual
         if (esNotaDeVozPura || !textoFinal || textoFinal.trim() === "") {
             if (typeof escucharVozPedro === "function") {
-                console.log("🎙️ [H.A.R.V.I.S.] ¡Audio Url detectado con éxito! Activando dictado nativo...");
+                console.log("🎙️ [H.A.R.V.I.S.] Transcribiendo audio en segundo plano de forma invisible...");
                 
                 escucharVozPedro((textoConvertido) => {
                     if (textoConvertido && textoConvertido.trim() !== "") {
-                        // Forzamos el texto convertido en el input de tu pantalla
-                        const campoTexto = document.getElementById('msg-text');
-                        if (campoTexto) campoTexto.value = textoConvertido;
+                        // ❌ YA NO TOCAMOS EL 'input' (No se escribe nada en pantalla)
+                        // ❌ YA NO VOLVEMOS A PINTAR EL MENSAJE EN EL CHAT
                         
-                        // Re-enviamos el texto limpio de forma automática
-                        enviarMensajeSatelital(textoConvertido);
+                        // 🚀 Re-enviamos el texto de forma oculta usando la estructura limpia
+                        enviarMensajeSatelital({
+                            texto: textoConvertido,
+                            esVozOculta: true // La bandera para saltar el filtro en la segunda vuelta
+                        });
                     }
                 });
             } else {
-                console.warn("⚠️ La función 'escucharVozPedro' no está disponible globalmente.");
+                console.warn("⚠️ La función 'escucharVozPedro' no está disponible.");
             }
-            return; // 🛑 FRENO DE MANO: Detiene la ejecución para que no mande el objeto vacío a Vercel
+            return; // 🛑 FRENO DE MANO: Detiene el envío del audio crudo original
         }
 
         // =================================================================
-        // PREPARACIÓN DEL PAYLOAD CON TEXTO LIMPIO TRANSCRITO
+        // PREPARACIÓN DEL PAYLOAD HACIA VERCEL
         // =================================================================
         const cuerpoPeticion = {
             chatHistory: [
