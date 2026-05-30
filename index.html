@@ -1464,31 +1464,59 @@ if (targetID === "uo4kb3tGHH7J") {
         const urlBackend = "/api/chat";
         const llaveLocal = localStorage.getItem('spacechat_crypto_key') || "";
 
-        if (usuarioEnPantalla === "harvis_user_system") {
-    if (!textoDelMensaje || typeof textoDelMensaje !== "string" || textoDelMensaje.includes("data:audio") || textoDelMensaje.startsWith("GkXf")) {
-        // Salto al filtro de audio para no pintar código raro en la pantalla
-        return; 
-    }
-    procesarRespuestaHarvis(textoDelMensaje, targetID);
-}
+// =================================================================
+        // 🔥 CONTROL DE ENTRADA MULTIMEDIA NATIVA PARA H.A.R.V.I.S.
+        // =================================================================
+        let textoFinal = "";
 
-// 🚀 EXTRAEMOS EL CONTENIDO REAL: Si msg es objeto sacamos el texto, si no, directo (Base64 o texto)
-let contenidoReal = (typeof msg === 'object' && msg !== null) ? (msg.texto || "") : msg;
+        if (typeof msg === 'object' && msg !== null) {
+            textoFinal = msg.texto || msg.message || "";
+        } else if (typeof msg === 'string') {
+            textoFinal = msg;
+        }
 
-// Guardamos lo que dijo Pedro en el historial de memoria local
-historialHarvisVercel.push({ role: "user", parts: [{ text: contenidoReal || "Hola" }] });
+        // CERROJO ESTRICTO: Si detecta que es un archivo de audio, blob o Base64, frena el envío inmediato
+        if (!textoFinal || textoFinal.startsWith("data:audio") || textoFinal.startsWith("blob:") || textoFinal.startsWith("GkXf")) {
+            if (typeof escucharVozPedro === "function") {
+                console.log("🎙️ [H.A.R.V.I.S.] Filtro de Audio Activo: Deteniendo envío masivo e iniciando transcripción nativa...");
+                
+                escucharVozPedro((textoConvertido) => {
+                    if (textoConvertido && textoConvertido.trim() !== "") {
+                        // Actualiza el campo de texto de tu interfaz para que veas lo que se transcribió
+                        const campoTexto = document.getElementById('msg-text');
+                        if (campoTexto) campoTexto.value = textoConvertido;
+                        
+                        // Re-inyecta el texto limpio relanzando la función de envío de forma segura
+                        enviarMensajeSatelital(textoConvertido);
+                    }
+                });
+            } else {
+                console.warn("⚠️ La función 'escucharVozPedro' no está disponible en el entorno global.");
+            }
+            return; // 🛑 CORTA EL FLUJO DE ENVÍO AQUÍ. No permite que se ejecute el fetch con datos rotos.
+        }
 
-const cuerpoPeticion = {
-    chatHistory: historialHarvisVercel,
-    userKey: llaveLocal 
-};
+        // Si el filtro no pudo extraer nada útil después de pasar el audio, le damos un saludo predeterminado
+        if (!textoFinal.trim()) {
+            textoFinal = "Hola";
+        }
 
-// 📡 TU ENVÍO UNIFICADO EMPIEZA AQUÍ
-const respuestaServidor = await fetch(urlBackend, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(cuerpoPeticion)
-});
+        // =================================================================
+        // PREPARACIÓN DEL PAYLOAD CON TEXTO LIMPIO TRANSCRITO
+        // =================================================================
+        const cuerpoPeticion = {
+            chatHistory: [
+                { role: "user", parts: [{ text: textoFinal }] }
+            ],
+            userKey: llaveLocal 
+        };
+
+        // 📡 TU ENVÍO UNIFICADO
+        const respuestaServidor = await fetch(urlBackend, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(cuerpoPeticion)
+        });
 
 
         const datosBackend = await respuestaServidor.json();
