@@ -1457,70 +1457,7 @@ const base64 = btoa(binary);
             });
         }
 
- // === CONEXIÓN SEGURA RUTA HACIA EL BACKEND EN VERCEL ===
-        if (targetID === "uo4kb3tGHH7J") {
-            
-            let textoParaHarvis = "";
-            let esNotaDeVoz = false;
 
-            // 1. Identificamos qué tipo de archivo acaba de procesar tu app visualmente
-            if (typeof msg === 'object' && msg !== null) {
-                if (msg.audioUrl || (msg.texto === "" && !msg.message)) {
-                    esNotaDeVoz = true; 
-                } else {
-                    textoParaHarvis = msg.texto || msg.message || "";
-                }
-            } else if (typeof msg === 'string') {
-                if (msg.startsWith("data:audio") || msg.startsWith("blob:") || msg.startsWith("GkXf")) {
-                    esNotaDeVoz = true;
-                } else {
-                    textoParaHarvis = msg;
-                }
-            }
-
-            // 2. BIFURCACIÓN INTELIGENTE (Pura ejecución directa sin trabar el hilo)
-            if (esNotaDeVoz || !textoParaHarvis || textoParaHarvis.trim() === "") {
-                if (typeof escucharVozPedro === "function") {
-                    console.log("🎙️ [H.A.R.V.I.S.] Audio en pantalla. Extrayendo texto en silencio para la API...");
-                    
-                    escucharVozPedro((textoConvertido) => {
-                        if (textoConvertido && textoConvertido.trim() !== "") {
-                            // Llamada directa, sin await, para que JavaScript no proteste por la sintaxis
-                            procesarRespuestaHarvis(textoConvertido, targetID);
-                        }
-                    });
-                } else {
-                    console.warn("⚠️ La función 'escucharVozPedro' no está disponible.");
-                }
-            } else {
-                procesarRespuestaHarvis(textoParaHarvis, targetID);
-            }
-            
-            // 🛑 Cortamos la ejecución aquí para H.A.R.V.I.S.
-            return;
-        }
-
-     }
-     }
-
-     
-
-        const datosBackend = await respuestaServidor.json();
-        const harvisMsgId = "msg_harvis_" + Date.now();
-        
-        let respuestaIA = "Sistemas listos, Pedro.";
-
-        // REVISIÓN DEL SVE: Tu backend devuelve { respuesta: "Texto de la IA" }
-        if (datosBackend && datosBackend.respuesta) {
-            respuestaIA = datosBackend.respuesta;
-        } else {
-            console.warn("⚠️ El backend no devolvió la propiedad 'respuesta':", datosBackend);
-            respuestaIA = "⚠️ H.A.R.V.I.S. no pudo procesar el formato del backend.";
-        }
-        
-        if (typeof hablarHarvis === "function") {
-            hablarHarvis(respuestaIA);
-        }
 // ✅ PEGA ESTE BLOQUE INTEGRAL EN EL DISPARADOR DE TARGETID:
 if (targetID === "uo4kb3tGHH7J") {
     try {
@@ -1549,7 +1486,7 @@ if (targetID === "uo4kb3tGHH7J") {
         if (!respuestaServidor.ok) {
             throw new Error(`Código de red: ${respuestaServidor.status}`);
         }
-     }
+     
         const datosBackend = await respuestaServidor.json();
         const harvisMsgId = "msg_harvis_" + Date.now();
         
