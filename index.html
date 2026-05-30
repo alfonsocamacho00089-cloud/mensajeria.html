@@ -1458,61 +1458,57 @@ const base64 = btoa(binary);
         }
 
 // === CONEXIÓN SEGURA RUTA HACIA EL BACKEND EN VERCEL ===
-        if (targetID === "uo4kb3tGHH7J") {
-            
-            let textoParaHarvis = "";
-            let esNotaDeVoz = false;
+if (targetID === "uo4kb3tGHH7J") {
+    
+    let textoParaHarvis = "";
+    let esNotaDeVoz = false;
 
-            // 1. Identificamos qué tipo de archivo acaba de procesar tu app visualmente
-            if (typeof msg === 'object' && msg !== null) {
-                if (msg.audioUrl || (msg.texto === "" && !msg.message)) {
-                    esNotaDeVoz = true; 
-                } else {
-                    textoParaHarvis = msg.texto || msg.message || "";
-                }
-            } else if (typeof msg === 'string') {
-                if (msg.startsWith("data:audio") || msg.startsWith("blob:") || msg.startsWith("GkXf")) {
-                    esNotaDeVoz = true;
-                } else {
-                    textoParaHarvis = msg;
-                }
-            }
-
-            // 2. BIFURCACIÓN INTELIGENTE
-            if (esNotaDeVoz || !textoParaHarvis || textoParaHarvis.trim() === "") {
-                if (typeof escucharVozPedro === "function") {
-                    console.log("🎙️ [H.A.R.V.I.S.] Audio en pantalla. Extrayendo texto en silencio para la API...");
-                    
-                    escucharVozPedro((textoConvertido) => {
-                        if (textoConvertido && textoConvertido.trim() !== "") {
-                            procesarRespuestaHarvis(textoConvertido, targetID);
-                        }
-                    });
-                } else {
-                    console.warn("⚠️ La función 'escucharVozPedro' no está disponible.");
-                }
-            } else {
-                procesarRespuestaHarvis(textoParaHarvis, targetID);
-            }
-            
-            // 🛑 Cortamos la ejecución aquí para H.A.R.V.I.S.
-            return;
+    // 1. Identificamos qué tipo de archivo acaba de procesar tu app visualmente
+    if (typeof msg === 'object' && msg !== null) {
+        if (msg.audioUrl || (msg.texto === "" && !msg.message)) {
+            esNotaDeVoz = true; 
+        } else {
+            textoParaHarvis = msg.texto || msg.message || "";
         }
-
-        // =================================================================
-        // ✅ CERRANDO LA ANTENA GENERAL (SOLO PARA CONTACTOS REGULARES)
-        // =================================================================
-        
-        // Esto limpia la caja de texto tras enviar a otros usuarios normales
-        if (inputMsg && !multimediaUrl) {
-            inputMsg.value = "";
-            inputMsg.style.height = '36px';
-            inputMsg.focus(); 
+    } else if (typeof msg === 'string') {
+        if (msg.startsWith("data:audio") || msg.startsWith("blob:") || msg.startsWith("GkXf")) {
+            esNotaDeVoz = true;
+        } else {
+            textoParaHarvis = msg;
         }
-
-    } catch (e) {
-        console.error("❌ Fallo crítico en el lanzamiento:", e);
     }
+
+    // 2. BIFURCACIÓN INTELIGENTE (Le agregamos async al callback interno para blindarlo)
+    if (esNotaDeVoz || !textoParaHarvis || textoParaHarvis.trim() === "") {
+        if (typeof escucharVozPedro === "function") {
+            console.log("🎙️ [H.A.R.V.I.S.] Audio en pantalla. Extrayendo texto en silencio para la API...");
+            
+            escucharVozPedro(async (textoConvertido) => { // 🧠 CLAVE: Agregamos 'async' aquí adentro
+                if (textoConvertido && textoConvertido.trim() !== "") {
+                    await procesarRespuestaHarvis(textoConvertido, targetID);
+                }
+            });
+        } else {
+            console.warn("⚠️ La función 'escucharVozPedro' no está disponible.");
+        }
+    } else {
+        // Al ser texto directo, corre en el hilo principal asíncrono
+        procesarRespuestaHarvis(textoParaHarvis, targetID);
+    }
+    
+    // 🛑 Cortamos la ejecución aquí para H.A.R.V.I.S.
+    return;
+}
+
+// =================================================================
+// ✅ CERRANDO LA ANTENA GENERAL (SOLO PARA CONTACTOS REGULARES)
+// =================================================================
+
+// Esto limpia la caja de texto tras enviar a otros usuarios normales
+if (inputMsg && !multimediaUrl) {
+    inputMsg.value = "";
+    inputMsg.style.height = '36px';
+    inputMsg.focus(); 
      }
         const datosBackend = await respuestaServidor.json();
         const harvisMsgId = "msg_harvis_" + Date.now();
