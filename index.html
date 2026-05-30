@@ -1464,46 +1464,31 @@ if (targetID === "uo4kb3tGHH7J") {
         const urlBackend = "/api/chat";
         const llaveLocal = localStorage.getItem('spacechat_crypto_key') || "";
 
-        // 🔥 FILTRO MULTIMEDIA AVANZADO Y CORREGIDO (SIN VARIABLES EXTERNAS):
-        let textoFinal = "";
+        if (usuarioEnPantalla === "harvis_user_system") {
+    if (!textoDelMensaje || typeof textoDelMensaje !== "string" || textoDelMensaje.includes("data:audio") || textoDelMensaje.startsWith("GkXf")) {
+        // Salto al filtro de audio para no pintar código raro en la pantalla
+        return; 
+    }
+    procesarRespuestaHarvis(textoDelMensaje, targetID);
+}
 
-        if (typeof msg === 'object' && msg !== null) {
-            // Prioridad 1: Si es un objeto, extraemos el texto limpio (el transcriptor lo guarda aquí)
-            textoFinal = msg.texto || msg.message || "";
-        } else if (typeof msg === 'string') {
-            // Prioridad 2: Si es un string directo, verificamos que no sea la URL del audio crudo
-            if (msg.startsWith("data:audio") || msg.startsWith("blob:")) {
-                // Si es SOLO audio y NO tenemos texto de respaldo...
-                // ...avisamos que el audio está en proceso de transcripción o se grabó vacío.
-                // (Aquí podrías poner un mensaje de error o simplemente no enviar nada)
-                textoFinal = "Procesando audio (si no se genera nada, intenta grabar de nuevo o escribir el comando)."; 
-            } else {
-                textoFinal = msg; // Si es texto plano, pasa directo
-            }
-        }
+// 🚀 EXTRAEMOS EL CONTENIDO REAL: Si msg es objeto sacamos el texto, si no, directo (Base64 o texto)
+let contenidoReal = (typeof msg === 'object' && msg !== null) ? (msg.texto || "") : msg;
 
-        // Si el filtro no pudo extraer nada útil, le damos un saludo predeterminado
-        // para que la petición no se vaya vacía y el backend responda.
-        if (!textoFinal.trim()) {
-            textoFinal = "Hola"; // Mensaje por defecto si todo lo anterior falló
-        }
+// Guardamos lo que dijo Pedro en el historial de memoria local
+historialHarvisVercel.push({ role: "user", parts: [{ text: contenidoReal || "Hola" }] });
 
-        const cuerpoPeticion = {
-            chatHistory: [
-                // Enviamos estrictamente TEXTO limpio para que Gemini lo entienda
-                { role: "user", parts: [{ text: textoFinal }] }
-            ],
-            userKey: llaveLocal 
-        };
+const cuerpoPeticion = {
+    chatHistory: historialHarvisVercel,
+    userKey: llaveLocal 
+};
 
-        // ... resto de tu lógica de fetch a '/api/chat' ...
-    
-        // 📡 TU ENVÍO UNIFICADO
-        const respuestaServidor = await fetch(urlBackend, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(cuerpoPeticion)
-        });
+// 📡 TU ENVÍO UNIFICADO EMPIEZA AQUÍ
+const respuestaServidor = await fetch(urlBackend, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(cuerpoPeticion)
+});
 
 
         const datosBackend = await respuestaServidor.json();
