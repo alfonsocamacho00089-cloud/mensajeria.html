@@ -1458,13 +1458,16 @@ const base64 = btoa(binary);
         }
 
 
-// === CONEXIÓN SEGURA RUTA HACIA EL BACKEND EN VERCEL (OPCIÓN B ACTIVADA) ===
+
+            
+                    
+     // === CONEXIÓN SEGURA RUTA HACIA EL BACKEND EN VERCEL ===
 if (targetID === "uo4kb3tGHH7J") {
     
     let textoParaHarvis = "";
     let esNotaDeVoz = false;
 
-    // 1. Identificamos si lo que viene en 'msg' es un objeto de audio o un Base64 directo
+    // A. Identificamos si lo que viene en 'msg' es un objeto de audio o un Base64 directo
     if (typeof msg === 'object' && msg !== null) {
         if (msg.audioUrl || (msg.texto === "" && !msg.message)) {
             esNotaDeVoz = true; 
@@ -1479,9 +1482,9 @@ if (targetID === "uo4kb3tGHH7J") {
         }
     }
 
-    // 2. FUNCIÓN INTERNA ASÍNCRONA: Para procesar el envío sin romper el flujo de JavaScript
-    const despacharHaciaVercel = async (textoFinal) => {
-        if (!textoFinal || textoFinal.trim() === "") return;
+    // B. El motor original intacto, encapsulado para ejecutarse tras la transcripción
+    const ejecutarProcesamientoHarvis = async (textoLimpio) => {
+        if (!textoLimpio || textoLimpio.trim() === "") return;
 
         try {
             const urlBackend = "/api/chat"; 
@@ -1489,7 +1492,7 @@ if (targetID === "uo4kb3tGHH7J") {
 
             const cuerpoPeticion = {
                 chatHistory: [
-                    { role: "user", parts: [{ text: textoFinal }] }
+                    { role: "user", parts: [{ text: textoLimpio }] }
                 ],
                 userKey: llaveLocal 
             };
@@ -1516,17 +1519,17 @@ if (targetID === "uo4kb3tGHH7J") {
                 respuestaIA = "⚠️ H.A.R.V.I.S. no pudo procesar el formato del backend.";
             }
             
-            // Audio nativo de respaldo
+            // 1. Audio nativo de respaldo
             if (typeof hablarHarvis === "function") {
                 hablarHarvis(respuestaIA);
             }
 
-            // Pintamos la respuesta en texto en la pantalla
+            // 2. Pintamos el texto en el chat
             if (typeof pintarMensaje === "function") {
                 pintarMensaje(respuestaIA, 'msg-izquierda', null, 'leido', harvisMsgId, 'texto');
             }
             
-            // Inyección de la nota de voz física generada por el servidor
+            // 3. Inyección segura de la nota de voz en vivo
             let audioDataUri = null;
             if (datosBackend && datosBackend.audioBase64) {
                 audioDataUri = `data:audio/mpeg;base64,${datosBackend.audioBase64}`;
@@ -1539,7 +1542,7 @@ if (targetID === "uo4kb3tGHH7J") {
                 }
             }
 
-            // Blindaje persistente en IndexedDB
+            // 4. Respaldo blindado en IndexedDB (¡Tus guardados intactos!)
             if (typeof guardarLocal === "function") {
                 await guardarLocal('mensajes', { 
                     id: harvisMsgId, 
@@ -1563,7 +1566,7 @@ if (targetID === "uo4kb3tGHH7J") {
                         ts: Date.now() + 1, 
                         hora: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })
                     });
-                    console.log("✅ Nota de voz de H.A.R.V.I.S. respaldada en IndexedDB.");
+                    console.log("✅ Nota de voz de H.A.R.V.I.S. respaldada con éxito en IndexedDB.");
                 }
             }
 
@@ -1576,25 +1579,25 @@ if (targetID === "uo4kb3tGHH7J") {
         }
     };
 
-    // 3. BIFURCACIÓN INTELIGENTE: Si es audio, transcribimos primero; si es texto, va directo
+    // C. Bifurcación de control: si es nota de voz extrae el texto, si no, ejecuta directo
     if (esNotaDeVoz || !textoParaHarvis || textoParaHarvis.trim() === "") {
         if (typeof escucharVozPedro === "function") {
-            console.log("🎙️ [H.A.R.V.I.S.] Detectado WebM/Audio. Transcribiendo localmente primero...");
+            console.log("🎙️ [H.A.R.V.I.S.] Audio WebM detectado. Transcribiendo a texto plano en el cliente...");
             
             escucharVozPedro((textoConvertido) => {
                 if (textoConvertido && textoConvertido.trim() !== "") {
-                    despacharHaciaVercel(textoConvertido);
+                    ejecutarProcesamientoHarvis(textoConvertido);
                 }
             });
         } else {
-            console.warn("⚠️ La función 'escucharVozPedro' no está disponible en el entorno.");
+            console.warn("⚠️ La función 'escucharVozPedro' no está disponible.");
         }
     } else {
-        // Si ya era texto plano, se va directo sin usar el micro
-        despacharHaciaVercel(textoParaHarvis);
+        // Si ya era texto desde el teclado, salta directo al motor sin tocar el micrófono
+        ejecutarProcesamientoHarvis(textoParaHarvis);
     }
     
-    // Limpieza de caja de texto
+    // Limpieza de caja de texto si existe
     if (typeof inputMsg !== 'undefined' && inputMsg && typeof multimediaUrl === 'undefined') {
         inputMsg.value = "";
         inputMsg.style.height = '36px';
