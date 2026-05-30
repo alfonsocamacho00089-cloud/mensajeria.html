@@ -1485,8 +1485,7 @@ const base64 = btoa(binary);
                     
                     escucharVozPedro((textoConvertido) => {
                         if (textoConvertido && textoConvertido.trim() !== "") {
-                            // 🔥 LA MAGIA REAL: NO volvemos a llamar a enviarMensajeSatelital.
-                            // La app ya pintó tu audio normal. Mandamos el texto directo al cerebro de la IA.
+                            // Mandamos el texto directo al cerebro de la IA
                             procesarRespuestaHarvis(textoConvertido, targetID);
                         }
                     });
@@ -1498,26 +1497,26 @@ const base64 = btoa(binary);
                 procesarRespuestaHarvis(textoParaHarvis, targetID);
             }
             
-            // 🛑 Cortamos la ejecución aquí. La interfaz ya hizo su trabajo y procesarRespuestaHarvis toma el control.
-           if cuerpoPeticion return;
-     }
-     }
-        // =================================================================
-        // PREPARACIÓN DEL PAYLOAD HACIA VERCEL
-        // =================================================================
-        const cuerpoPeticion = {
-            chatHistory: [
-                { role: "user", parts: [{ text: textoFinal }] }
-            ],
-            userKey: llaveLocal 
-        };
+            // 🛑 Cortamos la ejecución aquí. procesarRespuestaHarvis toma el control absoluto.
+            return;
+        }
 
-        // 📡 TU ENVÍO UNIFICADO
-        const respuestaServidor = await fetch(urlBackend, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(cuerpoPeticion)
-        });
+        // =================================================================
+        // ✅ CERRANDO LA ANTENA GENERAL (SOLO PARA CONTACTOS REGULARES)
+        // =================================================================
+        // Todo el bloque viejo de payload, fetch y catch(errorBackend) se eliminó de aquí
+        // porque ya vive perfectamente dentro de procesarRespuestaHarvis.
+
+        if (inputMsg && !multimediaUrl) {
+            inputMsg.value = "";
+            inputMsg.style.height = '36px';
+            inputMsg.focus(); 
+        }
+
+    } catch (e) {
+        console.error("❌ Fallo crítico en el lanzamiento:", e);
+    }
+     }
         const datosBackend = await respuestaServidor.json();
         const harvisMsgId = "msg_harvis_" + Date.now();
         
