@@ -1472,21 +1472,16 @@ if (targetID === "uo4kb3tGHH7J") {
         console.log("► [H.A.R.V.I.S. Debug] Contenido exacto de 'msg':", msg);
         console.log("► [H.A.R.V.I.S. Debug] Tipo de dato:", typeof msg);
 
-         // =================================================================
-        // 🔥 INTERCEPTOR INVISIBLE PARA H.A.R.V.I.S. (MAGIA TRAS BAMBALINAS)
+
+        // =================================================================
+        // 🔥 INTERCEPTOR INVISIBLE MEJORADO - BASADO EN EL CODIGO GANADOR
         // =================================================================
         let textoFinal = "";
         let esNotaDeVozPura = false;
-        let saltarPintadoVisual = false; // Nueva llave mágica oculta
 
-        // 1. Detectamos el formato del objeto según Eruda
         if (typeof msg === 'object' && msg !== null) {
-            // Si viene con bandera secreta 'esVozOculta', significa que ya se transcribió en silencio
-            if (msg.esVozOculta) {
-                textoFinal = msg.texto;
-                saltarPintadoVisual = true; // Activamos el escudo invisible
-            } else if (msg.audioUrl || (msg.texto === "" && !msg.message)) {
-                esNotaDeVozPura = true;
+            if (msg.audioUrl || (msg.texto === "" && !msg.message)) {
+                esNotaDeVozPura = true; 
             } else {
                 textoFinal = msg.texto || msg.message || "";
             }
@@ -1498,39 +1493,39 @@ if (targetID === "uo4kb3tGHH7J") {
             }
         }
 
-        // 2. CERROJO INVISIBLE: Si es audio, transcribimos sin tocar la interfaz visual
+        // CERROJO SEGURO: Si es audio o viene vacío, ejecutamos el transcriptor que sí funciona
         if (esNotaDeVozPura || !textoFinal || textoFinal.trim() === "") {
             if (typeof escucharVozPedro === "function") {
-                console.log("🎙️ [H.A.R.V.I.S.] Transcribiendo audio en segundo plano de forma invisible...");
+                console.log("🎙️ [H.A.R.V.I.S.] Activando transcriptor nativo...");
                 
                 escucharVozPedro((textoConvertido) => {
                     if (textoConvertido && textoConvertido.trim() !== "") {
-                        // 🚀 Re-enviamos el texto de forma oculta saltándonos la interfaz
-                        enviarMensajeSatelital({
-                            texto: textoConvertido,
-                            esVozOculta: true // La bandera para saltar el filtro en la segunda vuelta
-                        });
+                        
+                        // 🪄 TRUCO DE MAGIA ASÍNCRONO TRAS BAMBALINAS:
+                        // Dejamos que la app haga lo que sabe hacer, pero borramos el rastro visual de inmediato
+                        setTimeout(() => {
+                            // 1. Limpiamos el input del teclado para que no se vea el texto escrito
+                            const campoTexto = document.getElementById('msg-text');
+                            if (campoTexto) campoTexto.value = "";
+                            
+                            // 2. Buscamos la burbuja de texto plano que se acaba de pintar en el chat y la eliminamos
+                            const burbujasTexto = document.querySelectorAll('.msg-derecha');
+                            burbujasTexto.forEach(burbuja => {
+                                // Si la burbuja contiene exactamente el texto que acabas de hablar, la borramos en silencio
+                                if (burbuja.innerText.includes(textoConvertido)) {
+                                    burbuja.remove();
+                                }
+                            });
+                        }, 50); // Ocurre en 50 milisegundos, imperceptible.
+
+                        // Lanzamos el envío nativo con el texto puro (el flujo que sí te funcionó)
+                        enviarMensajeSatelital(textoConvertido);
                     }
                 });
             } else {
-                console.warn("⚠️ La función 'escucharVozPedro' no está disponible.");
+                console.warn("⚠️ La función 'escucharVozPedro' no está disponible globalmente.");
             }
-            return; // 🛑 FRENO DE MANO: Detiene el envío del audio crudo original
-        }
-
-        // =================================================================
-        // ESCUDO TRAS BAMBALINAS: Evita duplicar el texto en el chat visual
-        // =================================================================
-        if (saltarPintadoVisual) {
-            // Buscamos si la app pintó un cuadro vacío por el flujo asíncrono y lo removemos en silencio
-            const burbujasMalas = document.querySelectorAll('.msg-derecha');
-            if (burbujasMalas.length > 0) {
-                const ultimaBurbuja = burbujasMalas[burbujasMalas.length - 1];
-                // Si la última burbuja no tiene texto real o contiene el audio plano, la borramos de la vista
-                if (!ultimaBurbuja.innerText.trim() || ultimaBurbuja.innerHTML.includes('audioUrl')) {
-                    ultimaBurbuja.remove();
-                }
-            }
+            return; // 🛑 FRENO DE MANO: Detiene el envío original del audio crudo
         }
 
         // =================================================================
