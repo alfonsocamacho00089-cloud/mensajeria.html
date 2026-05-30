@@ -1473,37 +1473,45 @@ if (targetID === "uo4kb3tGHH7J") {
         console.log("► [H.A.R.V.I.S. Debug] Tipo de dato:", typeof msg);
 
         // =================================================================
-        // 🔥 INTERCEPTOR DEFINITIVO: DETECTA CADENAS VACÍAS Y AUDIOS CRUDOS
+        // 🔥 INTERCEPTOR ADAPTADO A TU OBJETO REAL (ERUDA)
         // =================================================================
         let textoFinal = "";
+        let esNotaDeVozPura = false;
 
+        // Inspeccionamos el objeto exactamente como salió en tu Eruda
         if (typeof msg === 'object' && msg !== null) {
-            textoFinal = msg.texto || msg.message || "";
+            if (msg.audioUrl || (msg.texto === "" && !msg.message)) {
+                esNotaDeVozPura = true; // ¡Atrapado por su estructura real!
+            } else {
+                textoFinal = msg.texto || msg.message || "";
+            }
         } else if (typeof msg === 'string') {
-            textoFinal = msg;
+            if (msg.startsWith("data:audio") || msg.startsWith("blob:") || msg.startsWith("GkXf")) {
+                esNotaDeVozPura = true;
+            } else {
+                textoFinal = msg;
+            }
         }
 
-        // Si es un string que indica audio, o si el texto extraído está COMPLETAMENTE vacío (como en tu Eruda)
-        const esAudioOBloqueVacio = !textoFinal || textoFinal.trim() === "" || textoFinal.startsWith("data:audio") || textoFinal.startsWith("blob:") || textoFinal.startsWith("GkXf");
-
-        if (esAudioOBloqueVacio) {
+        // CERROJO SEGURO: Si es una nota de voz detectada o el texto vino vacío, abrimos el micrófono
+        if (esNotaDeVozPura || !textoFinal || textoFinal.trim() === "") {
             if (typeof escucharVozPedro === "function") {
-                console.log("🎙️ [H.A.R.V.I.S.] Detectado cuadro vacío o audio. Forzando dictado de Xiaomi...");
+                console.log("🎙️ [H.A.R.V.I.S.] ¡Audio Url detectado con éxito! Activando dictado nativo...");
                 
                 escucharVozPedro((textoConvertido) => {
                     if (textoConvertido && textoConvertido.trim() !== "") {
-                        // Insertamos el texto que hablaste en tu barra de chat
+                        // Forzamos el texto convertido en el input de tu pantalla
                         const campoTexto = document.getElementById('msg-text');
                         if (campoTexto) campoTexto.value = textoConvertido;
                         
-                        // Re-enviamos la función llevando ya la frase escrita
+                        // Re-enviamos el texto limpio de forma automática
                         enviarMensajeSatelital(textoConvertido);
                     }
                 });
             } else {
-                console.warn("⚠️ 'escucharVozPedro' no está disponible en el entorno global.");
+                console.warn("⚠️ La función 'escucharVozPedro' no está disponible globalmente.");
             }
-            return; // 🛑 FRENO DE MANO: No permitimos que se mande el cuadro en blanco a Vercel
+            return; // 🛑 FRENO DE MANO: Detiene la ejecución para que no mande el objeto vacío a Vercel
         }
 
         // =================================================================
