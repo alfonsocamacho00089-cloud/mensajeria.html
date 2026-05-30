@@ -1458,75 +1458,49 @@ const base64 = btoa(binary);
         }
 
 // === CONEXIÓN SEGURA RUTA HACIA EL BACKEND EN VERCEL ===
-// === CONEXIÓN SEGURA RUTA HACIA EL BACKEND EN VERCEL ===
-if (targetID === "uo4kb3tGHH7J") {
-    try {
-        const urlBackend = "/api/chat";
-        const llaveLocal = localStorage.getItem('spacechat_crypto_key') || "";
+        if (targetID === "uo4kb3tGHH7J") {
+            
+            let textoParaHarvis = "";
+            let esNotaDeVoz = false;
 
-
-
-     // =================================================================
-        // 🔍 RASTREADOR DE DIAGNÓSTICO DE AUDIO
-        // =================================================================
-        console.log("► [H.A.R.V.I.S. Debug] Contenido exacto de 'msg':", msg);
-        console.log("► [H.A.R.V.I.S. Debug] Tipo de dato:", typeof msg);
-
-
-        // =================================================================
-        // 🔥 INTERCEPTOR INVISIBLE MEJORADO - BASADO EN EL CODIGO GANADOR
-        // =================================================================
-        let textoFinal = "";
-        let esNotaDeVozPura = false;
-
-        if (typeof msg === 'object' && msg !== null) {
-            if (msg.audioUrl || (msg.texto === "" && !msg.message)) {
-                esNotaDeVozPura = true; 
-            } else {
-                textoFinal = msg.texto || msg.message || "";
+            // 1. Identificamos qué tipo de archivo acaba de procesar tu app visualmente
+            if (typeof msg === 'object' && msg !== null) {
+                if (msg.audioUrl || (msg.texto === "" && !msg.message)) {
+                    esNotaDeVoz = true; 
+                } else {
+                    textoParaHarvis = msg.texto || msg.message || "";
+                }
+            } else if (typeof msg === 'string') {
+                if (msg.startsWith("data:audio") || msg.startsWith("blob:") || msg.startsWith("GkXf")) {
+                    esNotaDeVoz = true;
+                } else {
+                    textoParaHarvis = msg;
+                }
             }
-        } else if (typeof msg === 'string') {
-            if (msg.startsWith("data:audio") || msg.startsWith("blob:") || msg.startsWith("GkXf")) {
-                esNotaDeVozPura = true;
-            } else {
-                textoFinal = msg;
-            }
-        }
 
-        // CERROJO SEGURO: Si es audio o viene vacío, ejecutamos el transcriptor que sí funciona
-        if (esNotaDeVozPura || !textoFinal || textoFinal.trim() === "") {
-            if (typeof escucharVozPedro === "function") {
-                console.log("🎙️ [H.A.R.V.I.S.] Activando transcriptor nativo...");
-                
-                escucharVozPedro((textoConvertido) => {
-                    if (textoConvertido && textoConvertido.trim() !== "") {
-                        
-                        // 🪄 TRUCO DE MAGIA ASÍNCRONO TRAS BAMBALINAS:
-                        // Dejamos que la app haga lo que sabe hacer, pero borramos el rastro visual de inmediato
-                        setTimeout(() => {
-                            // 1. Limpiamos el input del teclado para que no se vea el texto escrito
-                            const campoTexto = document.getElementById('msg-text');
-                            if (campoTexto) campoTexto.value = "";
-                            
-                            // 2. Buscamos la burbuja de texto plano que se acaba de pintar en el chat y la eliminamos
-                            const burbujasTexto = document.querySelectorAll('.msg-derecha');
-                            burbujasTexto.forEach(burbuja => {
-                                // Si la burbuja contiene exactamente el texto que acabas de hablar, la borramos en silencio
-                                if (burbuja.innerText.includes(textoConvertido)) {
-                                    burbuja.remove();
-                                }
-                            });
-                        }, 50); // Ocurre en 50 milisegundos, imperceptible.
-
-                        // Lanzamos el envío nativo con el texto puro (el flujo que sí te funcionó)
-                        enviarMensajeSatelital(textoConvertido);
-                    }
-                });
+            // 2. BIFURCACIÓN INTELIGENTE (Fin del choque de trenes)
+            if (esNotaDeVoz || !textoParaHarvis || textoParaHarvis.trim() === "") {
+                if (typeof escucharVozPedro === "function") {
+                    console.log("🎙️ [H.A.R.V.I.S.] Audio en pantalla. Extrayendo texto en silencio para la API...");
+                    
+                    escucharVozPedro((textoConvertido) => {
+                        if (textoConvertido && textoConvertido.trim() !== "") {
+                            // 🔥 LA MAGIA REAL: NO volvemos a llamar a enviarMensajeSatelital.
+                            // La app ya pintó tu audio normal. Mandamos el texto directo al cerebro de la IA.
+                            procesarRespuestaHarvis(textoConvertido, targetID);
+                        }
+                    });
+                } else {
+                    console.warn("⚠️ La función 'escucharVozPedro' no está disponible.");
+                }
             } else {
-                console.warn("⚠️ La función 'escucharVozPedro' no está disponible globalmente.");
+                // Si era un texto normal escrito con el teclado, va directo al cerebro
+                procesarRespuestaHarvis(textoParaHarvis, targetID);
             }
-            return; // 🛑 FRENO DE MANO: Detiene el envío original del audio crudo
-        }
+            
+            // 🛑 Cortamos la ejecución aquí. La interfaz ya hizo su trabajo y procesarRespuestaHarvis toma el control.
+            return;
+     }
 
         // =================================================================
         // PREPARACIÓN DEL PAYLOAD HACIA VERCEL
