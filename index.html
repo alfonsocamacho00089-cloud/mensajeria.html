@@ -1485,7 +1485,7 @@ if (typeof msg === 'string' && (msg.includes("base64,") || msg.startsWith("GkXf"
     // ⌨️ SI ES TEXTO: Extraemos el texto limpio del input o del objeto msg
     let textoLimpio = "";
     if (typeof msg === 'object' && msg !== null) {
-        textoLimpio = msg.texto || msg.message || "";
+        textoLimpio = msg.text || msg.texto || msg.message || (typeof msg === 'string' ? msg : "");
     } else {
         textoLimpio = msg; // Pasa directo el texto del teclado
     }
