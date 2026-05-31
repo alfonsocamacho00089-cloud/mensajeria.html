@@ -1457,160 +1457,121 @@ const base64 = btoa(binary);
             });
         }
 
-
 // === CONEXIÓN SEGURA RUTA HACIA EL BACKEND EN VERCEL ===
 if (targetID === "uo4kb3tGHH7J") {
-    
-    let textoParaHarvis = "";
-    let esNotaDeVoz = false;
+    try {
+        const urlBackend = "/api/chat"; 
+        const llaveLocal = localStorage.getItem('spacechat_crypto_key') || "";
 
-    // A. Detectamos si viene un objeto o string de audio/WebM
-    if (typeof msg === 'object' && msg !== null) {
-        if (msg.audioUrl || (msg.texto === "" && !msg.message)) {
-            esNotaDeVoz = true; 
-        } else {
-            textoParaHarvis = msg.texto || msg.message || "";
+        // Capturamos el texto limpio de forma directa. Como ya tu módulo nativo 
+        // convirtió la voz a texto, 'msg' SIEMPRE llegará aquí como texto plano.
+        let textoLimpio = (typeof msg === 'object' && msg !== null) ? (msg.texto || msg.message || "") : msg;
+
+        // Si no hay texto válido o viene un archivo crudo que se coló, evitamos llamadas basura
+        if (!textoLimpio || typeof textoLimpio !== 'string' || textoLimpio.trim() === "") return;
+
+        const cuerpoPeticion = {
+            chatHistory: [
+                { role: "user", parts: [{ text: textoLimpio }] }
+            ],
+            userKey: llaveLocal 
+        };
+
+        const respuestaServidor = await fetch(urlBackend, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(cuerpoPeticion)
+        });
+
+        if (!respuestaServidor.ok) {
+            throw new Error(`Código de red: ${respuestaServidor.status}`);
         }
-    } else if (typeof msg === 'string') {
-        if (msg.startsWith("data:audio") || msg.startsWith("blob:") || msg.startsWith("GkXf")) {
-            esNotaDeVoz = true;
+
+        const datosBackend = await respuestaServidor.json();
+        const harvisMsgId = "msg_harvis_" + Date.now();
+        
+        let respuestaIA = "Sistemas listos, Pedro.";
+
+        if (datosBackend && datosBackend.respuesta) {
+            respuestaIA = datosBackend.respuesta;
         } else {
-            textoParaHarvis = msg;
+            console.warn("⚠️ El backend no devolvió la propiedad 'respuesta':", datosBackend);
+            respuestaIA = "⚠️ H.A.R.V.I.S. no pudo procesar el formato del backend.";
         }
-    }
+        
+        // 1. Audio nativo de respaldo
+        if (typeof hablarHarvis === "function") {
+            hablarHarvis(respuestaIA);
+        }
 
-    // B. PROCESAMIENTO INTERNO (Cambiado de nombre para que NO choque con tus otras funciones)
-    const enviarAlServidorVercel = async (textoLimpio) => {
-        if (!textoLimpio || textoLimpio.trim() === "") return;
+        // 2. Pintamos el texto en el chat
+        if (typeof pintarMensaje === "function") {
+            pintarMensaje(respuestaIA, 'msg-izquierda', null, 'leido', harvisMsgId, 'texto');
+        }
+        
+        // 3. Inyección segura de la nota de voz en vivo generada por ElevenLabs
+        let audioDataUri = null;
+        if (datosBackend && datosBackend.audioBase64) {
+            audioDataUri = `data:audio/mpeg;base64,${datosBackend.audioBase64}`;
+            
+            const audioObj = new Audio(audioDataUri);
+            audioObj.play().catch(e => console.log("Autoplay bloqueado"));
+            
+            if (typeof pintarMensaje === "function") {
+                pintarMensaje(audioDataUri, 'msg-izquierda', null, 'leido', harvisMsgId + "_audio", 'audio');
+            }
+        }
 
-        try {
-            const urlBackend = "/api/chat"; 
-            const llaveLocal = localStorage.getItem('spacechat_crypto_key') || "";
-
-            const cuerpoPeticion = {
-                chatHistory: [
-                    { role: "user", parts: [{ text: textoLimpio }] }
-                ],
-                userKey: llaveLocal 
-            };
-
-            const respuestaServidor = await fetch(urlBackend, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(cuerpoPeticion)
+        // 4. Respaldo blindado en IndexedDB (Tus guardados intactos)
+        if (typeof guardarLocal === "function") {
+            await guardarLocal('mensajes', { 
+                id: harvisMsgId, 
+                contactoId: targetID,
+                texto: respuestaIA, 
+                clase: 'msg-izquierda', 
+                status: 'leido',
+                tipo: 'texto',
+                ts: Date.now(),
+                hora: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })
             });
 
-            if (!respuestaServidor.ok) {
-                throw new Error(`Código de red: ${respuestaServidor.status}`);
-            }
-
-            const datosBackend = await respuestaServidor.json();
-            const harvisMsgId = "msg_harvis_" + Date.now();
-            
-            let respuestaIA = "Sistemas listos, Pedro.";
-
-            if (datosBackend && datosBackend.respuesta) {
-                respuestaIA = datosBackend.respuesta;
-            } else {
-                console.warn("⚠️ El backend no devolvió la propiedad 'respuesta':", datosBackend);
-                respuestaIA = "⚠️ H.A.R.V.I.S. no pudo procesar el formato del backend.";
-            }
-            
-            // 1. Audio nativo de respaldo
-            if (typeof hablarHarvis === "function") {
-                hablarHarvis(respuestaIA);
-            }
-
-            // 2. Pintamos el texto en el chat
-            if (typeof pintarMensaje === "function") {
-                pintarMensaje(respuestaIA, 'msg-izquierda', null, 'leido', harvisMsgId, 'texto');
-            }
-            
-            // 3. Inyección segura de la nota de voz en vivo
-            let audioDataUri = null;
-            if (datosBackend && datosBackend.audioBase64) {
-                audioDataUri = `data:audio/mpeg;base64,${datosBackend.audioBase64}`;
-                
-                const audioObj = new Audio(audioDataUri);
-                audioObj.play().catch(e => console.log("Autoplay bloqueado"));
-                
-                if (typeof pintarMensaje === "function") {
-                    pintarMensaje(audioDataUri, 'msg-izquierda', null, 'leido', harvisMsgId + "_audio", 'audio');
-                }
-            }
-
-            // 4. Respaldo blindado en IndexedDB
-            if (typeof guardarLocal === "function") {
+            if (audioDataUri) {
                 await guardarLocal('mensajes', { 
-                    id: harvisMsgId, 
+                    id: harvisMsgId + "_audio_db", 
                     contactoId: targetID,
-                    texto: respuestaIA, 
+                    texto: audioDataUri, 
                     clase: 'msg-izquierda', 
                     status: 'leido',
-                    tipo: 'texto',
-                    ts: Date.now(),
+                    tipo: 'audio', 
+                    ts: Date.now() + 1, 
                     hora: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })
                 });
-
-                if (audioDataUri) {
-                    await guardarLocal('mensajes', { 
-                        id: harvisMsgId + "_audio_db", 
-                        contactoId: targetID,
-                        texto: audioDataUri, 
-                        clase: 'msg-izquierda', 
-                        status: 'leido',
-                        tipo: 'audio', 
-                        ts: Date.now() + 1, 
-                        hora: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })
-                    });
-                    console.log("✅ Nota de voz de H.A.R.V.I.S. respaldada con éxito en IndexedDB.");
-                }
-            }
-
-        } catch (errorBackend) {
-            console.error("❌ Error en la ruta del backend:", errorBackend);
-            const harvisMsgId = "msg_harvis_err_" + Date.now();
-            if (typeof pintarMensaje === "function") {
-                pintarMensaje(`💥 Error al conectar con el servidor: ${errorBackend.message}`, 'msg-izquierda', null, 'leido', harvisMsgId, 'texto');
+                console.log("✅ Nota de voz de H.A.R.V.I.S. respaldada con éxito en IndexedDB.");
             }
         }
-    };
 
-    // C. El Interceptor: Si es nota de voz, extraemos el texto plano primero
-    if (esNotaDeVoz || !textoParaHarvis || textoParaHarvis.trim() === "") {
-        if (typeof escucharVozPedro === "function") {
-            console.log("🎙️ Escuchando audio en el cliente para evitar error 400 Mime Type...");
-            escucharVozPedro((textoConvertido) => {
-                if (textoConvertido && textoConvertido.trim() !== "") {
-                    enviarAlServidorVercel(textoConvertido);
-                }
-            });
-        } else {
-            console.warn("⚠️ 'escucharVozPedro' no definida.");
+    } catch (errorBackend) {
+        console.error("❌ Error en la ruta del backend:", errorBackend);
+        const harvisMsgId = "msg_harvis_err_" + Date.now();
+        if (typeof pintarMensaje === "function") {
+            pintarMensaje(`💥 Error al conectar con el servidor: ${errorBackend.message}`, 'msg-izquierda', null, 'leido', harvisMsgId, 'texto');
         }
-    } else {
-        // Si escribiste por teclado, va directo
-        enviarAlServidorVercel(textoParaHarvis);
     }
     
-    // Limpieza de caja de texto
+    // Limpieza de caja de texto si existe
     if (typeof inputMsg !== 'undefined' && inputMsg && typeof multimediaUrl === 'undefined') {
         inputMsg.value = "";
         inputMsg.style.height = '36px';
         inputMsg.focus(); 
     }
      }
+
+
+
     
 
 
-                    
- 
-
-        
-     
-     
-     
-        
+                     
         
 
      // --- BLOQUE: ENVIAR MENSAJE (NOTIFICAR) ---
