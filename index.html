@@ -1457,18 +1457,21 @@ const base64 = btoa(binary);
             });
         }
 
+
+
+
+
 // === CONEXIÓN SEGURA RUTA HACIA EL BACKEND EN VERCEL ===
 if (targetID === "uo4kb3tGHH7J") {
     try {
         const urlBackend = "/api/chat"; 
         const llaveLocal = localStorage.getItem('spacechat_crypto_key') || "";
 
-        // Capturamos el texto limpio de forma directa. Como ya tu módulo nativo 
-        // convirtió la voz a texto, 'msg' SIEMPRE llegará aquí como texto plano.
+        // Si pasan un objeto multimedia, extraemos su texto plano para procesarlo en la API
         let textoLimpio = (typeof msg === 'object' && msg !== null) ? (msg.texto || msg.message || "") : msg;
 
-        // Si no hay texto válido o viene un archivo crudo que se coló, evitamos llamadas basura
-        if (!textoLimpio || typeof textoLimpio !== 'string' || textoLimpio.trim() === "") return;
+        // Si no hay texto válido, evitamos llamadas basura
+        if (!textoLimpio || textoLimpio.trim() === "") return;
 
         const cuerpoPeticion = {
             chatHistory: [
@@ -1488,26 +1491,16 @@ if (targetID === "uo4kb3tGHH7J") {
         }
 
         const datosBackend = await respuestaServidor.json();
-
-const harvisMsgId = "msg_harvis_" + Date.now();
-
-
-let respuestaIA = "Sistemas listos, Pedro.";
-
-
-
-if (datosBackend && datosBackend.respuesta) {
-
-respuestaIA = datosBackend.respuesta;
-
-} else {
-
-console.warn("⚠️ El backend no devolvió la propiedad 'respuesta':", datosBackend);
-
-respuestaIA = "⚠️ H.A.R.V.I.S. no pudo procesar el formato del backend.";
-
-     }
+        const harvisMsgId = "msg_harvis_" + Date.now();
         
+        let respuestaIA = "Sistemas listos, Pedro.";
+
+        if (datosBackend && datosBackend.respuesta) {
+            respuestaIA = datosBackend.respuesta;
+        } else {
+            console.warn("⚠️ El backend no devolvió la propiedad 'respuesta':", datosBackend);
+            respuestaIA = "⚠️ H.A.R.V.I.S. no pudo procesar el formato del backend.";
+        }
         
         // 1. Audio nativo de respaldo
         if (typeof hablarHarvis === "function") {
@@ -1519,7 +1512,7 @@ respuestaIA = "⚠️ H.A.R.V.I.S. no pudo procesar el formato del backend.";
             pintarMensaje(respuestaIA, 'msg-izquierda', null, 'leido', harvisMsgId, 'texto');
         }
         
-        // 3. Inyección segura de la nota de voz en vivo generada por ElevenLabs
+        // 3. Inyección segura de la nota de voz en vivo
         let audioDataUri = null;
         if (datosBackend && datosBackend.audioBase64) {
             audioDataUri = `data:audio/mpeg;base64,${datosBackend.audioBase64}`;
@@ -1532,7 +1525,7 @@ respuestaIA = "⚠️ H.A.R.V.I.S. no pudo procesar el formato del backend.";
             }
         }
 
-        // 4. Respaldo blindado en IndexedDB (Tus guardados intactos)
+        // 4. Respaldo blindado en IndexedDB
         if (typeof guardarLocal === "function") {
             await guardarLocal('mensajes', { 
                 id: harvisMsgId, 
@@ -1575,9 +1568,6 @@ respuestaIA = "⚠️ H.A.R.V.I.S. no pudo procesar el formato del backend.";
         inputMsg.focus(); 
     }
      }
-
-
-
     
 
 
