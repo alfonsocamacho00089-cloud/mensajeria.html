@@ -3737,9 +3737,7 @@ if (datosBackend && datosBackend.audioBase64) {
             }
         }, 50);
         
-        if (typeof prepararEnvioMedia === "function") {
-            prepararEnvioMedia({ files: [archivoHarvis] }, 'audio');
-        }
+        
         tieneAudioServer = true;
     } catch (errAudio) {
         console.error("Error procesando binario de audio de ElevenLabs:", errAudio);
