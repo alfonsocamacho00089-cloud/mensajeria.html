@@ -3567,11 +3567,12 @@ let harvisProcesandoPeticion = false;       // El cerrojo contra ráfagas de voz
 let mensajePendientePorSaturacion = null;   // El buzón de mensajes en cola
 
 // =================================================================
+// =================================================================
 // 🧠 CEREBRO DE H.A.R.V.I.S.: CONEXIÓN Y PROCESAMIENTO CON VERCEL
 // =================================================================
 async function procesarRespuestaHarvis(msg, targetID) {
     
-    // 🛡️ CERROJO: Si el micrófono manda ráfagas repetidas en el mismo segundo, rebotan aquí
+    // 🛡️ CERROJO: Si el micrófono manda ráfagas repetidas, rebotan aquí
     if (harvisProcesandoPeticion) {
         console.warn("⚠️ H.A.R.V.I.S. bloqueó una petición duplicada por ráfaga de voz.");
         return;
@@ -3606,160 +3607,148 @@ async function procesarRespuestaHarvis(msg, targetID) {
             throw new Error(`Código de respuesta de red: ${respuestaServidor.status}`);
         }
 
+        const datosBackend = await respuestaServidor.json();
+        const harvisMsgId = "msg_harvis_" + Date.now();
+        let respuestaIA = "Sistemas listos, Pedro.";
 
-
-
-const datosBackend = await respuestaServidor.json();
-const harvisMsgId = "msg_harvis_" + Date.now();
-let respuestaIA = "Sistemas listos, Pedro.";
-
-if (datosBackend && datosBackend.respuesta) {
-    respuestaIA = datosBackend.respuesta;
-    
-    // ✅ PEGA ESTE BLOQUE EN SU LUGAR:
-if (respuestaIA.includes("GOOGLE API ERROR") || respuestaIA.includes("[Código 429]") || respuestaIA.includes("[Código 503]")) {
-    mensajePendientePorSaturacion = msg; 
-    
-    if (typeof pintarMensaje === "function") {
-        pintarMensaje(`💥 Servidor saturado (Límite 429). Mensaje guardado en cola.`, 'msg-izquierda', null, 'leido', harvisMsgId, 'texto');
-    }
-    
-    if (typeof actualizarMonitorAPI === "function") {
-        actualizarMonitorAPI(0, 'error', 'Error 429: Rate Limit');
-    }
-    
-    const txtStatus = document.getElementById('widget-status-text');
-    if (txtStatus) {
-        txtStatus.innerHTML = `
-            <span style="color:#ff3333; display:block; margin-bottom:4px;">Límite Excedido</span>
-            <button onclick="DespacharMensajeEnCola()" style="background:transparent; border:1px solid #d4af37; color:#d4af37; border-radius:4px; font-size:9px; padding:2px 6px; cursor:pointer;">
-                🔄 Reintentar Mensaje
-            </button>
-        `;
-    }
-    return; // 🛡️ Sale limpiamente hacia el 'finally' global sin romper el hilo del hardware
-     }
-    
-} else {
-    console.warn("⚠️ El backend no devolvió la propiedad 'respuesta':", datosBackend);
-    respuestaIA = "⚠️ H.A.R.V.I.S. no pudo procesar el formato del backend.";
-}
-
-// 1. Historial de sesión en memoria
-historialHarvisVercel.push({ role: "model", parts: [{ text: respuestaIA }] });
-if (historialHarvisVercel.length > 8) {
-    historialHarvisVercel.splice(0, 2); 
-}
-
-// 2. Pintamos el texto en vivo de inmediato
-if (typeof pintarMensaje === "function") {
-    pintarMensaje(respuestaIA, 'msg-izquierda', null, 'leido', harvisMsgId, 'texto');
-     }
-
-// 3. Procesamiento y Renderizado del Audio en Vivo
-let tieneAudioServer = false;
-let urlParaGuardar = null;
-
-if (datosBackend && datosBackend.audioBase64) {
-    try {
-        const byteCharacters = atob(datosBackend.audioBase64);
-        const byteNumbers = new Uint8Array(byteCharacters.length);
-        for (let i = 0; i < byteCharacters.length; i++) {
-            byteNumbers[i] = byteCharacters.charCodeAt(i);
-        }
-        
-        const archivoHarvis = new File([byteNumbers], `harvis_voz_${Date.now()}.mp3`, { type: 'audio/mpeg' });
-        urlParaGuardar = URL.createObjectURL(archivoHarvis);
-
-        const idBurbujaAudio = harvisMsgId + "_audio";
-
-        // 🎨 PRIMERO: Pintamos el reproductor en el chat usando el blob fresco de memoria
-        if (typeof pintarMensaje === "function") {
-            pintarMensaje(urlParaGuardar, 'msg-izquierda', null, 'leido', idBurbujaAudio, 'audio');
-        }
-        
-        // 🔊 SEGUNDO: Buscamos el reproductor recién pintado en la pantalla y le damos Play en vivo
-        // Le damos un mini "setTimeout" de 50ms para asegurar que el navegador ya dibujó el elemento en el DOM
-        setTimeout(() => {
-            const reproductorEnPantalla = document.getElementById(idBurbujaAudio) || document.querySelector(`[data-id="${idBurbujaAudio}"] audio`) || document.querySelector(`audio[src="${urlParaGuardar}"]`);
+        if (datosBackend && datosBackend.respuesta) {
+            respuestaIA = datosBackend.respuesta;
             
-            if (reproductorEnPantalla) {
-                console.log("✅ H.A.R.V.I.S: Reproduciendo audio directamente desde la burbuja visual.");
-                reproductorEnPantalla.play().catch(e => console.log("Autoplay de burbuja bloqueado por el navegador:", e));
-            } else {
-                // Respaldo por si el DOM tardó más de la cuenta en renderizar la burbuja
-                console.warn("⚠️ No se encontró la burbuja en el DOM a tiempo, usando respaldo de audio invisible.");
-                const audioHarvis = new Audio(urlParaGuardar);
-                audioHarvis.play().catch(e => console.log("Autoplay de respaldo bloqueado:", e));
+            // ✅ FILTRO CONTROL DE ERRORES API
+            if (respuestaIA.includes("GOOGLE API ERROR") || respuestaIA.includes("[Código 429]") || respuestaIA.includes("[Código 503]")) {
+                mensajePendientePorSaturacion = msg; 
+                
+                if (typeof pintarMensaje === "function") {
+                    pintarMensaje(`💥 Servidor saturado (Límite 429). Mensaje guardado en cola.`, 'msg-izquierda', null, 'leido', harvisMsgId, 'texto');
+                }
+                
+                if (typeof actualizarMonitorAPI === "function") {
+                    actualizarMonitorAPI(0, 'error', 'Error 429: Rate Limit');
+                }
+                
+                const txtStatus = document.getElementById('widget-status-text');
+                if (txtStatus) {
+                    txtStatus.innerHTML = `
+                        <span style="color:#ff3333; display:block; margin-bottom:4px;">Límite Excedido</span>
+                        <button onclick="DespacharMensajeEnCola()" style="background:transparent; border:1px solid #d4af37; color:#d4af37; border-radius:4px; font-size:9px; padding:2px 6px; cursor:pointer;">
+                            🔄 Reintentar Mensaje
+                        </button>
+                    `;
+                }
+                return; // 🛡️ Sale limpiamente hacia el 'finally' global
             }
-        }, 50);
-        
-        
-        tieneAudioServer = true;
-    } catch (errAudio) {
-        console.error("Error procesando binario de audio de ElevenLabs:", errAudio);
-    }
-}
+            
+        } else {
+            console.warn("⚠️ El backend no devolvió la propiedad 'respuesta':", datosBackend);
+            respuestaIA = "⚠️ H.A.R.V.I.S. no pudo procesar el formato del backend.";
+        }
 
-// Respaldo nativo si falla ElevenLabs o viene vacío
-if (!tieneAudioServer && typeof hablarHarvis === "function") {
-    hablarHarvis(respuestaIA);
-     }
-     
-// 4. Renderizado de Imagen (Pollinations)
-// 3. Imagen (tu lógica existente)
-    
-            if (datosBackend.imagenUrl) {
-                const estructuraImagenHtml = `<img src="${datosBackend.imagenUrl}" style="width:100%; border-radius:12px; border: 2px solid #FFD700; box-shadow: 0 0 15px rgba(255,217,0,0.5); margin-top:8px;" alt="YouSpace Art">`;
+        // 1. Historial de sesión en memoria
+        historialHarvisVercel.push({ role: "model", parts: [{ text: respuestaIA }] });
+        if (historialHarvisVercel.length > 8) {
+            historialHarvisVercel.splice(0, 2); 
+        }
+
+        // 2. Pintamos el texto en vivo de inmediato
+        if (typeof pintarMensaje === "function") {
+            pintarMensaje(respuestaIA, 'msg-izquierda', null, 'leido', harvisMsgId, 'texto');
+        } 
+
+        // 3. Procesamiento y Renderizado del Audio en Vivo
+        let tieneAudioServer = false;
+        let urlParaGuardar = null;
+
+        if (datosBackend && datosBackend.audioBase64) {
+            try { // 👈 Este es el try de la línea 3664 de tu captura
+                const byteCharacters = atob(datosBackend.audioBase64);
+                const byteNumbers = new Uint8Array(byteCharacters.length);
+                for (let i = 0; i < byteCharacters.length; i++) {
+                    byteNumbers[i] = byteCharacters.charCodeAt(i);
+                }
+                
+                const archivoHarvis = new File([byteNumbers], `harvis_voz_${Date.now()}.mp3`, { type: 'audio/mpeg' });
+                urlParaGuardar = URL.createObjectURL(archivoHarvis);
+
+                const idBurbujaAudio = harvisMsgId + "_audio";
+
+                // 🎨 PRIMERO: Pintamos el reproductor en el chat
+                if (typeof pintarMensaje === "function") {
+                    pintarMensaje(urlParaGuardar, 'msg-izquierda', null, 'leido', idBurbujaAudio, 'audio');
+                }
+                
+                // 🔊 SEGUNDO: Auto-play con retraso de renderizado
+                setTimeout(() => {
+                    const reproductorEnPantalla = document.getElementById(idBurbujaAudio) || document.querySelector(`[data-id="${idBurbujaAudio}"] audio`) || document.querySelector(`audio[src="${urlParaGuardar}"]`);
+                    
+                    if (reproductorEnPantalla) {
+                        console.log("✅ H.A.R.V.I.S: Reproduciendo audio directamente desde la burbuja visual.");
+                        reproductorEnPantalla.play().catch(e => console.log("Autoplay de burbuja bloqueado por el navegador:", e));
+                    } else {
+                        console.warn("⚠️ No se encontró la burbuja en el DOM a tiempo, usando respaldo de audio invisible.");
+                        const audioHarvis = new Audio(urlParaGuardar);
+                        audioHarvis.play().catch(e => console.log("Autoplay de respaldo bloqueado:", e));
+                    }
+                }, 50);
+                
+                tieneAudioServer = true;
+            } catch (errAudio) { // 🛠️ ¡AQUÍ ESTÁ TU CATCH FALTANTE!
+                console.error("Error procesando binario de audio de ElevenLabs:", errAudio);
+            }
+        }
+
+        // Respaldo nativo si falla ElevenLabs o viene vacío
+        if (!tieneAudioServer && typeof hablarHarvis === "function") {
+            hablarHarvis(respuestaIA);
+        }
+             
+        // 4. Renderizado de Imagen (Pollinations)
+        if (datosBackend && datosBackend.imagenUrl) {
+            const estructuraImagenHtml = `<img src="${datosBackend.imagenUrl}" style="width:100%; border-radius:12px; border: 2px solid #FFD700; box-shadow: 0 0 15px rgba(255,217,0,0.5); margin-top:8px;" alt="YouSpace Art">`;
+            if (typeof pintarMensaje === "function") {
                 pintarMensaje(estructuraImagenHtml, 'msg-izquierda', null, 'leido', harvisMsgId + "_img", 'texto');
             }
- }
+        }
 
-// 5. Guardado Inteligente en Base de Datos (IndexedDB)
-if (typeof guardarLocal === "function") {
-    // Guardamos el mensaje de texto principal
-    await guardarLocal('mensajes', { 
-        id: harvisMsgId, 
-        contactoId: targetID,
-        texto: datosBackend && datosBackend.imagenUrl ? `${respuestaIA} [Imagen Arte]` : respuestaIA, 
-        clase: 'msg-izquierda', 
-        status: 'leido',
-        tipo: 'texto',
-        ts: Date.now(),
-        hora: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })
-    });
+        // 5. Guardado Inteligente en Base de Datos (IndexedDB)
+        if (typeof guardarLocal === "function") {
+            // Guardamos el mensaje de texto principal
+            await guardarLocal('mensajes', { 
+                id: harvisMsgId, 
+                contactoId: targetID,
+                texto: datosBackend && datosBackend.imagenUrl ? `${respuestaIA} [Imagen Arte]` : respuestaIA, 
+                clase: 'msg-izquierda', 
+                status: 'leido',
+                tipo: 'texto',
+                ts: Date.now(),
+                hora: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })
+            });
 
-    // 🎙️ CLAVE DE LA BURBUJA PERSISTENTE: Guardamos el Base64 puro en el campo 'texto'
-    if (tieneAudioServer && datosBackend.audioBase64) {
-        await guardarLocal('mensajes', {
-            id: harvisMsgId + "_audio_db",
-            contactoId: targetID,
-            texto: `data:audio/mpeg;base64,${datosBackend.audioBase64}`, // 👈 Guardamos el Data URI completo, ¡este no caduca!
-            clase: 'msg-izquierda',
-            status: 'leido',
-            tipo: 'audio', // Le avisa a tu renderizador del historial que monte la burbuja de audio
-            ts: Date.now() + 1,
-            hora: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })
-        });
-    }
-}
+            // 🎙️ Guardamos el Base64 puro en IndexedDB para persistencia
+            if (tieneAudioServer && datosBackend.audioBase64) {
+                await guardarLocal('mensajes', {
+                    id: harvisMsgId + "_audio_db",
+                    contactoId: targetID,
+                    texto: `data:audio/mpeg;base64,${datosBackend.audioBase64}`,
+                    clase: 'msg-izquierda',
+                    status: 'leido',
+                    tipo: 'audio',
+                    ts: Date.now() + 1,
+                    hora: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })
+                });
+            }
+        }
 
-// 6. Monitor de API
-if (typeof actualizarMonitorAPI === "function") {
-    const tokensUtilizados = (datosBackend && datosBackend.usage && datosBackend.usage.totalTokenCount) ? datosBackend.usage.totalTokenCount : 0;
-    actualizarMonitorAPI(tokensUtilizados, 'success');
-     }
-
- 
+        // 6. Monitor de API (Éxito)
+        if (typeof actualizarMonitorAPI === "function") {
+            const tokensUtilizados = (datosBackend && datosBackend.usage && datosBackend.usage.totalTokenCount) ? datosBackend.usage.totalTokenCount : 0;
+            actualizarMonitorAPI(tokensUtilizados, 'success');
+        }
         
-                
-
-    
     } catch (errorBackend) {
         console.error("❌ Error en la ruta del backend:", errorBackend);
         const harvisMsgId = "msg_harvis_err_" + Date.now();
         
-        mensajePendientePorSaturacion = msg; // Guardamos tu texto ante caídas de red duras
+        mensajePendientePorSaturacion = msg; 
 
         if (typeof pintarMensaje === "function") {
             pintarMensaje(`💥 Error de conexión. Mensaje guardado en cola.`, 'msg-izquierda', null, 'leido', harvisMsgId, 'texto');
@@ -3787,7 +3776,7 @@ if (typeof actualizarMonitorAPI === "function") {
         }
         
     } finally {
-        // 🔓 FINALITY: Ocurra un éxito o un error, el cerrojo se abre para la siguiente orden de voz
+        // 🔓 FINALITY: Cerorjo abierto pase lo que pase para que el flujo de voz no muera
         harvisProcesandoPeticion = false;
     }
      }
