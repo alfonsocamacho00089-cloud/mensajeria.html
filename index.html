@@ -1464,31 +1464,35 @@ if (targetID === "uo4kb3tGHH7J") {
         const llaveLocal = localStorage.getItem('spacechat_crypto_key') || "";
 
         // 1. Preparamos las partes del mensaje para Gemini
-        const partesMensaje = [];
+        // 1. EL PROCESADOR INLINE: Analiza si 'msg' trae el audio binario de Luis
+        let partesContenido = [];
 
-        if (typeof msg === 'string' && msg.startsWith("data:audio/webm;base64,")) {
-            // Extraemos puramente la cadena Base64 quitando el encabezado
-            const base64Puro = msg.split(',')[1];
-            
-            partesMensaje.push({
-                inlineData: {
-                    data: base64Puro,
-                    mimeType: "audio/webm" // Le especificamos el formato real que muestra tu consola
+        if (typeof msg === 'string' && (msg.includes("base64,") || msg.startsWith("GkXf"))) {
+            // Si es el audio del micrófono, extraemos el Base64 puro
+            let base64Puro = msg;
+            if (msg.includes("base64,")) {
+                base64Puro = msg.split("base64,")[1] || "";
+            }
+
+            // Lo empaquetamos en la estructura limpia que Gemini exige para audio
+            partesContenido.push({
+                inlineData: { 
+                    mimeType: "audio/webm", 
+                    data: base64Puro.trim() 
                 }
             });
         } else {
-            // Si no es un audio de micrófono, pasa como texto normal de teclado
-            partesMensaje.push({ text: textoFinal });
+            // Si es texto normal del teclado, pasa directo como texto plano
+            partesContenido.push({ text: textoFinal });
         }
 
-        // 2. Metemos las partes estructuradas al cuerpo de la petición
+        // 2. Armamos la petición con las partes ya procesadas
         const cuerpoPeticion = {
             chatHistory: [
-                { role: "user", parts: partesMensaje }
+                { role: "user", parts: partesContenido }
             ],
             userKey: llaveLocal 
         };
-
         // ... resto de tu lógica de fetch a '/api/chat' ...
     
         // 📡 TU ENVÍO UNIFICADO
