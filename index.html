@@ -1465,44 +1465,45 @@ if (targetID === "uo4kb3tGHH7J") {
         const llaveLocal = localStorage.getItem('spacechat_crypto_key') || "";
 
         // 🔥 FILTRO UNIFICADO Y CORREGIDO (SIN VARIABLES ROTAS):
-        let partesContenido = [];
+        // 🔥 FILTRO UNIFICADO Y CORREGIDO (SIN VARIABLES ROTAS)
+let partesContenido = [];
 
-        if (typeof msg === 'string' && (msg.includes("base64,") || msg.startsWith("GkXf") || msg.startsWith("data:audio"))) {
-            // 🎙️ SI ES AUDIO: Extraemos el Base64 puro
-            let base64Puro = msg;
-            if (msg.includes("base64,")) {
-                base64Puro = msg.split("base64,")[1] || "";
-            }
+if (typeof msg === 'string' && (msg.includes("base64,") || msg.startsWith("GkXf") || msg.startsWith("data:audio"))) {
+    // 🎙️ SI ES AUDIO: Extraemos el Base64 puro
+    let base64Puro = msg;
+    if (msg.includes("base64,")) {
+        base64Puro = msg.split("base64,")[1] || "";
+    }
 
-            partesContenido.push({
-                inlineData: { 
-                    mimeType: "audio/webm", 
-                    data: base64Puro.trim() 
-                }
-            });
-        } else {
-            // ⌨️ SI ES TEXTO: Extraemos el texto limpio del input o del objeto msg
-            let textoLimpio = "";
-            if (typeof msg === 'object' && msg !== null) {
-                textoLimpio = msg.texto || msg.message || "";
-            } else {
-                textoLimpio = msg; // Pasa directo el texto del teclado
-            }
-
-            if (!textoLimpio.trim()) {
-                textoLimpio = "Hola";
-            }
-
-            partesContenido.push({ text: textoLimpio });
+    partesContenido.push({
+        inlineData: { 
+            mimeType: "audio/webm", 
+            data: base64Puro.trim() 
         }
+    });
+} else {
+    // ⌨️ SI ES TEXTO: Extraemos el texto limpio del input o del objeto msg
+    let textoLimpio = "";
+    if (typeof msg === 'object' && msg !== null) {
+        textoLimpio = msg.texto || msg.message || "";
+    } else {
+        textoLimpio = msg; // Pasa directo el texto del teclado
+    }
 
-        // 2. Armamos la petición con las partes ya sanadas
-        const cuerpoPeticion = {
-            chatHistory: [
-                { role: "user", parts: partesContenido }
-            ],
-            userKey: llaveLocal 
-        };
+    if (!textoLimpio.trim()) {
+        textoLimpio = "Hola";
+    }
+
+    partesContenido.push({ text: textoLimpio });
+}
+
+// 2. Armamos la petición con las partes ya sanadas
+const cuerpoPeticion = {
+    chatHistory: [
+        { role: "user", parts: partesContenido }
+    ],
+    userKey: llaveLocal 
+};
 
         // ... resto de tu lógica de fetch a '/api/chat' ...
     
