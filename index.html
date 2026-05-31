@@ -1479,9 +1479,9 @@ if (targetID === "uo4kb3tGHH7J") {
         }
     }
 
-    // B. FUNCIÓN ANÓNIMA DIRECTA EN LÍNEA (No duplica nombres en el archivo)
-    const enviarAlBackendLimpio = async (textoFinal) => {
-        if (!textoFinal || textoFinal.trim() === "") return;
+    // B. PROCESAMIENTO INTERNO (Cambiado de nombre para que NO choque con tus otras funciones)
+    const enviarAlServidorVercel = async (textoLimpio) => {
+        if (!textoLimpio || textoLimpio.trim() === "") return;
 
         try {
             const urlBackend = "/api/chat"; 
@@ -1489,7 +1489,7 @@ if (targetID === "uo4kb3tGHH7J") {
 
             const cuerpoPeticion = {
                 chatHistory: [
-                    { role: "user", parts: [{ text: textoFinal }] }
+                    { role: "user", parts: [{ text: textoLimpio }] }
                 ],
                 userKey: llaveLocal 
             };
@@ -1582,7 +1582,7 @@ if (targetID === "uo4kb3tGHH7J") {
             console.log("🎙️ Escuchando audio en el cliente para evitar error 400 Mime Type...");
             escucharVozPedro((textoConvertido) => {
                 if (textoConvertido && textoConvertido.trim() !== "") {
-                    enviarAlBackendLimpio(textoConvertido);
+                    enviarAlServidorVercel(textoConvertido);
                 }
             });
         } else {
@@ -1590,7 +1590,7 @@ if (targetID === "uo4kb3tGHH7J") {
         }
     } else {
         // Si escribiste por teclado, va directo
-        enviarAlBackendLimpio(textoParaHarvis);
+        enviarAlServidorVercel(textoParaHarvis);
     }
     
     // Limpieza de caja de texto
@@ -1600,7 +1600,9 @@ if (targetID === "uo4kb3tGHH7J") {
         inputMsg.focus(); 
     }
      }
-            
+    
+
+
                     
  
 
