@@ -143,7 +143,7 @@ Dirígete a tu interlocutor con respeto y seguridad, demostrando que tienes el c
             body: JSON.stringify({
                 contents: historialFormateado,
                 systemInstruction: { parts: [{ text: `${harvisPromptSystem}\n\nFECHA ACTUAL: ${fechaActual}.` }] },
-                tools: [{ google_search: {} }, { codeExecution: {} }],
+                tools: [{ google_search: {} }],
                 generationConfig: { temperature: 0.75 }
             })
         });
