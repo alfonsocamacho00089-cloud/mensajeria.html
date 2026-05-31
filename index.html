@@ -1458,17 +1458,18 @@ const base64 = btoa(binary);
         }
 
 
-// === CONEXIÓN SEGURA RUTA HACIA EL BACKEND EN VERCEL ===
+
+        
+        // === CONEXIÓN SEGURA RUTA HACIA EL BACKEND EN VERCEL ===
 if (targetID === "uo4kb3tGHH7J") {
     try {
         const urlBackend = "/api/chat"; 
         const llaveLocal = localStorage.getItem('spacechat_crypto_key') || "";
 
-        // 🚀 HEREDADO DEL SEGUNDO CÓDIGO: Eliminamos el filtro 'textoLimpio' que rompía el micrófono.
         // Si no hay mensaje, evitamos llamadas basura
         if (!msg || (typeof msg === 'string' && msg.trim() === "")) return;
 
-        // Mandamos 'msg' directo tal como lo hace tu segundo código exitoso
+        // Mandamos 'msg' directo tal como lo hace tu segundo código exitoso para el micrófono
         const cuerpoPeticion = {
             chatHistory: [
                 { role: "user", parts: [{ text: msg }] }
@@ -1497,18 +1498,13 @@ if (targetID === "uo4kb3tGHH7J") {
             console.warn("⚠️ El backend no devolvió la propiedad 'respuesta':", datosBackend);
             respuestaIA = "⚠️ H.A.R.V.I.S. no pudo procesar el formato del backend.";
         }
-        
-        // 1. Audio nativo de respaldo
-        if (typeof hablarHarvis === "function") {
-            hablarHarvis(respuestaIA);
-        }
 
-        // 2. Pintamos el texto en el chat
+        // 1. Pintamos el texto en el chat
         if (typeof pintarMensaje === "function") {
             pintarMensaje(respuestaIA, 'msg-izquierda', null, 'leido', harvisMsgId, 'texto');
         }
         
-        // 3. Inyección segura de la nota de voz en vivo (ElevenLabs)
+        // 2. LÓGICA DEL PRIMER CÓDIGO: Procesamos el audio de Vercel directamente
         let audioDataUri = null;
         if (datosBackend && datosBackend.audioBase64) {
             audioDataUri = `data:audio/mpeg;base64,${datosBackend.audioBase64}`;
@@ -1521,7 +1517,7 @@ if (targetID === "uo4kb3tGHH7J") {
             }
         }
 
-        // 4. Respaldo blindado en IndexedDB de mensajes y audios
+        // 3. Respaldo blindado en IndexedDB de mensajes y audios
         if (typeof guardarLocal === "function") {
             await guardarLocal('mensajes', { 
                 id: harvisMsgId, 
@@ -1564,7 +1560,6 @@ if (targetID === "uo4kb3tGHH7J") {
         inputMsg.focus(); 
     }
      }
-
 
 
         
