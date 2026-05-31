@@ -3426,6 +3426,9 @@ function actualizarUIUIGrabando(estaGrabando) {
     }
      }
 
+
+
+
 // =================================================================
 // 1. REGISTRO FIJO DE H.A.R.V.I.S. COMO UN CONTACTO NORMAL
 // =================================================================
@@ -3443,9 +3446,7 @@ const contactoHarvisFijo = {
 // =================================================================
 
 // Hace que el teléfono hable (Bocina)
-
-
-        function hablarHarvis(texto, alTerminar) {
+function hablarHarvis(texto, alTerminar) {
     const synth = window.speechSynthesis;
     synth.cancel(); // Limpia cualquier audio trabado
 
@@ -3462,7 +3463,6 @@ const contactoHarvisFijo = {
     const voces = synth.getVoices();
 
     // 3. BUSCADOR AUTOMÁTICO DE TU VOZ DE HOMBRE
-    // Filtramos las voces en español buscando las palabras clave de los paquetes masculinos de Google
     const vozDeHombre = voces.find(v => 
         v.lang.includes('es') && 
         (v.name.includes('Google') || v.name.includes('Natural')) &&
@@ -3487,7 +3487,7 @@ const contactoHarvisFijo = {
     }
     
     synth.speak(utterance);
-     }
+}
 
 
 // Hace que el teléfono escuche (Micrófono nativo)
@@ -3509,13 +3509,12 @@ function escucharVozPedro(alRecibirTexto) {
         
         alRecibirTexto(resultadoTexto);
     };
-     }
+}
 
-
-     // =================================================================
+// =================================================================
 // 3. CEREBRO RESPONDEDOR LOCAL DE H.A.R.V.I.S.
 // =================================================================
-function RespuestaHarvis(mensajeRecibidoDePedro) {
+function respuestaHarvis(mensajeRecibidoDePedro) {
     setTimeout(() => {
         const respuestaRobot = "Entendido señor Peres, procesando comando en YouSpace de forma local.";
         
