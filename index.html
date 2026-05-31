@@ -1488,16 +1488,26 @@ if (targetID === "uo4kb3tGHH7J") {
         }
 
         const datosBackend = await respuestaServidor.json();
-        const harvisMsgId = "msg_harvis_" + Date.now();
-        
-        let respuestaIA = "Sistemas listos, Pedro.";
 
-        if (datosBackend && datosBackend.respuesta) {
-            respuestaIA = datosBackend.respuesta;
-        } else {
-            console.warn("⚠️ El backend no devolvió la propiedad 'respuesta':", datosBackend);
-            respuestaIA = "⚠️ H.A.R.V.I.S. no pudo procesar el formato del backend.";
-        }
+const harvisMsgId = "msg_harvis_" + Date.now();
+
+
+let respuestaIA = "Sistemas listos, Pedro.";
+
+
+
+if (datosBackend && datosBackend.respuesta) {
+
+respuestaIA = datosBackend.respuesta;
+
+} else {
+
+console.warn("⚠️ El backend no devolvió la propiedad 'respuesta':", datosBackend);
+
+respuestaIA = "⚠️ H.A.R.V.I.S. no pudo procesar el formato del backend.";
+
+     }
+        
         
         // 1. Audio nativo de respaldo
         if (typeof hablarHarvis === "function") {
