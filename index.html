@@ -3386,12 +3386,15 @@ function actualizarUIUIGrabando(estaGrabando) {
     }
      }
 
+
+
+
 // =================================================================
 // 1. REGISTRO FIJO DE H.A.R.V.I.S. COMO UN CONTACTO NORMAL
 // =================================================================
 // Recuerda registrar este ID exacto en tu IndexedDB o array de contactos
 const contactoHarvisFijo = {
-    id: "uo4kb3tGHH7J",
+    id: "harvis_user_system",
     nombre: "H.A.R.V.I.S. 1.0",
     avatar: "🤖",
     estado: "Copiloto YouSpace en línea"
@@ -3403,52 +3406,19 @@ const contactoHarvisFijo = {
 // =================================================================
 
 // Hace que el teléfono hable (Bocina)
-
-
-        function hablarHarvis(texto, alTerminar) {
+function hablarHarvis(texto, alTerminar) {
     const synth = window.speechSynthesis;
-    synth.cancel(); // Limpia cualquier audio trabado
-
-    // 1. Limpieza estricta de Markdown
-    let textoLimpio = texto
-        .replace(/\*/g, '')
-        .replace(/#/g, '')
-        .replace(/-/g, '')
-        .replace(/[\uE000-\uF8FF]|\uD83C[\uDC00-\uDFFF]|\uD83D[\uDC00-\uDFFF]|[\u2011-\u26FF]|\uD83E[\uDC00-\uDFFF]/g, '');
-
-    const utterance = new SpeechSynthesisUtterance(textoLimpio);
+    synth.cancel(); // Evita que se solapen los audios
     
-    // 2. Traer todas las voces instaladas en tu Xiaomi
-    const voces = synth.getVoices();
-
-    // 3. BUSCADOR AUTOMÁTICO DE TU VOZ DE HOMBRE
-    // Filtramos las voces en español buscando las palabras clave de los paquetes masculinos de Google
-    const vozDeHombre = voces.find(v => 
-        v.lang.includes('es') && 
-        (v.name.includes('Google') || v.name.includes('Natural')) &&
-        (v.name.includes('Voz 2') || v.name.includes('Voz 3') || v.name.includes('male') || v.name.includes('B') || v.name.includes('C'))
-    );
-
-    // Si encontró la voz de hombre descargada, se la asignamos a HARVIS
-    if (vozDeHombre) {
-        utterance.voice = vozDeHombre;
-        console.log("¡H.A.R.V.I.S está usando la voz local montada!: " + vozDeHombre.name);
-    } else {
-        // Si no la encuentra, usa el respaldo por defecto de tu idioma
-        utterance.lang = 'es-Es';
-    }
-
-    // 4. Configuración de estilo elegante para tu asistente
-    utterance.rate = 1.02; // Un toque sutil de velocidad
-    utterance.pitch = 1.0; // Bajamos el tono para que suene más grave, imponente y con estilo "JARVIS"
-
+    const utterance = new SpeechSynthesisUtterance(texto);
+    utterance.lang = 'es-MX'; // Voz en español
+    utterance.rate = 1.0;     // Velocidad normal
+    
     if (alTerminar) {
         utterance.onend = () => alTerminar();
     }
-    
     synth.speak(utterance);
-     }
-
+}
 
 // Hace que el teléfono escuche (Micrófono nativo)
 function escucharVozPedro(alRecibirTexto) {
@@ -3458,20 +3428,17 @@ function escucharVozPedro(alRecibirTexto) {
         return;
     }
     const recognition = new SpeechRecognition();
-    recognition.lang = 'es-Es';
+    recognition.lang = 'es-MX';
     recognition.start();
     
     recognition.onresult = (event) => {
         const resultadoTexto = event.results[0][0].transcript;
-        
-        // 🚀 GUARDAMOS LA TRANSCRIPCIÓN EN UNA VARIABLE GLOBAL
-        window.ultimaVozPedro = resultadoTexto;
-        
         alRecibirTexto(resultadoTexto);
     };
-     }
+}
 
-     // =================================================================
+
+// =================================================================
 // 3. CEREBRO RESPONDEDOR LOCAL DE H.A.R.V.I.S.
 // =================================================================
 function procesarRespuestaHarvis(mensajeRecibidoDePedro) {
@@ -3486,7 +3453,6 @@ function procesarRespuestaHarvis(mensajeRecibidoDePedro) {
 
     }, 1000);
      }
-     
 
 
 
@@ -3552,42 +3518,47 @@ function actualizarMonitorAPI(tokensAcumuladosEnPeticion, estado = 'success', me
 // 1. CONTROLADOR DE ENVÍO DE MENSAJES (FLUX PRINCIPAL)
 // =================================================================
 function funcionDeEnvioRealDeTuApp(textoDelMensaje) {
+    // CAPTURA REAL DE SPACECHAT: Leemos tu elemento HTML (ajustado a targetID)
     const inputTarget = document.getElementById('targetID') || document.getElementById('target-id');
     const usuarioEnPantalla = inputTarget ? inputTarget.value : ""; 
     const targetID = usuarioEnPantalla;
 
     if (usuarioEnPantalla === "harvis_user_system") {
         
+        // Limpiamos tu textarea msg-text como hace siempre tu app
         const campoTexto = document.getElementById('msg-text');
         if (campoTexto) {
             campoTexto.value = "";
             campoTexto.style.height = '40px'; 
         }
 
+        // Activamos la escucha atenta de fondo para que siga el bucle estilo Alexa
         if (typeof activarEscuchaAtentaHarvis === "function") {
             activarEscuchaAtentaHarvis();
         }
 
+        // 🎙️ FILTRO DEFENSIVO PARA AUDIOS (Evita mandar Base64 a Gemini como texto)
         if (!textoDelMensaje || typeof textoDelMensaje !== "string" || textoDelMensaje.includes("data:audio") || textoDelMensaje.startsWith("GkXf")) {
             if (typeof escucharVozPedro === "function") {
                 console.log("🎙️ Filtro H.A.R.V.I.S.: Detectado archivo de audio. Forzando transcripción nativa...");
                 escucharVozPedro((textoConvertido) => {
                     if (textoConvertido && textoConvertido.trim() !== "") {
                         if (campoTexto) campoTexto.value = textoConvertido;
-                        funcionDeEnvioRealDeTuApp(textoConvertido); 
+                        funcionDeEnvioRealDeTuApp(textoConvertido); // Re-dispara con el texto ya convertido
                     }
                 });
             }
-            return; 
+            return; // Detiene el envío del audio plano
         }
 
-        // Ejecutar procesamiento con el Asistente
+        // 🧠 DISPARO HACIA EL CEREBRO DE H.A.R.V.I.S. (Vercel)
         procesarRespuestaHarvis(textoDelMensaje, targetID);
 
     } else {
+        // CHATS NORMALES: Tu lógica original de Firebase o IndexedDB se queda aquí quieta
         console.log("Mensaje enviado a contacto regular vía Firebase/IndexedDB:", textoDelMensaje);
     }
-}
+     }
 
 // =================================================================
 // 2. CONEXIÓN SEGURA Y PROCESAMIENTO CON TU BACKEND EN VERCEL
