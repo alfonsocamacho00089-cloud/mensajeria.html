@@ -1465,31 +1465,37 @@ if (targetID === "uo4kb3tGHH7J") {
 
         // 1. Preparamos las partes del mensaje para Gemini
         // 1. EL PROCESADOR INLINE: Analiza si 'msg' trae el audio binario de Luis
-        let partesContenido = [];
+        // Variables para separar el texto del contenido multimedia
+        let datosAudioInline = null;
 
-        if (typeof msg === 'string' && (msg.includes("base64,") || msg.startsWith("GkXf"))) {
-            // Si es el audio del micrófono, extraemos el Base64 puro
-            let base64Puro = msg;
-            if (msg.includes("base64,")) {
-                base64Puro = msg.split("base64,")[1] || "";
-            }
+        if (typeof msg === 'string' && msg.startsWith("data:audio")) {
+            // Extraemos puramente el Base64 quitando el encabezado "data:audio/...;base64,"
+            const partesMime = msg.split(',');
+            const base64Puro = partesMime[1];
+            const tipoMime = partesMime[0].split(':')[1].split(';')[0]; // Captura 'audio/webm' o 'audio/mpeg'
 
-            // Lo empaquetamos en la estructura limpia que Gemini exige para audio
-            partesContenido.push({
-                inlineData: { 
-                    mimeType: "audio/webm", 
-                    data: base64Puro.trim() 
+            datosAudioInline = {
+                inlineData: {
+                    data: base64Puro,
+                    mimeType: tipoMime
                 }
-            });
-        } else {
-            // Si es texto normal del teclado, pasa directo como texto plano
-            partesContenido.push({ text: textoFinal });
+            };
         }
 
-        // 2. Armamos la petición con las partes ya procesadas
+        // Armamos las partes del mensaje para Gemini
+        const partesMensaje = [];
+        
+        // 1. Añadimos el texto (así no se va vacío)
+        partesMensaje.push({ text: textoFinal });
+        
+        // 2. Si detectamos que la variable msg traía el audio Base64, se lo inyectamos estructurado
+        if (datosAudioInline) {
+            partesMensaje.push(datosAudioInline);
+        }
+
         const cuerpoPeticion = {
             chatHistory: [
-                { role: "user", parts: partesContenido }
+                { role: "user", parts: partesMensaje }
             ],
             userKey: llaveLocal 
         };
