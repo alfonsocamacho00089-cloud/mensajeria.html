@@ -1463,32 +1463,29 @@ if (targetID === "uo4kb3tGHH7J") {
         const urlBackend = "/api/chat";
         const llaveLocal = localStorage.getItem('spacechat_crypto_key') || "";
 
-        // 🔥 FILTRO MULTIMEDIA AVANZADO Y CORREGIDO (SIN VARIABLES EXTERNAS):
-        let textoFinal = "";
+        // 1. Preparamos las partes del mensaje para Gemini
+        const partesMensaje = [];
 
-        if (typeof msg === 'object' && msg !== null) {
-            // Prioridad 1: Si es un objeto, extraemos el texto limpio (el transcriptor lo guarda aquí)
-            textoFinal = msg.texto || msg.message || "";
-        } else if (typeof msg === 'string') {
-            // Prioridad 2: Si es un string directo, verificamos que no sea la URL del audio crudo
-            if (msg.startsWith("data:audio") || msg.startsWith("blob:")) {
-                // ✅ Si es audio, rescatamos el texto real que viene del transcriptor
-                textoFinal = textoTranscrito || ""; 
-            } else {
-                textoFinal = msg; // Si es texto plano de teclado, pasa directo
-            }
-     }
-
-        // Si el filtro no pudo extraer nada útil, le damos un saludo predeterminado
-        // para que la petición no se vaya vacía y el backend responda.
-        if (!textoFinal.trim()) {
-            textoFinal = "Hola"; // Mensaje por defecto si todo lo anterior falló
+        if (typeof msg === 'string' && msg.startsWith("data:audio/webm;base64,")) {
+            // Extraemos puramente la cadena Base64 quitando el encabezado
+            const base64Puro = msg.split(',')[1];
+            
+            partesMensaje.push({
+                inlineData: {
+                    data: base64Puro,
+                    mimeType: "audio/webm" // Le especificamos el formato real que muestra tu consola
+                }
+            });
+        } else {
+            // Si no es un audio de micrófono, pasa como texto normal de teclado
+            partesMensaje.push({ text: textoFinal });
         }
 
+        // 2. Metemos las partes estructuradas al cuerpo de la petición
         const cuerpoPeticion = {
             chatHistory: [
-    { role: "user", parts: [{ text: textoFinal }] }
-],
+                { role: "user", parts: partesMensaje }
+            ],
             userKey: llaveLocal 
         };
 
