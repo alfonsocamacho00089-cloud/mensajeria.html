@@ -1449,12 +1449,12 @@ const base64 = btoa(binary);
         // 🛡️ REGLA DE ORO: Si es para H.A.R.V.I.S., NO lo subas a Firebase. Si es un contacto normal, SÍ lo sube.
         if (targetID !== "uo4kb3tGHH7J") {
             await db.ref('cola_satelital/' + targetID).push({
-                p: base64,
-                from: miID,
-                ts: Date.now(),
-                msgId: msgId,
-                mediaType: tipoValidado 
-            });
+    p: base64,
+    from: miID,
+    ts: Date.now(),
+    msgId: msgId,
+    mediaType: tipoValidado 
+ });
         }
 
 // === CONEXIÓN SEGURA RUTA HACIA EL BACKEND EN VERCEL ===
