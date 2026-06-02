@@ -1183,22 +1183,12 @@ margin: 0;
   </div>
 
 
-<!-- ========================================== -->
-<!-- MODAL ESTUDIO SPAXIO (LIVES Y SUBIDAS)     -->
-<!-- ========================================== -->
 <div id="modal-spaxio" class="modal-cristal-oscuro" style="display: none;">
     <div class="spaxio-header">
         <h3 style="color: #ffd700; margin: 0; text-shadow: 0 0 5px rgba(255, 215, 0, 0.5);">🎬 Estudio Spaxio</h3>
         <button onclick="cerrarModalSpaxio()" class="btn-cerrar-dorado">✖</button>
     </div>
 
-    <!-- Pestañas de Navegación -->
-    <div class="spaxio-tabs">
-        <button id="tab-live" class="spaxio-tab activa" onclick="cambiarModoSpaxio('live')">🔴 Transmitir</button>
-        <button id="tab-upload" class="spaxio-tab" onclick="cambiarModoSpaxio('upload')">⬆️ Subir Archivo</button>
-    </div>
-
-    <!-- VISTA 1: TRANSMISIÓN EN VIVO -->
     <div id="vista-spaxio-live" class="spaxio-content">
         <div class="contenedor-camara-preview">
             <video id="video-preview-spaxio" autoplay muted playsinline></video>
@@ -1208,17 +1198,8 @@ margin: 0;
         </div>
         <button class="btn-accion-dorado" onclick="iniciarSpaxioLive()">▶ Empezar Directo</button>
     </div>
-
-    <!-- VISTA 2: SUBIR VIDEO/REEL -->
-    <div id="vista-spaxio-upload" class="spaxio-content" style="display: none;">
-        <div class="zona-drop-video">
-            <span style="font-size: 40px; color: #ffd700;">📂</span>
-            <p style="color: #fff; margin-top: 10px;">Selecciona un video de tu galería</p>
-            <input type="file" id="input-subir-spaxio" accept="video/*">
-        </div>
-        <button class="btn-accion-dorado" onclick="subirVideoSpaxio()">Subir a Spaxio</button>
-    </div>
 </div>
+    
 
   
     
