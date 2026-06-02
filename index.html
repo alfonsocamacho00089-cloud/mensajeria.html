@@ -845,7 +845,17 @@ margin: 0;
             <h1 id="nombre-dueño-header">SpaceChat</h1>
         </div>
     </div>
-
+<!-- En tu header, añade este botón antes de los de llamada -->
+<div style="display: flex; align-items: center; gap: 15px; flex-shrink: 0;">
+    <!-- Botón para abrir el Estudio Spaxio (el modal que ya tienes) -->
+    <button onclick="abrirModalSpaxio()" 
+            style="background: rgba(255, 215, 0, 0.1); border: 1px solid #ffd700; border-radius: 50%; width: 35px; height: 35px; cursor: pointer; color: #ffd700;">
+        ✨
+    </button>
+    
+    <button onclick="iniciarLlamadaSatelital('voz')" ...>📞</button>
+    <button onclick="iniciarLlamadaSatelital('video')" ...>📹</button>
+</div>
     <div style="display: flex; align-items: center; gap: 15px; flex-shrink: 0;">
         <button onclick="iniciarLlamadaSatelital('voz')" 
                 style="background: none; border: none; color: #ffd700; font-size: 20px; cursor: pointer; padding: 5px; transition: transform 0.2s;"
