@@ -1055,10 +1055,15 @@ margin: 0;
         <span style="text-shadow: 0 0 8px #ffd700;">🤖</span><span style="color: #ffd700;">H.A.R.V.I.S.</span>
     </div>
 
-    <!-- Botón Spaxio integrado limpiamente -->
-    <div class="btn-nav" onclick="abrirModalSpaxio()">
-        <span>🎬</span><span>Spaxio</span>
+<!-- Ejemplo para Spaxio Flow -->
+<div class="btn-nav" 
+     id="btn-nav-flow" 
+     data-contacto='{"id_sistema":"26fmetp4Q4WJ","nombre":"Spaxio","apellido":"Flow","estado":"activo"}'
+     onclick="cargarConversacionCon(JSON.parse(this.dataset.contacto).id_sistema)">
+        <span style="text-shadow: 0 0 8px #00d4ff;">🌊</span><span style="color: #00d4ff;">Spaxio Flow</span>
     </div>
+
+
 
     <div class="btn-nav active" onclick="document.getElementById('modal-agenda-completa').style.display='none'">
         <span>💬</span><span>Chat</span>
