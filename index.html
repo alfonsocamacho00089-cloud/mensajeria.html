@@ -4235,8 +4235,7 @@ async function encenderCamaraPreview() {
         console.error("❌ Error accediendo a la cámara.", err);
     }
      }
-
-     function iniciarSpaxioLive() {
+function iniciarSpaxioLive() {
     if (!streamCamaraActiva) return;
 
     spaxioChunks = [];
@@ -4246,11 +4245,18 @@ async function encenderCamaraPreview() {
         if (event.data.size > 0) spaxioChunks.push(event.data);
     };
 
+    // ESTA ES LA ÚNICA DEFINICIÓN DE ONSTOP QUE DEBES TENER
     spaxioRecorder.onstop = async () => {
         const videoBlob = new Blob(spaxioChunks, { type: 'video/webm' });
-        console.log("🛑 Live terminado. Blob generado, listo para enviar a tu API:", videoBlob);
+        console.log("🛑 Live terminado. Convirtiendo a Base64...");
         
-        // AQUÍ IRÁ TU LÓGICA PARA ENVIAR A VERCEL/BACKEND
+        const reader = new FileReader();
+        reader.readAsDataURL(videoBlob);
+        reader.onloadend = async () => {
+            const urlBase64 = reader.result;
+            await enviarMediaPorURL(urlBase64, 'video');
+            console.log("✅ Live procesado y enviado con éxito.");
+        };
     };
 
     spaxioRecorder.start();
@@ -4260,6 +4266,9 @@ async function encenderCamaraPreview() {
     document.querySelector('.btn-accion-dorado').textContent = "⏹ Terminar Directo";
     document.querySelector('.btn-accion-dorado').onclick = detenerSpaxioLive;
      }
+
+
+     
      function detenerSpaxioLive() {
     if (spaxioRecorder && spaxioRecorder.state !== "inactive") {
         spaxioRecorder.stop();
@@ -4278,25 +4287,6 @@ async function encenderCamaraPreview() {
 
      // ==========================================
 //   MÓDULO SPAXIOLIVE: Grabación (Actualizado)
-// ==========================================
-// ... (Tus funciones encenderCamaraPreview e iniciarSpaxioLive se mantienen igual) ...
-
-spaxioRecorder.onstop = async () => {
-    const videoBlob = new Blob(spaxioChunks, { type: 'video/webm' });
-    console.log("🛑 Live terminado. Convirtiendo a Base64...");
-    
-    // Convertimos el Blob del Live a Base64 usando tu lógica maestra
-    const reader = new FileReader();
-    reader.readAsDataURL(videoBlob);
-    reader.onloadend = async () => {
-        const urlBase64 = reader.result;
-        // Enviamos usando tu función maestra
-        await enviarMediaPorURL(urlBase64, 'video');
-        console.log("✅ Live procesado y enviado con éxito.");
-    };
-};
-
-// ... (Tu función detenerSpaxioLive se mantiene igual) ...
 
 // ==========================================
 //   MÓDULO SPAXIO UPLOAD (Integrado)
