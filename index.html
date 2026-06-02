@@ -4217,73 +4217,50 @@ function DespacharMensajeEnCola() {
     }
      }
 
-     // ==========================================
+// ==========================================
 //   MÓDULO SPAXIOLIVE: Grabación y Auto-Save
 // ==========================================
 let spaxioRecorder;
 let spaxioChunks = [];
-let streamCamaraActiva; // Guardamos la señal para no pedir permiso dos veces
+let streamCamaraActiva;
 
-// 1. Enciende la cámara solo para verse en el modal (Preview)
 async function encenderCamaraPreview() {
     try {
         streamCamaraActiva = await navigator.mediaDevices.getUserMedia({ 
             audio: true, 
             video: { facingMode: "user", width: { ideal: 1280 }, height: { ideal: 720 } } 
         });
-        // Conectamos la señal a la pantalla de cristal oscuro que creamos
         document.getElementById('video-preview-spaxio').srcObject = streamCamaraActiva;
     } catch (err) {
-        console.error("❌ H.A.R.V.I.S. reporta: Error accediendo a la cámara.", err);
+        console.error("❌ Error accediendo a la cámara.", err);
     }
-}
+     }
 
-// 2. Ahora sí, arranca a grabar cuando tocas "Empezar Directo"
-function iniciarSpaxioLive() {
-    if (!streamCamaraActiva) {
-        console.error("La cámara no está encendida.");
-        return;
-    }
+     function iniciarSpaxioLive() {
+    if (!streamCamaraActiva) return;
 
     spaxioChunks = [];
-    spaxioRecorder = new MediaRecorder(streamCamaraActiva, { mimeType: 'video/webm; codecs=vp9' });
+    spaxioRecorder = new MediaRecorder(streamCamaraActiva, { mimeType: 'video/webm' });
 
     spaxioRecorder.ondataavailable = (event) => {
         if (event.data.size > 0) spaxioChunks.push(event.data);
     };
 
     spaxioRecorder.onstop = async () => {
-        console.log("🛑 Live terminado. Iniciando Auto-Save en Storage...");
         const videoBlob = new Blob(spaxioChunks, { type: 'video/webm' });
+        console.log("🛑 Live terminado. Blob generado, listo para enviar a tu API:", videoBlob);
         
-        // Subida a Firebase Storage
-        const miId = localStorage.getItem('mi_dropis_id') || 'usuario_desconocido';
-        const nombreArchivo = `spaxiolive_${miId}_${Date.now()}.webm`;
-        const refStorage = storage.ref(`spaxiolives/${miId}/${nombreArchivo}`);
-        
-        try {
-            const subida = await refStorage.put(videoBlob);
-            const urlDescarga = await subida.ref.getDownloadURL();
-            console.log("✅ SpaxioLive guardado con éxito:", urlDescarga);
-            
-            // Aquí luego mandamos esto a Vercel
-            
-        } catch (error) {
-            console.error("❌ Error subiendo el Live:", error);
-        }
+        // AQUÍ IRÁ TU LÓGICA PARA ENVIAR A VERCEL/BACKEND
     };
 
     spaxioRecorder.start();
     
-    // Cambiamos el UI visualmente
     document.querySelector('.badge-live-offline').textContent = "🔴 EN DIRECTO";
     document.querySelector('.badge-live-offline').style.background = "red";
     document.querySelector('.btn-accion-dorado').textContent = "⏹ Terminar Directo";
-    document.querySelector('.btn-accion-dorado').onclick = detenerSpaxioLive; // Cambiamos la función del botón
-}
-
-// 3. Detiene la grabación y apaga la cámara
-function detenerSpaxioLive() {
+    document.querySelector('.btn-accion-dorado').onclick = detenerSpaxioLive;
+     }
+     function detenerSpaxioLive() {
     if (spaxioRecorder && spaxioRecorder.state !== "inactive") {
         spaxioRecorder.stop();
     }
@@ -4292,13 +4269,73 @@ function detenerSpaxioLive() {
         streamCamaraActiva.getTracks().forEach(track => track.stop());
     }
 
-    // Restauramos el UI
     document.querySelector('.badge-live-offline').textContent = "OFFLINE";
     document.querySelector('.badge-live-offline').style.background = "rgba(0,0,0,0.6)";
     document.querySelector('.btn-accion-dorado').textContent = "▶ Empezar Directo";
     document.querySelector('.btn-accion-dorado').onclick = iniciarSpaxioLive;
      }
 
+
+     // ==========================================
+//   MÓDULO SPAXIOLIVE: Grabación (Actualizado)
+// ==========================================
+// ... (Tus funciones encenderCamaraPreview e iniciarSpaxioLive se mantienen igual) ...
+
+spaxioRecorder.onstop = async () => {
+    const videoBlob = new Blob(spaxioChunks, { type: 'video/webm' });
+    console.log("🛑 Live terminado. Convirtiendo a Base64...");
+    
+    // Convertimos el Blob del Live a Base64 usando tu lógica maestra
+    const reader = new FileReader();
+    reader.readAsDataURL(videoBlob);
+    reader.onloadend = async () => {
+        const urlBase64 = reader.result;
+        // Enviamos usando tu función maestra
+        await enviarMediaPorURL(urlBase64, 'video');
+        console.log("✅ Live procesado y enviado con éxito.");
+    };
+};
+
+// ... (Tu función detenerSpaxioLive se mantiene igual) ...
+
+// ==========================================
+//   MÓDULO SPAXIO UPLOAD (Integrado)
+// ==========================================
+async function subirVideoSpaxio() {
+    const input = document.getElementById('input-subir-spaxio');
+    
+    if (!input.files || !input.files[0]) {
+        alert("⚠️ Por favor, selecciona un video primero.");
+        return;
+    }
+
+    try {
+        const btn = document.querySelector('#vista-spaxio-upload .btn-accion-dorado');
+        btn.textContent = "Procesando...";
+        btn.disabled = true;
+
+        // Usamos la función maestra que creaste para convertir y enviar
+        await prepararEnvioMedia(input, 'video');
+
+        alert("✅ Video subido con éxito.");
+        btn.textContent = "Subir a Spaxio";
+        btn.disabled = false;
+        
+        cerrarModalSpaxio();
+    } catch (error) {
+        console.error("❌ Error en el flujo de subida:", error);
+        alert("H.A.R.V.I.S.: Falló la conversión del video.");
+        const btn = document.querySelector('#vista-spaxio-upload .btn-accion-dorado');
+        btn.textContent = "Subir a Spaxio";
+        btn.disabled = false;
+    }
+}
+
+// ==========================================
+//   CONTROL DE PESTAÑAS (Mantenlo tal cual)
+// ==========================================
+// ... (Tus funciones cambiarModoSpaxio, abrirModalSpaxio y cerrarModalSpaxio) ...
+     
      function abrirModalSpaxio() {
     document.getElementById('modal-spaxio').style.display = 'flex';
     encenderCamaraPreview(); // <--- Llamamos a la cámara aquí
@@ -4334,52 +4371,7 @@ function cerrarModalSpaxio() {
     }
      }
 
-     // ==========================================
-//   MÓDULO SPAXIO UPLOAD
-// ==========================================
-async function subirVideoSpaxio() {
-    const input = document.getElementById('input-subir-spaxio');
-    const archivo = input.files[0];
-
-    if (!archivo) {
-        alert("⚠️ Por favor, selecciona un video primero.");
-        return;
-    }
-
-    console.log("🚀 Iniciando subida de archivo:", archivo.name);
-
-    // Referencia a Firebase Storage
-    const miId = localStorage.getItem('mi_dropis_id') || 'usuario_desconocido';
-    const nombreArchivo = `upload_${miId}_${Date.now()}_${archivo.name}`;
-    const refStorage = storage.ref(`spaxiolives/${miId}/${nombreArchivo}`);
-
-    try {
-        // Mostramos un feedback visual (opcional)
-        const btn = document.querySelector('#vista-spaxio-upload .btn-accion-dorado');
-        btn.textContent = "Subiendo...";
-        btn.disabled = true;
-
-        // Subir al Storage
-        const subida = await refStorage.put(archivo);
-        const urlDescarga = await subida.ref.getDownloadURL();
-        
-        console.log("✅ Video subido con éxito:", urlDescarga);
-        alert("¡Video subido correctamente!");
-
-        // Restaurar botón
-        btn.textContent = "Subir a Spaxio";
-        btn.disabled = false;
-        
-        // Opcional: cerrar modal tras subir
-        // cerrarModalSpaxio();
-
-    } catch (error) {
-        console.error("❌ Error al subir el archivo:", error);
-        alert("Error al subir el video. Intenta de nuevo.");
-        document.querySelector('#vista-spaxio-upload .btn-accion-dorado').textContent = "Subir a Spaxio";
-        document.querySelector('#vista-spaxio-upload .btn-accion-dorado').disabled = false;
-    }
-     }
+     
      
      function cargarFotoInicial() {
     const fotoGuardada = localStorage.getItem('mi_foto');
