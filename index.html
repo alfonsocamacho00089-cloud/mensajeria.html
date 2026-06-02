@@ -2343,8 +2343,36 @@ function pintarMensaje(contenido, clase, hora, status, id, tipo = 'texto') {
                     textoReal.includes('tiktok.com/') || textoReal.includes('facebook.com/') || 
                     tipo === 'video' || tipo === 'audio' || tipo === 'sticker' || tipo === 'stickers' ||
                     textoReal.startsWith('blob:') || textoReal.startsWith('data:audio'); 
- if (esCosaNueva) {
-        
+
+        // Detecta si es contenido de Spaxio (Lives, Reels, Fotos)
+const esSpaxio = (tipo === 'system_content' || id.includes('spaxio_')); 
+
+if (esSpaxio) {
+    // ----------------------------------------------------
+    // CAMINO 3: EL MODO INMERSIVO SPAXIO (Estilo TikTok)
+    // ----------------------------------------------------
+    div.style.background = 'transparent';
+    div.style.boxShadow = 'none';
+    div.style.padding = '0px';
+    div.style.width = '100%'; // ¡Aquí está la magia del tamaño!
+
+    div.innerHTML = `
+        <div style="width: 100%; border-radius: 15px; overflow: hidden; border: 2px solid #ffd700; background: #000;">
+            <video src="${contenido.videoUrl}" controls playsinline style="width: 100%; display: block;"></video>
+            <div style="padding: 10px; color: #ffd700; font-weight: bold;">${contenido.titulo || 'Spaxio Content'}</div>
+        </div>
+        <div style="font-size:10px; opacity:0.6; text-align:right; margin-top:4px; color: #fff;">
+            ${horaFinal}
+        </div>
+    `;
+    box.appendChild(div);
+    box.scrollTop = box.scrollHeight;
+} 
+else if (esCosaNueva) {
+    // ... tu código original de esCosaNueva sigue aquí igualito ...
+
+    // ... tu código original de camino 2 sigue aquí igualito ...
+     
         // ----------------------------------------------------
         // CAMINO 1: LAS COSAS NUEVAS (Redes y Multimedia pesada)
         // ----------------------------------------------------
