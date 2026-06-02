@@ -4333,6 +4333,53 @@ function cerrarModalSpaxio() {
         streamCamaraActiva = null; 
     }
      }
+
+     // ==========================================
+//   MÓDULO SPAXIO UPLOAD
+// ==========================================
+async function subirVideoSpaxio() {
+    const input = document.getElementById('input-subir-spaxio');
+    const archivo = input.files[0];
+
+    if (!archivo) {
+        alert("⚠️ Por favor, selecciona un video primero.");
+        return;
+    }
+
+    console.log("🚀 Iniciando subida de archivo:", archivo.name);
+
+    // Referencia a Firebase Storage
+    const miId = localStorage.getItem('mi_dropis_id') || 'usuario_desconocido';
+    const nombreArchivo = `upload_${miId}_${Date.now()}_${archivo.name}`;
+    const refStorage = storage.ref(`spaxiolives/${miId}/${nombreArchivo}`);
+
+    try {
+        // Mostramos un feedback visual (opcional)
+        const btn = document.querySelector('#vista-spaxio-upload .btn-accion-dorado');
+        btn.textContent = "Subiendo...";
+        btn.disabled = true;
+
+        // Subir al Storage
+        const subida = await refStorage.put(archivo);
+        const urlDescarga = await subida.ref.getDownloadURL();
+        
+        console.log("✅ Video subido con éxito:", urlDescarga);
+        alert("¡Video subido correctamente!");
+
+        // Restaurar botón
+        btn.textContent = "Subir a Spaxio";
+        btn.disabled = false;
+        
+        // Opcional: cerrar modal tras subir
+        // cerrarModalSpaxio();
+
+    } catch (error) {
+        console.error("❌ Error al subir el archivo:", error);
+        alert("Error al subir el video. Intenta de nuevo.");
+        document.querySelector('#vista-spaxio-upload .btn-accion-dorado').textContent = "Subir a Spaxio";
+        document.querySelector('#vista-spaxio-upload .btn-accion-dorado').disabled = false;
+    }
+     }
      
      function cargarFotoInicial() {
     const fotoGuardada = localStorage.getItem('mi_foto');
