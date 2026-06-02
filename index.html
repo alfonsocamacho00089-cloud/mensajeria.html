@@ -645,6 +645,131 @@ margin: 0;
     min-height: 20px;
 }
 
+/* --- MODAL ESTUDIO SPAXIO --- */
+.modal-cristal-oscuro {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(10, 10, 10, 0.85); /* Fondo oscuro translúcido */
+    backdrop-filter: blur(12px); /* Efecto Glassmorphism */
+    -webkit-backdrop-filter: blur(12px);
+    z-index: 40000;
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+.spaxio-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 15px;
+    border-bottom: 1px solid rgba(255, 215, 0, 0.3);
+}
+
+.btn-cerrar-dorado {
+    background: transparent;
+    border: none;
+    color: #ffd700;
+    font-size: 24px;
+    cursor: pointer;
+}
+
+.spaxio-tabs {
+    display: flex;
+    margin: 20px 0;
+    background: rgba(0, 0, 0, 0.5);
+    border-radius: 15px;
+    padding: 5px;
+    border: 1px solid rgba(255, 215, 0, 0.2);
+}
+
+.spaxio-tab {
+    flex: 1;
+    padding: 12px;
+    background: transparent;
+    border: none;
+    color: #888;
+    font-weight: bold;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.spaxio-tab.activa {
+    background: #ffd700;
+    color: #000;
+    box-shadow: 0 0 10px rgba(255, 215, 0, 0.4);
+}
+
+/* Contenedor de la cámara */
+.contenedor-camara-preview {
+    width: 100%;
+    height: 60vh; /* Ocupa buena parte de la pantalla */
+    background: #000;
+    border-radius: 20px;
+    overflow: hidden;
+    position: relative;
+    border: 2px solid rgba(255, 215, 0, 0.5);
+    margin-bottom: 20px;
+}
+
+#video-preview-spaxio {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.overlay-camara {
+    position: absolute;
+    top: 15px;
+    left: 15px;
+}
+
+.badge-live-offline {
+    background: rgba(0,0,0,0.6);
+    color: #fff;
+    padding: 5px 10px;
+    border-radius: 8px;
+    font-size: 12px;
+    border: 1px solid #555;
+}
+
+/* Zona de subida */
+.zona-drop-video {
+    height: 60vh;
+    border: 2px dashed rgba(255, 215, 0, 0.5);
+    border-radius: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background: rgba(255, 215, 0, 0.05);
+    margin-bottom: 20px;
+    position: relative;
+}
+
+#input-subir-spaxio {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+}
+
+.btn-accion-dorado {
+    width: 100%;
+    padding: 15px;
+    background: linear-gradient(135deg, #FFD700 0%, #B8860B 100%);
+    color: #000;
+    border: none;
+    border-radius: 15px;
+    font-size: 18px;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(255, 215, 0, 0.4);
+ }
+      
 /* --- BOTÓN CENTRAL SPAXIOLIVE --- */
 .btn-live-center {
     position: relative;
@@ -930,9 +1055,9 @@ margin: 0;
         <span style="text-shadow: 0 0 8px #ffd700;">🤖</span><span style="color: #ffd700;">H.A.R.V.I.S.</span>
     </div>
 
-    <div class="btn-live-center" onclick="abrirModalSpaxioLive()">
-        <div class="live-ring"></div>
-        <div class="live-icon"><i class="fa-solid fa-plus"></i></div>
+    <!-- Botón Spaxio integrado limpiamente -->
+    <div class="btn-nav" onclick="abrirModalSpaxio()">
+        <span>🎬</span><span>Spaxio</span>
     </div>
 
     <div class="btn-nav active" onclick="document.getElementById('modal-agenda-completa').style.display='none'">
@@ -1045,7 +1170,42 @@ margin: 0;
   </div>
 
 
+<!-- ========================================== -->
+<!-- MODAL ESTUDIO SPAXIO (LIVES Y SUBIDAS)     -->
+<!-- ========================================== -->
+<div id="modal-spaxio" class="modal-cristal-oscuro" style="display: none;">
+    <div class="spaxio-header">
+        <h3 style="color: #ffd700; margin: 0; text-shadow: 0 0 5px rgba(255, 215, 0, 0.5);">🎬 Estudio Spaxio</h3>
+        <button onclick="cerrarModalSpaxio()" class="btn-cerrar-dorado">✖</button>
+    </div>
 
+    <!-- Pestañas de Navegación -->
+    <div class="spaxio-tabs">
+        <button id="tab-live" class="spaxio-tab activa" onclick="cambiarModoSpaxio('live')">🔴 Transmitir</button>
+        <button id="tab-upload" class="spaxio-tab" onclick="cambiarModoSpaxio('upload')">⬆️ Subir Archivo</button>
+    </div>
+
+    <!-- VISTA 1: TRANSMISIÓN EN VIVO -->
+    <div id="vista-spaxio-live" class="spaxio-content">
+        <div class="contenedor-camara-preview">
+            <video id="video-preview-spaxio" autoplay muted playsinline></video>
+            <div class="overlay-camara">
+                <span class="badge-live-offline">OFFLINE</span>
+            </div>
+        </div>
+        <button class="btn-accion-dorado" onclick="iniciarSpaxioLive()">▶ Empezar Directo</button>
+    </div>
+
+    <!-- VISTA 2: SUBIR VIDEO/REEL -->
+    <div id="vista-spaxio-upload" class="spaxio-content" style="display: none;">
+        <div class="zona-drop-video">
+            <span style="font-size: 40px; color: #ffd700;">📂</span>
+            <p style="color: #fff; margin-top: 10px;">Selecciona un video de tu galería</p>
+            <input type="file" id="input-subir-spaxio" accept="video/*">
+        </div>
+        <button class="btn-accion-dorado" onclick="subirVideoSpaxio()">Subir a Spaxio</button>
+    </div>
+</div>
 
   
     
@@ -4016,65 +4176,99 @@ function DespacharMensajeEnCola() {
     }
      }
 
- // ==========================================
+     // ==========================================
 //   MÓDULO SPAXIOLIVE: Grabación y Auto-Save
 // ==========================================
 let spaxioRecorder;
 let spaxioChunks = [];
+let streamCamaraActiva; // Guardamos la señal para no pedir permiso dos veces
 
-async function iniciarSpaxioLive() {
+// 1. Enciende la cámara solo para verse en el modal (Preview)
+async function encenderCamaraPreview() {
     try {
-        // 1. Pedimos acceso a la cámara en alta calidad
-        const streamLive = await navigator.mediaDevices.getUserMedia({ audio: true, video: { facingMode: "user", width: { ideal: 1280 }, height: { ideal: 720 } } });
-        
-        // Aquí deberías conectar tu reproductor local (ej. un modal estilo TikTok)
-        // document.getElementById('video-spaxio-local').srcObject = streamLive;
-
-        // 2. Configuramos el grabador
-        spaxioChunks = [];
-        spaxioRecorder = new MediaRecorder(streamLive, { mimeType: 'video/webm; codecs=vp9' });
-
-        spaxioRecorder.ondataavailable = (event) => {
-            if (event.data.size > 0) spaxioChunks.push(event.data);
-        };
-
-        spaxioRecorder.onstop = async () => {
-            console.log("🛑 Live terminado. Iniciando Auto-Save en Storage...");
-            const videoBlob = new Blob(spaxioChunks, { type: 'video/webm' });
-            
-            // 3. Subida en segundo plano a Firebase Storage
-            const miId = localStorage.getItem('mi_dropis_id') || 'usuario_desconocido';
-            const nombreArchivo = `spaxiolive_${miId}_${Date.now()}.webm`;
-            const refStorage = storage.ref(`spaxiolives/${miId}/${nombreArchivo}`);
-            
-            try {
-                const subida = await refStorage.put(videoBlob);
-                const urlDescarga = await subida.ref.getDownloadURL();
-                console.log("✅ SpaxioLive guardado con éxito:", urlDescarga);
-                
-                // Aquí llamaremos al backend de Vercel para que H.A.R.V.I.S. lo fragmente
-                // solicitarAnalisisDeVideo(urlDescarga);
-                
-            } catch (error) {
-                console.error("❌ Error subiendo el Live:", error);
-            }
-        };
-
-        spaxioRecorder.start();
-        console.log("🔴 SpaxioLive EN DIRECTO");
-
+        streamCamaraActiva = await navigator.mediaDevices.getUserMedia({ 
+            audio: true, 
+            video: { facingMode: "user", width: { ideal: 1280 }, height: { ideal: 720 } } 
+        });
+        // Conectamos la señal a la pantalla de cristal oscuro que creamos
+        document.getElementById('video-preview-spaxio').srcObject = streamCamaraActiva;
     } catch (err) {
-        console.error("❌ H.A.R.V.I.S. reporta: Hardware de cámara inaccesible.", err);
+        console.error("❌ H.A.R.V.I.S. reporta: Error accediendo a la cámara.", err);
     }
 }
 
+// 2. Ahora sí, arranca a grabar cuando tocas "Empezar Directo"
+function iniciarSpaxioLive() {
+    if (!streamCamaraActiva) {
+        console.error("La cámara no está encendida.");
+        return;
+    }
+
+    spaxioChunks = [];
+    spaxioRecorder = new MediaRecorder(streamCamaraActiva, { mimeType: 'video/webm; codecs=vp9' });
+
+    spaxioRecorder.ondataavailable = (event) => {
+        if (event.data.size > 0) spaxioChunks.push(event.data);
+    };
+
+    spaxioRecorder.onstop = async () => {
+        console.log("🛑 Live terminado. Iniciando Auto-Save en Storage...");
+        const videoBlob = new Blob(spaxioChunks, { type: 'video/webm' });
+        
+        // Subida a Firebase Storage
+        const miId = localStorage.getItem('mi_dropis_id') || 'usuario_desconocido';
+        const nombreArchivo = `spaxiolive_${miId}_${Date.now()}.webm`;
+        const refStorage = storage.ref(`spaxiolives/${miId}/${nombreArchivo}`);
+        
+        try {
+            const subida = await refStorage.put(videoBlob);
+            const urlDescarga = await subida.ref.getDownloadURL();
+            console.log("✅ SpaxioLive guardado con éxito:", urlDescarga);
+            
+            // Aquí luego mandamos esto a Vercel
+            
+        } catch (error) {
+            console.error("❌ Error subiendo el Live:", error);
+        }
+    };
+
+    spaxioRecorder.start();
+    
+    // Cambiamos el UI visualmente
+    document.querySelector('.badge-live-offline').textContent = "🔴 EN DIRECTO";
+    document.querySelector('.badge-live-offline').style.background = "red";
+    document.querySelector('.btn-accion-dorado').textContent = "⏹ Terminar Directo";
+    document.querySelector('.btn-accion-dorado').onclick = detenerSpaxioLive; // Cambiamos la función del botón
+}
+
+// 3. Detiene la grabación y apaga la cámara
 function detenerSpaxioLive() {
     if (spaxioRecorder && spaxioRecorder.state !== "inactive") {
         spaxioRecorder.stop();
-        // Apagamos la cámara
-        spaxioRecorder.stream.getTracks().forEach(track => track.stop());
     }
+    
+    if (streamCamaraActiva) {
+        streamCamaraActiva.getTracks().forEach(track => track.stop());
+    }
+
+    // Restauramos el UI
+    document.querySelector('.badge-live-offline').textContent = "OFFLINE";
+    document.querySelector('.badge-live-offline').style.background = "rgba(0,0,0,0.6)";
+    document.querySelector('.btn-accion-dorado').textContent = "▶ Empezar Directo";
+    document.querySelector('.btn-accion-dorado').onclick = iniciarSpaxioLive;
      }
+
+     function abrirModalSpaxio() {
+    document.getElementById('modal-spaxio').style.display = 'flex';
+    encenderCamaraPreview(); // <--- Llamamos a la cámara aquí
+}
+
+function cerrarModalSpaxio() {
+    document.getElementById('modal-spaxio').style.display = 'none';
+    detenerSpaxioLive(); // <--- Apagamos todo si cierra la ventana
+     }
+
+     
      function cargarFotoInicial() {
     const fotoGuardada = localStorage.getItem('mi_foto');
     if (fotoGuardada && fotoGuardada !== "") {
