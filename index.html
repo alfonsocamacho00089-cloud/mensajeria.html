@@ -4217,10 +4217,10 @@ function DespacharMensajeEnCola() {
     }
      }
 
-// ==========================================
-//   MÓDULO SPAXIOLIVE: Grabación y Auto-Save
-// ==========================================
-let spaxioRecorder;
+
+
+     
+     let spaxioRecorder;
 let spaxioChunks = [];
 let streamCamaraActiva;
 
@@ -4232,9 +4232,10 @@ async function encenderCamaraPreview() {
         });
         document.getElementById('video-preview-spaxio').srcObject = streamCamaraActiva;
     } catch (err) {
-        console.error("❌ Error accediendo a la cámara.", err);
+        console.error("❌ H.A.R.V.I.S. reporta error de cámara:", err);
     }
-     }
+}
+
 function iniciarSpaxioLive() {
     if (!streamCamaraActiva) return;
 
@@ -4245,17 +4246,16 @@ function iniciarSpaxioLive() {
         if (event.data.size > 0) spaxioChunks.push(event.data);
     };
 
-    // ESTA ES LA ÚNICA DEFINICIÓN DE ONSTOP QUE DEBES TENER
     spaxioRecorder.onstop = async () => {
         const videoBlob = new Blob(spaxioChunks, { type: 'video/webm' });
-        console.log("🛑 Live terminado. Convirtiendo a Base64...");
+        console.log("🛑 Live finalizado. Procesando conversión...");
         
         const reader = new FileReader();
         reader.readAsDataURL(videoBlob);
         reader.onloadend = async () => {
             const urlBase64 = reader.result;
             await enviarMediaPorURL(urlBase64, 'video');
-            console.log("✅ Live procesado y enviado con éxito.");
+            console.log("✅ Live procesado y enviado a la red.");
         };
     };
 
@@ -4265,75 +4265,31 @@ function iniciarSpaxioLive() {
     document.querySelector('.badge-live-offline').style.background = "red";
     document.querySelector('.btn-accion-dorado').textContent = "⏹ Terminar Directo";
     document.querySelector('.btn-accion-dorado').onclick = detenerSpaxioLive;
-     }
+}
 
-
-     
-     function detenerSpaxioLive() {
+function detenerSpaxioLive() {
     if (spaxioRecorder && spaxioRecorder.state !== "inactive") {
         spaxioRecorder.stop();
     }
     
-    if (streamCamaraActiva) {
-        streamCamaraActiva.getTracks().forEach(track => track.stop());
-    }
-
     document.querySelector('.badge-live-offline').textContent = "OFFLINE";
     document.querySelector('.badge-live-offline').style.background = "rgba(0,0,0,0.6)";
     document.querySelector('.btn-accion-dorado').textContent = "▶ Empezar Directo";
     document.querySelector('.btn-accion-dorado').onclick = iniciarSpaxioLive;
-     }
-
-
-     // ==========================================
-//   MÓDULO SPAXIOLIVE: Grabación (Actualizado)
-
-// ==========================================
-//   MÓDULO SPAXIO UPLOAD (Integrado)
-// ==========================================
-async function subirVideoSpaxio() {
-    const input = document.getElementById('input-subir-spaxio');
-    
-    if (!input.files || !input.files[0]) {
-        alert("⚠️ Por favor, selecciona un video primero.");
-        return;
-    }
-
-    try {
-        const btn = document.querySelector('#vista-spaxio-upload .btn-accion-dorado');
-        btn.textContent = "Procesando...";
-        btn.disabled = true;
-
-        // Usamos la función maestra que creaste para convertir y enviar
-        await prepararEnvioMedia(input, 'video');
-
-        alert("✅ Video subido con éxito.");
-        btn.textContent = "Subir a Spaxio";
-        btn.disabled = false;
-        
-        cerrarModalSpaxio();
-    } catch (error) {
-        console.error("❌ Error en el flujo de subida:", error);
-        alert("H.A.R.V.I.S.: Falló la conversión del video.");
-        const btn = document.querySelector('#vista-spaxio-upload .btn-accion-dorado');
-        btn.textContent = "Subir a Spaxio";
-        btn.disabled = false;
-    }
 }
 
-// ==========================================
-//   CONTROL DE PESTAÑAS (Mantenlo tal cual)
-// ==========================================
-// ... (Tus funciones cambiarModoSpaxio, abrirModalSpaxio y cerrarModalSpaxio) ...
-     
-     function abrirModalSpaxio() {
+function abrirModalSpaxio() {
     document.getElementById('modal-spaxio').style.display = 'flex';
-    encenderCamaraPreview(); // <--- Llamamos a la cámara aquí
+    encenderCamaraPreview();
 }
 
 function cerrarModalSpaxio() {
+    // Apagamos la cámara al cerrar
+    if (streamCamaraActiva) {
+        streamCamaraActiva.getTracks().forEach(track => track.stop());
+    }
     document.getElementById('modal-spaxio').style.display = 'none';
-    detenerSpaxioLive(); // <--- Apagamos todo si cierra la ventana
+    detenerSpaxioLive();
      }
 
      function cambiarModoSpaxio(modo) {
