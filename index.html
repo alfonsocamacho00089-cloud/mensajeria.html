@@ -4222,9 +4222,24 @@ async function encenderCamaraPreview() {
     }
 }
 
+let modoActual = 'video'; // Por defecto es Reel
+
+function configurarModo(nuevoModo) {
+    modoActual = nuevoModo;
+    const btn = document.querySelector('.btn-accion-dorado');
+    btn.textContent = (modoActual === 'live') ? '▶ Iniciar Directo' : '▶ Grabar Reel';
+    console.log("H.A.R.V.I.S. listo para modo:", modoActual);
+}
+
 function iniciarSpaxioLive() {
     if (!streamCamaraActiva) return;
 
+    // 1. Si eligió Live, preparamos la difusión (WebRTC)
+    if (modoActual === 'live') {
+        iniciarDifusionWebRTC(); // Esta será la siguiente función que haremos
+    }
+
+    // 2. SIEMPRE iniciamos la grabación local (Auto-Save)
     spaxioChunks = [];
     spaxioRecorder = new MediaRecorder(streamCamaraActiva, { mimeType: 'video/webm' });
 
@@ -4234,24 +4249,26 @@ function iniciarSpaxioLive() {
 
     spaxioRecorder.onstop = async () => {
         const videoBlob = new Blob(spaxioChunks, { type: 'video/webm' });
-        console.log("🛑 Live finalizado. Procesando conversión...");
         
+        // Si estábamos en vivo, avisamos a la red que cerramos la transmisión
+        if (modoActual === 'live') detenerDifusionWebRTC();
+
         const reader = new FileReader();
         reader.readAsDataURL(videoBlob);
         reader.onloadend = async () => {
             const urlBase64 = reader.result;
-            await enviarMediaPorURL(urlBase64, 'video');
-            console.log("✅ Live procesado y enviado a la red.");
+            await enviarMediaPorURL(urlBase64, 'video'); // Esto sube el video al chat
+            console.log("✅ Contenido procesado y enviado al satélite.");
         };
     };
 
     spaxioRecorder.start();
     
-    document.querySelector('.badge-live-offline').textContent = "🔴 EN DIRECTO";
-    document.querySelector('.badge-live-offline').style.background = "red";
-    document.querySelector('.btn-accion-dorado').textContent = "⏹ Terminar Directo";
+    // UI Visual
+    document.querySelector('.badge-live-offline').textContent = (modoActual === 'live') ? "🔴 EN DIRECTO" : "🎥 GRABANDO";
+    document.querySelector('.btn-accion-dorado').textContent = "⏹ Terminar";
     document.querySelector('.btn-accion-dorado').onclick = detenerSpaxioLive;
-}
+     }
 
 function detenerSpaxioLive() {
     if (spaxioRecorder && spaxioRecorder.state !== "inactive") {
@@ -4303,7 +4320,98 @@ function cerrarModalSpaxio() {
     }
      }
 
-     
+     // ==========================================
+//   DIFUSIÓN WEBRTC (SISTEMA DE LIVES)
+// ==========================================
+
+async function iniciarDifusionWebRTC() {
+    console.log("📡 H.A.R.V.I.S.: Abriendo canal de difusión pública...");
+    
+    // 1. Creamos un PeerConnection para el Live
+    // Usamos 'public_live' como identificador para que otros se conecten
+    peerConnection = new RTCPeerConnection(configuracionRTC);
+    
+    // 2. Añadimos tu cámara al stream de difusión
+    streamLocal.getTracks().forEach(track => {
+        peerConnection.addTrack(track, streamLocal);
+    });
+
+    // 3. Cuando alguien quiera unirse al Live, enviará una solicitud
+    // H.A.R.V.I.S. debe escuchar ofertas en una ruta pública
+    db.ref(`lives_publicos/${miIdSatelital}/ofertas`).on('child_added', async (snapshot) => {
+        const oferta = snapshot.val();
+        if (oferta && peerConnection) {
+            await peerConnection.setRemoteDescription(new RTCSessionDescription(oferta));
+            const answer = await peerConnection.createAnswer();
+            await peerConnection.setLocalDescription(answer);
+            
+            // Enviamos la respuesta al espectador que pidió unirse
+            await db.ref(`lives_publicos/${miIdSatelital}/respuestas/${snapshot.key}`).set(answer);
+        }
+    });
+
+    // 4. Notificamos al mundo en Firebase que estamos en VIVO
+    await db.ref(`lives_publicos/${miIdSatelital}`).update({
+        status: 'en_vivo',
+        nombre_emisor: localStorage.getItem('mi_nombre') || "Usuario",
+        ts: Date.now()
+    });
+}
+
+function detenerDifusionWebRTC() {
+    console.log("🛑 H.A.R.V.I.S.: Cerrando difusión...");
+    
+    // Borramos el Live de la lista pública
+    db.ref(`lives_publicos/${miIdSatelital}`).remove();
+    
+    if (peerConnection) {
+        peerConnection.close();
+        peerConnection = null;
+    }
+     }
+
+     // ==========================================
+//   SISTEMA DE ESPECTADOR (UNIRSE AL LIVE)
+// ==========================================
+
+async function unirseAlLive(idDelEmisor) {
+    console.log(`📡 H.A.R.V.I.S.: Conectando al Live de ${idDelEmisor}...`);
+    
+    // 1. Preparamos el receptor
+    peerConnection = new RTCPeerConnection(configuracionRTC);
+    
+    // 2. Escuchamos cuando recibamos video del emisor
+    peerConnection.ontrack = (event) => {
+        const videoRemoto = document.getElementById('video-remoto');
+        if (videoRemoto) {
+            videoRemoto.srcObject = event.streams[0];
+            videoRemoto.play();
+        }
+    };
+
+    // 3. Enviamos nuestra solicitud de conexión al emisor
+    const offer = await peerConnection.createOffer();
+    await peerConnection.setLocalDescription(offer);
+    
+    // Guardamos nuestra oferta en la carpeta de "ofertas" del emisor
+    const miId = localStorage.getItem('mi_dropis_id');
+    await db.ref(`lives_publicos/${idDelEmisor}/ofertas/${miId}`).set(offer);
+
+    // 4. Esperamos a que el emisor nos responda (la "answer")
+    db.ref(`lives_publicos/${idDelEmisor}/respuestas/${miId}`).on('value', async (snapshot) => {
+        const answer = snapshot.val();
+        if (answer && !peerConnection.currentRemoteDescription) {
+            await peerConnection.setRemoteDescription(new RTCSessionDescription(answer));
+        }
+    });
+
+    // 5. Intercambio de candidatos ICE (para que la señal fluya)
+    peerConnection.onicecandidate = (event) => {
+        if (event.candidate) {
+            db.ref(`lives_publicos/${idDelEmisor}/ofertas/${miId}/candidatos`).push(event.candidate.toJSON());
+        }
+    };
+     }
      
      function cargarFotoInicial() {
     const fotoGuardada = localStorage.getItem('mi_foto');
