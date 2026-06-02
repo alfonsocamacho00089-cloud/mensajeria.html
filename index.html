@@ -1188,7 +1188,12 @@ margin: 0;
         <h3 style="color: #ffd700; margin: 0; text-shadow: 0 0 5px rgba(255, 215, 0, 0.5);">🎬 Estudio Spaxio</h3>
         <button onclick="cerrarModalSpaxio()" class="btn-cerrar-dorado">✖</button>
     </div>
-
+<div class="spaxio-selector">
+    <select id="modo-spaxio" onchange="configurarModo(this.value)">
+        <option value="video">🎥 Crear Reel</option>
+        <option value="live">🔴 Empezar Directo</option>
+    </select>
+</div>
     <div id="vista-spaxio-live" class="spaxio-content">
         <div class="contenedor-camara-preview">
             <video id="video-preview-spaxio" autoplay muted playsinline></video>
