@@ -4309,6 +4309,30 @@ function cerrarModalSpaxio() {
     detenerSpaxioLive(); // <--- Apagamos todo si cierra la ventana
      }
 
+     function cambiarModoSpaxio(modo) {
+    const isLive = modo === 'live';
+    
+    // 1. Cambiar la visibilidad de los contenedores
+    document.getElementById('vista-spaxio-live').style.display = isLive ? 'block' : 'none';
+    document.getElementById('vista-spaxio-upload').style.display = isLive ? 'none' : 'flex';
+    
+    // 2. Actualizar el estilo visual de las pestañas
+    document.getElementById('tab-live').classList.toggle('activa', isLive);
+    document.getElementById('tab-upload').classList.toggle('activa', !isLive);
+
+    // 3. MEJORA: Control de la cámara y grabación
+    if (isLive) {
+        // Si el usuario vuelve a la pestaña de directo, encendemos la cámara
+        encenderCamaraPreview();
+    } else {
+        // Si el usuario se va a "Subir Archivo", detenemos la grabación (si estaba activa) 
+        // y apagamos la cámara para ahorrar batería y proteger la privacidad.
+        detenerSpaxioLive(); 
+        
+        // Asegurarnos de limpiar la variable para que encenderCamaraPreview() funcione bien al volver
+        streamCamaraActiva = null; 
+    }
+     }
      
      function cargarFotoInicial() {
     const fotoGuardada = localStorage.getItem('mi_foto');
