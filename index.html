@@ -4466,19 +4466,32 @@ function monitorearLivesActivos() {
 // Inicia el monitoreo al abrir la App
 monitorearLivesActivos();
 
-     function cargarConversacionCon(idSistema) {
-    const box = document.getElementById('chat-box');
-    
-    // 🔥 DETECTOR DE SPAXIO FLOW
+     // 1. Esta función es la que pones en el onclick de tus botones
+function cargarConversacionCon(idSistema) {
+    console.log("Intentando abrir contacto:", idSistema);
+
+    // Caso Especial: SpaxioFlow
     if (idSistema === "26fmetp4Q4WJ") {
-        console.log("🌊 Entrando a SpaxioFlow Público...");
-        cargarFeedPublico(); // Esta es la función que definimos antes
-        return; // Salimos para que no intente cargar mensajes privados
+        console.log("🌊 Entrando a SpaxioFlow...");
+        if (typeof cargarFeedPublico === 'function') {
+            cargarFeedPublico();
+        }
+        return; // ¡Aquí termina todo!
     }
 
-    // Si no es SpaxioFlow, carga el chat normal de siempre
-    cargarConversacionCon(idSistema);
-     }
+    // Caso Normal: Chat Privado
+    // Llamamos a la función que SÍ hace el trabajo pesado
+    abrirChatPrivado(idSistema); 
+}
+
+// 2. Aquí va TU función original, pero le cambiamos el nombre para que no cause bucle
+function abrirChatPrivado(idSistema) {
+    // AQUÍ VA TODO EL CÓDIGO QUE YA TENÍAS DENTRO DE TU FUNCIÓN ORIGINAL
+    // Es decir, lo que sea que hacía tu app antes para abrir el chat
+    console.log("Abriendo chat privado con:", idSistema);
+    
+    // ... (aquí pegas el resto de la lógica original de tu función)
+ }
 
 // ==========================================
 //   CARGADOR DEL FEED PÚBLICO (SpaxioFlow)
