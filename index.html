@@ -4465,6 +4465,52 @@ function monitorearLivesActivos() {
 
 // Inicia el monitoreo al abrir la App
 monitorearLivesActivos();
+
+     function cargarConversacionCon(idSistema) {
+    const box = document.getElementById('chat-box');
+    
+    // 🔥 DETECTOR DE SPAXIO FLOW
+    if (idSistema === "26fmetp4Q4WJ") {
+        console.log("🌊 Entrando a SpaxioFlow Público...");
+        cargarFeedPublico(); // Esta es la función que definimos antes
+        return; // Salimos para que no intente cargar mensajes privados
+    }
+
+    // Si no es SpaxioFlow, carga el chat normal de siempre
+    cargarConversacionPrivada(idSistema);
+     }
+
+// ==========================================
+//   CARGADOR DEL FEED PÚBLICO (SpaxioFlow)
+// ==========================================
+
+async function cargarFeedPublico() {
+    console.log("📡 H.A.R.V.I.S.: Cargando el muro público de SpaxioFlow...");
+    
+    // 1. Limpiamos el chat actual para mostrar el feed
+    const box = document.getElementById('chat-box');
+    box.innerHTML = ''; 
+
+    // 2. Referencia al ID público de la comunidad
+    const refSpaxioFlow = db.ref('mensajes/SpaxioFlow'); // O tu ruta de almacenamiento
+    
+    // 3. Traemos el contenido ordenado por tiempo (los más nuevos primero)
+    refSpaxioFlow.orderByChild('ts').limitToLast(50).on('child_added', (snapshot) => {
+        const msg = snapshot.val();
+        
+        // Usamos tu función maestra 'pintarMensaje'
+        // El 'tipo' detectado en tu base de datos determinará si se ve como TikTok o chat
+        pintarMensaje(
+            msg.texto, 
+            'msg-izquierda', 
+            msg.hora, 
+            'leido', 
+            msg.id, 
+            msg.tipo
+        );
+    });
+     }
+     
      function cargarFotoInicial() {
     const fotoGuardada = localStorage.getItem('mi_foto');
     if (fotoGuardada && fotoGuardada !== "") {
