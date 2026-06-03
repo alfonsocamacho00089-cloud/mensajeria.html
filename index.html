@@ -1223,7 +1223,26 @@ margin: 0;
     </div>
 </div>
     
+<div id="banner-live-container" style="display: none; background: #1a1a1a; padding: 10px; border-bottom: 2px solid #ffd700;">
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+        <span style="color: #ffd700; font-weight: bold;">🔴 EN VIVO</span>
+        <button onclick="abrirPlayerLive()" style="background: #ffd700; border: none; padding: 5px 15px; border-radius: 5px; cursor: pointer;">Ver ahora</button>
+    </div>
+</div>
 
+<div id="modal-video-live" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #000; z-index: 9999; flex-direction: column;">
+    <div style="display: flex; justify-content: space-between; padding: 10px; background: #1a1a1a; align-items: center;">
+        <h3 style="color: #ffd700; margin: 0;">🔴 Transmisión en Vivo</h3>
+        <button onclick="cerrarPlayerLive()" style="background: transparent; color: white; border: none; font-size: 20px;">✖</button>
+    </div>
+    <div id="contenedor-iframe-live" style="width: 100%; aspect-ratio: 16 / 9;"></div>
+    <div style="padding: 15px; border-bottom: 1px solid #333;">
+        <button onclick="darLike()" style="background: none; border: 1px solid #ffd700; color: #ffd700; padding: 8px 15px; border-radius: 20px;">❤️ Me gusta (<span id="contador-likes">0</span>)</button>
+    </div>
+    <div id="chat-live-mini" style="flex: 1; padding: 10px; overflow-y: auto; color: white; background: #0a0a0a;">
+        <div id="mensajes-live" style="display: flex; flex-direction: column; gap: 5px;"></div>
+    </div>
+</div>
   
     
     <script>
@@ -4466,7 +4485,61 @@ function monitorearLivesActivos() {
 // Inicia el monitoreo al abrir la App
 monitorearLivesActivos();
 
+// A. Escuchar si hay Live
+firebase.database().ref('lives/tu_usuario_id').on('value', (snapshot) => {
+    const data = snapshot.val();
+    document.getElementById('banner-live-container').style.display = (data?.estaEnVivo) ? 'block' : 'none';
+    window.currentLiveId = data?.youtubeVideoId;
+});
 
+// B. Funciones de Apertura
+function abrirPlayerLive() {
+    const contenedor = document.getElementById('contenedor-iframe-live');
+    if (window.currentLiveId) {
+        contenedor.innerHTML = `<iframe width="100%" height="100%" src="https://www.youtube.com/embed/${window.currentLiveId}?autoplay=1" allowfullscreen></iframe>`;
+        document.getElementById('modal-video-live').style.display = 'flex';
+    }
+}
+
+function cerrarPlayerLive() {
+    document.getElementById('modal-video-live').style.display = 'none';
+    document.getElementById('contenedor-iframe-live').innerHTML = '';
+}
+
+// C. Interacción (Like)
+function darLike() {
+    firebase.database().ref('lives/tu_usuario_id/likes').transaction(c => (c || 0) + 1);
+}
+
+firebase.database().ref('lives/tu_usuario_id/likes').on('value', (s) => {
+    document.getElementById('contador-likes').textContent = s.val() || 0;
+});
+
+     // Listener de mensajes con filtro de seguridad
+firebase.database().ref('chat_lives/tu_usuario_id').on('child_added', async (snapshot) => {
+    const msg = snapshot.val();
+    const msgId = snapshot.key;
+    
+    // Filtro de lista negra
+    const estaBloqueado = (await firebase.database().ref('moderacion/silenciados/tu_usuario_id').child(msg.uid).once('value')).exists();
+    if (estaBloqueado) return;
+
+    const contenedor = document.getElementById('mensajes-live');
+    const div = document.createElement('div');
+    div.style.cssText = `padding: 5px; ${msg.tipo === 'fijado' ? 'border: 2px solid #ffd700; background: #332d00;' : ''}`;
+    
+    div.innerHTML = `
+        <b>${msg.usuario}:</b> ${msg.texto}
+        ${(esDueno) ? `<button onclick="fijarMensaje('${msgId}')">📍</button> <button onclick="silenciarUsuario('${msg.uid}')">🚫</button>` : ''}
+    `;
+    
+    msg.tipo === 'fijado' ? contenedor.prepend(div) : contenedor.append(div);
+    document.getElementById('chat-live-mini').scrollTop = document.getElementById('chat-live-mini').scrollHeight;
+});
+
+// Moderación
+function fijarMensaje(id) { firebase.database().ref(`chat_lives/tu_usuario_id/${id}/tipo`).set('fijado'); }
+function silenciarUsuario(uid) { firebase.database().ref('moderacion/silenciados/tu_usuario_id').update({ [uid]: true }); }
      
      function cargarFotoInicial() {
     const fotoGuardada = localStorage.getItem('mi_foto');
