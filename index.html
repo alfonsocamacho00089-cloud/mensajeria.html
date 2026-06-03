@@ -4467,31 +4467,18 @@ function monitorearLivesActivos() {
 monitorearLivesActivos();
 
      // 1. Esta función es la que pones en el onclick de tus botones
-function cargarConversacionCon(idSistema) {
-    console.log("Intentando abrir contacto:", idSistema);
-
-    // Caso Especial: SpaxioFlow
-    if (idSistema === "26fmetp4Q4WJ") {
-        console.log("🌊 Entrando a SpaxioFlow...");
-        if (typeof cargarFeedPublico === 'function') {
-            cargarFeedPublico();
-        }
-        return; // ¡Aquí termina todo!
+function CargarConversacionCon(idDestino, nombreDestino, fotoDestino) {
+    // 🔥 FILTRO PARA EL FEED PÚBLICO
+    if (idDestino === "26fmetp4Q4WJ") {
+        console.log("🌊 Entrando al Feed Público de Spaxio...");
+        cargarFeedPublico(); // Esta función debe descargar y mostrar los mensajes de la ruta 26fmetp4Q4WJ
+        return; // Esto detiene la ejecución y evita el error de bucle
     }
 
-    // Caso Normal: Chat Privado
-    // Llamamos a la función que SÍ hace el trabajo pesado
-    abrirChatPrivado(idSistema); 
-}
-
-// 2. Aquí va TU función original, pero le cambiamos el nombre para que no cause bucle
-function abrirChatPrivado(idSistema) {
-    // AQUÍ VA TODO EL CÓDIGO QUE YA TENÍAS DENTRO DE TU FUNCIÓN ORIGINAL
-    // Es decir, lo que sea que hacía tu app antes para abrir el chat
-    console.log("Abriendo chat privado con:", idSistema);
-    
-    // ... (aquí pegas el resto de la lógica original de tu función)
- }
+    // Lógica para chats privados que ya tenías
+    console.log("Abriendo chat privado con:", idDestino);
+    // ... aquí sigue tu código normal de abrir chat privado ...
+     }
 
 // ==========================================
 //   CARGADOR DEL FEED PÚBLICO (SpaxioFlow)
