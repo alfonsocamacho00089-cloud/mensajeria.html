@@ -4268,43 +4268,26 @@ function configurarModo(nuevoModo) {
     console.log("H.A.R.V.I.S. listo para modo:", modoActual);
 }
 
-function iniciarSpaxioLive() {
-    if (!streamCamaraActiva) return;
+// Variable global para la instancia de LiveKit
+let room;
 
-    // 1. Si eligió Live, preparamos la difusión (WebRTC)
-    if (modoActual === 'live') {
-        iniciarDifusionWebRTC(); // Esta será la siguiente función que haremos
-    }
-
-    // 2. SIEMPRE iniciamos la grabación local (Auto-Save)
-    spaxioChunks = [];
-    spaxioRecorder = new MediaRecorder(streamCamaraActiva, { mimeType: 'video/webm' });
-
-    spaxioRecorder.ondataavailable = (event) => {
-        if (event.data.size > 0) spaxioChunks.push(event.data);
-    };
-
-    spaxioRecorder.onstop = async () => {
-        const videoBlob = new Blob(spaxioChunks, { type: 'video/webm' });
-        
-        // Si estábamos en vivo, avisamos a la red que cerramos la transmisión
-        if (modoActual === 'live') detenerDifusionWebRTC();
-
-        const reader = new FileReader();
-        reader.readAsDataURL(videoBlob);
-        reader.onloadend = async () => {
-            const urlBase64 = reader.result;
-            await enviarMediaPorURL(urlBase64, 'video'); // Esto sube el video al chat
-            console.log("✅ Contenido procesado y enviado al satélite.");
-        };
-    };
-
-    spaxioRecorder.start();
+async function iniciarSpaxioLive() {
+    // 1. Crear/Unirse a una sala en LiveKit
+    const livekitUrl = 'TU_URL_DE_LIVEKIT'; 
+    const token = 'TOKEN_GENERADO_PARA_EL_USUARIO'; // Esto lo generaremos al vuelo
     
-    // UI Visual
-    document.querySelector('.badge-live-offline').textContent = (modoActual === 'live') ? "🔴 EN DIRECTO" : "🎥 GRABANDO";
-    document.querySelector('.btn-accion-dorado').textContent = "⏹ Terminar";
-    document.querySelector('.btn-accion-dorado').onclick = detenerSpaxioLive;
+    room = new LiveKitClient.Room();
+    
+    await room.connect(livekitUrl, token);
+    await room.localParticipant.setCameraEnabled(true);
+    await room.localParticipant.setMicrophoneEnabled(true);
+
+    // 2. Conectar al video tag que ya tienes
+    const previewVideo = document.getElementById('video-preview-spaxio');
+    const localTrack = room.localParticipant.videoTrackPublications.values().next().value.track;
+    localTrack.attach(previewVideo);
+    
+    console.log("🚀 Emisión en vivo iniciada vía LiveKit");
      }
 
 function detenerSpaxioLive() {
@@ -4357,190 +4340,14 @@ function cerrarModalSpaxio() {
     }
      }
 
-     // ==========================================
-//   DIFUSIÓN WEBRTC (SISTEMA DE LIVES)
-// ==========================================
-
-async function iniciarDifusionWebRTC() {
-    console.log("📡 H.A.R.V.I.S.: Abriendo canal de difusión pública...");
-    
-    // 1. Creamos un PeerConnection para el Live
-    // Usamos 'public_live' como identificador para que otros se conecten
-    peerConnection = new RTCPeerConnection(configuracionRTC);
-    
-    // 2. Añadimos tu cámara al stream de difusión
-    streamLocal.getTracks().forEach(track => {
-        peerConnection.addTrack(track, streamLocal);
-    });
-
-    // 3. Cuando alguien quiera unirse al Live, enviará una solicitud
-    // H.A.R.V.I.S. debe escuchar ofertas en una ruta pública
-    db.ref(`lives_publicos/${miIdSatelital}/ofertas`).on('child_added', async (snapshot) => {
-        const oferta = snapshot.val();
-        if (oferta && peerConnection) {
-            await peerConnection.setRemoteDescription(new RTCSessionDescription(oferta));
-            const answer = await peerConnection.createAnswer();
-            await peerConnection.setLocalDescription(answer);
-            
-            // Enviamos la respuesta al espectador que pidió unirse
-            await db.ref(`lives_publicos/${miIdSatelital}/respuestas/${snapshot.key}`).set(answer);
-        }
-    });
-
-    // 4. Notificamos al mundo en Firebase que estamos en VIVO
-    await db.ref(`lives_publicos/${miIdSatelital}`).update({
-        status: 'en_vivo',
-        nombre_emisor: localStorage.getItem('mi_nombre') || "Usuario",
-        ts: Date.now()
-    });
-}
-
-function detenerDifusionWebRTC() {
-    console.log("🛑 H.A.R.V.I.S.: Cerrando difusión...");
-    
-    // Borramos el Live de la lista pública
-    db.ref(`lives_publicos/${miIdSatelital}`).remove();
-    
-    if (peerConnection) {
-        peerConnection.close();
-        peerConnection = null;
-    }
-     }
-
-     // ==========================================
-//   SISTEMA DE ESPECTADOR (UNIRSE AL LIVE)
-// ==========================================
-
-async function unirseAlLive(idDelEmisor) {
-    console.log(`📡 H.A.R.V.I.S.: Conectando al Live de ${idDelEmisor}...`);
-    
-    // 1. Preparamos el receptor
-    peerConnection = new RTCPeerConnection(configuracionRTC);
-    
-    // 2. Escuchamos cuando recibamos video del emisor
-    peerConnection.ontrack = (event) => {
-        const videoRemoto = document.getElementById('video-remoto');
-        if (videoRemoto) {
-            videoRemoto.srcObject = event.streams[0];
-            videoRemoto.play();
-        }
-    };
-
-    // 3. Enviamos nuestra solicitud de conexión al emisor
-    const offer = await peerConnection.createOffer();
-    await peerConnection.setLocalDescription(offer);
-    
-    // Guardamos nuestra oferta en la carpeta de "ofertas" del emisor
-    const miId = localStorage.getItem('mi_dropis_id');
-    await db.ref(`lives_publicos/${idDelEmisor}/ofertas/${miId}`).set(offer);
-
-    // 4. Esperamos a que el emisor nos responda (la "answer")
-    db.ref(`lives_publicos/${idDelEmisor}/respuestas/${miId}`).on('value', async (snapshot) => {
-        const answer = snapshot.val();
-        if (answer && !peerConnection.currentRemoteDescription) {
-            await peerConnection.setRemoteDescription(new RTCSessionDescription(answer));
-        }
-    });
-
-    // 5. Intercambio de candidatos ICE (para que la señal fluya)
-    peerConnection.onicecandidate = (event) => {
-        if (event.candidate) {
-            db.ref(`lives_publicos/${idDelEmisor}/ofertas/${miId}/candidatos`).push(event.candidate.toJSON());
-        }
-    };
-     }
 
 
-     // ==========================================
-//   SENSOR DE DIRECTOS (H.A.R.V.I.S.)
-// ==========================================
 
-function monitorearLivesActivos() {
-    db.ref('lives_publicos').on('value', (snapshot) => {
-        const lives = snapshot.val();
-        const contenedorNotificaciones = document.getElementById('contenedor-notificaciones-live');
-        
-        if (!contenedorNotificaciones) return;
-        contenedorNotificaciones.innerHTML = ''; // Limpiamos la lista
 
-        if (lives) {
-            Object.keys(lives).forEach(idEmisor => {
-                const liveData = lives[idEmisor];
-                if (liveData.status === 'en_vivo') {
-                    // Creamos el botón "🔴 EN VIVO"
-                    const badge = document.createElement('div');
-                    badge.className = 'notificacion-live-bubble';
-                    badge.innerHTML = `
-                        <div class="live-indicator">🔴 EN VIVO</div>
-                        <span>${liveData.nombre_emisor}</span>
-                    `;
-                    badge.onclick = () => unirseAlLive(idEmisor); // ¡Directo a la acción!
-                    contenedorNotificaciones.appendChild(badge);
-                }
-            });
-        }
-    });
-}
-
-// Inicia el monitoreo al abrir la App
-monitorearLivesActivos();
-
-// A. Escuchar si hay Live
-firebase.database().ref('lives/tu_usuario_id').on('value', (snapshot) => {
-    const data = snapshot.val();
-    document.getElementById('banner-live-container').style.display = (data?.estaEnVivo) ? 'block' : 'none';
-    window.currentLiveId = data?.youtubeVideoId;
-});
-
-// B. Funciones de Apertura
-function abrirPlayerLive() {
-    const contenedor = document.getElementById('contenedor-iframe-live');
-    if (window.currentLiveId) {
-        contenedor.innerHTML = `<iframe width="100%" height="100%" src="https://www.youtube.com/embed/${window.currentLiveId}?autoplay=1" allowfullscreen></iframe>`;
-        document.getElementById('modal-video-live').style.display = 'flex';
-    }
-}
-
-function cerrarPlayerLive() {
-    document.getElementById('modal-video-live').style.display = 'none';
-    document.getElementById('contenedor-iframe-live').innerHTML = '';
-}
-
-// C. Interacción (Like)
-function darLike() {
-    firebase.database().ref('lives/tu_usuario_id/likes').transaction(c => (c || 0) + 1);
-}
-
-firebase.database().ref('lives/tu_usuario_id/likes').on('value', (s) => {
-    document.getElementById('contador-likes').textContent = s.val() || 0;
-});
-
-     // Listener de mensajes con filtro de seguridad
-firebase.database().ref('chat_lives/tu_usuario_id').on('child_added', async (snapshot) => {
-    const msg = snapshot.val();
-    const msgId = snapshot.key;
-    
-    // Filtro de lista negra
-    const estaBloqueado = (await firebase.database().ref('moderacion/silenciados/tu_usuario_id').child(msg.uid).once('value')).exists();
-    if (estaBloqueado) return;
-
-    const contenedor = document.getElementById('mensajes-live');
-    const div = document.createElement('div');
-    div.style.cssText = `padding: 5px; ${msg.tipo === 'fijado' ? 'border: 2px solid #ffd700; background: #332d00;' : ''}`;
-    
-    div.innerHTML = `
-        <b>${msg.usuario}:</b> ${msg.texto}
-        ${(esDueno) ? `<button onclick="fijarMensaje('${msgId}')">📍</button> <button onclick="silenciarUsuario('${msg.uid}')">🚫</button>` : ''}
-    `;
-    
-    msg.tipo === 'fijado' ? contenedor.prepend(div) : contenedor.append(div);
-    document.getElementById('chat-live-mini').scrollTop = document.getElementById('chat-live-mini').scrollHeight;
-});
-
-// Moderación
-function fijarMensaje(id) { firebase.database().ref(`chat_lives/tu_usuario_id/${id}/tipo`).set('fijado'); }
-function silenciarUsuario(uid) { firebase.database().ref('moderacion/silenciados/tu_usuario_id').update({ [uid]: true }); }
      
+
+
+
      function cargarFotoInicial() {
     const fotoGuardada = localStorage.getItem('mi_foto');
     if (fotoGuardada && fotoGuardada !== "") {
