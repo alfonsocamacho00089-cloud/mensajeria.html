@@ -16,6 +16,8 @@
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-storage-compat.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/protobufjs@7.2.4/dist/protobuf.min.js"></script>
+    <script src="https://esm.run/livekit-client"></script>
+ 
     <script src="https://cdn.jsdelivr.net/npm/eruda"></script>
     <script>eruda.init();</script>
     
@@ -4271,24 +4273,46 @@ function configurarModo(nuevoModo) {
 // Variable global para la instancia de LiveKit
 let room;
 
-async function iniciarSpaxioLive() {
-    // 1. Crear/Unirse a una sala en LiveKit
-    const livekitUrl = 'TU_URL_DE_LIVEKIT'; 
-    const token = 'TOKEN_GENERADO_PARA_EL_USUARIO'; // Esto lo generaremos al vuelo
-    
-    room = new LiveKitClient.Room();
-    
-    await room.connect(livekitUrl, token);
-    await room.localParticipant.setCameraEnabled(true);
-    await room.localParticipant.setMicrophoneEnabled(true);
+// Asegúrate de tener el SDK: <script src="https://esm.run/livekit-client
 
-    // 2. Conectar al video tag que ya tienes
+async function iniciarSpaxioLive() {
+    const miId = localStorage.getItem('mi_dropis_id');
     const previewVideo = document.getElementById('video-preview-spaxio');
-    const localTrack = room.localParticipant.videoTrackPublications.values().next().value.track;
-    localTrack.attach(previewVideo);
     
-    console.log("🚀 Emisión en vivo iniciada vía LiveKit");
-     }
+    try {
+        // 1. Obtener el Token del servidor (Cloud Function)
+        const getLiveKitToken = firebase.functions().httpsCallable('getLiveKitToken');
+        const result = await getLiveKitToken({ roomName: miId, identity: miId });
+        const token = result.data.token;
+
+        // 2. Conectar a LiveKit
+        const room = new LiveKitClient.Room();
+        await room.connect('wss://TU_PROYECTO.livekit.cloud', token);
+        
+        // 3. Publicar cámara y micro automáticamente
+        await room.localParticipant.setCameraEnabled(true);
+        await room.localParticipant.setMicrophoneEnabled(true);
+
+        // 4. Mostrar nuestro propio video en el preview
+        const localTrack = room.localParticipant.videoTrackPublications.values().next().value.track;
+        localTrack.attach(previewVideo);
+
+        console.log("🔴 Transmitiendo en vivo como:", miId);
+        
+        // UI Visual
+        document.querySelector('.badge-live-offline').textContent = "🔴 EN DIRECTO";
+        document.querySelector('.btn-accion-dorado').textContent = "⏹ Terminar";
+        document.querySelector('.btn-accion-dorado').onclick = () => {
+            room.disconnect();
+            location.reload(); // Reset rápido
+        };
+
+    } catch (err) {
+        console.error("❌ Error al iniciar el Live:", err);
+        alert("No se pudo iniciar la transmisión.");
+    }
+  }
+
 
 function detenerSpaxioLive() {
     if (spaxioRecorder && spaxioRecorder.state !== "inactive") {
