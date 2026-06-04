@@ -4294,7 +4294,7 @@ async function iniciarSpaxioLive() {
         room = new LiveKitClient.Room(); 
         await room.connect('wss://space-xquv9iaa.livekit.cloud', token);
         
-        // 3. Publicar cámara y micro
+     // 3. Publicar cámara y micro
         await room.localParticipant.setCameraEnabled(true);
         await room.localParticipant.setMicrophoneEnabled(true);
 
