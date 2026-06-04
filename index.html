@@ -4280,20 +4280,25 @@ async function iniciarSpaxioLive() {
     const previewVideo = document.getElementById('video-preview-spaxio');
     
     try {
-        // 1. Obtener el Token del servidor (Cloud Function)
-        const getLiveKitToken = firebase.functions().httpsCallable('getLiveKitToken');
-        const result = await getLiveKitToken({ roomName: miId, identity: miId });
-        const token = result.data.token;
+        // 1. Obtener el Token desde tu nueva API de Vercel (Seguro y profesional)
+        const response = await fetch('/api/get-livekit-token', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ roomName: miId, identity: miId })
+        });
+        
+        const { token } = await response.json();
 
         // 2. Conectar a LiveKit
-        const room = new LiveKitClient.Room();
-        await room.connect('wss://TU_PROYECTO.livekit.cloud', token);
+        // OJO: Cambia "TU_PROYECTO.livekit.cloud" por tu URL real
+        room = new LiveKitClient.Room(); 
+        await room.connect('wss://space-xquv9iaa.livekit.cloud', token);
         
-        // 3. Publicar cámara y micro automáticamente
+        // 3. Publicar cámara y micro
         await room.localParticipant.setCameraEnabled(true);
         await room.localParticipant.setMicrophoneEnabled(true);
 
-        // 4. Mostrar nuestro propio video en el preview
+        // 4. Mostrar el video
         const localTrack = room.localParticipant.videoTrackPublications.values().next().value.track;
         localTrack.attach(previewVideo);
 
@@ -4304,14 +4309,14 @@ async function iniciarSpaxioLive() {
         document.querySelector('.btn-accion-dorado').textContent = "⏹ Terminar";
         document.querySelector('.btn-accion-dorado').onclick = () => {
             room.disconnect();
-            location.reload(); // Reset rápido
+            location.reload(); 
         };
 
     } catch (err) {
         console.error("❌ Error al iniciar el Live:", err);
         alert("No se pudo iniciar la transmisión.");
     }
-  }
+     }
 
 
 function detenerSpaxioLive() {
