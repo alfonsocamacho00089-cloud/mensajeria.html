@@ -4364,9 +4364,42 @@ function cerrarModalSpaxio() {
     }
      }
 
+async function listarLivesActivos() {
+    // Esto lo ejecutas desde tu servidor o mediante una API call segura
+    // Para simplificar, la app detectará las salas activas
+    const response = await fetch('TU_SERVIDOR_API/list-rooms'); 
+    const rooms = await response.json(); // Lista de salas activas
 
+    const container = document.getElementById('contenedor-notificaciones-live');
+    container.innerHTML = '';
 
+    rooms.forEach(room => {
+        const btn = document.createElement('div');
+        btn.className = 'notificacion-live-bubble';
+        btn.innerHTML = `🔴 EN VIVO: Sala de ${room.name}`;
+        btn.onclick = () => unirseAlLive(room.name);
+        container.appendChild(btn);
+    });
+     }
 
+async function unirseAlLive(roomName) {
+    // 1. Obtener token de espectador (similar al emisor, pero sin permisos de publicar)
+    const token = await obtenerTokenEspectador(roomName);
+    
+    const room = new LiveKitClient.Room();
+    await room.connect('wss://TU_PROYECTO.livekit.cloud', token);
+
+    // 2. Escuchar cuando alguien publica un video
+    room.on(LiveKitClient.RoomEvent.TrackSubscribed, (track, publication, participant) => {
+        if (track.kind === LiveKitClient.Track.Kind.Video) {
+            const videoElement = document.getElementById('video-remoto'); // Un <video> en tu UI
+            track.attach(videoElement);
+        }
+    });
+    
+    // UI: Abrir el modal de visualización
+    document.getElementById('modal-video-live').style.display = 'flex';
+     }
 
      
 
