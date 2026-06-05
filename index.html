@@ -1665,17 +1665,19 @@ try {
     }); 
      }
      
-        
-  async function enviarMensajeSatelital(multimediaUrl = null, tipoMedia = 'texto') {
-    const inputMsg = document.querySelector('#msg-text');
-    const inputTarget = document.querySelector('#target-id');
-    
-        // NUEVO: Detecta si es un objeto (notificación) para saltar el DOM
-    const esNotificacion = (typeof multimediaUrl === 'object' && multimediaUrl !== null);
-    
+        function enviarMensajeSatelital(multimediaUrl = null, tipoMedia = 'texto') {
+
+const inputMsg = document.querySelector('#msg-text');
+
+const inputTarget = document.querySelector('#target-id');
+
+
+const msg = multimediaUrl ? multimediaUrl : (inputMsg ? inputMsg.value.trim() : "");
+
+
+     
   
-    const msg = esNotificacion ? JSON.stringify(multimediaUrl) : (multimediaUrl ? multimediaUrl : (inputMsg ? inputMsg.value.trim() : ""));
-    if (!inputTarget || !inputTarget.value) {
+     if (!inputTarget || !inputTarget.value) {
         console.error("H.A.R.V.I.S.: No hay un satélite de destino (ID vacío)");
         return;
     }
