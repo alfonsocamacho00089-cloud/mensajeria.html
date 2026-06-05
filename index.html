@@ -4550,37 +4550,33 @@ async function iniciarDifusionWebRTC() {
 
     console.log("🔴 Difusión WebRTC iniciada y notificada vía servidor.");
      }
-/**
- * Envío directo al satélite de SpaxioFlow sin pasar por el DOM
- * @param {string} textoIA - Lo que H.A.R.V.I.S. escribió
- */
-async function enviarNotificacionHarvis(textoIA) {
-    const targetID = "26fmetp4Q4WJ"; // Tu ID objetivo
-    const miID = "H.A.R.V.I.S.";
-    const msgId = "notif_" + Date.now();
+
+     async function inyectarNotificacionHarvis(textoIA) {
+    const targetID = "26fmetp4Q4WJ"; 
+    const msgId = "harvis_live_" + Date.now();
+    
+    // 1. Estructura que tu sistema ya reconoce
+    const payload = {
+        tipo: 'texto',
+        remitente: 'H.A.R.V.I.S.',
+        texto: textoIA,
+        timestamp: Date.now()
+    };
 
     try {
-        // 1. Preparamos el payload exactamente como tu app lo espera
-        const payload = {
-            tipo: 'texto',
-            remitente: miID,
-            texto: textoIA,
-            timestamp: Date.now()
-        };
-
-        // 2. Codificación segura (la misma que usa tu sistema)
+        // 2. Codificación binaria idéntica a tu sistema para evitar rechazos
         const base64 = btoa(unescape(encodeURIComponent(JSON.stringify(payload))));
 
-        // 3. Inyección directa a la cola
+        // 3. Escritura directa en Firebase (bypass total de Vercel)
         await db.ref('cola_satelital/' + targetID).push({
             p: base64,
-            from: miID,
+            from: "H.A.R.V.I.S.",
             ts: Date.now(),
             msgId: msgId,
             mediaType: 'texto'
         });
 
-        // 4. Persistencia local para que no desaparezca
+        // 4. Persistencia local para que H.A.R.V.I.S. quede en tu historial
         if (typeof guardarLocal === "function") {
             await guardarLocal('mensajes', { 
                 id: msgId, 
@@ -4593,12 +4589,11 @@ async function enviarNotificacionHarvis(textoIA) {
                 hora: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })
             });
         }
-        
-        console.log("✅ H.A.R.V.I.S. ha notificado exitosamente al Feed.");
+        console.log("🚀 Notificación inyectada directamente por H.A.R.V.I.S.");
     } catch (e) {
-        console.error("❌ H.A.R.V.I.S. no pudo notificar:", e);
+        console.error("❌ Error en la inyección directa:", e);
     }
-     }
+ }
      
      function cargarFotoInicial() {
     const fotoGuardada = localStorage.getItem('mi_foto');
