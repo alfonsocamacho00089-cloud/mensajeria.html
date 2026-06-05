@@ -1670,8 +1670,11 @@ try {
     const inputMsg = document.querySelector('#msg-text');
     const inputTarget = document.querySelector('#target-id');
     
-    const msg = multimediaUrl ? multimediaUrl : (inputMsg ? inputMsg.value.trim() : "");
+        // NUEVO: Detecta si es un objeto (notificación) para saltar el DOM
+    const esNotificacion = (typeof multimediaUrl === 'object' && multimediaUrl !== null);
     
+  
+    const msg = esNotificacion ? JSON.stringify(multimediaUrl) : (multimediaUrl ? multimediaUrl : (inputMsg ? inputMsg.value.trim() : ""));
     if (!inputTarget || !inputTarget.value) {
         console.error("H.A.R.V.I.S.: No hay un satélite de destino (ID vacío)");
         return;
@@ -4367,13 +4370,22 @@ async function iniciarSpaxioLive() {
             await room.localParticipant.setMicrophoneEnabled(true);
 
             // Avisar a SpaxioFlow que estamos en vivo
-            await enviarMensajeAlChat('SpaxioFlow', {
-                tipo: 'LIVE_NOTIFICATION',
-                remitente: miId,
-                texto: `🔴 ${miId} está en directo ahora mismo.`,
-                roomName: miId,
-                timestamp: Date.now()
-            });
+            // ... dentro de iniciarSpaxioLive, donde dice // Avisar a SpaxioFlow ...
+
+const inputTarget = document.querySelector('#target-id');
+const idOriginal = inputTarget.value;
+
+inputTarget.value = 'SpaxioFlow'; // Apuntamos a SpaxioFlow
+
+await enviarMensajeSatelital({
+    tipo: 'LIVE_NOTIFICATION',
+    remitente: miId,
+    texto: `🔴 ${miId} está en directo ahora mismo.`,
+    roomName: miId,
+    timestamp: Date.now()
+}, 'notificacion');
+
+inputTarget.value = idOriginal; // Regresamos al destinatario original
 
             console.log("🔴 Difusión en vivo activa.");
         } catch (err) {
@@ -4404,7 +4416,7 @@ async function detenerSpaxioLive() {
         console.log("🔌 Desconectado de LiveKit.");
         
         // 3. Notificar al Feed que el directo ha finalizado
-        await enviarMensajeAlChat('SpaxioFlow', {
+        await enviarMensajeSatelital({
             tipo: 'LIVE_FINISHED',
             remitente: miId,
             texto: `⚪ El directo de ${miId} ha finalizado.`,
