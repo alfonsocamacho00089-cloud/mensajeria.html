@@ -2576,20 +2576,7 @@ else if (esCosaNueva) {
         box.scrollTop = box.scrollHeight;
      }
 
-     // Dentro de tu función que renderiza mensajes en el chat:
-if (mensaje.tipo === 'LIVE_NOTIFICATION') {
-    const div = document.createElement('div');
-    div.className = 'notificacion-live-chat';
-    div.innerHTML = `
-        <p>${mensaje.texto}</p>
-        <button class="btn-ir-al-live" onclick="abrirModalYUnirse('${mensaje.roomName}')">
-            ▶ Unirse al directo
-        </button>
-    `;
-    chatContainer.appendChild(div);
-        box.scrollTop = box.scrollHeight;
-     
-     }
+
 
     // El menú de acciones (se aplica sin importar qué camino tomó)
     div.onclick = (e) => {
@@ -4372,15 +4359,16 @@ async function iniciarSpaxioLive() {
             await room.localParticipant.setMicrophoneEnabled(true);
 
             // Avisar a SpaxioFlow que estamos en vivo
-            // ... dentro de iniciarSpaxioLive, donde dice // Avisar a SpaxioFlow ...
+            // --- DENTRO DE iniciarSpaxioLive (donde inicias el Live) ---
 
+// 1. Apuntamos a SpaxioFlow
 const inputTarget = document.querySelector('#target-id');
 const idOriginal = inputTarget.value;
+inputTarget.value = 'SpaxioFlow';
 
-inputTarget.value = 'SpaxioFlow'; // Apuntamos a SpaxioFlow
-
-// ... dentro de iniciarSpaxioLive
-await enviarNotificacionSatelital({
+// 2. Enviamos el mensaje como texto normal (TU FUNCIÓN ORIGINAL)
+// Nota: Enviamos el JSON como string, tal cual
+const notificacion = JSON.stringify({
     tipo: 'LIVE_NOTIFICATION',
     remitente: miId,
     texto: `🔴 ${miId} está en directo ahora mismo.`,
@@ -4388,8 +4376,11 @@ await enviarNotificacionSatelital({
     timestamp: Date.now()
 });
 
-inputTarget.value = idOriginal; // Regresamos al destinatario original
+await enviarMensajeSatelital(notificacion, 'texto');
 
+// 3. Restauramos el destino original inmediatamente
+inputTarget.value = idOriginal;
+         
             console.log("🔴 Difusión en vivo activa.");
         } catch (err) {
             console.error("Error en LiveKit:", err);
@@ -4419,15 +4410,23 @@ async function detenerSpaxioLive() {
         console.log("🔌 Desconectado de LiveKit.");
         
         // 3. Notificar al Feed que el directo ha finalizado
-        // ... dentro de detenerSpaxioLive (o donde finalices)
-await enviarNotificacionSatelital({
+        // --- DENTRO DE detenerSpaxioLive ---
+
+const inputTarget = document.querySelector('#target-id');
+const idOriginal = inputTarget.value;
+inputTarget.value = 'SpaxioFlow';
+
+const avisoFin = JSON.stringify({
     tipo: 'LIVE_FINISHED',
     remitente: miId,
     texto: `⚪ El directo de ${miId} ha finalizado.`,
     roomName: miId,
     timestamp: Date.now()
 });
-     }
+
+await enviarMensajeSatelital(avisoFin, 'texto');
+
+inputTarget.value = idOriginal;
     // 4. Limpieza de hardware: Apagar tracks de la cámara/micro
     if (streamCamaraActiva) {
         streamCamaraActiva.getTracks().forEach(track => track.stop());
@@ -4555,19 +4554,7 @@ async function iniciarDifusionWebRTC() {
         timestamp: Date.now()
     });
      }
-async function enviarNotificacionSatelital(objetoNotificacion) {
-    const inputTarget = document.querySelector('#target-id');
-    const valorOriginal = inputTarget.value;
-    
-    // Cambiamos el destino al ID que quieres
-    inputTarget.value = 'SpaxioFlow';
-    
-    // Enviamos el objeto convertido a string a tu función original
-    await enviarMensajeSatelital(JSON.stringify(objetoNotificacion), 'notificacion');
-    
-    // Restauramos el ID original
-    inputTarget.value = valorOriginal;
-     }
+
 
      function cargarFotoInicial() {
     const fotoGuardada = localStorage.getItem('mi_foto');
