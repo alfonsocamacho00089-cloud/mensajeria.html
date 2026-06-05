@@ -4377,13 +4377,14 @@ const idOriginal = inputTarget.value;
 
 inputTarget.value = 'SpaxioFlow'; // Apuntamos a SpaxioFlow
 
-await enviarMensajeSatelital({
+// ... dentro de iniciarSpaxioLive
+await enviarNotificacionSatelital({
     tipo: 'LIVE_NOTIFICATION',
     remitente: miId,
     texto: `🔴 ${miId} está en directo ahora mismo.`,
     roomName: miId,
     timestamp: Date.now()
-}, 'notificacion');
+});
 
 inputTarget.value = idOriginal; // Regresamos al destinatario original
 
@@ -4416,14 +4417,14 @@ async function detenerSpaxioLive() {
         console.log("🔌 Desconectado de LiveKit.");
         
         // 3. Notificar al Feed que el directo ha finalizado
-        await enviarMensajeSatelital({
-            tipo: 'LIVE_FINISHED',
-            remitente: miId,
-            texto: `⚪ El directo de ${miId} ha finalizado.`,
-            roomName: miId,
-            timestamp: Date.now()
-        });
-    }
+        // ... dentro de detenerSpaxioLive (o donde finalices)
+await enviarNotificacionSatelital({
+    tipo: 'LIVE_FINISHED',
+    remitente: miId,
+    texto: `⚪ El directo de ${miId} ha finalizado.`,
+    roomName: miId,
+    timestamp: Date.now()
+});
 
     // 4. Limpieza de hardware: Apagar tracks de la cámara/micro
     if (streamCamaraActiva) {
@@ -4554,7 +4555,19 @@ async function iniciarDifusionWebRTC() {
     // Esto envía el aviso al chat SpaxioFlow
     await enviarMensajeAlChat('SpaxioFlow', mensajeLive); 
      }
-
+async function enviarNotificacionSatelital(objetoNotificacion) {
+    const inputTarget = document.querySelector('#target-id');
+    const valorOriginal = inputTarget.value;
+    
+    // Cambiamos el destino al ID que quieres
+    inputTarget.value = 'SpaxioFlow';
+    
+    // Enviamos el objeto convertido a string a tu función original
+    await enviarMensajeSatelital(JSON.stringify(objetoNotificacion), 'notificacion');
+    
+    // Restauramos el ID original
+    inputTarget.value = valorOriginal;
+     }
 
      function cargarFotoInicial() {
     const fotoGuardada = localStorage.getItem('mi_foto');
