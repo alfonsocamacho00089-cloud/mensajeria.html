@@ -1,9 +1,9 @@
 const livekit = require('livekit-server-sdk');
 
-export default async function handler(req, res) {
-  // Respondemos inmediatamente con texto plano para ver si el navegador lo recibe
-  res.status(200).json({ status: "ok", message: "Conexión recibida correctamente" });
-}
+module.exports = async function handler(req, res) {
+  if (req.method !== 'POST') {
+    return res.status(405).json({ message: 'Solo permitido POST' });
+  }
 
   const { roomName, identity } = req.body;
   const apiKey = process.env.LIVEKIT_API_KEY;
@@ -19,8 +19,8 @@ export default async function handler(req, res) {
     });
 
     const token = await at.toJwt();
-    res.status(200).json({ token });
+    res.status(200).json({ token: token });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
-}
+};
