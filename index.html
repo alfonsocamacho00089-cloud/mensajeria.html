@@ -4543,16 +4543,25 @@ async function iniciarDifusionWebRTC() {
     // 1. Lógica de LiveKit
     await iniciarSpaxioLiveKit(); 
 
-    // 2. AVISAR AL FEED usando la función segura
+    // 2. AVISAR AL FEED usando la lógica directa
     const miId = localStorage.getItem('mi_dropis_id');
+    const inputTarget = document.querySelector('#target-id');
+    const idOriginal = inputTarget.value;
     
-    await enviarNotificacionSatelital({
+    // Apuntamos a SpaxioFlow para el envío
+    inputTarget.value = 'SpaxioFlow';
+    
+    // Enviamos el mensaje como texto normal (JSON stringified)
+    await enviarMensajeSatelital(JSON.stringify({
         tipo: 'LIVE_NOTIFICATION',
         remitente: miId,
         texto: `🔴 ${miId} está en directo ahora mismo.`,
         roomName: miId,
         timestamp: Date.now()
-    });
+    }), 'texto');
+    
+    // Restauramos el destino original
+    inputTarget.value = idOriginal;
      }
 
 
