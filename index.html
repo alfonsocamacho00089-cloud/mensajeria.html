@@ -4541,21 +4541,19 @@ async function unirseAlLive(roomName) {
 
      
 async function iniciarDifusionWebRTC() {
-    // 1. Aquí va tu lógica de LiveKit que ya tenemos funcionando
+    // 1. Lógica de LiveKit
     await iniciarSpaxioLiveKit(); 
 
-    // 2. AVISAR AL FEED (SpaxioFlow)
+    // 2. AVISAR AL FEED usando la función segura
     const miId = localStorage.getItem('mi_dropis_id');
-    const mensajeLive = {
+    
+    await enviarNotificacionSatelital({
         tipo: 'LIVE_NOTIFICATION',
         remitente: miId,
         texto: `🔴 ${miId} está en directo ahora mismo.`,
-        roomName: miId, // El ID de la sala para unirse
-        timestamp: new Date().getTime()
-    };
-
-    // Esto envía el aviso al chat SpaxioFlow
-    await enviarMensajeAlChat('SpaxioFlow', mensajeLive); 
+        roomName: miId,
+        timestamp: Date.now()
+    });
      }
 async function enviarNotificacionSatelital(objetoNotificacion) {
     const inputTarget = document.querySelector('#target-id');
