@@ -1,5 +1,6 @@
-const { AccessToken } = require('livekit-server-sdk');
-
+// Cambia la primera línea por esto:
+const livekit = require('livekit-server-sdk');
+const AccessToken = livekit.AccessToken;
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ message: 'Solo permitido POST' });
