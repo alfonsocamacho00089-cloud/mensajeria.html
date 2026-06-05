@@ -4389,19 +4389,21 @@ async function listarLivesActivos() {
      }
 
 async function unirseAlLive(roomName) {
-    // 1. Obtener token de espectador (similar al emisor, pero sin permisos de publicar)
+    // 1. Obtener token de espectador (debe tener permisos de solo lectura)
     const token = await obtenerTokenEspectador(roomName);
     
-    const room = new LiveKitClient.Room();
-    await room.connect('wss://TU_PROYECTO.livekit.cloud', token);
-
-    // 2. Escuchar cuando alguien publica un video
-    room.on(LiveKitClient.RoomEvent.TrackSubscribed, (track, publication, participant) => {
-        if (track.kind === LiveKitClient.Track.Kind.Video) {
-            const videoElement = document.getElementById('video-remoto'); // Un <video> en tu UI
+    const room = new LivekitClient.Room(); // Asegúrate de la 'k' minúscula
+    
+    // 2. Escuchar cuando alguien (tú) publica un video
+    room.on(LivekitClient.RoomEvent.TrackSubscribed, (track, publication, participant) => {
+        if (track.kind === LivekitClient.Track.Kind.Video) {
+            const videoElement = document.getElementById('video-remoto');
             track.attach(videoElement);
         }
     });
+
+    // 3. Conectarse a la sala
+    await room.connect('wss://space-xquv9iaa.livekit.cloud', token);
     
     // UI: Abrir el modal de visualización
     document.getElementById('modal-video-live').style.display = 'flex';
