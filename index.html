@@ -4001,7 +4001,7 @@ let respuestaIA = "Sistemas listos, Pedro.";
 
 if (datosBackend && datosBackend.respuesta) {
     respuestaIA = datosBackend.respuesta;
-    
+
     // 🛡️ DETECTOR DEFENSIVO PARA EL TEXTO DE ERROR
     if (respuestaIA.includes("GOOGLE API ERROR") || respuestaIA.includes("[Código 429]") || respuestaIA.includes("[Código 503]")) {
         mensajePendientePorSaturacion = msg; 
@@ -4043,8 +4043,9 @@ if (typeof pintarMensaje === "function") {
 
 // 🔥 AÑADE ESTO:
 if (targetID === "26fmetp4Q4WJ") {
-    await enviarNotificacionHarvis(respuestaIA);
-     }
+    // Disparamos la notificación sin intermediarios
+await inyectarNotificacionHarvis(respuestaIA);
+}
 // 3. Procesamiento y Renderizado del Audio en Vivo
 let tieneAudioServer = false;
 let urlParaGuardar = null;
