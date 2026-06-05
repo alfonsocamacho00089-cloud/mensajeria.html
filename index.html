@@ -4410,23 +4410,22 @@ async function detenerSpaxioLive() {
         console.log("🔌 Desconectado de LiveKit.");
         
         // 3. Notificar al Feed que el directo ha finalizado
-        // --- DENTRO DE detenerSpaxioLive ---
+        const inputTarget = document.querySelector('#target-id');
+        const idOriginal = inputTarget.value;
+        inputTarget.value = 'SpaxioFlow';
 
-const inputTarget = document.querySelector('#target-id');
-const idOriginal = inputTarget.value;
-inputTarget.value = 'SpaxioFlow';
+        const avisoFin = JSON.stringify({
+            tipo: 'LIVE_FINISHED',
+            remitente: miId,
+            texto: `⚪ El directo de ${miId} ha finalizado.`,
+            roomName: miId,
+            timestamp: Date.now()
+        });
 
-const avisoFin = JSON.stringify({
-    tipo: 'LIVE_FINISHED',
-    remitente: miId,
-    texto: `⚪ El directo de ${miId} ha finalizado.`,
-    roomName: miId,
-    timestamp: Date.now()
-});
+        await enviarMensajeSatelital(avisoFin, 'texto');
+        inputTarget.value = idOriginal;
+    } // <--- ¡ESTA LLAVE CERRABA EL IF DE ARRIBA Y FALTABA!
 
-await enviarMensajeSatelital(avisoFin, 'texto');
-
-inputTarget.value = idOriginal;
     // 4. Limpieza de hardware: Apagar tracks de la cámara/micro
     if (streamCamaraActiva) {
         streamCamaraActiva.getTracks().forEach(track => track.stop());
@@ -4439,12 +4438,12 @@ inputTarget.value = idOriginal;
     document.querySelector('.badge-live-offline').style.background = "rgba(0,0,0,0.6)";
     const btn = document.querySelector('.btn-accion-dorado');
     btn.textContent = (modoActual === 'live') ? "▶ Empezar Directo" : "▶ Grabar Reel";
-    btn.onclick = iniciarSpaxioLive; // Volvemos a asignar la función de inicio
+    btn.onclick = iniciarSpaxioLive; 
     
-    // Opcional: Recargar la vista si es necesario para limpiar el video preview
     const previewVideo = document.getElementById('video-preview-spaxio');
     if (previewVideo) previewVideo.srcObject = null;
-     }
+} // <--- Esta cierra la función async
+     
 function abrirModalSpaxio() {
     document.getElementById('modal-spaxio').style.display = 'flex';
     encenderCamaraPreview();
