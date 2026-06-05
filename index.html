@@ -2571,6 +2571,21 @@ else if (esCosaNueva) {
         box.scrollTop = box.scrollHeight;
      }
 
+     // Dentro de tu función que renderiza mensajes en el chat:
+if (mensaje.tipo === 'LIVE_NOTIFICATION') {
+    const div = document.createElement('div');
+    div.className = 'notificacion-live-chat';
+    div.innerHTML = `
+        <p>${mensaje.texto}</p>
+        <button class="btn-ir-al-live" onclick="abrirModalYUnirse('${mensaje.roomName}')">
+            ▶ Unirse al directo
+        </button>
+    `;
+    chatContainer.appendChild(div);
+        box.scrollTop = box.scrollHeight;
+     
+     }
+
     // El menú de acciones (se aplica sin importar qué camino tomó)
     div.onclick = (e) => {
         mensajeSeleccionado = div; 
@@ -4359,6 +4374,14 @@ function abrirModalSpaxio() {
     encenderCamaraPreview();
 }
 
+
+     function abrirModalYUnirse(roomName) {
+    // 1. Abrimos el modal
+    abrirModalSpaxio();
+    
+    // 2. Nos unimos automáticamente
+    unirseAlLive(roomName); 
+     }
 function cerrarModalSpaxio() {
     // Apagamos la cámara al cerrar
     if (streamCamaraActiva) {
@@ -4440,7 +4463,23 @@ async function unirseAlLive(roomName) {
      }
 
      
+async function iniciarDifusionWebRTC() {
+    // 1. Aquí va tu lógica de LiveKit que ya tenemos funcionando
+    await iniciarSpaxioLiveKit(); 
 
+    // 2. AVISAR AL FEED (SpaxioFlow)
+    const miId = localStorage.getItem('mi_dropis_id');
+    const mensajeLive = {
+        tipo: 'LIVE_NOTIFICATION',
+        remitente: miId,
+        texto: `🔴 ${miId} está en directo ahora mismo.`,
+        roomName: miId, // El ID de la sala para unirse
+        timestamp: new Date().getTime()
+    };
+
+    // Esto envía el aviso al chat SpaxioFlow
+    await enviarMensajeAlChat('SpaxioFlow', mensajeLive); 
+     }
 
 
      function cargarFotoInicial() {
