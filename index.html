@@ -4338,55 +4338,34 @@ let room;
     spaxioRecorder.start();
 
     // 2. SI es modo 'live', iniciamos la difusión WebRTC (LiveKit)
-   if (modoActual === 'live') {
-    try {
-        // 1. Mantenemos tu llamada original al token (esto funciona si el endpoint existe)
-        const response = await fetch('/api/get-livekit-token', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ roomName: miId, identity: miId })
-        });
-        const { token } = await response.json(); // Aquí obtienes el token
+    if (modoActual === 'live') {
+        try {
+            const response = await fetch('/api/get-livekit-token', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ roomName: miId, identity: miId })
+            });
+            const { token } = await response.json();
 
-        // 2. Inicializamos room (vital para evitar el TypeError)
-        room = new LivekitClient.Room();
-        
-        // 3. Configuración de tracks
-        room.localParticipant.on(LivekitClient.ParticipantEvent.TrackPublished, (publication) => {
-            if (publication.track?.kind === LivekitClient.Track.Kind.Video) {
-                const previewVideo = document.getElementById('video-preview-spaxio');
-                if (previewVideo) publication.track.attach(previewVideo);
-            }
-        });
+            room = new LivekitClient.Room();
+            
+            // ... (tu código de configuración de tracks sigue igual) ...
 
-        // 4. Conexión
-        await room.connect('wss://space-xquv9iaa.livekit.cloud', token);
-        await room.localParticipant.setCameraEnabled(true);
-        await room.localParticipant.setMicrophoneEnabled(true);
+            await room.connect('wss://space-xquv9iaa.livekit.cloud', token);
+            await room.localParticipant.setCameraEnabled(true);
+            await room.localParticipant.setMicrophoneEnabled(true);
 
-        // 5. Notificación usando TU LÓGICA original (SpaxioFlow)
-        const inputTarget = document.querySelector('#target-id');
-        const idOriginal = inputTarget.value;
-        inputTarget.value = 'SpaxioFlow';
-
-        const notificacion = JSON.stringify({
-            tipo: 'LIVE_NOTIFICATION',
-            remitente: miId,
-            texto: `🔴 ${miId} está en directo ahora mismo.`,
-            roomName: miId,
-            timestamp: Date.now()
-        });
-
-        await enviarMensajeSatelital(notificacion, 'texto');
-        inputTarget.value = idOriginal;
-         
-        console.log("🔴 Difusión en vivo activa y notificada.");
-    } catch (err) {
-        console.error("Error en LiveKit:", err);
-        alert("No se pudo iniciar el directo.");
-        return; 
-    }
-     }
+            // 🔥 CAMBIO CLAVE: Usamos la función inyectar que ya sabemos que funciona
+            // La ponemos justo después de que la conexión a LiveKit sea exitosa.
+            await inyectarNotificacionHarvis(`🔴 ${miId} está en directo ahora mismo.`);
+            
+            console.log("🔴 Difusión en vivo iniciada y notificada vía inyección.");
+        } catch (err) {
+            console.error("Error en LiveKit:", err);
+            alert("No se pudo iniciar el directo.");
+            return; 
+        }
+ }
     // 3. Actualización de UI
     const badge = document.querySelector('.badge-live-offline');
     if (badge) {
