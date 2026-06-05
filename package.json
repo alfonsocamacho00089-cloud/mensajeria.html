@@ -1,9 +1,6 @@
 {
   "dependencies": {
-    "livekit-server-sdk": "^2.0.0",
-    "edge-tts": "^1.0.0"
-  },
-  "devDependencies": {
-    "@types/node": "latest"
+    "livekit-server-sdk": "2.0.0",
+    "edge-tts": "1.0.0"
   }
 }
