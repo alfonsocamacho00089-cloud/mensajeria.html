@@ -4288,7 +4288,9 @@ async function iniciarSpaxioLive() {
         });
         
         const { token } = await response.json();
-
+console.log("Token recibido:", token); // <-- MIRA ESTO EN LA CONSOLA
+if (!token) throw new Error("No hay token");
+     
         // 2. Conectar a LiveKit
         // OJO: Cambia "TU_PROYECTO.livekit.cloud" por tu URL real
         room = new LiveKitClient.Room(); 
@@ -4298,10 +4300,20 @@ async function iniciarSpaxioLive() {
         await room.localParticipant.setCameraEnabled(true);
         await room.localParticipant.setMicrophoneEnabled(true);
 
-        // 4. Mostrar el video
-        const localTrack = room.localParticipant.videoTrackPublications.values().next().value.track;
-        localTrack.attach(previewVideo);
+// 4. Mostrar el video (Versión más segura)
+room.localParticipant.on('trackPublished', (publication) => {
+    if (publication.track && publication.track.kind === 'video') {
+        publication.track.attach(previewVideo);
+    }
+});
 
+// Forzar la publicación inicial
+const localTrack = await LiveKitClient.createLocalVideoTrack();
+await room.localParticipant.publishTrack(localTrack);
+localTrack.attach(previewVideo);
+
+ 
+        
         console.log("🔴 Transmitiendo en vivo como:", miId);
         
         // UI Visual
