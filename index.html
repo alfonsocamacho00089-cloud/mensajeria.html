@@ -4306,6 +4306,13 @@ async function iniciarSpaxioLive() {
         
         console.log("🔴 Transmitiendo en vivo como:", miId);
         // ... resto de tu UI
+     // UI Visual
+        document.querySelector('.badge-live-offline').textContent = "🔴 EN DIRECTO";
+        document.querySelector('.btn-accion-dorado').textContent = "⏹ Terminar";
+        document.querySelector('.btn-accion-dorado').onclick = () => {
+            room.disconnect();
+            location.reload(); 
+        };
     } catch (err) {
         console.error(err);
         alert("ERROR: " + err.message);
