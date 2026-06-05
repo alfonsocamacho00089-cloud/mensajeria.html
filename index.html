@@ -4335,46 +4335,37 @@ async function iniciarSpaxioLive() {
 
     // 2. SI es modo 'live', iniciamos la difusión WebRTC (LiveKit)
     if (modoActual === 'live') {
-        try {
-            const response = await fetch('/api/get-livekit-token', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ roomName: miId, identity: miId })
-            });
-            const { token } = await response.json();
-            
-            room = new LivekitClient.Room();
-            
-            // Evento para visualizar el stream local
-            room.localParticipant.on(LivekitClient.ParticipantEvent.TrackPublished, (publication) => {
-                if (publication.track?.kind === LivekitClient.Track.Kind.Video) {
-                    publication.track.attach(previewVideo);
-                }
-            });
+        // --- NUEVO ENVÍO POR API NOTIFICAR (VERSIÓN SEGURA) ---
+try {
+    const respuesta = await fetch('/api/notificar', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            comando: "NOTIFICAR_LIVE",
+            datos: {
+                tipo: 'LIVE_NOTIFICATION',
+                remitente: miId,
+                texto: `🔴 ${miId} está en directo.`,
+                roomName: miId,
+                timestamp: Date.now()
+            }
+        })
+    });
 
-            await room.connect('wss://space-xquv9iaa.livekit.cloud?livekit_url=wss://space-xquv9iaa.livekit.cloud', token);
-            await room.localParticipant.setCameraEnabled(true);
-            await room.localParticipant.setMicrophoneEnabled(true);
+    if (!respuesta.ok) {
+        // Esto captura si el servidor responde con 404, 500, etc.
+        const errorText = await respuesta.text();
+        throw new Error(`Servidor respondió con ${respuesta.status}: ${errorText}`);
+    }
 
-            // Notificación vía API
-            await fetch('/api/notificar', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    comando: "NOTIFICAR_LIVE",
-                    datos: {
-                        tipo: 'LIVE_NOTIFICATION',
-                        remitente: miId,
-                        texto: `🔴 ${miId} está en directo ahora mismo.`,
-                        roomName: miId,
-                        timestamp: Date.now()
-                    }
-                })
-            });
+    console.log("🔴 Notificación enviada con éxito.");
+
+} catch (err) {
+    console.error("❌ ERROR CRÍTICO EN NOTIFICACIÓN:", err);
+    // Aquí puedes poner una alerta o una notificación visual si falla
+     
             
-            console.log("🔴 Difusión en vivo activa y notificada por API.");
-        } catch (err) {
-            console.error("Error en LiveKit:", err);
+            
             alert("No se pudo iniciar el directo.");
             return; // Si falla el live, no queremos continuar
         }
