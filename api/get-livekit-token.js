@@ -1,9 +1,9 @@
 const livekit = require('livekit-server-sdk');
 
 export default async function handler(req, res) {
-  if (req.method !== 'POST') {
-    return res.status(405).json({ message: 'Solo permitido POST' });
-  }
+  // Respondemos inmediatamente con texto plano para ver si el navegador lo recibe
+  res.status(200).json({ status: "ok", message: "Conexión recibida correctamente" });
+}
 
   const { roomName, identity } = req.body;
   const apiKey = process.env.LIVEKIT_API_KEY;
