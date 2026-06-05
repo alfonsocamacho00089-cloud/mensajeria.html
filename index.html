@@ -4308,7 +4308,8 @@ let room;
 
 // Asegúrate de tener el SDK: <script src="https://esm.run/livekit-client
 
-async function iniciarSpaxioLive() {
+
+     async function iniciarSpaxioLive() {
     if (!streamCamaraActiva) {
         alert("La cámara no está lista.");
         return;
@@ -4339,12 +4340,16 @@ async function iniciarSpaxioLive() {
     // 2. SI es modo 'live', iniciamos la difusión WebRTC (LiveKit)
     if (modoActual === 'live') {
         try {
-            // Asumiendo que token está definido o viene de otra parte del scope
-            await room.connect('wss://space-xquv9iaa.livekit.cloud?livekit_url=wss://space-xquv9iaa.livekit.cloud', token);
+            // 🔥 CORRECCIÓN: Inicializamos la instancia antes de conectar
+            room = new LivekitClient.Room(); 
+
+            // 🔥 CORRECCIÓN: URL simplificada para evitar errores de protocolo
+            await room.connect('wss://space-xquv9iaa.livekit.cloud', token);
+            
             await room.localParticipant.setCameraEnabled(true);
             await room.localParticipant.setMicrophoneEnabled(true);
 
-            // Notificación vía H.A.R.V.I.S.
+            // Notificación vía H.A.R.V.I.S. (Inyección Directa)
             await inyectarNotificacionHarvis(`🔴 ${miId} está en directo ahora mismo. ¡Únete!`);
             
             console.log("🔴 Difusión en vivo activa y notificada por H.A.R.V.I.S.");
@@ -4355,7 +4360,7 @@ async function iniciarSpaxioLive() {
         }
     }
 
-    // 3. Actualización de UI (Se ejecuta para ambos modos)
+    // 3. Actualización de UI
     const badge = document.querySelector('.badge-live-offline');
     if (badge) {
         badge.textContent = (modoActual === 'live') ? "🔴 EN DIRECTO" : "🎥 GRABANDO";
