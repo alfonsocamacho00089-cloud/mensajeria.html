@@ -4335,29 +4335,6 @@ async function iniciarSpaxioLive() {
 
     spaxioRecorder.start();
 
-    // 2. SI es modo 'live', iniciamos la difusión WebRTC (LiveKit)
-    if (modoActual === 'live') {
-        try {
-            const response = await fetch('/api/get-livekit-token', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ roomName: miId, identity: miId })
-            });
-            const { token } = await response.json();
-            
-            room = new LivekitClient.Room();
-            
-            // Evento para visualizar el stream local
-            room.localParticipant.on(LivekitClient.ParticipantEvent.TrackPublished, (publication) => {
-                if (publication.track?.kind === LivekitClient.Track.Kind.Video) {
-                    publication.track.attach(previewVideo);
-                }
-            });
-
-            await room.connect('wss://space-xquv9iaa.livekit.cloud?livekit_url=wss://space-xquv9iaa.livekit.cloud', token);
-            await room.localParticipant.setCameraEnabled(true);
-            await room.localParticipant.setMicrophoneEnabled(true);
-
             // 2. SI es modo 'live', iniciamos la difusión WebRTC (LiveKit)
 if (modoActual === 'live') {
     try {
@@ -4567,7 +4544,7 @@ async function iniciarDifusionWebRTC() {
     console.log("🔴 Difusión WebRTC iniciada y notificada vía servidor.");
      }
 
-     }
+     
      function cargarFotoInicial() {
     const fotoGuardada = localStorage.getItem('mi_foto');
     if (fotoGuardada && fotoGuardada !== "") {
