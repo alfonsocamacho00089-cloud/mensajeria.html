@@ -4313,62 +4313,124 @@ let room;
 // Asegúrate de tener el SDK: <script src="https://esm.run/livekit-client
 
 
+
 async function iniciarSpaxioLive() {
+    if (!streamCamaraActiva) {
+        alert("La cámara no está lista.");
+        return;
+    }
+
     const miId = localStorage.getItem('mi_dropis_id');
     const previewVideo = document.getElementById('video-preview-spaxio');
+
+    // 1. SIEMPRE iniciamos la grabación local (Respaldo/Reel)
+    spaxioChunks = [];
+    spaxioRecorder = new MediaRecorder(streamCamaraActiva, { mimeType: 'video/webm' });
     
-    try {
-        const response = await fetch('/api/get-livekit-token', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ roomName: miId, identity: miId })
-        });
-        
-        const { token } = await response.json();
-        if (!token) throw new Error("No hay token");
-     
-        room = new LivekitClient.Room(); 
-        
-        // Escucha cuando se publica un track de video para mostrarlo
-        room.localParticipant.on(LivekitClient.ParticipantEvent.TrackPublished, (publication) => {
-            if (publication.track && publication.track.kind === LivekitClient.Track.Kind.Video) {
-                publication.track.attach(previewVideo);
-            }
-        });
+    spaxioRecorder.ondataavailable = (event) => {
+        if (event.data.size > 0) spaxioChunks.push(event.data);
+    };
 
-        await room.connect('wss://space-xquv9iaa.livekit.cloud?livekit_url=wss://space-xquv9iaa.livekit.cloud', token);
-
-        // Habilitar cámara y micro (esto disparará el evento de arriba automáticamente)
-        await room.localParticipant.setCameraEnabled(true);
-        await room.localParticipant.setMicrophoneEnabled(true);
-        
-        console.log("🔴 Transmitiendo en vivo como:", miId);
-        // ... resto de tu UI
-     // UI Visual
-        document.querySelector('.badge-live-offline').textContent = "🔴 EN DIRECTO";
-        document.querySelector('.btn-accion-dorado').textContent = "⏹ Terminar";
-        document.querySelector('.btn-accion-dorado').onclick = () => {
-            room.disconnect();
-            location.reload(); 
+    spaxioRecorder.onstop = async () => {
+        const videoBlob = new Blob(spaxioChunks, { type: 'video/webm' });
+        const reader = new FileReader();
+        reader.readAsDataURL(videoBlob);
+        reader.onloadend = async () => {
+            await enviarMediaPorURL(reader.result, 'video');
+            console.log("✅ Respaldo de video guardado en SpaxioFlow.");
         };
-    } catch (err) {
-        console.error(err);
-        alert("ERROR: " + err.message);
+    };
+
+    spaxioRecorder.start();
+
+    // 2. SI es modo 'live', iniciamos la difusión WebRTC (LiveKit)
+    if (modoActual === 'live') {
+        try {
+            const response = await fetch('/api/get-livekit-token', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ roomName: miId, identity: miId })
+            });
+            const { token } = await response.json();
+            
+            room = new LivekitClient.Room();
+            
+            // Evento para visualizar el stream local
+            room.localParticipant.on(LivekitClient.ParticipantEvent.TrackPublished, (publication) => {
+                if (publication.track?.kind === LivekitClient.Track.Kind.Video) {
+                    publication.track.attach(previewVideo);
+                }
+            });
+
+            await room.connect('wss://space-xquv9iaa.livekit.cloud?livekit_url=wss://space-xquv9iaa.livekit.cloud', token);
+            await room.localParticipant.setCameraEnabled(true);
+            await room.localParticipant.setMicrophoneEnabled(true);
+
+            // Avisar a SpaxioFlow que estamos en vivo
+            await enviarMensajeAlChat('SpaxioFlow', {
+                tipo: 'LIVE_NOTIFICATION',
+                remitente: miId,
+                texto: `🔴 ${miId} está en directo ahora mismo.`,
+                roomName: miId,
+                timestamp: Date.now()
+            });
+
+            console.log("🔴 Difusión en vivo activa.");
+        } catch (err) {
+            console.error("Error en LiveKit:", err);
+            alert("No se pudo iniciar el directo.");
+            return; // Si falla el live, no queremos continuar
+        }
     }
+
+    // 3. Actualización de UI
+    document.querySelector('.badge-live-offline').textContent = (modoActual === 'live') ? "🔴 EN DIRECTO" : "🎥 GRABANDO";
+    document.querySelector('.btn-accion-dorado').textContent = "⏹ Terminar";
+    document.querySelector('.btn-accion-dorado').onclick = detenerSpaxioLive;
      }
 
+async function detenerSpaxioLive() {
+    const miId = localStorage.getItem('mi_dropis_id');
 
-function detenerSpaxioLive() {
+    // 1. Detener la grabación local (Si estaba activa)
     if (spaxioRecorder && spaxioRecorder.state !== "inactive") {
         spaxioRecorder.stop();
+        console.log("⏹ Grabación local detenida.");
     }
-    
+
+    // 2. Desconectar de LiveKit (Si estaba activo)
+    if (room && room.state === 'connected') {
+        room.disconnect();
+        console.log("🔌 Desconectado de LiveKit.");
+        
+        // 3. Notificar al Feed que el directo ha finalizado
+        await enviarMensajeAlChat('SpaxioFlow', {
+            tipo: 'LIVE_FINISHED',
+            remitente: miId,
+            texto: `⚪ El directo de ${miId} ha finalizado.`,
+            roomName: miId,
+            timestamp: Date.now()
+        });
+    }
+
+    // 4. Limpieza de hardware: Apagar tracks de la cámara/micro
+    if (streamCamaraActiva) {
+        streamCamaraActiva.getTracks().forEach(track => track.stop());
+        streamCamaraActiva = null;
+        console.log("📷 Cámara y micro liberados.");
+    }
+
+    // 5. Reset de UI: Restaurar el estado inicial
     document.querySelector('.badge-live-offline').textContent = "OFFLINE";
     document.querySelector('.badge-live-offline').style.background = "rgba(0,0,0,0.6)";
-    document.querySelector('.btn-accion-dorado').textContent = "▶ Empezar Directo";
-    document.querySelector('.btn-accion-dorado').onclick = iniciarSpaxioLive;
-}
-
+    const btn = document.querySelector('.btn-accion-dorado');
+    btn.textContent = (modoActual === 'live') ? "▶ Empezar Directo" : "▶ Grabar Reel";
+    btn.onclick = iniciarSpaxioLive; // Volvemos a asignar la función de inicio
+    
+    // Opcional: Recargar la vista si es necesario para limpiar el video preview
+    const previewVideo = document.getElementById('video-preview-spaxio');
+    if (previewVideo) previewVideo.srcObject = null;
+     }
 function abrirModalSpaxio() {
     document.getElementById('modal-spaxio').style.display = 'flex';
     encenderCamaraPreview();
