@@ -4304,8 +4304,6 @@ let room;
 
 // Asegúrate de tener el SDK: <script src="https://esm.run/livekit-client
 
-
-
 async function iniciarSpaxioLive() {
     if (!streamCamaraActiva) {
         alert("La cámara no está lista.");
@@ -4335,34 +4333,46 @@ async function iniciarSpaxioLive() {
 
     spaxioRecorder.start();
 
-            // 2. SI es modo 'live', iniciamos la difusión WebRTC (LiveKit)
-if (modoActual === 'live') {
-    try {
-        // ... (todo tu código de LiveKit anterior sigue igual) ...
-        await room.connect('wss://space-xquv9iaa.livekit.cloud?livekit_url=wss://space-xquv9iaa.livekit.cloud', token);
-        await room.localParticipant.setCameraEnabled(true);
-        await room.localParticipant.setMicrophoneEnabled(true);
-
-        // --- NUEVO ENVÍO POR API NOTIFICAR ---
-        await fetch('/api/notificar', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                comando: "NOTIFICAR_LIVE",
-                datos: {
-                    tipo: 'LIVE_NOTIFICATION',
-                    remitente: miId,
-                    texto: `🔴 ${miId} está en directo ahora mismo.`,
-                    roomName: miId,
-                    timestamp: Date.now()
+    // 2. SI es modo 'live', iniciamos la difusión WebRTC (LiveKit)
+    if (modoActual === 'live') {
+        try {
+            const response = await fetch('/api/get-livekit-token', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ roomName: miId, identity: miId })
+            });
+            const { token } = await response.json();
+            
+            room = new LivekitClient.Room();
+            
+            // Evento para visualizar el stream local
+            room.localParticipant.on(LivekitClient.ParticipantEvent.TrackPublished, (publication) => {
+                if (publication.track?.kind === LivekitClient.Track.Kind.Video) {
+                    publication.track.attach(previewVideo);
                 }
-            })
-        });
-        
-        console.log("🔴 Difusión en vivo activa y notificada por API.");
-        
-         
-     
+            });
+
+            await room.connect('wss://space-xquv9iaa.livekit.cloud?livekit_url=wss://space-xquv9iaa.livekit.cloud', token);
+            await room.localParticipant.setCameraEnabled(true);
+            await room.localParticipant.setMicrophoneEnabled(true);
+
+            // Notificación vía API
+            await fetch('/api/notificar', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    comando: "NOTIFICAR_LIVE",
+                    datos: {
+                        tipo: 'LIVE_NOTIFICATION',
+                        remitente: miId,
+                        texto: `🔴 ${miId} está en directo ahora mismo.`,
+                        roomName: miId,
+                        timestamp: Date.now()
+                    }
+                })
+            });
+            
+            console.log("🔴 Difusión en vivo activa y notificada por API.");
         } catch (err) {
             console.error("Error en LiveKit:", err);
             alert("No se pudo iniciar el directo.");
@@ -4375,6 +4385,9 @@ if (modoActual === 'live') {
     document.querySelector('.btn-accion-dorado').textContent = "⏹ Terminar";
     document.querySelector('.btn-accion-dorado').onclick = detenerSpaxioLive;
      }
+
+
+
 
 async function detenerSpaxioLive() {
     const miId = localStorage.getItem('mi_dropis_id');
