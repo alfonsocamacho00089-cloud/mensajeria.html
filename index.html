@@ -4370,39 +4370,45 @@ async function detenerSpaxioLive() {
     const miId = localStorage.getItem('mi_dropis_id');
 
     // 1. Detener la grabación local (Si estaba activa)
-    if (spaxioRecorder && spaxioRecorder.state !== "inactive") {
+    if (typeof spaxioRecorder !== 'undefined' && spaxioRecorder && spaxioRecorder.state !== "inactive") {
         spaxioRecorder.stop();
         console.log("⏹ Grabación local detenida.");
     }
 
     // 2. Desconectar de LiveKit (Si estaba activo)
-    if (room && room.state === 'connected') {
-// ... dentro de detenerSpaxioLive
-if (room && room.state === 'connected') {
-    room.disconnect();
-    console.log("🔌 Desconectado de LiveKit.");
-    
-    // 🔥 CAMBIO CRÍTICO: Notificación de cierre sin pasar por el servidor
-    await inyectarNotificacionHarvis(`⚪ El directo de ${miId} ha finalizado.`);
- }
-     // 4. Limpieza de hardware: Apagar tracks de la cámara/micro
-    if (streamCamaraActiva) {
+    if (typeof room !== 'undefined' && room && room.state === 'connected') {
+        room.disconnect();
+        console.log("🔌 Desconectado de LiveKit.");
+        
+        // Notificación de cierre
+        await inyectarNotificacionHarvis(`⚪ El directo de ${miId} ha finalizado.`);
+    }
+
+    // 4. Limpieza de hardware: Apagar tracks de la cámara/micro
+    if (typeof streamCamaraActiva !== 'undefined' && streamCamaraActiva) {
         streamCamaraActiva.getTracks().forEach(track => track.stop());
         streamCamaraActiva = null;
         console.log("📷 Cámara y micro liberados.");
     }
 
     // 5. Reset de UI: Restaurar el estado inicial
-    document.querySelector('.badge-live-offline').textContent = "OFFLINE";
-    document.querySelector('.badge-live-offline').style.background = "rgba(0,0,0,0.6)";
+    const badge = document.querySelector('.badge-live-offline');
+    if (badge) {
+        badge.textContent = "OFFLINE";
+        badge.style.background = "rgba(0,0,0,0.6)";
+    }
+
     const btn = document.querySelector('.btn-accion-dorado');
-    btn.textContent = (modoActual === 'live') ? "▶ Empezar Directo" : "▶ Grabar Reel";
-    btn.onclick = iniciarSpaxioLive; 
+    if (btn) {
+        btn.textContent = (typeof modoActual !== 'undefined' && modoActual === 'live') ? "▶ Empezar Directo" : "▶ Grabar Reel";
+        btn.onclick = iniciarSpaxioLive; 
+    }
     
     const previewVideo = document.getElementById('video-preview-spaxio');
-    if (previewVideo) previewVideo.srcObject = null;
-} // <--- Esta cierra la función async
-     
+    if (previewVideo) {
+        previewVideo.srcObject = null;
+    }
+ }
 function abrirModalSpaxio() {
     document.getElementById('modal-spaxio').style.display = 'flex';
     encenderCamaraPreview();
