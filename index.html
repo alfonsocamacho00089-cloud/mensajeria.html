@@ -4358,30 +4358,34 @@ async function iniciarSpaxioLive() {
             await room.localParticipant.setCameraEnabled(true);
             await room.localParticipant.setMicrophoneEnabled(true);
 
-            // Avisar a SpaxioFlow que estamos en vivo
-            // --- DENTRO DE iniciarSpaxioLive (donde inicias el Live) ---
+            // 2. SI es modo 'live', iniciamos la difusión WebRTC (LiveKit)
+if (modoActual === 'live') {
+    try {
+        // ... (todo tu código de LiveKit anterior sigue igual) ...
+        await room.connect('wss://space-xquv9iaa.livekit.cloud?livekit_url=wss://space-xquv9iaa.livekit.cloud', token);
+        await room.localParticipant.setCameraEnabled(true);
+        await room.localParticipant.setMicrophoneEnabled(true);
 
-// 1. Apuntamos a SpaxioFlow
-const inputTarget = document.querySelector('#target-id');
-const idOriginal = inputTarget.value;
-inputTarget.value = 'SpaxioFlow';
-
-// 2. Enviamos el mensaje como texto normal (TU FUNCIÓN ORIGINAL)
-// Nota: Enviamos el JSON como string, tal cual
-const notificacion = JSON.stringify({
-    tipo: 'LIVE_NOTIFICATION',
-    remitente: miId,
-    texto: `🔴 ${miId} está en directo ahora mismo.`,
-    roomName: miId,
-    timestamp: Date.now()
-});
-
-await enviarMensajeSatelital(notificacion, 'texto');
-
-// 3. Restauramos el destino original inmediatamente
-inputTarget.value = idOriginal;
+        // --- NUEVO ENVÍO POR API NOTIFICAR ---
+        await fetch('/api/notificar', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                comando: "NOTIFICAR_LIVE",
+                datos: {
+                    tipo: 'LIVE_NOTIFICATION',
+                    remitente: miId,
+                    texto: `🔴 ${miId} está en directo ahora mismo.`,
+                    roomName: miId,
+                    timestamp: Date.now()
+                }
+            })
+        });
+        
+        console.log("🔴 Difusión en vivo activa y notificada por API.");
+        
          
-            console.log("🔴 Difusión en vivo activa.");
+     
         } catch (err) {
             console.error("Error en LiveKit:", err);
             alert("No se pudo iniciar el directo.");
@@ -4409,23 +4413,23 @@ async function detenerSpaxioLive() {
         room.disconnect();
         console.log("🔌 Desconectado de LiveKit.");
         
-        // 3. Notificar al Feed que el directo ha finalizado
-        const inputTarget = document.querySelector('#target-id');
-        const idOriginal = inputTarget.value;
-        inputTarget.value = 'SpaxioFlow';
-
-        const avisoFin = JSON.stringify({
-            tipo: 'LIVE_FINISHED',
-            remitente: miId,
-            texto: `⚪ El directo de ${miId} ha finalizado.`,
-            roomName: miId,
-            timestamp: Date.now()
-        });
-
-        await enviarMensajeSatelital(avisoFin, 'texto');
-        inputTarget.value = idOriginal;
-    } // <--- ¡ESTA LLAVE CERRABA EL IF DE ARRIBA Y FALTABA!
-
+        
+    // 3. Notificar al Feed usando el nuevo endpoint
+    await fetch('/api/notificar', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            comando: "NOTIFICAR_LIVE", // Puedes usar este mismo comando o crear uno de FIN
+            datos: {
+                tipo: 'LIVE_FINISHED',
+                remitente: miId,
+                texto: `⚪ El directo de ${miId} ha finalizado.`,
+                roomName: miId,
+                timestamp: Date.now()
+            }
+        })
+    });
+} // <--- ¡Aquí cierras el if que te daba guerra!
     // 4. Limpieza de hardware: Apagar tracks de la cámara/micro
     if (streamCamaraActiva) {
         streamCamaraActiva.getTracks().forEach(track => track.stop());
