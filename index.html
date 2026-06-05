@@ -4294,9 +4294,10 @@ if (!token) throw new Error("No hay token");
         // 2. Conectar a LiveKit
         // OJO: Cambia "TU_PROYECTO.livekit.cloud" por tu URL real
         room = new LiveKitClient.Room(); 
-        // Prueba con el servidor público de LiveKit
-await room.connect('wss://livekit-demo.cloud.livekit.io', token);
-     // 3. Publicar cámara y micro
+    // Cambia tu URL actual por esta, que a veces esquiva los filtros de red:
+await room.connect('wss://space-xquv9iaa.livekit.cloud?livekit_url=wss://space-xquv9iaa.livekit.cloud', token);
+     // Prueba con el servidor público de LiveKit
+// 3. Publicar cámara y micro
         await room.localParticipant.setCameraEnabled(true);
         await room.localParticipant.setMicrophoneEnabled(true);
 
