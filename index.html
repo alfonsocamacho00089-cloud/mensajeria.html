@@ -893,6 +893,9 @@ margin: 0;
     </button>
     
     </div>
+
+ <div id="contenedor-notificaciones-live"></div>
+ 
     <div style="display: flex; align-items: center; gap: 15px; flex-shrink: 0;">
         <button onclick="iniciarLlamadaSatelital('voz')" 
                 style="background: none; border: none; color: #ffd700; font-size: 20px; cursor: pointer; padding: 5px; transition: transform 0.2s;"
@@ -4391,24 +4394,28 @@ function cerrarModalSpaxio() {
      }
 
 async function listarLivesActivos() {
-    const response = await fetch('/api/list-rooms'); // Asegúrate que sea una ruta válida
-    const rooms = await response.json(); 
+    try {
+        // Asegúrate de que esta URL devuelva un JSON como: [{ "name": "Luis" }, { "name": "Maria" }]
+        const response = await fetch('/api/list-rooms'); 
+        const rooms = await response.json(); 
 
-    const container = document.getElementById('contenedor-notificaciones-live');
-    container.innerHTML = ''; // Limpiamos antes de listar
+        const container = document.getElementById('contenedor-notificaciones-live');
+        container.innerHTML = ''; // Limpiamos para no duplicar
 
-    rooms.forEach(room => {
-        const div = document.createElement('div');
-        div.className = 'notificacion-live-bubble';
-        
-        // Creamos el texto y el botón de unión
-        div.innerHTML = `
-            <span>🔴 Directo de: ${room.name}</span>
-            <button class="btn-unirse" onclick="unirseAlLive('${room.name}')">Unirse</button>
-        `;
-        
-        container.appendChild(div);
-    });
+        rooms.forEach(room => {
+            const div = document.createElement('div');
+            div.className = 'notificacion-live-bubble';
+            
+            // Aquí inyectamos el botón de unirse
+            div.innerHTML = `
+                <span>🔴 En vivo: ${room.name}</span>
+                <button onclick="unirseAlLive('${room.name}')" style="background:gold; border:none; padding:5px; cursor:pointer;">Unirse</button>
+            `;
+            container.appendChild(div);
+        });
+    } catch (e) {
+        console.log("Esperando directos...");
+    }
  }
 
 async function unirseAlLive(roomName) {
