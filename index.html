@@ -4293,8 +4293,7 @@ async function iniciarSpaxioLive() {
         // OJO: Cambia "TU_PROYECTO.livekit.cloud" por tu URL real
         room = new LiveKitClient.Room(); 
         await room.connect('wss://space-xquv9iaa.livekit.cloud', token);
-        const previewVideo = document.getElementById('video-preview-spaxio');
-    
+        
      // 3. Publicar cámara y micro
         await room.localParticipant.setCameraEnabled(true);
         await room.localParticipant.setMicrophoneEnabled(true);
