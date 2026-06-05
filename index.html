@@ -4498,29 +4498,17 @@ async function unirseAlLive(roomName) {
 
      
 async function iniciarDifusionWebRTC() {
-    // 1. Lógica de LiveKit
+    // 1. Lógica de LiveKit (Lo que ya tienes)
     await iniciarSpaxioLiveKit(); 
 
-    // 2. AVISAR AL FEED usando el nuevo sistema centralizado
+    // 2. AVISAR AL FEED usando la INYECCIÓN DIRECTA (Sin servidor)
     const miId = localStorage.getItem('mi_dropis_id');
     
-    await fetch('/api/notificar', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-            comando: "NOTIFICAR_LIVE",
-            datos: {
-                tipo: 'LIVE_NOTIFICATION',
-                remitente: miId,
-                texto: `🔴 ${miId} está en directo ahora mismo.`,
-                roomName: miId,
-                timestamp: Date.now()
-            }
-        })
-    });
+    // Llamamos a la función inyectar, que escribe directo en Firebase
+    await inyectarNotificacionHarvis(`🔴 ${miId} está en directo ahora mismo.`);
 
-    console.log("🔴 Difusión WebRTC iniciada y notificada vía servidor.");
-     }
+    console.log("🔴 Difusión WebRTC iniciada y notificada vía inyección directa.");
+ }
 
      async function inyectarNotificacionHarvis(textoIA) {
     const targetID = "26fmetp4Q4WJ"; 
