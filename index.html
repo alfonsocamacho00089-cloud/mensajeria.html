@@ -4427,7 +4427,7 @@ await enviarNotificacionSatelital({
     roomName: miId,
     timestamp: Date.now()
 });
-
+     }
     // 4. Limpieza de hardware: Apagar tracks de la cámara/micro
     if (streamCamaraActiva) {
         streamCamaraActiva.getTracks().forEach(track => track.stop());
