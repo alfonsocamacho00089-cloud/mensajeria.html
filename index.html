@@ -4274,6 +4274,7 @@ let room;
 
 // Asegúrate de tener el SDK: <script src="https://esm.run/livekit-client
 
+
 async function iniciarSpaxioLive() {
     const miId = localStorage.getItem('mi_dropis_id');
     const previewVideo = document.getElementById('video-preview-spaxio');
@@ -4289,32 +4290,25 @@ async function iniciarSpaxioLive() {
         if (!token) throw new Error("No hay token");
      
         room = new LivekitClient.Room(); 
+        
+        // Escucha cuando se publica un track de video para mostrarlo
+        room.localParticipant.on(LivekitClient.ParticipantEvent.TrackPublished, (publication) => {
+            if (publication.track && publication.track.kind === LivekitClient.Track.Kind.Video) {
+                publication.track.attach(previewVideo);
+            }
+        });
+
         await room.connect('wss://space-xquv9iaa.livekit.cloud?livekit_url=wss://space-xquv9iaa.livekit.cloud', token);
 
-        // 3. Publicar cámara y micro (Esto es suficiente para publicar)
+        // Habilitar cámara y micro (esto disparará el evento de arriba automáticamente)
         await room.localParticipant.setCameraEnabled(true);
         await room.localParticipant.setMicrophoneEnabled(true);
-
-        // 4. Mostrar el video: Obtenemos el track directamente del participante local
-        // Esto evita el error de "publishing a second track"
-        const localTrack = room.localParticipant.videoTracks.values().next().value;
-        if (localTrack) {
-            localTrack.track.attach(previewVideo);
-        }
         
         console.log("🔴 Transmitiendo en vivo como:", miId);
-        
-        // UI Visual
-        document.querySelector('.badge-live-offline').textContent = "🔴 EN DIRECTO";
-        document.querySelector('.btn-accion-dorado').textContent = "⏹ Terminar";
-        document.querySelector('.btn-accion-dorado').onclick = () => {
-            room.disconnect();
-            location.reload(); 
-        };
-
+        // ... resto de tu UI
     } catch (err) {
         console.error(err);
-        alert("ERROR REAL: " + err.toString());
+        alert("ERROR: " + err.message);
     }
      }
 
