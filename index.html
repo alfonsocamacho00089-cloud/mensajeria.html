@@ -4340,40 +4340,22 @@ async function iniciarSpaxioLive() {
     // 2. SI es modo 'live', iniciamos la difusión WebRTC (LiveKit)
     if (modoActual === 'live') {
         // --- NUEVO ENVÍO POR API NOTIFICAR (VERSIÓN SEGURA) ---
+// ... dentro de iniciarSpaxioLive, en el bloque 'if (modoActual === 'live')'
 try {
-    const respuesta = await fetch('/api/notificar', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-            comando: "NOTIFICAR_LIVE",
-            datos: {
-                tipo: 'LIVE_NOTIFICATION',
-                remitente: miId,
-                texto: `🔴 ${miId} está en directo.`,
-                roomName: miId,
-                timestamp: Date.now()
-            }
-        })
-    });
+    // ... tu lógica de conexión a LiveKit ...
+    await room.connect('wss://space-xquv9iaa.livekit.cloud?livekit_url=wss://space-xquv9iaa.livekit.cloud', token);
+    await room.localParticipant.setCameraEnabled(true);
+    await room.localParticipant.setMicrophoneEnabled(true);
 
-    if (!respuesta.ok) {
-        // Esto captura si el servidor responde con 404, 500, etc.
-        const errorText = await respuesta.text();
-        throw new Error(`Servidor respondió con ${respuesta.status}: ${errorText}`);
-    }
-
-    console.log("🔴 Notificación enviada con éxito.");
-
+    // 🔥 CAMBIO CRÍTICO: Usamos inyección directa en lugar de fetch a /api/notificar
+    await inyectarNotificacionHarvis(`🔴 ${miId} está en directo ahora mismo. ¡Únete!`);
+    
+    console.log("🔴 Difusión en vivo activa y notificada por H.A.R.V.I.S.");
 } catch (err) {
-    console.error("❌ ERROR CRÍTICO EN NOTIFICACIÓN:", err);
-    // Aquí puedes poner una alerta o una notificación visual si falla
-     
-            
-            
-            alert("No se pudo iniciar el directo.");
-            return; // Si falla el live, no queremos continuar
-        }
-    }
+    console.error("Error en LiveKit:", err);
+    alert("No se pudo iniciar el directo.");
+    return;
+ }
 
     // 3. Actualización de UI
     document.querySelector('.badge-live-offline').textContent = (modoActual === 'live') ? "🔴 EN DIRECTO" : "🎥 GRABANDO";
@@ -4395,27 +4377,15 @@ async function detenerSpaxioLive() {
 
     // 2. Desconectar de LiveKit (Si estaba activo)
     if (room && room.state === 'connected') {
-        room.disconnect();
-        console.log("🔌 Desconectado de LiveKit.");
-        
-        
-    // 3. Notificar al Feed usando el nuevo endpoint
-    await fetch('/api/notificar', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-            comando: "NOTIFICAR_LIVE", // Puedes usar este mismo comando o crear uno de FIN
-            datos: {
-                tipo: 'LIVE_FINISHED',
-                remitente: miId,
-                texto: `⚪ El directo de ${miId} ha finalizado.`,
-                roomName: miId,
-                timestamp: Date.now()
-            }
-        })
-    });
-} // <--- ¡Aquí cierras el if que te daba guerra!
-    // 4. Limpieza de hardware: Apagar tracks de la cámara/micro
+// ... dentro de detenerSpaxioLive
+if (room && room.state === 'connected') {
+    room.disconnect();
+    console.log("🔌 Desconectado de LiveKit.");
+    
+    // 🔥 CAMBIO CRÍTICO: Notificación de cierre sin pasar por el servidor
+    await inyectarNotificacionHarvis(`⚪ El directo de ${miId} ha finalizado.`);
+ }
+     // 4. Limpieza de hardware: Apagar tracks de la cámara/micro
     if (streamCamaraActiva) {
         streamCamaraActiva.getTracks().forEach(track => track.stop());
         streamCamaraActiva = null;
