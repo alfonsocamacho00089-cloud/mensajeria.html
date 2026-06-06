@@ -4291,7 +4291,10 @@ function DespacharMensajeEnCola() {
         console.log("No hay mensajes pendientes en la cola.");
     }
      }
-let spaxioRecorder = null;
+
+
+
+                let spaxioRecorder = null;
 let fragmentosVideo = [];
 let streamCamaraActiva;
 let room; // Instancia global de LiveKit
@@ -4318,7 +4321,7 @@ function configurarModo(nuevoModo) {
 }
 
 // ========================================================
-// 🔥 NUEVA FUNCIÓN: INICIAR TRANSMISIÓN (ESTILO YOUTUBE)
+// 🔥 INICIAR TRANSMISIÓN (ESTILO YOUTUBE)
 // ========================================================
 async function iniciarSpaxioLive() {
     if (!streamCamaraActiva) return;
@@ -4326,7 +4329,6 @@ async function iniciarSpaxioLive() {
 
     if (modoActual === 'live') {
         try {
-            // 1. Pedir token al backend.
             const response = await fetch('/api/get-livekit-token', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -4336,7 +4338,6 @@ async function iniciarSpaxioLive() {
 
             room = new LivekitClient.Room();
 
-            // Sincronizar previsualización local en tu pantalla de control
             room.localParticipant.on(LivekitClient.ParticipantEvent.TrackPublished, (publication) => {
                 if (publication.track && publication.track.kind === LivekitClient.Track.Kind.Video) {
                     const preview = document.getElementById('video-preview-spaxio');
@@ -4344,42 +4345,32 @@ async function iniciarSpaxioLive() {
                 }
             });
 
-            // Conexión a la nube de LiveKit
             await room.connect('wss://space-xquv9iaa.livekit.cloud', token);
             await room.localParticipant.setCameraEnabled(true);
             await room.localParticipant.setMicrophoneEnabled(true);
 
-            // Avisamos al sistema mediante tu inyección satelital limpia
             await inyectarNotificacionHarvis(`🔴 ${miId} está en directo ahora mismo.`);
-            
             console.log("🔴 Difusión en vivo iniciada y transmitiendo a la nube.");
 
-            // ====================================================================
-            // 📦 NUEVO: Arrancar la grabación local en segundo plano al iniciar el Live
-            // ====================================================================
-            fragmentosVideo = []; // Limpiamos grabaciones anteriores
+            // 📦 Grabador local YouSpaxio encendido
+            fragmentosVideo = []; 
 
             if (typeof streamCamaraActiva !== 'undefined' && streamCamaraActiva) {
                 try {
-                    // Usamos el formato nativo de video de Android/PWAs
                     spaxioRecorder = new MediaRecorder(streamCamaraActiva, { mimeType: 'video/webm;codecs=vp8,opus' });
                 } catch (e) {
-                    // Alternativa por si el codec vp8 no es soportado por el navegador del teléfono
                     spaxioRecorder = new MediaRecorder(streamCamaraActiva);
                 }
 
-                // Guardar los pedazos de video conforme se vayan generando
                 spaxioRecorder.ondataavailable = (event) => {
                     if (event.data && event.data.size > 0) {
                         fragmentosVideo.push(event.data);
                     }
                 };
 
-                // Cada 1 segundo (1000ms) empaqueta un fragmento para no saturar la RAM
                 spaxioRecorder.start(1000); 
                 console.log("🔴 Grabador local YouSpaxio encendido.");
             }
-            // ====================================================================
 
         } catch (err) {
             console.error("Error en LiveKit:", err);
@@ -4388,7 +4379,6 @@ async function iniciarSpaxioLive() {
         }
     }
 
-    // Actualización de UI Dorada
     const badge = document.querySelector('.badge-live-offline');
     if (badge) badge.textContent = (modoActual === 'live') ? "🔴 EN DIRECTO" : "🎥 GRABANDO";
 
@@ -4397,59 +4387,62 @@ async function iniciarSpaxioLive() {
         btn.textContent = "⏹ Terminar";
         btn.onclick = detenerSpaxioLive;
     }
- }
+}
 
 // ========================================================
-// 🔥 NUEVA FUNCIÓN: DETENER Y PUBLICAR EL LINK AUTOMÁTICO
+// 🔥 DETENER Y MANDAR URL DIRECTA .MP4 AL PUENTE DE FIREBASE
 // ========================================================
 async function detenerSpaxioLive() {
     const miId = localStorage.getItem('mi_dropis_id');
 
-// 1. Detener el grabador local del teléfono y empaquetar el video
-if (spaxioRecorder && spaxioRecorder.state !== 'inactive') {
-    spaxioRecorder.stop();
-    console.log("🛑 Grabación local pausada. Procesando archivo...");
+    // 1. Detener el grabador local del teléfono y procesar el archivo pesado
+    if (spaxioRecorder && spaxioRecorder.state !== 'inactive') {
+        spaxioRecorder.stop();
+        console.log("🛑 Grabación local pausada. Procesando archivo...");
 
-    // Unimos todos los fragmentos acumulados en un solo objeto binario
-    const videoBlob = new Blob(fragmentosVideo, { type: 'video/mp4' });
-    
-    // Creamos el formulario nativo que exige la API de Telegram
-    const formData = new FormData();
-    
-    // CAMBIO CLAVE: Reemplaza estos valores con tus credenciales reales directamente
-    const BOT_TOKEN = "8955541679:AAFFv3C7LIUusNsT3LBveWqHHbTJdUsYjMM"; 
-    const CHAT_ID = "8320121552"; // ID de tu canal privado Spaxio
+        const videoBlob = new Blob(fragmentosVideo, { type: 'video/mp4' });
+        const BUCKET_NAME = "lives";
+        const FILE_NAME = `${miId}-${Date.now()}.mp4`;
 
-    formData.append('chat_id', CHAT_ID);
-    formData.append('video', videoBlob, `${miId}-live.mp4`);
-    formData.append('caption', `🎬 **SpaxioLive Guardado**\n👤 Transmisión de: \`${miId}\`\n📅 Fecha: ${new Date().toLocaleString()}`);
-    formData.append('parse_mode', 'Markdown');
-
-    console.log("📤 Subiendo video directo a Telegram desde el dispositivo...");
-
-    // Enviamos el video directamente a Telegram saltándonos los límites de Vercel
-    fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendVideo`, {
-        method: 'POST',
-        body: formData
-    })
-    .then(res => res.json())
-    .then(async (data) => {
-        if (data && data.ok) {
-            const telegramFileId = data.result.video.file_id;
-            console.log("🚀 ¡Video salvado en Telegram directamente! ID:", telegramFileId);
+        // 🟢 PASO 1: Pedirle el token o pase seguro a tu API de Vercel (No viaja el video)
+        fetch('/api/get-upload-url', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ fileName: FILE_NAME })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.uploadUrl) {
+                console.log("📤 Subiendo video pesado directo a Supabase con pase seguro...");
+                
+                // 🟢 PASO 2: Mandar el video real directo a Supabase mediante PUT sin pasar por Vercel
+                return fetch(data.uploadUrl, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'video/mp4' },
+                    body: videoBlob
+                });
+            } else {
+                throw new Error("No se pudo obtener la URL pre-firmada de subida.");
+            }
+        })
+        .then(res => res.json())
+        .then(async (storageData) => {
+            // 🟢 PASO 3: ¡ÉXITO! Construimos tu URL .mp4 pública definitiva
+            // ⚠️ REEMPLAZA "tu-proyecto" CON EL ID REAL DE TU URL DE SUPABASE
+            const SUPABASE_BASE = "https://tu-proyecto.supabase.co"; 
+            const urlDirectaMp4 = `${SUPABASE_BASE}/storage/v1/object/public/${BUCKET_NAME}/${FILE_NAME}`;
             
+            console.log("🎥 URL Directa para tu Frame listo:", urlDirectaMp4);
+
             // ============================================================
-            // 🔥 AQUÍ GUARDAS EL ID EN TU FIREBASE REALTIME DATABASE:
-            // database.ref('lives/' + miId).set({ fileId: telegramFileId });
+            // ⚡ AQUÍ VIAJA TU STRING DE LA URL POR EL PUENTE DE FIREBASE REALTIME:
+            // database.ref('lives_activas/' + miId).set({ urlVideo: urlDirectaMp4 });
             // ============================================================
             
-            await inyectarNotificacionHarvis(`✅ Transmisión de ${miId} guardada en Spaxio Cloud.`);
-        } else {
-            console.error("❌ Telegram rechazó el archivo:", data);
-        }
-    })
-    .catch(err => console.error("❌ Error de red subiendo a Telegram:", err));
-     }
+            await inyectarNotificacionHarvis(`✅ Transmisión de ${miId} guardada y URL generada.`);
+        })
+        .catch(err => console.error("❌ Error en el proceso de subida segura:", err));
+    }
 
     // 2. Desconectar de LiveKit
     if (typeof room !== 'undefined' && room && room.state === 'connected') {
@@ -4458,7 +4451,7 @@ if (spaxioRecorder && spaxioRecorder.state !== 'inactive') {
         await inyectarNotificacionHarvis(`⚪ El directo de ${miId} ha finalizado.`);
     }
 
-    // 3. Limpieza de hardware (Cámara y micrófono)
+    // 3. Limpieza de hardware
     if (typeof streamCamaraActiva !== 'undefined' && streamCamaraActiva) {
         streamCamaraActiva.getTracks().forEach(track => track.stop());
         streamCamaraActiva = null;
@@ -4483,6 +4476,7 @@ if (spaxioRecorder && spaxioRecorder.state !== 'inactive') {
         previewVideo.srcObject = null;
     }
      }
+    
 
      
   
