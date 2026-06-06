@@ -4315,21 +4315,29 @@ async function iniciarSpaxioLive() {
     const miId = localStorage.getItem('mi_dropis_id');
     const TIEMPO_SEGMENTO = 30000; // 30 segundos
     
-    spaxioChunks = [];
-    spaxioRecorder = new MediaRecorder(streamCamaraActiva, { mimeType: 'video/webm' });
+    // Configuración optimizada con menor bitrate para un "viaje" rápido
+    spaxioRecorder = new MediaRecorder(streamCamaraActiva, { 
+        mimeType: 'video/webm;codecs=vp8',
+        videoBitsPerSecond: 250000 // 250 kbps para mayor fluidez en la red
+    });
     
-    // El 'await' aquí es correcto porque esta función es ASYNC
     spaxioRecorder.ondataavailable = async (event) => {
         if (event.data.size > 0) {
             const blob = event.data;
-            const reader = new FileReader();
+            const nombreArchivo = `transito/${miId}/${Date.now()}.webm`;
+            const storageRef = firebase.storage().ref(nombreArchivo);
             
-            reader.readAsDataURL(blob);
-            reader.onloadend = async () => {
-                // Aquí el await es válido porque onloadend es una función async
-                await enviarMediaPorURL(reader.result, 'video');
-                console.log("🎬 Segmento enviado correctamente.");
-            };
+            try {
+                // 1. El viaje empieza aquí: subida binaria directa
+                await storageRef.put(blob, { contentType: 'video/webm' });
+                
+                // 2. Una vez confirmado el envío, eliminamos el archivo inmediatamente
+                await storageRef.delete();
+                
+                console.log("🚀 Viaje completado y eliminado del servidor.");
+            } catch (error) {
+                console.error("❌ Error en el proceso de viaje:", error);
+            }
         }
     };
 
@@ -4337,7 +4345,7 @@ async function iniciarSpaxioLive() {
         console.log("⏹ Grabación finalizada.");
     };
 
-    // Esto activa la segmentación
+    // Inicia la grabación segmentada
     spaxioRecorder.start(TIEMPO_SEGMENTO);
     console.log("✅ Grabación segmentada iniciada.");
      
