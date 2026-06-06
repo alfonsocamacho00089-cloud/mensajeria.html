@@ -4291,7 +4291,8 @@ function DespacharMensajeEnCola() {
         console.log("No hay mensajes pendientes en la cola.");
     }
      }
-
+let spaxioRecorder = null;
+let fragmentosVideo = [];
 let streamCamaraActiva;
 let room; // Instancia global de LiveKit
 let modoActual = 'video'; 
@@ -4325,8 +4326,7 @@ async function iniciarSpaxioLive() {
 
     if (modoActual === 'live') {
         try {
-            // 1. Pedir token al backend. OJO: Tu API de Node/Vercel debe incluir la orden de 
-            // activar el "Egress / Room Composite" de LiveKit para que empiece a grabar en su nube.
+            // 1. Pedir token al backend.
             const response = await fetch('/api/get-livekit-token', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -4354,6 +4354,33 @@ async function iniciarSpaxioLive() {
             
             console.log("🔴 Difusión en vivo iniciada y transmitiendo a la nube.");
 
+            // ====================================================================
+            // 📦 NUEVO: Arrancar la grabación local en segundo plano al iniciar el Live
+            // ====================================================================
+            fragmentosVideo = []; // Limpiamos grabaciones anteriores
+
+            if (typeof streamCamaraActiva !== 'undefined' && streamCamaraActiva) {
+                try {
+                    // Usamos el formato nativo de video de Android/PWAs
+                    spaxioRecorder = new MediaRecorder(streamCamaraActiva, { mimeType: 'video/webm;codecs=vp8,opus' });
+                } catch (e) {
+                    // Alternativa por si el codec vp8 no es soportado por el navegador del teléfono
+                    spaxioRecorder = new MediaRecorder(streamCamaraActiva);
+                }
+
+                // Guardar los pedazos de video conforme se vayan generando
+                spaxioRecorder.ondataavailable = (event) => {
+                    if (event.data && event.data.size > 0) {
+                        fragmentosVideo.push(event.data);
+                    }
+                };
+
+                // Cada 1 segundo (1000ms) empaqueta un fragmento para no saturar la RAM
+                spaxioRecorder.start(1000); 
+                console.log("🔴 Grabador local YouSpaxio encendido.");
+            }
+            // ====================================================================
+
         } catch (err) {
             console.error("Error en LiveKit:", err);
             alert("No se pudo iniciar el directo.");
@@ -4370,7 +4397,7 @@ async function iniciarSpaxioLive() {
         btn.textContent = "⏹ Terminar";
         btn.onclick = detenerSpaxioLive;
     }
-}
+ }
 
 // ========================================================
 // 🔥 NUEVA FUNCIÓN: DETENER Y PUBLICAR EL LINK AUTOMÁTICO
@@ -4378,23 +4405,56 @@ async function iniciarSpaxioLive() {
 async function detenerSpaxioLive() {
     const miId = localStorage.getItem('mi_dropis_id');
 
-    // 1. Desconectar de LiveKit.
+    // 1. Detener el grabador local del teléfono y empaquetar el video
+    if (spaxioRecorder && spaxioRecorder.state !== 'inactive') {
+        spaxioRecorder.stop();
+        console.log("🛑 Grabación local pausada. Procesando archivo...");
+
+        // Unimos todos los fragmentos acumulados en un solo objeto binario
+        const videoBlob = new Blob(fragmentosVideo, { type: 'video/mp4' });
+        
+        // Creamos el formulario virtual para enviarlo por HTTP POST
+        const formData = new FormData();
+        formData.append('video', videoBlob, `${miId}-live.mp4`);
+        formData.append('roomName', miId);
+
+        // Enviamos el video de manera asíncrona a nuestra API de Vercel
+        fetch('/api/upload-to-telegram.js', {
+            method: 'POST',
+            body: formData
+        })
+        .then(res => res.json())
+        .then(async (data) => {
+            if (data && data.telegramFileId) {
+                console.log("🚀 ¡Video salvado en Telegram con éxito! ID:", data.telegramFileId);
+                
+                // ============================================================
+                // 🔥 AQUÍ GUARDAS EL ID EN TU FIREBASE REALTIME DATABASE:
+                // Guarda 'data.telegramFileId' bajo el nodo del usuario para que
+                // tu reproductor cargue el video usando los servidores de Telegram.
+                // ============================================================
+                
+                await inyectarNotificacionHarvis(`✅ Transmisión de ${miId} procesada y guardada.`);
+            }
+        })
+        .catch(err => console.error("❌ Error enviando video a la API:", err));
+    }
+
+    // 2. Desconectar de LiveKit
     if (typeof room !== 'undefined' && room && room.state === 'connected') {
         room.disconnect();
-        console.log("🔌 Desconectado de LiveKit. Grabación en la nube finalizada.");
-        
-        // Notificación de cierre en tu feed de Firebase
+        console.log("🔌 Desconectado de LiveKit.");
         await inyectarNotificacionHarvis(`⚪ El directo de ${miId} ha finalizado.`);
     }
 
-    // 2. Limpieza de hardware (Cámara y micrófono)
+    // 3. Limpieza de hardware (Cámara y micrófono)
     if (typeof streamCamaraActiva !== 'undefined' && streamCamaraActiva) {
         streamCamaraActiva.getTracks().forEach(track => track.stop());
         streamCamaraActiva = null;
         console.log("📷 Hardware liberado correctamente.");
     }
 
-    // 3. Reset de la Interfaz (UI) estilo Negro y Dorado
+    // 4. Reset de la Interfaz (UI) estilo Negro y Dorado
     const badge = document.querySelector('.badge-live-offline');
     if (badge) {
         badge.textContent = "OFFLINE";
@@ -4411,7 +4471,7 @@ async function detenerSpaxioLive() {
     if (previewVideo) {
         previewVideo.srcObject = null;
     }
- }
+     }
 
      
   
