@@ -4307,60 +4307,51 @@ function configurarModo(nuevoModo) {
 let room;
 
 // Asegúrate de que esto esté DENTRO de tu archivo JS como parte de un bloque funcional
+// Aseguramos que las variables existan en el ámbito global o superior
+window.spaxioChunks = window.spaxioChunks || [];
+window.spaxioRecorder = window.spaxioRecorder || null;
+
 async function iniciarSpaxioLive() {
-
-    if (!streamCamaraActiva) {
-
-        alert("La cámara no está lista.");
-
+    if (!window.streamCamaraActiva) {
+        console.error("Cámara no detectada");
         return;
-
     }
 
+    try {
+        // 1. Reset seguro
+        window.spaxioChunks = [];
+        
+        // 2. Inicialización
+        window.spaxioRecorder = new MediaRecorder(window.streamCamaraActiva, { mimeType: 'video/webm' });
 
-
-    const miId = localStorage.getItem('mi_dropis_id');
-
-    
-
-    // 1. SIEMPRE iniciamos la grabación local (Respaldo/Reel)
-
-    spaxioChunks = [];
-
-    spaxioRecorder = new MediaRecorder(streamCamaraActiva, { mimeType: 'video/webm' });
-
-    
-
-    spaxioRecorder.ondataavailable = (event) => {
-
-        if (event.data.size > 0) spaxioChunks.push(event.data);
-
-    };
-
-
-
-    spaxioRecorder.onstop = async () => {
-
-        const videoBlob = new Blob(spaxioChunks, { type: 'video/webm' });
-
-        const reader = new FileReader();
-
-        reader.readAsDataURL(videoBlob);
-
-        reader.onloadend = async () => {
-
-            await enviarMediaPorURL(reader.result, 'video');
-
-            console.log("✅ Respaldo de video guardado en SpaxioFlow.");
-
+        window.spaxioRecorder.ondataavailable = (event) => {
+            if (event.data && event.data.size > 0) {
+                window.spaxioChunks.push(event.data);
+            }
         };
 
-    };
+        window.spaxioRecorder.onstop = async () => {
+            console.log("Procesando respaldo...");
+            const videoBlob = new Blob(window.spaxioChunks, { type: 'video/webm' });
+            
+            // Usamos una Promesa para que el FileReader sea 'awaitable'
+            const base64Data = await new Promise((resolve) => {
+                const reader = new FileReader();
+                reader.onloadend = () => resolve(reader.result);
+                reader.readAsDataURL(videoBlob);
+            });
 
+            await enviarMediaPorURL(base64Data, 'video');
+            console.log("✅ Respaldo guardado exitosamente.");
+        };
 
+        window.spaxioRecorder.start();
+        console.log("Grabación iniciada");
 
-    spaxioRecorder.start();
-
+    } catch (e) {
+        console.error("Error crítico al iniciar MediaRecorder:", e);
+    }
+     }
 
 
 
