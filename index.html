@@ -4317,32 +4317,33 @@ async function iniciarSpaxioLive() {
     spaxioChunks = [];
     spaxioRecorder = new MediaRecorder(streamCamaraActiva, { mimeType: 'video/webm' });
 
-    // ESTO ES LO QUE SOLUCIONA TU ERROR: 
-    // Usamos una función normal (sin async) y .then() para el envío.
+    // REVISA BIEN ESTA PARTE: No debe haber palabra 'async' ni 'await' aquí dentro
     spaxioRecorder.ondataavailable = function(event) {
         if (event.data.size > 0) {
             const reader = new FileReader();
             
             reader.onloadend = function() {
-                // Aquí llamamos a la función de envío de forma tradicional
+                // Aquí usamos .then() porque no estamos en una función async
                 enviarMediaPorURL(reader.result, 'video')
-                    .then(() => console.log("🎬 Segmento enviado correctamente."))
-                    .catch((err) => console.error("Error al enviar:", err));
+                    .then(function() {
+                        console.log("🎬 Segmento enviado correctamente.");
+                    })
+                    .catch(function(err) {
+                        console.error("Error al enviar:", err);
+                    });
             };
             
             reader.readAsDataURL(event.data);
         }
     };
 
-    spaxioRecorder.onstop = () => {
+    spaxioRecorder.onstop = function() {
         console.log("⏹ Grabación finalizada.");
     };
 
     spaxioRecorder.start(TIEMPO_SEGMENTO);
     console.log("✅ Grabación segmentada iniciada.");
      }
-
-     
 
     // 2. SI es modo 'live', iniciamos la difusión WebRTC (LiveKit)
     if (modoActual === 'live') {
