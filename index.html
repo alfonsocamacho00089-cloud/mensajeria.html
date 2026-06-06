@@ -4305,41 +4305,56 @@ function configurarModo(nuevoModo) {
 
 // Variable global para la instancia de LiveKit
 let room;
-
 async function iniciarSpaxioLive() {
-    if (!streamCamaraActiva) {
-        alert("La cámara no está lista.");
-        return;
-    }
+    if (!streamCamaraActiva) return;
 
     const miId = localStorage.getItem('mi_dropis_id');
-    const TIEMPO_SEGMENTO = 30000; // 30 segundos
+    const TIEMPO_SEGMENTO = 30000;
     
-    spaxioRecorder = new MediaRecorder(streamCamaraActiva, { 
-        mimeType: 'video/webm;codecs=vp8',
-        videoBitsPerSecond: 250000 
-    });
-    
-    spaxioRecorder.ondataavailable = async (event) => {
-    if (event.data.size > 0) {
-        // 1. Convertimos el Blob en una URL local del navegador
-        const urlTemporal = URL.createObjectURL(event.data);
-        
-        // 2. Pasamos esa URL (que es un string) a tu función
-        await enviarMediaPorURL(urlTemporal, 'video');
-        
-        console.log("🚀 Viaje completado: URL temporal enviada:", urlTemporal);
-    }
-};
+    // Función para crear un nuevo grabador limpio
+    const crearGrabador = () => {
+        const recorder = new MediaRecorder(streamCamaraActiva, { 
+            mimeType: 'video/webm;codecs=vp8',
+            videoBitsPerSecond: 250000 
+        });
 
-    spaxioRecorder.onstop = () => {
-        console.log("⏹ Grabación finalizada.");
+        recorder.ondataavailable = async (event) => {
+            if (event.data && event.data.size > 0) {
+                // Generamos una URL nueva y fresca para cada segmento
+                const urlTemporal = URL.createObjectURL(event.data);
+                
+                // IMPORTANTE: Solo enviamos el mensaje, dejamos que el renderizador 
+                // del chat (que ya funciona bien con textos/fotos) pinte el video
+                await enviarMensajeSatelital(urlTemporal, 'video');
+                
+                console.log("🚀 Segmento enviado exitosamente:", urlTemporal);
+            }
+        };
+        return recorder;
     };
 
-    spaxioRecorder.start(TIEMPO_SEGMENTO);
-    console.log("✅ Grabación segmentada iniciada.");
+    // Iniciamos el primer grabador
+    spaxioRecorder = crearGrabador();
+    spaxioRecorder.start();
+
+    // Ciclo de segmentación forzada: Detenemos y reiniciamos
+    // Esto garantiza que el navegador escriba los metadatos completos del WebM
+    const intervalo = setInterval(() => {
+        if (spaxioRecorder && spaxioRecorder.state === "recording") {
+            spaxioRecorder.stop(); // Esto dispara ondataavailable con el segmento completo
+            spaxioRecorder = crearGrabador();
+            spaxioRecorder.start();
+        }
+    }, TIEMPO_SEGMENTO);
+
+    // Guardamos el intervalo para limpiarlo luego en detenerSpaxioLive
+    spaxioRecorder.intervalo = intervalo;
+    
+    // ... resto de tu lógica de LiveKit ...
      
 
+
+  
      
 
     // 2. SI es modo 'live', iniciamos la difusión WebRTC (LiveKit)
@@ -4383,13 +4398,20 @@ async function iniciarSpaxioLive() {
         btn.onclick = detenerSpaxioLive;
     }
      }
-
-
-
+    
+    
 
 async function detenerSpaxioLive() {
     const miId = localStorage.getItem('mi_dropis_id');
-
+// 1. Limpiar el intervalo de grabación
+    if (spaxioRecorder && spaxioRecorder.intervalo) {
+        clearInterval(spaxioRecorder.intervalo);
+    }
+    
+    // 2. Detener recorder
+    if (spaxioRecorder && spaxioRecorder.state !== "inactive") {
+        spaxioRecorder.stop();
+     }
     // 1. Detener la grabación local (Si estaba activa)
     if (typeof spaxioRecorder !== 'undefined' && spaxioRecorder && spaxioRecorder.state !== "inactive") {
         spaxioRecorder.stop();
