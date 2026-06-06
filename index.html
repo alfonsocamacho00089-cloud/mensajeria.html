@@ -2488,6 +2488,23 @@ else if (esCosaNueva) {
                         </a>
                     </div>
                 `;
+
+     // Dentro de: else if (esCosaNueva) { ... } del requestAnimationFrame
+// Justo al lado de tus ifs de YouTube y TikTok, añade este:
+
+if (textoReal.includes('livekit.cloud/storage/') || textoReal.includes('.mp4')) {
+    cuerpoHTML = `
+        <div style="max-width:260px; background:#111; border: 2px solid #ffd700; border-radius:12px; padding:6px;">
+            <video src="${textoReal}" controls playsinline 
+                   style="width:100%; max-height:320px; border-radius:8px; display:block; background:#000;">
+            </video>
+            <a href="${textoReal}" download
+               style="display:flex; align-items:center; justify-content:center; margin-top:6px; padding:6px; background:#000; border: 1px solid #ffd700; border-radius:8px; color:#ffd700; font-size:11px; text-decoration:none; font-weight:bold; gap:6px;">
+               📥 Descargar Directo al Teléfono
+            </a>
+        </div>
+    `;
+     }
             } else if (tipo === 'video') {
                 cuerpoHTML = `
                     <video src="${textoReal}" controls playsinline
@@ -4275,12 +4292,9 @@ function DespacharMensajeEnCola() {
     }
      }
 
-
-
-     
-     let spaxioRecorder;
-let spaxioChunks = [];
 let streamCamaraActiva;
+let room; // Instancia global de LiveKit
+let modoActual = 'video'; 
 
 async function encenderCamaraPreview() {
     try {
@@ -4294,72 +4308,25 @@ async function encenderCamaraPreview() {
     }
 }
 
-let modoActual = 'video'; // Por defecto es Reel
-
 function configurarModo(nuevoModo) {
     modoActual = nuevoModo;
     const btn = document.querySelector('.btn-accion-dorado');
-    btn.textContent = (modoActual === 'live') ? '▶ Iniciar Directo' : '▶ Grabar Reel';
-    console.log("H.A.R.V.I.S. listo para modo:", modoActual);
+    if (btn) {
+        btn.textContent = (modoActual === 'live') ? '▶ Iniciar Directo' : '▶ Grabar Reel';
+    }
 }
 
-// Variable global para la instancia de LiveKit
-let room;
+// ========================================================
+// 🔥 NUEVA FUNCIÓN: INICIAR TRANSMISIÓN (ESTILO YOUTUBE)
+// ========================================================
 async function iniciarSpaxioLive() {
     if (!streamCamaraActiva) return;
-
     const miId = localStorage.getItem('mi_dropis_id');
-    const TIEMPO_SEGMENTO = 30000;
-    
-    // Función para crear un nuevo grabador limpio
-    const crearGrabador = () => {
-        const recorder = new MediaRecorder(streamCamaraActiva, { 
-            mimeType: 'video/webm;codecs=vp8',
-            videoBitsPerSecond: 250000 
-        });
 
-        recorder.ondataavailable = async (event) => {
-            if (event.data && event.data.size > 0) {
-                // Generamos una URL nueva y fresca para cada segmento
-                const urlTemporal = URL.createObjectURL(event.data);
-                
-                // IMPORTANTE: Solo enviamos el mensaje, dejamos que el renderizador 
-                // del chat (que ya funciona bien con textos/fotos) pinte el video
-                await enviarMensajeSatelital(urlTemporal, 'video');
-                
-                console.log("🚀 Segmento enviado exitosamente:", urlTemporal);
-            }
-        };
-        return recorder;
-    };
-
-    // Iniciamos el primer grabador
-    spaxioRecorder = crearGrabador();
-    spaxioRecorder.start();
-
-    // Ciclo de segmentación forzada: Detenemos y reiniciamos
-    // Esto garantiza que el navegador escriba los metadatos completos del WebM
-    const intervalo = setInterval(() => {
-        if (spaxioRecorder && spaxioRecorder.state === "recording") {
-            spaxioRecorder.stop(); // Esto dispara ondataavailable con el segmento completo
-            spaxioRecorder = crearGrabador();
-            spaxioRecorder.start();
-        }
-    }, TIEMPO_SEGMENTO);
-
-    // Guardamos el intervalo para limpiarlo luego en detenerSpaxioLive
-    spaxioRecorder.intervalo = intervalo;
-    
-    // ... resto de tu lógica de LiveKit ...
-     
-
-
-  
-     
-
-    // 2. SI es modo 'live', iniciamos la difusión WebRTC (LiveKit)
     if (modoActual === 'live') {
         try {
+            // 1. Pedir token al backend. OJO: Tu API de Node/Vercel debe incluir la orden de 
+            // activar el "Egress / Room Composite" de LiveKit para que empiece a grabar en su nube.
             const response = await fetch('/api/get-livekit-token', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -4368,73 +4335,80 @@ async function iniciarSpaxioLive() {
             const { token } = await response.json();
 
             room = new LivekitClient.Room();
-            
-            // ... (tu código de configuración de tracks sigue igual) ...
 
+            // Sincronizar previsualización local en tu pantalla de control
+            room.localParticipant.on(LivekitClient.ParticipantEvent.TrackPublished, (publication) => {
+                if (publication.track && publication.track.kind === LivekitClient.Track.Kind.Video) {
+                    const preview = document.getElementById('video-preview-spaxio');
+                    publication.track.attach(preview);
+                }
+            });
+
+            // Conexión a la nube de LiveKit
             await room.connect('wss://space-xquv9iaa.livekit.cloud', token);
             await room.localParticipant.setCameraEnabled(true);
             await room.localParticipant.setMicrophoneEnabled(true);
 
-            // 🔥 CAMBIO CLAVE: Usamos la función inyectar que ya sabemos que funciona
-            // La ponemos justo después de que la conexión a LiveKit sea exitosa.
+            // Avisamos al sistema mediante tu inyección satelital limpia
             await inyectarNotificacionHarvis(`🔴 ${miId} está en directo ahora mismo.`);
             
-            console.log("🔴 Difusión en vivo iniciada y notificada vía inyección.");
+            console.log("🔴 Difusión en vivo iniciada y transmitiendo a la nube.");
+
         } catch (err) {
             console.error("Error en LiveKit:", err);
             alert("No se pudo iniciar el directo.");
             return; 
         }
- }
-    // 3. Actualización de UI
-    const badge = document.querySelector('.badge-live-offline');
-    if (badge) {
-        badge.textContent = (modoActual === 'live') ? "🔴 EN DIRECTO" : "🎥 GRABANDO";
     }
+
+    // Actualización de UI Dorada
+    const badge = document.querySelector('.badge-live-offline');
+    if (badge) badge.textContent = (modoActual === 'live') ? "🔴 EN DIRECTO" : "🎥 GRABANDO";
 
     const btn = document.querySelector('.btn-accion-dorado');
     if (btn) {
         btn.textContent = "⏹ Terminar";
         btn.onclick = detenerSpaxioLive;
     }
-     }
-    
-    
+}
 
+// ========================================================
+// 🔥 NUEVA FUNCIÓN: DETENER Y PUBLICAR EL LINK AUTOMÁTICO
+// ========================================================
 async function detenerSpaxioLive() {
     const miId = localStorage.getItem('mi_dropis_id');
-// 1. Limpiar el intervalo de grabación
-    if (spaxioRecorder && spaxioRecorder.intervalo) {
-        clearInterval(spaxioRecorder.intervalo);
-    }
-    
-    // 2. Detener recorder
-    if (spaxioRecorder && spaxioRecorder.state !== "inactive") {
-        spaxioRecorder.stop();
-     }
-    // 1. Detener la grabación local (Si estaba activa)
-    if (typeof spaxioRecorder !== 'undefined' && spaxioRecorder && spaxioRecorder.state !== "inactive") {
-        spaxioRecorder.stop();
-        console.log("⏹ Grabación local detenida.");
-    }
 
-    // 2. Desconectar de LiveKit (Si estaba activo)
+    // 1. Desconectar de LiveKit. Al cerrar la sala, el servidor detiene la grabación en la nube.
     if (typeof room !== 'undefined' && room && room.state === 'connected') {
         room.disconnect();
-        console.log("🔌 Desconectado de LiveKit.");
+        console.log("🔌 Desconectado de LiveKit. Grabación en la nube finalizada.");
         
-        // Notificación de cierre
-        await inyectarNotificacionHarvis(`⚪ El directo de ${miId} ha finalizado.`);
+        await inyectarNotificacionHarvis(`实时 ⚪ El directo de ${miId} ha finalizado.`);
+
+        // 2. EXTRAER EL LINK GUARDADO (Simulando el comportamiento de YouTube)
+        // Le pedimos al backend la URL final que generó LiveKit en su almacenamiento público
+        try {
+            const res = await fetch(`/api/get-recorded-live?roomName=${miId}`);
+            const data = await res.json();
+            
+            if (data && data.videoUrl) {
+                // Mandamos un único mensaje de texto plano con la URL al chat nativo.
+                // Tu 'enviarMensajeSatelital' lo subirá a Firebase como un texto ultraligero.
+                await enviarMensajeSatelital(data.videoUrl, 'video');
+                console.log("🚀 URL del directo guardado enviada al chat:", data.videoUrl);
+            }
+        } catch (e) {
+            console.error("Error obteniendo el archivo guardado de LiveKit:", e);
+        }
     }
 
-    // 4. Limpieza de hardware: Apagar tracks de la cámara/micro
+    // 3. Limpieza de hardware (Tu código original intacto)
     if (typeof streamCamaraActiva !== 'undefined' && streamCamaraActiva) {
         streamCamaraActiva.getTracks().forEach(track => track.stop());
         streamCamaraActiva = null;
-        console.log("📷 Cámara y micro liberados.");
     }
 
-    // 5. Reset de UI: Restaurar el estado inicial
+    // Reset de UI
     const badge = document.querySelector('.badge-live-offline');
     if (badge) {
         badge.textContent = "OFFLINE";
@@ -4443,15 +4417,19 @@ async function detenerSpaxioLive() {
 
     const btn = document.querySelector('.btn-accion-dorado');
     if (btn) {
-        btn.textContent = (typeof modoActual !== 'undefined' && modoActual === 'live') ? "▶ Empezar Directo" : "▶ Grabar Reel";
+        btn.textContent = (modoActual === 'live') ? "▶ Empezar Directo" : "▶ Grabar Reel";
         btn.onclick = iniciarSpaxioLive; 
     }
     
     const previewVideo = document.getElementById('video-preview-spaxio');
-    if (previewVideo) {
-        previewVideo.srcObject = null;
-    }
- }
+    if (previewVideo) previewVideo.srcObject = null;
+     }
+
+     
+  
+            
+
+    
 function abrirModalSpaxio() {
     document.getElementById('modal-spaxio').style.display = 'flex';
     encenderCamaraPreview();
@@ -4499,71 +4477,76 @@ function cerrarModalSpaxio() {
     }
      }
 
+
+// ========================================================
+// 1. LISTAR LIVES (Se queda para saber quién está transmitiendo)
+// ========================================================
 async function listarLivesActivos() {
     try {
-        // Asegúrate de que esta URL devuelva un JSON como: [{ "name": "Luis" }, { "name": "Maria" }]
         const response = await fetch('/api/list-rooms'); 
         const rooms = await response.json(); 
 
         const container = document.getElementById('contenedor-notificaciones-live');
-        container.innerHTML = ''; // Limpiamos para no duplicar
+        if (!container) return; // Blindaje por si el elemento no está en pantalla
+        container.innerHTML = ''; 
 
         rooms.forEach(room => {
             const div = document.createElement('div');
             div.className = 'notificacion-live-bubble';
             
-            // Aquí inyectamos el botón de unirse
+            // Mantiene tu estilo visual
             div.innerHTML = `
-                <span>🔴 En vivo: ${room.name}</span>
-                <button onclick="unirseAlLive('${room.name}')" style="background:gold; border:none; padding:5px; cursor:pointer;">Unirse</button>
+                <span style="color: #fff;">🔴 En vivo: <strong>${room.name}</strong></span>
+                <button onclick="unirseAlLive('${room.name}')" style="background:#ffd700; color:#000; border:none; padding:5px 10px; border-radius:8px; font-weight:bold; cursor:pointer; margin-left:10px;">Unirse</button>
             `;
             container.appendChild(div);
         });
     } catch (e) {
-        console.log("Esperando directos...");
+        console.log("Esperando directos activos...");
     }
- }
+}
 
+// ========================================================
+// 2. UNIRSE AL LIVE (Se queda para enganchar el video remoto)
+// ========================================================
 async function unirseAlLive(roomName) {
-    // 1. Obtener token de espectador (debe tener permisos de solo lectura)
-    const token = await obtenerTokenEspectador(roomName);
-    
-    const room = new LivekitClient.Room(); // Asegúrate de la 'k' minúscula
-    
-    // 2. Escuchar cuando alguien (tú) publica un video
-    room.on(LivekitClient.RoomEvent.TrackSubscribed, (track, publication, participant) => {
-        if (track.kind === LivekitClient.Track.Kind.Video) {
-            const videoElement = document.getElementById('video-remoto');
-            track.attach(videoElement);
-        }
-    });
+    try {
+        // 1. Obtener token de espectador
+        const token = await obtenerTokenEspectador(roomName);
+        if (!token) throw new Error("No se pudo obtener el token de espectador");
+        
+        const roomEspectador = new LivekitClient.Room(); 
+        
+        // 2. Escuchar cuando tú (el emisor) publicas el video en la nube
+        roomEspectador.on(LivekitClient.RoomEvent.TrackSubscribed, (track, publication, participant) => {
+            if (track.kind === LivekitClient.Track.Kind.Video) {
+                const videoElement = document.getElementById('video-remoto');
+                if (videoElement) {
+                    track.attach(videoElement);
+                }
+            }
+        });
 
-    // 3. Conectarse a la sala
-    await room.connect('wss://space-xquv9iaa.livekit.cloud', token);
-    
-    // UI: Abrir el modal de visualización
-    document.getElementById('modal-video-live').style.display = 'flex';
-     }
+        // 3. Conectarse a la sala en modo espectador
+        await roomEspectador.connect('wss://space-xquv9iaa.livekit.cloud', token);
+        
+        // UI: Abrir el modal donde los muchachos te van a ver
+        const modal = document.getElementById('modal-video-live');
+        if (modal) modal.style.display = 'flex';
 
-     
-async function iniciarDifusionWebRTC() {
-    // 1. Lógica de LiveKit (Lo que ya tienes)
-    await iniciarSpaxioLiveKit(); 
+    } catch (err) {
+        console.error("❌ Error al unirse al directo:", err);
+        alert("No se pudo conectar al en vivo.");
+    }
+}
 
-    // 2. AVISAR AL FEED usando la INYECCIÓN DIRECTA (Sin servidor)
-    const miId = localStorage.getItem('mi_dropis_id');
-    
-    // Llamamos a la función inyectar, que escribe directo en Firebase
-    await inyectarNotificacionHarvis(`🔴 ${miId} está en directo ahora mismo.`);
-
-    console.log("🔴 Difusión WebRTC iniciada y notificada vía inyección directa.");
- }
-
-     async function inyectarNotificacionHarvis(textoIA) {
+// ========================================================
+// 3. INYECCIÓN DIRECTA DE HARVIS (Se queda intacta)
+// ========================================================
+async function inyectarNotificacionHarvis(textoIA) {
     const targetID = "26fmetp4Q4WJ"; 
     const msgId = "harvis_live_" + Date.now();
     
-    // 1. Estructura que tu sistema ya reconoce
     const payload = {
         tipo: 'texto',
         remitente: 'H.A.R.V.I.S.',
@@ -4572,10 +4555,9 @@ async function iniciarDifusionWebRTC() {
     };
 
     try {
-        // 2. Codificación binaria idéntica a tu sistema para evitar rechazos
         const base64 = btoa(unescape(encodeURIComponent(JSON.stringify(payload))));
 
-        // 3. Escritura directa en Firebase (bypass total de Vercel)
+        // Escritura directa en tu Firebase
         await db.ref('cola_satelital/' + targetID).push({
             p: base64,
             from: "H.A.R.V.I.S.",
@@ -4584,7 +4566,7 @@ async function iniciarDifusionWebRTC() {
             mediaType: 'texto'
         });
 
-        // 4. Persistencia local para que H.A.R.V.I.S. quede en tu historial
+        // Tu persistencia local en IndexedDB/guardarLocal para el historial de HARVIS
         if (typeof guardarLocal === "function") {
             await guardarLocal('mensajes', { 
                 id: msgId, 
@@ -4601,7 +4583,7 @@ async function iniciarDifusionWebRTC() {
     } catch (e) {
         console.error("❌ Error en la inyección directa:", e);
     }
- }
+     }
      
      function cargarFotoInicial() {
     const fotoGuardada = localStorage.getItem('mi_foto');
