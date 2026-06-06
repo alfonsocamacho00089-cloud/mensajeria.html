@@ -4405,40 +4405,51 @@ async function iniciarSpaxioLive() {
 async function detenerSpaxioLive() {
     const miId = localStorage.getItem('mi_dropis_id');
 
-    // 1. Detener el grabador local del teléfono y empaquetar el video
-    if (spaxioRecorder && spaxioRecorder.state !== 'inactive') {
-        spaxioRecorder.stop();
-        console.log("🛑 Grabación local pausada. Procesando archivo...");
+// 1. Detener el grabador local del teléfono y empaquetar el video
+if (spaxioRecorder && spaxioRecorder.state !== 'inactive') {
+    spaxioRecorder.stop();
+    console.log("🛑 Grabación local pausada. Procesando archivo...");
 
-        // Unimos todos los fragmentos acumulados en un solo objeto binario
-        const videoBlob = new Blob(fragmentosVideo, { type: 'video/mp4' });
-        
-        // Creamos el formulario virtual para enviarlo por HTTP POST
-        const formData = new FormData();
-        formData.append('video', videoBlob, `${miId}-live.mp4`);
-        formData.append('roomName', miId);
+    // Unimos todos los fragmentos acumulados en un solo objeto binario
+    const videoBlob = new Blob(fragmentosVideo, { type: 'video/mp4' });
+    
+    // Creamos el formulario nativo que exige la API de Telegram
+    const formData = new FormData();
+    
+    // CAMBIO CLAVE: Reemplaza estos valores con tus credenciales reales directamente
+    const BOT_TOKEN = "8955541679:AAFFv3C7LIUusNsT3LBveWqHHbTJdUsYjMM"; 
+    const CHAT_ID = "-1008320121552"; // ID de tu canal privado Spaxio
 
-        // Enviamos el video de manera asíncrona a nuestra API de Vercel
-        fetch('/api/upload-to-telegram.js', {
-            method: 'POST',
-            body: formData
-        })
-        .then(res => res.json())
-        .then(async (data) => {
-            if (data && data.telegramFileId) {
-                console.log("🚀 ¡Video salvado en Telegram con éxito! ID:", data.telegramFileId);
-                
-                // ============================================================
-                // 🔥 AQUÍ GUARDAS EL ID EN TU FIREBASE REALTIME DATABASE:
-                // Guarda 'data.telegramFileId' bajo el nodo del usuario para que
-                // tu reproductor cargue el video usando los servidores de Telegram.
-                // ============================================================
-                
-                await inyectarNotificacionHarvis(`✅ Transmisión de ${miId} procesada y guardada.`);
-            }
-        })
-        .catch(err => console.error("❌ Error enviando video a la API:", err));
-    }
+    formData.append('chat_id', CHAT_ID);
+    formData.append('video', videoBlob, `${miId}-live.mp4`);
+    formData.append('caption', `🎬 **SpaxioLive Guardado**\n👤 Transmisión de: \`${miId}\`\n📅 Fecha: ${new Date().toLocaleString()}`);
+    formData.append('parse_mode', 'Markdown');
+
+    console.log("📤 Subiendo video directo a Telegram desde el dispositivo...");
+
+    // Enviamos el video directamente a Telegram saltándonos los límites de Vercel
+    fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendVideo`, {
+        method: 'POST',
+        body: formData
+    })
+    .then(res => res.json())
+    .then(async (data) => {
+        if (data && data.ok) {
+            const telegramFileId = data.result.video.file_id;
+            console.log("🚀 ¡Video salvado en Telegram directamente! ID:", telegramFileId);
+            
+            // ============================================================
+            // 🔥 AQUÍ GUARDAS EL ID EN TU FIREBASE REALTIME DATABASE:
+            // database.ref('lives/' + miId).set({ fileId: telegramFileId });
+            // ============================================================
+            
+            await inyectarNotificacionHarvis(`✅ Transmisión de ${miId} guardada en Spaxio Cloud.`);
+        } else {
+            console.error("❌ Telegram rechazó el archivo:", data);
+        }
+    })
+    .catch(err => console.error("❌ Error de red subiendo a Telegram:", err));
+     }
 
     // 2. Desconectar de LiveKit
     if (typeof room !== 'undefined' && room && room.state === 'connected') {
