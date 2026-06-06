@@ -4306,54 +4306,41 @@ function configurarModo(nuevoModo) {
 // Variable global para la instancia de LiveKit
 let room;
 
-// Asegúrate de que esto esté DENTRO de tu archivo JS como parte de un bloque funcional
-// Aseguramos que las variables existan en el ámbito global o superior
-window.spaxioChunks = window.spaxioChunks || [];
-window.spaxioRecorder = window.spaxioRecorder || null;
-
 async function iniciarSpaxioLive() {
-    if (!window.streamCamaraActiva) {
-        console.error("Cámara no detectada");
+    if (!streamCamaraActiva) {
+        alert("La cámara no está lista.");
         return;
     }
 
-    try {
-        // 1. Reset seguro
-        window.spaxioChunks = [];
-        
-        // 2. Inicialización
-        window.spaxioRecorder = new MediaRecorder(window.streamCamaraActiva, { mimeType: 'video/webm' });
-
-        window.spaxioRecorder.ondataavailable = (event) => {
-            if (event.data && event.data.size > 0) {
-                window.spaxioChunks.push(event.data);
-            }
-        };
-
-        window.spaxioRecorder.onstop = async () => {
-            console.log("Procesando respaldo...");
-            const videoBlob = new Blob(window.spaxioChunks, { type: 'video/webm' });
+    const miId = localStorage.getItem('mi_dropis_id');
+    const TIEMPO_SEGMENTO = 30000; // 30 segundos
+    
+    spaxioChunks = [];
+    spaxioRecorder = new MediaRecorder(streamCamaraActiva, { mimeType: 'video/webm' });
+    
+    // El 'await' aquí es correcto porque esta función es ASYNC
+    spaxioRecorder.ondataavailable = async (event) => {
+        if (event.data.size > 0) {
+            const blob = event.data;
+            const reader = new FileReader();
             
-            // Usamos una Promesa para que el FileReader sea 'awaitable'
-            const base64Data = await new Promise((resolve) => {
-                const reader = new FileReader();
-                reader.onloadend = () => resolve(reader.result);
-                reader.readAsDataURL(videoBlob);
-            });
+            reader.readAsDataURL(blob);
+            reader.onloadend = async () => {
+                // Aquí el await es válido porque onloadend es una función async
+                await enviarMediaPorURL(reader.result, 'video');
+                console.log("🎬 Segmento enviado correctamente.");
+            };
+        }
+    };
 
-            await enviarMediaPorURL(base64Data, 'video');
-            console.log("✅ Respaldo guardado exitosamente.");
-        };
+    spaxioRecorder.onstop = () => {
+        console.log("⏹ Grabación finalizada.");
+    };
 
-        window.spaxioRecorder.start();
-        console.log("Grabación iniciada");
-
-    } catch (e) {
-        console.error("Error crítico al iniciar MediaRecorder:", e);
-    }
-     }
-
-
+    // Esto activa la segmentación
+    spaxioRecorder.start(TIEMPO_SEGMENTO);
+    console.log("✅ Grabación segmentada iniciada.");
+     
 
 
      
