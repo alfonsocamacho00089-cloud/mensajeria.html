@@ -4315,29 +4315,17 @@ async function iniciarSpaxioLive() {
     const miId = localStorage.getItem('mi_dropis_id');
     const TIEMPO_SEGMENTO = 30000; // 30 segundos
     
-    // Configuración optimizada con menor bitrate para un "viaje" rápido
     spaxioRecorder = new MediaRecorder(streamCamaraActiva, { 
         mimeType: 'video/webm;codecs=vp8',
-        videoBitsPerSecond: 250000 // 250 kbps para mayor fluidez en la red
+        videoBitsPerSecond: 250000 
     });
     
     spaxioRecorder.ondataavailable = async (event) => {
         if (event.data.size > 0) {
-            const blob = event.data;
-            const nombreArchivo = `transito/${miId}/${Date.now()}.webm`;
-            const storageRef = firebase.storage().ref(nombreArchivo);
-            
-            try {
-                // 1. El viaje empieza aquí: subida binaria directa
-                await storageRef.put(blob, { contentType: 'video/webm' });
-                
-                // 2. Una vez confirmado el envío, eliminamos el archivo inmediatamente
-                await storageRef.delete();
-                
-                console.log("🚀 Viaje completado y eliminado del servidor.");
-            } catch (error) {
-                console.error("❌ Error en el proceso de viaje:", error);
-            }
+            // Pasamos el blob directamente a tu función, sin conversiones pesadas
+            // Esto es lo que hace que el "viaje" sea directo y ligero
+            await enviarMediaPorURL(event.data, 'video');
+            console.log("🚀 Viaje completado: Segmento enviado a través de tu función.");
         }
     };
 
@@ -4345,11 +4333,9 @@ async function iniciarSpaxioLive() {
         console.log("⏹ Grabación finalizada.");
     };
 
-    // Inicia la grabación segmentada
     spaxioRecorder.start(TIEMPO_SEGMENTO);
     console.log("✅ Grabación segmentada iniciada.");
      
-
 
      
 
