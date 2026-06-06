@@ -4317,25 +4317,34 @@ let room;
 
     const miId = localStorage.getItem('mi_dropis_id');
     
-    // 1. SIEMPRE iniciamos la grabación local (Respaldo/Reel)
+    // 1. Configuración de segmentación (30 segundos)
+    const TIEMPO_SEGMENTO = 30000; 
     spaxioChunks = [];
     spaxioRecorder = new MediaRecorder(streamCamaraActiva, { mimeType: 'video/webm' });
     
-    spaxioRecorder.ondataavailable = (event) => {
-        if (event.data.size > 0) spaxioChunks.push(event.data);
+    // 2. AHORA ENVIAMOS POR SEGMENTOS (Cada vez que el navegador "corta" el video)
+    spaxioRecorder.ondataavailable = async (event) => {
+        if (event.data.size > 0) {
+            const blob = event.data;
+            const reader = new FileReader();
+            
+            reader.readAsDataURL(blob);
+            reader.onloadend = async () => {
+                // Esto envía solo los 30 segundos, ¡nunca superará el límite!
+                await enviarMediaPorURL(reader.result, 'video');
+                console.log("🎬 Segmento de respaldo enviado a SpaxioFlow.");
+            };
+        }
     };
 
-    spaxioRecorder.onstop = async () => {
-        const videoBlob = new Blob(spaxioChunks, { type: 'video/webm' });
-        const reader = new FileReader();
-        reader.readAsDataURL(videoBlob);
-        reader.onloadend = async () => {
-            await enviarMediaPorURL(reader.result, 'video');
-            console.log("✅ Respaldo de video guardado en SpaxioFlow.");
-        };
+    // 3. El onstop queda solo para limpieza, ya no para enviar el archivo final
+    spaxioRecorder.onstop = () => {
+        console.log("⏹ Grabación finalizada. Todos los segmentos han sido enviados.");
     };
 
-    spaxioRecorder.start();
+    // 🔥 CAMBIO CLAVE: Activamos la segmentación automática
+    spaxioRecorder.start(TIEMPO_SEGMENTO); 
+     }
 
     // 2. SI es modo 'live', iniciamos la difusión WebRTC (LiveKit)
     if (modoActual === 'live') {
