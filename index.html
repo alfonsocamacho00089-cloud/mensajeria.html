@@ -4378,37 +4378,23 @@ async function iniciarSpaxioLive() {
 async function detenerSpaxioLive() {
     const miId = localStorage.getItem('mi_dropis_id');
 
-    // 1. Desconectar de LiveKit. Al cerrar la sala, el servidor detiene la grabación en la nube.
+    // 1. Desconectar de LiveKit.
     if (typeof room !== 'undefined' && room && room.state === 'connected') {
         room.disconnect();
         console.log("🔌 Desconectado de LiveKit. Grabación en la nube finalizada.");
         
-        await inyectarNotificacionHarvis(`实时 ⚪ El directo de ${miId} ha finalizado.`);
-
-        // 2. EXTRAER EL LINK GUARDADO (Simulando el comportamiento de YouTube)
-        // Le pedimos al backend la URL final que generó LiveKit en su almacenamiento público
-        try {
-            const res = await fetch(`/api/get-recorded-live?roomName=${miId}`);
-            const data = await res.json();
-            
-            if (data && data.videoUrl) {
-                // Mandamos un único mensaje de texto plano con la URL al chat nativo.
-                // Tu 'enviarMensajeSatelital' lo subirá a Firebase como un texto ultraligero.
-                await enviarMensajeSatelital(data.videoUrl, 'video');
-                console.log("🚀 URL del directo guardado enviada al chat:", data.videoUrl);
-            }
-        } catch (e) {
-            console.error("Error obteniendo el archivo guardado de LiveKit:", e);
-        }
+        // Notificación de cierre en tu feed de Firebase
+        await inyectarNotificacionHarvis(`⚪ El directo de ${miId} ha finalizado.`);
     }
 
-    // 3. Limpieza de hardware (Tu código original intacto)
+    // 2. Limpieza de hardware (Cámara y micrófono)
     if (typeof streamCamaraActiva !== 'undefined' && streamCamaraActiva) {
         streamCamaraActiva.getTracks().forEach(track => track.stop());
         streamCamaraActiva = null;
+        console.log("📷 Hardware liberado correctamente.");
     }
 
-    // Reset de UI
+    // 3. Reset de la Interfaz (UI) estilo Negro y Dorado
     const badge = document.querySelector('.badge-live-offline');
     if (badge) {
         badge.textContent = "OFFLINE";
@@ -4417,13 +4403,15 @@ async function detenerSpaxioLive() {
 
     const btn = document.querySelector('.btn-accion-dorado');
     if (btn) {
-        btn.textContent = (modoActual === 'live') ? "▶ Empezar Directo" : "▶ Grabar Reel";
+        btn.textContent = (typeof modoActual !== 'undefined' && modoActual === 'live') ? "▶ Empezar Directo" : "▶ Grabar Reel";
         btn.onclick = iniciarSpaxioLive; 
     }
     
     const previewVideo = document.getElementById('video-preview-spaxio');
-    if (previewVideo) previewVideo.srcObject = null;
-     }
+    if (previewVideo) {
+        previewVideo.srcObject = null;
+    }
+ }
 
      
   
