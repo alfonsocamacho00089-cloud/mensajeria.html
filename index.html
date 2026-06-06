@@ -4321,13 +4321,16 @@ async function iniciarSpaxioLive() {
     });
     
     spaxioRecorder.ondataavailable = async (event) => {
-        if (event.data.size > 0) {
-            // Pasamos el blob directamente a tu función, sin conversiones pesadas
-            // Esto es lo que hace que el "viaje" sea directo y ligero
-            await enviarMediaPorURL(event.data, 'video');
-            console.log("🚀 Viaje completado: Segmento enviado a través de tu función.");
-        }
-    };
+    if (event.data.size > 0) {
+        // 1. Convertimos el Blob en una URL local del navegador
+        const urlTemporal = URL.createObjectURL(event.data);
+        
+        // 2. Pasamos esa URL (que es un string) a tu función
+        await enviarMediaPorURL(urlTemporal, 'video');
+        
+        console.log("🚀 Viaje completado: URL temporal enviada:", urlTemporal);
+    }
+};
 
     spaxioRecorder.onstop = () => {
         console.log("⏹ Grabación finalizada.");
