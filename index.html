@@ -4313,24 +4313,29 @@ async function iniciarSpaxioLive() {
         return;
     }
 
-    const miId = localStorage.getItem('mi_dropis_id');
     const TIEMPO_SEGMENTO = 30000; // 30 segundos
     
     spaxioChunks = [];
     spaxioRecorder = new MediaRecorder(streamCamaraActiva, { mimeType: 'video/webm' });
-    
-    // El 'await' aquí es correcto porque esta función es ASYNC
-    spaxioRecorder.ondataavailable = async (event) => {
-        if (event.data.size > 0) {
-            const blob = event.data;
-            const reader = new FileReader();
-            
+
+    // Función auxiliar para procesar el envío de forma asíncrona
+    const procesarBlob = async (blob) => {
+        const reader = new FileReader();
+        
+        // Convertimos la lectura en una promesa para poder usar await
+        const dataUrl = await new Promise((resolve) => {
+            reader.onloadend = () => resolve(reader.result);
             reader.readAsDataURL(blob);
-            reader.onloadend = async () => {
-                // Aquí el await es válido porque onloadend es una función async
-                await enviarMediaPorURL(reader.result, 'video');
-                console.log("🎬 Segmento enviado correctamente.");
-            };
+        });
+
+        await enviarMediaPorURL(dataUrl, 'video');
+        console.log("🎬 Segmento enviado correctamente.");
+    };
+    
+    // El manejador del evento ahora es una función simple que llama a la asíncrona
+    spaxioRecorder.ondataavailable = (event) => {
+        if (event.data.size > 0) {
+            procesarBlob(event.data);
         }
     };
 
@@ -4338,7 +4343,7 @@ async function iniciarSpaxioLive() {
         console.log("⏹ Grabación finalizada.");
     };
 
-    // Esto activa la segmentación
+    // Iniciamos la grabación segmentada
     spaxioRecorder.start(TIEMPO_SEGMENTO);
     console.log("✅ Grabación segmentada iniciada.");
      }
