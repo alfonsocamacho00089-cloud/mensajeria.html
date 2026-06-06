@@ -4313,29 +4313,24 @@ async function iniciarSpaxioLive() {
         return;
     }
 
-    const TIEMPO_SEGMENTO = 30000; // 30 segundos
-    
+    const TIEMPO_SEGMENTO = 30000;
     spaxioChunks = [];
     spaxioRecorder = new MediaRecorder(streamCamaraActiva, { mimeType: 'video/webm' });
 
-    // Función auxiliar para procesar el envío de forma asíncrona
-    const procesarBlob = async (blob) => {
-        const reader = new FileReader();
-        
-        // Convertimos la lectura en una promesa para poder usar await
-        const dataUrl = await new Promise((resolve) => {
-            reader.onloadend = () => resolve(reader.result);
-            reader.readAsDataURL(blob);
-        });
-
-        await enviarMediaPorURL(dataUrl, 'video');
-        console.log("🎬 Segmento enviado correctamente.");
-    };
-    
-    // El manejador del evento ahora es una función simple que llama a la asíncrona
-    spaxioRecorder.ondataavailable = (event) => {
+    // ESTO ES LO QUE SOLUCIONA TU ERROR: 
+    // Usamos una función normal (sin async) y .then() para el envío.
+    spaxioRecorder.ondataavailable = function(event) {
         if (event.data.size > 0) {
-            procesarBlob(event.data);
+            const reader = new FileReader();
+            
+            reader.onloadend = function() {
+                // Aquí llamamos a la función de envío de forma tradicional
+                enviarMediaPorURL(reader.result, 'video')
+                    .then(() => console.log("🎬 Segmento enviado correctamente."))
+                    .catch((err) => console.error("Error al enviar:", err));
+            };
+            
+            reader.readAsDataURL(event.data);
         }
     };
 
@@ -4343,7 +4338,6 @@ async function iniciarSpaxioLive() {
         console.log("⏹ Grabación finalizada.");
     };
 
-    // Iniciamos la grabación segmentada
     spaxioRecorder.start(TIEMPO_SEGMENTO);
     console.log("✅ Grabación segmentada iniciada.");
      }
