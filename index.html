@@ -4404,44 +4404,50 @@ async function detenerSpaxioLive() {
         const BUCKET_NAME = "lives";
         const FILE_NAME = `${miId}-${Date.now()}.mp4`;
 
-        // 🟢 PASO 1: Pedirle el token o pase seguro a tu API de Vercel (No viaja el video)
+        // 1. Le pedimos el pase seguro a nuestra API de Vercel
         fetch('/api/get-upload-url', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ fileName: FILE_NAME })
         })
-        .then(res => res.json())
+        .then(res => {
+            if (!res.ok) throw new Error("Error en el servidor Vercel");
+            return res.json();
+        })
         .then(data => {
             if (data.uploadUrl) {
                 console.log("📤 Subiendo video pesado directo a Supabase con pase seguro...");
+                
                 // 2. Subimos el archivo pesado DIRECTO a Supabase usando la URL pre-firmada nativa
-return fetch(data.uploadUrl, {
-    method: 'PUT',
-    body: videoBlob // Mandamos el binario puro, sin headers raros para que pase directo
-});
-               
+                return fetch(data.uploadUrl, {
+                    method: 'PUT',
+                    body: videoBlob // Binario puro para PWAs en Android
+                });
             } else {
                 throw new Error("No se pudo obtener la URL pre-firmada de subida.");
             }
         })
-        .then(res => res.json())
-        .then(async (storageData) => {
-            // 🟢 PASO 3: ¡ÉXITO! Construimos tu URL .mp4 pública definitiva
-            // ⚠️ REEMPLAZA "tu-proyecto" CON EL ID REAL DE TU URL DE SUPABASE
-            const SUPABASE_BASE = "https://fcklnjgkwrnunoroseze.supabase.co"; 
+        .then(async (supabaseRes) => {
+            // ¡Si la respuesta de la subida es OK (200), el archivo ya está arriba!
+            if (!supabaseRes.ok) throw new Error("Supabase rechazó el archivo binario");
+
+            // 3. ¡ÉXITO TOTAL! Construimos tu URL .mp4 pública definitiva con tu ID real
+            const SUPABASE_BASE = "https://fcklnjgkwrnunoroseze.supabase.co; 
             const urlDirectaMp4 = `${SUPABASE_BASE}/storage/v1/object/public/${BUCKET_NAME}/${FILE_NAME}`;
             
             console.log("🎥 URL Directa para tu Frame listo:", urlDirectaMp4);
 
             // ============================================================
-            // ⚡ AQUÍ VIAJA TU STRING DE LA URL POR EL PUENTE DE FIREBASE REALTIME:
+            // ⚡ TU PUENTE DE FIREBASE REALTIME DE TODA LA VIDA:
             // database.ref('lives_activas/' + miId).set({ urlVideo: urlDirectaMp4 });
             // ============================================================
             
             await inyectarNotificacionHarvis(`✅ Transmisión de ${miId} guardada y URL generada.`);
         })
-        .catch(err => console.error("❌ Error en el proceso de subida segura:", err));
-    }
+        .catch(err => {
+            console.error("❌ Error en el proceso de subida segura:");
+            console.log(err.message || err);
+        });
 
     // 2. Desconectar de LiveKit
     if (typeof room !== 'undefined' && room && room.state === 'connected') {
