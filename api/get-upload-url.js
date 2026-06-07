@@ -13,8 +13,8 @@ export default async function handler(req, res) {
 
   try {
     // URL REST limpia para solicitar la subida firmada
-    const urlFirmaSupabase = `${supabaseUrl}/storage/v1/object/upload/sign/lives`;
-
+    // Cambia "lives" por el nombre exacto de tu bucket en Supabase
+const urlFirmaSupabase = `${supabaseUrl}/storage/v1/object/upload/sign/lives`;
     const response = await fetch(urlFirmaSupabase, {
       method: 'POST',
       headers: {
