@@ -4414,30 +4414,33 @@ async function detenerSpaxioLive() {
             if (!res.ok) throw new Error("Error en el servidor Vercel");
             return res.json();
         })
-        // ... (dentro de detenerSpaxioLive, cuando procesas el fetch)
-.then(data => {
-    if (data.uploadUrl) {
-        console.log("📤 Subiendo video pesado directo a Supabase con pase seguro...");
-        
-        // Creamos un FormData limpio para empaquetar el video pesado sin perder metadata
-        const formData = new FormData();
-        formData.append('cacheControl', '3600');
-        formData.append('file', videoBlob, FILE_NAME);
+        .then(data => {
+            if (data.uploadUrl) {
+                console.log("📤 Subiendo video pesado directo a Supabase con pase seguro...");
+                
+                // 📦 CORRECCIÓN: Creamos un contenedor FormData para empaquetar el Blob correctamente
+                const formData = new FormData();
+                // Adjuntamos el archivo binario. El tercer parámetro le dice a Supabase el nombre exacto
+                formData.append('file', videoBlob, FILE_NAME);
 
-        // Subimos usando POST a la URL firmada que nos preparó Vercel
-        return fetch(data.uploadUrl, {
-            method: 'POST', // Las URLs firmadas de Supabase aceptan POST para recibir el FormData
-            body: formData
-        });
-    } else {
-        throw new Error("No se pudo obtener la URL pre-firmada de subida.");
-    }
-})
+                // 2. Subimos el archivo usando POST (requerido por el endpoint firmado de Supabase)
+                return fetch(data.uploadUrl, {
+                    method: 'POST',
+                    body: formData // Enviamos el FormData directamente sin cabeceras Content-Type manuales
+                });
+            } else {
+                throw new Error("No se pudo obtener la URL pre-firmada de subida.");
+            }
+        })
         .then(async (supabaseRes) => {
-            // ¡Si la respuesta de la subida es OK (200), el archivo ya está arriba!
-            if (!supabaseRes.ok) throw new Error("Supabase rechazó el archivo binario");
+            // Si Supabase devuelve un status entre 200 y 299, la subida fue un éxito completo
+            if (!supabaseRes.ok) {
+                const errorTexto = await supabaseRes.text();
+                console.error("❌ Detalle del rechazo de Supabase:", errorTexto);
+                throw new Error("Supabase rechazó el archivo binario");
+            }
 
-            // 3. ¡ÉXITO TOTAL! Construimos tu URL .mp4 pública definitiva con tu ID real
+            // 3. ¡ÉXITO TOTAL! Construimos tu URL .mp4 pública definitiva
             const SUPABASE_BASE = "https://fcklnjgkwrnunoroseze.supabase.co"; 
             const urlDirectaMp4 = `${SUPABASE_BASE}/storage/v1/object/public/${BUCKET_NAME}/${FILE_NAME}`;
             
@@ -4454,8 +4457,6 @@ async function detenerSpaxioLive() {
             console.error("❌ Error en el proceso de subida segura:");
             console.log(err.message || err);
         });
-    } // <--- 🔑 AQUÍ SE CIERRA EL 'if (spaxioRecorder...)' QUE ESTABA ABIERTO
-
     // 2. Desconectar de LiveKit
     if (typeof room !== 'undefined' && room && room.state === 'connected') {
         room.disconnect();
