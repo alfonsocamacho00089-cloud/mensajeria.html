@@ -12,7 +12,7 @@ export default async function handler(req, res) {
   }
 
   try {
-    // 🔑 CORRECCIÓN DE RUTA: Supabase exige la estructura /object/upload/sign/bucket/archivo
+    // 🔑 Usamos FETCH puro conectándonos directo a la API REST de Supabase
     const urlFirmaSupabase = `${supabaseUrl}/storage/v1/object/upload/sign/lives/${fileName}`;
 
     const response = await fetch(urlFirmaSupabase, {
@@ -22,19 +22,16 @@ export default async function handler(req, res) {
         'apikey': supabaseKey,
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({
-        expiresIn: 900 // El pase dura 15 minutos para subir el video pesado
-      })
+      body: JSON.stringify({ expiresIn: 900 }) // 15 minutos para subir
     });
 
     const data = await response.json();
 
     if (!response.ok || data.error) {
-      return res.status(500).json({ error: data.error || 'Supabase rechazó la creación del pase' });
+      return res.status(500).json({ error: data.error || 'Supabase rechazó la firma' });
     }
 
-    // Supabase nos devuelve una parte del enlace en data.url. 
-    // Construimos la URL de subida definitiva metiéndole la firma autorizada
+    // Armamos el enlace final que usará tu teléfono
     const uploadUrl = `${supabaseUrl}/storage/v1${data.url}`;
 
     return res.status(200).json({ uploadUrl: uploadUrl });
