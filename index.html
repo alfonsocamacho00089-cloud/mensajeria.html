@@ -4413,8 +4413,8 @@ async function detenerSpaxioLive() {
         spaxioRecorder.stop();
         console.log("🛑 Grabación local pausada. Procesando archivo...");
 
-        const videoBlob = new Blob(fragmentosVideo, { type: 'video/mp4' });
-        const BUCKET_NAME = "lives";
+        // Al detener la grabación en tu JS, asegúrate de crear el blob usando el tipo exacto del grabador:
+const videoBlob = new Blob(fragmentosVideo, { type: spaxioRecorder.mimeType });  const BUCKET_NAME = "lives";
         const FILE_NAME = `${miId}-${Date.now()}.mp4`;
 
         // 1. Le pedimos el pase seguro a nuestra API de Vercel
