@@ -4457,6 +4457,7 @@ async function detenerSpaxioLive() {
             console.error("❌ Error en el proceso de subida segura:");
             console.log(err.message || err);
         });
+     }
     // 2. Desconectar de LiveKit
     if (typeof room !== 'undefined' && room && room.state === 'connected') {
         room.disconnect();
