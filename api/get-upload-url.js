@@ -12,8 +12,10 @@ export default async function handler(req, res) {
   }
 
   try {
-    // Petición nativa a la API de Supabase para crear la URL pre-firmada (Válida por 15 minutos)
-    const response = await fetch(`${supabaseUrl}/storage/v1/object/upload/sign/lives`, {
+    // 🔑 CORRECCIÓN DE RUTA: Supabase exige la estructura /object/upload/sign/bucket/archivo
+    const urlFirmaSupabase = `${supabaseUrl}/storage/v1/object/upload/sign/lives/${fileName}`;
+
+    const response = await fetch(urlFirmaSupabase, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${supabaseKey}`,
@@ -21,20 +23,19 @@ export default async function handler(req, res) {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        path: fileName,
-        expiresIn: 900 // 15 minutos
+        expiresIn: 900 // El pase dura 15 minutos para subir el video pesado
       })
     });
 
     const data = await response.json();
 
     if (!response.ok || data.error) {
-      return res.status(500).json({ error: data.error || 'Error al generar la firma' });
+      return res.status(500).json({ error: data.error || 'Supabase rechazó la creación del pase' });
     }
 
-    // Supabase devuelve el PATH de subida. Construimos la URL firmada completa.
-    // OJO: La URL de subida pre-firmada usa el endpoint /object/upload/sign/
-    const uploadUrl = `${supabaseUrl}/storage/v1/object/upload/sign/lives/${data.url || data.path || fileName}`;
+    // Supabase nos devuelve una parte del enlace en data.url. 
+    // Construimos la URL de subida definitiva metiéndole la firma autorizada
+    const uploadUrl = `${supabaseUrl}/storage/v1${data.url}`;
 
     return res.status(200).json({ uploadUrl: uploadUrl });
 
