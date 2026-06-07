@@ -4414,13 +4414,12 @@ async function detenerSpaxioLive() {
         .then(data => {
             if (data.uploadUrl) {
                 console.log("📤 Subiendo video pesado directo a Supabase con pase seguro...");
-                
-                // 🟢 PASO 2: Mandar el video real directo a Supabase mediante PUT sin pasar por Vercel
-                return fetch(data.uploadUrl, {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'video/mp4' },
-                    body: videoBlob
-                });
+                // 2. Subimos el archivo pesado DIRECTO a Supabase usando la URL pre-firmada nativa
+return fetch(data.uploadUrl, {
+    method: 'PUT',
+    body: videoBlob // Mandamos el binario puro, sin headers raros para que pase directo
+});
+               
             } else {
                 throw new Error("No se pudo obtener la URL pre-firmada de subida.");
             }
