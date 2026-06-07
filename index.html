@@ -4711,46 +4711,6 @@ async function inyectarNotificacionHarvis(textoIA) {
         console.error("❌ Error en la inyección directa:", e);
     }
      }
-// ========================================================
-// ⚡ DISPARADOR DE EVENTOS SPAXIOFLOW HACIA EL BACKEND
-// ========================================================
-async function emitirEventoSpaxioFlow(tipo, urlOTexto, metadatos Adicionales = {}) {
-    console.log(`🤖 H.A.R.V.I.S. preparando despacho de evento (${tipo})...`);
-    
-    const urlEndpoint = "/api/spaxioflow-event";
-
-    // Estructuramos el cuerpo exacto que espera tu handler de Vercel
-    const cuerpoPeticion = {
-        tipoEvento: tipo,          // Puede ser 'texto', 'video' o 'imagen'
-        contenido: urlOTexto,       // Mensaje de texto o el enlace público del bucket
-        metadata: metadatosAdicionales // Ej: { duracion: "12:30", peso: "2.81MB" }
-    };
-
-    try {
-        const respuesta = await fetch(urlEndpoint, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(cuerpoPeticion)
-        });
-
-        const resultado = await respuesta.json();
-
-        if (!respuesta.ok) {
-            throw new Error(resultado.error || "Fallo en la respuesta del servidor");
-        }
-
-        console.log("✅ H.A.R.V.I.S: Registro exitoso en Supabase:", resultado.data);
-        return resultado;
-
-    } catch (error) {
-        console.error("❌ Error enviando evento a la cartelera global:", error);
-        // Aquí puedes meter una alerta sutil Negro & Oro en tu UI por si falla la red
-    }
-}
-
-
 
  
      function cargarFotoInicial() {
