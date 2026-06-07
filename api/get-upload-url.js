@@ -12,8 +12,8 @@ export default async function handler(req, res) {
   }
 
   try {
-    // 🔑 Usamos FETCH puro conectándonos directo a la API REST de Supabase
-    const urlFirmaSupabase = `${supabaseUrl}/storage/v1/object/upload/sign/lives/${fileName}`;
+    // 🔑 ENDPOINT CORRECTO: Se le pega al bucket general "lives"
+    const urlFirmaSupabase = `${supabaseUrl}/storage/v1/object/upload/sign/lives`;
 
     const response = await fetch(urlFirmaSupabase, {
       method: 'POST',
@@ -22,7 +22,11 @@ export default async function handler(req, res) {
         'apikey': supabaseKey,
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({ expiresIn: 900 }) // 15 minutos para subir
+      // 🔑 AQUÍ VA EL NOMBRE DEL ARCHIVO: Supabase lo exige dentro del JSON
+      body: JSON.stringify({ 
+        path: fileName,
+        expiresIn: 900 // 15 minutos de validez
+      })
     });
 
     const data = await response.json();
@@ -31,7 +35,8 @@ export default async function handler(req, res) {
       return res.status(500).json({ error: data.error || 'Supabase rechazó la firma' });
     }
 
-    // Armamos el enlace final que usará tu teléfono
+    // Supabase nos devuelve la ruta firmada relativa en 'data.url'.
+    // Armamos la URL completa para que tu teléfono haga el PUT directo.
     const uploadUrl = `${supabaseUrl}/storage/v1${data.url}`;
 
     return res.status(200).json({ uploadUrl: uploadUrl });
