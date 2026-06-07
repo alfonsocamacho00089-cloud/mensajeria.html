@@ -4403,7 +4403,8 @@ async function detenerSpaxioLive() {
         const videoBlob = new Blob(fragmentosVideo, { type: 'video/mp4' });
         const BUCKET_NAME = "lives";
         const FILE_NAME = `${miId}-${Date.now()}.mp4`;
-// 1. Le pedimos el pase seguro a nuestra API de Vercel
+
+        // 1. Le pedimos el pase seguro a nuestra API de Vercel
         fetch('/api/get-upload-url', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -4447,7 +4448,7 @@ async function detenerSpaxioLive() {
             console.error("❌ Error en el proceso de subida segura:");
             console.log(err.message || err);
         });
-        
+    } // <--- 🔑 AQUÍ SE CIERRA EL 'if (spaxioRecorder...)' QUE ESTABA ABIERTO
 
     // 2. Desconectar de LiveKit
     if (typeof room !== 'undefined' && room && room.state === 'connected') {
@@ -4480,7 +4481,7 @@ async function detenerSpaxioLive() {
     if (previewVideo) {
         previewVideo.srcObject = null;
     }
-     }
+} // <--- 🔑 AQUÍ SE CIERRA LA FUNCIÓN 'detenerSpaxioLive()'
     
 
      
