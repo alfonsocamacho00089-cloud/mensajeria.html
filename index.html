@@ -4414,19 +4414,25 @@ async function detenerSpaxioLive() {
             if (!res.ok) throw new Error("Error en el servidor Vercel");
             return res.json();
         })
-        .then(data => {
-            if (data.uploadUrl) {
-                console.log("📤 Subiendo video pesado directo a Supabase con pase seguro...");
-                
-                // 2. Subimos el archivo pesado DIRECTO a Supabase usando la URL pre-firmada nativa
-                return fetch(data.uploadUrl, {
-                    method: 'PUT',
-                    body: videoBlob // Binario puro para PWAs en Android
-                });
-            } else {
-                throw new Error("No se pudo obtener la URL pre-firmada de subida.");
-            }
-        })
+        // ... (dentro de detenerSpaxioLive, cuando procesas el fetch)
+.then(data => {
+    if (data.uploadUrl) {
+        console.log("📤 Subiendo video pesado directo a Supabase con pase seguro...");
+        
+        // Creamos un FormData limpio para empaquetar el video pesado sin perder metadata
+        const formData = new FormData();
+        formData.append('cacheControl', '3600');
+        formData.append('file', videoBlob, FILE_NAME);
+
+        // Subimos usando POST a la URL firmada que nos preparó Vercel
+        return fetch(data.uploadUrl, {
+            method: 'POST', // Las URLs firmadas de Supabase aceptan POST para recibir el FormData
+            body: formData
+        });
+    } else {
+        throw new Error("No se pudo obtener la URL pre-firmada de subida.");
+    }
+})
         .then(async (supabaseRes) => {
             // ¡Si la respuesta de la subida es OK (200), el archivo ya está arriba!
             if (!supabaseRes.ok) throw new Error("Supabase rechazó el archivo binario");
