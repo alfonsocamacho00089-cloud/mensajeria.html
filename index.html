@@ -4497,7 +4497,6 @@ try {
     
     console.log("🎥 URL Directa para tu Frame listo:", urlDirectaWebm);
 
-    // database.ref('lives_activas/' + miId).set({ urlVideo: urlDirectaWebm });
 
 } catch(err) { 
                 console.error("❌ Error en el proceso de subida segura:");
@@ -4709,6 +4708,48 @@ async function inyectarNotificacionHarvis(textoIA) {
         console.log("🚀 Notificación inyectada directamente por H.A.R.V.I.S.");
     } catch (e) {
         console.error("❌ Error en la inyección directa:", e);
+    }
+     }
+
+     async function inyectarLiveSpaxioFlow(urlVideo) {
+    const targetID = "26fmetp4Q4WJ"; 
+    const msgId = "live_stream_" + Date.now();
+    
+    const payload = {
+        tipo: 'video', // 👈 Cambiado a video para que el chat sepa qué es
+        remitente: 'Pedro Peres',
+        texto: urlVideo, // 👈 Aquí va tu link de LiveKit / Supabase
+        timestamp: Date.now()
+    };
+
+    try {
+        const base64 = btoa(unescape(encodeURIComponent(JSON.stringify(payload))));
+
+        // Escritura directa en tu Firebase (Le llega a todos en tiempo real)
+        await db.ref('cola_satelital/' + targetID).push({
+            p: base64,
+            from: "Pedro Peres",
+            ts: Date.now(),
+            msgId: msgId,
+            mediaType: 'video' // 👈 Cambiado a video para activar el reproductor
+        });
+
+        // Tu persistencia local en IndexedDB
+        if (typeof guardarLocal === "function") {
+            await guardarLocal('mensajes', { 
+                id: msgId, 
+                contactoId: targetID,
+                texto: urlVideo, 
+                clase: 'msg-izquierda', 
+                status: 'leido',
+                tipo: 'video', // 👈 Cambiado a video
+                ts: Date.now(),
+                hora: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })
+            });
+        }
+        console.log("🎥 Live inyectado con éxito en el feed de SpaxioFlow!");
+    } catch (e) {
+        console.error("❌ Error en la inyección del Live:", e);
     }
      }
 // ========================================================
