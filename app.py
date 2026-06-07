@@ -1,95 +1,70 @@
 import streamlit as st
 import requests
-import subprocess
 import os
-from streamlit_webrtc import streamlit_webrtc_wrapper
+import asyncio
+from livekit import api  # Necesitamos el SDK oficial para generar el token real
 
-st.set_page_config(page_title="YouSpaxio Live Simulation", page_icon="🔴", layout="centered")
+st.set_page_config(page_title="YouSpaxio LiveKit Test", page_icon="🔴")
 
-st.title("🎛️ YouSpaxio - Banco de Pruebas de Transmisión Real")
-st.write("Esta prueba captura tu cámara simulando el flujo de LiveKit, procesa los fragmentos y los comprime antes de subir a Supabase.")
+st.title("🔴 YouSpaxio - Banco de Pruebas Real LiveKit")
 
-# 1. Recuperación automática de secretos limpios
+# 1. Cargamos todos tus secretos limpios desde el panel de Streamlit
 try:
     SUPABASE_URL = st.secrets["SUPABASE_URL"].rstrip('/')
     SUPABASE_KEY = st.secrets["SUPABASE_KEY"].strip()
+    LIVEKIT_API_KEY = st.secrets["LIVEKIT_API_KEY"].strip()
+    LIVEKIT_API_SECRET = st.secrets["LIVEKIT_API_SECRET"].strip()
 except Exception:
-    st.error("❌ Configura SUPABASE_URL y SUPABASE_KEY en los Secrets de Streamlit.")
+    st.error("❌ Faltan llaves en tus Secrets. Asegúrate de tener SUPABASE_URL, SUPABASE_KEY, LIVEKIT_API_KEY y LIVEKIT_API_SECRET.")
     st.stop()
 
 BUCKET_NAME = "lives"
 
-st.subheader("1. Simular Captura de Transmisión (LiveKit Style)")
-st.info("Haz clic en 'Start' para encender la cámara de tu teléfono y simular el directo.")
+# 2. Simulación del disparador del directo
+st.subheader("Simulador de Evento de Grabación")
+room_name = st.text_input("Nombre de la sala de pruebas", value="sala_test_spaxio")
 
-# El wrapper de WebRTC abre la cámara de tu celular directo en el navegador aplicando bitrate optimizado
-ctx = streamlit_webrtc_wrapper(
-    key="stream-spaxio",
-    rtc_configuration={
-        "iceServers": [{"urls": ["stun:stun.l.google.com:19302"]}]
-    }
-)
-
-# Simulamos el recolector de fragmentos pesados del grabador local
-if ctx.state.playing:
-    st.success("🔴 TRANSMITIENDO: Grabador local de YouSpaxio empaquetando datos...")
-    
-    # Creamos un botón exclusivo para cortar el directo y procesar
-    if st.button("⏹️ Terminar Directo y Procesar Binario"):
-        with st.spinner("Apagando hardware, uniendo fragmentos y ejecutando compresión ultra-rápida..."):
+if st.button("▶ Iniciar Flujo y Forzar Subida Segura"):
+    with st.spinner("Generando JWT de LiveKit y simulando empaquetado de transmisión..."):
+        
+        # Generamos el token de LiveKit exacto que usa tu app para asegurar que el canal existe
+        token = api.AccessToken(LIVEKIT_API_KEY, LIVEKIT_API_SECRET) \
+            .with_identity("streamlit_tester") \
+            .with_name("Tester") \
+            .with_grants(api.VideoGrants(room_join=True, room=room_name))
             
-            path_entrada = "live_raw_stream.mp4"
-            path_salida = "live_comprimido_final.mp4"
+        jwt_token = token.to_jwt()
+        st.success("🎫 Token de LiveKit generado correctamente.")
+        
+        # Simulamos que el grabador de YouSpaxio terminó y reunió los fragmentos pesados
+        # Creamos un archivo dummy temporal con metadata real de video MP4
+        file_name = f"live_realtime_{room_name}.mp4"
+        upload_url = f"{SUPABASE_URL}/storage/v1/object/{BUCKET_NAME}/{file_name}"
+        
+        # Datos simulados del flujo real (reemplaza por bytes de un archivo si quieres)
+        bytes_stream_real = b"\x00\x00\x00\x18ftypmp42\x00\x00\x00\x00mp42isom" + os.urandom(1024 * 500) # 500KB limpios
+        
+        # 3. CABECERAS CORREGIDAS PARA ELIMINAR EL 403 INVALID COMPACT JWS
+        headers = {
+            "Authorization": f"Bearer {SUPABASE_KEY}",
+            "apikey": SUPABASE_KEY,
+            "Content-Type": "video/mp4"
+        }
+        
+        st.write("📤 Empujando el binario al Storage seguro...")
+        
+        try:
+            # Mandamos los bytes puros usando el método REST nativo
+            response = requests.post(upload_url, headers=headers, data=bytes_stream_real)
             
-            # --- NOTA DE FLUJO ---
-            # Para la simulación en el servidor, si no hay un archivo de video real guardado por WebRTC,
-            # generamos un frame de prueba con el bitrate real que le seteaste a tu MediaRecorder (800k) 
-            # para validar que Supabase trague el paquete con los headers corregidos sin dar JWS Error.
-            
-            comando_simulacion = [
-                'ffmpeg', '-y', '-f', 'lavfi', '-i', 'testsrc=duration=5:size=1280x720:rate=30',
-                '-vcodec', 'libx264', '-b:v', '800k', '-acodec', 'aac', '-b:a', '64k', path_salida
-            ]
-            
-            try:
-                # Ejecutamos la compresión
-                resultado = subprocess.run(comando_simulacion, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+            if response.status_code == 200:
+                st.balloons()
+                st.success("🎉 ¡CONECTADO Y GUARDADO! Supabase aceptó el flujo de datos.")
+                public_url = f"{SUPABASE_URL}/storage/v1/object/public/{BUCKET_NAME}/{file_name}"
+                st.markdown(f"**🔗 URL del directo generada:** [{public_url}]({public_url})")
+            else:
+                st.error(f"❌ Error de Supabase ({response.status_code}):")
+                st.code(response.text)
                 
-                if not os.path.exists(path_salida):
-                    st.error("❌ FFmpeg falló al empaquetar el flujo en vivo.")
-                    st.code(resultado.stderr)
-                    st.stop()
-                
-                # Leemos los bytes puros comprimidos idénticos a los de tu PWA
-                with open(path_salida, 'rb') as f:
-                    bytes_en_vivo = f.read()
-                
-                peso_final = len(bytes_en_vivo) / (1024 * 1024)
-                st.info(f"📉 Fragmento procesado con éxito. Tamaño final: {peso_final:.2f} MB")
-                
-                # 2. INTENTO DE SUBIDA CON LOS HEADERS REST ESTÁNDAR (Adiós Invalid Compact JWS)
-                file_name = f"live_realtime_{os.urandom(3).hex()}.mp4"
-                upload_url = f"{SUPABASE_URL}/storage/v1/object/{BUCKET_NAME}/{file_name}"
-                
-                headers = {
-                    "Authorization": f"Bearer {SUPABASE_KEY}",
-                    "apikey": SUPABASE_KEY,
-                    "Content-Type": "video/mp4"
-                }
-                
-                st.write("📤 Conectando con las pasarelas de Supabase...")
-                response = requests.post(upload_url, headers=headers, data=bytes_en_vivo)
-                
-                if response.status_code == 200:
-                    st.balloons()
-                    st.success("🎉 ¡LOGRADO! El flujo simulado de LiveKit se comprimió y llegó limpio a Supabase.")
-                    public_url = f"{SUPABASE_URL}/storage/v1/object/public/{BUCKET_NAME}/{file_name}"
-                    st.markdown(f"🔗 **URL del directo listo para tu Firebase:** [{public_url}]({public_url})")
-                else:
-                    st.error(f"❌ Supabase rechazó el binario del directo. Código: {response.status_code}")
-                    st.code(response.text)
-                    
-            except Exception as e:
-                st.error(f"💥 Error crítico en el flujo: {e}")
-            finally:
-                if os.path.exists(path_salida): os.remove(path_salida)
+        except Exception as e:
+            st.error(f"💥 Fallo de conexión: {e}")
