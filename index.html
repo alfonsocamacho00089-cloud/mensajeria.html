@@ -4711,7 +4711,50 @@ async function inyectarNotificacionHarvis(textoIA) {
         console.error("❌ Error en la inyección directa:", e);
     }
      }
+// ========================================================
+// 🎥 SPAXIOFLOW: ESCUCHADOR EN TIEMPO REAL PARA TRANSMISIONES
+// ========================================================
+function activarSpaxioFlowRealtime() {
+    console.log("🤖 H.A.R.V.I.S: Conectando canal de streaming en tiempo real...");
 
+    // Nos acoplamos a la tabla que acabamos de verificar juntos
+    supabase
+        .channel('canal-spaxioflow')
+        .on('postgres_changes', 
+            { 
+                event: 'INSERT', 
+                schema: 'public', 
+                table: 'spaxioflow_feed' 
+            }, 
+            (payload) => {
+                // 📡 ¡BOOM! Supabase avisa que Pedro Peres subió un nuevo Live o Foto
+                const nuevoEvento = payload.new;
+                console.log("🔥 Transmisión detectada en vivo:", nuevoEvento);
+
+                // Verificamos si es el ID fijo de SpaxioFlow
+                if (nuevoEvento.chat_id === "26fmetp4Q4WJ") {
+                    
+                    // Ejecutamos tu función nativa que ya pinta el contenedor o iframe
+                    if (typeof pintarMensaje === "function") {
+                        
+                        if (nuevoEvento.tipo === 'video') {
+                            // Renderiza el reproductor de video de una en la pantalla de todos
+                            pintarMensaje(nuevoEvento.content, 'msg-izquierda', nuevoEvento.sender_name, 'leido', "live_" + nuevoEvento.id, 'video');
+                        } 
+                        else if (nuevoEvento.tipo === 'imagen') {
+                            // Si lanzas una captura o foto fija al feed
+                            pintarMensaje(nuevoEvento.content, 'msg-izquierda', nuevoEvento.sender_name, 'leido', "img_" + nuevoEvento.id, 'imagen');
+                        }
+                        else if (nuevoEvento.tipo === 'texto') {
+                            // Mensajes de texto normales o avisos del sistema
+                            pintarMensaje(nuevoEvento.content, 'msg-izquierda', nuevoEvento.sender_name, 'leido', "txt_" + nuevoEvento.id, 'texto');
+                        }
+                    }
+                }
+            }
+        )
+        .subscribe();
+     }
  
      function cargarFotoInicial() {
     const fotoGuardada = localStorage.getItem('mi_foto');
