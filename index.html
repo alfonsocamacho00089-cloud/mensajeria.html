@@ -4432,7 +4432,7 @@ async function detenerSpaxioLive() {
             if (!supabaseRes.ok) throw new Error("Supabase rechazó el archivo binario");
 
             // 3. ¡ÉXITO TOTAL! Construimos tu URL .mp4 pública definitiva con tu ID real
-            const SUPABASE_BASE = "https://fcklnjgkwrnunoroseze.supabase.co; 
+            const SUPABASE_BASE = "https://fcklnjgkwrnunoroseze.supabase.co"; 
             const urlDirectaMp4 = `${SUPABASE_BASE}/storage/v1/object/public/${BUCKET_NAME}/${FILE_NAME}`;
             
             console.log("🎥 URL Directa para tu Frame listo:", urlDirectaMp4);
