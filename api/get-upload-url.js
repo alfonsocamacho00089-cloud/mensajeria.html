@@ -12,23 +12,23 @@ export default async function handler(req, res) {
   }
 
   try {
-    // URL REST limpia para solicitar la subida firmada
-    // Cambia "lives" por el nombre exacto de tu bucket en Supabase
-const urlFirmaSupabase = `${supabaseUrl}/storage/v1/object/upload/sign/lives`;
+    // Apuntamos al bucket "lives" limpiando cualquier espacio residual
+    const nombreBucket = "lives".trim();
+    const urlFirmaSupabase = `${supabaseUrl}/storage/v1/object/upload/sign/${nombreBucket}`;
+
     const response = await fetch(urlFirmaSupabase, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${supabaseKey.trim()}`, // Limpiamos espacios invisibles
+        'Authorization': `Bearer ${supabaseKey.trim()}`,
         'apikey': supabaseKey.trim(),
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({ 
-        path: fileName,
+        path: fileName.trim(),
         expiresIn: 900 
       })
     });
 
-    // Capturamos el texto crudo de la respuesta para saber qué dice Supabase
     const textoRespuesta = await response.text();
     console.log("📢 RESPUESTA CRUDA DE SUPABASE:", textoRespuesta);
 
