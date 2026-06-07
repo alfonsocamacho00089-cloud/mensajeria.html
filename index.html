@@ -4352,129 +4352,95 @@ function configurarModo(nuevoModo) {
 
 // ========================================================
 
-async function iniciarSpaxioLive() {
+
+    async function iniciarSpaxioLive() {
 
     if (!streamCamaraActiva) return;
 
     const miId = localStorage.getItem('mi_dropis_id');
 
-
-
     if (modoActual === 'live') {
-
         try {
-
             const response = await fetch('/api/get-livekit-token', {
-
                 method: 'POST',
-
                 headers: { 'Content-Type': 'application/json' },
-
                 body: JSON.stringify({ roomName: miId, identity: miId })
-
             });
-
             const { token } = await response.json();
-
-
 
             room = new LivekitClient.Room();
 
-
-
             room.localParticipant.on(LivekitClient.ParticipantEvent.TrackPublished, (publication) => {
-
                 if (publication.track && publication.track.kind === LivekitClient.Track.Kind.Video) {
-
                     const preview = document.getElementById('video-preview-spaxio');
-
                     publication.track.attach(preview);
-
                 }
-
             });
 
-
-
             await room.connect('wss://space-xquv9iaa.livekit.cloud', token);
-
             await room.localParticipant.setCameraEnabled(true);
-
             await room.localParticipant.setMicrophoneEnabled(true);
 
-
-
             await inyectarNotificacionHarvis(`🔴 ${miId} está en directo ahora mismo.`);
-
             console.log("🔴 Difusión en vivo iniciada y transmitiendo a la nube.");
 
-
-
             // 📦 Grabador local YouSpaxio encendido con compresión activa
-fragmentosVideo = []; 
+            fragmentosVideo = []; 
 
-if (typeof streamCamaraActiva !== 'undefined' && streamCamaraActiva) {
-    try {
-        // Configuramos opciones para forzar al teléfono a comprimir el archivo
-        const opcionesCompresion = {
-            mimeType: 'video/webm;codecs=vp8,opus',
-            videoBitsPerSecond: 800000, // 🔥 Limitamos a 800 Kbps (Suficiente para celular y súper ligero)
-            audioBitsPerSecond: 64000   // 🔥 Limitamos el audio a 64 Kbps
-        };
-        
-        spaxioRecorder = new MediaRecorder(streamCamaraActiva, opcionesCompresion);
-    } catch (e) {
-        console.warn("⚠️ El navegador no soporta codecs avanzados, usando bitrate estándar bajo:");
-        try {
-            // Intento secundario si el codec VP8 falla en algún Android viejo
-            spaxioRecorder = new MediaRecorder(streamCamaraActiva, { videoBitsPerSecond: 1000000 });
-        } catch (err2) {
-            spaxioRecorder = new MediaRecorder(streamCamaraActiva);
-        }
-    }
+            if (typeof streamCamaraActiva !== 'undefined' && streamCamaraActiva) {
+                try {
+                    // Configuramos opciones para forzar al teléfono a comprimir el archivo
+                    const opcionesCompresion = {
+                        mimeType: 'video/webm;codecs=vp8,opus',
+                        videoBitsPerSecond: 800000, // 🔥 Limitamos a 800 Kbps (Suficiente para celular y súper ligero)
+                        audioBitsPerSecond: 64000   // 🔥 Limitamos el audio a 64 Kbps
+                    };
+                    
+                    spaxioRecorder = new MediaRecorder(streamCamaraActiva, opcionesCompresion);
+                } catch (e) {
+                    console.warn("⚠️ El navegador no soporta codecs avanzados, usando bitrate estándar bajo:");
+                    try {
+                        // Intento secundario si el codec VP8 falla en algún Android viejo
+                        spaxioRecorder = new MediaRecorder(streamCamaraActiva, { videoBitsPerSecond: 1000000 });
+                    } catch (err2) {
+                        spaxioRecorder = new MediaRecorder(streamCamaraActiva);
+                    }
+                }
 
-    spaxioRecorder.ondataavailable = (event) => {
-        if (event.data && event.data.size > 0) {
-            fragmentosVideo.push(event.data);
-        }
-    };
+                spaxioRecorder.ondataavailable = (event) => {
+                    if (event.data && event.data.size > 0) {
+                        fragmentosVideo.push(event.data);
+                    }
+                };
 
-    spaxioRecorder.start(1000); 
-    console.log("🔴 Grabador local YouSpaxio encendido en modo comprimido (LIGERO).");
- 
-
+                spaxioRecorder.start(1000); 
+                console.log("🔴 Grabador local YouSpaxio encendido en modo comprimido (LIGERO).");
+            } // <--- 🔑 AQUÍ SE CIERRA EL 'if (typeof streamCamaraActiva...)'
 
         } catch (err) {
-
             console.error("Error en LiveKit:", err);
-
             alert("No se pudo iniciar el directo.");
-
             return; 
-
         }
+    } // <--- 🔑 AQUÍ SE CIERRA EL 'if (modoActual === 'live')'
 
-    }
-
-
-
+    // Actualización de la Interfaz (UI)
     const badge = document.querySelector('.badge-live-offline');
-
     if (badge) badge.textContent = (modoActual === 'live') ? "🔴 EN DIRECTO" : "🎥 GRABANDO";
 
-
-
+    // 🔧 Corregido el salto de línea que tenías aquí adentro
     const btn = document.querySelector('.btn-accion-dorado');
-
     if (btn) {
-
         btn.textContent = "⏹ Terminar";
-
         btn.onclick = detenerSpaxioLive;
-
     }
+} // <--- 🔑 AQUÍ SE CIERRA LA FUNCIÓN PRINCIPAL        
 
-}
+    
+
+
+
+    
 
 
 
