@@ -1,5 +1,4 @@
-requests
 streamlit
-
-
+requests
+streamlit-webrtc
 
