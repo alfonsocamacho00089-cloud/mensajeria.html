@@ -4497,63 +4497,49 @@ async function detenerSpaxioLive() {
         spaxioRecorder.onstop = async () => {
             console.log("🛑 Grabación local finalizada en hardware. Procesando archivo binario...");
 
-            // Juntamos los fragmentos reales acumulados durante el en vivo
-            const videoBlob = new Blob(fragmentosVideo, { type: 'video/mp4' });
-            
-            if (videoBlob.size === 0) {
-                console.error("❌ El archivo de video se generó vacío. Revisa los fragmentos.");
-                return;
-            }
+            // 1. Cambiamos el tipo del Blob al formato nativo que Chrome grabó realmente
+const videoBlob = new Blob(fragmentosVideo, { type: 'video/webm' }); 
 
-            const BUCKET_NAME = "lives";
-            const FILE_NAME = `${miId}-${Date.now()}.mp4`;
+const BUCKET_NAME = "lives";
+// 2. Le dejamos la extensión .webm para que el storage lo reconozca perfecto
+const FILE_NAME = `${miId}-${Date.now()}.webm`; 
 
-            console.log(`📦 Preparando subida segura de (${(videoBlob.size / (1024 * 1024)).toFixed(2)} MB)...`);
+console.log(`📦 Preparando subida segura de (${(videoBlob.size / (1024 * 1024)).toFixed(2)} MB)...`);
 
-            // 1. Le pedimos el pase seguro a nuestra API de Vercel
-            try {
-                const res = await fetch('/api/get-upload-url', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ fileName: FILE_NAME })
-                });
+// 3. Cuando pidas la URL firmada a Vercel, asegúrate de pasarle el Content-Type correcto si tu API lo requiere:
+try {
+    const res = await fetch('/api/get-upload-url', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ fileName: FILE_NAME, contentType: 'video/webm' }) // <--- Avisamos que es webm
+    });
 
-                if (!res.ok) throw new Error("Error en el servidor Vercel");
-                const data = await res.json();
+    if (!res.ok) throw new Error("Error en el servidor Vercel");
+    const data = await res.json();
 
-                if (!data.uploadUrl) throw new Error("No se pudo obtener la URL pre-firmada de subida.");
+    if (!data.uploadUrl) throw new Error("No se pudo obtener la URL pre-firmada de subida.");
 
-                console.log("📤 Subiendo bytes puros directo a Supabase con pase seguro...");
-                
-                // 2. Subida limpia por PUT (Método idéntico al éxito de Streamlit)
-                const supabaseRes = await fetch(data.uploadUrl, {
-                    method: 'PUT', // Forzamos PUT para que trague el binario directo sin romper el JWS
-                    headers: {
-                        'Content-Type': 'video/mp4'
-                    },
-                    body: videoBlob // Mandamos el flujo crudo directamente
-                });
+    console.log("📤 Subiendo bytes puros directo a Supabase...");
+    
+    const supabaseRes = await fetch(data.uploadUrl, {
+        method: 'PUT', 
+        headers: {
+            'Content-Type': 'video/webm' // <--- Cabecera idéntica a la firma
+        },
+        body: videoBlob 
+    });
 
-                if (!supabaseRes.ok) {
-                    const errorTexto = await supabaseRes.text();
-                    console.error("❌ Detalle del rechazo de Supabase:", errorTexto);
-                    throw new Error("Supabase rechazó el archivo binario");
-                }
+    if (!supabaseRes.ok) throw new Error("Supabase rechazó el archivo binario");
 
-                // 3. ¡ÉXITO TOTAL! Construimos tu URL .mp4 pública definitiva
-                const SUPABASE_BASE = "https://fcklnjgkwrnunoroseze.supabase.co"; 
-                const urlDirectaMp4 = `${SUPABASE_BASE}/storage/v1/object/public/${BUCKET_NAME}/${FILE_NAME}`;
-                
-                console.log("🎥 URL Directa para tu Frame listo:", urlDirectaMp4);
+    const SUPABASE_BASE = "https://fcklnjgkwrnunoroseze.supabase.co"; 
+    // 4. Tu URL final quedará lista en .webm (que corre nativo en cualquier PWA o etiqueta <video>)
+    const urlDirectaWebm = `${SUPABASE_BASE}/storage/v1/object/public/${BUCKET_NAME}/${FILE_NAME}`;
+    
+    console.log("🎥 URL Directa para tu Frame listo:", urlDirectaWebm);
 
-                // ============================================================
-                // ⚡ TU PUENTE DE FIREBASE REALTIME DE TODA LA VIDA:
-                // database.ref('lives_activas/' + miId).set({ urlVideo: urlDirectaMp4 });
-                // ============================================================
-                
-                await inyectarNotificacionHarvis(`✅ Transmisión de ${miId} guardada y URL generada.`);
+    // database.ref('lives_activas/' + miId).set({ urlVideo: urlDirectaWebm });
 
-            } catch (err) {
+} catch(err) { 
                 console.error("❌ Error en el proceso de subida segura:");
                 console.log(err.message || err);
             }
