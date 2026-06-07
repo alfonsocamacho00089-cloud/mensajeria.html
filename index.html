@@ -4392,8 +4392,8 @@ function configurarModo(nuevoModo) {
                     // Configuramos opciones para forzar al teléfono a comprimir el archivo
                     const opcionesCompresion = {
                         mimeType: 'video/webm;codecs=vp8,opus',
-                        videoBitsPerSecond: 800000, // 🔥 Limitamos a 800 Kbps (Suficiente para celular y súper ligero)
-                        audioBitsPerSecond: 64000   // 🔥 Limitamos el audio a 64 Kbps
+                        videoBitsPerSecond: 600000, // 🔥 Limitamos a 800 Kbps (Suficiente para celular y súper ligero)
+                        audioBitsPerSecond: 32000   // 🔥 Limitamos el audio a 64 Kbps
                     };
                     
                     spaxioRecorder = new MediaRecorder(streamCamaraActiva, opcionesCompresion);
