@@ -4816,37 +4816,35 @@ function activarSpaxioFlowRealtime() {
         .subscribe();
      }
 
+    
 // Variables globales extendidas para el control de IA y Hardware
 let spaxioAnimFrameId = null;
 let scene3D, camera3D, renderer3D, cuboPrueba;
 let videoElementOculto = null;
 let faceMeshIA = null;
 let camaraMediaPipe = null;
+let spaxioVersoEnSegundoPlano = false; // 💎 AGREGADA: Evita que el botón se congele al verificar el fondo
 
 // Coordenadas de rotación de la cabeza que capturará la IA
 let rotacionRostro = { x: 0, y: 0 };
 
 // 🔥 LOGICA DE APERTURA INTEGRADA CON IA DE CLIENTE
-
-            
-        async function abrirSpaxioVersoDesdeContacto() { // 🔑 LLAVE DE APERTURA DE LA FUNCIÓN
-
+async function abrirSpaxioVersoDesdeContacto() {
     // 🧠 SI YA ESTÁ VIVO EN EL FONDO, SOLO TRÁELO AL FRENTE
     if (spaxioVersoEnSegundoPlano) {
         maximizarSpaxioVerso();
         return;
     }
 
-    // Lógica para abrir la tubería de la sala específica
     const idSalaMetaverso = "6bdq9a7CC9UI";
 
+    // Inicializamos el canal de Supabase Realtime de inmediato
     canalSpaxioverso = supabase.channel(`sala_${idSalaMetaverso}`, {
         config: {
-            broadcast: { self: false } // false para que no te rebote a ti mismo tu propio movimiento
+            broadcast: { self: false }
         }
     });
 
-    // Te unes al canal
     canalSpaxioverso.subscribe((status) => {
         if (status === 'SUBSCRIBED') {
             console.log("🔌 Conectado con éxito a la autopista del Spaxioverso");
@@ -4882,12 +4880,10 @@ let rotacionRostro = { x: 0, y: 0 };
 
         videoElementOculto = document.getElementById('video-captura-omni');
 
-        // Inicializamos primero el entorno 3D y luego despertamos la IA
         // 🔄 ARRANQUE EN CADENA: Primero el motor gráfico, luego la IA
         setTimeout(() => {
-            inicializarEntorno3D(); // Levanta el cubo y el piso verde primero
+            inicializarEntorno3D();
             
-            // Le damos 400ms al teléfono para que estabilice los gráficos antes de encender la cámara
             setTimeout(() => {
                 encenderRastreadorFacialOMNI();
             }, 400);
@@ -4897,9 +4893,7 @@ let rotacionRostro = { x: 0, y: 0 };
     } catch (error) {
         console.error("❌ Fallo crítico al levantar el espacio del SpaxioVerso:", error);
     }
-} // 🔑 LLAVE FINAL QUE CIERRA LA FUNCIÓN EN GENERAL
-
-     
+}
 
 // 🎮 TU MOTOR GRÁFICO BASE CON SISTEMA DE TELEMETRÍA RECEPTOR
 function inicializarEntorno3D() {
@@ -4910,25 +4904,22 @@ function inicializarEntorno3D() {
     scene3D = new THREE.Scene();
     scene3D.background = new THREE.Color(0x050505);
 
-    // Forzamos la lectura del tamaño real de la pantalla del teléfono
     const ancho = window.innerWidth;
-    const alto = window.innerHeight - 60; // Descontamos el header dorado
+    const alto = window.innerHeight - 60;
     
     camera3D = new THREE.PerspectiveCamera(75, ancho / alto, 0.1, 1000);
     camera3D.position.set(0, 3, 7);
     camera3D.lookAt(0, 0, 0);
     scene3D.add(camera3D);
 
-    // 🔥 AQUÍ VA TU BLOQUE: Inicializar el renderizador con máxima potencia para el teléfono
     renderer3D = new THREE.WebGLRenderer({ 
         antialias: true,
-        powerPreference: "high-performance" // Le dice al teléfono que use la GPU con todo
+        powerPreference: "high-performance"
     });
     renderer3D.setSize(ancho, alto);
     renderer3D.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    contenedorCanvas.appendChild(renderer3D.domElement); // Metemos el canvas 3D al contenedor visual
+    contenedorCanvas.appendChild(renderer3D.domElement);
 
-    // 💡 Luces
     const luzAmbiental = new THREE.AmbientLight(0xffffff, 0.5);
     scene3D.add(luzAmbiental);
 
@@ -4936,13 +4927,11 @@ function inicializarEntorno3D() {
     luzPuntual.position.set(5, 5, 5);
     scene3D.add(luzPuntual);
 
-    // 📦 Cubo de Oro que responderá a tus movimientos de cabeza
-    const geometria = new THREE.BoxGeometry(1.5, 1.5, 1.5);
+    const geometry = new THREE.BoxGeometry(1.5, 1.5, 1.5);
     const material = new THREE.MeshStandardMaterial({ color: 0xffd700, roughness: 0.3, metalness: 0.8 });
-    cuboPrueba = new THREE.Mesh(geometria, material);
+    cuboPrueba = new THREE.Mesh(geometry, material);
     scene3D.add(cuboPrueba);
 
-    // 🛣️ El Suelo Verde Satinado
     const sueloGeo = new THREE.PlaneGeometry(20, 20);
     const sueloMat = new THREE.MeshStandardMaterial({ 
         color: 0x143b1f, roughness: 0.6, metalness: 0.3,
@@ -4953,26 +4942,23 @@ function inicializarEntorno3D() {
     suelo.position.y = -1.5;
     scene3D.add(suelo);
 
-    // 🔄 Bucle de Animación
     function animarSpaxioVerso() {
         spaxioAnimFrameId = requestAnimationFrame(animarSpaxioVerso);
         
-        // INTERCEPCIÓN DE MOVIMIENTO DE IA:
         if (cuboPrueba) {
             cuboPrueba.rotation.y = THREE.MathUtils.lerp(cuboPrueba.rotation.y, rotacionRostro.y, 0.1);
             cuboPrueba.rotation.x = THREE.MathUtils.lerp(cuboPrueba.rotation.x, rotacionRostro.x, 0.1);
         }
         
-        // REGLA DE ORO AUTOMÁTICA: Solo renderiza si todo está listo
         if (renderer3D && scene3D && camera3D) {
             renderer3D.render(scene3D, camera3D);
         }
     }
 
     animarSpaxioVerso();
-     }
+}
      
-// 👁️ MOTOR DE IA DE MEDIAPIPE (Zero-Shot Face Tracking)
+// 👁️ MOTOR DE IA DE MEDIAPIPE CON BROADCST INCORPORADO
 function encenderRastreadorFacialOMNI() {
     if (!videoElementOculto) return;
 
@@ -4982,39 +4968,36 @@ function encenderRastreadorFacialOMNI() {
         locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${file}`
     });
 
-    // Configuración balanceada para el procesador del teléfono (Ligera y Veloz)
     faceMeshIA.setOptions({
         maxNumFaces: 1,
-        refineLandmarks: false, // Falso para no saturar la GPU calculando iris de los ojos
+        refineLandmarks: false,
         minDetectionConfidence: 0.5,
         minTrackingConfidence: 0.5
     });
 
-    // Captura de los resultados analizados por la IA
     faceMeshIA.onResults((results) => {
         if (results.multiFaceLandmarks && results.multiFaceLandmarks.length > 0) {
             const puntosClave = results.multiFaceLandmarks[0];
-            
-            // Extraemos puntos estratégicos del rostro para calcular inclinación de la cabeza
-            // Punto 4 = Punta de la nariz, Punto 152 = Mentón, Punto 33 = Ojo Izquierdo, Punto 263 = Ojo Derecho
             const nariz = puntosClave[4];
-            const menton = puntosClave[152];
             
-            // Calculamos diferencias relativas de movimiento
-            // Mapeamos el giro horizontal (Y) e inclinación vertical (X)
             rotacionRostro.y = (nariz.x - 0.5) * -2.5; 
             rotacionRostro.x = (nariz.y - 0.4) * 2.5;
+
+            // 🔥 CORRECCIÓN: Si el bucle de envío no se ha iniciado, lo disparamos usando Supabase
+            if (!intervaloTransmision) {
+                const miIdUsuario = localStorage.getItem('mi_dropis_id') || 'Pedro_Peres_Dev';
+                iniciarTransmisionOmniRealtime("6bdq9a7CC9UI", miIdUsuario);
+            }
         }
     });
 
-    // Arrancamos el flujo del hardware de la cámara usando la utilidad nativa de MediaPipe
     camaraMediaPipe = new Camera(videoElementOculto, {
         onFrame: async () => {
             if (faceMeshIA) {
                 await faceMeshIA.send({ image: videoElementOculto });
             }
         },
-        width: 480,  // Resolución capada a baja definición para procesamiento instantáneo en celular
+        width: 480,
         height: 360,
         facingMode: "user"
     });
@@ -5024,19 +5007,19 @@ function encenderRastreadorFacialOMNI() {
         .catch(err => console.error("❌ Fallo de hardware en cámara Omni:", err));
 }
 
-// CIERRE COMPLETO: Apaga luces, animaciones y libera la cámara del teléfono al instante
 function cerrarSpaxioVerso() {
     const contenedor3D = document.getElementById('contenedor-spaxioverso');
     if (contenedor3D) {
         contenedor3D.style.display = 'none';
         
-        // 1. Apagar bucle 3D
+        // Apagamos la transmisión en tiempo real
+        detenerTransmisionOmniRealtime();
+        
         if (spaxioAnimFrameId) {
             cancelAnimationFrame(spaxioAnimFrameId);
             spaxioAnimFrameId = null;
         }
         
-        // 2. Apagar Hardware de Cámara e IA de golpe
         if (camaraMediaPipe) {
             camaraMediaPipe.stop();
             camaraMediaPipe = null;
@@ -5050,61 +5033,52 @@ function cerrarSpaxioVerso() {
             videoElementOculto.srcObject.getTracks().forEach(track => track.stop());
         }
 
-        console.log("🔌 Sistema OMNI y hardware apagados correctamente para ahorro de energía.");
+        console.log("🔌 Sistema OMNI y hardware apagados correctamente.");
     }
-     }
-
-// Variable para saber si está corriendo oculto en el fondo
-let spaxioVersoEnSegundoPlano = false;
+}
 
 function minimizarSpaxioVerso() {
     const contenedor3D = document.getElementById('contenedor-spaxioverso');
     if (contenedor3D) {
-        // En vez de apagarlo, lo mandamos al fondo absoluto y lo hacemos invisible
-        contenedor3D.style.zIndex = "-1000";
-        contenedor3D.style.opacity = "0";
-        contenedor3D.style.pointerEvents = "none"; // Para que puedas clickear tus chats sin problemas
-        
+        contenedor3D.style.cssText += `
+            z-index: -1000;
+            opacity: 0;
+            pointer-events: none;
+        `;
         spaxioVersoEnSegundoPlano = true;
-        console.log("📥 H.A.R.V.I.S: SpaxioVerso minimizado. Sigue ejecutándose en segundo plano...");
-        
-        // Opcional: Aquí puedes mostrar un mini aviso flotante en tu app si quieres recordar que sigue activo
+        console.log("📥 H.A.R.V.I.S: SpaxioVerso minimizado.");
     }
 }
 
-// Modificación para cuando vuelvas a pulsar el botón del planeta en tus contactos
 function maximizarSpaxioVerso() {
     const contenedor3D = document.getElementById('contenedor-spaxioverso');
     if (contenedor3D) {
-        // Lo traemos al frente de inmediato con prioridad máxima
-        contenedor3D.style.zIndex = "2000";
-        contenedor3D.style.opacity = "1";
-        contenedor3D.style.pointerEvents = "auto";
-        
+        contenedor3D.style.cssText += `
+            z-index: 2000;
+            opacity: 1;
+            pointer-events: auto;
+        `;
         spaxioVersoEnSegundoPlano = false;
-        console.log("📤 H.A.R.V.I.S: SpaxioVerso restaurado al frente.");
+        console.log("📤 H.A.R.V.I.S: SpaxioVerso maximizado.");
     }
-     }
- // ==========================================
+}
+
+// ==========================================
 // 🚀 TRANSMISIÓN EN TIEMPO REAL (SUPABASE REALTIME)
 // ==========================================
-
-// Variables globales de control de flujo de transmisión
 let intervaloTransmision = null;
 let ultimasCoordenadasEnviadas = { x: 0, y: 0 };
-let canalSpaxioverso = null; // Guardará la referencia de tu canal activo
+let canalSpaxioverso = null;
 
 function iniciarTransmisionOmniRealtime(idSala, idUsuario) {
     if (intervaloTransmision) clearInterval(intervaloTransmision);
 
     console.log("🚀 H.A.R.V.I.S: Iniciando emisión de telemetría facial al Spaxioverso...");
 
-    // Emitimos cada 150ms: equilibrio óptimo para redes móviles
     intervaloTransmision = setInterval(() => {
         const cambioX = Math.abs(rotacionRostro.x - ultimasCoordenadasEnviadas.x);
         const cambioY = Math.abs(rotacionRostro.y - ultimasCoordenadasEnviadas.y);
 
-        // Solo disparamos el broadcast si la cabeza se movió significativamente
         if (cambioX > 0.01 || cambioY > 0.01) {
             enviarCoordenadasAlSpaxioverso(idSala, idUsuario, rotacionRostro.x, rotacionRostro.y);
             
@@ -5114,7 +5088,6 @@ function iniciarTransmisionOmniRealtime(idSala, idUsuario) {
     }, 150);
 }
 
-// 💎 FUNCIÓN MAESTRA UNIFICADA (Opción B Pura)
 async function enviarCoordenadasAlSpaxioverso(idSala, idUsuario, coordX, coordY) {
     if (canalSpaxioverso) {
         canalSpaxioverso.send({
@@ -5136,7 +5109,6 @@ function detenerTransmisionOmniRealtime() {
         console.log("🛑 H.A.R.V.I.S: Emisión de telemetría facial apagada.");
     }
      }
-
  
      function cargarFotoInicial() {
     const fotoGuardada = localStorage.getItem('mi_foto');
