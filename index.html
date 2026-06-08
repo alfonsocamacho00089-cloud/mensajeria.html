@@ -4853,32 +4853,34 @@ async function abrirSpaxioVersoDesdeContacto() {
 
     console.log("🪐 H.A.R.V.I.S: Inicializando autopistas del SpaxioVerso...");
     
-    // 🔌 ANCLAJE SENIOR: Buscamos '_supabase' que es la variable real que ya usas en tu app
-    const clienteSupabase = typeof _supabase !== 'undefined' ? _supabase : (typeof supabase !== 'undefined' ? supabase : null);
-    
-    if (clienteSupabase && !canalSpaxioverso) {
-        canalSpaxioverso = clienteSupabase.channel(`sala_${ID_SALA_METAVERSO}`, {
+    // 🔌 CONEXIÓN DIRECTA Y SEGURA POR WEBSOCKET (OPCIÓN B)
+    // Usamos la URL de tu proyecto que sacamos de tu API de Vercel
+    const SUPABASE_URL = "https://fcklnjgkwrnunoroseze.supabase.co";
+    // Coloca aquí tu clave pública 'anon' (la que empieza por eyJ...). Es 100% seguro ponerla en el cliente.
+    const SUPABASE_ANON_KEY = "sb_publishable_E3sJKafeX2bLgYcXGAxcNQ_7_a0WTkK"; 
+
+    if (!canalSpaxioverso && typeof supabase !== 'undefined') {
+        // Inicializamos la instancia pública local para el WebSocket del metaverso
+        const clienteRealtime = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        canalSpaxioverso = clienteRealtime.channel(`sala_${ID_SALA_METAVERSO}`, {
             config: { broadcast: { self: false } }
         });
 
-        // 📡 RECEPTOR OMNI: Escuchamos los movimientos de otros usuarios en la sala
+        // 📡 RECEPTOR OMNI: Escuchamos los movimientos de otros usuarios
         canalSpaxioverso.on('broadcast', { event: 'movimiento_rostro' }, (response) => {
             const { idUsuario, x, y } = response.payload;
             
-            // Si no conocemos a este usuario, le fabricamos su avatar en nuestra escena
             if (!avatarsRemotos[idUsuario]) {
                 const geoRemota = new THREE.BoxGeometry(1.2, 1.2, 1.2);
                 const matRemoto = new THREE.MeshStandardMaterial({ color: 0x00ffcc, roughness: 0.4 }); 
                 const nuevoCubo = new THREE.Mesh(geoRemota, matRemoto);
                 
-                // Los posicionamos un poco hacia los lados para que no se pisen con tu cubo dorado
                 nuevoCubo.position.set((Math.random() - 0.5) * 4, 0, (Math.random() - 0.5) * 2);
                 scene3D.add(nuevoCubo);
-                
                 avatarsRemotos[idUsuario] = nuevoCubo;
             }
             
-            // Guardamos la rotación destino para suavizarla en el bucle principal
             avatarsRemotos[idUsuario].targetRotationX = x;
             avatarsRemotos[idUsuario].targetRotationY = y;
         });
@@ -4888,9 +4890,13 @@ async function abrirSpaxioVersoDesdeContacto() {
                 console.log("🔌 Conectado con éxito a la autopista Realtime del Spaxioverso");
             }
         });
-    } else if (!clienteSupabase) {
-        console.warn("⚠️ H.A.R.V.I.S: No se detectó '_supabase' en el entorno global. Corriendo en modo local.");
+    } else if (typeof supabase === 'undefined') {
+        console.warn("⚠️ H.A.R.V.I.S: Falta cargar el script CDN de Supabase en el HTML. Corriendo en modo local.");
     }
+
+    // El resto de tu función (el bloque try/catch con el contenedor3D) se queda exactamente igual...
+
+        
     
     try {
         let contenedor3D = document.getElementById('contenedor-spaxioverso');
