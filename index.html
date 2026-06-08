@@ -4879,8 +4879,9 @@ function inicializarEntorno3D() {
     const ancho = contenedorCanvas.clientWidth;
     const alto = contenedorCanvas.clientHeight;
     camera3D = new THREE.PerspectiveCamera(75, ancho / alto, 0.1, 1000);
-    camera3D.position.z = 5;
-    camera3D.position.y = 1;
+    camera3D.position.set(0, 3, 7); // Más alto (Y=3) y un poco más lejos (Z=7)
+    camera3D.lookAt(0, 0, 0);       // Apuntamos al centro (donde está el cubo)
+    scene3D.add(camera3D);         // Nos aseguramos de añadirla
 
     // 3. Crear Renderizador WebGL liviano con antialiasing para que no se vea pixelado
     renderer3D = new THREE.WebGLRenderer({ antialias: true });
@@ -4908,8 +4909,14 @@ function inicializarEntorno3D() {
 
     // Un suelo de referencia sutil para dar sensación de profundidad
     const sueloGeo = new THREE.PlaneGeometry(20, 20);
-    const sueloMat = new THREE.MeshStandardMaterial({ color: 0x11141a, roughness: 0.8 });
-    const suelo = new THREE.Mesh(sueloGeo, sueloMat);
+    // Un suelo de referencia teñido de "Verde Satén" para el inicio del SpaxioVerso
+    const sueloMat = new THREE.MeshStandardMaterial({ 
+    color: 0x143b1f, // Verde oscuro satinado
+    roughness: 0.6,
+    metalness: 0.3,
+    emissive: 0x05ffd1, // Pequeño brillo esmeralda
+    emissiveIntensity: 0.05
+});    const suelo = new THREE.Mesh(sueloGeo, sueloMat);
     suelo.rotation.x = -Math.PI / 2;
     suelo.position.y = -1.5;
     scene3D.add(suelo);
