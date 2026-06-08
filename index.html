@@ -2343,18 +2343,17 @@ async function cargarProto() {
 // Variable necesaria para que el menú sepa a qué mensaje le diste clic
 
           let mensajeSeleccionado = null;
+               
 function pintarMensaje(contenido, clase, hora, status, id, tipo = 'texto') {
     const box = document.getElementById('chat-box');
     if (!box) return;
 
     let textoReal = (typeof contenido === 'object') ? (contenido.texto || "") : contenido;
     
-    // Antes del match, elimina los saltos de línea que H.A.R.V.I.S. pueda haber puesto
+    // Elimina los saltos de línea que H.A.R.V.I.S. pueda haber puesto
     textoReal = textoReal.replace(/[\r\n]+/g, '');
 
-    // ========================================================
-    // 🔥 EL DETECTOR COMPLETO: Captura URLs de GIFs y Multimedia
-    // ========================================================
+    // Detector de GIFs y Multimedia
     if (textoReal.includes('i.ibb.co') || textoReal.includes('firebasestorage') || textoReal.includes('.gif') || textoReal.includes('giphy.com')) {
         tipo = 'foto';
     }
@@ -2362,74 +2361,51 @@ function pintarMensaje(contenido, clase, hora, status, id, tipo = 'texto') {
     const match = textoReal.match(/IMAGEN:(https?:\/\/[^\s\]]+)/i);
     if (match) {
         tipo = 'foto';
-        textoReal = match[1]; // Extrae la URL limpia quitando el prefijo "IMAGEN:"
+        textoReal = match[1]; 
     }
 
-    // A partir de aquí continúa tu segundo bloque (Creación del div, validación de tipo === 'foto', etc.)
-    // Extraemos la URL si viene con el formato IMAGEN:[URL]
-    // Antes del match, elimina los saltos de línea que H.A.R.V.I.S. pueda haber puesto
-
-    
-    // ... resto de tu código
-    // --------------------------
-
-    // ... el resto de tu código sigue igual
-
-    // ========================================================
-    // 🔥 EL REMEDIO: Le devolvemos la clase 'mensaje' original
-    // ========================================================
     const div = document.createElement('div');
-    div.className = "mensaje msg-burbuja " + clase; // <-- Agregamos 'mensaje' manteniendo tu clase nueva por si acaso
+    div.className = "mensaje msg-burbuja " + clase; 
     div.id = id;
 
     const horaFinal = hora || new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
     const checkHTML = clase === 'msg-derecha' ? `<span style="margin-left:5px; font-size:10px;">${status === 'leido' ? '✓✓' : '✓'}</span>` : '';
-// Dentro de pintarMensaje
-// Dentro de pintarMensaje
+    
     console.log("Intentando pintar tipo:", tipo, "con contenido:", contenido);
     
-    // ========================================================
-    // 🔥 EL DIVISOR: ¿Es un enlace externo o archivo pesado / sticker / GIF?
-    // ========================================================
     const esCosaNueva = textoReal.includes('youtube.com/') || textoReal.includes('youtu.be/') || 
                     textoReal.includes('tiktok.com/') || textoReal.includes('facebook.com/') || 
+                    textoReal.includes('supabase.co') || textoReal.startsWith('LIVEKIT_ROOM:') ||
                     tipo === 'video' || tipo === 'audio' || tipo === 'sticker' || tipo === 'stickers' ||
                     textoReal.startsWith('blob:') || textoReal.startsWith('data:audio'); 
 
-        // Detecta si es contenido de Spaxio (Lives, Reels, Fotos)
-const esSpaxio = (tipo === 'system_content' || id.includes('spaxio_')); 
+    const esSpaxio = (tipo === 'system_content' || id.includes('spaxio_')); 
 
-if (esSpaxio) {
-    // ----------------------------------------------------
-    // CAMINO 3: EL MODO INMERSIVO SPAXIO (Estilo TikTok)
-    // ----------------------------------------------------
-    div.style.background = 'transparent';
-    div.style.boxShadow = 'none';
-    div.style.padding = '0px';
-    div.style.width = '100%'; // ¡Aquí está la magia del tamaño!
+    if (esSpaxio) {
+        // ----------------------------------------------------
+        // CAMINO 3: EL MODO INMERSIVO SPAXIO (Estilo TikTok)
+        // ----------------------------------------------------
+        div.style.background = 'transparent';
+        div.style.boxShadow = 'none';
+        div.style.padding = '0px';
+        div.style.width = '100%';
 
-    div.innerHTML = `
-        <div style="width: 100%; border-radius: 15px; overflow: hidden; border: 2px solid #ffd700; background: #000;">
-            <video src="${contenido.videoUrl}" controls playsinline style="width: 100%; display: block;"></video>
-            <div style="padding: 10px; color: #ffd700; font-weight: bold;">${contenido.titulo || 'Spaxio Content'}</div>
-        </div>
-        <div style="font-size:10px; opacity:0.6; text-align:right; margin-top:4px; color: #fff;">
-            ${horaFinal}
-        </div>
-    `;
-    box.appendChild(div);
-    box.scrollTop = box.scrollHeight;
-} 
-else if (esCosaNueva) {
-    // ... tu código original de esCosaNueva sigue aquí igualito ...
-
-    // ... tu código original de camino 2 sigue aquí igualito ...
-     
+        div.innerHTML = `
+            <div style="width: 100%; border-radius: 15px; overflow: hidden; border: 2px solid #ffd700; background: #000;">
+                <video src="${contenido.videoUrl}" controls playsinline style="width: 100%; display: block;"></video>
+                <div style="padding: 10px; color: #ffd700; font-weight: bold;">${contenido.titulo || 'Spaxio Content'}</div>
+            </div>
+            <div style="font-size:10px; opacity:0.6; text-align:right; margin-top:4px; color: #fff;">
+                ${horaFinal}
+            </div>
+        `;
+        box.appendChild(div);
+        box.scrollTop = box.scrollHeight;
+    } 
+    else if (esCosaNueva) {
         // ----------------------------------------------------
         // CAMINO 1: LAS COSAS NUEVAS (Redes y Multimedia pesada)
         // ----------------------------------------------------
-        
-        // Quitamos el fondo para que el iframe, video, nota de voz o sticker no se vean encerrados
         div.style.background = 'transparent';
         div.style.backgroundColor = 'transparent';
         div.style.boxShadow = 'none';
@@ -2446,7 +2422,6 @@ else if (esCosaNueva) {
         box.appendChild(div);
         box.scrollTop = box.scrollHeight;
 
-        // Render asíncrono para no trabar el chat
         requestAnimationFrame(() => {
             const contenedorCuerpo = div.querySelector('.cuerpo-mensaje-dinamico');
             if (!contenedorCuerpo) return;
@@ -2488,82 +2463,95 @@ else if (esCosaNueva) {
                         </a>
                     </div>
                 `;
+            } else if (tipo === 'video' || textoReal.includes('.mp4') || textoReal.includes('.webm')) {
+                // 🔥 EL REPRODUCTOR INTELIGENTE: Detecta si es LiveKit o archivo guardado en Supabase
+                if (textoReal.startsWith('LIVEKIT_ROOM:')) {
+                    const roomNameToConnect = textoReal.split(':')[1];
+                    const uniqueVideoId = "live_kit_el_" + Date.now();
+                    
+                    cuerpoHTML = `
+                        <div style="max-width:260px; background:#111; border: 2px solid #ffd700; border-radius:12px; padding:6px;">
+                            <video id="${uniqueVideoId}" autoplay playsinline muted
+                                   style="width:100%; max-height:320px; border-radius:8px; display:block; background:#000;">
+                            </video>
+                            <div style="display:flex; align-items:center; justify-content:center; margin-top:6px; padding:4px; background:#000; border-radius:6px; color:#ffd700; font-size:11px; font-weight:bold; gap:6px;">
+                               🔴 EN VIVO DESDE LIVEKIT
+                            </div>
+                        </div>
+                    `;
 
-     // Dentro de: else if (esCosaNueva) { ... } del requestAnimationFrame
-// Justo al lado de tus ifs de YouTube y TikTok, añade este:
+                    // Conexión asíncrona del espectador a la sala en directo
+                    setTimeout(async () => {
+                        try {
+                            const videoElement = document.getElementById(uniqueVideoId);
+                            if (!videoElement) return;
 
-if (textoReal.includes('livekit.cloud/storage/') || textoReal.includes('.mp4')) {
-    cuerpoHTML = `
-        <div style="max-width:260px; background:#111; border: 2px solid #ffd700; border-radius:12px; padding:6px;">
-            <video src="${textoReal}" controls playsinline 
-                   style="width:100%; max-height:320px; border-radius:8px; display:block; background:#000;">
-            </video>
-            <a href="${textoReal}" download
-               style="display:flex; align-items:center; justify-content:center; margin-top:6px; padding:6px; background:#000; border: 1px solid #ffd700; border-radius:8px; color:#ffd700; font-size:11px; text-decoration:none; font-weight:bold; gap:6px;">
-               📥 Descargar Directo al Teléfono
-            </a>
-        </div>
-    `;
-     }
-            } else if (tipo === 'video') {
-                cuerpoHTML = `
-                    <video src="${textoReal}" controls playsinline
-                           style="max-width:240px; max-height:320px; border-radius:12px; display:block; border: 2px solid #ffd700; background:#000;">
-                    </video>
-                `;
+                            const res = await fetch('/api/get-livekit-token', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ roomName: roomNameToConnect, identity: 'viewer_' + Date.now() })
+                            });
+                            const { token } = await res.json();
+                            
+                            const viewerRoom = new LivekitClient.Room();
+                            viewerRoom.on(LivekitClient.RoomEvent.TrackSubscribed, (track) => {
+                                if (track.kind === LivekitClient.Track.Kind.Video) {
+                                    track.attach(videoElement);
+                                }
+                            });
+                            await viewerRoom.connect('wss://space-xquv9iaa.livekit.cloud', token);
+                        } catch (err) {
+                            console.error("❌ Fallo conectando espectador:", err);
+                        }
+                    }, 300);
+
+                } else {
+                    // Si no es sala en vivo, es el archivo grabado final de tu Supabase
+                    cuerpoHTML = `
+                        <div style="max-width:260px; background:#111; border: 2px solid #ffd700; border-radius:12px; padding:6px;">
+                            <video src="${textoReal}" controls playsinline 
+                                   style="width:100%; max-height:320px; border-radius:8px; display:block; background:#000;">
+                            </video>
+                            <a href="${textoReal}" download
+                               style="display:flex; align-items:center; justify-content:center; margin-top:6px; padding:6px; background:#000; border: 1px solid #ffd700; border-radius:8px; color:#ffd700; font-size:11px; text-decoration:none; font-weight:bold; gap:6px;">
+                               📥 Descargar Directo al Teléfono
+                            </a>
+                        </div>
+                    `;
+                }
             } else if (tipo === 'sticker' || tipo === 'stickers') {
-                // Renderizador de Stickers/GIFs sin fondo
                 cuerpoHTML = `<img src="${textoReal}" style="max-width:180px; max-height:180px; display:block; border:none; background:transparent;">`;
+            } else if (tipo === 'audio' || textoReal.startsWith('data:audio') || (textoReal.startsWith('blob:') && textoReal.includes('audio')) || textoReal.includes('.ogg')) {
+                
+                const tipoArchivo = textoReal.includes('webm') ? 'audio/webm' : 
+                                    textoReal.includes('ogg') ? 'audio/ogg' : 'audio/mpeg';
 
-     } else if (tipo === 'audio' || textoReal.startsWith('data:audio') || (textoReal.startsWith('blob:') && textoReal.includes('audio')) || textoReal.includes('.webm') || textoReal.includes('.ogg')) {
-    
-    // Tu detector de archivos idéntico
-    const tipoArchivo = textoReal.includes('webm') ? 'audio/webm' : 
-                        textoReal.includes('ogg') ? 'audio/ogg' : 
-                        textoReal.includes('mpeg') || textoReal.includes('mp3') ? 'audio/mpeg' : 'audio/mpeg';
+                div.style.background = ''; 
+                div.style.backgroundColor = '';
+                div.style.boxShadow = '';
+                div.style.border = '';
+                div.style.padding = '0px 2px 0px 2px'; 
+                div.style.width = 'max-content';
 
-    // 🔥 EL TRUCO MULTIMEDIA: Quitamos la transparencia forzada del contenedor padre 
-    // para que use tu burbuja nativa del CSS (.msg-burbuja)
-    div.style.background = ''; 
-    div.style.backgroundColor = '';
-    div.style.boxShadow = '';
-    div.style.border = '';
-    
-    // REDUCCIÓN CLAVE: Bajamos el padding a los lados y casi a cero arriba/abajo
-    // Formato: arriba(2px) derecha(6px) abajo(2px) izquierda(6px)
-    div.style.padding = '0px 2px 0px 2px'; 
-    
-    // Forzamos a la burbuja a cerrarse justo donde termina el reproductor
-    div.style.width = 'max-content';
-
-    // Inyectamos el reproductor con filtros CSS para matar el color blanco nativo
-    cuerpoHTML = `
-        <audio src="${textoReal}" controls playsinline type="${tipoArchivo}"
-               style="max-width:240px; display:block; margin-top:0px; outline:none; 
-                      filter: invert(0.9) hue-rotate(180deg); mix-blend-mode: screen; background: rgba(0, 77, 64, 0.8) 100%) : rgba(32, 44, 51, 0.6);">
-        </audio>
-    `;
-     }
+                cuerpoHTML = `
+                    <audio src="${textoReal}" controls playsinline type="${tipoArchivo}"
+                           style="max-width:240px; display:block; margin-top:0px; outline:none; 
+                                  filter: invert(0.9) hue-rotate(180deg); mix-blend-mode: screen;">
+                    </audio>
+                `;
+            }
              
             contenedorCuerpo.innerHTML = cuerpoHTML;
             box.scrollTop = box.scrollHeight;
         });
 
-     }
-
-
-            
-
-        else {
-
+    } else {
         // ----------------------------------------------------
         // CAMINO 2: EL CHAT NORMAL (Estructura Antigua Intacta)
         // ----------------------------------------------------
-        
         let cuerpoHTML = "";
         
         if (tipo === 'foto') {
-            // Quitamos el color de fondo de la burbuja para que la foto flote libre
             div.style.background = 'transparent';
             div.style.backgroundColor = 'transparent';
             div.style.boxShadow = 'none';
@@ -2574,13 +2562,12 @@ if (textoReal.includes('livekit.cloud/storage/') || textoReal.includes('.mp4')) 
                 const urlLimpia = textoReal.split(' ')[0];
                 cuerpoHTML = `<img src="${urlLimpia}" style="max-width:100%; border-radius:12px; display:block; border: 2px solid #ffd700;">`;
             } else {
-                cuerpoHTML = `<img src="${textoReal}" style="max-width:100%; border-radius:12px; display:block; border: none; background:transparent; onclick="window.open('${textoReal}', '_blank')">`;
+                cuerpoHTML = `<img src="${textoReal}" style="max-width:100%; border-radius:12px; display:block; border: none; background:transparent;" onclick="window.open('${textoReal}', '_blank')">`;
             }
         } else {
             cuerpoHTML = `<span class="texto-msg">${textoReal}</span>`;
         }
 
-        // Aquí usamos exactamente tu maquetación vieja
         div.innerHTML = `
             ${cuerpoHTML}
             <div class="msg-info">
@@ -2591,11 +2578,9 @@ if (textoReal.includes('livekit.cloud/storage/') || textoReal.includes('.mp4')) 
         
         box.appendChild(div);
         box.scrollTop = box.scrollHeight;
-     }
+    }
 
-
-
-    // El menú de acciones (se aplica sin importar qué camino tomó)
+    // Menú de acciones táctil
     div.onclick = (e) => {
         mensajeSeleccionado = div; 
         const menu = document.getElementById('menu-acciones');
@@ -2607,8 +2592,6 @@ if (textoReal.includes('livekit.cloud/storage/') || textoReal.includes('.mp4')) 
         e.stopPropagation(); 
     };
      }
- 
-
      
     async function marcarMensajeComoRecibido(msgId, emisorID) {
     // 1. CAMBIO VISUAL (Lo que ves en el momento)
