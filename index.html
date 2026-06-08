@@ -1728,16 +1728,36 @@ const base64 = btoa(binary);
             hora: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })
         });
 
-        // 🛡️ REGLA DE ORO: Si es para H.A.R.V.I.S., NO lo subas a Firebase. Si es un contacto normal, SÍ lo sube.
-        if (targetID !== "uo4kb3tGHH7J") {
+        // Pintamos y guardamos pasando el tipo corregido localmente primero
+        pintarMensaje(msg, 'msg-derecha', null, 'enviado', msgId, tipoValidado);
+        
+        // 🔥 INTERCEPCIÓN DE ENVÍO: Si es para el Feed, se va directo a Supabase publicando para todos
+        if (targetID === "26fmetp4Q4WJ") {
+            const miNombre = localStorage.getItem('mi_nombre_perfil') || "Pedro Peres"; 
+            
+            const { error } = await supabase
+                .from('spaxioflow_feed')
+                .insert([
+                    {
+                        chat_id: targetID,
+                        content: msg,
+                        tipo: tipoValidado === 'stickers' ? 'imagen' : (tipoValidado === 'media' ? 'imagen' : tipoValidado), // Asegurar consistencia de tipo
+                        sender_name: miNombre
+                    }
+                ]);
+                
+            if (error) console.error("❌ Error insertando post en Supabase:", error);
+            
+        } else if (targetID !== "uo4kb3tGHH7J") {
+            // 🛡️ REGLA DE ORO: Si es un contacto normal, SÍ lo sube a Firebase
             await db.ref('cola_satelital/' + targetID).push({
-    p: base64,
-    from: miID,
-    ts: Date.now(),
-    msgId: msgId,
-    mediaType: tipoValidado 
- });
-        }
+                p: base64,
+                from: miID,
+                ts: Date.now(),
+                msgId: msgId,
+                mediaType: tipoValidado 
+            });
+     }
 
 // === CONEXIÓN SEGURA RUTA HACIA EL BACKEND EN VERCEL ===
 // === CONEXIÓN SEGURA RUTA HACIA EL BACKEND EN VERCEL ===
@@ -2081,78 +2101,47 @@ async function cargarConversacionCon(idDestino, nombreDestino, fotoDestino) {
         }
     }
 
-        // =========================================================
-        // 5. CARGA DESDE v10 (IndexedDB)
-    // 1. MATAMOS AL FANTASMA: Limpiamos la libreta vieja antes de leer la nueva
+        
+// 5. CARGA DESDE v10 (IndexedDB)
     localStorage.removeItem('chat_' + idDestino);
 
-    // =========================================================
-    // 📡 RUTA INDEPENDIENTE ÚNICAMENTE PARA SPAXIOFLOW
-    // =========================================================
-    if (String(idDestino) === "26fmetp4Q4WJ") {
-        console.log("📡 Sintonizando canal independiente de SpaxioFlow...");
+    try {
+        const box = document.getElementById('chat-box');
+        if (box) box.innerHTML = ""; 
 
-        try {
-            // Apagamos conexiones viejas en esta ruta pública
-            db.ref('cola_satelital/' + idDestino).off();
+        // 🔥 INTERCEPCIÓN MAESTRA: Si es el feed global de SpaxioFlow, lee de Supabase, no del local
+        if (idDestino === "26fmetp4Q4WJ") {
+            console.log("📡 Cargando historial global de SpaxioFlow desde Supabase...");
+            
+            const { data: posts, error } = await supabase
+                .from('spaxioflow_feed')
+                .select('*')
+                .eq('chat_id', '26fmetp4Q4WJ')
+                .order('id', { ascending: true }); // O por tu columna de timestamp
 
-            // Escuchamos el texto directo que entra a la cartelera pública
-            db.ref('cola_satelital/' + idDestino).on('child_added', (snapshot) => {
-                const data = snapshot.val();
-                if (!data) return;
-
-                // Agarra el texto directo o contenido sin decodificar nada raro
-                const textoPlano = data.texto || data.content || "";
-                let tipoMedia = data.mediaType || "texto";
-
-                if (textoPlano) {
-                    const miIdLocal = localStorage.getItem('mi_dropis_id');
-                    const claseBurbuja = (data.from === miIdLocal) ? 'msg-derecha' : 'msg-izquierda';
-
-                    // Si detecta la cabecera de imagen base64, la marca como foto
-                    if (textoPlano.startsWith('data:image/')) {
-                        tipoMedia = 'foto';
-                    }
-
-                    // Pinta directo en tu pantalla
-                    pintarMensaje(
-                        textoPlano, 
-                        claseBurbuja, 
-                        new Date(data.ts || Date.now()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true }), 
-                        'leido', 
-                        data.msgId || snapshot.key, 
-                        tipoMedia
-                    );
-                }
-            });
-        } catch (eF) {
-            console.error("Error en canal independiente:", eF);
-        }
-
-    } else {
-        // =========================================================
-        // 🔒 CHAT NORMAL: Tu lógica original de la v10 INTACTA
-        // =========================================================
-        try {
-            // Desconectamos la cartelera si nos vamos a un chat privado
-            db.ref('cola_satelital/26fmetp4Q4WJ').off();
-
+            if (!error && posts) {
+                posts.forEach(post => {
+                    // Mapeamos los tipos exactos de tu tabla: 'video', 'imagen', 'texto'
+                    pintarMensaje(post.content, 'msg-izquierda', post.sender_name || 'Anónimo', 'leido', "feed_" + post.id, post.tipo);
+                });
+            } else {
+                console.error("Error al traer feed de Supabase:", error);
+            }
+        } else {
+            // 🔒 CHAT NORMAL ENCRIPTADO INDIVIDUAL (Mantiene tu lógica original intacta)
             const todosLosMensajes = await obtenerTodo('mensajes');
             const mensajesFiltrados = todosLosMensajes.filter(m => String(m.contactoId) === String(idDestino));
-
-            const boxVisual = document.getElementById('chat-box');
-            if (boxVisual) boxVisual.innerHTML = ""; 
 
             if (typeof renderizarMensajes === "function") {
                 renderizarMensajes(mensajesFiltrados);
             } else {
                 mensajesFiltrados.forEach(m => {
-                    pintarMensaje(m.texto, m.clase, m.hora, m.status || 'enviado', m.id);
+                    pintarMensaje(m.texto, m.clase, m.hora, m.status || 'enviado', m.id, m.tipo || 'texto');
                 });
             }
-        } catch (e) {
-            console.error("Error cargando mensajes de v10:", e);
         }
+    } catch (e) {
+        console.error("Error cargando mensajes:", e);
      }
     
                 
@@ -4752,43 +4741,39 @@ async function inyectarNotificacionHarvis(textoIA) {
 
      async function inyectarLiveSpaxioFlow(urlVideo) {
     const targetID = "26fmetp4Q4WJ"; 
-    const msgId = "live_stream_" + Date.now();
-    
-    const payload = {
-        tipo: 'video', // 👈 Cambiado a video para que el chat sepa qué es
-        remitente: 'Pedro Peres',
-        texto: urlVideo, // 👈 Aquí va tu link de LiveKit / Supabase
-        timestamp: Date.now()
-    };
+    const miNombre = localStorage.getItem('mi_nombre_perfil') || "Pedro Peres";
 
     try {
-        const base64 = btoa(unescape(encodeURIComponent(JSON.stringify(payload))));
+        // 🔥 ESTRUCTURA PÚBLICA GLOBAL: Guardado directo en la persistencia del Feed
+        const { error } = await supabase
+            .from('spaxioflow_feed')
+            .insert([
+                {
+                    chat_id: targetID,
+                    content: urlVideo,
+                    tipo: 'video', // Activa el contenedor o iframe de video en realtime
+                    sender_name: miNombre
+                }
+            ]);
 
-        // Escritura directa en tu Firebase (Le llega a todos en tiempo real)
-        await db.ref('cola_satelital/' + targetID).push({
-            p: base64,
-            from: "Pedro Peres",
-            ts: Date.now(),
-            msgId: msgId,
-            mediaType: 'video' // 👈 Cambiado a video para activar el reproductor
-        });
+        if (error) throw error;
 
-        // Tu persistencia local en IndexedDB
+        // Persistencia local para tu propio dispositivo por comodidad
         if (typeof guardarLocal === "function") {
             await guardarLocal('mensajes', { 
-                id: msgId, 
+                id: "live_stream_" + Date.now(), 
                 contactoId: targetID,
                 texto: urlVideo, 
-                clase: 'msg-izquierda', 
+                clase: 'msg-derecha', 
                 status: 'leido',
-                tipo: 'video', // 👈 Cambiado a video
+                tipo: 'video', 
                 ts: Date.now(),
                 hora: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })
             });
         }
-        console.log("🎥 Live inyectado con éxito en el feed de SpaxioFlow!");
+        console.log("🎥 ¡Transmisión insertada de forma permanente en el ecosistema SpaxioFlow!");
     } catch (e) {
-        console.error("❌ Error en la inyección del Live:", e);
+        console.error("❌ Error en la inyección del Live a Supabase:", e);
     }
      }
 // ========================================================
