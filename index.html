@@ -4866,9 +4866,15 @@ async function abrirSpaxioVersoDesdeContacto() {
         videoElementOculto = document.getElementById('video-captura-omni');
 
         // Inicializamos primero el entorno 3D y luego despertamos la IA
+        // 🔄 ARRANQUE EN CADENA: Primero el motor gráfico, luego la IA
         setTimeout(() => {
-            inicializarEntorno3D();
-            encenderRastreadorFacialOMNI();
+            inicializarEntorno3D(); // Levanta el cubo y el piso verde primero
+            
+            // Le damos 400ms al teléfono para que estabilice los gráficos antes de encender la cámara
+            setTimeout(() => {
+                encenderRastreadorFacialOMNI();
+            }, 400);
+            
         }, 100);
 
     } catch (error) {
@@ -4882,7 +4888,6 @@ function inicializarEntorno3D() {
     if (!contenedorCanvas) return;
     contenedorCanvas.innerHTML = "";
 
-   
     scene3D = new THREE.Scene();
     scene3D.background = new THREE.Color(0x050505);
 
@@ -4891,11 +4896,20 @@ function inicializarEntorno3D() {
     const alto = window.innerHeight - 60; // Descontamos el header dorado
     
     camera3D = new THREE.PerspectiveCamera(75, ancho / alto, 0.1, 1000);
- 
-     camera3D.position.set(0, 3, 7);
+    camera3D.position.set(0, 3, 7);
     camera3D.lookAt(0, 0, 0);
     scene3D.add(camera3D);
 
+    // 🔥 AQUÍ VA TU BLOQUE: Inicializar el renderizador con máxima potencia para el teléfono
+    renderer3D = new THREE.WebGLRenderer({ 
+        antialias: true,
+        powerPreference: "high-performance" // Le dice al teléfono que use la GPU con todo
+    });
+    renderer3D.setSize(ancho, alto);
+    renderer3D.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    contenedorCanvas.appendChild(renderer3D.domElement); // Metemos el canvas 3D al contenedor visual
+
+    // 💡 Luces
     const luzAmbiental = new THREE.AmbientLight(0xffffff, 0.5);
     scene3D.add(luzAmbiental);
 
@@ -4903,12 +4917,13 @@ function inicializarEntorno3D() {
     luzPuntual.position.set(5, 5, 5);
     scene3D.add(luzPuntual);
 
-    // Cubo de Oro que responderá a tus movimientos de cabeza
+    // 📦 Cubo de Oro que responderá a tus movimientos de cabeza
     const geometria = new THREE.BoxGeometry(1.5, 1.5, 1.5);
     const material = new THREE.MeshStandardMaterial({ color: 0xffd700, roughness: 0.3, metalness: 0.8 });
     cuboPrueba = new THREE.Mesh(geometria, material);
     scene3D.add(cuboPrueba);
 
+    // 🛣️ El Suelo Verde Satinado
     const sueloGeo = new THREE.PlaneGeometry(20, 20);
     const sueloMat = new THREE.MeshStandardMaterial({ 
         color: 0x143b1f, roughness: 0.6, metalness: 0.3,
@@ -4919,22 +4934,23 @@ function inicializarEntorno3D() {
     suelo.position.y = -1.5;
     scene3D.add(suelo);
 
+    // 🔄 Bucle de Animación
     function animarSpaxioVerso() {
         spaxioAnimFrameId = requestAnimationFrame(animarSpaxioVerso);
         
-        // 🔄 INTERCEPCIÓN DE MOVIMIENTO DE IA:
+        // INTERCEPCIÓN DE MOVIMIENTO DE IA:
         if (cuboPrueba) {
             cuboPrueba.rotation.y = THREE.MathUtils.lerp(cuboPrueba.rotation.y, rotacionRostro.y, 0.1);
             cuboPrueba.rotation.x = THREE.MathUtils.lerp(cuboPrueba.rotation.x, rotacionRostro.x, 0.1);
-     }
+        }
         
-        // 🛡️ REGLA DE ORO AUTOMÁTICA: Solo renderiza si el motor gráfico ya terminó de crearse por completo
+        // REGLA DE ORO AUTOMÁTICA: Solo renderiza si todo está listo
         if (renderer3D && scene3D && camera3D) {
             renderer3D.render(scene3D, camera3D);
         }
-     }
+    }
 
- animarSpaxioVerso();
+    animarSpaxioVerso();
      }
      
 // 👁️ MOTOR DE IA DE MEDIAPIPE (Zero-Shot Face Tracking)
