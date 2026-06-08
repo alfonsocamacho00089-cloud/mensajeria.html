@@ -1717,39 +1717,29 @@ const base64 = btoa(binary);
                 // Pintamos y guardamos pasando el tipo corregido localmente primero
         pintarMensaje(msg, 'msg-derecha', null, 'enviado', msgId, tipoValidado);
         
-        await guardarLocal('mensajes', { 
-            id: msgId, 
-            contactoId: targetID,
-            texto: msg, 
-            clase: 'msg-derecha', 
-            status: 'enviado',
-            tipo: tipoValidado,
-            ts: Date.now(),
-            hora: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })
-        });
-
-        // Pintamos y guardamos pasando el tipo corregido localmente primero
-        pintarMensaje(msg, 'msg-derecha', null, 'enviado', msgId, tipoValidado);
-        
-        // 🔥 INTERCEPCIÓN DE ENVÍO: Si es para el Feed, se va directo a Supabase publicando para todos
+        // 🔥 CONEXIÓN SUPREMA AL BACKEND DE VERCEL PARA EL FEED GLOBAL
         if (targetID === "26fmetp4Q4WJ") {
             const miNombre = localStorage.getItem('mi_nombre_perfil') || "Pedro Peres"; 
             
-            const { error } = await supabase
-                .from('spaxioflow_feed')
-                .insert([
-                    {
-                        chat_id: targetID,
-                        content: msg,
-                        tipo: tipoValidado === 'stickers' ? 'imagen' : (tipoValidado === 'media' ? 'imagen' : tipoValidado), // Asegurar consistencia de tipo
-                        sender_name: miNombre
-                    }
-                ]);
-                
-            if (error) console.error("❌ Error insertando post en Supabase:", error);
+            // Mapeamos los tipos para que tu base de datos los reciba limpios
+            let tipoFinal = tipoValidado;
+            if (tipoValidado === 'stickers' || tipoValidado === 'media') tipoFinal = 'imagen';
+
+            fetch('/api/spaxioflow-event', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    tipoEvento: tipoFinal,
+                    contenido: msg,
+                    remitente: miNombre
+                })
+            })
+            .then(res => res.json())
+            .then(data => console.log("📡 Feed actualizado vía Vercel:", data))
+            .catch(err => console.error("❌ Fallo al actualizar feed desde el teléfono:", err));
             
         } else if (targetID !== "uo4kb3tGHH7J") {
-            // 🛡️ REGLA DE ORO: Si es un contacto normal, SÍ lo sube a Firebase
+            // 🛡️ REGLA DE ORO: Si es un contacto normal, sigue usando la cola satelital tradicional
             await db.ref('cola_satelital/' + targetID).push({
                 p: base64,
                 from: miID,
@@ -4744,21 +4734,25 @@ async function inyectarNotificacionHarvis(textoIA) {
     const miNombre = localStorage.getItem('mi_nombre_perfil') || "Pedro Peres";
 
     try {
-        // 🔥 ESTRUCTURA PÚBLICA GLOBAL: Guardado directo en la persistencia del Feed
-        const { error } = await supabase
-            .from('spaxioflow_feed')
-            .insert([
-                {
-                    chat_id: targetID,
-                    content: urlVideo,
-                    tipo: 'video', // Activa el contenedor o iframe de video en realtime
-                    sender_name: miNombre
-                }
-            ]);
+        console.log("🚀 Disparando evento de streaming hacia Vercel...");
 
-        if (error) throw error;
+        // Llamada directa a tu manejador para registrar el video .webm creado
+        const res = await fetch('/api/spaxioflow-event', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                tipoEvento: 'video',
+                contenido: urlVideo,
+                remitente: miNombre,
+                metadata: { timestamp_local: Date.now() }
+            })
+        });
 
-        // Persistencia local para tu propio dispositivo por comodidad
+        if (!res.ok) throw new Error("Vercel rechazó la inyección del Live");
+        const data = await res.json();
+        console.log("🎥 ¡Transmisión registrada con éxito en el Feed Global!", data);
+
+        // Tu persistencia local en IndexedDB se mantiene para el historial del teléfono
         if (typeof guardarLocal === "function") {
             await guardarLocal('mensajes', { 
                 id: "live_stream_" + Date.now(), 
@@ -4771,9 +4765,8 @@ async function inyectarNotificacionHarvis(textoIA) {
                 hora: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })
             });
         }
-        console.log("🎥 ¡Transmisión insertada de forma permanente en el ecosistema SpaxioFlow!");
     } catch (e) {
-        console.error("❌ Error en la inyección del Live a Supabase:", e);
+        console.error("❌ Error en la inyección del Live a través de Vercel:", e);
     }
      }
 // ========================================================
