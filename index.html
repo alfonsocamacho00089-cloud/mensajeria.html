@@ -1036,8 +1036,12 @@ margin: 0;
    
      <div id="nombre-dueño-header-lista" style="background: rgba(32, 44, 51, 0.3); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(15px); color: #ffffff; padding: 15px; font-weight: 900; text-transform: uppercase; text-align: left; border-bottom: 1px solid #333; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 1001;">
             <span>SPACECHAT</span>
-            <div onclick="alternarVistaPerfil()" style="cursor: pointer; color: #ffd700; font-size: 22px; padding: 0 10px;">⋮</div>
-        </div>
+            <div style="display: flex; align-items: center; gap: 15px;">
+                <!-- Botón Supremo de Acceso al SpaxioVerso -->
+                <div onclick="abrirSpaxioVersoDesdeContacto()" title="Entrar al SpaxioVerso" style="cursor: pointer; color: #ffd700; font-size: 20px; padding: 0 5px; text-shadow: 0 0 8px #ffd700;">🪐</div>
+                <div onclick="alternarVistaPerfil()" style="cursor: pointer; color: #ffd700; font-size: 22px; padding: 0 10px;">⋮</div>
+            </div>
+     </div>
      
      <div id="seccion-mi-perfil" style="display: none; padding: 15px; background: #1e222b; border-bottom: 1px solid #1e222b;">
             <!-- Modifica el estilo del div que envuelve los inputs y el botón -->
@@ -4807,6 +4811,67 @@ function activarSpaxioFlowRealtime() {
             }
         )
         .subscribe();
+     }
+
+     // 🔥 LOGICA DE INTERCEPCIÓN PARA EL SPAXIOVERSO (ESTILO SPAXIOFLOW)
+async function abrirSpaxioVersoDesdeContacto() {
+    const idSalaMetaverso = "SPAXIOVERSO_GLOBAL";
+    console.log("🪐 H.A.R.V.I.S: Interceptando ID único para el SpaxioVerso:", idSalaMetaverso);
+    
+    // 1. Limpiamos o cerramos modales de contactos si es necesario
+    // Aquí puedes meter la lógica para ocultar el modal actual si deseas ver la sala a pantalla completa
+    
+    try {
+        // 2. Verificamos si ya existe el contenedor visual en el DOM, si no, lo creamos dinámicamente
+        let contenedor3D = document.getElementById('contenedor-spaxioverso');
+        if (!contenedor3D) {
+            contenedor3D = document.createElement('div');
+            contenedor3D.id = 'contenedor-spaxioverso';
+            // Estilo de pantalla completa de nivel profesional con fondo oscuro satinado
+            contenedor3D.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100dvw;
+                height: 100dvh;
+                background: #0b141a;
+                z-index: 2000;
+                display: flex;
+                flex-direction: column;
+                color: #fff;
+            `;
+            
+            // Le metemos un header interno para poder salir del SpaxioVerso de forma segura
+            contenedor3D.innerHTML = `
+                <div style="background: rgba(32, 44, 51, 0.8); backdrop-filter: blur(10px); padding: 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; z-index: 2001;">
+                    <span style="color: #ffd700; font-weight: 900; letter-spacing: 1px;">🪐 SPAXIOVERSO SALA [${idSalaMetaverso}]</span>
+                    <button onclick="cerrarSpaxioVerso()" style="background: transparent; border: 1px solid #ffd700; color: #ffd700; padding: 5px 12px; border-radius: 6px; font-weight: bold; cursor: pointer;">[ Salir ]</button>
+                </div>
+                <!-- El lienzo canvas de alto rendimiento gráfico donde Three.js pintará el "espacio verde" -->
+                <div id="canvas-render-3d" style="flex-grow: 1; width: 100%; height: 100%; background: #000;"></div>
+            `;
+            document.body.appendChild(contenedor3D);
+        } else {
+            contenedor3D.style.display = 'flex';
+        }
+
+        // 3. LLAMADA AL MOTOR 3D (Lo prepararemos en el siguiente paso cuando verifiques este)
+        console.log("🎮 Entorno listo. Esperando inicialización del motor gráfico Three.js...");
+        // inicializarEntorno3D();
+
+    } catch (error) {
+        console.error("❌ Fallo crítico al levantar el espacio del SpaxioVerso:", error);
+    }
+}
+
+// Función de salida segura para limpiar el hardware del teléfono
+function cerrarSpaxioVerso() {
+    const contenedor3D = document.getElementById('contenedor-spaxioverso');
+    if (contenedor3D) {
+        contenedor3D.style.display = 'none';
+        console.log("🔌 Salida del SpaxioVerso: Renderizado pausado de forma segura.");
+        // Aquí detendremos el bucle de renderizado más adelante para ahorrar batería
+    }
      }
  
      function cargarFotoInicial() {
