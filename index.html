@@ -4384,9 +4384,9 @@ function configurarModo(nuevoModo) {
             await inyectarNotificacionHarvis(`🔴 ${miId} está en directo ahora mismo.`);
             console.log("🔴 Difusión en vivo iniciada y transmitiendo a la nube.");
          
-            // 👈 PEGA ESTA LÍNEA AQUÍ:
-            inyectarLiveSpaxioFlow(`https://space-xquv9iaa.livekit.cloud/#/${miId}`);
-     
+            // 👈 CAMBIA LA LÍNEA QUE PUSISTE EN INICIAR SPAXIOLIVE POR ESTA:
+            await inyectarLiveSpaxioFlow(`LIVEKIT_ROOM:${miId}`);
+         
             // 📦 Grabador local YouSpaxio encendido con compresión activa
             fragmentosVideo = []; 
 
