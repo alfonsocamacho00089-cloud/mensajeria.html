@@ -4817,7 +4817,8 @@ function activarSpaxioFlowRealtime() {
      }
 
 
-     // =================================================================
+             
+// =================================================================
 // 🪐 SPAXIOVERSO OMNI: MOTOR GRÁFICO, IA Y TELEMETRÍA ULTRA-LIGERA
 // =================================================================
 
@@ -4829,11 +4830,14 @@ let faceMeshIA = null;
 let camaraMediaPipe = null;
 let spaxioVersoEnSegundoPlano = false;
 
-// Variables de conectividad y estados de transmisión (Supabase Realtime)
+// Variables de conectividad y estados de transmisión (Supabase Realtime Opción B)
 let canalSpaxioverso = null;
 let intervaloTransmision = null;
 let ultimasCoordenadasEnviadas = { x: 0, y: 0 };
 let rotacionRostro = { x: 0, y: 0 };
+
+// Diccionario para renderizar los cubos de los demás usuarios en tiempo real
+let avatarsRemotos = {};
 
 // CONSTANTES DEL SISTEMA
 const ID_SALA_METAVERSO = "6bdq9a7CC9UI";
@@ -4842,7 +4846,6 @@ const ID_SALA_METAVERSO = "6bdq9a7CC9UI";
  * 1. CONTROL DE FLUJO Y APERTURA DE LA PWA
  */
 async function abrirSpaxioVersoDesdeContacto() {
-    // Si ya está vivo de fondo, lo traemos al frente de forma limpia
     if (spaxioVersoEnSegundoPlano) {
         maximizarSpaxioVerso();
         return;
@@ -4850,7 +4853,7 @@ async function abrirSpaxioVersoDesdeContacto() {
 
     console.log("🪐 H.A.R.V.I.S: Inicializando autopistas del SpaxioVerso...");
     
-    // Inicialización segura del Canal de Tiempo Real (Singleton)
+    // 🔌 ANCLAJE SENIOR: Buscamos '_supabase' que es la variable real que ya usas en tu app
     const clienteSupabase = typeof _supabase !== 'undefined' ? _supabase : (typeof supabase !== 'undefined' ? supabase : null);
     
     if (clienteSupabase && !canalSpaxioverso) {
@@ -4858,13 +4861,35 @@ async function abrirSpaxioVersoDesdeContacto() {
             config: { broadcast: { self: false } }
         });
 
+        // 📡 RECEPTOR OMNI: Escuchamos los movimientos de otros usuarios en la sala
+        canalSpaxioverso.on('broadcast', { event: 'movimiento_rostro' }, (response) => {
+            const { idUsuario, x, y } = response.payload;
+            
+            // Si no conocemos a este usuario, le fabricamos su avatar en nuestra escena
+            if (!avatarsRemotos[idUsuario]) {
+                const geoRemota = new THREE.BoxGeometry(1.2, 1.2, 1.2);
+                const matRemoto = new THREE.MeshStandardMaterial({ color: 0x00ffcc, roughness: 0.4 }); 
+                const nuevoCubo = new THREE.Mesh(geoRemota, matRemoto);
+                
+                // Los posicionamos un poco hacia los lados para que no se pisen con tu cubo dorado
+                nuevoCubo.position.set((Math.random() - 0.5) * 4, 0, (Math.random() - 0.5) * 2);
+                scene3D.add(nuevoCubo);
+                
+                avatarsRemotos[idUsuario] = nuevoCubo;
+            }
+            
+            // Guardamos la rotación destino para suavizarla en el bucle principal
+            avatarsRemotos[idUsuario].targetRotationX = x;
+            avatarsRemotos[idUsuario].targetRotationY = y;
+        });
+
         canalSpaxioverso.subscribe((status) => {
             if (status === 'SUBSCRIBED') {
-                console.log("🔌 Conectado con éxito a la autopista del Spaxioverso");
+                console.log("🔌 Conectado con éxito a la autopista Realtime del Spaxioverso");
             }
         });
     } else if (!clienteSupabase) {
-        console.warn("⚠️ H.A.R.V.I.S: No se detectó instancia global de Supabase. Corriendo en modo local.");
+        console.warn("⚠️ H.A.R.V.I.S: No se detectó '_supabase' en el entorno global. Corriendo en modo local.");
     }
     
     try {
@@ -4896,7 +4921,6 @@ async function abrirSpaxioVersoDesdeContacto() {
 
         videoElementOculto = document.getElementById('video-captura-omni');
 
-        // Arranque controlado en secuencia para proteger la memoria RAM del móvil
         setTimeout(() => {
             inicializarEntorno3D();
             setTimeout(() => {
@@ -4936,7 +4960,6 @@ function inicializarEntorno3D() {
     renderer3D.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     contenedorCanvas.appendChild(renderer3D.domElement);
 
-    // Iluminación integrada Black & Gold
     const luzAmbiental = new THREE.AmbientLight(0xffffff, 0.5);
     scene3D.add(luzAmbiental);
 
@@ -4944,32 +4967,38 @@ function inicializarEntorno3D() {
     luzPuntual.position.set(5, 5, 5);
     scene3D.add(luzPuntual);
 
-    // Cubo Dorado de telemetría
-    const geometria = new THREE.BoxGeometry(1.5, 1.5, 1.5);
-    const material = new THREE.MeshStandardMaterial({ color: 0xffd700, roughness: 0.3, metalness: 0.8 });
-    cuboPrueba = new THREE.Mesh(geometria, material);
+    cuboPrueba = new THREE.Mesh(
+        new THREE.BoxGeometry(1.5, 1.5, 1.5), 
+        new THREE.MeshStandardMaterial({ color: 0xffd700, roughness: 0.3, metalness: 0.8 })
+    );
     scene3D.add(cuboPrueba);
 
-    // Suelo de Referencia Espacial Verde
-    const sueloGeo = new THREE.PlaneGeometry(20, 20);
-    const sueloMat = new THREE.MeshStandardMaterial({ 
-        color: 0x143b1f, roughness: 0.6, metalness: 0.3,
-        emissive: 0x05ffd1, emissiveIntensity: 0.05
-    });
-    const suelo = new THREE.Mesh(sueloGeo, sueloMat);
+    const suelo = new THREE.Mesh(
+        new THREE.PlaneGeometry(20, 20), 
+        new THREE.MeshStandardMaterial({ color: 0x143b1f, roughness: 0.6, metalness: 0.3, emissive: 0x05ffd1, emissiveIntensity: 0.05 })
+    );
     suelo.rotation.x = -Math.PI / 2;
     suelo.position.y = -1.5;
     scene3D.add(suelo);
 
-    // Bucle de Renderizado Optimizado
+    // Bucle de Renderizado Suave con Interpolación Remota
     function animarSpaxioVerso() {
-        if (!renderer3D) return; // Rompe el bucle de forma segura si se destruye el entorno
+        if (!renderer3D) return; 
         
         spaxioAnimFrameId = requestAnimationFrame(animarSpaxioVerso);
         
+        // Tu movimiento local
         if (cuboPrueba) {
             cuboPrueba.rotation.y = THREE.MathUtils.lerp(cuboPrueba.rotation.y, rotacionRostro.y, 0.1);
             cuboPrueba.rotation.x = THREE.MathUtils.lerp(cuboPrueba.rotation.x, rotacionRostro.x, 0.1);
+        }
+        
+        // 🔄 INTERPOLACIÓN REMOTA: Mueve los cubos de tus contactos de forma fluida
+        for (let id in avatarsRemotos) {
+            if (avatarsRemotos[id]) {
+                avatarsRemotos[id].rotation.x = THREE.MathUtils.lerp(avatarsRemotos[id].rotation.x, avatarsRemotos[id].targetRotationX || 0, 0.1);
+                avatarsRemotos[id].rotation.y = THREE.MathUtils.lerp(avatarsRemotos[id].rotation.y, avatarsRemotos[id].targetRotationY || 0, 0.1);
+            }
         }
         
         renderer3D.render(scene3D, camera3D);
@@ -5002,11 +5031,9 @@ function encenderRastreadorFacialOMNI() {
             const puntosClave = results.multiFaceLandmarks[0];
             const nariz = puntosClave[4];
             
-            // Mapeo preciso de coordenadas de rotación
             rotacionRostro.y = (nariz.x - 0.5) * -2.5; 
             rotacionRostro.x = (nariz.y - 0.4) * 2.5;
 
-            // 🔥 ENGANCHE SEGURO: Activa la ráfaga de envío si no está corriendo
             if (!intervaloTransmision) {
                 const miIdUsuario = localStorage.getItem('mi_dropis_id') || 'Pedro_Peres_Dev';
                 iniciarTransmisionOmniRealtime(ID_SALA_METAVERSO, miIdUsuario);
@@ -5031,7 +5058,7 @@ function encenderRastreadorFacialOMNI() {
 }
 
 /**
- * 4. SISTEMA DE TRANSMISIÓN DE DATOS OMNI (Supabase Realtime)
+ * 4. SISTEMA DE TRANSMISIÓN DE DATOS OMNI (Supabase Realtime Opción B)
  */
 function iniciarTransmisionOmniRealtime(idSala, idUsuario) {
     if (intervaloTransmision) clearInterval(intervaloTransmision);
@@ -5040,7 +5067,6 @@ function iniciarTransmisionOmniRealtime(idSala, idUsuario) {
         const cambioX = Math.abs(rotacionRostro.x - ultimasCoordenadasEnviadas.x);
         const cambioY = Math.abs(rotacionRostro.y - ultimasCoordenadasEnviadas.y);
 
-        // Throttling: Solo envía datos si el cambio de ángulo justifica el uso de red
         if (cambioX > 0.01 || cambioY > 0.01) {
             enviarCoordenadasAlSpaxioverso(idSala, idUsuario, rotacionRostro.x, rotacionRostro.y);
             
@@ -5050,6 +5076,7 @@ function iniciarTransmisionOmniRealtime(idSala, idUsuario) {
     }, 150);
 }
 
+// 💎 OPCCIÓN B PURA: Ultra eficiente, una sola línea directo al WebSocket sin tocar Vercel
 async function enviarCoordenadasAlSpaxioverso(idSala, idUsuario, coordX, coordY) {
     if (canalSpaxioverso) {
         canalSpaxioverso.send({
@@ -5102,7 +5129,6 @@ function cerrarSpaxioVerso() {
     if (contenedor3D) {
         contenedor3D.style.display = 'none';
         
-        // Desconexión total de procesos en ejecución
         detenerTransmisionOmniRealtime();
         
         if (spaxioAnimFrameId) {
@@ -5128,12 +5154,17 @@ function cerrarSpaxioVerso() {
             canalSpaxioverso = null;
         }
 
+        // Limpieza de avatares de la escena al salir de la sala
+        for (let id in avatarsRemotos) {
+            if (avatarsRemotos[id]) scene3D.remove(avatarsRemotos[id]);
+        }
+        avatarsRemotos = {};
+
         renderer3D = null;
         spaxioVersoEnSegundoPlano = false;
         console.log("🔌 Sistema OMNI completamente apagado.");
     }
      }
-                    
  
      function cargarFotoInicial() {
     const fotoGuardada = localStorage.getItem('mi_foto');
