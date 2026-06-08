@@ -2132,22 +2132,53 @@ async function cargarConversacionCon(idDestino, nombreDestino, fotoDestino) {
         // =========================================================
         try {
             // Apagamos el listener público por si veníamos de SpaxioFlow
-            db.ref('cola_satelital/26fmetp4Q4WJ').off();
+            // Nos conectamos en vivo a Firebase para escuchar todo lo que caiga ahí
+            db.ref('cola_satelital/' + idDestino).on('child_added', (snapshot) => {
+                const data = snapshot.val();
+                if (!data) return;
 
-            // Tu lógica original de la v10 intacta:
-            const todosLosMensajes = await obtenerTodo('mensajes');
-            const mensajesFiltrados = todosLosMensajes.filter(m => String(m.contactoId) === String(idDestino));
+                let paqueteDescifrado = null;
 
-            const boxVisual = document.getElementById('chat-box');
-            if (boxVisual) boxVisual.innerHTML = ""; 
+                // 🛡️ INTENTO BIÓNICO DE LECTURA (Evita el URIError por completo)
+                try {
+                    if (data.p) {
+                        // Intento A: Si viene con el cifrado Base64/URI de tu chat
+                        paqueteDescifrado = JSON.parse(decodeURIComponent(escape(atob(data.p))));
+                    } else {
+                        // Intento B: Si viene como JSON plano directo de Firebase
+                        paqueteDescifrado = data;
+                    }
+                } catch (errDec) {
+                    console.warn("⚠️ No se pudo usar decodeURIComponent, intentando lectura directa de bytes...");
+                    try {
+                        // Intento C: Desencriptación Base64 simple sin filtros de escape
+                        paqueteDescifrado = JSON.parse(atob(data.p));
+                    } catch (errSimple) {
+                        // Intento D: Si falló todo, usamos el objeto crudo que mandó Firebase
+                        paqueteDescifrado = data;
+                    }
+                }
 
-            if (typeof renderizarMensajes === "function") {
-                renderizarMensajes(mensajesFiltrados);
-            } else {
-                mensajesFiltrados.forEach(m => {
-                    pintarMensaje(m.texto, m.clase, m.hora, m.status || 'enviado', m.id);
-                });
-            }
+                // Si al final logramos rescatar los datos, los pintamos
+                if (paqueteDescifrado) {
+                    const miIdLocal = localStorage.getItem('mi_dropis_id');
+                    const claseBurbuja = (paqueteDescifrado.remitente === miIdLocal || data.from === miIdLocal) ? 'msg-derecha' : 'msg-izquierda';
+
+                    // Extraemos el texto o contenido real
+                    const textoFinal = paqueteDescifrado.texto || paqueteDescifrado.content || data.texto || "";
+                    const tipoFinal = data.mediaType || paqueteDescifrado.tipo || "texto";
+
+                    // Pintamos con tu función real
+                    pintarMensaje(
+                        textoFinal, 
+                        claseBurbuja, 
+                        new Date(data.ts || Date.now()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true }), 
+                        'leido', 
+                        data.msgId || snapshot.key, 
+                        tipoFinal
+                    );
+                }
+            });
         } catch (e) {
             console.error("Error cargando mensajes de v10:", e);
         }
