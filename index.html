@@ -4827,20 +4827,21 @@ let camaraMediaPipe = null;
 let rotacionRostro = { x: 0, y: 0 };
 
 // 🔥 LOGICA DE APERTURA INTEGRADA CON IA DE CLIENTE
-async function abrirSpaxioVersoDesdeContacto() {
-    // 🧠 SI YA ESTÁ VIVO EN EL FONDO, SOLO TRÁELO AL FRENTE
+
+            async function abrirSpaxioVersoDesdeContacto() {
+    // 🛡️ REGLA 1: Si ya está vivo en el fondo, solo maximiza y sal de la función de inmediato
     if (spaxioVersoEnSegundoPlano) {
         maximizarSpaxioVerso();
         return;
     }
 
-    // Lógica para abrir la tubería de la sala específica
+    // Si es la primera vez que se abre, creamos todo lo demás:
     const idSalaMetaverso = "6bdq9a7CC9UI";
 
     // Inicializamos el canal de Supabase Realtime
     canalSpaxioverso = supabase.channel(`sala_${idSalaMetaverso}`, {
         config: {
-            broadcast: { self: false } // false para que no te rebote a ti mismo tu propio movimiento
+            broadcast: { self: false } 
         }
     });
 
@@ -4885,9 +4886,8 @@ async function abrirSpaxioVersoDesdeContacto() {
 
         // 🔄 ARRANQUE EN CADENA: Primero el motor gráfico, luego la IA
         setTimeout(() => {
-            inicializarEntorno3D(); // Levanta el cubo y el piso verde primero
+            inicializarEntorno3D(); 
             
-            // Le damos 400ms al teléfono para que estabilice los gráficos antes de encender la cámara
             setTimeout(() => {
                 encenderRastreadorFacialOMNI();
             }, 400);
@@ -4898,6 +4898,8 @@ async function abrirSpaxioVersoDesdeContacto() {
         console.error("❌ Fallo crítico al levantar el espacio del SpaxioVerso:", error);
     }
      }
+
+     
 
 // 🎮 TU MOTOR GRÁFICO BASE CON SISTEMA DE TELEMETRÍA RECEPTOR
 function inicializarEntorno3D() {
