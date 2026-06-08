@@ -4852,53 +4852,11 @@ async function abrirSpaxioVersoDesdeContacto() {
         return;
     }
 
-    console.log("🪐 H.A.R.V.I.S: Inicializando autopistas del SpaxioVerso...");
+    console.log("🪐 H.A.R.V.I.S: Inicializando entorno gráfico del SpaxioVerso...");
     
-    // 🔌 CONEXIÓN DIRECTA Y SEGURA POR WEBSOCKET (OPCIÓN B)
-    // Usamos la URL de tu proyecto que sacamos de tu API de Vercel
-    const SUPABASE_URL = "https://fcklnjgkwrnunoroseze.supabase.co";
-    // Coloca aquí tu clave pública 'anon' (la que empieza por eyJ...). Es 100% seguro ponerla en el cliente.
-    const SUPABASE_ANON_KEY = "sb_publishable_E3sJKafeX2bLgYcXGAxcNQ_7_a0WTkK"; 
+    // Eliminamos Supabase de aquí. El control de transmisión se activa automáticamente
+    // a través de LiveKit cuando MediaPipe detecta los puntos de la cara.
 
-    if (!canalSpaxioverso && typeof supabase !== 'undefined') {
-        // Inicializamos la instancia pública local para el WebSocket del metaverso
-        const clienteRealtime = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-        canalSpaxioverso = clienteRealtime.channel(`sala_${ID_SALA_METAVERSO}`, {
-            config: { broadcast: { self: false } }
-        });
-
-        // 📡 RECEPTOR OMNI: Escuchamos los movimientos de otros usuarios
-        canalSpaxioverso.on('broadcast', { event: 'movimiento_rostro' }, (response) => {
-            const { idUsuario, x, y } = response.payload;
-            
-            if (!avatarsRemotos[idUsuario]) {
-                const geoRemota = new THREE.BoxGeometry(1.2, 1.2, 1.2);
-                const matRemoto = new THREE.MeshStandardMaterial({ color: 0x00ffcc, roughness: 0.4 }); 
-                const nuevoCubo = new THREE.Mesh(geoRemota, matRemoto);
-                
-                nuevoCubo.position.set((Math.random() - 0.5) * 4, 0, (Math.random() - 0.5) * 2);
-                scene3D.add(nuevoCubo);
-                avatarsRemotos[idUsuario] = nuevoCubo;
-            }
-            
-            avatarsRemotos[idUsuario].targetRotationX = x;
-            avatarsRemotos[idUsuario].targetRotationY = y;
-        });
-
-        canalSpaxioverso.subscribe((status) => {
-            if (status === 'SUBSCRIBED') {
-                console.log("🔌 Conectado con éxito a la autopista Realtime del Spaxioverso");
-            }
-        });
-    } else if (typeof supabase === 'undefined') {
-        console.warn("⚠️ H.A.R.V.I.S: Falta cargar el script CDN de Supabase en el HTML. Corriendo en modo local.");
-    }
-
-    // El resto de tu función (el bloque try/catch con el contenedor3D) se queda exactamente igual...
-
-        
-    
     try {
         let contenedor3D = document.getElementById('contenedor-spaxioverso');
         if (!contenedor3D) {
@@ -4938,7 +4896,10 @@ async function abrirSpaxioVersoDesdeContacto() {
     } catch (error) {
         console.error("❌ Fallo crítico al levantar el espacio del SpaxioVerso:", error);
     }
-}
+     }
+
+    // El resto de tu función (el bloque try/catch con el contenedor3D) se queda exactamente igual...
+
 
 /**
  * 2. MOTOR GRÁFICO (WebGL con Three.js)
