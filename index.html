@@ -4856,8 +4856,7 @@ async function abrirSpaxioVersoDesdeContacto() {
                     <span style="color: #ffd700; font-weight: 900; letter-spacing: 1px;">🪐 SPAXIOVERSO OMNI [${idSalaMetaverso}]</span>
                     <button onclick="cerrarSpaxioVerso()" style="background: transparent; border: 1px solid #ffd700; color: #ffd700; padding: 5px 12px; border-radius: 6px; font-weight: bold; cursor: pointer;">[ Salir ]</button>
                 </div>
-                <div id="canvas-render-3d" style="flex-grow: 1; width: 100%; height: 100%; background: #050505; overflow: hidden;"></div>
-                
+                <div id="canvas-render-3d" style="position: absolute; top: 60px; left: 0; width: 100vw; height: calc(100vh - 60px); background: #050505; overflow: hidden; z-index: 2500;"></div>
                 <video id="video-captura-omni" style="display: none;" playsinline></video>`;
             document.body.appendChild(contenedor3D);
         } else {
