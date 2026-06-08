@@ -4828,6 +4828,13 @@ let rotacionRostro = { x: 0, y: 0 };
 
 // 🔥 LOGICA DE APERTURA INTEGRADA CON IA DE CLIENTE
 async function abrirSpaxioVersoDesdeContacto() {
+
+ // 🧠 SI YA ESTÁ VIVO EN EL FONDO, SOLO TRÁELO AL FRENTE
+    if (spaxioVersoEnSegundoPlano) {
+        maximizarSpaxioVerso();
+        return;
+    }
+
     const idSalaMetaverso = "6bdq9a7CC9UI";
     console.log("🪐 H.A.R.V.I.S: Iniciando SpaxioVerso con tracking facial Omni...");
     
@@ -5013,7 +5020,37 @@ function cerrarSpaxioVerso() {
     }
      }
 
+// Variable para saber si está corriendo oculto en el fondo
+let spaxioVersoEnSegundoPlano = false;
 
+function minimizarSpaxioVerso() {
+    const contenedor3D = document.getElementById('contenedor-spaxioverso');
+    if (contenedor3D) {
+        // En vez de apagarlo, lo mandamos al fondo absoluto y lo hacemos invisible
+        contenedor3D.style.zIndex = "-1000";
+        contenedor3D.style.opacity = "0";
+        contenedor3D.style.pointerEvents = "none"; // Para que puedas clickear tus chats sin problemas
+        
+        spaxioVersoEnSegundoPlano = true;
+        console.log("📥 H.A.R.V.I.S: SpaxioVerso minimizado. Sigue ejecutándose en segundo plano...");
+        
+        // Opcional: Aquí puedes mostrar un mini aviso flotante en tu app si quieres recordar que sigue activo
+    }
+}
+
+// Modificación para cuando vuelvas a pulsar el botón del planeta en tus contactos
+function maximizarSpaxioVerso() {
+    const contenedor3D = document.getElementById('contenedor-spaxioverso');
+    if (contenedor3D) {
+        // Lo traemos al frente de inmediato con prioridad máxima
+        contenedor3D.style.zIndex = "2000";
+        contenedor3D.style.opacity = "1";
+        contenedor3D.style.pointerEvents = "auto";
+        
+        spaxioVersoEnSegundoPlano = false;
+        console.log("📤 H.A.R.V.I.S: SpaxioVerso restaurado al frente.");
+    }
+     }
  
 
  
