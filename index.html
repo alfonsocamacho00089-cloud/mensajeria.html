@@ -2084,27 +2084,74 @@ async function cargarConversacionCon(idDestino, nombreDestino, fotoDestino) {
 
     // 5. CARGA DESDE v10 (IndexedDB)
     // 1. MATAMOS AL FANTASMA: Limpiamos la libreta vieja antes de leer la nueva
-localStorage.removeItem('chat_' + idDestino);
+    localStorage.removeItem('chat_' + idDestino);
 
-try {
-    // 2. Traemos solo lo que existe en la v10
-    const todosLosMensajes = await obtenerTodo('mensajes');
-    const mensajesFiltrados = todosLosMensajes.filter(m => String(m.contactoId) === String(idDestino));
+    // =========================================================
+    // 📡 INTERCEPTOR GLOBAL PARA SPAXIOFLOW
+    // =========================================================
+    if (String(idDestino) === "26fmetp4Q4WJ") {
+        console.log("📡 Sintonizando la manguera pública de SpaxioFlow...");
 
-    // 3. Limpiamos el contenedor visual por seguridad
-    const box = document.getElementById('chat-box');
-    if (box) box.innerHTML = ""; 
+        try {
+            // Apagamos cualquier conexión vieja para no duplicar datos
+            db.ref('cola_satelital/' + idDestino).off();
 
-    if (typeof renderizarMensajes === "function") {
-        renderizarMensajes(mensajesFiltrados);
+            // Nos conectamos en vivo a Firebase para escuchar todo lo que caiga ahí
+            db.ref('cola_satelital/' + idDestino).on('child_added', (snapshot) => {
+                const data = snapshot.val();
+                if (!data) return;
+
+                try {
+                    // Desencriptamos el paquete en Base64 que usa tu app
+                    const paqueteDescifrado = JSON.parse(decodeURIComponent(escape(atob(data.p))));
+                    
+                    const miIdLocal = localStorage.getItem('mi_dropis_id');
+                    const claseBurbuja = (paqueteDescifrado.remitente === miIdLocal || data.from === miIdLocal) ? 'msg-derecha' : 'msg-izquierda';
+
+                    // Pintamos en tiempo real (LiveKits, Videos o Textos)
+                    pintarMensaje(
+                        paqueteDescifrado.texto, 
+                        claseBurbuja, 
+                        new Date(data.ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true }), 
+                        'leido', 
+                        data.msgId || snapshot.key, 
+                        data.mediaType || paqueteDescifrado.tipo
+                    );
+
+                } catch (errDec) {
+                    console.error("❌ Error descifrando payload público:", errDec);
+                }
+            });
+        } catch (eFirebase) {
+            console.error("❌ Error conectando a la cola_satelital:", eFirebase);
+        }
+
     } else {
-        mensajesFiltrados.forEach(m => {
-            pintarMensaje(m.texto, m.clase, m.hora, m.status || 'enviado', m.id);
-        });
-    }
-} catch (e) {
-    console.error("Error cargando mensajes de v10:", e);
-     }
+        // =========================================================
+        // 🔒 CHAT NORMAL: Si es cualquier otro contacto (Juan, María, etc.)
+        // =========================================================
+        try {
+            // Apagamos el listener público por si veníamos de SpaxioFlow
+            db.ref('cola_satelital/26fmetp4Q4WJ').off();
+
+            // Tu lógica original de la v10 intacta:
+            const todosLosMensajes = await obtenerTodo('mensajes');
+            const mensajesFiltrados = todosLosMensajes.filter(m => String(m.contactoId) === String(idDestino));
+
+            const boxVisual = document.getElementById('chat-box');
+            if (boxVisual) boxVisual.innerHTML = ""; 
+
+            if (typeof renderizarMensajes === "function") {
+                renderizarMensajes(mensajesFiltrados);
+            } else {
+                mensajesFiltrados.forEach(m => {
+                    pintarMensaje(m.texto, m.clase, m.hora, m.status || 'enviado', m.id);
+                });
+            }
+        } catch (e) {
+            console.error("Error cargando mensajes de v10:", e);
+        }
+    } // 👈 AQUÍ CIERRA EL BLOCAZO DEL IF/ELSE
 // =========================================================
     // EL AVISO CLONADO (Al final de cargarConversacionCon)
     // =========================================================
