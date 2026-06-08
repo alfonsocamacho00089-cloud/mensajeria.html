@@ -4915,7 +4915,7 @@ function inicializarEntorno3D() {
         if (cuboPrueba) {
             cuboPrueba.rotation.y = THREE.MathUtils.lerp(cuboPrueba.rotation.y, rotacionRostro.y, 0.1);
             cuboPrueba.rotation.x = THREE.MathUtils.lerp(cuboPrueba.rotation.x, rotacionRostro.x, 0.1);
-        
+     }
         
         // 🛡️ REGLA DE ORO AUTOMÁTICA: Solo renderiza si el motor gráfico ya terminó de crearse por completo
         if (renderer3D && scene3D && camera3D) {
@@ -4923,6 +4923,9 @@ function inicializarEntorno3D() {
         }
      }
 
+ animarSpaxioVerso();
+     }
+     
 // 👁️ MOTOR DE IA DE MEDIAPIPE (Zero-Shot Face Tracking)
 function encenderRastreadorFacialOMNI() {
     if (!videoElementOculto) return;
