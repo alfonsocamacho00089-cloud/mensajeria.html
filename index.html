@@ -2099,26 +2099,22 @@ async function cargarConversacionCon(idDestino, nombreDestino, fotoDestino) {
         const box = document.getElementById('chat-box');
         if (box) box.innerHTML = ""; 
 
-        // 🔥 INTERCEPCIÓN MAESTRA: Si es el feed global de SpaxioFlow, lee de Supabase, no del local
+        // 🔥 INTERCEPCIÓN MAESTRA CON VERCEL (Cero errores de variables indefinidas)
         if (idDestino === "26fmetp4Q4WJ") {
-            console.log("📡 Cargando historial global de SpaxioFlow desde Supabase...");
+            console.log("📡 Cargando historial global de SpaxioFlow desde Vercel...");
             
-            const { data: posts, error } = await supabase
-                .from('spaxioflow_feed')
-                .select('*')
-                .eq('chat_id', '26fmetp4Q4WJ')
-                .order('id', { ascending: true }); // O por tu columna de timestamp
+            const res = await fetch('/api/get-spaxioflow-feed');
+            if (!res.ok) throw new Error("Fallo al obtener el feed desde el backend");
+            const posts = await res.json();
 
-            if (!error && posts) {
+            if (posts && Array.isArray(posts)) {
                 posts.forEach(post => {
-                    // Mapeamos los tipos exactos de tu tabla: 'video', 'imagen', 'texto'
-                    pintarMensaje(post.content, 'msg-izquierda', post.sender_name || 'Anónimo', 'leido', "feed_" + post.id, post.tipo);
+                    // Pinta los videos, imágenes y textos almacenados globalmente
+                    pintarMensaje(post.content, 'msg-izquierda', post.sender_name || 'H.A.R.V.I.S.', 'leido', "feed_" + post.id, post.tipo);
                 });
-            } else {
-                console.error("Error al traer feed de Supabase:", error);
             }
         } else {
-            // 🔒 CHAT NORMAL ENCRIPTADO INDIVIDUAL (Mantiene tu lógica original intacta)
+            // 🔒 LÓGICA ORIGINAL DE CHATS PRIVADOS (Mantiene tu IndexedDB intacto)
             const todosLosMensajes = await obtenerTodo('mensajes');
             const mensajesFiltrados = todosLosMensajes.filter(m => String(m.contactoId) === String(idDestino));
 
@@ -2131,9 +2127,8 @@ async function cargarConversacionCon(idDestino, nombreDestino, fotoDestino) {
             }
         }
     } catch (e) {
-        console.error("Error cargando mensajes:", e);
+        console.error("❌ Error cargando mensajes del feed:", e);
      }
-    
                 
         // =========================================================
     // EL AVISO CLONADO (Al final de cargarConversacionCon)
