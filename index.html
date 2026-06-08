@@ -2464,18 +2464,22 @@ function pintarMensaje(contenido, clase, hora, status, id, tipo = 'texto') {
                     </div>
                 `;
             } else if (tipo === 'video' || textoReal.includes('.mp4') || textoReal.includes('.webm')) {
-                // 🔥 EL REPRODUCTOR INTELIGENTE: Detecta si es LiveKit o archivo guardado en Supabase
+                // 🔥 EL REPRODUCTOR INTELIGENTE: Detecta si es LiveKit o tu reproductor nativo
                 if (textoReal.startsWith('LIVEKIT_ROOM:')) {
                     const roomNameToConnect = textoReal.split(':')[1];
                     const uniqueVideoId = "live_kit_el_" + Date.now();
                     
                     cuerpoHTML = `
-                        <div style="max-width:260px; background:#111; border: 2px solid #ffd700; border-radius:12px; padding:6px;">
+                        <div style="max-width:260px; background:#111; border: 2px solid #ffd700; border-radius:12px; padding:6px; position:relative;">
                             <video id="${uniqueVideoId}" autoplay playsinline muted
                                    style="width:100%; max-height:320px; border-radius:8px; display:block; background:#000;">
                             </video>
-                            <div style="display:flex; align-items:center; justify-content:center; margin-top:6px; padding:4px; background:#000; border-radius:6px; color:#ffd700; font-size:11px; font-weight:bold; gap:6px;">
-                               🔴 EN VIVO DESDE LIVEKIT
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-top:6px; padding:4px 6px; background:#000; border-radius:6px;">
+                                <span style="color:#ffd700; font-size:11px; font-weight:bold;">🔴 EN VIVO</span>
+                                <button onclick="document.getElementById('${uniqueVideoId}').requestFullscreen?.()" 
+                                        style="background:transparent; border:none; color:#ffd700; font-size:12px; font-weight:bold; cursor:pointer; padding:2px 6px; border:1px solid #ffd700; border-radius:4px;">
+                                    🔲 Pantalla Completa
+                               </button>
                             </div>
                         </div>
                     `;
@@ -2506,19 +2510,15 @@ function pintarMensaje(contenido, clase, hora, status, id, tipo = 'texto') {
                     }, 300);
 
                 } else {
-                    // Si no es sala en vivo, es el archivo grabado final de tu Supabase
+                    // 🎥 TU REPRODUCTOR ORIGINAL INTACTO (Sin agregados raros)
                     cuerpoHTML = `
-                        <div style="max-width:260px; background:#111; border: 2px solid #ffd700; border-radius:12px; padding:6px;">
-                            <video src="${textoReal}" controls playsinline 
-                                   style="width:100%; max-height:320px; border-radius:8px; display:block; background:#000;">
-                            </video>
-                            <a href="${textoReal}" download
-                               style="display:flex; align-items:center; justify-content:center; margin-top:6px; padding:6px; background:#000; border: 1px solid #ffd700; border-radius:8px; color:#ffd700; font-size:11px; text-decoration:none; font-weight:bold; gap:6px;">
-                               📥 Descargar Directo al Teléfono
-                            </a>
-                        </div>
+                        <video src="${textoReal}" controls playsinline
+                               style="max-width:240px; max-height:320px; border-radius:12px; display:block; border: 2px solid #ffd700; background:#000;">
+                        </video>
                     `;
-                }
+     }
+
+                
             } else if (tipo === 'sticker' || tipo === 'stickers') {
                 cuerpoHTML = `<img src="${textoReal}" style="max-width:180px; max-height:180px; display:block; border:none; background:transparent;">`;
             } else if (tipo === 'audio' || textoReal.startsWith('data:audio') || (textoReal.startsWith('blob:') && textoReal.includes('audio')) || textoReal.includes('.ogg')) {
