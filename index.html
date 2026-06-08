@@ -4383,7 +4383,10 @@ function configurarModo(nuevoModo) {
 
             await inyectarNotificacionHarvis(`🔴 ${miId} está en directo ahora mismo.`);
             console.log("🔴 Difusión en vivo iniciada y transmitiendo a la nube.");
-
+         
+            // 👈 PEGA ESTA LÍNEA AQUÍ:
+            inyectarLiveSpaxioFlow(`https://space-xquv9iaa.livekit.cloud/#/${miId}`);
+     
             // 📦 Grabador local YouSpaxio encendido con compresión activa
             fragmentosVideo = []; 
 
@@ -4496,7 +4499,9 @@ try {
     const urlDirectaWebm = `${SUPABASE_BASE}/storage/v1/object/public/${BUCKET_NAME}/${FILE_NAME}`;
     
     console.log("🎥 URL Directa para tu Frame listo:", urlDirectaWebm);
-
+  
+ // 👈 PEGA ESTA LÍNEA AQUÍ:
+    await inyectarLiveSpaxioFlow(urlDirectaWebm);
 
 } catch(err) { 
                 console.error("❌ Error en el proceso de subida segura:");
