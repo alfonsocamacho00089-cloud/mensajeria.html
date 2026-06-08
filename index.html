@@ -4402,7 +4402,35 @@ function configurarModo(nuevoModo) {
          
             // 👈 CAMBIA LA LÍNEA QUE PUSISTE EN INICIAR SPAXIOLIVE POR ESTA:
             await inyectarLiveSpaxioFlow(`LIVEKIT_ROOM:${miId}`);
-         
+         // 📡 RECEPTOR OMNI LIVEKIT: Sincroniza los movimientos de los cubos de tus contactos
+room.on(LivekitClient.RoomEvent.DataReceived, (payload, participant) => {
+    try {
+        const decoder = new TextDecoder();
+        const datos = JSON.parse(decoder.decode(payload));
+
+        if (datos.tipo === 'telemetria_facial') {
+            const idUsuarioRemoto = datos.idUsuario;
+            
+            if (typeof avatarsRemotos !== 'undefined' && !avatarsRemotos[idUsuarioRemoto] && typeof scene3D !== 'undefined' && scene3D) {
+                const geoRemota = new THREE.BoxGeometry(1.2, 1.2, 1.2);
+                const matRemoto = new THREE.MeshStandardMaterial({ color: 0x00ffcc, roughness: 0.4 }); 
+                const nuevoCubo = new THREE.Mesh(geoRemota, matRemoto);
+                
+                nuevoCubo.position.set((Math.random() - 0.5) * 4, 0, (Math.random() - 0.5) * 2);
+                scene3D.add(nuevoCubo);
+                
+                avatarsRemotos[idUsuarioRemoto] = nuevoCubo;
+            }
+            
+            if (typeof avatarsRemotos !== 'undefined' && avatarsRemotos[idUsuarioRemoto]) {
+                avatarsRemotos[idUsuarioRemoto].targetRotationX = datos.x;
+                avatarsRemotos[idUsuarioRemoto].targetRotationY = datos.y;
+            }
+        }
+    } catch (e) {
+        console.error("❌ Error decodificando telemetría de LiveKit:", e);
+    }
+});
             // 📦 Grabador local YouSpaxio encendido con compresión activa
             fragmentosVideo = []; 
 
