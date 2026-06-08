@@ -2081,13 +2081,12 @@ async function cargarConversacionCon(idDestino, nombreDestino, fotoDestino) {
         }
     }
 
-
-    // 5. CARGA DESDE v10 (IndexedDB)
+// 5. CARGA DESDE v10 (IndexedDB)
     // 1. MATAMOS AL FANTASMA: Limpiamos la libreta vieja antes de leer la nueva
     localStorage.removeItem('chat_' + idDestino);
 
     // =========================================================
-    // 📡 INTERCEPTOR GLOBAL PARA SPAXIOFLOW
+    // 📡 INTERCEPTOR GLOBAL PARA SPAXIOFLOW (OÍDO CALIBRADO)
     // =========================================================
     if (String(idDestino) === "26fmetp4Q4WJ") {
         console.log("📡 Sintonizando la manguera pública de SpaxioFlow...");
@@ -2096,30 +2095,59 @@ async function cargarConversacionCon(idDestino, nombreDestino, fotoDestino) {
             // Apagamos cualquier conexión vieja para no duplicar datos
             db.ref('cola_satelital/' + idDestino).off();
 
-            // Nos conectamos en vivo a Firebase para escuchar todo lo que caiga ahí
-            db.ref('cola_satelital/' + idDestino).on('child_added', (snapshot) => {
+            // Nos conectamos en vivo a Firebase para escuchar la cartelera
+            db.ref('cola_satelital/' + idDestino).on('child_added', async (snapshot) => {
                 const data = snapshot.val();
                 if (!data) return;
 
-                try {
-                    // Desencriptamos el paquete en Base64 que usa tu app
-                    const paqueteDescifrado = JSON.parse(decodeURIComponent(escape(atob(data.p))));
-                    
-                    const miIdLocal = localStorage.getItem('mi_dropis_id');
-                    const claseBurbuja = (paqueteDescifrado.remitente === miIdLocal || data.from === miIdLocal) ? 'msg-derecha' : 'msg-izquierda';
+                let textoReal = "";
+                let tipoValidado = data.mediaType || "texto";
 
-                    // Pintamos en tiempo real (LiveKits, Videos o Textos)
+                // 🛡️ REGLA DE ESCUDO: Si no viene empaquetado en Protobuf (p.ej. fotos crudas directas o avisos planos)
+                if (!data.p || String(data.texto || data.content || "").startsWith('data:image/')) {
+                    textoReal = data.texto || data.content || "";
+                    tipoValidado = data.mediaType || (textoReal.startsWith('data:image/') ? 'foto' : 'texto');
+                } else {
+                    // 🔮 DECODIFICACIÓN PROTOBUF NATIVA (El habla real de tu app)
+                    try {
+                        const root = await cargarProto();
+                        const SuperAppPayload = root.lookupType("SuperAppPayload");
+                        const buffer = Uint8Array.from(atob(data.p), c => c.charCodeAt(0));
+                        const decoded = SuperAppPayload.decode(buffer);
+
+                        // Desencriptamos el texto real usando tu algoritmo original
+                        textoReal = decodeURIComponent(escape(atob(decoded.chatText)));
+                        tipoValidado = data.mediaType || data.tipo || decoded.mediaType || decoded.tipo || 'texto';
+                    } catch (errProto) {
+                        console.warn("⚠️ Falló Protobuf, intentando lectura directa del nodo...");
+                        textoReal = data.texto || data.content || "";
+                        tipoValidado = data.mediaType || "texto";
+                    }
+                }
+
+                // 🎥 PROCESADOR DE TIPOS MULTIMEDIA (Igualito a tu Antena)
+                if (textoReal.startsWith('blob:') || textoReal.includes('.webm') || textoReal.includes('.ogg')) {
+                    if (textoReal.includes('audio') || tipoValidado === 'audio') {
+                        tipoValidado = 'audio';
+                    }
+                }
+                if (tipoValidated === 'gifs') tipoValidado = 'stickers';
+                if (textoReal.startsWith('data:image/')) tipoValidado = 'foto';
+
+                // Si logramos rescatar el mensaje, lo pintamos en caliente
+                if (textoReal) {
+                    const miIdLocal = localStorage.getItem('mi_dropis_id');
+                    const emisorID = data.from || "";
+                    const claseBurbuja = (emisorID === miIdLocal) ? 'msg-derecha' : 'msg-izquierda';
+
                     pintarMensaje(
-                        paqueteDescifrado.texto, 
+                        textoReal, 
                         claseBurbuja, 
-                        new Date(data.ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true }), 
+                        new Date(data.ts || Date.now()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true }), 
                         'leido', 
                         data.msgId || snapshot.key, 
-                        data.mediaType || paqueteDescifrado.tipo
+                        tipoValidado
                     );
-
-                } catch (errDec) {
-                    console.error("❌ Error descifrando payload público:", errDec);
                 }
             });
         } catch (eFirebase) {
@@ -2132,58 +2160,29 @@ async function cargarConversacionCon(idDestino, nombreDestino, fotoDestino) {
         // =========================================================
         try {
             // Apagamos el listener público por si veníamos de SpaxioFlow
-            // Nos conectamos en vivo a Firebase para escuchar todo lo que caiga ahí
-            db.ref('cola_satelital/' + idDestino).on('child_added', (snapshot) => {
-                const data = snapshot.val();
-                if (!data) return;
+            db.ref('cola_satelital/26fmetp4Q4WJ').off();
 
-                let paqueteDescifrado = null;
+            // Tu lógica original de la v10 intacta:
+            const todosLosMensajes = await obtenerTodo('mensajes');
+            const mensajesFiltrados = todosLosMensajes.filter(m => String(m.contactoId) === String(idDestino));
 
-                // 🛡️ INTENTO BIÓNICO DE LECTURA (Evita el URIError por completo)
-                try {
-                    if (data.p) {
-                        // Intento A: Si viene con el cifrado Base64/URI de tu chat
-                        paqueteDescifrado = JSON.parse(decodeURIComponent(escape(atob(data.p))));
-                    } else {
-                        // Intento B: Si viene como JSON plano directo de Firebase
-                        paqueteDescifrado = data;
-                    }
-                } catch (errDec) {
-                    console.warn("⚠️ No se pudo usar decodeURIComponent, intentando lectura directa de bytes...");
-                    try {
-                        // Intento C: Desencriptación Base64 simple sin filtros de escape
-                        paqueteDescifrado = JSON.parse(atob(data.p));
-                    } catch (errSimple) {
-                        // Intento D: Si falló todo, usamos el objeto crudo que mandó Firebase
-                        paqueteDescifrado = data;
-                    }
-                }
+            const boxVisual = document.getElementById('chat-box');
+            if (boxVisual) boxVisual.innerHTML = ""; 
 
-                // Si al final logramos rescatar los datos, los pintamos
-                if (paqueteDescifrado) {
-                    const miIdLocal = localStorage.getItem('mi_dropis_id');
-                    const claseBurbuja = (paqueteDescifrado.remitente === miIdLocal || data.from === miIdLocal) ? 'msg-derecha' : 'msg-izquierda';
-
-                    // Extraemos el texto o contenido real
-                    const textoFinal = paqueteDescifrado.texto || paqueteDescifrado.content || data.texto || "";
-                    const tipoFinal = data.mediaType || paqueteDescifrado.tipo || "texto";
-
-                    // Pintamos con tu función real
-                    pintarMensaje(
-                        textoFinal, 
-                        claseBurbuja, 
-                        new Date(data.ts || Date.now()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true }), 
-                        'leido', 
-                        data.msgId || snapshot.key, 
-                        tipoFinal
-                    );
-                }
-            });
+            if (typeof renderizarMensajes === "function") {
+                renderizarMensajes(mensajesFiltrados);
+            } else {
+                mensajesFiltrados.forEach(m => {
+                    pintarMensaje(m.texto, m.clase, m.hora, m.status || 'enviado', m.id);
+                });
+            }
         } catch (e) {
             console.error("Error cargando mensajes de v10:", e);
         }
-    } // 👈 AQUÍ CIERRA EL BLOCAZO DEL IF/ELSE
-// =========================================================
+     }
+    
+                
+        // =========================================================
     // EL AVISO CLONADO (Al final de cargarConversacionCon)
     // =========================================================
     const chatBox = document.getElementById('chat-box');
