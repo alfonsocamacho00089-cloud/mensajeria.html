@@ -5046,19 +5046,26 @@ function iniciarTransmisionOmniRealtime(idSala, idUsuario) {
 
 // 💎 OPCCIÓN B PURA: Ultra eficiente, una sola línea directo al WebSocket sin tocar Vercel
 async function enviarCoordenadasAlSpaxioverso(idSala, idUsuario, coordX, coordY) {
-    if (canalSpaxioverso) {
-        canalSpaxioverso.send({
-            type: 'broadcast',
-            event: 'movimiento_rostro',
-            payload: { 
-                idUsuario: idUsuario, 
-                x: parseFloat(coordX.toFixed(4)), 
-                y: parseFloat(coordY.toFixed(4)) 
-            }
-        });
+    // Si la transmisión de LiveKit que tienes en tu archivo principal está activa y conectada...
+    if (typeof room !== 'undefined' && room && room.state === 'connected') {
+        try {
+            const encoder = new TextEncoder();
+            const dataPayload = JSON.stringify({
+                tipo: 'telemetria_facial',
+                idUsuario: idUsuario,
+                x: parseFloat(coordX.toFixed(4)),
+                y: parseFloat(coordY.toFixed(4))
+            });
+            
+            const dataUint8 = encoder.encode(dataPayload);
+            
+            // Se envía de forma asíncrona e instantánea por la sesión de streaming existente
+            await room.localParticipant.publishData(dataUint8, LivekitClient.DataPacket_Kind.LOSSY);
+        } catch (err) {
+            console.warn("⚠️ H.A.R.V.I.S: Error al enviar telemetría facial por LiveKit:", err);
+        }
     }
-}
-
+ }
 function detenerTransmisionOmniRealtime() {
     if (intervaloTransmision) {
         clearInterval(intervaloTransmision);
