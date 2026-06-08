@@ -4912,18 +4912,16 @@ function inicializarEntorno3D() {
         spaxioAnimFrameId = requestAnimationFrame(animarSpaxioVerso);
         
         // 🔄 INTERCEPCIÓN DE MOVIMIENTO DE IA:
-        // En lugar de girar solo, el cubo se inclina según los datos que lee la cámara de tu cara
         if (cuboPrueba) {
-            // Suavizado de interpolación (Lerp) para que el movimiento en el teléfono vaya como seda
             cuboPrueba.rotation.y = THREE.MathUtils.lerp(cuboPrueba.rotation.y, rotacionRostro.y, 0.1);
             cuboPrueba.rotation.x = THREE.MathUtils.lerp(cuboPrueba.rotation.x, rotacionRostro.x, 0.1);
         }
         
-        renderer3D.render(scene3D, camera3D);
-    }
-    
-    animarSpaxioVerso();
-}
+        // 🛡️ REGLA DE ORO AUTOMÁTICA: Solo renderiza si el motor gráfico ya terminó de crearse por completo
+        if (renderer3D && scene3D && camera3D) {
+            renderer3D.render(scene3D, camera3D);
+        }
+     }
 
 // 👁️ MOTOR DE IA DE MEDIAPIPE (Zero-Shot Face Tracking)
 function encenderRastreadorFacialOMNI() {
