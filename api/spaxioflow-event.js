@@ -22,16 +22,16 @@ export default async function handler(req, res) {
     // El ID fijo y sagrado de SpaxioFlow que descubrimos hoy
     const chatTargetID = "26fmetp4Q4WJ"; 
 
-    // 🧠 Formateo Estructurado del Evento administrado por la lógica de H.A.R.V.I.S.
+    // 🧠 Formateo Estructurado del Evento administrado por la lógica de tu ecosistema
     const nuevoEvento = {
       chat_id: chatTargetID,
-      sender_name: "H.A.R.V.I.S.",
+      // 🔥 AHORA ES DINÁMICO: Si le pasas un remitente en el body lo usa, si no, usa H.A.R.V.I.S. por defecto
+      sender_name: req.body.remitente || "H.A.R.V.I.S.", 
       tipo: tipoEvento,         // 'texto', 'imagen', 'video'
       content: contenido,       // Mensaje de texto o la URL directa de Supabase Storage
-      meta_info: metadata || {}, // Por si quieres guardar duración del live, tamaño, etc.
+      meta_info: metadata || {}, 
       created_at: new Date().toISOString()
     };
-
     // 📡 Inserción directa en la REST API de Supabase sin librerías pesadas
     const urlSupabaseRest = `${urlLimpia}/rest/v1/spaxioflow_feed`;
 
