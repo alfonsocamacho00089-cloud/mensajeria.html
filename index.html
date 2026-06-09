@@ -4957,7 +4957,7 @@ function inicializarEntorno3D() {
 
     // 🏆 CARGA DE TU AVATAR LOCAL
     // Nota: Coloca tu archivo .glb en tu carpeta de assets (Ej: 'assets/avatar_local.glb')
-    loader3D.load('assets/avatar_local.glb', (gltf) => {
+    loader3D.load('/assets/avatar_local.glb', (gltf) => {
         cuboPrueba = gltf.scene; // Mantenemos la variable 'cuboPrueba' para no romper tus otras funciones
         cuboPrueba.scale.set(1.3, 1.3, 1.3); // Ajusta la escala según tu modelo
         cuboPrueba.position.set(0, 0, 0);
