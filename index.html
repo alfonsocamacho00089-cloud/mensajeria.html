@@ -4908,50 +4908,7 @@ async function abrirSpaxioVersoDesdeContacto() {
         /**
  * 2. MOTOR GRÁFICO (WebGL con Three.js y Avatares de Prueba)
  */
-function inicializarEntorno3D() {
-    const contenedorCanvas = document.getElementById('canvas-render-3d');
-    if (!contenedorCanvas) return;
-    contenedorCanvas.innerHTML = "";
-
-    scene3D = new THREE.Scene();
-    scene3D.background = new THREE.Color(0x050505);
-
-    const ancho = window.innerWidth;
-    const alto = window.innerHeight - 60;
-    
-    camera3D = new THREE.PerspectiveCamera(75, ancho / alto, 0.1, 1000);
-    camera3D.position.set(0, 3, 7);
-    camera3D.lookAt(0, 1.5, 0); 
-    scene3D.add(camera3D);
-
-    renderer3D = new THREE.WebGLRenderer({ 
-        antialias: true,
-        powerPreference: "high-performance"
-    });
-    renderer3D.setSize(ancho, alto);
-    renderer3D.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    contenedorCanvas.appendChild(renderer3D.domElement);
-
-    const luzAmbiental = new THREE.AmbientLight(0xffffff, 0.6);
-    scene3D.add(luzAmbiental);
-
-    const luzPuntual = new THREE.PointLight(0xffd700, 2, 50);
-    luzPuntual.position.set(5, 8, 5);
-    scene3D.add(luzPuntual);
-
-    // Suelo estilo matriz digital premium
-    const suelo = new THREE.Mesh(
-        new THREE.PlaneGeometry(50, 50), 
-        new THREE.MeshStandardMaterial({ 
-            color: 0x0f1a1c, 
-            roughness: 0.4, 
-            metalness: 0.8, 
-            emissive: 0xffd700, 
-            emissiveIntensity: 0.02 
-        })
-    );
-    suelo.rotation.x = -Math.PI / 2;
-    suelo.position.y = 0; 
+ 0; 
     scene3D.add(suelo);
 
     // 🏆 OBJETO LOCAL TEMPORAL (Cubo de Oro Pulido)
@@ -5006,16 +4963,122 @@ function inicializarEntorno3D() {
 
     // Bucle de Renderizado Suave con Interpolación Remota (Lerp)
     function animarSpaxioVerso() {
+
+
+     /**
+ * 2. MOTOR GRÁFICO (WebGL con Three.js y Avatares Reales glTF)
+ */
+function inicializarEntorno3D() {
+    const contenedorCanvas = document.getElementById('canvas-render-3d');
+    if (!contenedorCanvas) return;
+    contenedorCanvas.innerHTML = "";
+
+    scene3D = new THREE.Scene();
+    scene3D.background = new THREE.Color(0x050505);
+
+    const ancho = window.innerWidth;
+    const alto = window.innerHeight - 60;
+    
+    camera3D = new THREE.PerspectiveCamera(75, ancho / alto, 0.1, 1000);
+    camera3D.position.set(0, 2.5, 4); // Acercamos la cámara para ver mejor al avatar
+    camera3D.lookAt(0, 1.3, 0); 
+    scene3D.add(camera3D);
+
+    renderer3D = new THREE.WebGLRenderer({ 
+        antialias: true,
+        powerPreference: "high-performance"
+    });
+    renderer3D.setSize(ancho, alto);
+    renderer3D.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    contenedorCanvas.appendChild(renderer3D.domElement);
+
+    const luzAmbiental = new THREE.AmbientLight(0xffffff, 0.7);
+    scene3D.add(luzAmbiental);
+
+    const luzPuntual = new THREE.PointLight(0xffd700, 2.5, 50);
+    luzPuntual.position.set(3, 6, 4);
+    scene3D.add(luzPuntual);
+
+    // Suelo Matriz Spaxioverso
+    const suelo = new THREE.Mesh(
+        new THREE.PlaneGeometry(50, 50), 
+        new THREE.MeshStandardMaterial({ 
+            color: 0x0f1a1c, 
+            roughness: 0.4, 
+            metalness: 0.8, 
+            emissive: 0xffd700, 
+            emissiveIntensity: 0.02 
+        })
+    );
+    suelo.rotation.x = -Math.PI / 2;
+    suelo.position.y = 0; 
+    scene3D.add(suelo);
+
+    // 🚀 INSTANCIAR EL CARGADOR DE MODELOS 3D (.GLB / .GLTF)
+    const loader3D = new THREE.GLTFLoader();
+
+    // 🏆 CARGA DE TU AVATAR LOCAL
+    // Nota: Coloca tu archivo .glb en tu carpeta de assets (Ej: 'assets/avatar_local.glb')
+    loader3D.load('assets/avatar_local.glb', (gltf) => {
+        cuboPrueba = gltf.scene; // Mantenemos la variable 'cuboPrueba' para no romper tus otras funciones
+        cuboPrueba.scale.set(1.3, 1.3, 1.3); // Ajusta la escala según tu modelo
+        cuboPrueba.position.set(0, 0, 0);
+        scene3D.add(cuboPrueba);
+        console.log("🪐 H.A.R.V.I.S: Avatar local cargado con éxito.");
+    }, undefined, (error) => {
+        console.error("❌ Error al cargar el avatar local:", error);
+    });
+
+    // 🚀 RECEPTOR OMNI LIVEKIT: Sincroniza y pinta los avatares remotos reales
+    if (typeof room !== 'undefined' && room && room.state === 'connected') {
+        room.on(LivekitClient.RoomEvent.DataReceived, (payload, participant) => {
+            try {
+                const decoder = new TextDecoder();
+                const datos = JSON.parse(decoder.decode(payload));
+
+                if (datos.tipo === 'telemetria_facial') {
+                    const idUsuarioRemoto = datos.idUsuario;
+                    
+                    // Si el contacto entra y no tiene avatar en pantalla, lo cargamos en el mapa
+                    if (!avatarsRemotos[idUsuarioRemoto]) {
+                        console.log(`📦 H.A.R.V.I.S: Descargando modelo para usuario remoto: ${idUsuarioRemoto}`);
+                        
+                        // Cargamos el modelo base para los visitantes
+                        loader3D.load('assets/avatar_remoto.glb', (gltf) => {
+                            const nuevoAvatar = gltf.scene;
+                            nuevoAvatar.scale.set(1.3, 1.3, 1.3);
+                            
+                            // Posición aleatoria para que no se pisen en la sala
+                            nuevoAvatar.position.set((Math.random() - 0.5) * 5, 0, (Math.random() - 0.5) * 3);
+                            scene3D.add(nuevoAvatar);
+                            
+                            avatarsRemotos[idUsuarioRemoto] = nuevoAvatar;
+                        });
+                    }
+                    
+                    // Inyectamos la rotación de red si el modelo ya terminó de cargar en la escena
+                    if (avatarsRemotos[idUsuarioRemoto]) {
+                        avatarsRemotos[idUsuarioRemoto].targetRotationY = datos.y;
+                    }
+                }
+            } catch (e) {
+                console.error("❌ Error en el puente de avatares LiveKit:", e);
+            }
+        });
+    }
+
+    // Bucle de Renderizado Suave con Interpolación Remota (Lerp)
+    function animarSpaxioVerso() {
         if (!renderer3D) return; 
         
         spaxioAnimFrameId = requestAnimationFrame(animarSpaxioVerso);
         
-        // 1. Mueve tu avatar local según la IA de MediaPipe
+        // 1. Mueve tu avatar real local (Gira todo el cuerpo sobre el eje Y con tu cara)
         if (cuboPrueba) {
             cuboPrueba.rotation.y = THREE.MathUtils.lerp(cuboPrueba.rotation.y, rotacionRostro.y, 0.15);
         }
         
-        // 2. Mueve los avatares remotos con transiciones fluidas
+        // 2. Mueve los avatares de los contactos remotos
         for (let id in avatarsRemotos) {
             if (avatarsRemotos[id]) {
                 avatarsRemotos[id].rotation.y = THREE.MathUtils.lerp(avatarsRemotos[id].rotation.y, avatarsRemotos[id].targetRotationY || 0, 0.15);
@@ -5027,6 +5090,8 @@ function inicializarEntorno3D() {
 
     animarSpaxioVerso();
      }
+
+     
 /**
  * 3. PROCESAMIENTO DE IA (MediaPipe FaceMesh)
  */
