@@ -4938,13 +4938,28 @@ const SpaxioAvatarController = {
     },
 
     // 2. FASE ACTUAL: Procesar gestos del rostro (MediaPipe Face Mesh)
+    
+        // 👁️ Procesar parpadeo real en el Chibi
     actualizarGestosFaciales: function(datosMediaPipe) {
         if (!this.rostroMesh || !datosMediaPipe) return;
 
-        // Aquí irá la lógica de parpadeo y apertura de boca
-        // Ejemplo analítico futuro: 
-        // let indiceBoca = this.rostroMesh.morphTargetDictionary['jawOpen'];
-        // this.rostroMesh.morphTargetValues[indiceBoca] = datosMediaPipe.bocaApertura;
+        // Buscamos los índices de los ojos cerrados dentro del .glb
+        let diccionario = this.rostroMesh.morphTargetDictionary;
+        
+        if (diccionario) {
+            let indiceOjoIzq = diccionario['Blink'] || diccionario['blink_L'];
+            let indiceOjoDer = diccionario['Blink'] || diccionario['blink_R'];
+
+            // Si MediaPipe nos da el peso del parpadeo (un número entre 0 y 1)
+            if (indiceOjoIzq !== undefined && datosMediaPipe.ojoIzquierdoCerrado !== undefined) {
+                // Suavizamos el movimiento del parpadeo con un lerp para que no sea un golpe brusco
+                this.rostroMesh.morphTargetInfluences[indiceOjoIzq] = THREE.MathUtils.lerp(
+                    this.rostroMesh.morphTargetInfluences[indiceOjoIzq],
+                    datosMediaPipe.ojoIzquierdoCerrado,
+                    0.25
+                );
+            }
+        }
     },
 
     // 3. FASE FUTURA: Mover la cabeza y articulaciones (Girar y Sentarse)
