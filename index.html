@@ -4917,7 +4917,81 @@ async function abrirSpaxioVersoDesdeContacto() {
      }
 
     // El resto de tu función (el bloque try/catch con el contenedor3D) se queda exactamente igual...
+// 🎮 Controlador Global del SpaxioVerso (Estructura expandible)
+const SpaxioAvatarController = {
+    // Referencias internas del esqueleto del personaje
+    huesos: {
+        cuello: null,
+        torso: null,
+        brazoIzquierdo: null,
+        brazoDerecho: null,
+        piernaIzquierda: null,
+        piernaDerecha: null
+    },
+    // Referencia para las expresiones faciales (BlendShapes / Morph Targets)
+    rostroMesh: null,
 
+    // 1. Identificar y enlazar los huesos del archivo .glb al cargar
+    vincularEsqueleto: function(gltfScene) {
+        console.log("🧬 H.A.R.V.I.S: Escaneando estructura del avatar...");
+        
+        // Buscamos los componentes por sus nombres estándar en los GLB de Sketchfab/ReadyPlayerMe
+        this.huesos.cuello = gltfScene.getObjectByName('Neck') || gltfScene.getObjectByName('head');
+        this.huesos.torso = gltfScene.getObjectByName('Spine') || gltfScene.getObjectByName('spine');
+        
+        // Dejamos los enlaces listos para la fase del cuerpo entero
+        this.huesos.brazoIzquierdo = gltfScene.getObjectByName('LeftArm') || gltfScene.getObjectByName('left_arm');
+        this.huesos.brazoDerecho = gltfScene.getObjectByName('RightArm') || gltfScene.getObjectByName('right_arm');
+        this.huesos.piernaIzquierda = gltfScene.getObjectByName('LeftUpLeg') || gltfScene.getObjectByName('left_leg');
+        this.huesos.piernaDerecha = gltfScene.getObjectByName('RightUpLeg') || gltfScene.getObjectByName('right_leg');
+
+        // Buscar la malla que contiene las expresiones faciales
+        gltfScene.traverse((child) => {
+            if (child.isMesh && child.morphTargetDictionary) {
+                this.rostroMesh = child; // Guardamos la malla del rostro
+            }
+        });
+
+        console.log("✅ H.A.R.V.I.S: Esqueleto mapeado y preparado para expansión.");
+    },
+
+    // 2. FASE ACTUAL: Procesar gestos del rostro (MediaPipe Face Mesh)
+    actualizarGestosFaciales: function(datosMediaPipe) {
+        if (!this.rostroMesh || !datosMediaPipe) return;
+
+        // Aquí irá la lógica de parpadeo y apertura de boca
+        // Ejemplo analítico futuro: 
+        // let indiceBoca = this.rostroMesh.morphTargetDictionary['jawOpen'];
+        // this.rostroMesh.morphTargetValues[indiceBoca] = datosMediaPipe.bocaApertura;
+    },
+
+    // 3. FASE FUTURA: Mover la cabeza y articulaciones (Girar y Sentarse)
+    actualizarRotacionYCuerpo: function(rotacionRostro, datosPose) {
+        // Suavizado Lerp para la cabeza (Ya operativo)
+        if (this.huesos.cuello && rotacionRostro) {
+            this.huesos.cuello.rotation.y = THREE.MathUtils.lerp(this.huesos.cuello.rotation.y, rotacionRostro.y, 0.15);
+            this.huesos.cuello.rotation.x = THREE.MathUtils.lerp(this.huesos.cuello.rotation.x, rotacionRostro.x, 0.15);
+        }
+
+        // Espacio reservado para conectar MediaPipe Pose (Brazos, piernas y posición sentada)
+        if (datosPose) {
+            this.aplicarCalculoCuerpoEntero(datosPose);
+        }
+    },
+
+    // 4. FASE FUTURA: Caminar, correr o simular traslación en el entorno
+    actualizarDesplazamiento: function(datosCaminar) {
+        // Espacio reservado para físicas de movimiento o animaciones automáticas de caminata
+        if (datosCaminar) {
+            // Aquí moveremos la posición general del avatar en el plano X o Z
+        }
+    },
+
+    // Función auxiliar interna para no saturar el bucle principal
+    aplicarCalculoCuerpoEntero: function(datosPose) {
+        // Aquí se inyectarán las matemáticas de rotación de los brazos y piernas después
+    }
+};
 
 
      /**
@@ -4974,15 +5048,21 @@ function inicializarEntorno3D() {
 
     // 🏆 CARGA DE TU AVATAR LOCAL
     // Nota: Coloca tu archivo .glb en tu carpeta de assets (Ej: 'assets/avatar_local.glb')
-    loader3D.load('/assets/avatar_local.glb', (gltf) => {
-        cuboPrueba = gltf.scene; // Mantenemos la variable 'cuboPrueba' para no romper tus otras funciones
-        cuboPrueba.scale.set(1.3, 1.3, 1.3); // Ajusta la escala según tu modelo
-        cuboPrueba.position.set(0, 0, 0);
-        scene3D.add(cuboPrueba);
-        console.log("🪐 H.A.R.V.I.S: Avatar local cargado con éxito.");
-    }, undefined, (error) => {
-        console.error("❌ Error al cargar el avatar local:", error);
-    });
+    
+
+     loader3D.load('/assets/avatar_local.glb', (gltf) => {
+    cuboPrueba = gltf.scene;
+    cuboPrueba.scale.set(1.3, 1.3, 1.3);
+    cuboPrueba.position.set(0, 0, 0);
+    scene3D.add(cuboPrueba);
+
+    // 🔥 DEJAMOS EL ESQUELETO CONECTADO DE UNA VEZ
+    SpaxioAvatarController.vincularEsqueleto(cuboPrueba);
+
+    console.log("🪐 H.A.R.V.I.S: Avatar listo y estructurado.");
+}, undefined, (error) => {
+    console.error("❌ Error:", error);
+});
 
     // 🚀 RECEPTOR OMNI LIVEKIT: Sincroniza y pinta los avatares remotos reales
     if (typeof room !== 'undefined' && room && room.state === 'connected') {
@@ -5212,6 +5292,20 @@ function cerrarSpaxioVerso() {
         console.log("🔌 Sistema OMNI completamente apagado.");
     }
      }
+
+     function actualizarEscena3D() {
+    // 1. Ejecuta la rotación de cabeza y prepara el cuerpo
+    SpaxioAvatarController.actualizarRotacionYCuerpo(rotacionRostro, null); // Pasaremos los datos de pose luego
+    
+    // 2. Prepara las expresiones de ojos y boca
+    SpaxioAvatarController.actualizarGestosFaciales(null); // Pasaremos los pesos faciales luego
+
+    // 3. Prepara el espacio de movimiento/caminar por los escenarios
+    SpaxioAvatarController.actualizarDesplazamiento(null);
+
+    renderer3D.render(scene3D, camera3D);
+    requestAnimationFrame(actualizarEscena3D);
+}
  
      function cargarFotoInicial() {
     const fotoGuardada = localStorage.getItem('mi_foto');
