@@ -4818,25 +4818,7 @@ function activarSpaxioFlowRealtime() {
         .subscribe();
      }
 
-let flujoVideo3D = renderer3D.domElement.captureStream(30); // Captura a 30 FPS el muñeco
-let flujoAudio = tuStreamDeMicrofono; // Captura tu voz
 
-// Combinar audio y video en un solo grabador
-let streamCompleto = new MediaStream([...flujoVideo3D.getVideoTracks(), ...flujoAudio.getAudioTracks()]);
-let grabadorMedia = new MediaRecorder(streamCompleto, { mimeType: 'video/webm;codecs=vp9' });
-
-let pedazosDeVideo = [];
-grabadorMedia.ondataavailable = e => pedazosDeVideo.push(e.data);
-
-grabadorMedia.onstop = () => {
-    let videoBlob = new Blob(pedazosDeVideo, { type: 'video/webm' });
-    // ¡Aquí tienes el archivo .webm listo para mandarlo a SpaxioFlow!
-};
-
-// Botón de Grabar de tu App
-function iniciarGrabacionSpaxio() { grabadorMedia.start(); }
-function detenerGrabacionSpaxio() { grabadorMedia.stop(); }
-             
 // =================================================================
 // 🪐 SPAXIOVERSO OMNI: MOTOR GRÁFICO, IA Y TELEMETRÍA ULTRA-LIGERA
 // =================================================================
