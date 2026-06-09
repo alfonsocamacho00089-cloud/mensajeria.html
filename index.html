@@ -4905,6 +4905,10 @@ async function abrirSpaxioVersoDesdeContacto() {
 /**
  * 2. MOTOR GRÁFICO (WebGL con Three.js)
  */
+
+        /**
+ * 2. MOTOR GRÁFICO (WebGL con Three.js y Avatares de Prueba)
+ */
 function inicializarEntorno3D() {
     const contenedorCanvas = document.getElementById('canvas-render-3d');
     if (!contenedorCanvas) return;
@@ -4918,7 +4922,7 @@ function inicializarEntorno3D() {
     
     camera3D = new THREE.PerspectiveCamera(75, ancho / alto, 0.1, 1000);
     camera3D.position.set(0, 3, 7);
-    camera3D.lookAt(0, 0, 0);
+    camera3D.lookAt(0, 1.5, 0); 
     scene3D.add(camera3D);
 
     renderer3D = new THREE.WebGLRenderer({ 
@@ -4929,44 +4933,93 @@ function inicializarEntorno3D() {
     renderer3D.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     contenedorCanvas.appendChild(renderer3D.domElement);
 
-    const luzAmbiental = new THREE.AmbientLight(0xffffff, 0.5);
+    const luzAmbiental = new THREE.AmbientLight(0xffffff, 0.6);
     scene3D.add(luzAmbiental);
 
-    const luzPuntual = new THREE.PointLight(0xffd700, 1.5, 50);
-    luzPuntual.position.set(5, 5, 5);
+    const luzPuntual = new THREE.PointLight(0xffd700, 2, 50);
+    luzPuntual.position.set(5, 8, 5);
     scene3D.add(luzPuntual);
 
-    cuboPrueba = new THREE.Mesh(
-        new THREE.BoxGeometry(1.5, 1.5, 1.5), 
-        new THREE.MeshStandardMaterial({ color: 0xffd700, roughness: 0.3, metalness: 0.8 })
-    );
-    scene3D.add(cuboPrueba);
-
+    // Suelo estilo matriz digital premium
     const suelo = new THREE.Mesh(
-        new THREE.PlaneGeometry(20, 20), 
-        new THREE.MeshStandardMaterial({ color: 0x143b1f, roughness: 0.6, metalness: 0.3, emissive: 0x05ffd1, emissiveIntensity: 0.05 })
+        new THREE.PlaneGeometry(50, 50), 
+        new THREE.MeshStandardMaterial({ 
+            color: 0x0f1a1c, 
+            roughness: 0.4, 
+            metalness: 0.8, 
+            emissive: 0xffd700, 
+            emissiveIntensity: 0.02 
+        })
     );
     suelo.rotation.x = -Math.PI / 2;
-    suelo.position.y = -1.5;
+    suelo.position.y = 0; 
     scene3D.add(suelo);
 
-    // Bucle de Renderizado Suave con Interpolación Remota
+    // 🏆 OBJETO LOCAL TEMPORAL (Cubo de Oro Pulido)
+    // Mantiene tu estética y te permite ver tu movimiento mientras integras los modelos .glb
+    const geoLocal = new THREE.BoxGeometry(1.2, 1.8, 1.2); 
+    const matLocal = new THREE.MeshStandardMaterial({
+        color: 0xffd700, 
+        metalness: 0.9,
+        roughness: 0.1
+    });
+    cuboPrueba = new THREE.Mesh(geoLocal, matLocal);
+    cuboPrueba.position.set(0, 0.9, 0); // Apoyado firmemente sobre el suelo
+    scene3D.add(cuboPrueba);
+
+    // 🚀 RECEPTOR OMNI LIVEKIT: Sincroniza y pinta los avatares remotos en caliente
+    if (typeof room !== 'undefined' && room && room.state === 'connected') {
+        room.on(LivekitClient.RoomEvent.DataReceived, (payload, participant) => {
+            try {
+                const decoder = new TextDecoder();
+                const datos = JSON.parse(decoder.decode(payload));
+
+                if (datos.tipo === 'telemetria_facial') {
+                    const idUsuarioRemoto = datos.idUsuario;
+                    
+                    // Si entra otro usuario de tu red, le fabricamos su avatar de prueba
+                    if (!avatarsRemotos[idUsuarioRemoto]) {
+                        console.log(`📦 H.A.R.V.I.S: Detectado usuario remoto. Renderizando en escena: ${idUsuarioRemoto}`);
+                        
+                        const geoRemota = new THREE.BoxGeometry(1.2, 1.8, 1.2);
+                        const matRemoto = new THREE.MeshStandardMaterial({ 
+                            color: 0x00ffcc, // Cian brillante para identificar a los contactos
+                            roughness: 0.2, 
+                            metalness: 0.6 
+                        }); 
+                        const nuevoAvatar = new THREE.Mesh(geoRemota, matRemoto);
+                        
+                        // Los esparcimos en el eje X y Z para que no aparezcan uno encima del otro
+                        nuevoAvatar.position.set((Math.random() - 0.5) * 6, 0.9, (Math.random() - 0.5) * 4);
+                        scene3D.add(nuevoAvatar);
+                        
+                        avatarsRemotos[idUsuarioRemoto] = nuevoAvatar;
+                    }
+                    
+                    // Asignamos la rotación horizontal (Y) que llega de la red
+                    avatarsRemotos[idUsuarioRemoto].targetRotationY = datos.y;
+                }
+            } catch (e) {
+                console.error("❌ Error en el puente gráfico de LiveKit:", e);
+            }
+        });
+    }
+
+    // Bucle de Renderizado Suave con Interpolación Remota (Lerp)
     function animarSpaxioVerso() {
         if (!renderer3D) return; 
         
         spaxioAnimFrameId = requestAnimationFrame(animarSpaxioVerso);
         
-        // Tu movimiento local
+        // 1. Mueve tu avatar local según la IA de MediaPipe
         if (cuboPrueba) {
-            cuboPrueba.rotation.y = THREE.MathUtils.lerp(cuboPrueba.rotation.y, rotacionRostro.y, 0.1);
-            cuboPrueba.rotation.x = THREE.MathUtils.lerp(cuboPrueba.rotation.x, rotacionRostro.x, 0.1);
+            cuboPrueba.rotation.y = THREE.MathUtils.lerp(cuboPrueba.rotation.y, rotacionRostro.y, 0.15);
         }
         
-        // 🔄 INTERPOLACIÓN REMOTA: Mueve los cubos de tus contactos de forma fluida
+        // 2. Mueve los avatares remotos con transiciones fluidas
         for (let id in avatarsRemotos) {
             if (avatarsRemotos[id]) {
-                avatarsRemotos[id].rotation.x = THREE.MathUtils.lerp(avatarsRemotos[id].rotation.x, avatarsRemotos[id].targetRotationX || 0, 0.1);
-                avatarsRemotos[id].rotation.y = THREE.MathUtils.lerp(avatarsRemotos[id].rotation.y, avatarsRemotos[id].targetRotationY || 0, 0.1);
+                avatarsRemotos[id].rotation.y = THREE.MathUtils.lerp(avatarsRemotos[id].rotation.y, avatarsRemotos[id].targetRotationY || 0, 0.15);
             }
         }
         
@@ -4974,8 +5027,7 @@ function inicializarEntorno3D() {
     }
 
     animarSpaxioVerso();
-}
-
+     }
 /**
  * 3. PROCESAMIENTO DE IA (MediaPipe FaceMesh)
  */
