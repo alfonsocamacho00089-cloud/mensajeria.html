@@ -4972,61 +4972,89 @@ const SpaxioAvatarController = {
 };
 
 /**
- * 🛠️ FUNCIÓN CONSTRUCTORA DEL MANIQUÍ LOCAL (Llamar dentro de inicializarEntorno3D)
+ * 🦾 INYECCIÓN OPTIMIZADA DEL MANIQUÍ (Sólido, Negro y Oro Premium)
  */
 function inicializarManiquiLocal() {
-    console.log("🤖 H.A.R.V.I.S: Construyendo maniquí con sistema facial integrado...");
+    // Forzamos a que la escena exista para evitar bloqueos
+    if (!scene3D) return;
+
+    console.log("🤖 H.A.R.V.I.S: Inyectando clon estetico...");
 
     const grupoAvatar = new THREE.Group();
 
-    // 1. El Cuerpo (Torso)
+    // 1. El Cuerpo (Torso) - Sólido negro que reacciona a las luces del entorno
     const geoTorso = new THREE.CylinderGeometry(0.2, 0.15, 0.6, 16);
-    const matNegro = new THREE.MeshBasicMaterial({ color: 0x111111 }); // Base negra premium
+    const matNegro = new THREE.MeshStandardMaterial({ 
+        color: 0x111111, 
+        roughness: 0.3, 
+        metalness: 0.8 
+    }); 
     const torsoMesh = new THREE.Mesh(geoTorso, matNegro);
-    torsoMesh.position.set(0, 0, 0);
+    torsoMesh.position.set(0, 1.0, 0); // Mantiene la altura ideal elevada
     grupoAvatar.add(torsoMesh);
 
-    // 2. La Cabeza
+    // 2. La Cabeza - Oro sólido y liso (Sin rejillas extrañas)
     const geoCabeza = new THREE.SphereGeometry(0.22, 32, 32);
-    const matOro = new THREE.MeshBasicMaterial({ color: 0xD4AF37 }); // Oro Negro estético
+    const matOro = new THREE.MeshStandardMaterial({ 
+        color: 0xD4AF37, 
+        roughness: 0.2, 
+        metalness: 0.9 
+    }); 
     const cabezaMesh = new THREE.Mesh(geoCabeza, matOro);
-    cabezaMesh.position.set(0, 0.45, 0);
+    cabezaMesh.position.set(0, 1.45, 0); 
     grupoAvatar.add(cabezaMesh);
 
-    // 3. Ojos Físicos (Para ver el parpadeo en la pantalla)
+    // 3. Ojos Físicos - Blancos con un toque de brillo propio
     const geoOjo = new THREE.SphereGeometry(0.04, 16, 16);
-    const matOjo = new THREE.MeshBasicMaterial({ color: 0xffffff });
+    const matOjo = new THREE.MeshStandardMaterial({ 
+        color: 0xffffff, 
+        emissive: 0xffffff, 
+        emissiveIntensity: 0.6 
+    });
+    
+    window.ojoIzq = new THREE.Mesh(geoOjo, matOjo);
+    window.ojoIzq.position.set(-0.07, 1.48, 0.18);
+    
+    window.ojoDer = window.ojoIzq.clone();
+    window.ojoDer.position.x = 0.07;
+    
+    grupoAvatar.add(window.ojoIzq, window.ojoDer); // Corregido el bug del doble window
 
-    ojoIzq = new THREE.Mesh(geoOjo, matOjo);
-    ojoIzq.position.set(-0.07, 0.48, 0.18);
-    ojoDer = ojoIzq.clone();
-    ojoDer.position.x = 0.07;
-
-    grupoAvatar.add(ojoIzq, ojoDer);
-
-    // 4. Una Boca Física (Para ver la apertura)
+    // 4. Boca Física - Sólida y discreta en conjunto con el diseño negro
     const geoBoca = new THREE.CylinderGeometry(0.06, 0.06, 0.02, 16);
-    const matBoca = new THREE.MeshBasicMaterial({ color: 0x222222 });
-    bocaMesh = new THREE.Mesh(geoBoca, matBoca);
-    bocaMesh.position.set(0, 0.38, 0.18);
-    bocaMesh.rotation.x = Math.PI / 2;
-    grupoAvatar.add(bocaMesh);
+    const matBoca = new THREE.MeshStandardMaterial({ 
+        color: 0x222222, 
+        roughness: 0.4 
+    }); 
+    window.bocaMesh = new THREE.Mesh(geoBoca, matBoca);
+    window.bocaMesh.position.set(0, 1.38, 0.18);
+    window.bocaMesh.rotation.x = Math.PI / 2;
+    grupoAvatar.add(window.bocaMesh);
 
-    // Añadimos todo el conjunto a la escena 3D principal
+    // Añadimos el maniquí definitivo a la escena principal
     scene3D.add(grupoAvatar);
 
-    // 🧬 Enlazamos los componentes al controlador de SpaxioVerso
+    // Enlaces de control acoplados para SpaxioVerso
     SpaxioAvatarController.huesos.torso = torsoMesh;
-    SpaxioAvatarController.huesos.cuello = cabezaMesh; // Para que gire la cabeza con el rostro
-    SpaxioAvatarController.rostroMesh = cabezaMesh;     // Referencia base
+    SpaxioAvatarController.huesos.cuello = cabezaMesh;
+    SpaxioAvatarController.rostroMesh = cabezaMesh;
 
-    // Mapeo virtual para compatibilidad de scripts
     cabezaMesh.morphTargetDictionary = { 'ojoIzqCerrar': 0, 'ojoDerCerrar': 1, 'bocaAbrir': 2 };
     cabezaMesh.morphTargetInfluences = [0, 0, 0];
 
-    console.log("✅ H.A.R.V.I.S: Entorno blindado. Clon listo para pruebas de SpaxioFlow.");
-     }
+    // Sincronización posicional de la cámara frente al rostro
+    if (camera3D) {
+        camera3D.position.set(0, 1.4, 1.2); 
+        camera3D.lookAt(0, 1.4, 0);
+    }
 
+    // Renderizado forzado instantáneo para evitar parpadeos
+    if (renderer3D) {
+        renderer3D.render(scene3D, camera3D);
+    }
+
+    console.log("✅ H.A.R.V.I.S: Clon estetico acoplado.");
+ }
 
      /**
  * 2. MOTOR GRÁFICO (WebGL con Three.js y Avatares Reales glTF)
@@ -5087,70 +5115,12 @@ function inicializarManiquiLocal() {
     
     console.log("🤖 H.A.R.V.I.S: Inyectando maniquí geométrico holográfico...");
     
-    // Forzamos a que la escena se limpie para evitar bloqueos
-    if (!scene3D) return;
-
-    const grupoAvatar = new THREE.Group();
-
-    // 1. El Cuerpo (Torso) - Una malla de oro negro brillante que rompe la oscuridad
-    const geoTorso = new THREE.CylinderGeometry(0.2, 0.15, 0.6, 16);
-    const matNegro = new THREE.MeshPhongMaterial({ color: 0x111111, emissive: 0xD4AF37, emissiveIntensity: 0.1 }); 
-    const torsoMesh = new THREE.Mesh(geoTorso, matNegro);
-    torsoMesh.position.set(0, 1.0, 0); 
-    grupoAvatar.add(torsoMesh);
-
-    // 2. La Cabeza - Una rejilla futurista tipo cyberpunk
-    const geoCabeza = new THREE.SphereGeometry(0.22, 32, 32);
-    const matOro = new THREE.MeshPhongMaterial({ color: 0xD4AF37, wireframe: true, emissive: 0xffd700, emissiveIntensity: 0.2 }); 
-    const cabezaMesh = new THREE.Mesh(geoCabeza, matOro);
-    cabezaMesh.position.set(0, 1.45, 0); 
-    grupoAvatar.add(cabezaMesh);
-
-    // 3. Ojos Físicos - Ahora sí brillan de verdad (No más bombillos planos)
-    const geoOjo = new THREE.SphereGeometry(0.04, 16, 16);
-    const matOjo = new THREE.MeshBasicMaterial({ color: 0xffffff, emissive: 0xffffff, emissiveIntensity: 1.0 });
     
-    window.ojoIzq = new THREE.Mesh(geoOjo, matOjo);
-    window.ojoIzq.position.set(-0.07, 1.48, 0.18);
-    
-    window.ojoDer = window.ojoIzq.clone();
-    window.ojoDer.position.x = 0.07;
-    
-    grupoAvatar.add(window.ojoIzq, window.window.ojoDer);
-
-    // 4. Boca Física
-    const geoBoca = new THREE.CylinderGeometry(0.06, 0.06, 0.02, 16);
-    const matBoca = new THREE.MeshBasicMaterial({ color: 0xff4500, wireframe: true }); // Malla roja de pruebas
-    window.bocaMesh = new THREE.Mesh(geoBoca, matBoca);
-    window.bocaMesh.position.set(0, 1.38, 0.18);
-    window.bocaMesh.rotation.x = Math.PI / 2;
-    grupoAvatar.add(window.bocaMesh);
-
-    // Añadimos el maniquí a la escena principal
-    scene3D.add(grupoAvatar);
-
-    // Enlaces de control acoplados
-    SpaxioAvatarController.huesos.torso = torsoMesh;
-    SpaxioAvatarController.huesos.cuello = cabezaMesh;
-    SpaxioAvatarController.rostroMesh = cabezaMesh;
-
-    cabezaMesh.morphTargetDictionary = { 'ojoIzqCerrar': 0, 'ojoDerCerrar': 1, 'bocaAbrir': 2 };
-    cabezaMesh.morphTargetInfluences = [0, 0, 0];
-
-    // Refrescamos la cámara para asegurarnos de que mire al objetivo correcto
-    if (camera3D) {
-        camera3D.position.set(0, 1.4, 1.2); // Coloca la cámara justo enfrente de la cara dorada
-        camera3D.lookAt(0, 1.4, 0);
-    }
-
-    // Tiro de renderizado forzado instantáneo
-    if (renderer3D) {
-        renderer3D.render(scene3D, camera3D);
-    }
 
     console.log("✅ H.A.R.V.I.S: Clon holográfico acoplado al SpaxioVerso.");
      
-
+// 🦾 INYECCIÓN SEGURA DEL MANIQUÍ NATIVO
+inicializarManiquiLocal();
     // 🚀 RECEPTOR OMNI LIVEKIT: Sincroniza y pinta los avatares remotos reales
     if (typeof room !== 'undefined' && room && room.state === 'connected') {
         room.on(LivekitClient.RoomEvent.DataReceived, (payload, participant) => {
