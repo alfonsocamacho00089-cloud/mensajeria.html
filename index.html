@@ -5037,6 +5037,13 @@ function inicializarManiquiLocal() {
     if (!contenedorCanvas) return;
     contenedorCanvas.innerHTML = "";
 
+    // 🔥 FORZAMOS LA LLAMADA AQUÍ EN LA PRIMERA LÍNEA DISPONIBLE
+    crearManiquiOroNegro();
+
+    scene3D = new THREE.Scene();
+    scene3D.background = new THREE.Color(0x050505);
+    // ... Todo tu código largo sigue normal hacia abajo ...
+
     scene3D = new THREE.Scene();
     scene3D.background = new THREE.Color(0x050505);
 
@@ -5085,37 +5092,51 @@ function inicializarManiquiLocal() {
      console.log("🤖 H.A.R.V.I.S: Construyendo maniquí de emergencia...");
      
     function crearManiquiOroNegro() {
+    console.log("🤖 H.A.R.V.I.S: Inyectando maniquí geométrico...");
     
+    // Forzamos a que la escena se limpie para evitar bloqueos
+    if (!scene3D) return;
+
     const grupoAvatar = new THREE.Group();
 
+    // 1. El Cuerpo (Torso) - Usamos una rejilla de oro brillante para que rompa la oscuridad
     const geoTorso = new THREE.CylinderGeometry(0.2, 0.15, 0.6, 16);
-    const matNegro = new THREE.MeshBasicMaterial({ color: 0xD4AF37, wireframe: true });   
-    torsoMesh.position.set(0, 1.0, 0); // Elevado al centro de la cámara
+    const matNegro = new THREE.MeshBasicMaterial({ color: 0xD4AF37, wireframe: true });
+    const torsoMesh = new THREE.Mesh(geoTorso, matNegro);
+    torsoMesh.position.set(0, 1.0, 0); 
     grupoAvatar.add(torsoMesh);
 
+    // 2. La Cabeza - Malla brillante para que no dependa de luces externas
     const geoCabeza = new THREE.SphereGeometry(0.22, 32, 32);
     const matOro = new THREE.MeshBasicMaterial({ color: 0xffd700, wireframe: true });
     const cabezaMesh = new THREE.Mesh(geoCabeza, matOro);
-    cabezaMesh.position.set(0, 1.45, 0); // Elevado al centro de la cámara
+    cabezaMesh.position.set(0, 1.45, 0); 
     grupoAvatar.add(cabezaMesh);
 
+    // 3. Ojos Físicos - Asignación directa a ventana global para evitar congelamientos
     const geoOjo = new THREE.SphereGeometry(0.04, 16, 16);
     const matOjo = new THREE.MeshBasicMaterial({ color: 0xffffff });
-    ojoIzq = new THREE.Mesh(geoOjo, matOjo);
-    ojoIzq.position.set(-0.07, 1.48, 0.18);
-    ojoDer = ojoIzq.clone();
-    ojoDer.position.x = 0.07;
-    grupoAvatar.add(ojoIzq, ojoDer);
+    
+    window.ojoIzq = new THREE.Mesh(geoOjo, matOjo);
+    window.ojoIzq.position.set(-0.07, 1.48, 0.18);
+    
+    window.ojoDer = window.ojoIzq.clone();
+    window.ojoDer.position.x = 0.07;
+    
+    grupoAvatar.add(window.ojoIzq, window.window.ojoDer);
 
+    // 4. Boca Física
     const geoBoca = new THREE.CylinderGeometry(0.06, 0.06, 0.02, 16);
-    const matBoca = new THREE.MeshBasicMaterial({ color: 0x222222 });
-    bocaMesh = new THREE.Mesh(geoBoca, matBoca);
-    bocaMesh.position.set(0, 1.38, 0.18);
-    bocaMesh.rotation.x = Math.PI / 2;
-    grupoAvatar.add(bocaMesh);
+    const matBoca = new THREE.MeshBasicMaterial({ color: 0xff0000 }); // Color rojo de pruebas para que resalte
+    window.bocaMesh = new THREE.Mesh(geoBoca, matBoca);
+    window.bocaMesh.position.set(0, 1.38, 0.18);
+    window.bocaMesh.rotation.x = Math.PI / 2;
+    grupoAvatar.add(window.bocaMesh);
 
+    // Añadimos el maniquí a la escena principal
     scene3D.add(grupoAvatar);
 
+    // Enlaces de control acoplados
     SpaxioAvatarController.huesos.torso = torsoMesh;
     SpaxioAvatarController.huesos.cuello = cabezaMesh;
     SpaxioAvatarController.rostroMesh = cabezaMesh;
@@ -5123,8 +5144,14 @@ function inicializarManiquiLocal() {
     cabezaMesh.morphTargetDictionary = { 'ojoIzqCerrar': 0, 'ojoDerCerrar': 1, 'bocaAbrir': 2 };
     cabezaMesh.morphTargetInfluences = [0, 0, 0];
 
-    // 🔥 FORZAR AL RENDERIZADOR A PINTAR LA ESCENA DE INMEDIATO
-    if (renderer3D && camera3D) {
+    // Refrescamos la cámara para asegurarnos de que mire al objetivo correcto
+    if (camera3D) {
+        camera3D.position.set(0, 1.4, 1.2); // Coloca la cámara justo enfrente de la cara dorada
+        camera3D.lookAt(0, 1.4, 0);
+    }
+
+    // Tiro de renderizado forzado instantáneo
+    if (renderer3D) {
         renderer3D.render(scene3D, camera3D);
     }
 
