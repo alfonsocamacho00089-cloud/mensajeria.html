@@ -5081,57 +5081,55 @@ function inicializarManiquiLocal() {
     // =================================================================
     // 🦾 CONSTRUCCIÓN INMEDIATA DEL MANIQUÍ LOCAL (100% AUTÓNOMO)
     // =================================================================
-    function crearManiquiOroNegro() {
+    
      console.log("🤖 H.A.R.V.I.S: Construyendo maniquí de emergencia...");
      
+    function crearManiquiOroNegro() {
+    console.log("🤖 H.A.R.V.I.S: Inyectando maniquí geométrico...");
     const grupoAvatar = new THREE.Group();
 
-    // 1. El Cuerpo (Torso) colocado sobre el suelo
     const geoTorso = new THREE.CylinderGeometry(0.2, 0.15, 0.6, 16);
     const matNegro = new THREE.MeshBasicMaterial({ color: 0x111111 });
     const torsoMesh = new THREE.Mesh(geoTorso, matNegro);
-    torsoMesh.position.set(0, 0.3, 0); // Ajustado para que asiente en el suelo
+    torsoMesh.position.set(0, 1.0, 0); // Elevado al centro de la cámara
     grupoAvatar.add(torsoMesh);
 
-    // 2. La Cabeza
     const geoCabeza = new THREE.SphereGeometry(0.22, 32, 32);
     const matOro = new THREE.MeshBasicMaterial({ color: 0xD4AF37 });
     const cabezaMesh = new THREE.Mesh(geoCabeza, matOro);
-    cabezaMesh.position.set(0, 0.75, 0); // Posición relativa superior
+    cabezaMesh.position.set(0, 1.45, 0); // Elevado al centro de la cámara
     grupoAvatar.add(cabezaMesh);
 
-    // 3. Ojos Físicos Blancos
     const geoOjo = new THREE.SphereGeometry(0.04, 16, 16);
     const matOjo = new THREE.MeshBasicMaterial({ color: 0xffffff });
-    
     ojoIzq = new THREE.Mesh(geoOjo, matOjo);
-    ojoIzq.position.set(-0.07, 0.78, 0.18);
+    ojoIzq.position.set(-0.07, 1.48, 0.18);
     ojoDer = ojoIzq.clone();
     ojoDer.position.x = 0.07;
     grupoAvatar.add(ojoIzq, ojoDer);
 
-    // 4. Boca Física Oscura
     const geoBoca = new THREE.CylinderGeometry(0.06, 0.06, 0.02, 16);
     const matBoca = new THREE.MeshBasicMaterial({ color: 0x222222 });
     bocaMesh = new THREE.Mesh(geoBoca, matBoca);
-    bocaMesh.position.set(0, 0.68, 0.18);
+    bocaMesh.position.set(0, 1.38, 0.18);
     bocaMesh.rotation.x = Math.PI / 2;
     grupoAvatar.add(bocaMesh);
 
-    // Añadimos el maniquí completo a la escena
     scene3D.add(grupoAvatar);
 
-    // Enlaces directos al controlador para telemetría
     SpaxioAvatarController.huesos.torso = torsoMesh;
     SpaxioAvatarController.huesos.cuello = cabezaMesh;
     SpaxioAvatarController.rostroMesh = cabezaMesh;
 
-    // Diccionario virtual para evitar errores de compatibilidad
     cabezaMesh.morphTargetDictionary = { 'ojoIzqCerrar': 0, 'ojoDerCerrar': 1, 'bocaAbrir': 2 };
     cabezaMesh.morphTargetInfluences = [0, 0, 0];
 
- renderer3D.render(scene3D, camera3D);
-    console.log("✅ H.A.R.V.I.S: Maniquí Oro y Negro renderizado en pantalla.");
+    // 🔥 FORZAR AL RENDERIZADOR A PINTAR LA ESCENA DE INMEDIATO
+    if (renderer3D && camera3D) {
+        renderer3D.render(scene3D, camera3D);
+    }
+
+    console.log("✅ H.A.R.V.I.S: Maniquí acoplado al SpaxioVerso.");
      }
      
    
