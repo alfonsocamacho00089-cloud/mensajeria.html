@@ -5083,6 +5083,58 @@ function inicializarEntorno3D() {
     // 🏆 CARGA DE TU AVATAR LOCAL
     // Nota: Coloca tu archivo .glb en tu carpeta de assets (Ej: 'assets/avatar_local.glb')
     
+    // ... Tu código actual donde creas la escena, cámara y renderer3D ...
+    // Ejemplo: scene3D = new THREE.Scene();
+    // Ejemplo: renderer3D = new THREE.WebGLRenderer(...);
+
+    // =================================================================
+    // 🦾 INYECTAR MANIQUÍ LOCAL INMEDIATAMENTE AQUÍ
+    // =================================================================
+    console.log("🤖 H.A.R.V.I.S: Construyendo maniquí de emergencia...");
+
+    const grupoAvatar = new THREE.Group();
+
+    const geoTorso = new THREE.CylinderGeometry(0.2, 0.15, 0.6, 16);
+    const matNegro = new THREE.MeshBasicMaterial({ color: 0x111111 });
+    const torsoMesh = new THREE.Mesh(geoTorso, matNegro);
+    torsoMesh.position.set(0, 0, 0);
+    grupoAvatar.add(torsoMesh);
+
+    const geoCabeza = new THREE.SphereGeometry(0.22, 32, 32);
+    const matOro = new THREE.MeshBasicMaterial({ color: 0xD4AF37 });
+    const cabezaMesh = new THREE.Mesh(geoCabeza, matOro);
+    cabezaMesh.position.set(0, 0.45, 0);
+    grupoAvatar.add(cabezaMesh);
+
+    const geoOjo = new THREE.SphereGeometry(0.04, 16, 16);
+    const matOjo = new THREE.MeshBasicMaterial({ color: 0xffffff });
+    
+    // Declaramos las variables globales de los ojos sin el "const" para que se enlacen arriba
+    ojoIzq = new THREE.Mesh(geoOjo, matOjo);
+    ojoIzq.position.set(-0.07, 0.48, 0.18);
+    ojoDer = ojoIzq.clone();
+    ojoDer.position.x = 0.07;
+    grupoAvatar.add(ojoIzq, ojoDer);
+
+    const geoBoca = new THREE.CylinderGeometry(0.06, 0.06, 0.02, 16);
+    const matBoca = new THREE.MeshBasicMaterial({ color: 0x222222 });
+    bocaMesh = new THREE.Mesh(geoBoca, matBoca);
+    bocaMesh.position.set(0, 0.38, 0.18);
+    bocaMesh.rotation.x = Math.PI / 2;
+    grupoAvatar.add(bocaMesh);
+
+    scene3D.add(grupoAvatar);
+
+    // Enlaces de control mutuo
+    SpaxioAvatarController.huesos.torso = torsoMesh;
+    SpaxioAvatarController.huesos.cuello = cabezaMesh;
+    SpaxioAvatarController.rostroMesh = cabezaMesh;
+
+    cabezaMesh.morphTargetDictionary = { 'ojoIzqCerrar': 0, 'ojoDerCerrar': 1, 'bocaAbrir': 2 };
+    cabezaMesh.morphTargetInfluences = [0, 0, 0];
+
+    console.log("✅ H.A.R.V.I.S: Maniquí Oro y Negro renderizado en pantalla.");
+     }
 
      loader3D.load('/assets/avatar_local.glb', (gltf) => {
     cuboPrueba = gltf.scene;
