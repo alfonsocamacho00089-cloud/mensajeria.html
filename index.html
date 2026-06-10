@@ -5145,14 +5145,29 @@ function encenderRastreadorFacialOMNI() {
         minDetectionConfidence: 0.5,
         minTrackingConfidence: 0.5
     });
-
-    faceMeshIA.onResults((results) => {
+faceMeshIA.onResults((results) => {
         if (results.multiFaceLandmarks && results.multiFaceLandmarks.length > 0) {
             const puntosClave = results.multiFaceLandmarks[0];
-            const nariz = puntosClave[4];
             
+            // Punto 4 es la punta de la nariz (Para la rotación)
+            const nariz = puntosClave[4];
             rotacionRostro.y = (nariz.x - 0.5) * -2.5; 
             rotacionRostro.x = (nariz.y - 0.4) * 2.5;
+
+            // 👄 NUEVO: Detectar apertura de boca (Puntos 13 y 14 son los labios internos)
+            const labioSup = puntosClave[13];
+            const labioInf = puntosClave[14];
+            const distanciaBoca = Math.abs(labioInf.y - labioSup.y);
+
+            // Cambiar imagen si la distancia supera el límite
+            if (window.avatarPlano) {
+                // 0.015 es la sensibilidad. Si hablas muy bajito y no lo capta, bájalo a 0.010
+                if (distanciaBoca > 0.015) {
+                    window.avatarPlano.material.map = window.texturaHablando;
+                } else {
+                    window.avatarPlano.material.map = window.texturaNormal;
+                }
+            }
 
             if (!intervaloTransmision) {
                 const miIdUsuario = localStorage.getItem('mi_dropis_id') || 'Pedro_Peres_Dev';
@@ -5160,7 +5175,7 @@ function encenderRastreadorFacialOMNI() {
             }
         }
     });
-
+    
     camaraMediaPipe = new Camera(videoElementOculto, {
         onFrame: async () => {
             if (faceMeshIA) {
