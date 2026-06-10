@@ -5082,7 +5082,7 @@ function inicializarManiquiLocal() {
     // 🦾 CONSTRUCCIÓN INMEDIATA DEL MANIQUÍ LOCAL (100% AUTÓNOMO)
     // =================================================================
     console.log("🤖 H.A.R.V.I.S: Construyendo maniquí de emergencia...");
-
+function crearManiquiOroNegro() {
     const grupoAvatar = new THREE.Group();
 
     // 1. El Cuerpo (Torso) colocado sobre el suelo
@@ -5131,8 +5131,8 @@ function inicializarManiquiLocal() {
 
     console.log("✅ H.A.R.V.I.S: Maniquí Oro y Negro renderizado en pantalla.");
      }
-     }
-     }
+     
+   
 
     // 🚀 RECEPTOR OMNI LIVEKIT: Sincroniza y pinta los avatares remotos reales
     if (typeof room !== 'undefined' && room && room.state === 'connected') {
