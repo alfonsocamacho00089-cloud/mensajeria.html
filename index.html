@@ -5034,13 +5034,12 @@ function sincronizarPerifericosKalidokit(resultadosMediaPipe) {
     if (!cuboPrueba || !resultadosMediaPipe) return;
 
     const elementoVideo = videoElementOculto;
-
-    // 1. OBTENCIÓN DE PUNTOS CRUDOS DE MEDIAPIPE
-    const puntosCara = resultadosMediaPipe.multiFaceLandmarks ? resultadosMediaPipe.multiFaceLandmarks[0] : null;
-    const puntosCuerpo = resultadosMediaPipe.poseLandmarks;
-    const puntosCuerpo3D = resultadosMediaPipe.poseWorldLandmarks;
-    const manoIzquierda = resultadosMediaPipe.leftHandLandmarks;
-    const manoDerecha = resultadosMediaPipe.rightHandLandmarks;
+// CORRECCIÓN PARA HOLISTIC
+const puntosCara = resultadosMediaPipe.faceLandmarks; // Holistic lo entrega directo
+const puntosCuerpo = resultadosMediaPipe.poseLandmarks;
+const puntosCuerpo3D = resultadosMediaPipe.poseWorldLandmarks;
+const manoIzquierda = resultadosMediaPipe.leftHandLandmarks;
+const manoDerecha = resultadosMediaPipe.rightHandLandmarks;
 
     // 2. COMPUTACIÓN CINEMÁTICA CON KALIDOKIT
     const rostroRig = puntosCara ? Kalidokit.Face.solve(puntosCara, { runtime: 'mediapipe', video: elementoVideo }) : null;
@@ -5122,21 +5121,19 @@ function sincronizarPerifericosKalidokit(resultadosMediaPipe) {
     // Nota: Coloca tu archivo .glb en tu carpeta de assets (Ej: 'assets/avatar_local.glb')
     
 
-     loader3D.load('/assets/avatar_local.glb', (gltf) => {
-    cuboPrueba = gltf.scene;
-    cuboPrueba.scale.set(1.3, 1.3, 1.3);
-    cuboPrueba.position.set(0, 0, 0);
-    scene3D.add(cuboPrueba);
-
-    // 🔥 DEJAMOS EL ESQUELETO CONECTADO DE UNA VEZ
-    SpaxioAvatarController.vincularEsqueleto(cuboPrueba);
-
-    console.log("🪐 H.A.R.V.I.S: Avatar listo y estructurado.");
-}, undefined, (error) => {
-    console.error("❌ Error:", error);
-});
-
-     
+     function cargarAvatar() {
+    loader3D.load('/assets/avatar_local.glb', (gltf) => {
+        cuboPrueba = gltf.scene;
+        cuboPrueba.scale.set(1.3, 1.3, 1.3);
+        cuboPrueba.position.set(0, 0, 0);
+        scene3D.add(cuboPrueba);
+        
+        SpaxioAvatarController.vincularEsqueleto(cuboPrueba);
+        console.log("🪐 H.A.R.V.I.S: Avatar cargado correctamente.");
+    }, undefined, (error) => {
+        console.error("❌ Error al cargar modelo:", error);
+    });
+     }
 
     // 🚀 RECEPTOR OMNI LIVEKIT: Sincroniza y pinta los avatares remotos reales
     if (typeof room !== 'undefined' && room && room.state === 'connected') {
