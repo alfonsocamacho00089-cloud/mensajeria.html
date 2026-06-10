@@ -5101,18 +5101,18 @@ function inicializarEntorno3D() {
         });
     }
 
-    // Bucle de Renderizado Suave con Interpolación Remota (Lerp)
     function animarSpaxioVerso() {
         if (!renderer3D) return; 
         
         spaxioAnimFrameId = requestAnimationFrame(animarSpaxioVerso);
         
-        // 1. Mueve tu avatar real local (Gira todo el cuerpo sobre el eje Y con tu cara)
-        if (cuboPrueba) {
-            cuboPrueba.rotation.y = THREE.MathUtils.lerp(cuboPrueba.rotation.y, rotacionRostro.y, 0.15);
+        // Mueve la "cartulina" de Homero para que mire hacia donde tú miras
+        if (window.avatarPlano) {
+            window.avatarPlano.rotation.y = THREE.MathUtils.lerp(window.avatarPlano.rotation.y, rotacionRostro.y, 0.15);
+            window.avatarPlano.rotation.x = THREE.MathUtils.lerp(window.avatarPlano.rotation.x, rotacionRostro.x, 0.15);
         }
         
-        // 2. Mueve los avatares de los contactos remotos
+        // 2. Mueve los avatares de los contactos remotos (se queda igual)
         for (let id in avatarsRemotos) {
             if (avatarsRemotos[id]) {
                 avatarsRemotos[id].rotation.y = THREE.MathUtils.lerp(avatarsRemotos[id].rotation.y, avatarsRemotos[id].targetRotationY || 0, 0.15);
@@ -5120,7 +5120,8 @@ function inicializarEntorno3D() {
         }
         
         renderer3D.render(scene3D, camera3D);
-    }
+     }
+        
 
     animarSpaxioVerso();
      }
