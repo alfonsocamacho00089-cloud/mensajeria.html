@@ -5003,37 +5003,28 @@ function inicializarEntorno3D(contenedorID) {
     const contenedor = document.getElementById(contenedorID);
     if (!contenedor) return;
 
-    // Escena Black & Gold minimalista
-    escenaAvatar = new THREE.Scene();
-    escenaAvatar.background = new THREE.Color(0x000000);
+    // Usamos las variables globales que declaraste al principio
+    scene3D = new THREE.Scene();
+    scene3D.background = new THREE.Color(0x000000);
 
-    // Cámara optimizada para retratos en vertical de celular
-    camaraAvatar = new THREE.PerspectiveCamera(45, contenedor.clientWidth / contenedor.clientHeight, 0.1, 100);
-    camaraAvatar.position.set(0, 1.3, 1.6);
+    camera3D = new THREE.PerspectiveCamera(45, contenedor.clientWidth / contenedor.clientHeight, 0.1, 100);
+    camera3D.position.set(0, 1.3, 1.6);
 
-    // Renderizador con control de pixeles para que no te explote la batería del teléfono
-    renderAvatar = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-    renderAvatar.setSize(contenedor.clientWidth, contenedor.clientHeight);
-    renderAvatar.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    contenedor.appendChild(renderAvatar.domElement);
+    renderer3D = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    renderer3D.setSize(contenedor.clientWidth, contenedor.clientHeight);
+    renderer3D.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    contenedor.appendChild(renderer3D.domElement);
 
-    // Iluminación Premium Dorada
     const luzAmbiental = new THREE.AmbientLight(0xffffff, 0.5);
-    escenaAvatar.add(luzAmbiental);
+    scene3D.add(luzAmbiental);
     
     const luzPuntoOro = new THREE.DirectionalLight(0xffd700, 1.0);
     luzPuntoOro.position.set(2, 4, 3);
-    escenaAvatar.add(luzPuntoOro);
+    scene3D.add(luzPuntoOro);
 
-    function bucleRender() {
-        requestAnimationFrame(bucleRender);
-        if (renderAvatar && escenaAvatar && camaraAvatar) {
-            renderAvatar.render(escenaAvatar, camaraAvatar);
-        }
-    }
-    bucleRender();
-}
-
+    // BORRAMOS el bucleRender interno aquí, porque ya tienes animarSpaxioVerso() 
+    // al final del archivo controlando el renderizado global.
+ }
 // FUNCIÓN DE INTERCEPCIÓN TOTAL EN TIEMPO REAL
 
 
