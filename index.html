@@ -5039,38 +5039,31 @@ function inicializarEntorno3D(contenedorID) {
 
     // --- SECCIÓN C: MANOS Y DEDOS ---
 function sincronizarPerifericosKalidokit(resultadosMediaPipe) {
-    // Cambiamos modeloAvatar por tu variable real: cuboPrueba
-    if (!cuboPrueba || !resultadosMediaPipe) return;
+    // 1. Frenamos si el modelo no ha cargado
+    if (!cuboPrueba || !resultadosMediaPipe || !resultadosMediaPipe.multiFaceLandmarks) return;
 
+    const puntosCara = resultadosMediaPipe.multiFaceLandmarks[0];
     const elementoVideo = videoElementOculto;
 
-    // 1. OBTENCIÓN DE PUNTOS CRUDOS DE MEDIAPIPE
-    const puntosCara = resultadosMediaPipe.multiFaceLandmarks ? resultadosMediaPipe.multiFaceLandmarks[0] : null;
-    const puntosCuerpo = resultadosMediaPipe.poseLandmarks;
-    const puntosCuerpo3D = resultadosMediaPipe.poseWorldLandmarks;
-    const manoIzquierda = resultadosMediaPipe.leftHandLandmarks;
-    const manoDerecha = resultadosMediaPipe.rightHandLandmarks;
+    // 2. Kalidokit calcula la cinemática
+    const rostroRig = Kalidokit.Face.solve(puntosCara, { 
+        runtime: 'mediapipe', 
+        video: elementoVideo 
+    });
 
-    // 2. COMPUTACIÓN CINEMÁTICA CON KALIDOKIT
-    const rostroRig = puntosCara ? Kalidokit.Face.solve(puntosCara, { runtime: 'mediapipe', video: elementoVideo }) : null;
-    const cuerpoRig = (puntosCuerpo && puntosCuerpo3D) ? Kalidokit.Pose.solve(puntosCuerpo3D, puntosCuerpo, { runtime: 'mediapipe', video: elementoVideo }) : null;
-    const mDerechaRig = manoDerecha ? Kalidokit.Hand.solve(manoDerecha, "Right") : null;
-    const mIzquierdaRig = manoIzquierda ? Kalidokit.Hand.solve(manoIzquierda, "Left") : null;
-
-    // 3. REFLEJO EN TU AVATAR REAL (cuboPrueba)
-
-    // --- CARA Y CUELLO ---
     if (rostroRig) {
+        // 3. Movemos los huesos reales de tu .glb
         const cabeza = cuboPrueba.getObjectByName("Head") || cuboPrueba.getObjectByName("head");
         const cuello = cuboPrueba.getObjectByName("Neck") || cuboPrueba.getObjectByName("neck");
+        
         if (cabeza) {
             cabeza.rotation.set(rostroRig.head.x, rostroRig.head.y, rostroRig.head.z);
         }
         if (cuello) {
-            cuello.rotation.y = rostroRig.head.y * 0.3;
+            cuello.rotation.y = rostroRig.head.y * 0.3; 
         }
 
-        // BlendShapes (Pestañeo, boca, expresiones)
+        // 4. Mapeo de gesticulaciones (Ojos y Boca)
         cuboPrueba.traverse((nodo) => {
             if (nodo.isMesh && nodo.morphTargetDictionary) {
                 const targets = {
@@ -5079,13 +5072,69 @@ function sincronizarPerifericosKalidokit(resultadosMediaPipe) {
                     "jawOpen": rostroRig.mouth.y,
                     "mouthPucker": rostroRig.mouth.x
                 };
+                
                 for (const [key, value] of Object.entries(targets)) {
                     const indice = nodo.morphTargetDictionary[key] || nodo.morphTargetDictionary[key.toLowerCase()];
-                    if (indice !== undefined) nodo.morphTargetInfluences[indice] = value;
+                    if (indice !== undefined) {
+                        nodo.morphTargetInfluences[indice] = value;
+                    }
                 }
             }
         });
     }
+}
+
+function encenderRastreadorFacialOMNI() {
+    if (!videoElementOculto) return;
+
+    console.log("🤖 H.A.R.V.I.S: Sincronizando visión computacional...");
+
+    faceMeshIA = new FaceMesh({
+        locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${file}`
+    });
+
+    faceMeshIA.setOptions({
+        maxNumFaces: 1,
+        refineLandmarks: true, // 🔥 ESTO DEBE ESTAR EN TRUE PARA LOS OJOS
+        minDetectionConfidence: 0.5,
+        minTrackingConfidence: 0.5
+    });
+
+    faceMeshIA.onResults((results) => {
+        if (results.multiFaceLandmarks && results.multiFaceLandmarks.length > 0) {
+            const puntosClave = results.multiFaceLandmarks[0];
+            const nariz = puntosClave[4];
+            
+            rotacionRostro.y = (nariz.x - 0.5) * -2.5; 
+            rotacionRostro.x = (nariz.y - 0.4) * 2.5;
+
+            if (!intervaloTransmision) {
+                const miIdUsuario = localStorage.getItem('mi_dropis_id') || 'Pedro_Peres_Dev';
+                iniciarTransmisionOmniRealtime(ID_SALA_METAVERSO, miIdUsuario);
+            }
+
+            // 🔥 LA LÍNEA MÁGICA: Envía los datos seguros a Kalidokit
+            if (typeof Kalidokit !== 'undefined') {
+                sincronizarPerifericosKalidokit(results);
+            }
+        }
+    });
+
+    camaraMediaPipe = new Camera(videoElementOculto, {
+        onFrame: async () => {
+            if (faceMeshIA) {
+                await faceMeshIA.send({ image: videoElementOculto });
+            }
+        },
+        width: 480,
+        height: 360,
+        facingMode: "user"
+    });
+
+    camaraMediaPipe.start()
+        .then(() => console.log("📷 Captura de hardware activa."))
+        .catch(err => console.error("❌ Error de hardware en cámara:", err));
+}
 
     // --- CUERPO Y BRAZOS ---
     if (cuerpoRig) {
@@ -5213,55 +5262,7 @@ function sincronizarPerifericosKalidokit(resultadosMediaPipe) {
 /**
  * 3. PROCESAMIENTO DE IA (MediaPipe FaceMesh)
  */
-function encenderRastreadorFacialOMNI() {
-    if (!videoElementOculto) return;
 
-    console.log("🤖 H.A.R.V.I.S: Sincronizando visión computacional...");
-
-    faceMeshIA = new FaceMesh({
-        locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${file}`
-    });
-
-    faceMeshIA.setOptions({
-        maxNumFaces: 1,
-        refineLandmarks: false,
-        minDetectionConfidence: 0.5,
-        minTrackingConfidence: 0.5
-    });
-
-    faceMeshIA.onResults((results) => {
-        if (results.multiFaceLandmarks && results.multiFaceLandmarks.length > 0) {
-            const puntosClave = results.multiFaceLandmarks[0];
-            const nariz = puntosClave[4];
-            
-            rotacionRostro.y = (nariz.x - 0.5) * -2.5; 
-            rotacionRostro.x = (nariz.y - 0.4) * 2.5;
-
-            if (!intervaloTransmision) {
-                const miIdUsuario = localStorage.getItem('mi_dropis_id') || 'Pedro_Peres_Dev';
-                iniciarTransmisionOmniRealtime(ID_SALA_METAVERSO, miIdUsuario);
-            }
-
-            // 🔥 LA LÍNEA MÁGICA ENLAZADA: Envía los datos frescos de MediaPipe a Kalidokit
-            sincronizarPerifericosKalidokit(results);
-        }
-    });
-
-    camaraMediaPipe = new Camera(videoElementOculto, {
-        onFrame: async () => {
-            if (faceMeshIA) {
-                await faceMeshIA.send({ image: videoElementOculto });
-            }
-        },
-        width: 480,
-        height: 360,
-        facingMode: "user"
-    });
-
-    camaraMediaPipe.start()
-        .then(() => console.log("📷 Captura de hardware activa."))
-        .catch(err => console.error("❌ Error de hardware en cámara:", err));
- }
 
 /**
  * 4. SISTEMA DE TRANSMISIÓN DE DATOS OMNI (Supabase Realtime Opción B)
