@@ -5207,24 +5207,26 @@ function sincronizarPerifericosKalidokit(resultadosMediaPipe) {
 function encenderRastreadorFacialOMNI() {
     if (!videoElementOculto) return;
 
-    console.log("🤖 H.A.R.V.I.S: Sincronizando visión computacional...");
+    console.log("🤖 H.A.R.V.I.S: Iniciando motor HOLISTIC para cuerpo completo...");
 
-    faceMeshIA = new FaceMesh({
-        locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${file}`
+    // 1. Cambiamos FaceMesh por Holistic
+    faceMeshIA = new Holistic({
+        locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/holistic/${file}`
     });
 
+    // 2. Ajustamos las opciones para el nuevo motor
     faceMeshIA.setOptions({
-        maxNumFaces: 1,
-        refineLandmarks: false,
+        modelComplexity: 1,
+        smoothLandmarks: true,
+        refineFaceLandmarks: true, // Importante para Kalidokit
         minDetectionConfidence: 0.5,
         minTrackingConfidence: 0.5
     });
 
     faceMeshIA.onResults((results) => {
-        if (results.multiFaceLandmarks && results.multiFaceLandmarks.length > 0) {
-            const puntosClave = results.multiFaceLandmarks[0];
-            const nariz = puntosClave[4];
-            
+        // 3. Procesamiento de telemetría (mantenemos tu lógica de rotación de cara)
+        if (results.faceLandmarks && results.faceLandmarks.length > 0) {
+            const nariz = results.faceLandmarks[4];
             rotacionRostro.y = (nariz.x - 0.5) * -2.5; 
             rotacionRostro.x = (nariz.y - 0.4) * 2.5;
 
@@ -5232,12 +5234,13 @@ function encenderRastreadorFacialOMNI() {
                 const miIdUsuario = localStorage.getItem('mi_dropis_id') || 'Pedro_Peres_Dev';
                 iniciarTransmisionOmniRealtime(ID_SALA_METAVERSO, miIdUsuario);
             }
-
-            // 🔥 LA LÍNEA MÁGICA ENLAZADA: Envía los datos frescos de MediaPipe a Kalidokit
-            sincronizarPerifericosKalidokit(results);
         }
+
+        // 4. Envío unificado: Holistic devuelve resultados que Kalidokit ya sabe leer
+        sincronizarPerifericosKalidokit(results);
     });
 
+    // 5. La configuración de la cámara se mantiene igual
     camaraMediaPipe = new Camera(videoElementOculto, {
         onFrame: async () => {
             if (faceMeshIA) {
@@ -5250,9 +5253,9 @@ function encenderRastreadorFacialOMNI() {
     });
 
     camaraMediaPipe.start()
-        .then(() => console.log("📷 Captura de hardware activa."))
+        .then(() => console.log("📷 Captura de hardware activa (Holistic)."))
         .catch(err => console.error("❌ Error de hardware en cámara:", err));
- }
+     }
 
 /**
  * 4. SISTEMA DE TRANSMISIÓN DE DATOS OMNI (Supabase Realtime Opción B)
