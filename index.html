@@ -4938,29 +4938,75 @@ const SpaxioAvatarController = {
     },
 
     // 2. FASE ACTUAL: Procesar gestos del rostro (MediaPipe Face Mesh)
+    // 🤖 GENERADOR NATIVO DE AVATAR (100% Autónomo y Local)
+console.log("🤖 H.A.R.V.I.S: Construyendo maniquí con sistema facial integrado...");
+
+const grupoAvatar = new THREE.Group();
+
+// 1. El Cuerpo (Torso)
+const geoTorso = new THREE.CylinderGeometry(0.2, 0.15, 0.6, 16);
+const matNegro = new THREE.MeshBasicMaterial({ color: 0x111111 }); // Base negra premium
+const torsoMesh = new THREE.Mesh(geoTorso, matNegro);
+torsoMesh.position.set(0, 0, 0);
+grupoAvatar.add(torsoMesh);
+
+// 2. La Cabeza
+const geoCabeza = new THREE.SphereGeometry(0.22, 32, 32);
+const matOro = new THREE.MeshBasicMaterial({ color: 0xD4AF37 }); // Tu Oro Negro estético
+const cabezaMesh = new THREE.Mesh(geoCabeza, matOro);
+cabezaMesh.position.set(0, 0.45, 0);
+grupoAvatar.add(cabezaMesh);
+
+// 3. Ojos Físicos (Para ver el parpadeo en la pantalla)
+const geoOjo = new THREE.SphereGeometry(0.04, 16, 16);
+const matOjo = new THREE.MeshBasicMaterial({ color: 0xffffff });
+
+const ojoIzq = new THREE.Mesh(geoOjo, matOjo);
+ojoIzq.position.set(-0.07, 0.48, 0.18);
+const ojoDer = ojoIzq.clone();
+ojoDer.position.x = 0.07;
+
+grupoAvatar.add(ojoIzq, ojoDer);
+
+// 4. Una Boca Física (Para ver la apertura)
+const geoBoca = new THREE.CylinderGeometry(0.06, 0.06, 0.02, 16);
+const matBoca = new THREE.MeshBasicMaterial({ color: 0x222222 });
+const bocaMesh = new THREE.Mesh(geoBoca, matBoca);
+bocaMesh.position.set(0, 0.38, 0.18);
+bocaMesh.rotation.x = Math.PI / 2;
+grupoAvatar.add(bocaMesh);
+
+// Añadimos todo el conjunto a la escena 3D principal
+scene3D.add(grupoAvatar);
+
+// 🧬 Enlazamos los componentes al controlador de SpaxioVerso
+SpaxioAvatarController.huesos.torso = torsoMesh;
+SpaxioAvatarController.huesos.cuello = cabezaMesh; // Para que gire la cabeza
+SpaxioAvatarController.rostroMesh = cabezaMesh;     // Referencia base
+
+// 👁️👄 Creamos los "músculos" artificiales controlados por código
+cabezaMesh.morphTargetDictionary = { 'ojoIzqCerrar': 0, 'ojoDerCerrar': 1, 'bocaAbrir': 2 };
+cabezaMesh.morphTargetInfluences = [0, 0, 0];
+
+// Modificamos la función de actualización para mover las piezas físicas directamente
+SpaxioAvatarController.actualizarGestosFaciales = function(datosMediaPipe) {
+    if (!datosMediaPipe) return;
     
-        // 👁️ Procesar parpadeo real en el Chibi
-    actualizarGestosFaciales: function(datosMediaPipe) {
-        if (!this.rostroMesh || !datosMediaPipe) return;
+    // Si MediaPipe detecta parpadeo, encogemos los ojos verticalmente
+    if (datosMediaPipe.ojoIzquierdoCerrado !== undefined) {
+        ojoIzq.scale.y = THREE.MathUtils.lerp(ojoIzq.scale.y, 1 - datosMediaPipe.ojoIzquierdoCerrado, 0.3);
+    }
+    if (datosMediaPipe.ojoDerechoCerrado !== undefined) {
+        ojoDer.scale.y = THREE.MathUtils.lerp(ojoDer.scale.y, 1 - datosMediaPipe.ojoDerechoCerrado, 0.3);
+    }
+    
+    // Si detecta apertura de boca, estiramos la boca hacia abajo
+    if (datosMediaPipe.bocaApertura !== undefined) {
+        bocaMesh.scale.y = THREE.MathUtils.lerp(bocaMesh.scale.y, 1 + (datosMediaPipe.bocaApertura * 2.5), 0.2);
+    }
+};
 
-        // Buscamos los índices de los ojos cerrados dentro del .glb
-        let diccionario = this.rostroMesh.morphTargetDictionary;
-        
-        if (diccionario) {
-            let indiceOjoIzq = diccionario['Blink'] || diccionario['blink_L'];
-            let indiceOjoDer = diccionario['Blink'] || diccionario['blink_R'];
-
-            // Si MediaPipe nos da el peso del parpadeo (un número entre 0 y 1)
-            if (indiceOjoIzq !== undefined && datosMediaPipe.ojoIzquierdoCerrado !== undefined) {
-                // Suavizamos el movimiento del parpadeo con un lerp para que no sea un golpe brusco
-                this.rostroMesh.morphTargetInfluences[indiceOjoIzq] = THREE.MathUtils.lerp(
-                    this.rostroMesh.morphTargetInfluences[indiceOjoIzq],
-                    datosMediaPipe.ojoIzquierdoCerrado,
-                    0.25
-                );
-            }
-        }
-    },
+console.log("✅ H.A.R.V.I.S: Entorno blindado. Clon listo para pruebas de SpaxioFlow.");
 
     // 3. FASE FUTURA: Mover la cabeza y articulaciones (Girar y Sentarse)
     actualizarRotacionYCuerpo: function(rotacionRostro, datosPose) {
