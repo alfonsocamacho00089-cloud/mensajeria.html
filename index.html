@@ -4837,6 +4837,9 @@ let intervaloTransmision = null;
 let ultimasCoordenadasEnviadas = { x: 0, y: 0 };
 let rotacionRostro = { x: 0, y: 0 };
 
+// Variables globales para las piezas del maniquí local
+let ojoIzq = null, ojoDer = null, bocaMesh = null;
+
 // Diccionario para renderizar los cubos de los demás usuarios en tiempo real
 let avatarsRemotos = {};
 
@@ -4853,9 +4856,6 @@ async function abrirSpaxioVersoDesdeContacto() {
     }
 
     console.log("🪐 H.A.R.V.I.S: Inicializando entorno gráfico del SpaxioVerso...");
-    
-    // Eliminamos Supabase de aquí. El control de transmisión se activa automáticamente
-    // a través de LiveKit cuando MediaPipe detecta los puntos de la cara.
 
     try {
         let contenedor3D = document.getElementById('contenedor-spaxioverso');
@@ -4896,12 +4896,10 @@ async function abrirSpaxioVersoDesdeContacto() {
     } catch (error) {
         console.error("❌ Fallo crítico al levantar el espacio del SpaxioVerso:", error);
     }
-     }
+}
 
-    // El resto de tu función (el bloque try/catch con el contenedor3D) se queda exactamente igual...
 // 🎮 Controlador Global del SpaxioVerso (Estructura expandible)
 const SpaxioAvatarController = {
-    // Referencias internas del esqueleto del personaje
     huesos: {
         cuello: null,
         torso: null,
@@ -4910,131 +4908,124 @@ const SpaxioAvatarController = {
         piernaIzquierda: null,
         piernaDerecha: null
     },
-    // Referencia para las expresiones faciales (BlendShapes / Morph Targets)
     rostroMesh: null,
 
-    // 1. Identificar y enlazar los huesos del archivo .glb al cargar
+    // 1. Vincular huesos de un archivo .glb externo si existiera
     vincularEsqueleto: function(gltfScene) {
         console.log("🧬 H.A.R.V.I.S: Escaneando estructura del avatar...");
-        
-        // Buscamos los componentes por sus nombres estándar en los GLB de Sketchfab/ReadyPlayerMe
         this.huesos.cuello = gltfScene.getObjectByName('Neck') || gltfScene.getObjectByName('head');
         this.huesos.torso = gltfScene.getObjectByName('Spine') || gltfScene.getObjectByName('spine');
         
-        // Dejamos los enlaces listos para la fase del cuerpo entero
         this.huesos.brazoIzquierdo = gltfScene.getObjectByName('LeftArm') || gltfScene.getObjectByName('left_arm');
         this.huesos.brazoDerecho = gltfScene.getObjectByName('RightArm') || gltfScene.getObjectByName('right_arm');
         this.huesos.piernaIzquierda = gltfScene.getObjectByName('LeftUpLeg') || gltfScene.getObjectByName('left_leg');
         this.huesos.piernaDerecha = gltfScene.getObjectByName('RightUpLeg') || gltfScene.getObjectByName('right_leg');
 
-        // Buscar la malla que contiene las expresiones faciales
         gltfScene.traverse((child) => {
             if (child.isMesh && child.morphTargetDictionary) {
-                this.rostroMesh = child; // Guardamos la malla del rostro
+                this.rostroMesh = child;
             }
         });
-
-        console.log("✅ H.A.R.V.I.S: Esqueleto mapeado y preparado para expansión.");
+        console.log("✅ H.A.R.V.I.S: Esqueleto mapeado.");
     },
 
-    // 2. FASE ACTUAL: Procesar gestos del rostro (MediaPipe Face Mesh)
-    // 🤖 GENERADOR NATIVO DE AVATAR (100% Autónomo y Local)
-console.log("🤖 H.A.R.V.I.S: Construyendo maniquí con sistema facial integrado...");
+    // 2. FASE ACTUAL: Procesar gestos del rostro en tiempo real
+    actualizarGestosFaciales: function(datosMediaPipe) {
+        if (!datosMediaPipe) return;
+        
+        // Si MediaPipe detecta parpadeo, encogemos los ojos físicos en vertical
+        if (datosMediaPipe.ojoIzquierdoCerrado !== undefined && ojoIzq) {
+            ojoIzq.scale.y = THREE.MathUtils.lerp(ojoIzq.scale.y, 1 - datosMediaPipe.ojoIzquierdoCerrado, 0.3);
+        }
+        if (datosMediaPipe.ojoDerechoCerrado !== undefined && ojoDer) {
+            ojoDer.scale.y = THREE.MathUtils.lerp(ojoDer.scale.y, 1 - datosMediaPipe.ojoDerechoCerrado, 0.3);
+        }
+        
+        // Si detecta apertura de boca, estiramos la boca hacia abajo
+        if (datosMediaPipe.bocaApertura !== undefined && bocaMesh) {
+            bocaMesh.scale.y = THREE.MathUtils.lerp(bocaMesh.scale.y, 1 + (datosMediaPipe.bocaApertura * 2.5), 0.2);
+        }
+    },
 
-const grupoAvatar = new THREE.Group();
-
-// 1. El Cuerpo (Torso)
-const geoTorso = new THREE.CylinderGeometry(0.2, 0.15, 0.6, 16);
-const matNegro = new THREE.MeshBasicMaterial({ color: 0x111111 }); // Base negra premium
-const torsoMesh = new THREE.Mesh(geoTorso, matNegro);
-torsoMesh.position.set(0, 0, 0);
-grupoAvatar.add(torsoMesh);
-
-// 2. La Cabeza
-const geoCabeza = new THREE.SphereGeometry(0.22, 32, 32);
-const matOro = new THREE.MeshBasicMaterial({ color: 0xD4AF37 }); // Tu Oro Negro estético
-const cabezaMesh = new THREE.Mesh(geoCabeza, matOro);
-cabezaMesh.position.set(0, 0.45, 0);
-grupoAvatar.add(cabezaMesh);
-
-// 3. Ojos Físicos (Para ver el parpadeo en la pantalla)
-const geoOjo = new THREE.SphereGeometry(0.04, 16, 16);
-const matOjo = new THREE.MeshBasicMaterial({ color: 0xffffff });
-
-const ojoIzq = new THREE.Mesh(geoOjo, matOjo);
-ojoIzq.position.set(-0.07, 0.48, 0.18);
-const ojoDer = ojoIzq.clone();
-ojoDer.position.x = 0.07;
-
-grupoAvatar.add(ojoIzq, ojoDer);
-
-// 4. Una Boca Física (Para ver la apertura)
-const geoBoca = new THREE.CylinderGeometry(0.06, 0.06, 0.02, 16);
-const matBoca = new THREE.MeshBasicMaterial({ color: 0x222222 });
-const bocaMesh = new THREE.Mesh(geoBoca, matBoca);
-bocaMesh.position.set(0, 0.38, 0.18);
-bocaMesh.rotation.x = Math.PI / 2;
-grupoAvatar.add(bocaMesh);
-
-// Añadimos todo el conjunto a la escena 3D principal
-scene3D.add(grupoAvatar);
-
-// 🧬 Enlazamos los componentes al controlador de SpaxioVerso
-SpaxioAvatarController.huesos.torso = torsoMesh;
-SpaxioAvatarController.huesos.cuello = cabezaMesh; // Para que gire la cabeza
-SpaxioAvatarController.rostroMesh = cabezaMesh;     // Referencia base
-
-// 👁️👄 Creamos los "músculos" artificiales controlados por código
-cabezaMesh.morphTargetDictionary = { 'ojoIzqCerrar': 0, 'ojoDerCerrar': 1, 'bocaAbrir': 2 };
-cabezaMesh.morphTargetInfluences = [0, 0, 0];
-
-// Modificamos la función de actualización para mover las piezas físicas directamente
-SpaxioAvatarController.actualizarGestosFaciales = function(datosMediaPipe) {
-    if (!datosMediaPipe) return;
-    
-    // Si MediaPipe detecta parpadeo, encogemos los ojos verticalmente
-    if (datosMediaPipe.ojoIzquierdoCerrado !== undefined) {
-        ojoIzq.scale.y = THREE.MathUtils.lerp(ojoIzq.scale.y, 1 - datosMediaPipe.ojoIzquierdoCerrado, 0.3);
-    }
-    if (datosMediaPipe.ojoDerechoCerrado !== undefined) {
-        ojoDer.scale.y = THREE.MathUtils.lerp(ojoDer.scale.y, 1 - datosMediaPipe.ojoDerechoCerrado, 0.3);
-    }
-    
-    // Si detecta apertura de boca, estiramos la boca hacia abajo
-    if (datosMediaPipe.bocaApertura !== undefined) {
-        bocaMesh.scale.y = THREE.MathUtils.lerp(bocaMesh.scale.y, 1 + (datosMediaPipe.bocaApertura * 2.5), 0.2);
-    }
-};
-
-console.log("✅ H.A.R.V.I.S: Entorno blindado. Clon listo para pruebas de SpaxioFlow.");
-
-    // 3. FASE FUTURA: Mover la cabeza y articulaciones (Girar y Sentarse)
+    // 3. Mover la cabeza y articulaciones (Girar y Sentarse)
     actualizarRotacionYCuerpo: function(rotacionRostro, datosPose) {
-        // Suavizado Lerp para la cabeza (Ya operativo)
         if (this.huesos.cuello && rotacionRostro) {
             this.huesos.cuello.rotation.y = THREE.MathUtils.lerp(this.huesos.cuello.rotation.y, rotacionRostro.y, 0.15);
             this.huesos.cuello.rotation.x = THREE.MathUtils.lerp(this.huesos.cuello.rotation.x, rotacionRostro.x, 0.15);
         }
 
-        // Espacio reservado para conectar MediaPipe Pose (Brazos, piernas y posición sentada)
         if (datosPose) {
             this.aplicarCalculoCuerpoEntero(datosPose);
         }
     },
 
-    // 4. FASE FUTURA: Caminar, correr o simular traslación en el entorno
+    // 4. FASE FUTURA: Caminar, correr o simular traslación
     actualizarDesplazamiento: function(datosCaminar) {
-        // Espacio reservado para físicas de movimiento o animaciones automáticas de caminata
         if (datosCaminar) {
-            // Aquí moveremos la posición general del avatar en el plano X o Z
+            // Reserva para físicas de movimiento
         }
     },
 
-    // Función auxiliar interna para no saturar el bucle principal
     aplicarCalculoCuerpoEntero: function(datosPose) {
-        // Aquí se inyectarán las matemáticas de rotación de los brazos y piernas después
+        // Matemáticas de rotación de extremidades futuras
     }
 };
+
+/**
+ * 🛠️ FUNCIÓN CONSTRUCTORA DEL MANIQUÍ LOCAL (Llamar dentro de inicializarEntorno3D)
+ */
+function inicializarManiquiLocal() {
+    console.log("🤖 H.A.R.V.I.S: Construyendo maniquí con sistema facial integrado...");
+
+    const grupoAvatar = new THREE.Group();
+
+    // 1. El Cuerpo (Torso)
+    const geoTorso = new THREE.CylinderGeometry(0.2, 0.15, 0.6, 16);
+    const matNegro = new THREE.MeshBasicMaterial({ color: 0x111111 }); // Base negra premium
+    const torsoMesh = new THREE.Mesh(geoTorso, matNegro);
+    torsoMesh.position.set(0, 0, 0);
+    grupoAvatar.add(torsoMesh);
+
+    // 2. La Cabeza
+    const geoCabeza = new THREE.SphereGeometry(0.22, 32, 32);
+    const matOro = new THREE.MeshBasicMaterial({ color: 0xD4AF37 }); // Oro Negro estético
+    const cabezaMesh = new THREE.Mesh(geoCabeza, matOro);
+    cabezaMesh.position.set(0, 0.45, 0);
+    grupoAvatar.add(cabezaMesh);
+
+    // 3. Ojos Físicos (Para ver el parpadeo en la pantalla)
+    const geoOjo = new THREE.SphereGeometry(0.04, 16, 16);
+    const matOjo = new THREE.MeshBasicMaterial({ color: 0xffffff });
+
+    ojoIzq = new THREE.Mesh(geoOjo, matOjo);
+    ojoIzq.position.set(-0.07, 0.48, 0.18);
+    ojoDer = ojoIzq.clone();
+    ojoDer.position.x = 0.07;
+
+    grupoAvatar.add(ojoIzq, ojoDer);
+
+    // 4. Una Boca Física (Para ver la apertura)
+    const geoBoca = new THREE.CylinderGeometry(0.06, 0.06, 0.02, 16);
+    const matBoca = new THREE.MeshBasicMaterial({ color: 0x222222 });
+    bocaMesh = new THREE.Mesh(geoBoca, matBoca);
+    bocaMesh.position.set(0, 0.38, 0.18);
+    bocaMesh.rotation.x = Math.PI / 2;
+    grupoAvatar.add(bocaMesh);
+
+    // Añadimos todo el conjunto a la escena 3D principal
+    scene3D.add(grupoAvatar);
+
+    // 🧬 Enlazamos los componentes al controlador de SpaxioVerso
+    SpaxioAvatarController.huesos.torso = torsoMesh;
+    SpaxioAvatarController.huesos.cuello = cabezaMesh; // Para que gire la cabeza con el rostro
+    SpaxioAvatarController.rostroMesh = cabezaMesh;     // Referencia base
+
+    // Mapeo virtual para compatibilidad de scripts
+    cabezaMesh.morphTargetDictionary = { 'ojoIzqCerrar': 0, 'ojoDerCerrar': 1, 'bocaAbrir': 2 };
+    cabezaMesh.morphTargetInfluences = [0, 0, 0];
+
+    console.log("✅ H.A.R.V.I.S: Entorno blindado. Clon listo para pruebas de SpaxioFlow.");
+     }
 
 
      /**
