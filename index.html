@@ -5143,10 +5143,7 @@ function sincronizarPerifericosKalidokit(resultadosMediaPipe) {
     console.error("❌ Error:", error);
 });
 
-     holistic.onResults((results) => {
-    // Alimenta el Rig tracking supremo al instante
-    sincronizarPerifericosKalidokit(results);
-});
+     
 
     // 🚀 RECEPTOR OMNI LIVEKIT: Sincroniza y pinta los avatares remotos reales
     if (typeof room !== 'undefined' && room && room.state === 'connected') {
