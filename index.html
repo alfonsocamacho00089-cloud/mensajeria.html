@@ -5128,14 +5128,9 @@ const manoDerecha = resultadosMediaPipe.rightHandLandmarks;
         cuboPrueba.scale.set(1.3, 1.3, 1.3);
         cuboPrueba.position.set(0, 0, 0);
         scene3D.add(cuboPrueba);
-        
         SpaxioAvatarController.vincularEsqueleto(cuboPrueba);
-        console.log("🪐 H.A.R.V.I.S: Avatar cargado correctamente.");
-    }, undefined, (error) => {
-        console.error("❌ Error al cargar modelo:", error);
-    });
-     }
-
+    }, undefined, (error) => { console.error("❌ Error al cargar modelo:", error); });
+ }
     // 🚀 RECEPTOR OMNI LIVEKIT: Sincroniza y pinta los avatares remotos reales
     if (typeof room !== 'undefined' && room && room.state === 'connected') {
         room.on(LivekitClient.RoomEvent.DataReceived, (payload, participant) => {
