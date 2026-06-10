@@ -5089,13 +5089,12 @@ function inicializarManiquiLocal() {
     const grupoAvatar = new THREE.Group();
 
     const geoTorso = new THREE.CylinderGeometry(0.2, 0.15, 0.6, 16);
-    const matNegro = new THREE.MeshBasicMaterial({ color: 0x111111 });
-    const torsoMesh = new THREE.Mesh(geoTorso, matNegro);
+    const matNegro = new THREE.MeshBasicMaterial({ color: 0xD4AF37, wireframe: true });   
     torsoMesh.position.set(0, 1.0, 0); // Elevado al centro de la cámara
     grupoAvatar.add(torsoMesh);
 
     const geoCabeza = new THREE.SphereGeometry(0.22, 32, 32);
-    const matOro = new THREE.MeshBasicMaterial({ color: 0xD4AF37 });
+    const matOro = new THREE.MeshBasicMaterial({ color: 0xffd700, wireframe: true });
     const cabezaMesh = new THREE.Mesh(geoCabeza, matOro);
     cabezaMesh.position.set(0, 1.45, 0); // Elevado al centro de la cámara
     grupoAvatar.add(cabezaMesh);
