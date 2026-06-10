@@ -5081,8 +5081,9 @@ function inicializarManiquiLocal() {
     // =================================================================
     // 🦾 CONSTRUCCIÓN INMEDIATA DEL MANIQUÍ LOCAL (100% AUTÓNOMO)
     // =================================================================
-    console.log("🤖 H.A.R.V.I.S: Construyendo maniquí de emergencia...");
-function crearManiquiOroNegro() {
+    function crearManiquiOroNegro() {
+     console.log("🤖 H.A.R.V.I.S: Construyendo maniquí de emergencia...");
+     
     const grupoAvatar = new THREE.Group();
 
     // 1. El Cuerpo (Torso) colocado sobre el suelo
@@ -5129,6 +5130,7 @@ function crearManiquiOroNegro() {
     cabezaMesh.morphTargetDictionary = { 'ojoIzqCerrar': 0, 'ojoDerCerrar': 1, 'bocaAbrir': 2 };
     cabezaMesh.morphTargetInfluences = [0, 0, 0];
 
+ renderer3D.render(scene3D, camera3D);
     console.log("✅ H.A.R.V.I.S: Maniquí Oro y Negro renderizado en pantalla.");
      }
      
