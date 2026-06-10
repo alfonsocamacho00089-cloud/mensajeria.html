@@ -5048,18 +5048,22 @@ function inicializarEntorno3D() {
     // NOTA: Debes tener estas dos imágenes PNG sin fondo en tu carpeta assets
     window.texturaNormal = textureLoader.load('assets/homero_cerrado.png');
     window.texturaHablando = textureLoader.load('assets/homero_abierto.png');
-
+window.texturaNormal.minFilter = THREE.LinearFilter;
+window.texturaHablando.minFilter = THREE.LinearFilter;
     // Creamos la "cartulina" (Plano 2D) donde se dibujará a Homero
-    const geoPlano = new THREE.PlaneGeometry(1.2, 1.5); // Ancho y Alto
-    const matPlano = new THREE.MeshBasicMaterial({ 
-        map: window.texturaNormal, 
-        transparent: true,  // Fundamental para que no se vea el fondo blanco del PNG
-        side: THREE.DoubleSide 
-    });
+    // Configuración del Plano del Avatar
+// Si se ve muy grande, reduce estos números (ej. 0.8, 1.0)
+const geoPlano = new THREE.PlaneGeometry(1.2, 1.5); 
+const matPlano = new THREE.MeshBasicMaterial({ 
+    map: window.texturaNormal, 
+    transparent: true, 
+    side: THREE.DoubleSide,
+    depthWrite: false // Esto ayuda a que no aparezcan sombras raras detrás del PNG
+});
 
-    window.avatarPlano = new THREE.Mesh(geoPlano, matPlano);
-    window.avatarPlano.position.set(0, 1.3, 0); // A la altura de la cámara
-    scene3D.add(window.avatarPlano);
+window.avatarPlano = new THREE.Mesh(geoPlano, matPlano);
+window.avatarPlano.position.set(0, 1.3, 0); 
+scene3D.add(window.avatarPlano);
     
     console.log("🎭 H.A.R.V.I.S: Avatar 2D ligero inyectado en escena.");
 
