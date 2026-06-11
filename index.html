@@ -4973,8 +4973,9 @@ function inicializarEntorno3D(contenedorID) {
 
     // Usamos el clienteWidth/Height del contenedor
     camera3D = new THREE.PerspectiveCamera(45, contenedor.clientWidth / contenedor.clientHeight, 0.1, 100);
-    camera3D.position.set(0, 1.3, 1.6);
-
+    // En inicializarEntorno3D:
+camera3D.position.set(0, 1.3, 2); // 2 unidades de profundidad es suficiente
+camera3D.lookAt(0, 1, 0); // Que mire al torso, no al suelo
     renderer3D = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     renderer3D.setSize(contenedor.clientWidth, contenedor.clientHeight); // <--- Aquí fallaba si era 0
     renderer3D.setPixelRatio(Math.min(window.devicePixelRatio, 2));
@@ -5080,12 +5081,20 @@ const manoDerecha = resultadosMediaPipe.rightHandLandmarks;
     if (!loader3D) loader3D = new THREE.GLTFLoader();
     
     loader3D.load('/assets/avatar_local.glb', (gltf) => {
-        cuboPrueba = gltf.scene;
-        cuboPrueba.scale.set(1.3, 1.3, 1.3);
-        scene3D.add(cuboPrueba);
-        SpaxioAvatarController.vincularEsqueleto(cuboPrueba);
-    }, undefined, (error) => { console.error("❌ Error al cargar:", error); });
- }
+    cuboPrueba = gltf.scene;
+    
+    // FORZADO: Escalado y posición central
+    const box = new THREE.Box3().setFromObject(cuboPrueba);
+    const center = box.getCenter(new THREE.Vector3());
+    cuboPrueba.position.sub(center); // Centra el modelo
+    cuboPrueba.scale.set(1, 1, 1);
+    
+    scene3D.add(cuboPrueba);
+    avatarCargado = true;
+    
+    // MUESTRA EL OBJETO EN CONSOLA PARA VER SUS DIMENSIONES REALES
+    console.log("Dimensiones del modelo:", box);
+}, undefined, (e) => console.error(e));
      
     // 🚀 RECEPTOR OMNI LIVEKIT: Sincroniza y pinta los avatares remotos reales
     if (typeof room !== 'undefined' && room && room.state === 'connected') {
