@@ -5127,22 +5127,30 @@ const manoDerecha = resultadosMediaPipe.rightHandLandmarks;
 
     // Bucle de Renderizado Suave con Interpolación Remota (Lerp)
     
-    function animarSpaxioVerso() {
-    // Si no existe, no intentamos renderizar, simplemente volvemos a intentar en el siguiente frame
-    if (!window.renderer3D && typeof renderer3D === 'undefined') {
-        console.warn("⏳ Esperando renderizador...");
-        requestAnimationFrame(animarSpaxioVerso);
-        return;
-    }
+    // 1. VARIABLE DE ESTADO (Bandera)
+let motorCorriendo = false;
 
-    spaxioAnimFrameId = requestAnimationFrame(animarSpaxioVerso);
+function animarSpaxioVerso() {
+    // Si ya hay un bucle corriendo, no crees otro
+    if (motorCorriendo) return;
+    motorCorriendo = true;
     
-    if (cuboPrueba) {
-        cuboPrueba.rotation.y = THREE.MathUtils.lerp(cuboPrueba.rotation.y, rotacionRostro.y, 0.15);
+    function bucle() {
+        if (!renderer3D) {
+            motorCorriendo = false;
+            return;
+        }
+        
+        spaxioAnimFrameId = requestAnimationFrame(bucle);
+        
+        if (cuboPrueba) {
+            cuboPrueba.rotation.y = THREE.MathUtils.lerp(cuboPrueba.rotation.y, rotacionRostro.y, 0.15);
+        }
+        
+        renderer3D.render(scene3D, camera3D);
     }
-    
-    renderer3D.render(scene3D, camera3D);
- }
+    bucle();
+     }
 
     animarSpaxioVerso();
      
