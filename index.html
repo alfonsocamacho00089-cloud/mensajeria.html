@@ -5152,18 +5152,30 @@ scene3D.add(new THREE.AxesHelper(5)); // Muestra ejes X,Y,Z para ver dónde est�
     // 1. VARIABLE DE ESTADO (Bandera)
 let motorCorriendo = false;
 
+// Variable global para controlar el ID
+let spaxioAnimFrameId = null;
+
 function animarSpaxioVerso() {
-    spaxioAnimFrameId = requestAnimationFrame(animarSpaxioVerso);
-    
-    if (renderer3D && scene3D && camera3D) {
-        // --- PRUEBA VISUAL ---
-        // Forzamos a que el renderizador pinte azul si está trabajando
-        renderer3D.setClearColor(0x0000ff, 1); 
-        renderer3D.render(scene3D, camera3D);
-        console.log("🎨 Renderizando frame...");
-    } else {
-        console.log("❌ Renderer, scene o camera no definidos");
+    // 1. MATAR CUALQUIER BUCLE ANTERIOR
+    if (spaxioAnimFrameId !== null) {
+        cancelAnimationFrame(spaxioAnimFrameId);
     }
+
+    // 2. DEFINIR EL BUCLE
+    function loop() {
+        if (!renderer3D) return;
+
+        spaxioAnimFrameId = requestAnimationFrame(loop);
+
+        if (cuboPrueba) {
+            cuboPrueba.rotation.y = THREE.MathUtils.lerp(cuboPrueba.rotation.y, rotacionRostro.y, 0.15);
+        }
+
+        renderer3D.render(scene3D, camera3D);
+    }
+
+    // 3. INICIAR
+    loop();
  }
 
     animarSpaxioVerso();
