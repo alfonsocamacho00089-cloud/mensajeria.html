@@ -4854,45 +4854,42 @@ const ID_SALA_METAVERSO = "6bdq9a7CC9UI";
 async function abrirSpaxioVersoDesdeContacto() {
     let contenedor3D = document.getElementById('contenedor-spaxioverso');
 
-    // Si ya existe, solo mostrar
     if (contenedor3D) {
         contenedor3D.style.display = 'flex';
+        if (renderer3D) animarSpaxioVerso();
         if (camaraMediaPipe) camaraMediaPipe.start();
         return;
     }
 
-    // Creación forzada
+    // Creación del contenedor
     contenedor3D = document.createElement('div');
     contenedor3D.id = 'contenedor-spaxioverso';
     contenedor3D.style.cssText = "position: fixed; top: 0; left: 0; width: 100dvw; height: 100dvh; background: #0b141a; z-index: 2000; display: flex; flex-direction: column;";
-    contenedor3D.innerHTML = `
-        <div style="padding:15px; display:flex; justify-content:space-between;">
-            <button onclick="cerrarSpaxioVerso()">[ Salir ]</button>
-        </div>
-        <div id="canvas-render-3d" style="flex-grow:1;"></div>
-        <video id="video-captura-omni" style="display:none;" playsinline></video>
-    `;
+    contenedor3D.innerHTML = `<div id="canvas-render-3d" style="flex-grow:1;"></div><video id="video-captura-omni" style="display:none;" playsinline></video>`;
     document.body.appendChild(contenedor3D);
 
-    // Damos tiempo al navegador para que el elemento exista en el DOM antes de inicializar
-    await new Promise(resolve => setTimeout(resolve, 200));
-
-    // Inicialización del motor 3D
+    // Esperamos 300ms a que el layout de Android se estabilice
+    await new Promise(r => setTimeout(r, 300));
+    
     videoElementOculto = document.getElementById('video-captura-omni');
     inicializarEntorno3D('canvas-render-3d');
-    
-    // Carga de activos
     cargarAvatar();
 
-    // Arrancar Holistic solo cuando el entorno esté listo
-    if (renderer3D) {
-        encenderRastreadorFacialOMNI();
-        // El bucle de animación ya tiene su propia protección de 'if (!renderer3D)'
-        animarSpaxioVerso();
-    } else {
-        console.error("❌ ERROR: El renderizador no se pudo inicializar.");
-    }
-     }
+    // Verificación de arranque
+    let intentos = 0;
+    const verificar = setInterval(() => {
+        intentos++;
+        if (renderer3D) {
+            clearInterval(verificar);
+            encenderRastreadorFacialOMNI();
+            animarSpaxioVerso();
+            console.log("🚀 SpaxioVerso OMNI activo.");
+        } else if (intentos > 10) {
+            clearInterval(verificar);
+            console.error("❌ Fallo crítico al iniciar renderizador.");
+        }
+    }, 200);
+ }
 // 🎮 Controlador Global del SpaxioVerso
 const SpaxioAvatarController = {
     huesos: {
@@ -4965,27 +4962,26 @@ let escenaAvatar, camaraAvatar, renderAvatar, modeloAvatar;
 // Asegúrate de que esta función devuelva el renderer para confirmar éxito
 function inicializarEntorno3D(contenedorID) {
     const contenedor = document.getElementById(contenedorID);
-    if (!contenedor) {
-        console.error("❌ ERROR: Contenedor no existe en el DOM");
-        return false; // Retorna falso si no pudo inicializar
-    }
+    if (!contenedor) return;
 
-    // Inicialización directa
+    // FORZAMOS dimensiones antes de crear el renderer
+    contenedor.style.width = '100%';
+    contenedor.style.height = '100%';
+
     scene3D = new THREE.Scene();
     scene3D.background = new THREE.Color(0x000000);
+
+    // Usamos el clienteWidth/Height del contenedor
     camera3D = new THREE.PerspectiveCamera(45, contenedor.clientWidth / contenedor.clientHeight, 0.1, 100);
     camera3D.position.set(0, 1.3, 1.6);
-    
+
     renderer3D = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-    renderer3D.setSize(contenedor.clientWidth, contenedor.clientHeight);
+    renderer3D.setSize(contenedor.clientWidth, contenedor.clientHeight); // <--- Aquí fallaba si era 0
+    renderer3D.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     
     contenedor.appendChild(renderer3D.domElement);
-    
-    console.log("✅ Renderer creado y adjuntado");
-    return true; // Confirmación de éxito
-     }
-// FUNCIÓN DE INTERCEPCIÓN TOTAL EN TIEMPO REAL
-
+    console.log("✅ Renderer inicializado en tamaño:", contenedor.clientWidth, "x", contenedor.clientHeight);
+ }
 
     // --- SECCIÓN C: MANOS Y DEDOS ---
 function sincronizarPerifericosKalidokit(resultadosMediaPipe) {
