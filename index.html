@@ -4979,7 +4979,9 @@ camera3D.lookAt(0, 1, 0); // Que mire al torso, no al suelo
     renderer3D = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     renderer3D.setSize(contenedor.clientWidth, contenedor.clientHeight); // <--- Aquí fallaba si era 0
     renderer3D.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    
+    const luzFrontal = new THREE.DirectionalLight(0xffffff, 2);
+luzFrontal.position.set(0, 1, 5); // Frente al avatar
+scene3D.add(luzFrontal);
     contenedor.appendChild(renderer3D.domElement);
     console.log("✅ Renderer inicializado en tamaño:", contenedor.clientWidth, "x", contenedor.clientHeight);
  }
