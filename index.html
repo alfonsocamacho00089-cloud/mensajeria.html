@@ -4849,13 +4849,17 @@ const ID_SALA_METAVERSO = "6bdq9a7CC9UI";
  * 1. CONTROL DE FLUJO Y APERTURA DE LA PWA
  */
 async function abrirSpaxioVersoDesdeContacto() {
-    if (spaxioVersoEnSegundoPlano) {
-        maximizarSpaxioVerso();
+    const contenedor3D = document.getElementById('contenedor-spaxioverso');
+
+    if (contenedor3D) {
+        // Si ya existe, solo lo volvemos visible
+        contenedor3D.style.display = 'flex';
+        // Si el motor ya estaba iniciado, reanudamos la cámara
+        if (camaraMediaPipe) camaraMediaPipe.start();
         return;
     }
 
-    console.log("🪐 H.A.R.V.I.S: Inicializando entorno gráfico del SpaxioVerso...");
-    
+    console.log("🪐 H.A.R.V.I.S: Creando infraestructura permanente...");
     // Eliminamos Supabase de aquí. El control de transmisión se activa automáticamente
     // a través de LiveKit cuando MediaPipe detecta los puntos de la cara.
 
@@ -4890,11 +4894,13 @@ async function abrirSpaxioVersoDesdeContacto() {
 
         // En tu función principal, cambia el orden de los setTimeout así:
 setTimeout(() => {
-            inicializarEntorno3D();
-            setTimeout(() => {
-                encenderRastreadorFacialOMNI();
-            }, 100);
-        }, 100);
+        inicializarEntorno3D('canvas-render-3d');
+        cargarAvatar(); // ¡Carga forzada antes de la IA!
+        setTimeout(() => {
+            encenderRastreadorFacialOMNI();
+        }, 800); // Esperamos a que el render esté listo
+    }, 200);
+ 
 
     } catch (error) {
         console.error("❌ Fallo crítico al levantar el espacio del SpaxioVerso:", error);
@@ -5331,48 +5337,28 @@ function maximizarSpaxioVerso() {
         console.log("📤 SpaxioVerso al frente.");
     }
 }
-
 function cerrarSpaxioVerso() {
     const contenedor3D = document.getElementById('contenedor-spaxioverso');
     if (contenedor3D) {
-        contenedor3D.style.display = 'none';
-        
-        detenerTransmisionOmniRealtime();
-        
-        if (spaxioAnimFrameId) {
-            cancelAnimationFrame(spaxioAnimFrameId);
-            spaxioAnimFrameId = null;
-        }
-        
+        // Solo ocultamos. El contexto WebGL y faceMeshIA siguen vivos en RAM.
+        // Dentro de tu función de cierre (la nueva que propusiste)
+contenedor3D.style.display = 'none';
+
+// Pausar el renderizado para ahorrar batería
+if (spaxioAnimFrameId) {
+    cancelAnimationFrame(spaxioAnimFrameId);
+    spaxioAnimFrameId = null;
+ }
+        // Pausamos la cámara para liberar el procesador, pero NO destruimos el motor
         if (camaraMediaPipe) {
             camaraMediaPipe.stop();
-            camaraMediaPipe = null;
-        }
-        if (faceMeshIA) {
-            faceMeshIA.close();
-            faceMeshIA = null;
         }
         
-        if (videoElementOculto && videoElementOculto.srcObject) {
-            videoElementOculto.srcObject.getTracks().forEach(track => track.stop());
-        }
-
-        if (canalSpaxioverso) {
-            canalSpaxioverso.unsubscribe();
-            canalSpaxioverso = null;
-        }
-
-        // Limpieza de avatares de la escena al salir de la sala
-        for (let id in avatarsRemotos) {
-            if (avatarsRemotos[id]) scene3D.remove(avatarsRemotos[id]);
-        }
-        avatarsRemotos = {};
-
-        renderer3D = null;
-        spaxioVersoEnSegundoPlano = false;
-        console.log("🔌 Sistema OMNI completamente apagado.");
+        console.log("🔌 Sistema OMNI en espera. Motor IA y Contexto 3D preservados.");
     }
      }
+
+
 
      function actualizarEscena3D() {
     // 1. Ejecuta la rotación de cabeza y prepara el cuerpo
