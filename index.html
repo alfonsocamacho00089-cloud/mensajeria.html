@@ -4952,54 +4952,35 @@ const SpaxioAvatarController = {
      /**
  * 2. MOTOR GRÁFICO (WebGL con Three.js y Avatares Reales glTF)
  */// ==========================================
-// CONTROLADOR SPAXIO AVATAR SUPREMO (CARA + MANOS + CUERPO)
-// ==========================================
-window.scene3D = new THREE.Scene();
-window.camera3D = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
-window.renderer3D = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-     
-// Declaración explícita de variables globales para evitar errores de scope
-
+window.SpaxioVerso = {
+    scene: new THREE.Scene(),
+    camera: null,
+    renderer: null,
+    isReady: false,
+    containerID: 'contenedor-spaxioverso'
+};
 
 function inicializarEntorno3D(contenedorID) {
     const contenedor = document.getElementById(contenedorID);
-    if (!contenedor) {
-        console.error("❌ Contenedor no encontrado: " + contenedorID);
-        return;
-    }
+    if (!contenedor) return;
 
-    // 1. Obtener dimensiones reales inmediatas
-    const width = contenedor.clientWidth || window.innerWidth;
-    const height = contenedor.clientHeight || window.innerHeight;
+    const w = contenedor.clientWidth || window.innerWidth;
+    const h = contenedor.clientHeight || window.innerHeight;
 
-    // 2. Inicializar Escena
-    window.scene3D = new THREE.Scene();
-    window.scene3D.background = new THREE.Color(0x000000);
+    SpaxioVerso.camera = new THREE.PerspectiveCamera(45, w / h, 0.1, 1000);
+    SpaxioVerso.camera.position.set(0, 1.3, 2);
 
-    // 3. Configurar Cámara
-    window.camera3D = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
-    window.camera3D.position.set(0, 1.3, 2);
-    window.camera3D.lookAt(0, 1, 0);
-
-    // 4. Configurar Renderer
-    window.renderer3D = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-    window.renderer3D.setSize(width, height);
-    window.renderer3D.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    SpaxioVerso.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    SpaxioVerso.renderer.setSize(w, h);
+    SpaxioVerso.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     
-    // Inyección forzada en el DOM
-    contenedor.appendChild(window.renderer3D.domElement);
+    contenedor.appendChild(SpaxioVerso.renderer.domElement);
 
-    // 5. Iluminación (Vital para que el avatar no sea negro)
-    const luzAmbiental = new THREE.AmbientLight(0xffffff, 1);
-    window.scene3D.add(luzAmbiental);
-    const luzFrontal = new THREE.DirectionalLight(0xffffff, 2);
-    luzFrontal.position.set(0, 1, 5);
-    window.scene3D.add(luzFrontal);
-
-    console.log("✅ Renderer inicializado. Tamaño:", width, "x", height);
+    // Iluminación para evitar el renderizado negro
+    SpaxioVerso.scene.add(new THREE.AmbientLight(0xffffff, 1.5));
     
-    // Forzar un primer frame para validar que el canvas responde
-    window.renderer3D.render(window.scene3D, window.camera3D);
+    SpaxioVerso.isReady = true;
+    console.log("✅ SpaxioVerso: Entorno montado.");
      }
 
     // --- SECCIÓN C: MANOS Y DEDOS ---
