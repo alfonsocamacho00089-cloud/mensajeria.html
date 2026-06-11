@@ -5000,8 +5000,11 @@ const SpaxioAvatarController = {
 // ==========================================
 let escenaAvatar, camaraAvatar, renderAvatar, modeloAvatar;
 
-function inicializarEntorno3D(contenedorID) {
-    const contenedor = document.getElementById(contenedorID);
+ // Prueba de diagnóstico forzada
+inicializarEntorno3D('canvas-render-3d');
+scene3D.background = new THREE.Color(0xff0000); // ¡Si esto se pone ROJO, el motor funciona!
+
+     const contenedor = document.getElementById(contenedorID);
     if (!contenedor) return;
 
     // Usamos las variables globales que declaraste al principio
