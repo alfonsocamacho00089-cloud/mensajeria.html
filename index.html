@@ -4824,7 +4824,9 @@ function activarSpaxioFlowRealtime() {
 // =================================================================
 // 🪐 SPAXIOVERSO OMNI: MOTOR GRÁFICO, IA Y TELEMETRÍA ULTRA-LIGERA
 // =================================================================
-
+window.scene3D = new THREE.Scene();
+window.camera3D = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+window.renderer3D = new THREE.WebGLRenderer({ antialias: true, alpha: true });
 // Variables globales de control de infraestructura
 let spaxioAnimFrameId = null;
 let scene3D = null, camera3D = null, renderer3D = null, cuboPrueba = null;
@@ -4957,9 +4959,7 @@ const SpaxioAvatarController = {
 // ==========================================
 
 // Declaración explícita de variables globales para evitar errores de scope
-window.scene3D = null;
-window.camera3D = null;
-window.renderer3D = null;
+
 
 function inicializarEntorno3D(contenedorID) {
     const contenedor = document.getElementById(contenedorID);
