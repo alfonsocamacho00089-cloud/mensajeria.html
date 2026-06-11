@@ -4854,52 +4854,37 @@ const ID_SALA_METAVERSO = "6bdq9a7CC9UI";
 async function abrirSpaxioVersoDesdeContacto() {
     let contenedor3D = document.getElementById('contenedor-spaxioverso');
 
+    // Si ya existe, lo mostramos
     if (contenedor3D) {
         contenedor3D.style.display = 'flex';
-        // Solo animar si el renderer realmente existe
         if (renderer3D) animarSpaxioVerso();
-        if (camaraMediaPipe) camaraMediaPipe.start();
         return;
     }
 
-    // 1. Inyección del DOM
-    console.log("🪐 H.A.R.V.I.S: Construyendo entorno...");
+    // Creación del DOM
     contenedor3D = document.createElement('div');
     contenedor3D.id = 'contenedor-spaxioverso';
-    contenedor3D.style.cssText = "position: fixed; top: 0; left: 0; width: 100dvw; height: 100dvh; background: #0b141a; z-index: 2000; display: flex; flex-direction: column;";
-    
-    contenedor3D.innerHTML = `
-        <div style="padding:15px; display:flex; justify-content:space-between;">
-            <button onclick="cerrarSpaxioVerso()">[ Salir ]</button>
-        </div>
-        <div id="canvas-render-3d" style="flex-grow:1;"></div>
-        <video id="video-captura-omni" style="display:none;" playsinline></video>
-    `;
-
+    contenedor3D.style.cssText = "position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #0b141a; z-index: 2000; display: flex; flex-direction: column;";
+    contenedor3D.innerHTML = `<div id="canvas-render-3d" style="flex-grow:1;"></div><video id="video-captura-omni" style="display:none;" playsinline></video>`;
     document.body.appendChild(contenedor3D);
 
-    // 2. Espera crítica de sincronización (Mobile Safari/Chrome necesitan este tick)
-    await new Promise(resolve => setTimeout(resolve, 50));
-    
-    videoElementOculto = document.getElementById('video-captura-omni');
-    
-    // 3. Inicialización controlada
-    inicializarEntorno3D('canvas-render-3d');
-    cargarAvatar(); 
+    // Verificación inmediata: ¿El elemento existe en el DOM real?
+    const canvas = document.getElementById('canvas-render-3d');
+    if (!canvas) {
+        console.error("❌ El DOM no ha registrado el canvas aún");
+        return;
+    }
 
-    // 4. Inicio secuencial del motor Holistic + Bucle 3D
-    const verificarYArrancar = setInterval(() => {
-        if (renderer3D && document.getElementById('canvas-render-3d')) {
-            console.log("✅ Entorno 3D verificado. Activando OMNI...");
-            clearInterval(verificarYArrancar);
-            
-            encenderRastreadorFacialOMNI();
-            animarSpaxioVerso(); 
-        } else {
-            console.log("⏳ Esperando renderizador...");
-        }
-    }, 200);
-     }
+    // Inicialización
+    const exito = inicializarEntorno3D('canvas-render-3d');
+    
+    if (exito) {
+        cargarAvatar();
+        encenderRastreadorFacialOMNI();
+        // Llamada directa: si el renderer ya existe, animamos
+        animarSpaxioVerso();
+    }
+ }
 // 🎮 Controlador Global del SpaxioVerso
 const SpaxioAvatarController = {
     huesos: {
@@ -4969,38 +4954,28 @@ let escenaAvatar, camaraAvatar, renderAvatar, modeloAvatar;
 
  // Prueba de diagnóstico forzada
 function inicializarEntorno3D(contenedorID) {
-     const contenedor = document.getElementById(contenedorID);
-    if (!contenedor) return;
+// Asegúrate de que esta función devuelva el renderer para confirmar éxito
+function inicializarEntorno3D(contenedorID) {
+    const contenedor = document.getElementById(contenedorID);
+    if (!contenedor) {
+        console.error("❌ ERROR: Contenedor no existe en el DOM");
+        return false; // Retorna falso si no pudo inicializar
+    }
 
-    // Usamos las variables globales que declaraste al principio
+    // Inicialización directa
     scene3D = new THREE.Scene();
     scene3D.background = new THREE.Color(0x000000);
-
     camera3D = new THREE.PerspectiveCamera(45, contenedor.clientWidth / contenedor.clientHeight, 0.1, 100);
     camera3D.position.set(0, 1.3, 1.6);
-
+    
     renderer3D = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     renderer3D.setSize(contenedor.clientWidth, contenedor.clientHeight);
-    renderer3D.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    
     contenedor.appendChild(renderer3D.domElement);
-
-    const luzAmbiental = new THREE.AmbientLight(0xffffff, 0.5);
-    scene3D.add(luzAmbiental);
     
-    const luzPuntoOro = new THREE.DirectionalLight(0xffd700, 1.0);
-    luzPuntoOro.position.set(2, 4, 3);
-    scene3D.add(luzPuntoOro);
-
-    // BORRAMOS el bucleRender interno aquí, porque ya tienes animarSpaxioVerso() 
-    
-// al final del archivo controlando el renderizado global.
- // --- INYECCIÓN DE PRUEBA (SOLO PARA VER SI EL RENDER FUNCIONA) ---
-const geometria = new THREE.BoxGeometry(0.5, 0.5, 0.5);
-const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
-const cuboTemporal = new THREE.Mesh(geometria, material);
-scene3D.add(cuboTemporal);
-// ------
- }
+    console.log("✅ Renderer creado y adjuntado");
+    return true; // Confirmación de éxito
+     }
 // FUNCIÓN DE INTERCEPCIÓN TOTAL EN TIEMPO REAL
 
 
