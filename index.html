@@ -5279,7 +5279,34 @@ function detenerTransmisionOmniRealtime() {
         console.log("🛑 H.A.R.V.I.S: Emisión de telemetría facial apagada.");
     }
 }
+// Este bloque asegura que el motor solo se cree cuando THREE esté listo
+window.addEventListener('load', () => {
+    // 1. Verificación de librerías
+    if (typeof THREE === 'undefined') {
+        console.error("❌ Three.js no cargado. Revisa el orden de tus scripts.");
+        return;
+    }
 
+    // 2. Inicialización segura del contenedor
+    window.SpaxioVerso = {
+        scene: new THREE.Scene(),
+        camera: new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000),
+        renderer: new THREE.WebGLRenderer({ antialias: true, alpha: true }),
+        isReady: false
+    };
+
+    // 3. Ajuste de CSS del canvas para asegurar visibilidad
+    const contenedor = document.getElementById('contenedor-spaxioverso');
+    if (contenedor) {
+        SpaxioVerso.renderer.setSize(contenedor.clientWidth, contenedor.clientHeight);
+        contenedor.appendChild(SpaxioVerso.renderer.domElement);
+        SpaxioVerso.renderer.domElement.style.position = 'absolute';
+        SpaxioVerso.renderer.domElement.style.top = '0';
+        SpaxioVerso.renderer.domElement.style.zIndex = '10'; // Traer al frente
+        SpaxioVerso.isReady = true;
+        console.log("✅ SpaxioVerso: Inicialización exitosa post-carga.");
+    }
+});
 /**
  * 5. INTERRUPTORES DE CICLO DE VIDA (Minimizar / Cerrar)
  */
