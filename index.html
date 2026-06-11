@@ -4854,37 +4854,45 @@ const ID_SALA_METAVERSO = "6bdq9a7CC9UI";
 async function abrirSpaxioVersoDesdeContacto() {
     let contenedor3D = document.getElementById('contenedor-spaxioverso');
 
-    // Si ya existe, lo mostramos
+    // Si ya existe, solo mostrar
     if (contenedor3D) {
         contenedor3D.style.display = 'flex';
-        if (renderer3D) animarSpaxioVerso();
+        if (camaraMediaPipe) camaraMediaPipe.start();
         return;
     }
 
-    // Creación del DOM
+    // Creación forzada
     contenedor3D = document.createElement('div');
     contenedor3D.id = 'contenedor-spaxioverso';
-    contenedor3D.style.cssText = "position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #0b141a; z-index: 2000; display: flex; flex-direction: column;";
-    contenedor3D.innerHTML = `<div id="canvas-render-3d" style="flex-grow:1;"></div><video id="video-captura-omni" style="display:none;" playsinline></video>`;
+    contenedor3D.style.cssText = "position: fixed; top: 0; left: 0; width: 100dvw; height: 100dvh; background: #0b141a; z-index: 2000; display: flex; flex-direction: column;";
+    contenedor3D.innerHTML = `
+        <div style="padding:15px; display:flex; justify-content:space-between;">
+            <button onclick="cerrarSpaxioVerso()">[ Salir ]</button>
+        </div>
+        <div id="canvas-render-3d" style="flex-grow:1;"></div>
+        <video id="video-captura-omni" style="display:none;" playsinline></video>
+    `;
     document.body.appendChild(contenedor3D);
 
-    // Verificación inmediata: ¿El elemento existe en el DOM real?
-    const canvas = document.getElementById('canvas-render-3d');
-    if (!canvas) {
-        console.error("❌ El DOM no ha registrado el canvas aún");
-        return;
-    }
+    // Damos tiempo al navegador para que el elemento exista en el DOM antes de inicializar
+    await new Promise(resolve => setTimeout(resolve, 200));
 
-    // Inicialización
-    const exito = inicializarEntorno3D('canvas-render-3d');
+    // Inicialización del motor 3D
+    videoElementOculto = document.getElementById('video-captura-omni');
+    inicializarEntorno3D('canvas-render-3d');
     
-    if (exito) {
-        cargarAvatar();
+    // Carga de activos
+    cargarAvatar();
+
+    // Arrancar Holistic solo cuando el entorno esté listo
+    if (renderer3D) {
         encenderRastreadorFacialOMNI();
-        // Llamada directa: si el renderer ya existe, animamos
+        // El bucle de animación ya tiene su propia protección de 'if (!renderer3D)'
         animarSpaxioVerso();
+    } else {
+        console.error("❌ ERROR: El renderizador no se pudo inicializar.");
     }
- }
+     }
 // 🎮 Controlador Global del SpaxioVerso
 const SpaxioAvatarController = {
     huesos: {
@@ -5122,17 +5130,17 @@ const manoDerecha = resultadosMediaPipe.rightHandLandmarks;
     }
 
     // Bucle de Renderizado Suave con Interpolación Remota (Lerp)
+    
     function animarSpaxioVerso() {
-    // Si no hay renderer, no podemos hacer nada
-    if (!renderer3D) {
-        console.warn("⚠️ Renderizador no encontrado, reintentando en 500ms...");
-        setTimeout(animarSpaxioVerso, 500);
+    // Si no existe, no intentamos renderizar, simplemente volvemos a intentar en el siguiente frame
+    if (!window.renderer3D && typeof renderer3D === 'undefined') {
+        console.warn("⏳ Esperando renderizador...");
+        requestAnimationFrame(animarSpaxioVerso);
         return;
     }
 
     spaxioAnimFrameId = requestAnimationFrame(animarSpaxioVerso);
     
-    // Mueve tu avatar real
     if (cuboPrueba) {
         cuboPrueba.rotation.y = THREE.MathUtils.lerp(cuboPrueba.rotation.y, rotacionRostro.y, 0.15);
     }
