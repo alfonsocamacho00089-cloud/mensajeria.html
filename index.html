@@ -5024,7 +5024,14 @@ function inicializarEntorno3D(contenedorID) {
     scene3D.add(luzPuntoOro);
 
     // BORRAMOS el bucleRender interno aquí, porque ya tienes animarSpaxioVerso() 
-    // al final del archivo controlando el renderizado global.
+    
+// al final del archivo controlando el renderizado global.
+ // --- INYECCIÓN DE PRUEBA (SOLO PARA VER SI EL RENDER FUNCIONA) ---
+const geometria = new THREE.BoxGeometry(0.5, 0.5, 0.5);
+const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+const cuboTemporal = new THREE.Mesh(geometria, material);
+scene3D.add(cuboTemporal);
+// ------
  }
 // FUNCIÓN DE INTERCEPCIÓN TOTAL EN TIEMPO REAL
 
