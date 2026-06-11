@@ -4888,20 +4888,16 @@ async function abrirSpaxioVersoDesdeContacto() {
 
         videoElementOculto = document.getElementById('video-captura-omni');
 
-        setTimeout(() => {
-            // Prueba de diagnóstico forzada
-inicializarEntorno3D('canvas-render-3d');
-scene3D.background = new THREE.Color(0xff0000); // ¡Si esto se pone ROJO, el motor funciona!
-            setTimeout(() => {
-                encenderRastreadorFacialOMNI();
-            }, 400);
-        }, 100);
-
-    } catch (error) {
-        console.error("❌ Fallo crítico al levantar el espacio del SpaxioVerso:", error);
-    }
-     }
-
+        // En tu función principal, cambia el orden de los setTimeout así:
+setTimeout(() => {
+    inicializarEntorno3D(); // 1. Prepara el escenario
+    cargarAvatar();         // 2. FUERZA la carga del modelo YA, antes de la IA
+    
+    setTimeout(() => {
+        encenderRastreadorFacialOMNI(); // 3. Al final, enciende la IA
+    }, 1000); // Damos un segundo de margen para que el avatar esté en memoria
+}, 100);
+     
     // El resto de tu función (el bloque try/catch con el contenedor3D) se queda exactamente igual...
 // 🎮 Controlador Global del SpaxioVerso (Estructura expandible)
 const SpaxioAvatarController = {
