@@ -4957,34 +4957,51 @@ const SpaxioAvatarController = {
 // ==========================================
 let escenaAvatar, camaraAvatar, renderAvatar, modeloAvatar;
 
- // Prueba de diagnóstico forzada
+// Declaración explícita de variables globales para evitar errores de scope
+window.scene3D = null;
+window.camera3D = null;
+window.renderer3D = null;
 
-// Asegúrate de que esta función devuelva el renderer para confirmar éxito
 function inicializarEntorno3D(contenedorID) {
     const contenedor = document.getElementById(contenedorID);
-    if (!contenedor) return;
+    if (!contenedor) {
+        console.error("❌ Contenedor no encontrado: " + contenedorID);
+        return;
+    }
 
-    // FORZAMOS dimensiones antes de crear el renderer
-    contenedor.style.width = '100%';
-    contenedor.style.height = '100%';
+    // 1. Obtener dimensiones reales inmediatas
+    const width = contenedor.clientWidth || window.innerWidth;
+    const height = contenedor.clientHeight || window.innerHeight;
 
-    scene3D = new THREE.Scene();
-    scene3D.background = new THREE.Color(0x000000);
+    // 2. Inicializar Escena
+    window.scene3D = new THREE.Scene();
+    window.scene3D.background = new THREE.Color(0x000000);
 
-    // Usamos el clienteWidth/Height del contenedor
-    camera3D = new THREE.PerspectiveCamera(45, contenedor.clientWidth / contenedor.clientHeight, 0.1, 100);
-    // En inicializarEntorno3D:
-camera3D.position.set(0, 1.3, 2); // 2 unidades de profundidad es suficiente
-camera3D.lookAt(0, 1, 0); // Que mire al torso, no al suelo
-    renderer3D = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-    renderer3D.setSize(contenedor.clientWidth, contenedor.clientHeight); // <--- Aquí fallaba si era 0
-    renderer3D.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    // 3. Configurar Cámara
+    window.camera3D = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
+    window.camera3D.position.set(0, 1.3, 2);
+    window.camera3D.lookAt(0, 1, 0);
+
+    // 4. Configurar Renderer
+    window.renderer3D = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    window.renderer3D.setSize(width, height);
+    window.renderer3D.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    
+    // Inyección forzada en el DOM
+    contenedor.appendChild(window.renderer3D.domElement);
+
+    // 5. Iluminación (Vital para que el avatar no sea negro)
+    const luzAmbiental = new THREE.AmbientLight(0xffffff, 1);
+    window.scene3D.add(luzAmbiental);
     const luzFrontal = new THREE.DirectionalLight(0xffffff, 2);
-luzFrontal.position.set(0, 1, 5); // Frente al avatar
-scene3D.add(luzFrontal);
-    contenedor.appendChild(renderer3D.domElement);
-    console.log("✅ Renderer inicializado en tamaño:", contenedor.clientWidth, "x", contenedor.clientHeight);
- }
+    luzFrontal.position.set(0, 1, 5);
+    window.scene3D.add(luzFrontal);
+
+    console.log("✅ Renderer inicializado. Tamaño:", width, "x", height);
+    
+    // Forzar un primer frame para validar que el canvas responde
+    window.renderer3D.render(window.scene3D, window.camera3D);
+     }
 
     // --- SECCIÓN C: MANOS Y DEDOS ---
 function sincronizarPerifericosKalidokit(resultadosMediaPipe) {
