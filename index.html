@@ -4832,7 +4832,7 @@ let videoElementOculto = null;
 let faceMeshIA = null;
 let camaraMediaPipe = null;
 let spaxioVersoEnSegundoPlano = false;
-
+let loader3D = new THREE.GLTFLoader();
 // Variables de conectividad y estados de transmisión (Supabase Realtime Opción B)
 let canalSpaxioverso = null;
 let intervaloTransmision = null;
@@ -4849,20 +4849,18 @@ const ID_SALA_METAVERSO = "6bdq9a7CC9UI";
  * 1. CONTROL DE FLUJO Y APERTURA DE LA PWA
  */
 async function abrirSpaxioVersoDesdeContacto() {
-    const contenedor3D = document.getElementById('contenedor-spaxioverso');
-
+    // Si ya existe, solo mostrar
+    let contenedor3D = document.getElementById('contenedor-spaxioverso');
     if (contenedor3D) {
         contenedor3D.style.display = 'flex';
         if (camaraMediaPipe) camaraMediaPipe.start();
-        if (!spaxioAnimFrameId) animarSpaxioVerso();
         return;
     }
 
-    // Creación inicial del DOM
-    console.log("🪐 H.A.R.V.I.S: Construyendo SpaxioVerso OMNI...");
-    let contenedor3DNew = document.createElement('div');
-    contenedor3DNew.id = 'contenedor-spaxioverso';
-
+    // Creación si no existe
+    console.log("🪐 H.A.R.V.I.S: Inicializando...");
+    contenedor3D = document.createElement('div');
+    contenedor3D.id = 'contenedor-spaxioverso';
     
     try {
         let contenedor3D = document.getElementById('contenedor-spaxioverso');
@@ -4886,18 +4884,19 @@ async function abrirSpaxioVersoDesdeContacto() {
                 <div id="canvas-render-3d" style="position: absolute; top: 60px; left: 0; width: 100vw; height: calc(100vh - 60px); background: #050505; overflow: hidden; z-index: 1999;"></div>
                 <video id="video-captura-omni" style="display: none;" playsinline></video>
             `;
-            document.body.appendChild(contenedor3DNew);
+            document.body.appendChild(contenedor3D);
     
-    // --- NUEVA SECUENCIA PRIORITARIA ---
+    // --- 3. SECUENCIA SINCRONIZADA ---
     inicializarEntorno3D('canvas-render-3d');
+    
+    // Cargamos el modelo ANTES de encender la IA
     cargarAvatar(); 
     
+    // Damos un margen mínimo para el setup de los objetos 3D
     setTimeout(() => {
         encenderRastreadorFacialOMNI();
-    }, 800);
-
-     }
-
+    }, 500);
+ }
     } catch (error) {
         console.error("❌ Fallo crítico al levantar el espacio del SpaxioVerso:", error);
     }
@@ -5133,14 +5132,15 @@ const manoDerecha = resultadosMediaPipe.rightHandLandmarks;
     
 
      function cargarAvatar() {
+    if (!loader3D) loader3D = new THREE.GLTFLoader();
+    
     loader3D.load('/assets/avatar_local.glb', (gltf) => {
         cuboPrueba = gltf.scene;
         cuboPrueba.scale.set(1.3, 1.3, 1.3);
         scene3D.add(cuboPrueba);
         SpaxioAvatarController.vincularEsqueleto(cuboPrueba);
-        console.log("✅ Avatar cargado y listo.");
-    }, undefined, (error) => console.error("❌ Error de carga:", error));
-     }
+    }, undefined, (error) => { console.error("❌ Error al cargar:", error); });
+ }
      
     // 🚀 RECEPTOR OMNI LIVEKIT: Sincroniza y pinta los avatares remotos reales
     if (typeof room !== 'undefined' && room && room.state === 'connected') {
