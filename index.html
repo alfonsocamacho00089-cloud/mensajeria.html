@@ -5152,30 +5152,25 @@ let motorCorriendo = false;
 // Variable global para controlar el ID
 let spaxioAnimFrameId = null;
 
+// --- Bucle de Renderizado corregido ---
 function animarSpaxioVerso() {
-    // 1. MATAR CUALQUIER BUCLE ANTERIOR
-    if (spaxioAnimFrameId !== null) {
-        cancelAnimationFrame(spaxioAnimFrameId);
-    }
+    if (spaxioAnimFrameId !== null) cancelAnimationFrame(spaxioAnimFrameId);
 
-    // 2. DEFINIR EL BUCLE
     function loop() {
-    if (!renderer3D) return;
+        // USAMOS EL OBJETO GLOBAL SpaxioVerso
+        if (!window.SpaxioVerso || !window.SpaxioVerso.renderer) return;
 
-    spaxioAnimFrameId = requestAnimationFrame(loop);
+        spaxioAnimFrameId = requestAnimationFrame(loop);
 
-    // Solo rotar si existe el cubo Y la variable de rotación está definida
-    if (cuboPrueba && typeof rotacionRostro !== 'undefined') {
-        cuboPrueba.rotation.y = THREE.MathUtils.lerp(cuboPrueba.rotation.y, rotacionRostro.y || 0, 0.15);
+        if (cuboPrueba && typeof rotacionRostro !== 'undefined') {
+            cuboPrueba.rotation.y = THREE.MathUtils.lerp(cuboPrueba.rotation.y, rotacionRostro.y || 0, 0.15);
+        }
+
+        // RENDERIZAMOS USANDO EL CONTEXTO GLOBAL
+        window.SpaxioVerso.renderer.render(window.SpaxioVerso.scene, window.SpaxioVerso.camera);
     }
-
-    renderer3D.render(scene3D, camera3D);
- }
-
-    // 3. INICIAR
     loop();
- }
-
+     }
     animarSpaxioVerso();
      
      
