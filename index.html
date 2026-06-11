@@ -4856,20 +4856,15 @@ async function abrirSpaxioVersoDesdeContacto() {
 
     if (contenedor3D) {
         contenedor3D.style.display = 'flex';
-        if (renderer3D) {
-            console.log("🚀 Reactivando renderizador existente...");
-            animarSpaxioVerso(); 
-        }
+        if (renderer3D) animarSpaxioVerso();
         if (camaraMediaPipe) camaraMediaPipe.start();
         return;
     }
 
-    // 2. Creación forzada
-    console.log("🪐 H.A.R.V.I.S: Construyendo entorno...");
+    // 1. Construcción del DOM (Base de tu éxito anterior)
     contenedor3D = document.createElement('div');
     contenedor3D.id = 'contenedor-spaxioverso';
     contenedor3D.style.cssText = "position: fixed; top: 0; left: 0; width: 100dvw; height: 100dvh; background: #0b141a; z-index: 2000; display: flex; flex-direction: column;";
-    
     contenedor3D.innerHTML = `
         <div style="padding:15px; display:flex; justify-content:space-between;">
             <button onclick="cerrarSpaxioVerso()">[ Salir ]</button>
@@ -4877,20 +4872,27 @@ async function abrirSpaxioVersoDesdeContacto() {
         <div id="canvas-render-3d" style="flex-grow:1;"></div>
         <video id="video-captura-omni" style="display:none;" playsinline></video>
     `;
-
     document.body.appendChild(contenedor3D);
 
+    // 2. Inicialización 3D (Esperamos a que el navegador registre el elemento)
+    await new Promise(r => setTimeout(r, 100));
     videoElementOculto = document.getElementById('video-captura-omni');
-    
     inicializarEntorno3D('canvas-render-3d');
-    cargarAvatar(); 
     
+    // 3. Carga del Avatar y Holistic en paralelo
+    cargarAvatar();
+    
+    // Nueva lógica de seguridad: Solo iniciamos el bucle una vez que el motor de IA está listo
+    // para evitar el error de "Renderizador no encontrado"
+    encenderRastreadorFacialOMNI();
+    
+    // Forzamos el inicio del bucle después de que los recursos clave se carguen
     setTimeout(() => {
-        encenderRastreadorFacialOMNI();
-        animarSpaxioVerso();
-    }, 500);
-} // <--- Cierre de función necesario
-
+        if (renderer3D) {
+            animarSpaxioVerso();
+        }
+    }, 1000); 
+     }
 // 🎮 Controlador Global del SpaxioVerso
 const SpaxioAvatarController = {
     huesos: {
