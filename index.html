@@ -4848,12 +4848,14 @@ const ID_SALA_METAVERSO = "6bdq9a7CC9UI";
 /**
  * 1. CONTROL DE FLUJO Y APERTURA DE LA PWA
  */
+
+     
+     
 async function abrirSpaxioVersoDesdeContacto() {
     let contenedor3D = document.getElementById('contenedor-spaxioverso');
 
     if (contenedor3D) {
         contenedor3D.style.display = 'flex';
-        // REINICIO DE MOTOR: Si el canvas existe, forzamos el render
         if (renderer3D) {
             console.log("🚀 Reactivando renderizador existente...");
             animarSpaxioVerso(); 
@@ -4868,7 +4870,6 @@ async function abrirSpaxioVersoDesdeContacto() {
     contenedor3D.id = 'contenedor-spaxioverso';
     contenedor3D.style.cssText = "position: fixed; top: 0; left: 0; width: 100dvw; height: 100dvh; background: #0b141a; z-index: 2000; display: flex; flex-direction: column;";
     
-    // Inyectamos el HTML
     contenedor3D.innerHTML = `
         <div style="padding:15px; display:flex; justify-content:space-between;">
             <button onclick="cerrarSpaxioVerso()">[ Salir ]</button>
@@ -4879,24 +4880,19 @@ async function abrirSpaxioVersoDesdeContacto() {
 
     document.body.appendChild(contenedor3D);
 
-    // 3. Inicialización Directa
     videoElementOculto = document.getElementById('video-captura-omni');
     
-    // Inicializamos 3D primero
     inicializarEntorno3D('canvas-render-3d');
-    
     cargarAvatar(); 
     
     setTimeout(() => {
         encenderRastreadorFacialOMNI();
-        animarSpaxioVerso(); // Iniciamos el bucle SIEMPRE al abrir
+        animarSpaxioVerso();
     }, 500);
-     
-    
-    // El resto de tu función (el bloque try/catch con el contenedor3D) se queda exactamente igual...
-// 🎮 Controlador Global del SpaxioVerso (Estructura expandible)
+} // <--- Cierre de función necesario
+
+// 🎮 Controlador Global del SpaxioVerso
 const SpaxioAvatarController = {
-    // Referencias internas del esqueleto del personaje
     huesos: {
         cuello: null,
         torso: null,
@@ -4905,49 +4901,31 @@ const SpaxioAvatarController = {
         piernaIzquierda: null,
         piernaDerecha: null
     },
-    // Referencia para las expresiones faciales (BlendShapes / Morph Targets)
     rostroMesh: null,
 
-    // 1. Identificar y enlazar los huesos del archivo .glb al cargar
     vincularEsqueleto: function(gltfScene) {
         console.log("🧬 H.A.R.V.I.S: Escaneando estructura del avatar...");
-        
-        // Buscamos los componentes por sus nombres estándar en los GLB de Sketchfab/ReadyPlayerMe
         this.huesos.cuello = gltfScene.getObjectByName('Neck') || gltfScene.getObjectByName('head');
         this.huesos.torso = gltfScene.getObjectByName('Spine') || gltfScene.getObjectByName('spine');
-        
-        // Dejamos los enlaces listos para la fase del cuerpo entero
         this.huesos.brazoIzquierdo = gltfScene.getObjectByName('LeftArm') || gltfScene.getObjectByName('left_arm');
         this.huesos.brazoDerecho = gltfScene.getObjectByName('RightArm') || gltfScene.getObjectByName('right_arm');
         this.huesos.piernaIzquierda = gltfScene.getObjectByName('LeftUpLeg') || gltfScene.getObjectByName('left_leg');
         this.huesos.piernaDerecha = gltfScene.getObjectByName('RightUpLeg') || gltfScene.getObjectByName('right_leg');
 
-        // Buscar la malla que contiene las expresiones faciales
         gltfScene.traverse((child) => {
             if (child.isMesh && child.morphTargetDictionary) {
-                this.rostroMesh = child; // Guardamos la malla del rostro
+                this.rostroMesh = child;
             }
         });
-
-        console.log("✅ H.A.R.V.I.S: Esqueleto mapeado y preparado para expansión.");
+        console.log("✅ H.A.R.V.I.S: Esqueleto mapeado.");
     },
 
-    // 2. FASE ACTUAL: Procesar gestos del rostro (MediaPipe Face Mesh)
-    
-        // 👁️ Procesar parpadeo real en el Chibi
     actualizarGestosFaciales: function(datosMediaPipe) {
         if (!this.rostroMesh || !datosMediaPipe) return;
-
-        // Buscamos los índices de los ojos cerrados dentro del .glb
         let diccionario = this.rostroMesh.morphTargetDictionary;
-        
         if (diccionario) {
             let indiceOjoIzq = diccionario['Blink'] || diccionario['blink_L'];
-            let indiceOjoDer = diccionario['Blink'] || diccionario['blink_R'];
-
-            // Si MediaPipe nos da el peso del parpadeo (un número entre 0 y 1)
             if (indiceOjoIzq !== undefined && datosMediaPipe.ojoIzquierdoCerrado !== undefined) {
-                // Suavizamos el movimiento del parpadeo con un lerp para que no sea un golpe brusco
                 this.rostroMesh.morphTargetInfluences[indiceOjoIzq] = THREE.MathUtils.lerp(
                     this.rostroMesh.morphTargetInfluences[indiceOjoIzq],
                     datosMediaPipe.ojoIzquierdoCerrado,
@@ -4957,31 +4935,18 @@ const SpaxioAvatarController = {
         }
     },
 
-    // 3. FASE FUTURA: Mover la cabeza y articulaciones (Girar y Sentarse)
     actualizarRotacionYCuerpo: function(rotacionRostro, datosPose) {
-        // Suavizado Lerp para la cabeza (Ya operativo)
         if (this.huesos.cuello && rotacionRostro) {
             this.huesos.cuello.rotation.y = THREE.MathUtils.lerp(this.huesos.cuello.rotation.y, rotacionRostro.y, 0.15);
             this.huesos.cuello.rotation.x = THREE.MathUtils.lerp(this.huesos.cuello.rotation.x, rotacionRostro.x, 0.15);
         }
-
-        // Espacio reservado para conectar MediaPipe Pose (Brazos, piernas y posición sentada)
         if (datosPose) {
             this.aplicarCalculoCuerpoEntero(datosPose);
         }
     },
 
-    // 4. FASE FUTURA: Caminar, correr o simular traslación en el entorno
-    actualizarDesplazamiento: function(datosCaminar) {
-        // Espacio reservado para físicas de movimiento o animaciones automáticas de caminata
-        if (datosCaminar) {
-            // Aquí moveremos la posición general del avatar en el plano X o Z
-        }
-    },
-
-    // Función auxiliar interna para no saturar el bucle principal
     aplicarCalculoCuerpoEntero: function(datosPose) {
-        // Aquí se inyectarán las matemáticas de rotación de los brazos y piernas después
+        // Lógica futura para el cuerpo
     }
 };
 
