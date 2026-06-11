@@ -4889,7 +4889,9 @@ async function abrirSpaxioVersoDesdeContacto() {
         videoElementOculto = document.getElementById('video-captura-omni');
 
         setTimeout(() => {
-            inicializarEntorno3D();
+            // Prueba de diagnóstico forzada
+inicializarEntorno3D('canvas-render-3d');
+scene3D.background = new THREE.Color(0xff0000); // ¡Si esto se pone ROJO, el motor funciona!
             setTimeout(() => {
                 encenderRastreadorFacialOMNI();
             }, 400);
@@ -5001,9 +5003,7 @@ const SpaxioAvatarController = {
 let escenaAvatar, camaraAvatar, renderAvatar, modeloAvatar;
 
  // Prueba de diagnóstico forzada
-function inicializarEntorno3D('canvas-render-3d');
-scene3D.background = new THREE.Color(0xff0000); // ¡Si esto se pone ROJO, el motor funciona!
-
+function inicializarEntorno3D(contenedorID) {
      const contenedor = document.getElementById(contenedorID);
     if (!contenedor) return;
 
