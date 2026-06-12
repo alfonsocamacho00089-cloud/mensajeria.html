@@ -4885,50 +4885,51 @@ async function abrirSpaxioVersoDesdeContacto() {
 /** 2. INICIALIZACIÓN OPTIMIZADA **/
 function inicializarEntorno3D() {
     const contenedor = document.getElementById('canvas-render-3d');
+    if (!contenedor) return;
     
-    // Forzar dimensiones para evitar el error de renderizado en cero
     const ancho = contenedor.offsetWidth || window.innerWidth;
     const alto = contenedor.offsetHeight || window.innerHeight;
 
+    window.SpaxioVerso.scene = new THREE.Scene(); // Asegurar escena limpia
     window.SpaxioVerso.scene.background = new THREE.Color(0x000000);
     
-    // Configurar cámara
     window.SpaxioVerso.camera = new THREE.PerspectiveCamera(45, ancho / alto, 0.1, 1000);
-    window.SpaxioVerso.camera.position.set(0, 1.5, 2); // Ajuste leve para ver mejor el rostro
+    window.SpaxioVerso.camera.position.set(0, 1.5, 2);
 
-    // Configurar Renderer
     window.SpaxioVerso.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     window.SpaxioVerso.renderer.setSize(ancho, alto);
-    window.SpaxioVerso.renderer.setPixelRatio(window.devicePixelRatio); // Vital para móviles
+    window.SpaxioVerso.renderer.setPixelRatio(window.devicePixelRatio);
     contenedor.appendChild(window.SpaxioVerso.renderer.domElement);
 
-    // ILUMINACIÓN: Esencial para que el modelo no se vea negro
-    const luzAmbiente = new THREE.AmbientLight(0xffffff, 0.7);
-    window.SpaxioVerso.scene.add(luzAmbiente);
-
+    // Luces
+    window.SpaxioVerso.scene.add(new THREE.AmbientLight(0xffffff, 0.7));
     const luzPrincipal = new THREE.DirectionalLight(0xffffff, 1.5);
     luzPrincipal.position.set(1, 1, 1);
     window.SpaxioVerso.scene.add(luzPrincipal);
     
-    // LUZ ADICIONAL: Luz de relleno para evitar sombras muy marcadas
-    const luzRelleno = new THREE.DirectionalLight(0xffffff, 0.5);
-    luzRelleno.position.set(-1, 0, 1);
-    window.SpaxioVerso.scene.add(luzRelleno);
-    
-   // Cargar modelo
+    // --- ESTA ES LA PARTE QUE TE DABA ERROR ---
+    const loader3D = new THREE.GLTFLoader(); 
     loader3D.load('/assets/avatar_local.glb', (gltf) => {
-    window.SpaxioVerso.avatar = gltf.scene;
-    window.SpaxioVerso.avatar.scale.set(50, 50, 50); // Escala necesaria para este archivo específico
-    window.SpaxioVerso.scene.add(window.SpaxioVerso.avatar);
-    
-    // IMPORTANTE: Esto le dice a tu bucle de animación que ya puede empezar a renderizar el avatar
-    window.SpaxioVerso.isReady = true; 
-    
-    SpaxioAvatarController.vincularEsqueleto(window.SpaxioVerso.avatar);
-}, undefined, (err) => console.error(err));
+        window.SpaxioVerso.avatar = gltf.scene;
+        window.SpaxioVerso.avatar.scale.set(50, 50, 50);
+        
+        // Forzar materiales visibles
+        window.SpaxioVerso.avatar.traverse((child) => {
+            if (child.isMesh) child.material.needsUpdate = true;
+        });
+
+        window.SpaxioVerso.scene.add(window.SpaxioVerso.avatar);
+        SpaxioAvatarController.vincularEsqueleto(window.SpaxioVerso.avatar);
+        
+        window.SpaxioVerso.isReady = true; 
+        console.log("✅ Avatar cargado y listo");
+    }, undefined, (err) => {
+        console.error("❌ Error cargando GLTF:", err);
+    });
     
     animarSpaxioVerso();
      }
+    
 /** 4. BUCLE DE ANIMACIÓN CON AJUSTE DE REDIMENSIONADO **/
 function animarSpaxioVerso() {
     // 1. Solicitamos el frame primero para mantener el bucle vivo
