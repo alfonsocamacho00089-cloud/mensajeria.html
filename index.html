@@ -4907,15 +4907,19 @@ function inicializarEntorno3D() {
     window.SpaxioVerso.scene.add(new THREE.AmbientLight(0xffffff, 1));
 
     // 3. CARGA DIRECTA (Sin variables raras)
-    loader3D.load('/assets/avatar_local.glb', (gltf) => {
-        console.log("✅ Modelo cargado correctamente");
-        window.SpaxioVerso.avatar = gltf.scene;
-        window.SpaxioVerso.avatar.scale.set(50, 50, 50);
-        window.SpaxioVerso.scene.add(window.SpaxioVerso.avatar);
-        window.SpaxioVerso.isReady = true;
-    }, undefined, (error) => {
-        console.error("❌ ERROR CRÍTICO:", error);
-    });
+    // Asegúrate de que esto esté fuera de cualquier función
+const loader3D = new THREE.GLTFLoader(); 
+
+// Dentro de tu función inicializarEntorno3D:
+loader3D.load('/assets/avatar_local.glb', (gltf) => {
+    console.log("¡Modelo cargado!");
+    window.SpaxioVerso.avatar = gltf.scene;
+    window.SpaxioVerso.avatar.scale.set(50, 50, 50);
+    window.SpaxioVerso.scene.add(window.SpaxioVerso.avatar);
+    window.SpaxioVerso.isReady = true;
+}, undefined, (err) => {
+    console.error("Error crítico de carga:", err);
+});
 
     animarSpaxioVerso();
      }
