@@ -4914,7 +4914,7 @@ const loader3D = new THREE.GLTFLoader();
 loader3D.load('/assets/avatar_local.glb', (gltf) => {
     console.log("¡Modelo cargado!");
     window.SpaxioVerso.avatar = gltf.scene;
-    window.SpaxioVerso.avatar.scale.set(50, 50, 50);
+    window.SpaxioVerso.avatar.scale.set(5, 5, 5);
     window.SpaxioVerso.scene.add(window.SpaxioVerso.avatar);
     window.SpaxioVerso.isReady = true;
 }, undefined, (err) => {
