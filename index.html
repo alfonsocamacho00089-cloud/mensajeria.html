@@ -4926,26 +4926,29 @@ loader3D.load('/assets/avatar_local.glb', (gltf) => {
     
 /** 4. BUCLE DE ANIMACIÓN CON AJUSTE DE REDIMENSIONADO **/
 function animarSpaxioVerso() {
-    // 1. Solicitamos el frame primero para mantener el bucle vivo
     spaxioAnimFrameId = requestAnimationFrame(animarSpaxioVerso);
     
-    // 2. Si no está listo, simplemente no renderizamos nada todavía, pero el bucle sigue corriendo
-    if (!window.SpaxioVerso.isReady || !window.SpaxioVerso.renderer) {
-        return; 
-    }
-    
-    // 3. Lógica de animación
     if (window.SpaxioVerso.avatar) {
+        // En lugar de rotar todo el objeto, rota solo el hueso del cuello si es posible
+        // O ajusta los ejes de rotación aquí mismo:
+        
+        // Prueba esto si el avatar se mueve raro:
         window.SpaxioVerso.avatar.rotation.y = THREE.MathUtils.lerp(
             window.SpaxioVerso.avatar.rotation.y, 
-            rotacionRostro.y || 0, // Fallback por si rotacionRostro es undefined
+            rotacionRostro.y, 
             0.15
         );
+        
+        // Si el avatar se inclina hacia los lados de forma extraña, 
+        // a veces es mejor resetear la rotación en X o Z:
+        window.SpaxioVerso.avatar.rotation.x = 0; 
+        window.SpaxioVerso.avatar.rotation.z = 0;
     }
     
-    // 4. Renderizado final
     window.SpaxioVerso.renderer.render(window.SpaxioVerso.scene, window.SpaxioVerso.camera);
 }
+    
+    
 
 // CORRECCIÓN: Unimos la línea rota y aseguramos que el ID exista
 window.addEventListener('resize', () => {
