@@ -4928,22 +4928,22 @@ loader3D.load('/assets/avatar_local.glb', (gltf) => {
 function animarSpaxioVerso() {
     spaxioAnimFrameId = requestAnimationFrame(animarSpaxioVerso);
     
-    if (window.SpaxioVerso.avatar) {
-        // En lugar de rotar todo el objeto, rota solo el hueso del cuello si es posible
-        // O ajusta los ejes de rotación aquí mismo:
-        
-        // Prueba esto si el avatar se mueve raro:
-        window.SpaxioVerso.avatar.rotation.y = THREE.MathUtils.lerp(
-            window.SpaxioVerso.avatar.rotation.y, 
-            rotacionRostro.y, 
-            0.15
-        );
-        
-        // Si el avatar se inclina hacia los lados de forma extraña, 
-        // a veces es mejor resetear la rotación en X o Z:
-        window.SpaxioVerso.avatar.rotation.x = 0; 
-        window.SpaxioVerso.avatar.rotation.z = 0;
-    }
+if (window.SpaxioVerso.avatar) {
+    // Solo permitimos rotación en Y (izquierda/derecha) para que no se caiga
+    const rotY = rotacionRostro.y || 0;
+    
+    // Aplicamos una interpolación más suave y restringimos ejes
+    window.SpaxioVerso.avatar.rotation.y = THREE.MathUtils.lerp(
+        window.SpaxioVerso.avatar.rotation.y, 
+        rotY, 
+        0.1
+    );
+    
+    // FORZAMOS a que X y Z siempre estén derechos
+    window.SpaxioVerso.avatar.rotation.x = 0;
+    window.SpaxioVerso.avatar.rotation.z = 0;
+ 
+            }
     
     window.SpaxioVerso.renderer.render(window.SpaxioVerso.scene, window.SpaxioVerso.camera);
 }
