@@ -4937,7 +4937,8 @@ function animarSpaxioVerso() {
         return;
     }
     // ... resto de tu código
- 
+ spaxioAnimFrameId = requestAnimationFrame(animarSpaxioVerso);
+    
     
     if (window.SpaxioVerso.avatar) {
         // Suavizado de rotación
