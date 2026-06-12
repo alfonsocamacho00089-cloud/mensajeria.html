@@ -4931,31 +4931,34 @@ function inicializarEntorno3D() {
      }
 /** 4. BUCLE DE ANIMACIÓN CON AJUSTE DE REDIMENSIONADO **/
 function animarSpaxioVerso() {
-    // Si no está listo, no intentes renderizar el avatar todavía
-    if (!window.SpaxioVerso.isReady) {
-        requestAnimationFrame(animarSpaxioVerso);
-        return;
+    // 1. Solicitamos el frame primero para mantener el bucle vivo
+    spaxioAnimFrameId = requestAnimationFrame(animarSpaxioVerso);
+    
+    // 2. Si no está listo, simplemente no renderizamos nada todavía, pero el bucle sigue corriendo
+    if (!window.SpaxioVerso.isReady || !window.SpaxioVerso.renderer) {
+        return; 
     }
-    // ... resto de tu código
- spaxioAnimFrameId = requestAnimationFrame(animarSpaxioVerso);
     
-    
+    // 3. Lógica de animación
     if (window.SpaxioVerso.avatar) {
-        // Suavizado de rotación
         window.SpaxioVerso.avatar.rotation.y = THREE.MathUtils.lerp(
             window.SpaxioVerso.avatar.rotation.y, 
-            rotacionRostro.y, 
+            rotacionRostro.y || 0, // Fallback por si rotacionRostro es undefined
             0.15
         );
     }
     
+    // 4. Renderizado final
     window.SpaxioVerso.renderer.render(window.SpaxioVerso.scene, window.SpaxioVerso.camera);
 }
 
-// NUEVO: Manejar cambios de orientación o tamaño en el móvil
+// CORRECCIÓN: Unimos la línea rota y aseguramos que el ID exista
 window.addEventListener('resize', () => {
-    if (!window.SpaxioVerso.renderer) return;
+    if (!window.SpaxioVerso || !window.SpaxioVerso.renderer) return;
+    
     const contenedor = document.getElementById('canvas-render-3d');
+    if (!contenedor) return;
+
     const w = contenedor.clientWidth;
     const h = contenedor.clientHeight;
     
