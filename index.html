@@ -4918,12 +4918,27 @@ function inicializarEntorno3D() {
     // Cargar modelo
     const loader3D = new THREE.GLTFLoader();
     loader3D.load('/assets/avatar_local.glb', (gltf) => {
-        window.SpaxioVerso.avatar = gltf.scene;
-        window.SpaxioVerso.scene.add(window.SpaxioVerso.avatar);
-        SpaxioAvatarController.vincularEsqueleto(window.SpaxioVerso.avatar);
-    }, undefined, (error) => console.error("Error al cargar modelo:", error));
+    window.SpaxioVerso.avatar = gltf.scene;
+    
+    // 1. Aplicar la escala necesaria para que no sea invisible
+    window.SpaxioVerso.avatar.scale.set(50, 50, 50);
+    
+    // 2. CORRECCIÓN DE MATERIALES:
+    // Si quieres que se vea bien, recorremos el modelo y forzamos 
+    // a que el material use iluminación básica o ajustamos el tipo de material.
+    window.SpaxioVerso.avatar.traverse((child) => {
+        if (child.isMesh) {
+            // Opción A: Mantener material original pero asegurar que reciba luz
+            child.material.needsUpdate = true;
+            
+            // Opción B: Si aun así no se ve, fuerza un material que sí brille sin luces
+            // child.material = new THREE.MeshLambertMaterial({ color: 0xffffff });
+        }
+    });
 
-    window.SpaxioVerso.isReady = true;
+    window.SpaxioVerso.scene.add(window.SpaxioVerso.avatar);
+    SpaxioAvatarController.vincularEsqueleto(window.SpaxioVerso.avatar);
+}); 
     animarSpaxioVerso();
 }
 
