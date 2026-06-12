@@ -4916,32 +4916,28 @@ function inicializarEntorno3D() {
     window.SpaxioVerso.scene.add(luzRelleno);
     
    // Cargar modelo
-    const loader3D = new THREE.GLTFLoader();
     loader3D.load('/assets/avatar_local.glb', (gltf) => {
-        window.SpaxioVerso.avatar = gltf.scene;
-        
-        // 1. Escala
-        window.SpaxioVerso.avatar.scale.set(50, 50, 50);
-        
-        // 2. Materiales
-        window.SpaxioVerso.avatar.traverse((child) => {
-            if (child.isMesh) {
-                child.material.needsUpdate = true;
-            }
-        });
-
-        window.SpaxioVerso.scene.add(window.SpaxioVerso.avatar);
-        SpaxioAvatarController.vincularEsqueleto(window.SpaxioVerso.avatar);
-        window.SpaxioVerso.isReady = true; // Asegúrate de marcar esto aquí
-    });
+    window.SpaxioVerso.avatar = gltf.scene;
+    window.SpaxioVerso.avatar.scale.set(50, 50, 50); // Escala necesaria para este archivo específico
+    window.SpaxioVerso.scene.add(window.SpaxioVerso.avatar);
+    
+    // IMPORTANTE: Esto le dice a tu bucle de animación que ya puede empezar a renderizar el avatar
+    window.SpaxioVerso.isReady = true; 
+    
+    SpaxioAvatarController.vincularEsqueleto(window.SpaxioVerso.avatar);
+}, undefined, (err) => console.error(err));
     
     animarSpaxioVerso();
      }
 /** 4. BUCLE DE ANIMACIÓN CON AJUSTE DE REDIMENSIONADO **/
 function animarSpaxioVerso() {
-    if (!window.SpaxioVerso.isReady) return;
-    
-    spaxioAnimFrameId = requestAnimationFrame(animarSpaxioVerso);
+    // Si no está listo, no intentes renderizar el avatar todavía
+    if (!window.SpaxioVerso.isReady) {
+        requestAnimationFrame(animarSpaxioVerso);
+        return;
+    }
+    // ... resto de tu código
+ 
     
     if (window.SpaxioVerso.avatar) {
         // Suavizado de rotación
