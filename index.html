@@ -4958,7 +4958,48 @@ function detenerTransmisionOmniRealtime() {
         console.log("🛑 H.A.R.V.I.S: Emisión de telemetría facial apagada.");
     }
 }
+async function iniciarSpaxioVerso() {
 
+// 1. Crear Contenedor
+
+const div = document.createElement('div');
+
+div.id = 'contenedor-spaxioverso';
+
+div.style.cssText = "position:fixed; top:0; left:0; width:100vw; height:100vh; z-index:9999;";
+
+div.innerHTML = `<video id="video-input" style="display:none;"></video>`;
+
+document.body.appendChild(div);
+
+     // 2. Montar Motor
+
+inicializarEntorno3D('contenedor-spaxioverso');
+
+
+
+// 3. Cargar Avatar
+
+loader3D.load('/assets/avatar_local.glb', (gltf) => {
+
+window.SpaxioVerso.avatar = gltf.scene;
+
+window.SpaxioVerso.scene.add(window.SpaxioVerso.avatar);
+
+});
+
+     // 4. Iniciar IA
+
+encenderRastreadorFacialOMNI(document.getElementById('video-input'));
+
+
+// 5. Iniciar Render
+
+animarSpaxioVerso();
+
+console.log("🚀 SpaxioVerso OMNI Iniciado.");
+
+}
      
 /**
  * 5. INTERRUPTORES DE CICLO DE VIDA (Minimizar / Cerrar)
