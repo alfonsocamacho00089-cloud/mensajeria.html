@@ -4821,80 +4821,46 @@ function activarSpaxioFlowRealtime() {
      }
 
 // =================================================================
-// 🪐 SPAXIOVERSO OMNI: MOTOR GRÁFICO, IA Y TELEMETRÍA (VERSIÓN FINAL INTEGRADA)
+// 🪐 SPAXIOVERSO OMNI: MOTOR GRÁFICO, IA Y TELEMETRÍA (VERSIÓN FINAL)
 // =================================================================
 
 window.SpaxioVerso = {
     scene: new THREE.Scene(),
     camera: null,
     renderer: null,
-    avatar: null, // Será el contenedor del gltf
-    isReady: false,
-    containerID: 'contenedor-spaxioverso'
+    avatar: null,
+    isReady: false
 };
 
-// Variables de Estado
-let spaxioAnimFrameId = null;
-let videoElementOculto = null;
-let camaraMediaPipe = null;
-let faceMeshIA = null;
-let loader3D = new THREE.GLTFLoader();
-let avatarsRemotos = {};
 let rotacionRostro = { x: 0, y: 0, z: 0 };
 let ultimasCoordenadasEnviadas = { x: 0, y: 0 };
 let intervaloTransmision = null;
+let faceMeshIA = null;
+let camaraMediaPipe = null;
+let loader3D = new THREE.GLTFLoader();
 const ID_SALA_METAVERSO = "6bdq9a7CC9UI";
 
 /**
- * 1. CONTROLADOR DE AVATAR (H.A.R.V.I.S)
- */
-const SpaxioAvatarController = {
-    huesos: { cuello: null, torso: null, brazoIzquierdo: null, brazoDerecho: null },
-    rostroMesh: null,
-
-    vincularEsqueleto: function(gltfScene) {
-        this.huesos.cuello = gltfScene.getObjectByName('Neck') || gltfScene.getObjectByName('head');
-        this.huesos.torso = gltfScene.getObjectByName('Spine') || gltfScene.getObjectByName('spine');
-        gltfScene.traverse((child) => {
-            if (child.isMesh && child.morphTargetDictionary) this.rostroMesh = child;
-        });
-        console.log("✅ H.A.R.V.I.S: Esqueleto mapeado.");
-    }
-};
-
-/**
- * 2. MOTOR GRÁFICO
+ * 1. MOTOR GRÁFICO
  */
 function inicializarEntorno3D(contenedorID) {
     const contenedor = document.getElementById(contenedorID);
     if (!contenedor) return;
 
-    const w = contenedor.clientWidth || window.innerWidth;
-    const h = contenedor.clientHeight || window.innerHeight;
-
+    const w = contenedor.clientWidth, h = contenedor.clientHeight;
     window.SpaxioVerso.camera = new THREE.PerspectiveCamera(45, w / h, 0.1, 1000);
     window.SpaxioVerso.camera.position.set(0, 1.3, 2);
     window.SpaxioVerso.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     window.SpaxioVerso.renderer.setSize(w, h);
-    
     contenedor.appendChild(window.SpaxioVerso.renderer.domElement);
     window.SpaxioVerso.scene.add(new THREE.AmbientLight(0xffffff, 1.5));
     window.SpaxioVerso.isReady = true;
 }
 
-function cargarAvatar() {
-    loader3D.load('/assets/avatar_local.glb', (gltf) => {
-        window.SpaxioVerso.avatar = gltf.scene;
-        SpaxioAvatarController.vincularEsqueleto(window.SpaxioVerso.avatar);
-        window.SpaxioVerso.scene.add(window.SpaxioVerso.avatar);
-    });
-}
-
 /**
- * 3. PROCESAMIENTO DE IA (HOLISTIC + KALIDOKIT)
+ * 2. IA Y RASTREO (HOLISTIC)
  */
-function encenderRastreadorFacialOMNI() {
-    videoElementOculto = document.getElementById('video-captura-omni');
+function encenderRastreadorFacialOMNI(videoElement) {
     faceMeshIA = new Holistic({
         locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/holistic/${file}`
     });
@@ -4902,141 +4868,64 @@ function encenderRastreadorFacialOMNI() {
     faceMeshIA.setOptions({ modelComplexity: 0, smoothLandmarks: true, refineFaceLandmarks: true });
     faceMeshIA.onResults((results) => {
         if (results.faceLandmarks) {
-            const nariz = results.faceLandmarks[4];
-            rotacionRostro.y = (nariz.x - 0.5) * -2.5;
-            rotacionRostro.x = (nariz.y - 0.4) * 2.5;
+            rotacionRostro.y = (results.faceLandmarks[4].x - 0.5) * -2.5;
+            rotacionRostro.x = (results.faceLandmarks[4].y - 0.4) * 2.5;
+            // Sincronizar con el modelo
+            if (window.SpaxioVerso.avatar) {
+                window.SpaxioVerso.avatar.rotation.y = THREE.MathUtils.lerp(window.SpaxioVerso.avatar.rotation.y, rotacionRostro.y, 0.15);
+            }
         }
-        sincronizarPerifericosKalidokit(results);
     });
 
-    camaraMediaPipe = new Camera(videoElementOculto, {
-        onFrame: async () => await faceMeshIA.send({ image: videoElementOculto }),
+    camaraMediaPipe = new Camera(videoElement, {
+        onFrame: async () => await faceMeshIA.send({ image: videoElement }),
         width: 480, height: 360
     });
     camaraMediaPipe.start();
 }
 
-function sincronizarPerifericosKalidokit(res) {
-    if (!window.SpaxioVerso.avatar || !res) return;
-    
-    // Ejemplo de cómo acceder ahora:
-    const cabeza = window.SpaxioVerso.avatar.getObjectByName("Head");
-    if (cabeza && res.faceLandmarks) {
-        // Tu lógica de Kalidokit aquí...
-    
-    
-const elementoVideo = videoElementOculto;
-// CORRECCIÓN PARA HOLISTIC
-const puntosCara = resultadosMediaPipe.faceLandmarks; // Holistic lo entrega directo
-const puntosCuerpo = resultadosMediaPipe.poseLandmarks;
-const puntosCuerpo3D = resultadosMediaPipe.poseWorldLandmarks;
-const manoIzquierda = resultadosMediaPipe.leftHandLandmarks;
-const manoDerecha = resultadosMediaPipe.rightHandLandmarks;
-
-    // 2. COMPUTACIÓN CINEMÁTICA CON KALIDOKIT
-    const rostroRig = puntosCara ? Kalidokit.Face.solve(puntosCara, { runtime: 'mediapipe', video: elementoVideo }) : null;
-    const cuerpoRig = (puntosCuerpo && puntosCuerpo3D) ? Kalidokit.Pose.solve(puntosCuerpo3D, puntosCuerpo, { runtime: 'mediapipe', video: elementoVideo }) : null;
-    const mDerechaRig = manoDerecha ? Kalidokit.Hand.solve(manoDerecha, "Right") : null;
-    const mIzquierdaRig = manoIzquierda ? Kalidokit.Hand.solve(manoIzquierda, "Left") : null;
-
-    // 3. REFLEJO EN TU AVATAR REAL (cuboPrueba)
-
-    // --- CARA Y CUELLO ---
-    if (rostroRig) {
-        const cabeza = cuboPrueba.getObjectByName("Head") || cuboPrueba.getObjectByName("head");
-        const cuello = cuboPrueba.getObjectByName("Neck") || cuboPrueba.getObjectByName("neck");
-        if (cabeza) {
-            cabeza.rotation.set(rostroRig.head.x, rostroRig.head.y, rostroRig.head.z);
-        }
-        if (cuello) {
-            cuello.rotation.y = rostroRig.head.y * 0.3;
-        }
-
-        // BlendShapes (Pestañeo, boca, expresiones)
-        cuboPrueba.traverse((nodo) => {
-            if (nodo.isMesh && nodo.morphTargetDictionary) {
-                const targets = {
-                    "eyeBlinkLeft": rostroRig.eye.l,
-                    "eyeBlinkRight": rostroRig.eye.r,
-                    "jawOpen": rostroRig.mouth.y,
-                    "mouthPucker": rostroRig.mouth.x
-                };
-                for (const [key, value] of Object.entries(targets)) {
-                    const indice = nodo.morphTargetDictionary[key] || nodo.morphTargetDictionary[key.toLowerCase()];
-                    if (indice !== undefined) nodo.morphTargetInfluences[indice] = value;
-                }
-            }
-        });
-    }
-
-    // --- CUERPO Y BRAZOS ---
-    if (cuerpoRig) {
-        const huesosCuerpo = {
-            "RightUpperArm": cuboPrueba.getObjectByName("RightUpperArm") || cuboPrueba.getObjectByName("rightUpperArm"),
-            "LeftUpperArm": cuboPrueba.getObjectByName("LeftUpperArm") || cuboPrueba.getObjectByName("leftUpperArm"),
-            "RightLowerArm": cuboPrueba.getObjectByName("RightLowerArm") || cuboPrueba.getObjectByName("rightLowerArm"),
-            "LeftLowerArm": cuboPrueba.getObjectByName("LeftLowerArm") || cuboPrueba.getObjectByName("leftLowerArm"),
-            "Spine": cuboPrueba.getObjectByName("Spine") || cuboPrueba.getObjectByName("spine")
-        };
- 
-if (huesosCuerpo.RightUpperArm) huesosCuerpo.RightUpperArm.rotation.set(cuerpoRig.RightUpperArm.x, cuerpoRig.RightUpperArm.y, cuerpoRig.RightUpperArm.z);
-        if (huesosCuerpo.LeftUpperArm) huesosCuerpo.LeftUpperArm.rotation.set(cuerpoRig.LeftUpperArm.x, cuerpoRig.LeftUpperArm.y, cuerpoRig.LeftUpperArm.z);
-        if (huesosCuerpo.RightLowerArm) huesosCuerpo.RightLowerArm.rotation.set(cuerpoRig.RightLowerArm.x, cuerpoRig.RightLowerArm.y, cuerpoRig.RightLowerArm.z);
-        if (huesosCuerpo.LeftLowerArm) huesosCuerpo.LeftLowerArm.rotation.set(cuerpoRig.LeftLowerArm.x, cuerpoRig.LeftLowerArm.y, cuerpoRig.LeftLowerArm.z);
-        if (huesosCuerpo.Spine) huesosCuerpo.Spine.rotation.set(cuerpoRig.Spine.x, cuerpoRig.Spine.y, cuerpoRig.Spine.z);
-    }
-
-    // --- MANOS Y DEDOS ---
-    const mapearEstructuraMano = (rigMano, prefijo) => {
-        if (!rigMano) return;
-        
-        const muneca = cuboPrueba.getObjectByName(`${prefijo}Wrist`) || cuboPrueba.getObjectByName(`${prefijo.toLowerCase()}Wrist`);
-        if (muneca) muneca.rotation.set(rigMano[`${prefijo}Wrist`].x, rigMano[`${prefijo}Wrist`].y, rigMano[`${prefijo}Wrist`].z);
-
-        const dedos = ["Thumb", "Index", "Middle", "Ring", "Little"];
-        dedos.forEach(dedo => {
-            ["Proximal", "Intermediate", "Distal"].forEach(fase => {
-                const nombreHueso = `${prefijo}${dedo}${fase}`;
-                const hueso3D = cuboPrueba.getObjectByName(nombreHueso) || cuboPrueba.getObjectByName(nombreHueso.toLowerCase());
-                if (hueso3D && rigMano[nombreHueso]) {
-                    hueso3D.rotation.set(rigMano[nombreHueso].x, rigMano[nombreHueso].y, rigMano[nombreHueso].z);
-                }
-            });
-        });
-    };
-
-    mapearEstructuraMano(mDerechaRig, "Right");
-    mapearEstructuraMano(mIzquierdaRig, "Left");
-     }
 /**
- * 4. BUCLE DE RENDERIZADO
+ * 3. BUCLE DE RENDERIZADO
  */
 function animarSpaxioVerso() {
-    spaxioAnimFrameId = requestAnimationFrame(animarSpaxioVerso);
-    if (!window.SpaxioVerso.isReady) return;
-
-    if (window.SpaxioVerso.avatar) {
-        window.SpaxioVerso.avatar.rotation.y = THREE.MathUtils.lerp(
-            window.SpaxioVerso.avatar.rotation.y, rotacionRostro.y, 0.15
-        );
+    requestAnimationFrame(animarSpaxioVerso);
+    if (window.SpaxioVerso.isReady) {
+        window.SpaxioVerso.renderer.render(window.SpaxioVerso.scene, window.SpaxioVerso.camera);
     }
-    window.SpaxioVerso.renderer.render(window.SpaxioVerso.scene, window.SpaxioVerso.camera);
 }
 
 /**
- * 5. TRANSMISIÓN LIVEKIT
+ * 4. INICIALIZADOR PRINCIPAL
  */
-if (typeof room !== 'undefined') {
-    room.on(LivekitClient.RoomEvent.DataReceived, (payload, participant) => {
-        const datos = JSON.parse(new TextDecoder().decode(payload));
-        if (datos.tipo === 'telemetria_facial' && !avatarsRemotos[datos.idUsuario]) {
-            loader3D.load('assets/avatar_remoto.glb', (gltf) => {
-                window.SpaxioVerso.scene.add(gltf.scene);
-                avatarsRemotos[datos.idUsuario] = gltf.scene;
-            });
-        }
+async function iniciarSpaxioVerso() {
+    // 1. Crear Contenedor
+    const div = document.createElement('div');
+    div.id = 'contenedor-spaxioverso';
+    div.style.cssText = "position:fixed; top:0; left:0; width:100vw; height:100vh; z-index:9999;";
+    div.innerHTML = `<video id="video-input" style="display:none;"></video>`;
+    document.body.appendChild(div);
+
+    // 2. Montar Motor
+    inicializarEntorno3D('contenedor-spaxioverso');
+
+    // 3. Cargar Avatar
+    loader3D.load('/assets/avatar_local.glb', (gltf) => {
+        window.SpaxioVerso.avatar = gltf.scene;
+        window.SpaxioVerso.scene.add(window.SpaxioVerso.avatar);
     });
-     }
+
+    // 4. Iniciar IA
+    encenderRastreadorFacialOMNI(document.getElementById('video-input'));
+    
+    // 5. Iniciar Render
+    animarSpaxioVerso();
+    console.log("🚀 SpaxioVerso OMNI Iniciado.");
+}
+
+// Ejecución
+window.addEventListener('load', iniciarSpaxioVerso);
+
+
 
     
 
@@ -5117,13 +5006,7 @@ window.addEventListener('load', () => {
     }
 });
 
-     async function abrirSpaxioVersoDesdeContacto() {
-    // Simplemente inicializa el entorno y lanza los procesos
-    inicializarEntorno3D('contenedor-spaxioverso');
-    cargarAvatar();
-    encenderRastreadorFacialOMNI();
-    animarSpaxioVerso();
-     }
+     
 /**
  * 5. INTERRUPTORES DE CICLO DE VIDA (Minimizar / Cerrar)
  */
