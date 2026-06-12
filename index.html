@@ -4841,7 +4841,8 @@ let intervaloTransmision = null;
 let ultimasCoordenadasEnviadas = { x: 0, y: 0 };
 let rotacionRostro = { x: 0, y: 0 };
 let avatarsRemotos = {};
-
+// Añade esto al inicio de tu archivo, junto a las otras variables globales
+const loader3D = new THREE.GLTFLoader();
 const ID_SALA_METAVERSO = "6bdq9a7CC9UI";
 
 /** 1. CONTROLADOR DE AVATAR (H.A.R.V.I.S) **/
@@ -4901,16 +4902,14 @@ function inicializarEntorno3D() {
     window.SpaxioVerso.scene.add(new THREE.AmbientLight(0xffffff, 1));
 
     // 3. CARGA DIRECTA (Sin variables raras)
-    new THREE.GLTFLoader().load('/assets/avatar_local.glb', (gltf) => {
-        console.log("¡Modelo cargado!");
+    loader3D.load('/assets/avatar_local.glb', (gltf) => {
+        console.log("✅ Modelo cargado correctamente");
         window.SpaxioVerso.avatar = gltf.scene;
-        window.SpaxioVerso.avatar.scale.set(50, 50, 50); // Mantenemos la escala
+        window.SpaxioVerso.avatar.scale.set(50, 50, 50);
         window.SpaxioVerso.scene.add(window.SpaxioVerso.avatar);
         window.SpaxioVerso.isReady = true;
-    }, (xhr) => {
-        console.log((xhr.loaded / xhr.total * 100) + '% cargado');
-    }, (error) => {
-        console.error("ERROR CRÍTICO AL CARGAR:", error);
+    }, undefined, (error) => {
+        console.error("❌ ERROR CRÍTICO:", error);
     });
 
     animarSpaxioVerso();
