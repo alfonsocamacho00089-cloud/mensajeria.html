@@ -4886,47 +4886,33 @@ async function abrirSpaxioVersoDesdeContacto() {
 function inicializarEntorno3D() {
     const contenedor = document.getElementById('canvas-render-3d');
     if (!contenedor) return;
-    
-    const ancho = contenedor.offsetWidth || window.innerWidth;
-    const alto = contenedor.offsetHeight || window.innerHeight;
 
-    window.SpaxioVerso.scene = new THREE.Scene(); // Asegurar escena limpia
+    // 1. Configuración básica
+    window.SpaxioVerso.scene = new THREE.Scene();
     window.SpaxioVerso.scene.background = new THREE.Color(0x000000);
-    
-    window.SpaxioVerso.camera = new THREE.PerspectiveCamera(45, ancho / alto, 0.1, 1000);
+    window.SpaxioVerso.camera = new THREE.PerspectiveCamera(45, contenedor.clientWidth / contenedor.clientHeight, 0.1, 1000);
     window.SpaxioVerso.camera.position.set(0, 1.5, 2);
-
+    
     window.SpaxioVerso.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-    window.SpaxioVerso.renderer.setSize(ancho, alto);
-    window.SpaxioVerso.renderer.setPixelRatio(window.devicePixelRatio);
+    window.SpaxioVerso.renderer.setSize(contenedor.clientWidth, contenedor.clientHeight);
     contenedor.appendChild(window.SpaxioVerso.renderer.domElement);
 
-    // Luces
-    window.SpaxioVerso.scene.add(new THREE.AmbientLight(0xffffff, 0.7));
-    const luzPrincipal = new THREE.DirectionalLight(0xffffff, 1.5);
-    luzPrincipal.position.set(1, 1, 1);
-    window.SpaxioVerso.scene.add(luzPrincipal);
-    
-    // --- ESTA ES LA PARTE QUE TE DABA ERROR ---
-    const loader3D = new THREE.GLTFLoader(); 
-    loader3D.load('/assets/avatar_local.glb', (gltf) => {
-        window.SpaxioVerso.avatar = gltf.scene;
-        window.SpaxioVerso.avatar.scale.set(50, 50, 50);
-        
-        // Forzar materiales visibles
-        window.SpaxioVerso.avatar.traverse((child) => {
-            if (child.isMesh) child.material.needsUpdate = true;
-        });
+    // 2. Luces
+    window.SpaxioVerso.scene.add(new THREE.AmbientLight(0xffffff, 1));
 
+    // 3. CARGA DIRECTA (Sin variables raras)
+    new THREE.GLTFLoader().load('/assets/avatar_local.glb', (gltf) => {
+        console.log("¡Modelo cargado!");
+        window.SpaxioVerso.avatar = gltf.scene;
+        window.SpaxioVerso.avatar.scale.set(50, 50, 50); // Mantenemos la escala
         window.SpaxioVerso.scene.add(window.SpaxioVerso.avatar);
-        SpaxioAvatarController.vincularEsqueleto(window.SpaxioVerso.avatar);
-        
-        window.SpaxioVerso.isReady = true; 
-        console.log("✅ Avatar cargado y listo");
-    }, undefined, (err) => {
-        console.error("❌ Error cargando GLTF:", err);
+        window.SpaxioVerso.isReady = true;
+    }, (xhr) => {
+        console.log((xhr.loaded / xhr.total * 100) + '% cargado');
+    }, (error) => {
+        console.error("ERROR CRÍTICO AL CARGAR:", error);
     });
-    
+
     animarSpaxioVerso();
      }
     
