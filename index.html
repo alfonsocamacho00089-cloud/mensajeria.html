@@ -4948,38 +4948,28 @@ loader3D.load('/assets/avatar_local.glb', (gltf) => {
 
      
      /** 4. BUCLE DE ANIMACIÓN CON AJUSTE DE REDIMENSIONADO **/
-// Variable global para controlar la velocidad (fuera de la función)
-let ultimaActualizacion = 0;
-const FPS_LIMIT = 30; // 30 FPS son suficientes para móviles y evitan bloqueos
-const intervalo = 1000 / FPS_LIMIT;
-
-function animarSpaxioVerso(tiempo) {
+function animarSpaxioVerso() {
     spaxioAnimFrameId = requestAnimationFrame(animarSpaxioVerso);
     
-    // Control de tasa de refresco para no saturar los sensores del móvil
-    if (tiempo - ultimaActualizacion > intervalo) {
+    if (window.SpaxioVerso.avatar) {
+        // Obtenemos la rotación objetivo
+        const rotY = rotacionRostro.y || 0;
         
-        if (window.SpaxioVerso.avatar) {
-            // Suavizado de rotación (Lerp)
-            const rotY = rotacionRostro.y || 0;
-            
-            window.SpaxioVerso.avatar.rotation.y = THREE.MathUtils.lerp(
-                window.SpaxioVerso.avatar.rotation.y, 
-                rotY, 
-                0.15 // Aumenté un poco a 0.15 para mayor respuesta
-            );
-            
-            // Forzar eje vertical (evita que se "caiga" o rote raro)
-            window.SpaxioVerso.avatar.rotation.x = 0;
-            window.SpaxioVerso.avatar.rotation.z = 0;
-        }
-
-        // Renderizado eficiente
-        window.SpaxioVerso.renderer.render(window.SpaxioVerso.scene, window.SpaxioVerso.camera);
+        // Mantenemos tu velocidad original de respuesta (0.1)
+        window.SpaxioVerso.avatar.rotation.y = THREE.MathUtils.lerp(
+            window.SpaxioVerso.avatar.rotation.y, 
+            rotY, 
+            0.1
+        );
         
-        ultimaActualizacion = tiempo;
+        // Bloqueo estricto de ejes para que no se maree el modelo
+        window.SpaxioVerso.avatar.rotation.x = 0;
+        window.SpaxioVerso.avatar.rotation.z = 0;
     }
- }
+    
+    // Renderizado directo, sin esperas ni limitaciones
+    window.SpaxioVerso.renderer.render(window.SpaxioVerso.scene, window.SpaxioVerso.camera);
+     }
     
     
 
