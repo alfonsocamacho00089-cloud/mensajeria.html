@@ -4909,17 +4909,23 @@ function inicializarEntorno3D() {
     // 3. CARGA DIRECTA (Sin variables raras)
     // Asegúrate de que esto esté fuera de cualquier función
 const loader3D = new THREE.GLTFLoader(); 
-
-// Dentro de tu función inicializarEntorno3D:
 loader3D.load('/assets/avatar_local.glb', (gltf) => {
-    console.log("¡Modelo cargado!");
     window.SpaxioVerso.avatar = gltf.scene;
-    window.SpaxioVerso.avatar.scale.set(1, 1, 1);
+
+    // 1. EL TRUCO: Escalar desde el nodo raíz y limpiar cualquier escala previa
+    window.SpaxioVerso.avatar.scale.set(0.001, 0.001, 0.001); // Un valor muy pequeño para empezar
+
+    // 2. FORZAR escala en todos los hijos por si alguno tiene escala propia
+    window.SpaxioVerso.avatar.traverse((child) => {
+        if (child.isObject3D) {
+            child.scale.set(1, 1, 1); 
+        }
+    });
+
     window.SpaxioVerso.scene.add(window.SpaxioVerso.avatar);
     window.SpaxioVerso.isReady = true;
-}, undefined, (err) => {
-    console.error("Error crítico de carga:", err);
 });
+
 
     animarSpaxioVerso();
      }
