@@ -4948,28 +4948,38 @@ loader3D.load('/assets/avatar_local.glb', (gltf) => {
 
      
      /** 4. BUCLE DE ANIMACIÓN CON AJUSTE DE REDIMENSIONADO **/
-function animarSpaxioVerso() {
+// Variable global para controlar la velocidad (fuera de la función)
+let ultimaActualizacion = 0;
+const FPS_LIMIT = 30; // 30 FPS son suficientes para móviles y evitan bloqueos
+const intervalo = 1000 / FPS_LIMIT;
+
+function animarSpaxioVerso(tiempo) {
     spaxioAnimFrameId = requestAnimationFrame(animarSpaxioVerso);
     
-if (window.SpaxioVerso.avatar) {
-    // Solo permitimos rotación en Y (izquierda/derecha) para que no se caiga
-    const rotY = rotacionRostro.y || 0;
-    
-    // Aplicamos una interpolación más suave y restringimos ejes
-    window.SpaxioVerso.avatar.rotation.y = THREE.MathUtils.lerp(
-        window.SpaxioVerso.avatar.rotation.y, 
-        rotY, 
-        0.1
-    );
-    
-    // FORZAMOS a que X y Z siempre estén derechos
-    window.SpaxioVerso.avatar.rotation.x = 0;
-    window.SpaxioVerso.avatar.rotation.z = 0;
- 
-            }
-    
-    window.SpaxioVerso.renderer.render(window.SpaxioVerso.scene, window.SpaxioVerso.camera);
-}
+    // Control de tasa de refresco para no saturar los sensores del móvil
+    if (tiempo - ultimaActualizacion > intervalo) {
+        
+        if (window.SpaxioVerso.avatar) {
+            // Suavizado de rotación (Lerp)
+            const rotY = rotacionRostro.y || 0;
+            
+            window.SpaxioVerso.avatar.rotation.y = THREE.MathUtils.lerp(
+                window.SpaxioVerso.avatar.rotation.y, 
+                rotY, 
+                0.15 // Aumenté un poco a 0.15 para mayor respuesta
+            );
+            
+            // Forzar eje vertical (evita que se "caiga" o rote raro)
+            window.SpaxioVerso.avatar.rotation.x = 0;
+            window.SpaxioVerso.avatar.rotation.z = 0;
+        }
+
+        // Renderizado eficiente
+        window.SpaxioVerso.renderer.render(window.SpaxioVerso.scene, window.SpaxioVerso.camera);
+        
+        ultimaActualizacion = tiempo;
+    }
+ }
     
     
 
