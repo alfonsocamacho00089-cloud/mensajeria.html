@@ -4913,19 +4913,36 @@ const loader3D = new THREE.GLTFLoader();
 
 // Dentro de tu función inicializarEntorno3D:
 loader3D.load('/assets/avatar_local.glb', (gltf) => {
-    console.log("¡Modelo cargado!");
     window.SpaxioVerso.avatar = gltf.scene;
-    window.SpaxioVerso.avatar.scale.set(0, 1.5, 15);
+
+    // --- CÓDIGO FIJO: Ajuste de escala y posición ---
+    window.SpaxioVerso.avatar.position.set(0, 0, 0);
+    window.SpaxioVerso.avatar.scale.set(1, 1, 1);
+
+    const factorDeEscala = 0.05; 
+    window.SpaxioVerso.avatar.traverse((child) => {
+        if (child.isMesh) {
+            child.scale.set(factorDeEscala, factorDeEscala, factorDeEscala);
+        }
+    });
+
+    // Ajuste de cámara (fijo)
+    window.SpaxioVerso.camera.position.set(0, 1.5, 5); 
+    window.SpaxioVerso.camera.lookAt(0, 1.5, 0);
+    // ------------------------------------------------
+
     window.SpaxioVerso.scene.add(window.SpaxioVerso.avatar);
+    
+    // Vinculamos el esqueleto para que responda a tus movimientos
+    SpaxioAvatarController.vincularEsqueleto(window.SpaxioVerso.avatar);
+    
     window.SpaxioVerso.isReady = true;
+    console.log("Avatar cargado y configurado permanentemente");
 }, undefined, (err) => {
-    console.error("Error crítico de carga:", err);
+    console.error("Error al cargar:", err);
 });
 
-    animarSpaxioVerso();
-     }
-
- 
+ animarSpaxioVerso();
      /** 4. BUCLE DE ANIMACIÓN CON AJUSTE DE REDIMENSIONADO **/
 function animarSpaxioVerso() {
     spaxioAnimFrameId = requestAnimationFrame(animarSpaxioVerso);
