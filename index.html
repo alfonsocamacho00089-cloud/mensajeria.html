@@ -5010,23 +5010,49 @@ window.addEventListener('resize', () => {
 
 /** 3. IA Y RASTREO **/
 function encenderRastreadorFacialOMNI() {
-    faceMeshIA = new FaceMesh({
-        locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${file}`
+    // Usamos Holistic para obtener cara + manos al mismo tiempo
+    holisticIA = new Holistic({
+        locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/holistic/${file}`
     });
-    faceMeshIA.setOptions({ maxNumFaces: 1, refineLandmarks: false });
-    faceMeshIA.onResults((results) => {
-        if (results.multiFaceLandmarks?.length > 0) {
-            const nariz = results.multiFaceLandmarks[0][4];
+
+    holisticIA.setOptions({
+        modelComplexity: 1,
+        smoothLandmarks: true,
+        refineFaceLandmarks: true
+    });
+
+    holisticIA.onResults((results) => {
+        // --- 1. RASTREO FACIAL ---
+        if (results.faceLandmarks) {
+            const nariz = results.faceLandmarks[4];
             rotacionRostro.y = (nariz.x - 0.5) * -2.5;
             rotacionRostro.x = (nariz.y - 0.4) * 2.5;
         }
+
+        // --- 2. RASTREO DE MANOS ---
+        // Actualizamos las variables globales que declaraste arriba
+        if (results.leftHandLandmarks) {
+            posicionManos.left.set(
+                (results.leftHandLandmarks[0].x - 0.5) * 5,
+                -(results.leftHandLandmarks[0].y - 0.5) * 5,
+                0
+            );
+        }
+        if (results.rightHandLandmarks) {
+            posicionManos.right.set(
+                (results.rightHandLandmarks[0].x - 0.5) * 5,
+                -(results.rightHandLandmarks[0].y - 0.5) * 5,
+                0
+            );
+        }
     });
+
     camaraMediaPipe = new Camera(videoElementOculto, {
-        onFrame: async () => await faceMeshIA.send({ image: videoElementOculto }),
+        onFrame: async () => await holisticIA.send({ image: videoElementOculto }),
         width: 480, height: 360
     });
     camaraMediaPipe.start();
-}
+ }
 
 
 function cerrarSpaxioVerso() {
