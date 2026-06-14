@@ -4865,25 +4865,20 @@ const SpaxioAvatarController = {
     rostroMesh: null,
     
     vincularEsqueleto: function(gltfScene) {
-        // Cuello
         this.huesos.cuello = gltfScene.getObjectByName('mixamorigNeck') || gltfScene.getObjectByName('mixamorigHead');
         
-        // Lado Izquierdo
         this.huesos.brazoIzq = gltfScene.getObjectByName('mixamorigLeftArm');
         this.huesos.codoIzq = gltfScene.getObjectByName('mixamorigLeftForeArm');
         this.huesos.manoIzq = gltfScene.getObjectByName('mixamorigLeftHand');
         
-        // Lado Derecho (¡Te faltaban estos!)
         this.huesos.brazoDer = gltfScene.getObjectByName('mixamorigRightArm');
         this.huesos.codoDer = gltfScene.getObjectByName('mixamorigRightForeArm');
         this.huesos.manoDer = gltfScene.getObjectByName('mixamorigRightHand');
 
-        // Mapeo facial
         gltfScene.traverse((child) => {
             if (child.isMesh && child.morphTargetDictionary) this.rostroMesh = child;
         });
-
-        console.log("🧬 H.A.R.V.I.S: Esqueleto vinculado correctamente.");
+        console.log("🧬 H.A.R.V.I.S: Esqueleto y brazos vinculados correctamente.");
     }
 };
 
@@ -4975,30 +4970,35 @@ loader3D.load('/assets/avatar_local.glb', (gltf) => {
 function animarSpaxioVerso() {
     spaxioAnimFrameId = requestAnimationFrame(animarSpaxioVerso);
     
-    // 1. Mover el CUELLO
+    // --- 1. CUELLO ---
     if (window.SpaxioVerso.avatar && SpaxioAvatarController.huesos.cuello) {
         SpaxioAvatarController.huesos.cuello.rotation.y = THREE.MathUtils.lerp(
             SpaxioAvatarController.huesos.cuello.rotation.y, rotacionRostro.y || 0, 0.1
         );
+        SpaxioAvatarController.huesos.cuello.rotation.x = 0;
+        SpaxioAvatarController.huesos.cuello.rotation.z = 0;
     }
 
-    // 2. Mover BRAZOS (Izquierdo y Derecho) con Kalidokit
-    if (window.SpaxioVerso.poseResults && SpaxioAvatarController.huesos.brazoIzq) {
-        
-        // Resolver Izquierdo
-        const leftArm = Kalidokit.Arm.solve(window.SpaxioVerso.poseResults, 'Left');
-        SpaxioAvatarController.huesos.brazoIzq.rotation.setFromVector3(leftArm.upperArm);
-        SpaxioAvatarController.huesos.codoIzq.rotation.setFromVector3(leftArm.foreArm);
-        SpaxioAvatarController.huesos.manoIzq.rotation.setFromVector3(leftArm.hand);
+    // --- 2. BRAZOS (Kalidokit Integrado) ---
+    if (window.SpaxioVerso.poseResults && typeof Kalidokit !== 'undefined') {
+        const pose = window.SpaxioVerso.poseResults;
+        const leftArm = Kalidokit.Arm.solve(pose, 'Left');
+        const rightArm = Kalidokit.Arm.solve(pose, 'Right');
 
-        // Resolver Derecho
-        const rightArm = Kalidokit.Arm.solve(window.SpaxioVerso.poseResults, 'Right');
-        SpaxioAvatarController.huesos.brazoDer.rotation.setFromVector3(rightArm.upperArm);
-        SpaxioAvatarController.huesos.codoDer.rotation.setFromVector3(rightArm.foreArm);
-        SpaxioAvatarController.huesos.manoDer.rotation.setFromVector3(rightArm.hand);
+        if (SpaxioAvatarController.huesos.brazoIzq) {
+            SpaxioAvatarController.huesos.brazoIzq.rotation.set(leftArm.upperArm.x, leftArm.upperArm.y, leftArm.upperArm.z);
+            SpaxioAvatarController.huesos.codoIzq.rotation.set(leftArm.foreArm.x, leftArm.foreArm.y, leftArm.foreArm.z);
+            SpaxioAvatarController.huesos.manoIzq.rotation.set(leftArm.hand.x, leftArm.hand.y, leftArm.hand.z);
+        }
+
+        if (SpaxioAvatarController.huesos.brazoDer) {
+            SpaxioAvatarController.huesos.brazoDer.rotation.set(rightArm.upperArm.x, rightArm.upperArm.y, rightArm.upperArm.z);
+            SpaxioAvatarController.huesos.codoDer.rotation.set(rightArm.foreArm.x, rightArm.foreArm.y, rightArm.foreArm.z);
+            SpaxioAvatarController.huesos.manoDer.rotation.set(rightArm.hand.x, rightArm.hand.y, rightArm.hand.z);
+        }
     }
     
-    // 3. Renderizar
+    // --- 3. RENDER ---
     window.SpaxioVerso.renderer.render(window.SpaxioVerso.scene, window.SpaxioVerso.camera);
      }
      
