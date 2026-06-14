@@ -4846,6 +4846,10 @@ let intervaloTransmision = null;
 let ultimasCoordenadasEnviadas = { x: 0, y: 0 };
 let rotacionRostro = { x: 0, y: 0 };
 let avatarsRemotos = {};
+let posicionManos = { 
+    left: new THREE.Vector3(0, 0, 0), 
+    right: new THREE.Vector3(0, 0, 0) 
+};    
 // Añade esto al inicio de tu archivo, junto a las otras variables globales
 const loader3D = new THREE.GLTFLoader();
 const ID_SALA_METAVERSO = "6bdq9a7CC9UI";
@@ -4975,7 +4979,14 @@ function animarSpaxioVerso() {
         SpaxioAvatarController.huesos.cuello.rotation.x = 0;
         SpaxioAvatarController.huesos.cuello.rotation.z = 0;
     }
-    
+    // Dentro de animarSpaxioVerso, justo después de mover el cuello:
+
+if (SpaxioAvatarController.huesos.manoIzq && SpaxioAvatarController.huesos.manoDer) {
+    // Aplicamos suavizado (lerp) a la posición de las manos
+    // Aquí usamos los valores de tu variable global posicionManos
+    SpaxioAvatarController.huesos.manoIzq.rotation.set(posicionManos.left.x, posicionManos.left.y, 0);
+    SpaxioAvatarController.huesos.manoDer.rotation.set(posicionManos.right.x, posicionManos.right.y, 0);
+     }
     window.SpaxioVerso.renderer.render(window.SpaxioVerso.scene, window.SpaxioVerso.camera);
  }
         
@@ -5016,7 +5027,6 @@ function encenderRastreadorFacialOMNI() {
     });
     camaraMediaPipe.start();
 }
-
 
 
 function cerrarSpaxioVerso() {
