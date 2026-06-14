@@ -5034,33 +5034,21 @@ function encenderRastreadorFacialOMNI() {
     });
 
     holisticIA.onResults((results) => {
-        // 1. RASTREO FACIAL
+        // 1. RASTREO FACIAL (Esto controla la cabeza)
         if (results.faceLandmarks) {
             const nariz = results.faceLandmarks[4];
             rotacionRostro.y = (nariz.x - 0.5) * -2.5;
             rotacionRostro.x = (nariz.y - 0.4) * 2.5;
         }
 
-        // 2. RASTREO DE MANOS Y POSE (Cuerpo)
-        // Guardamos los resultados para que el bucle animarSpaxioVerso los use
+        // 2. RASTREO DE CUERPO Y MANOS (Todo se entrega a Kalidokit)
+        // Guardamos la pose completa para que el bucle la procese
         if (results.poseLandmarks) {
             window.SpaxioVerso.poseResults = results.poseLandmarks;
         }
         
-        if (results.leftHandLandmarks) {
-            posicionManos.left.set(
-                (results.leftHandLandmarks[0].x - 0.5) * 5,
-                -(results.leftHandLandmarks[0].y - 0.5) * 5,
-                0
-            );
-        }
-        if (results.rightHandLandmarks) {
-            posicionManos.right.set(
-                (results.rightHandLandmarks[0].x - 0.5) * 5,
-                -(results.rightHandLandmarks[0].y - 0.5) * 5,
-                0
-            );
-        }
+        // No necesitamos calcular posicionManos manualmente aquí, 
+        // ya que Kalidokit.Arm.solve lo hace dentro de la pose.
     });
 
     camaraMediaPipe = new Camera(videoElementOculto, {
