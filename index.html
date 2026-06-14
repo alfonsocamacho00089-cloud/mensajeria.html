@@ -4857,25 +4857,33 @@ const ID_SALA_METAVERSO = "6bdq9a7CC9UI";
 /** 1. CONTROLADOR DE AVATAR (H.A.R.V.I.S) **/
 /** 1. CONTROLADOR DE AVATAR (H.A.R.V.I.S) **/
 const SpaxioAvatarController = {
-    huesos: { cuello: null },
+    huesos: { 
+        cuello: null, 
+        brazoIzq: null, codoIzq: null, manoIzq: null,
+        brazoDer: null, codoDer: null, manoDer: null 
+    },
     rostroMesh: null,
+    
     vincularEsqueleto: function(gltfScene) {
-        // AQUÍ ESTABA EL ERROR: Necesitamos usar el nombre exacto de la lista
+        // Cuello
         this.huesos.cuello = gltfScene.getObjectByName('mixamorigNeck') || gltfScene.getObjectByName('mixamorigHead');
-        // Añade esto a tu controlador
-this.huesos.manoIzq = gltfScene.getObjectByName('mixamorigLeftHand');
-this.huesos.manoDer = gltfScene.getObjectByName('mixamorigRightHand');
-// En tu SpaxioAvatarController.vincularEsqueleto:
-this.huesos.brazoIzq = gltfScene.getObjectByName('mixamorigLeftArm'); // Hombro/Brazo superior
-this.huesos.codoIzq = gltfScene.getObjectByName('mixamorigLeftForeArm'); // Antebrazo
-// Haz lo mismo para la derecha...
-// En animarSpaxioVerso, mapeamos la posición de la IA a la rotación del hueso:
-// (Asumiendo que tu IA entrega 'posicionManos.left' y 'right')
-SpaxioAvatarController.huesos.manoIzq.rotation.set(posicionManos.left.x, posicionManos.left.y, 0);
+        
+        // Lado Izquierdo
+        this.huesos.brazoIzq = gltfScene.getObjectByName('mixamorigLeftArm');
+        this.huesos.codoIzq = gltfScene.getObjectByName('mixamorigLeftForeArm');
+        this.huesos.manoIzq = gltfScene.getObjectByName('mixamorigLeftHand');
+        
+        // Lado Derecho (¡Te faltaban estos!)
+        this.huesos.brazoDer = gltfScene.getObjectByName('mixamorigRightArm');
+        this.huesos.codoDer = gltfScene.getObjectByName('mixamorigRightForeArm');
+        this.huesos.manoDer = gltfScene.getObjectByName('mixamorigRightHand');
+
+        // Mapeo facial
         gltfScene.traverse((child) => {
             if (child.isMesh && child.morphTargetDictionary) this.rostroMesh = child;
         });
-        console.log("🧬 H.A.R.V.I.S: Esqueleto vinculado al hueso:", this.huesos.cuello);
+
+        console.log("🧬 H.A.R.V.I.S: Esqueleto vinculado correctamente.");
     }
 };
 
