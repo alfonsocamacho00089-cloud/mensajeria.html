@@ -4865,7 +4865,10 @@ const SpaxioAvatarController = {
         // Añade esto a tu controlador
 this.huesos.manoIzq = gltfScene.getObjectByName('mixamorigLeftHand');
 this.huesos.manoDer = gltfScene.getObjectByName('mixamorigRightHand');
-
+// En tu SpaxioAvatarController.vincularEsqueleto:
+this.huesos.brazoIzq = gltfScene.getObjectByName('mixamorigLeftHand'); // Hombro/Brazo superior
+this.huesos.codoIzq = gltfScene.getObjectByName('mixamorigLeftForeHand'); // Antebrazo
+// Haz lo mismo para la derecha...
 // En animarSpaxioVerso, mapeamos la posición de la IA a la rotación del hueso:
 // (Asumiendo que tu IA entrega 'posicionManos.left' y 'right')
 SpaxioAvatarController.huesos.manoIzq.rotation.set(posicionManos.left.x, posicionManos.left.y, 0);
