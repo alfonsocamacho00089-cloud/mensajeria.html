@@ -4858,7 +4858,13 @@ const SpaxioAvatarController = {
     vincularEsqueleto: function(gltfScene) {
         // AQUÍ ESTABA EL ERROR: Necesitamos usar el nombre exacto de la lista
         this.huesos.cuello = gltfScene.getObjectByName('mixamorigNeck') || gltfScene.getObjectByName('mixamorigHead');
-        
+        // Añade esto a tu controlador
+this.huesos.manoIzq = gltfScene.getObjectByName('mixamorigLeftHand');
+this.huesos.manoDer = gltfScene.getObjectByName('mixamorigRightHand');
+
+// En animarSpaxioVerso, mapeamos la posición de la IA a la rotación del hueso:
+// (Asumiendo que tu IA entrega 'posicionManos.left' y 'right')
+SpaxioAvatarController.huesos.manoIzq.rotation.set(posicionManos.left.x, posicionManos.left.y, 0);
         gltfScene.traverse((child) => {
             if (child.isMesh && child.morphTargetDictionary) this.rostroMesh = child;
         });
