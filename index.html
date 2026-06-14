@@ -4851,15 +4851,18 @@ const loader3D = new THREE.GLTFLoader();
 const ID_SALA_METAVERSO = "6bdq9a7CC9UI";
 
 /** 1. CONTROLADOR DE AVATAR (H.A.R.V.I.S) **/
+/** 1. CONTROLADOR DE AVATAR (H.A.R.V.I.S) **/
 const SpaxioAvatarController = {
     huesos: { cuello: null },
     rostroMesh: null,
     vincularEsqueleto: function(gltfScene) {
-        this.huesos.cuello = gltfScene.getObjectByName('Neck') || gltfScene.getObjectByName('head');
+        // AQUÍ ESTABA EL ERROR: Necesitamos usar el nombre exacto de la lista
+        this.huesos.cuello = gltfScene.getObjectByName('mixamorigNeck') || gltfScene.getObjectByName('mixamorigHead');
+        
         gltfScene.traverse((child) => {
             if (child.isMesh && child.morphTargetDictionary) this.rostroMesh = child;
         });
-        console.log("🧬 H.A.R.V.I.S: Esqueleto vinculado.");
+        console.log("🧬 H.A.R.V.I.S: Esqueleto vinculado al hueso:", this.huesos.cuello);
     }
 };
 
@@ -4951,26 +4954,26 @@ loader3D.load('/assets/avatar_local.glb', (gltf) => {
 function animarSpaxioVerso() {
     spaxioAnimFrameId = requestAnimationFrame(animarSpaxioVerso);
     
-    if (window.SpaxioVerso.avatar) {
-        // Obtenemos la rotación objetivo
+    // Verificamos que el hueso exista antes de intentar moverlo
+    if (window.SpaxioVerso.avatar && SpaxioAvatarController.huesos.cuello) {
         const rotY = rotacionRostro.y || 0;
         
-        // Mantenemos tu velocidad original de respuesta (0.1)
-        window.SpaxioVerso.avatar.rotation.y = THREE.MathUtils.lerp(
-            window.SpaxioVerso.avatar.rotation.y, 
+        // Aplicamos la rotación SOLO al hueso del cuello
+        SpaxioAvatarController.huesos.cuello.rotation.y = THREE.MathUtils.lerp(
+            SpaxioAvatarController.huesos.cuello.rotation.y, 
             rotY, 
             0.1
         );
         
-        // Bloqueo estricto de ejes para que no se maree el modelo
-        window.SpaxioVerso.avatar.rotation.x = 0;
-        window.SpaxioVerso.avatar.rotation.z = 0;
+        // Limpiamos los otros ejes para evitar rotaciones extrañas
+        SpaxioAvatarController.huesos.cuello.rotation.x = 0;
+        SpaxioAvatarController.huesos.cuello.rotation.z = 0;
     }
     
-    // Renderizado directo, sin esperas ni limitaciones
     window.SpaxioVerso.renderer.render(window.SpaxioVerso.scene, window.SpaxioVerso.camera);
-     }
-    
+ }
+        
+        
     
 
 // CORRECCIÓN: Unimos la línea rota y aseguramos que el ID exista
