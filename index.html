@@ -4866,8 +4866,8 @@ const SpaxioAvatarController = {
 this.huesos.manoIzq = gltfScene.getObjectByName('mixamorigLeftHand');
 this.huesos.manoDer = gltfScene.getObjectByName('mixamorigRightHand');
 // En tu SpaxioAvatarController.vincularEsqueleto:
-this.huesos.brazoIzq = gltfScene.getObjectByName('mixamorigLeftHand'); // Hombro/Brazo superior
-this.huesos.codoIzq = gltfScene.getObjectByName('mixamorigLeftForeHand'); // Antebrazo
+this.huesos.brazoIzq = gltfScene.getObjectByName('mixamorigLeftArm'); // Hombro/Brazo superior
+this.huesos.codoIzq = gltfScene.getObjectByName('mixamorigLeftForeArm'); // Antebrazo
 // Haz lo mismo para la derecha...
 // En animarSpaxioVerso, mapeamos la posición de la IA a la rotación del hueso:
 // (Asumiendo que tu IA entrega 'posicionManos.left' y 'right')
@@ -4967,32 +4967,34 @@ loader3D.load('/assets/avatar_local.glb', (gltf) => {
 function animarSpaxioVerso() {
     spaxioAnimFrameId = requestAnimationFrame(animarSpaxioVerso);
     
-    // Verificamos que el hueso exista antes de intentar moverlo
+    // 1. Mover el CUELLO
     if (window.SpaxioVerso.avatar && SpaxioAvatarController.huesos.cuello) {
-        const rotY = rotacionRostro.y || 0;
-        
-        // Aplicamos la rotación SOLO al hueso del cuello
         SpaxioAvatarController.huesos.cuello.rotation.y = THREE.MathUtils.lerp(
-            SpaxioAvatarController.huesos.cuello.rotation.y, 
-            rotY, 
-            0.1
+            SpaxioAvatarController.huesos.cuello.rotation.y, rotacionRostro.y || 0, 0.1
         );
-        
-        // Limpiamos los otros ejes para evitar rotaciones extrañas
-        SpaxioAvatarController.huesos.cuello.rotation.x = 0;
-        SpaxioAvatarController.huesos.cuello.rotation.z = 0;
     }
-    // Dentro de animarSpaxioVerso, justo después de mover el cuello:
 
-if (SpaxioAvatarController.huesos.manoIzq && SpaxioAvatarController.huesos.manoDer) {
-    // Aplicamos suavizado (lerp) a la posición de las manos
-    // Aquí usamos los valores de tu variable global posicionManos
-    SpaxioAvatarController.huesos.manoIzq.rotation.set(posicionManos.left.x, posicionManos.left.y, 0);
-    SpaxioAvatarController.huesos.manoDer.rotation.set(posicionManos.right.x, posicionManos.right.y, 0);
-     }
-    window.SpaxioVerso.renderer.render(window.SpaxioVerso.scene, window.SpaxioVerso.camera);
- }
+    // 2. Mover BRAZOS (Izquierdo y Derecho) con Kalidokit
+    if (window.SpaxioVerso.poseResults && SpaxioAvatarController.huesos.brazoIzq) {
         
+        // Resolver Izquierdo
+        const leftArm = Kalidokit.Arm.solve(window.SpaxioVerso.poseResults, 'Left');
+        SpaxioAvatarController.huesos.brazoIzq.rotation.setFromVector3(leftArm.upperArm);
+        SpaxioAvatarController.huesos.codoIzq.rotation.setFromVector3(leftArm.foreArm);
+        SpaxioAvatarController.huesos.manoIzq.rotation.setFromVector3(leftArm.hand);
+
+        // Resolver Derecho
+        const rightArm = Kalidokit.Arm.solve(window.SpaxioVerso.poseResults, 'Right');
+        SpaxioAvatarController.huesos.brazoDer.rotation.setFromVector3(rightArm.upperArm);
+        SpaxioAvatarController.huesos.codoDer.rotation.setFromVector3(rightArm.foreArm);
+        SpaxioAvatarController.huesos.manoDer.rotation.setFromVector3(rightArm.hand);
+    }
+    
+    // 3. Renderizar
+    window.SpaxioVerso.renderer.render(window.SpaxioVerso.scene, window.SpaxioVerso.camera);
+     }
+     
+    
         
     
 
@@ -5013,7 +5015,6 @@ window.addEventListener('resize', () => {
 
 /** 3. IA Y RASTREO **/
 function encenderRastreadorFacialOMNI() {
-    // Usamos Holistic para obtener cara + manos al mismo tiempo
     holisticIA = new Holistic({
         locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/holistic/${file}`
     });
@@ -5025,15 +5026,19 @@ function encenderRastreadorFacialOMNI() {
     });
 
     holisticIA.onResults((results) => {
-        // --- 1. RASTREO FACIAL ---
+        // 1. RASTREO FACIAL
         if (results.faceLandmarks) {
             const nariz = results.faceLandmarks[4];
             rotacionRostro.y = (nariz.x - 0.5) * -2.5;
             rotacionRostro.x = (nariz.y - 0.4) * 2.5;
         }
 
-        // --- 2. RASTREO DE MANOS ---
-        // Actualizamos las variables globales que declaraste arriba
+        // 2. RASTREO DE MANOS Y POSE (Cuerpo)
+        // Guardamos los resultados para que el bucle animarSpaxioVerso los use
+        if (results.poseLandmarks) {
+            window.SpaxioVerso.poseResults = results.poseLandmarks;
+        }
+        
         if (results.leftHandLandmarks) {
             posicionManos.left.set(
                 (results.leftHandLandmarks[0].x - 0.5) * 5,
@@ -5055,7 +5060,7 @@ function encenderRastreadorFacialOMNI() {
         width: 480, height: 360
     });
     camaraMediaPipe.start();
- }
+     }
 
 
 function cerrarSpaxioVerso() {
