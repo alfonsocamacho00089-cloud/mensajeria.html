@@ -4978,13 +4978,25 @@ function animarSpaxioVerso() {
     // 2. Mover Brazos y Manos
     if (window.SpaxioVerso.poseResults?.landmarks) {
         // Resolvemos cuerpo
-        const riggedPose = window.Kalidokit.Pose.solve(
-            window.SpaxioVerso.poseResults.worldLandmarks, 
-            window.SpaxioVerso.poseResults.landmarks, 
-            { runtime: "mediapipe", enableLegs: false }
-        );
+        
 
-        if (riggedPose) {
+     // Dentro de animarSpaxioVerso:
+const riggedPose = window.Kalidokit.Pose.solve(
+    window.SpaxioVerso.poseResults.worldLandmarks, 
+    window.SpaxioVerso.poseResults.landmarks, 
+    { runtime: "mediapipe", enableLegs: false }
+);
+
+// DIAGNÓSTICO: Si esto no sale en consola, es que no está detectando pose
+if (!riggedPose) {
+    // Esto solo se ejecutará si MediaPipe no detecta cuerpo
+    // No saturará la consola porque solo ocurre si el esqueleto falla
+    console.warn("MediaPipe no detecta esqueleto corporal.");
+} else {
+    // Si esto sale, es que SÍ detecta cuerpo y el problema es el nombre de los huesos
+    console.log("Esqueleto detectado, aplicando movimiento...");
+    // ... tu código de aplicar rotaciones aquí
+     }
             const apply = (bone, data) => { if(bone && data) bone.rotation.set(data.x, data.y, data.z); };
             
             // Brazos
