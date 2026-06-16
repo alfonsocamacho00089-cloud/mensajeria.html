@@ -4964,17 +4964,20 @@ loader3D.load('/assets/avatar_local.glb', (gltf) => {
 }
 /** 4. BUCLE DE ANIMACIÓN CON AJUSTE DE REDIMENSIONADO **/
 
+
 function animarSpaxioVerso() {
     spaxioAnimFrameId = requestAnimationFrame(animarSpaxioVerso);
     
-    // Solo lógica de movimiento, sin logs
+    // 1. Mover Cuello (Funciona bien)
     if (window.SpaxioVerso.avatar && SpaxioAvatarController.huesos.cuello) {
         SpaxioAvatarController.huesos.cuello.rotation.y = THREE.MathUtils.lerp(
             SpaxioAvatarController.huesos.cuello.rotation.y, rotacionRostro.y || 0, 0.1
         );
     }
 
-    if (window.SpaxioVerso.poseResults?.landmarks && window.Kalidokit?.Pose?.solve) {
+    // 2. Mover Brazos y Manos
+    if (window.SpaxioVerso.poseResults?.landmarks) {
+        // Resolvemos cuerpo
         const riggedPose = window.Kalidokit.Pose.solve(
             window.SpaxioVerso.poseResults.worldLandmarks, 
             window.SpaxioVerso.poseResults.landmarks, 
@@ -4982,13 +4985,15 @@ function animarSpaxioVerso() {
         );
 
         if (riggedPose) {
-            // Mapeo directo sin logs
             const apply = (bone, data) => { if(bone && data) bone.rotation.set(data.x, data.y, data.z); };
             
+            // Brazos
             apply(SpaxioAvatarController.huesos.brazoIzq, riggedPose.leftArm.upperArm);
             apply(SpaxioAvatarController.huesos.codoIzq, riggedPose.leftArm.foreArm);
+            
+            // Manos (Aquí usamos los datos de manos que ya capturas)
             apply(SpaxioAvatarController.huesos.manoIzq, riggedPose.leftArm.hand);
-
+            
             apply(SpaxioAvatarController.huesos.brazoDer, riggedPose.rightArm.upperArm);
             apply(SpaxioAvatarController.huesos.codoDer, riggedPose.rightArm.foreArm);
             apply(SpaxioAvatarController.huesos.manoDer, riggedPose.rightArm.hand);
