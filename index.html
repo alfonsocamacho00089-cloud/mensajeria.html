@@ -4980,34 +4980,27 @@ SpaxioAvatarController.huesos.cuello.rotation.y, rotacionRostro.y || 0, 0.1
 );
 
      }
-     // 2. BRAZOS (Solución de rotación)
-if (window.SpaxioVerso.poseResults && window.Kalidokit?.Pose?.solve) {
-    const { landmarks, worldLandmarks } = window.SpaxioVerso.poseResults;
-    const riggedPose = window.Kalidokit.Pose.solve(worldLandmarks, landmarks, {
-        runtime: "mediapipe",
-        enableLegs: false
-    });
+     // 2. BRAZOS (FORZANDO EL MAEPEO DIRECTO)
+    if (window.SpaxioVerso.poseResults && window.Kalidokit?.Pose?.solve) {
+        const { landmarks, worldLandmarks } = window.SpaxioVerso.poseResults;
+        const riggedPose = window.Kalidokit.Pose.solve(worldLandmarks, landmarks, {
+            runtime: "mediapipe",
+            enableLegs: false
+        });
 
-    if (riggedPose) {
-        // Función para aplicar rotación suavemente
-        const updateBone = (bone, data) => {
-            if (bone && data) {
-                // Usamos rotation.set pero aseguramos que el orden de ejes sea XYZ
-                // Si el brazo se ve raro, cambia a .set(data.y, data.x, data.z)
-                bone.rotation.set(data.x, data.y, data.z); 
-            }
-        };
+        if (riggedPose && riggedPose.leftArm && riggedPose.rightArm) {
+            // Mapeo manual SIN funciones auxiliares para asegurar que no haya errores de ámbito
+            
+            // Izquierdo
+            SpaxioAvatarController.huesos.brazoIzq.rotation.set(riggedPose.leftArm.upperArm.x, riggedPose.leftArm.upperArm.y, riggedPose.leftArm.upperArm.z);
+            SpaxioAvatarController.huesos.codoIzq.rotation.set(riggedPose.leftArm.foreArm.x, riggedPose.leftArm.foreArm.y, riggedPose.leftArm.foreArm.z);
+            SpaxioAvatarController.huesos.manoIzq.rotation.set(riggedPose.leftArm.hand.x, riggedPose.leftArm.hand.y, riggedPose.leftArm.hand.z);
 
-        // Brazo Izquierdo
-        updateBone(SpaxioAvatarController.huesos.brazoIzq, riggedPose.leftArm.upperArm);
-        updateBone(SpaxioAvatarController.huesos.codoIzq, riggedPose.leftArm.foreArm);
-        updateBone(SpaxioAvatarController.huesos.manoIzq, riggedPose.leftArm.hand);
-
-        // Brazo Derecho
-        updateBone(SpaxioAvatarController.huesos.brazoDer, riggedPose.rightArm.upperArm);
-        updateBone(SpaxioAvatarController.huesos.codoDer, riggedPose.rightArm.foreArm);
-        updateBone(SpaxioAvatarController.huesos.manoDer, riggedPose.rightArm.hand);
-    }
+            // Derecho
+            SpaxioAvatarController.huesos.brazoDer.rotation.set(riggedPose.rightArm.upperArm.x, riggedPose.rightArm.upperArm.y, riggedPose.rightArm.upperArm.z);
+            SpaxioAvatarController.huesos.codoDer.rotation.set(riggedPose.rightArm.foreArm.x, riggedPose.rightArm.foreArm.y, riggedPose.rightArm.foreArm.z);
+            SpaxioAvatarController.huesos.manoDer.rotation.set(riggedPose.rightArm.hand.x, riggedPose.rightArm.hand.y, riggedPose.rightArm.hand.z);
+        }
  }
     
     
