@@ -4993,8 +4993,7 @@ if (window.SpaxioVerso.poseResults && window.Kalidokit?.Pose?.solve) {
 
         if (riggedPose) {
 
-     if (!riggedPose.leftArm) console.log("⚠️ riggedPose no tiene datos de leftArm");
-            // Mapeo Izquierdo
+       // Mapeo Izquierdo
             if (SpaxioAvatarController.huesos.brazoIzq && riggedPose.leftArm) {
                 SpaxioAvatarController.huesos.brazoIzq.rotation.set(riggedPose.leftArm.upperArm.x, riggedPose.leftArm.upperArm.y, riggedPose.leftArm.upperArm.z);
                 SpaxioAvatarController.huesos.codoIzq.rotation.set(riggedPose.leftArm.foreArm.x, riggedPose.leftArm.foreArm.y, riggedPose.leftArm.foreArm.z);
