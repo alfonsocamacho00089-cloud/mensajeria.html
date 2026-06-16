@@ -4965,53 +4965,33 @@ loader3D.load('/assets/avatar_local.glb', (gltf) => {
 /** 4. BUCLE DE ANIMACIÓN CON AJUSTE DE REDIMENSIONADO **/
 
 
+// 1. Centraliza el callback (NO lo inyectes varias veces)
+holisticIA.onResults((results) => {
+    window.SpaxioVerso.poseResults = results;
+});
+
+// 2. En el bucle de animación, verifica la pose
 function animarSpaxioVerso() {
     spaxioAnimFrameId = requestAnimationFrame(animarSpaxioVerso);
     
-    // 1. Mover Cuello (Funciona bien)
-    if (window.SpaxioVerso.avatar && SpaxioAvatarController.huesos.cuello) {
-        SpaxioAvatarController.huesos.cuello.rotation.y = THREE.MathUtils.lerp(
-            SpaxioAvatarController.huesos.cuello.rotation.y, rotacionRostro.y || 0, 0.1
+    if (window.SpaxioVerso.poseResults && window.SpaxioVerso.poseResults.poseLandmarks) {
+        const riggedPose = window.Kalidokit.Pose.solve(
+            window.SpaxioVerso.poseResults.poseLandmarks, 
+            { runtime: "mediapipe" }
         );
-    }
 
-    // 2. Mover Brazos y Manos
-    if (window.SpaxioVerso.poseResults?.landmarks) {
-        // Resolvemos cuerpo
-        
+        if (riggedPose) {
+            // Aplicar rotaciones
+            const apply = (bone, rot) => {
+                if (bone) bone.rotation.set(rot.x, rot.y, rot.z);
+            };
 
-     // Dentro de animarSpaxioVerso:
-const riggedPose = window.Kalidokit.Pose.solve(
-    window.SpaxioVerso.poseResults.worldLandmarks, 
-    window.SpaxioVerso.poseResults.landmarks, 
-    { runtime: "mediapipe", enableLegs: false }
-);
-
-// DIAGNÓSTICO: Si esto no sale en consola, es que no está detectando pose
-if (!riggedPose) {
-    // Esto solo se ejecutará si MediaPipe no detecta cuerpo
-    // No saturará la consola porque solo ocurre si el esqueleto falla
-    console.warn("MediaPipe no detecta esqueleto corporal.");
-} else {
-    // Si esto sale, es que SÍ detecta cuerpo y el problema es el nombre de los huesos
-    console.log("Esqueleto detectado, aplicando movimiento...");
-    // ... tu código de aplicar rotaciones aquí
-     
-            const apply = (bone, data) => { if(bone && data) bone.rotation.set(data.x, data.y, data.z); };
-            
-            // Brazos
             apply(SpaxioAvatarController.huesos.brazoIzq, riggedPose.leftArm.upperArm);
             apply(SpaxioAvatarController.huesos.codoIzq, riggedPose.leftArm.foreArm);
-            
-            // Manos (Aquí usamos los datos de manos que ya capturas)
-            apply(SpaxioAvatarController.huesos.manoIzq, riggedPose.leftArm.hand);
-            
             apply(SpaxioAvatarController.huesos.brazoDer, riggedPose.rightArm.upperArm);
             apply(SpaxioAvatarController.huesos.codoDer, riggedPose.rightArm.foreArm);
-            apply(SpaxioAvatarController.huesos.manoDer, riggedPose.rightArm.hand);
         }
     }
-    
     window.SpaxioVerso.renderer.render(window.SpaxioVerso.scene, window.SpaxioVerso.camera);
  }
      
