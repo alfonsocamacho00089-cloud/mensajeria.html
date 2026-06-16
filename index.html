@@ -4965,43 +4965,35 @@ loader3D.load('/assets/avatar_local.glb', (gltf) => {
 
      
      /** 4. BUCLE DE ANIMACIÓN CON AJUSTE DE REDIMENSIONADO **/
-function animarSpaxioVerso() {
-    spaxioAnimFrameId = requestAnimationFrame(animarSpaxioVerso);
-    
-    // 1. CUELLO (Funciona bien)
-    if (window.SpaxioVerso.avatar && SpaxioAvatarController.huesos.cuello) {
-        SpaxioAvatarController.huesos.cuello.rotation.y = THREE.MathUtils.lerp(
-            SpaxioAvatarController.huesos.cuello.rotation.y, rotacionRostro.y || 0, 0.1
-        );
+// 2. BRAZOS (Solución de rotación)
+if (window.SpaxioVerso.poseResults && window.Kalidokit?.Pose?.solve) {
+    const { landmarks, worldLandmarks } = window.SpaxioVerso.poseResults;
+    const riggedPose = window.Kalidokit.Pose.solve(worldLandmarks, landmarks, {
+        runtime: "mediapipe",
+        enableLegs: false
+    });
+
+    if (riggedPose) {
+        // Función para aplicar rotación suavemente
+        const updateBone = (bone, data) => {
+            if (bone && data) {
+                // Usamos rotation.set pero aseguramos que el orden de ejes sea XYZ
+                // Si el brazo se ve raro, cambia a .set(data.y, data.x, data.z)
+                bone.rotation.set(data.x, data.y, data.z); 
+            }
+        };
+
+        // Brazo Izquierdo
+        updateBone(SpaxioAvatarController.huesos.brazoIzq, riggedPose.leftArm.upperArm);
+        updateBone(SpaxioAvatarController.huesos.codoIzq, riggedPose.leftArm.foreArm);
+        updateBone(SpaxioAvatarController.huesos.manoIzq, riggedPose.leftArm.hand);
+
+        // Brazo Derecho
+        updateBone(SpaxioAvatarController.huesos.brazoDer, riggedPose.rightArm.upperArm);
+        updateBone(SpaxioAvatarController.huesos.codoDer, riggedPose.rightArm.foreArm);
+        updateBone(SpaxioAvatarController.huesos.manoDer, riggedPose.rightArm.hand);
     }
-
-    // 2. BRAZOS (El puente que faltaba)
-    if (window.SpaxioVerso.poseResults && window.Kalidokit?.Pose?.solve) {
-        const { landmarks, worldLandmarks } = window.SpaxioVerso.poseResults;
-        
-        // Calculamos la cinemática inversa (IK)
-        const riggedPose = window.Kalidokit.Pose.solve(worldLandmarks, landmarks, {
-            runtime: "mediapipe",
-            enableLegs: false
-        });
-
-        if (riggedPose) {
-            // Aplicamos rotaciones
-            const updateBone = (bone, data) => {
-                if (bone && data) bone.rotation.set(data.x, data.y, data.z);
-            };
-
-            // Brazo Izquierdo
-            updateBone(SpaxioAvatarController.huesos.brazoIzq, riggedPose.leftArm.upperArm);
-            updateBone(SpaxioAvatarController.huesos.codoIzq, riggedPose.leftArm.foreArm);
-            updateBone(SpaxioAvatarController.huesos.manoIzq, riggedPose.leftArm.hand);
-
-            // Brazo Derecho
-            updateBone(SpaxioAvatarController.huesos.brazoDer, riggedPose.rightArm.upperArm);
-            updateBone(SpaxioAvatarController.huesos.codoDer, riggedPose.rightArm.foreArm);
-            updateBone(SpaxioAvatarController.huesos.manoDer, riggedPose.rightArm.hand);
-        }
-    }
+ }
     
     
     // 3. RENDER
