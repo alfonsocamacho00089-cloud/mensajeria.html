@@ -4965,10 +4965,6 @@ loader3D.load('/assets/avatar_local.glb', (gltf) => {
 /** 4. BUCLE DE ANIMACIÓN CON AJUSTE DE REDIMENSIONADO **/
 
 
-// 1. Centraliza el callback (NO lo inyectes varias veces)
-holisticIA.onResults((results) => {
-    window.SpaxioVerso.poseResults = results;
-});
 
 // 2. En el bucle de animación, verifica la pose
 function animarSpaxioVerso() {
