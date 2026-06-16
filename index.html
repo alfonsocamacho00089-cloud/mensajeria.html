@@ -5033,19 +5033,21 @@ function encenderRastreadorFacialOMNI() {
         refineFaceLandmarks: true
     });
 
-    holisticIA.onResults((results) => {
-        // RASTREO FACIAL (Esto funcionaba)
+    
+        holisticIA.onResults((results) => {
+        // 1. RASTREO FACIAL (Sin cambios)
         if (results.faceLandmarks) {
             const nariz = results.faceLandmarks[4];
             rotacionRostro.y = (nariz.x - 0.5) * -2.5;
             rotacionRostro.x = (nariz.y - 0.4) * 2.5;
         }
 
-        // RASTREO CORPORAL (La estructura simple de siempre)
-        if (results.poseLandmarks && results.poseWorldLandmarks) {
+        // 2. RASTREO CORPORAL FLEXIBLE
+        // Quitamos el '&&' restrictivo. Si tenemos landmarks, intentamos mover los brazos.
+        if (results.poseLandmarks) {
             window.SpaxioVerso.poseResults = {
                 landmarks: results.poseLandmarks,
-                worldLandmarks: results.poseWorldLandmarks
+                worldLandmarks: results.poseWorldLandmarks || results.poseLandmarks
             };
         }
     });
