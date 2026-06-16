@@ -4965,52 +4965,38 @@ loader3D.load('/assets/avatar_local.glb', (gltf) => {
 /** 4. BUCLE DE ANIMACIÓN CON AJUSTE DE REDIMENSIONADO **/
 
 function animarSpaxioVerso() {
-
-spaxioAnimFrameId = requestAnimationFrame(animarSpaxioVerso);
-
-
-// 1. CUELLO (Funciona bien)
-
-if (window.SpaxioVerso.avatar && SpaxioAvatarController.huesos.cuello) {
-
-SpaxioAvatarController.huesos.cuello.rotation.y = THREE.MathUtils.lerp(
-
-SpaxioAvatarController.huesos.cuello.rotation.y, rotacionRostro.y || 0, 0.1
-
-);
-
-     }
-     
-    // 2. BRAZOS (PUENTE DIRECTO DE DATOS)
-if (window.SpaxioVerso.poseResults && window.Kalidokit?.Pose?.solve) {
-    const { landmarks, worldLandmarks } = window.SpaxioVerso.poseResults;
+    spaxioAnimFrameId = requestAnimationFrame(animarSpaxioVerso);
     
-    // Calculamos la cinemática
-    const riggedPose = window.Kalidokit.Pose.solve(worldLandmarks, landmarks, {
-        runtime: "mediapipe",
-        enableLegs: false
-    });
+    // Solo lógica de movimiento, sin logs
+    if (window.SpaxioVerso.avatar && SpaxioAvatarController.huesos.cuello) {
+        SpaxioAvatarController.huesos.cuello.rotation.y = THREE.MathUtils.lerp(
+            SpaxioAvatarController.huesos.cuello.rotation.y, rotacionRostro.y || 0, 0.1
+        );
+    }
 
-    if (riggedPose && riggedPose.leftArm && riggedPose.rightArm) {
-        // Mapeo Izquierdo
-        if (SpaxioAvatarController.huesos.brazoIzq) {
-            SpaxioAvatarController.huesos.brazoIzq.rotation.set(riggedPose.leftArm.upperArm.x, riggedPose.leftArm.upperArm.y, riggedPose.leftArm.upperArm.z);
-            SpaxioAvatarController.huesos.codoIzq.rotation.set(riggedPose.leftArm.foreArm.x, riggedPose.leftArm.foreArm.y, riggedPose.leftArm.foreArm.z);
-            SpaxioAvatarController.huesos.manoIzq.rotation.set(riggedPose.leftArm.hand.x, riggedPose.leftArm.hand.y, riggedPose.leftArm.hand.z);
-        }
-        // Mapeo Derecho
-        if (SpaxioAvatarController.huesos.brazoDer) {
-            SpaxioAvatarController.huesos.brazoDer.rotation.set(riggedPose.rightArm.upperArm.x, riggedPose.rightArm.upperArm.y, riggedPose.rightArm.upperArm.z);
-            SpaxioAvatarController.huesos.codoDer.rotation.set(riggedPose.rightArm.foreArm.x, riggedPose.rightArm.foreArm.y, riggedPose.rightArm.foreArm.z);
-            SpaxioAvatarController.huesos.manoDer.rotation.set(riggedPose.rightArm.hand.x, riggedPose.rightArm.hand.y, riggedPose.rightArm.hand.z);
+    if (window.SpaxioVerso.poseResults?.landmarks && window.Kalidokit?.Pose?.solve) {
+        const riggedPose = window.Kalidokit.Pose.solve(
+            window.SpaxioVerso.poseResults.worldLandmarks, 
+            window.SpaxioVerso.poseResults.landmarks, 
+            { runtime: "mediapipe", enableLegs: false }
+        );
+
+        if (riggedPose) {
+            // Mapeo directo sin logs
+            const apply = (bone, data) => { if(bone && data) bone.rotation.set(data.x, data.y, data.z); };
+            
+            apply(SpaxioAvatarController.huesos.brazoIzq, riggedPose.leftArm.upperArm);
+            apply(SpaxioAvatarController.huesos.codoIzq, riggedPose.leftArm.foreArm);
+            apply(SpaxioAvatarController.huesos.manoIzq, riggedPose.leftArm.hand);
+
+            apply(SpaxioAvatarController.huesos.brazoDer, riggedPose.rightArm.upperArm);
+            apply(SpaxioAvatarController.huesos.codoDer, riggedPose.rightArm.foreArm);
+            apply(SpaxioAvatarController.huesos.manoDer, riggedPose.rightArm.hand);
         }
     }
-     }
     
-    
-    // 3. RENDER
     window.SpaxioVerso.renderer.render(window.SpaxioVerso.scene, window.SpaxioVerso.camera);
-     }
+ }
      
     
         
@@ -5050,16 +5036,13 @@ holisticIA.setOptions({
     // Dentro de encenderRastreadorFacialOMNI, en el onResults:
 // Asegúrate de que esto esté dentro de encenderRastreadorFacialOMNI
 holisticIA.onResults((results) => {
-    // 1. Rastro facial (mantenemos lo que funciona)
     if (results.faceLandmarks) {
         const nariz = results.faceLandmarks[4];
         rotacionRostro.y = (nariz.x - 0.5) * -2.5;
         rotacionRostro.x = (nariz.y - 0.4) * 2.5;
     }
 
-    // 2. FORZADO TOTAL DE DATOS DE POSE
-    // Quitamos el IF restrictivo. Si llega algo, lo enviamos al avatar.
-    // Esto evita que MediaPipe bloquee el movimiento por "cuerpo no visible".
+    // SIN NINGÚN CONSOLE.LOG AQUÍ
     window.SpaxioVerso.poseResults = {
         landmarks: results.poseLandmarks || null,
         worldLandmarks: results.poseWorldLandmarks || null
