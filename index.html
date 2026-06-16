@@ -5032,12 +5032,16 @@ function encenderRastreadorFacialOMNI() {
     holisticIA = new Holistic({
         locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/holistic/${file}`
     });
+// DEBES tener algo como esto para que el cuerpo sea detectado:
 
-    holisticIA.setOptions({
-        modelComplexity: 1,
-        smoothLandmarks: true,
-        refineFaceLandmarks: true
-    });
+holisticIA.setOptions({
+    selfieMode: true,        // Esencial en móviles
+    modelComplexity: 1,      // 0, 1 o 2 (Usa 1 para equilibrio)
+    smoothLandmarks: true,
+    enableSegmentation: false,
+    refineFaceLandmarks: true
+});
+    
 
     // Dentro de encenderRastreadorFacialOMNI, en el onResults:
 // Asegúrate de que esto esté dentro de encenderRastreadorFacialOMNI
