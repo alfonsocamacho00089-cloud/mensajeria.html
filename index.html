@@ -4979,13 +4979,17 @@ function animarSpaxioVerso() {
 
     // 2. BRAZOS Y CUERPO
     // Validamos primero que la pose exista y que la herramienta de Kalidokit esté cargada
-    if (window.SpaxioVerso.poseResults && window.Kalidokit?.Pose?.solve) {
-        const pose = window.SpaxioVerso.poseResults;
-        
-        const riggedPose = window.Kalidokit.Pose.solve(pose, pose, {
-            runtime: "mediapipe",
-            enableLegs: false
-        });
+    // Dentro de animarSpaxioVerso:
+if (window.SpaxioVerso.poseResults && window.Kalidokit?.Pose?.solve) {
+    const { landmarks, worldLandmarks } = window.SpaxioVerso.poseResults;
+    
+    // Ahora pasamos el 3D (world) y el 2D (landmarks)
+    const riggedPose = window.Kalidokit.Pose.solve(worldLandmarks, landmarks, {
+        runtime: "mediapipe",
+        enableLegs: false
+    });
+    // ... el resto de tu código de mapeo de huesos igual ...
+     
 
         if (riggedPose) {
             // Mapeo Izquierdo
@@ -5039,24 +5043,24 @@ function encenderRastreadorFacialOMNI() {
         refineFaceLandmarks: true
     });
 
-    holisticIA.onResults((results) => {
-        // 1. RASTREO FACIAL (Esto controla la cabeza)
-        if (results.faceLandmarks) {
-            const nariz = results.faceLandmarks[4];
-            rotacionRostro.y = (nariz.x - 0.5) * -2.5;
-            rotacionRostro.x = (nariz.y - 0.4) * 2.5;
-        }
+    // Dentro de encenderRastreadorFacialOMNI, en el onResults:
+holisticIA.onResults((results) => {
+    // 1. RASTREO FACIAL
+    if (results.faceLandmarks) {
+        const nariz = results.faceLandmarks[4];
+        rotacionRostro.y = (nariz.x - 0.5) * -2.5;
+        rotacionRostro.x = (nariz.y - 0.4) * 2.5;
+    }
 
-        // 2. RASTREO DE CUERPO Y MANOS (Todo se entrega a Kalidokit)
-        // Guardamos la pose completa para que el bucle la procese
-        if (results.poseLandmarks) {
-            window.SpaxioVerso.poseResults = results.poseLandmarks;
-        }
-        
-        // No necesitamos calcular posicionManos manualmente aquí, 
-        // ya que Kalidokit.Arm.solve lo hace dentro de la pose.
-    });
-
+    // 2. RASTREO DE CUERPO (CORRECCIÓN CRÍTICA)
+    if (results.poseLandmarks && results.poseWorldLandmarks) {
+        // Guardamos AMBOS sets de datos necesarios para Kalidokit
+        window.SpaxioVerso.poseResults = {
+            landmarks: results.poseLandmarks,
+            worldLandmarks: results.poseWorldLandmarks
+        };
+    }
+});
     camaraMediaPipe = new Camera(videoElementOculto, {
         onFrame: async () => await holisticIA.send({ image: videoElementOculto }),
         width: 480, height: 360
