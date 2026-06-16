@@ -5046,23 +5046,22 @@ function encenderRastreadorFacialOMNI() {
 
     // Dentro de encenderRastreadorFacialOMNI, en el onResults:
 holisticIA.onResults((results) => {
-    // 1. RASTREO FACIAL
+    // 1. RASTREO FACIAL (Esto funciona, lo mantenemos)
     if (results.faceLandmarks) {
         const nariz = results.faceLandmarks[4];
         rotacionRostro.y = (nariz.x - 0.5) * -2.5;
         rotacionRostro.x = (nariz.y - 0.4) * 2.5;
     }
 
-    // 2. RASTREO DE CUERPO (EL PUENTE)
+    // 2. RASTREO DE CUERPO (CORRECCIÓN: Depuración activa)
     if (results.poseLandmarks && results.poseWorldLandmarks) {
-        // Asignamos directamente al objeto global
         window.SpaxioVerso.poseResults = {
             landmarks: results.poseLandmarks,
             worldLandmarks: results.poseWorldLandmarks
         };
     } else {
-        // Si esto sale en consola, es que MediaPipe no detecta tu cuerpo
-        console.warn("MediaPipe no está enviando poseLandmarks");
+        // Solo para verificar en consola
+        console.warn("Esperando detección de cuerpo..."); 
     }
 });
     camaraMediaPipe = new Camera(videoElementOculto, {
