@@ -4981,26 +4981,30 @@ SpaxioAvatarController.huesos.cuello.rotation.y, rotacionRostro.y || 0, 0.1
 
      }
      // 2. BRAZOS (FORZANDO EL MAEPEO DIRECTO)
-    if (window.SpaxioVerso.poseResults && window.Kalidokit?.Pose?.solve) {
-        const { landmarks, worldLandmarks } = window.SpaxioVerso.poseResults;
-        const riggedPose = window.Kalidokit.Pose.solve(worldLandmarks, landmarks, {
-            runtime: "mediapipe",
-            enableLegs: false
-        });
+    if// 2. BRAZOS (PUENTE DIRECTO DE DATOS)
+if (window.SpaxioVerso.poseResults && window.Kalidokit?.Pose?.solve) {
+    const { landmarks, worldLandmarks } = window.SpaxioVerso.poseResults;
+    
+    // Calculamos la cinemática
+    const riggedPose = window.Kalidokit.Pose.solve(worldLandmarks, landmarks, {
+        runtime: "mediapipe",
+        enableLegs: false
+    });
 
-        if (riggedPose && riggedPose.leftArm && riggedPose.rightArm) {
-            // Mapeo manual SIN funciones auxiliares para asegurar que no haya errores de ámbito
-            
-            // Izquierdo
+    if (riggedPose && riggedPose.leftArm && riggedPose.rightArm) {
+        // Mapeo Izquierdo
+        if (SpaxioAvatarController.huesos.brazoIzq) {
             SpaxioAvatarController.huesos.brazoIzq.rotation.set(riggedPose.leftArm.upperArm.x, riggedPose.leftArm.upperArm.y, riggedPose.leftArm.upperArm.z);
             SpaxioAvatarController.huesos.codoIzq.rotation.set(riggedPose.leftArm.foreArm.x, riggedPose.leftArm.foreArm.y, riggedPose.leftArm.foreArm.z);
             SpaxioAvatarController.huesos.manoIzq.rotation.set(riggedPose.leftArm.hand.x, riggedPose.leftArm.hand.y, riggedPose.leftArm.hand.z);
-
-            // Derecho
+        }
+        // Mapeo Derecho
+        if (SpaxioAvatarController.huesos.brazoDer) {
             SpaxioAvatarController.huesos.brazoDer.rotation.set(riggedPose.rightArm.upperArm.x, riggedPose.rightArm.upperArm.y, riggedPose.rightArm.upperArm.z);
             SpaxioAvatarController.huesos.codoDer.rotation.set(riggedPose.rightArm.foreArm.x, riggedPose.rightArm.foreArm.y, riggedPose.rightArm.foreArm.z);
             SpaxioAvatarController.huesos.manoDer.rotation.set(riggedPose.rightArm.hand.x, riggedPose.rightArm.hand.y, riggedPose.rightArm.hand.z);
         }
+    }
  }
     
     
