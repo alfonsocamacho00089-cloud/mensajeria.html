@@ -4973,25 +4973,40 @@ holisticIA.onResults((results) => {
 // 2. En el bucle de animación, verifica la pose
 function animarSpaxioVerso() {
     spaxioAnimFrameId = requestAnimationFrame(animarSpaxioVerso);
-    
-    if (window.SpaxioVerso.poseResults && window.SpaxioVerso.poseResults.poseLandmarks) {
+
+    // Mover Cuello (siempre activo)
+    if (window.SpaxioVerso.avatar && SpaxioAvatarController.huesos.cuello) {
+        SpaxioAvatarController.huesos.cuello.rotation.y = THREE.MathUtils.lerp(
+            SpaxioAvatarController.huesos.cuello.rotation.y, rotacionRostro.y || 0, 0.1
+        );
+    }
+
+    // Mover Brazos y Manos (si MediaPipe detecta pose corporal)
+    if (window.SpaxioVerso.poseResults?.poseLandmarks) {
+        
         const riggedPose = window.Kalidokit.Pose.solve(
             window.SpaxioVerso.poseResults.poseLandmarks, 
-            { runtime: "mediapipe" }
+            window.SpaxioVerso.poseResults.poseLandmarks, 
+            { runtime: "mediapipe", enableLegs: false }
         );
 
         if (riggedPose) {
-            // Aplicar rotaciones
-            const apply = (bone, rot) => {
-                if (bone) bone.rotation.set(rot.x, rot.y, rot.z);
+            const apply = (bone, data) => { 
+                if(bone && data) bone.rotation.set(data.x, data.y, data.z); 
             };
-
+            
+            // Izquierda
             apply(SpaxioAvatarController.huesos.brazoIzq, riggedPose.leftArm.upperArm);
             apply(SpaxioAvatarController.huesos.codoIzq, riggedPose.leftArm.foreArm);
+            apply(SpaxioAvatarController.huesos.manoIzq, riggedPose.leftArm.hand);
+            
+            // Derecha
             apply(SpaxioAvatarController.huesos.brazoDer, riggedPose.rightArm.upperArm);
             apply(SpaxioAvatarController.huesos.codoDer, riggedPose.rightArm.foreArm);
+            apply(SpaxioAvatarController.huesos.manoDer, riggedPose.rightArm.hand);
         }
     }
+    
     window.SpaxioVerso.renderer.render(window.SpaxioVerso.scene, window.SpaxioVerso.camera);
  }
      
@@ -5016,7 +5031,6 @@ window.addEventListener('resize', () => {
 
 /** 3. IA Y RASTREO **/
 
-// DEBES tener algo como esto para que el cuerpo sea detectado:
 function encenderRastreadorFacialOMNI() {
     holisticIA = new Holistic({
         locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/holistic/${file}`
@@ -5026,32 +5040,26 @@ function encenderRastreadorFacialOMNI() {
         modelComplexity: 1,
         smoothLandmarks: true,
         refineFaceLandmarks: true,
-        // ESTA LÍNEA ES CLAVE: Asegura que el modelo busque manos activamente
         enableHandLandmarks: true 
     });
 
     holisticIA.onResults((results) => {
-        // --- 1. RASTREO FACIAL ---
+        // 1. Guardamos todo el paquete de resultados en el objeto global
+        window.SpaxioVerso.poseResults = results;
+
+        // 2. Rastreo Facial
         if (results.faceLandmarks) {
             const nariz = results.faceLandmarks[4];
             rotacionRostro.y = (nariz.x - 0.5) * -2.5;
             rotacionRostro.x = (nariz.y - 0.4) * 2.5;
         }
 
-        // --- 2. RASTREO DE MANOS (Tu código original) ---
+        // 3. Rastreo de Manos (si existiera lógica manual extra)
         if (results.leftHandLandmarks) {
-            posicionManos.left.set(
-                (results.leftHandLandmarks[0].x - 0.5) * 5,
-                -(results.leftHandLandmarks[0].y - 0.5) * 5,
-                0
-            );
+            posicionManos.left.set((results.leftHandLandmarks[0].x - 0.5) * 5, -(results.leftHandLandmarks[0].y - 0.5) * 5, 0);
         }
         if (results.rightHandLandmarks) {
-            posicionManos.right.set(
-                (results.rightHandLandmarks[0].x - 0.5) * 5,
-                -(results.rightHandLandmarks[0].y - 0.5) * 5,
-                0
-            );
+            posicionManos.right.set((results.rightHandLandmarks[0].x - 0.5) * 5, -(results.rightHandLandmarks[0].y - 0.5) * 5, 0);
         }
     });
 
@@ -5060,7 +5068,9 @@ function encenderRastreadorFacialOMNI() {
         width: 480, height: 360
     });
     camaraMediaPipe.start();
-     }
+ }
+
+    
 
     
 
