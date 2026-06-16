@@ -4970,50 +4970,53 @@ loader3D.load('/assets/avatar_local.glb', (gltf) => {
 function animarSpaxioVerso() {
     spaxioAnimFrameId = requestAnimationFrame(animarSpaxioVerso);
 
-    // 1. Mover Cuello
+    // Mover Cuello (Funciona siempre)
     if (window.SpaxioVerso.avatar && SpaxioAvatarController.huesos.cuello) {
         SpaxioAvatarController.huesos.cuello.rotation.y = THREE.MathUtils.lerp(
             SpaxioAvatarController.huesos.cuello.rotation.y, rotacionRostro.y || 0, 0.1
         );
     }
 
-    // 2. Comprobar que MediaPipe sí mandó los datos corporales (3D y 2D)
-    if (window.SpaxioVerso.poseResults?.poseWorldLandmarks && window.SpaxioVerso.poseResults?.poseLandmarks) {
-        
-        // 3. Alimentar a Kalidokit correctamente (Mundo 3D primero, 2D después)
-        const riggedPose = window.Kalidokit.Pose.solve(
-            window.SpaxioVerso.poseResults.poseWorldLandmarks, 
-            window.SpaxioVerso.poseResults.poseLandmarks, 
-            { runtime: "mediapipe", enableLegs: false }
-        );
+    // --- FILTRO DE SEGURIDAD PARA BRAZOS ---
+    const poseResults = window.SpaxioVerso.poseResults;
+    
+    // Verificamos que existan, tengan longitud y contengan datos válidos
+    const tienePoseValida = poseResults && 
+                            poseResults.poseWorldLandmarks && 
+                            poseResults.poseWorldLandmarks.length >= 33;
 
-        if (riggedPose) {
-            const apply = (bone, data) => { 
-                // Asegurarnos de que el hueso y el dato existan antes de rotar
-                if(bone && data) {
-                    bone.rotation.set(data.x, data.y, data.z); 
-                }
-            };
-            
-            // 4. EL FIX FATAL: Usar la sintaxis real de Kalidokit (Mayúsculas, sin sub-objetos)
-            
-            // Brazo Izquierdo
-            apply(SpaxioAvatarController.huesos.brazoIzq, riggedPose.LeftUpperArm);
-            apply(SpaxioAvatarController.huesos.codoIzq, riggedPose.LeftLowerArm);
-            apply(SpaxioAvatarController.huesos.manoIzq, riggedPose.LeftHand);
-            
-            // Brazo Derecho
-            apply(SpaxioAvatarController.huesos.brazoDer, riggedPose.RightUpperArm);
-            apply(SpaxioAvatarController.huesos.codoDer, riggedPose.RightLowerArm);
-            apply(SpaxioAvatarController.huesos.manoDer, riggedPose.RightHand);
+    if (tienePoseValida) {
+        try {
+            const riggedPose = window.Kalidokit.Pose.solve(
+                poseResults.poseWorldLandmarks, 
+                poseResults.poseLandmarks, 
+                { runtime: "mediapipe", enableLegs: false }
+            );
+
+            if (riggedPose) {
+                const apply = (bone, data) => { 
+                    if(bone && data) bone.rotation.set(data.x, data.y, data.z); 
+                };
+                
+                // Aplicar solo si tenemos datos calculados
+                apply(SpaxioAvatarController.huesos.brazoIzq, riggedPose.LeftUpperArm);
+                apply(SpaxioAvatarController.huesos.codoIzq, riggedPose.LeftLowerArm);
+                apply(SpaxioAvatarController.huesos.manoIzq, riggedPose.LeftHand);
+                
+                apply(SpaxioAvatarController.huesos.brazoDer, riggedPose.RightUpperArm);
+                apply(SpaxioAvatarController.huesos.codoDer, riggedPose.RightLowerArm);
+                apply(SpaxioAvatarController.huesos.manoDer, riggedPose.RightHand);
+            }
+        } catch (e) {
+            console.warn("Fallo al resolver pose, ignorando frame...", e);
         }
     }
     
-    // 5. Renderizar frame
-    if (window.SpaxioVerso.renderer && window.SpaxioVerso.scene && window.SpaxioVerso.camera) {
+    // Render
+    if (window.SpaxioVerso.renderer) {
         window.SpaxioVerso.renderer.render(window.SpaxioVerso.scene, window.SpaxioVerso.camera);
     }
-     }
+}
      
     
         
