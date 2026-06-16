@@ -4971,7 +4971,8 @@ loader3D.load('/assets/avatar_local.glb', (gltf) => {
 
 
 // 2. En el bucle de animación, verifica la pose
-function animarSpaxioVerso() {
+
+     function animarSpaxioVerso() {
     spaxioAnimFrameId = requestAnimationFrame(animarSpaxioVerso);
 
     // 1. Mover Cuello
@@ -4992,39 +4993,28 @@ function animarSpaxioVerso() {
         );
 
         if (riggedPose) {
-            // Función de aplicación con DEBUG
-            // --- FUNCIÓN MEJORADA DE APLICACIÓN ---
-const applyRotation = (bone, rotationData, multiplier = 2) => {
-    if (bone && rotationData) {
-        // Multiplicamos por 'multiplier' para que el movimiento sea visible
-        // x, y, z son los datos que vienen de Kalidokit
-        bone.rotation.set(
-            rotationData.x * multiplier, 
-            rotationData.y * multiplier, 
-            rotationData.z * multiplier
-        );
-        
-        // Debug temporal: Solo imprime si hay movimiento real
-        if (Math.abs(rotationData.x) > 0.01) {
-            console.log("🦾 Movimiento detectado en:", bone.name, rotationData.x);
+            // Función interna rápida para aplicar
+            const apply = (bone, data, mult) => {
+                if(bone && data) {
+                    bone.rotation.set(data.x * mult, data.y * mult, data.z * mult);
+                }
+            };
+
+            // Aplicamos multiplicador 5 a brazos y 2 al torso
+            apply(SpaxioAvatarController.huesos.brazoIzq, riggedPose.LeftUpperArm, 5);
+            apply(SpaxioAvatarController.huesos.codoIzq, riggedPose.LeftLowerArm, 5);
+            apply(SpaxioAvatarController.huesos.manoIzq, riggedPose.LeftHand, 5);
+            
+            apply(SpaxioAvatarController.huesos.brazoDer, riggedPose.RightUpperArm, 5);
+            apply(SpaxioAvatarController.huesos.codoDer, riggedPose.RightLowerArm, 5);
+            apply(SpaxioAvatarController.huesos.manoDer, riggedPose.RightHand, 5);
+            
+            apply(SpaxioAvatarController.huesos.torso, riggedPose.Hips, 2);
         }
     }
-};
-
-// --- DENTRO DE TU BUCLE DE ANIMACIÓN ---
-if (riggedPose) {
-    // Probamos con un multiplicador alto (ej. 5 o 10) para ver si el brazo reacciona
-    applyRotation(SpaxioAvatarController.huesos.brazoIzq, riggedPose.LeftUpperArm, 5);
-    applyRotation(SpaxioAvatarController.huesos.codoIzq, riggedPose.LeftLowerArm, 5);
-    applyRotation(SpaxioAvatarController.huesos.brazoDer, riggedPose.RightUpperArm, 5);
-    applyRotation(SpaxioAvatarController.huesos.codoDer, riggedPose.RightLowerArm, 5);
     
-    // También aplicamos el torso
-    applyRotation(SpaxioAvatarController.huesos.torso, riggedPose.Hips, 2);
- }
-     } 
-    // Render
-    if (window.SpaxioVerso.renderer) {
+    // --- IMPORTANTE: EL RENDER SIEMPRE VA AFUERA ---
+    if (window.SpaxioVerso.renderer && window.SpaxioVerso.scene && window.SpaxioVerso.camera) {
         window.SpaxioVerso.renderer.render(window.SpaxioVerso.scene, window.SpaxioVerso.camera);
     }
      }
