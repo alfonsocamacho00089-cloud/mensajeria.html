@@ -5053,14 +5053,18 @@ holisticIA.onResults((results) => {
         rotacionRostro.x = (nariz.y - 0.4) * 2.5;
     }
 
-     // 2. RASTREO DE CUERPO (CORRECCIÓN: Enviamos 3D y 2D)
-        if (results.poseLandmarks && results.poseWorldLandmarks) {
-            window.SpaxioVerso.poseResults = {
-                landmarks: results.poseLandmarks,
-                worldLandmarks: results.poseWorldLandmarks
-            };
-     }
- });
+    // 2. RASTREO DE CUERPO (EL PUENTE)
+    if (results.poseLandmarks && results.poseWorldLandmarks) {
+        // Asignamos directamente al objeto global
+        window.SpaxioVerso.poseResults = {
+            landmarks: results.poseLandmarks,
+            worldLandmarks: results.poseWorldLandmarks
+        };
+    } else {
+        // Si esto sale en consola, es que MediaPipe no detecta tu cuerpo
+        console.warn("MediaPipe no está enviando poseLandmarks");
+    }
+});
     camaraMediaPipe = new Camera(videoElementOculto, {
         onFrame: async () => await holisticIA.send({ image: videoElementOculto }),
         width: 480, height: 360
