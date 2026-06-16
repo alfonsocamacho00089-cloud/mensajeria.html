@@ -4974,41 +4974,50 @@ holisticIA.onResults((results) => {
 function animarSpaxioVerso() {
     spaxioAnimFrameId = requestAnimationFrame(animarSpaxioVerso);
 
-    // Mover Cuello (siempre activo)
+    // 1. Mover Cuello
     if (window.SpaxioVerso.avatar && SpaxioAvatarController.huesos.cuello) {
         SpaxioAvatarController.huesos.cuello.rotation.y = THREE.MathUtils.lerp(
             SpaxioAvatarController.huesos.cuello.rotation.y, rotacionRostro.y || 0, 0.1
         );
     }
 
-    // Mover Brazos y Manos (si MediaPipe detecta pose corporal)
-    if (window.SpaxioVerso.poseResults?.poseLandmarks) {
+    // 2. Comprobar que MediaPipe sí mandó los datos corporales (3D y 2D)
+    if (window.SpaxioVerso.poseResults?.poseWorldLandmarks && window.SpaxioVerso.poseResults?.poseLandmarks) {
         
+        // 3. Alimentar a Kalidokit correctamente (Mundo 3D primero, 2D después)
         const riggedPose = window.Kalidokit.Pose.solve(
-            window.SpaxioVerso.poseResults.poseLandmarks, 
+            window.SpaxioVerso.poseResults.poseWorldLandmarks, 
             window.SpaxioVerso.poseResults.poseLandmarks, 
             { runtime: "mediapipe", enableLegs: false }
         );
 
         if (riggedPose) {
             const apply = (bone, data) => { 
-                if(bone && data) bone.rotation.set(data.x, data.y, data.z); 
+                // Asegurarnos de que el hueso y el dato existan antes de rotar
+                if(bone && data) {
+                    bone.rotation.set(data.x, data.y, data.z); 
+                }
             };
             
-            // Izquierda
-            apply(SpaxioAvatarController.huesos.brazoIzq, riggedPose.leftArm.upperArm);
-            apply(SpaxioAvatarController.huesos.codoIzq, riggedPose.leftArm.foreArm);
-            apply(SpaxioAvatarController.huesos.manoIzq, riggedPose.leftArm.hand);
+            // 4. EL FIX FATAL: Usar la sintaxis real de Kalidokit (Mayúsculas, sin sub-objetos)
             
-            // Derecha
-            apply(SpaxioAvatarController.huesos.brazoDer, riggedPose.rightArm.upperArm);
-            apply(SpaxioAvatarController.huesos.codoDer, riggedPose.rightArm.foreArm);
-            apply(SpaxioAvatarController.huesos.manoDer, riggedPose.rightArm.hand);
+            // Brazo Izquierdo
+            apply(SpaxioAvatarController.huesos.brazoIzq, riggedPose.LeftUpperArm);
+            apply(SpaxioAvatarController.huesos.codoIzq, riggedPose.LeftLowerArm);
+            apply(SpaxioAvatarController.huesos.manoIzq, riggedPose.LeftHand);
+            
+            // Brazo Derecho
+            apply(SpaxioAvatarController.huesos.brazoDer, riggedPose.RightUpperArm);
+            apply(SpaxioAvatarController.huesos.codoDer, riggedPose.RightLowerArm);
+            apply(SpaxioAvatarController.huesos.manoDer, riggedPose.RightHand);
         }
     }
     
-    window.SpaxioVerso.renderer.render(window.SpaxioVerso.scene, window.SpaxioVerso.camera);
- }
+    // 5. Renderizar frame
+    if (window.SpaxioVerso.renderer && window.SpaxioVerso.scene && window.SpaxioVerso.camera) {
+        window.SpaxioVerso.renderer.render(window.SpaxioVerso.scene, window.SpaxioVerso.camera);
+    }
+     }
      
     
         
