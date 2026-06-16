@@ -4978,29 +4978,33 @@ function animarSpaxioVerso() {
     }
 
     // --- 2. BRAZOS (Versión compatible universal) ---
-    if (window.SpaxioVerso.poseResults && window.Kalidokit) {
-        const pose = window.SpaxioVerso.poseResults;
-        
-        // Usamos la función global .solve() que es la que existe en tu consola
-        const solve = window.Kalidokit.solve || (window.Kalidokit.Arm && window.Kalidokit.Arm.solve);
-        
-        if (solve) {
-            const leftArm = solve(pose, 'Left');
-            const rightArm = solve(pose, 'Right');
+    // --- 2. BRAZOS Y CUERPO (Solución final para tu versión) ---
+if (window.SpaxioVerso.poseResults && window.Kalidokit) {
+    const pose = window.SpaxioVerso.poseResults;
+    
+    // En tu versión, el método es Pose.solve
+    // Recibe: (pose3D, pose2D)
+    const riggedPose = window.Kalidokit.Pose.solve(pose, pose, {
+        runtime: "mediapipe",
+        enableLegs: false // Si no necesitas piernas, esto ahorra procesamiento
+    });
 
-            if (SpaxioAvatarController.huesos.brazoIzq && leftArm) {
-                SpaxioAvatarController.huesos.brazoIzq.rotation.set(leftArm.upperArm.x, leftArm.upperArm.y, leftArm.upperArm.z);
-                SpaxioAvatarController.huesos.codoIzq.rotation.set(leftArm.foreArm.x, leftArm.foreArm.y, leftArm.foreArm.z);
-                SpaxioAvatarController.huesos.manoIzq.rotation.set(leftArm.hand.x, leftArm.hand.y, leftArm.hand.z);
-            }
+    if (riggedPose) {
+        // Mapeo de los resultados de Pose.solve a tus huesos
+        // Nota: riggedPose.leftArm y rightArm contienen las rotaciones de hombro, codo y mano
+        if (SpaxioAvatarController.huesos.brazoIzq && riggedPose.leftArm) {
+            SpaxioAvatarController.huesos.brazoIzq.rotation.set(riggedPose.leftArm.upperArm.x, riggedPose.leftArm.upperArm.y, riggedPose.leftArm.upperArm.z);
+            SpaxioAvatarController.huesos.codoIzq.rotation.set(riggedPose.leftArm.foreArm.x, riggedPose.leftArm.foreArm.y, riggedPose.leftArm.foreArm.z);
+            SpaxioAvatarController.huesos.manoIzq.rotation.set(riggedPose.leftArm.hand.x, riggedPose.leftArm.hand.y, riggedPose.leftArm.hand.z);
+        }
 
-            if (SpaxioAvatarController.huesos.brazoDer && rightArm) {
-                SpaxioAvatarController.huesos.brazoDer.rotation.set(rightArm.upperArm.x, rightArm.upperArm.y, rightArm.upperArm.z);
-                SpaxioAvatarController.huesos.codoDer.rotation.set(rightArm.foreArm.x, rightArm.foreArm.y, rightArm.foreArm.z);
-                SpaxioAvatarController.huesos.manoDer.rotation.set(rightArm.hand.x, rightArm.hand.y, rightArm.hand.z);
-            }
+        if (SpaxioAvatarController.huesos.brazoDer && riggedPose.rightArm) {
+            SpaxioAvatarController.huesos.brazoDer.rotation.set(riggedPose.rightArm.upperArm.x, riggedPose.rightArm.upperArm.y, riggedPose.rightArm.upperArm.z);
+            SpaxioAvatarController.huesos.codoDer.rotation.set(riggedPose.rightArm.foreArm.x, riggedPose.rightArm.foreArm.y, riggedPose.rightArm.foreArm.z);
+            SpaxioAvatarController.huesos.manoDer.rotation.set(riggedPose.rightArm.hand.x, riggedPose.rightArm.hand.y, riggedPose.rightArm.hand.z);
         }
     }
+}
     
     // --- 3. RENDER ---
     window.SpaxioVerso.renderer.render(window.SpaxioVerso.scene, window.SpaxioVerso.camera);
