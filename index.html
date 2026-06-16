@@ -5018,42 +5018,46 @@ window.addEventListener('resize', () => {
 });
 
 /** 3. IA Y RASTREO **/
+
+// DEBES tener algo como esto para que el cuerpo sea detectado:
 function encenderRastreadorFacialOMNI() {
     holisticIA = new Holistic({
         locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/holistic/${file}`
     });
-// DEBES tener algo como esto para que el cuerpo sea detectado:
 
-holisticIA.setOptions({
-    selfieMode: true,        // Esencial en móviles
-    modelComplexity: 1,      // 0, 1 o 2 (Usa 1 para equilibrio)
-    smoothLandmarks: true,
-    enableSegmentation: false,
-    refineFaceLandmarks: true
-});
-    
+    holisticIA.setOptions({
+        selfieMode: true,
+        modelComplexity: 1, // Vuelve al valor original que tenías
+        smoothLandmarks: true,
+        enableSegmentation: false,
+        refineFaceLandmarks: true
+    });
 
-    // Dentro de encenderRastreadorFacialOMNI, en el onResults:
-// Asegúrate de que esto esté dentro de encenderRastreadorFacialOMNI
-holisticIA.onResults((results) => {
-    if (results.faceLandmarks) {
-        const nariz = results.faceLandmarks[4];
-        rotacionRostro.y = (nariz.x - 0.5) * -2.5;
-        rotacionRostro.x = (nariz.y - 0.4) * 2.5;
-    }
+    holisticIA.onResults((results) => {
+        // RASTREO FACIAL (Esto funcionaba)
+        if (results.faceLandmarks) {
+            const nariz = results.faceLandmarks[4];
+            rotacionRostro.y = (nariz.x - 0.5) * -2.5;
+            rotacionRostro.x = (nariz.y - 0.4) * 2.5;
+        }
 
-    // SIN NINGÚN CONSOLE.LOG AQUÍ
-    window.SpaxioVerso.poseResults = {
-        landmarks: results.poseLandmarks || null,
-        worldLandmarks: results.poseWorldLandmarks || null
-    };
-});
+        // RASTREO CORPORAL (La estructura simple de siempre)
+        if (results.poseLandmarks && results.poseWorldLandmarks) {
+            window.SpaxioVerso.poseResults = {
+                landmarks: results.poseLandmarks,
+                worldLandmarks: results.poseWorldLandmarks
+            };
+        }
+    });
+
     camaraMediaPipe = new Camera(videoElementOculto, {
         onFrame: async () => await holisticIA.send({ image: videoElementOculto }),
         width: 480, height: 360
     });
     camaraMediaPipe.start();
      }
+
+    
 
 
 function cerrarSpaxioVerso() {
