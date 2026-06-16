@@ -4962,10 +4962,25 @@ loader3D.load('/assets/avatar_local.glb', (gltf) => {
  animarSpaxioVerso();
 
 }
+/** 4. BUCLE DE ANIMACIÓN CON AJUSTE DE REDIMENSIONADO **/
 
-     
-     /** 4. BUCLE DE ANIMACIÓN CON AJUSTE DE REDIMENSIONADO **/
-// 2. BRAZOS (Solución de rotación)
+function animarSpaxioVerso() {
+
+spaxioAnimFrameId = requestAnimationFrame(animarSpaxioVerso);
+
+
+// 1. CUELLO (Funciona bien)
+
+if (window.SpaxioVerso.avatar && SpaxioAvatarController.huesos.cuello) {
+
+SpaxioAvatarController.huesos.cuello.rotation.y = THREE.MathUtils.lerp(
+
+SpaxioAvatarController.huesos.cuello.rotation.y, rotacionRostro.y || 0, 0.1
+
+);
+
+     }
+     // 2. BRAZOS (Solución de rotación)
 if (window.SpaxioVerso.poseResults && window.Kalidokit?.Pose?.solve) {
     const { landmarks, worldLandmarks } = window.SpaxioVerso.poseResults;
     const riggedPose = window.Kalidokit.Pose.solve(worldLandmarks, landmarks, {
