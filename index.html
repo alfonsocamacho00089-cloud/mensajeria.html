@@ -4993,27 +4993,35 @@ function animarSpaxioVerso() {
 
         if (riggedPose) {
             // Función de aplicación con DEBUG
-            const apply = (bone, data, name) => { 
-                if(bone && data) {
-                    // Si los valores no son 0, imprimimos para ver si están llegando datos
-                    if (Math.abs(data.x) > 0.01) { 
-                        // console.log("Moviendo hueso:", name, data); // Descomenta esto si quieres saturar la consola
-                    }
-                    // Aplicamos directamente la rotación
-                    bone.rotation.set(data.x, data.y, data.z); 
-                }
-            };
-            
-            // Aplicamos rotaciones
-            apply(SpaxioAvatarController.huesos.brazoIzq, riggedPose.LeftUpperArm, "BrazoIzq");
-            apply(SpaxioAvatarController.huesos.codoIzq, riggedPose.LeftLowerArm, "CodoIzq");
-            apply(SpaxioAvatarController.huesos.manoIzq, riggedPose.LeftHand, "ManoIzq");
-            
-            apply(SpaxioAvatarController.huesos.brazoDer, riggedPose.RightUpperArm, "BrazoDer");
-            apply(SpaxioAvatarController.huesos.codoDer, riggedPose.RightLowerArm, "CodoDer");
-            apply(SpaxioAvatarController.huesos.manoDer, riggedPose.RightHand, "ManoDer");
+            // --- FUNCIÓN MEJORADA DE APLICACIÓN ---
+const applyRotation = (bone, rotationData, multiplier = 2) => {
+    if (bone && rotationData) {
+        // Multiplicamos por 'multiplier' para que el movimiento sea visible
+        // x, y, z son los datos que vienen de Kalidokit
+        bone.rotation.set(
+            rotationData.x * multiplier, 
+            rotationData.y * multiplier, 
+            rotationData.z * multiplier
+        );
+        
+        // Debug temporal: Solo imprime si hay movimiento real
+        if (Math.abs(rotationData.x) > 0.01) {
+            console.log("🦾 Movimiento detectado en:", bone.name, rotationData.x);
         }
     }
+};
+
+// --- DENTRO DE TU BUCLE DE ANIMACIÓN ---
+if (riggedPose) {
+    // Probamos con un multiplicador alto (ej. 5 o 10) para ver si el brazo reacciona
+    applyRotation(SpaxioAvatarController.huesos.brazoIzq, riggedPose.LeftUpperArm, 5);
+    applyRotation(SpaxioAvatarController.huesos.codoIzq, riggedPose.LeftLowerArm, 5);
+    applyRotation(SpaxioAvatarController.huesos.brazoDer, riggedPose.RightUpperArm, 5);
+    applyRotation(SpaxioAvatarController.huesos.codoDer, riggedPose.RightLowerArm, 5);
+    
+    // También aplicamos el torso
+    applyRotation(SpaxioAvatarController.huesos.torso, riggedPose.Hips, 2);
+ }
     
     // Render
     if (window.SpaxioVerso.renderer) {
