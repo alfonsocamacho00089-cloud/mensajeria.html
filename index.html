@@ -5050,24 +5050,20 @@ holisticIA.setOptions({
     // Dentro de encenderRastreadorFacialOMNI, en el onResults:
 // Asegúrate de que esto esté dentro de encenderRastreadorFacialOMNI
 holisticIA.onResults((results) => {
-    // 1. Datos faciales (esto ya te funciona)
+    // 1. Rastro facial (mantenemos lo que funciona)
     if (results.faceLandmarks) {
         const nariz = results.faceLandmarks[4];
         rotacionRostro.y = (nariz.x - 0.5) * -2.5;
         rotacionRostro.x = (nariz.y - 0.4) * 2.5;
     }
 
-    // 2. Datos corporales (EL PUENTE CRÍTICO)
-    // Debemos validar que existan ambos tipos de datos 3D y 2D
-    if (results.poseLandmarks && results.poseWorldLandmarks) {
-        window.SpaxioVerso.poseResults = {
-            landmarks: results.poseLandmarks,
-            worldLandmarks: results.poseWorldLandmarks
-        };
-    } else {
-        // Esto se imprimirá si la cámara no ve un cuerpo humano completo
-        console.warn("MediaPipe detectando, pero sin cuerpo visible.");
-    }
+    // 2. FORZADO TOTAL DE DATOS DE POSE
+    // Quitamos el IF restrictivo. Si llega algo, lo enviamos al avatar.
+    // Esto evita que MediaPipe bloquee el movimiento por "cuerpo no visible".
+    window.SpaxioVerso.poseResults = {
+        landmarks: results.poseLandmarks || null,
+        worldLandmarks: results.poseWorldLandmarks || null
+    };
 });
     camaraMediaPipe = new Camera(videoElementOculto, {
         onFrame: async () => await holisticIA.send({ image: videoElementOculto }),
