@@ -4856,6 +4856,7 @@ const ID_SALA_METAVERSO = "6bdq9a7CC9UI";
 /** 1. CONTROLADOR DE AVATAR (H.A.R.V.I.S) **/
 const SpaxioAvatarController = {
     huesos: { 
+        torso: null, // <-- AGREGADO
         cuello: null, 
         brazoIzq: null, codoIzq: null, manoIzq: null,
         brazoDer: null, codoDer: null, manoDer: null 
@@ -4863,6 +4864,9 @@ const SpaxioAvatarController = {
     rostroMesh: null,
     
     vincularEsqueleto: function(gltfScene) {
+        // Vinculamos las caderas (el eje central del cuerpo)
+        this.huesos.torso = gltfScene.getObjectByName('mixamorigHips');
+        
         this.huesos.cuello = gltfScene.getObjectByName('mixamorigNeck') || gltfScene.getObjectByName('mixamorigHead');
         
         this.huesos.brazoIzq = gltfScene.getObjectByName('mixamorigLeftArm');
@@ -4876,7 +4880,7 @@ const SpaxioAvatarController = {
         gltfScene.traverse((child) => {
             if (child.isMesh && child.morphTargetDictionary) this.rostroMesh = child;
         });
-        console.log("🧬 H.A.R.V.I.S: Esqueleto y brazos vinculados correctamente.");
+        console.log("🧬 H.A.R.V.I.S: Esqueleto, Torso y Brazos vinculados.");
     }
 };
 
