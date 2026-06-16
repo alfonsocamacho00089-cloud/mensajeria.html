@@ -4968,46 +4968,41 @@ loader3D.load('/assets/avatar_local.glb', (gltf) => {
 function animarSpaxioVerso() {
     spaxioAnimFrameId = requestAnimationFrame(animarSpaxioVerso);
     
-    // 1. CUELLO
+    // 1. CUELLO (Funciona bien)
     if (window.SpaxioVerso.avatar && SpaxioAvatarController.huesos.cuello) {
         SpaxioAvatarController.huesos.cuello.rotation.y = THREE.MathUtils.lerp(
             SpaxioAvatarController.huesos.cuello.rotation.y, rotacionRostro.y || 0, 0.1
         );
-        SpaxioAvatarController.huesos.cuello.rotation.x = 0;
-        SpaxioAvatarController.huesos.cuello.rotation.z = 0;
     }
 
-    // 2. BRAZOS Y CUERPO
-    // Validamos primero que la pose exista y que la herramienta de Kalidokit esté cargada
-    // Dentro de animarSpaxioVerso:
-if (window.SpaxioVerso.poseResults && window.Kalidokit?.Pose?.solve) {
-    const { landmarks, worldLandmarks } = window.SpaxioVerso.poseResults;
-    
-    // Ahora pasamos el 3D (world) y el 2D (landmarks)
-    const riggedPose = window.Kalidokit.Pose.solve(worldLandmarks, landmarks, {
-        runtime: "mediapipe",
-        enableLegs: false
-    });
-    // ... el resto de tu código de mapeo de huesos igual ...
-     
+    // 2. BRAZOS (El puente que faltaba)
+    if (window.SpaxioVerso.poseResults && window.Kalidokit?.Pose?.solve) {
+        const { landmarks, worldLandmarks } = window.SpaxioVerso.poseResults;
+        
+        // Calculamos la cinemática inversa (IK)
+        const riggedPose = window.Kalidokit.Pose.solve(worldLandmarks, landmarks, {
+            runtime: "mediapipe",
+            enableLegs: false
+        });
 
         if (riggedPose) {
+            // Aplicamos rotaciones
+            const updateBone = (bone, data) => {
+                if (bone && data) bone.rotation.set(data.x, data.y, data.z);
+            };
 
-       // Mapeo Izquierdo
-            if (SpaxioAvatarController.huesos.brazoIzq && riggedPose.leftArm) {
-                SpaxioAvatarController.huesos.brazoIzq.rotation.set(riggedPose.leftArm.upperArm.x, riggedPose.leftArm.upperArm.y, riggedPose.leftArm.upperArm.z);
-                SpaxioAvatarController.huesos.codoIzq.rotation.set(riggedPose.leftArm.foreArm.x, riggedPose.leftArm.foreArm.y, riggedPose.leftArm.foreArm.z);
-                SpaxioAvatarController.huesos.manoIzq.rotation.set(riggedPose.leftArm.hand.x, riggedPose.leftArm.hand.y, riggedPose.leftArm.hand.z);
-            }
+            // Brazo Izquierdo
+            updateBone(SpaxioAvatarController.huesos.brazoIzq, riggedPose.leftArm.upperArm);
+            updateBone(SpaxioAvatarController.huesos.codoIzq, riggedPose.leftArm.foreArm);
+            updateBone(SpaxioAvatarController.huesos.manoIzq, riggedPose.leftArm.hand);
 
-            // Mapeo Derecho
-            if (SpaxioAvatarController.huesos.brazoDer && riggedPose.rightArm) {
-                SpaxioAvatarController.huesos.brazoDer.rotation.set(riggedPose.rightArm.upperArm.x, riggedPose.rightArm.upperArm.y, riggedPose.rightArm.upperArm.z);
-                SpaxioAvatarController.huesos.codoDer.rotation.set(riggedPose.rightArm.foreArm.x, riggedPose.rightArm.foreArm.y, riggedPose.rightArm.foreArm.z);
-                SpaxioAvatarController.huesos.manoDer.rotation.set(riggedPose.rightArm.hand.x, riggedPose.rightArm.hand.y, riggedPose.rightArm.hand.z);
-            }
+            // Brazo Derecho
+            updateBone(SpaxioAvatarController.huesos.brazoDer, riggedPose.rightArm.upperArm);
+            updateBone(SpaxioAvatarController.huesos.codoDer, riggedPose.rightArm.foreArm);
+            updateBone(SpaxioAvatarController.huesos.manoDer, riggedPose.rightArm.hand);
         }
     }
+    
     
     // 3. RENDER
     window.SpaxioVerso.renderer.render(window.SpaxioVerso.scene, window.SpaxioVerso.camera);
@@ -5045,23 +5040,25 @@ function encenderRastreadorFacialOMNI() {
     });
 
     // Dentro de encenderRastreadorFacialOMNI, en el onResults:
+// Asegúrate de que esto esté dentro de encenderRastreadorFacialOMNI
 holisticIA.onResults((results) => {
-    // 1. RASTREO FACIAL (Esto funciona, lo mantenemos)
+    // 1. Datos faciales (esto ya te funciona)
     if (results.faceLandmarks) {
         const nariz = results.faceLandmarks[4];
         rotacionRostro.y = (nariz.x - 0.5) * -2.5;
         rotacionRostro.x = (nariz.y - 0.4) * 2.5;
     }
 
-    // 2. RASTREO DE CUERPO (CORRECCIÓN: Depuración activa)
+    // 2. Datos corporales (EL PUENTE CRÍTICO)
+    // Debemos validar que existan ambos tipos de datos 3D y 2D
     if (results.poseLandmarks && results.poseWorldLandmarks) {
         window.SpaxioVerso.poseResults = {
             landmarks: results.poseLandmarks,
             worldLandmarks: results.poseWorldLandmarks
         };
     } else {
-        // Solo para verificar en consola
-        console.warn("Esperando detección de cuerpo..."); 
+        // Esto se imprimirá si la cámara no ve un cuerpo humano completo
+        console.warn("MediaPipe detectando, pero sin cuerpo visible.");
     }
 });
     camaraMediaPipe = new Camera(videoElementOculto, {
