@@ -4970,45 +4970,44 @@ loader3D.load('/assets/avatar_local.glb', (gltf) => {
 function animarSpaxioVerso() {
     spaxioAnimFrameId = requestAnimationFrame(animarSpaxioVerso);
 
-    // Mover Cuello (Funciona siempre)
+    // 1. Mover Cuello
     if (window.SpaxioVerso.avatar && SpaxioAvatarController.huesos.cuello) {
         SpaxioAvatarController.huesos.cuello.rotation.y = THREE.MathUtils.lerp(
             SpaxioAvatarController.huesos.cuello.rotation.y, rotacionRostro.y || 0, 0.1
         );
     }
 
-    // --- FILTRO DE SEGURIDAD PARA BRAZOS ---
+    // 2. Procesar Cuerpo
     const poseResults = window.SpaxioVerso.poseResults;
-    
-    // Verificamos que existan, tengan longitud y contengan datos válidos
-    const tienePoseValida = poseResults && 
-                            poseResults.poseWorldLandmarks && 
-                            poseResults.poseWorldLandmarks.length >= 33;
+    if (poseResults && poseResults.poseWorldLandmarks) {
+        
+        const riggedPose = window.Kalidokit.Pose.solve(
+            poseResults.poseWorldLandmarks, 
+            poseResults.poseLandmarks, 
+            { runtime: "mediapipe", enableLegs: false }
+        );
 
-    if (tienePoseValida) {
-        try {
-            const riggedPose = window.Kalidokit.Pose.solve(
-                poseResults.poseWorldLandmarks, 
-                poseResults.poseLandmarks, 
-                { runtime: "mediapipe", enableLegs: false }
-            );
-
-            if (riggedPose) {
-                const apply = (bone, data) => { 
-                    if(bone && data) bone.rotation.set(data.x, data.y, data.z); 
-                };
-                
-                // Aplicar solo si tenemos datos calculados
-                apply(SpaxioAvatarController.huesos.brazoIzq, riggedPose.LeftUpperArm);
-                apply(SpaxioAvatarController.huesos.codoIzq, riggedPose.LeftLowerArm);
-                apply(SpaxioAvatarController.huesos.manoIzq, riggedPose.LeftHand);
-                
-                apply(SpaxioAvatarController.huesos.brazoDer, riggedPose.RightUpperArm);
-                apply(SpaxioAvatarController.huesos.codoDer, riggedPose.RightLowerArm);
-                apply(SpaxioAvatarController.huesos.manoDer, riggedPose.RightHand);
-            }
-        } catch (e) {
-            console.warn("Fallo al resolver pose, ignorando frame...", e);
+        if (riggedPose) {
+            // Función de aplicación con DEBUG
+            const apply = (bone, data, name) => { 
+                if(bone && data) {
+                    // Si los valores no son 0, imprimimos para ver si están llegando datos
+                    if (Math.abs(data.x) > 0.01) { 
+                        // console.log("Moviendo hueso:", name, data); // Descomenta esto si quieres saturar la consola
+                    }
+                    // Aplicamos directamente la rotación
+                    bone.rotation.set(data.x, data.y, data.z); 
+                }
+            };
+            
+            // Aplicamos rotaciones
+            apply(SpaxioAvatarController.huesos.brazoIzq, riggedPose.LeftUpperArm, "BrazoIzq");
+            apply(SpaxioAvatarController.huesos.codoIzq, riggedPose.LeftLowerArm, "CodoIzq");
+            apply(SpaxioAvatarController.huesos.manoIzq, riggedPose.LeftHand, "ManoIzq");
+            
+            apply(SpaxioAvatarController.huesos.brazoDer, riggedPose.RightUpperArm, "BrazoDer");
+            apply(SpaxioAvatarController.huesos.codoDer, riggedPose.RightLowerArm, "CodoDer");
+            apply(SpaxioAvatarController.huesos.manoDer, riggedPose.RightHand, "ManoDer");
         }
     }
     
@@ -5016,7 +5015,7 @@ function animarSpaxioVerso() {
     if (window.SpaxioVerso.renderer) {
         window.SpaxioVerso.renderer.render(window.SpaxioVerso.scene, window.SpaxioVerso.camera);
     }
-}
+     }
      
     
         
