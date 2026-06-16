@@ -4992,6 +4992,8 @@ if (window.SpaxioVerso.poseResults && window.Kalidokit?.Pose?.solve) {
      
 
         if (riggedPose) {
+
+     if (!riggedPose.leftArm) console.log("⚠️ riggedPose no tiene datos de leftArm");
             // Mapeo Izquierdo
             if (SpaxioAvatarController.huesos.brazoIzq && riggedPose.leftArm) {
                 SpaxioAvatarController.huesos.brazoIzq.rotation.set(riggedPose.leftArm.upperArm.x, riggedPose.leftArm.upperArm.y, riggedPose.leftArm.upperArm.z);
@@ -5052,15 +5054,13 @@ holisticIA.onResults((results) => {
         rotacionRostro.x = (nariz.y - 0.4) * 2.5;
     }
 
-    // 2. RASTREO DE CUERPO (CORRECCIÓN CRÍTICA)
-    if (results.poseLandmarks && results.poseWorldLandmarks) {
-        // Guardamos AMBOS sets de datos necesarios para Kalidokit
-        window.SpaxioVerso.poseResults = {
-            landmarks: results.poseLandmarks,
-            worldLandmarks: results.poseWorldLandmarks
-        };
-    }
-});
+     // 2. RASTREO DE CUERPO (CORRECCIÓN: Enviamos 3D y 2D)
+        if (results.poseLandmarks && results.poseWorldLandmarks) {
+            window.SpaxioVerso.poseResults = {
+                landmarks: results.poseLandmarks,
+                worldLandmarks: results.poseWorldLandmarks
+            };
+     }
     camaraMediaPipe = new Camera(videoElementOculto, {
         onFrame: async () => await holisticIA.send({ image: videoElementOculto }),
         width: 480, height: 360
