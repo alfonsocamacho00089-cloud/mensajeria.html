@@ -5022,9 +5022,13 @@ window.addEventListener('resize', () => {
 /** 3. IA Y RASTREO **/
 
 function encenderRastreadorFacialOMNI() {
-    // Inicializamos Holistic para capturar rostro y manos en simultáneo
+    // Usamos una ruta más directa para evitar errores de red
+    const CDN_URL = "https://cdn.jsdelivr.net/npm/@mediapipe/holistic@0.5.1675471628/";
+
     holisticIA = new Holistic({
-        locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/holistic/${file}`
+        locateFile: (file) => {
+            return `${CDN_URL}${file}`;
+        }
     });
 
     holisticIA.setOptions({
@@ -5042,7 +5046,7 @@ function encenderRastreadorFacialOMNI() {
             rotacionRostro.x = (nariz.y - 0.4) * 2.5;
         }
 
-        // --- Rastreo Manual Directo (Izquierda) ---
+        // --- Rastreo Manual Directo ---
         if (results.leftHandLandmarks) {
             posicionManos.left.set(
                 (results.leftHandLandmarks[0].x - 0.5) * 5,
@@ -5051,7 +5055,6 @@ function encenderRastreadorFacialOMNI() {
             );
         }
         
-        // --- Rastreo Manual Directo (Derecha) ---
         if (results.rightHandLandmarks) {
             posicionManos.right.set(
                 (results.rightHandLandmarks[0].x - 0.5) * 5,
@@ -5061,15 +5064,19 @@ function encenderRastreadorFacialOMNI() {
         }
     });
 
-    // Inicialización y arranque de la cámara
     camaraMediaPipe = new Camera(videoElementOculto, {
         onFrame: async () => await holisticIA.send({ image: videoElementOculto }),
         width: 480, 
         height: 360
     });
-    camaraMediaPipe.start();
-     }
+    
+    // Agregamos un pequeño delay para asegurar que los scripts cargaron
+    setTimeout(() => {
+        camaraMediaPipe.start();
+    }, 1000);
+ }
 
+    
     
 
     
