@@ -4975,53 +4975,31 @@ loader3D.load('/assets/avatar_local.glb', (gltf) => {
      function animarSpaxioVerso() {
     spaxioAnimFrameId = requestAnimationFrame(animarSpaxioVerso);
 
-    // 1. Mover Cuello (Tu lógica original)
+    // 1. Mover Cuello con suavizado (Lerp)
     if (window.SpaxioVerso.avatar && SpaxioAvatarController.huesos.cuello) {
+        const rotY = rotacionRostro.y || 0;
         SpaxioAvatarController.huesos.cuello.rotation.y = THREE.MathUtils.lerp(
-            SpaxioAvatarController.huesos.cuello.rotation.y, rotacionRostro.y || 0, 0.1
+            SpaxioAvatarController.huesos.cuello.rotation.y, 
+            rotY, 
+            0.1
         );
+        SpaxioAvatarController.huesos.cuello.rotation.x = 0;
+        SpaxioAvatarController.huesos.cuello.rotation.z = 0;
     }
 
-    // 2. Procesar Cuerpo (Blindaje añadido)
-    const poseResults = window.SpaxioVerso.poseResults;
-    
-    // --- ESTA ES LA CLAVE: Solo entra si hay datos completos ---
-    if (poseResults && poseResults.poseWorldLandmarks && poseResults.poseLandmarks && poseResults.poseLandmarks.length >= 33) {
-        
-        const riggedPose = window.Kalidokit.Pose.solve(
-            poseResults.poseWorldLandmarks, 
-            poseResults.poseLandmarks, 
-            { runtime: "mediapipe", enableLegs: false }
-        );
-
-        if (riggedPose) {
-            // Función interna (tu lógica de aplicar)
-            const apply = (bone, data, mult) => {
-                if(bone && data) {
-                    // Usamos .set para Euler, manteniendo tu lógica de multiplicadores
-                    bone.rotation.set(data.x * mult, data.y * mult, data.z * mult);
-                }
-            };
-
-            // Aplicamos con tus multiplicadores
-            apply(SpaxioAvatarController.huesos.brazoIzq, riggedPose.LeftUpperArm, 5);
-            apply(SpaxioAvatarController.huesos.codoIzq, riggedPose.LeftLowerArm, 5);
-            apply(SpaxioAvatarController.huesos.manoIzq, riggedPose.LeftHand, 5);
-            
-            apply(SpaxioAvatarController.huesos.brazoDer, riggedPose.RightUpperArm, 5);
-            apply(SpaxioAvatarController.huesos.codoDer, riggedPose.RightLowerArm, 5);
-            apply(SpaxioAvatarController.huesos.manoDer, riggedPose.RightHand, 5);
-            
-            apply(SpaxioAvatarController.huesos.torso, riggedPose.Hips, 2);
-        }
+    // 2. Mover Manos con tu lógica directa de telemetría de pantalla
+    if (SpaxioAvatarController.huesos.manoIzq && SpaxioAvatarController.huesos.manoDer) {
+        SpaxioAvatarController.huesos.manoIzq.rotation.set(posicionManos.left.x, posicionManos.left.y, 0);
+        SpaxioAvatarController.huesos.manoDer.rotation.set(posicionManos.right.x, posicionManos.right.y, 0);
     }
-    
-    // 3. Renderizado (Fuera de la lógica, tal como lo tenías)
+
+    // 3. Renderizar la escena permanentemente
     if (window.SpaxioVerso.renderer && window.SpaxioVerso.scene && window.SpaxioVerso.camera) {
         window.SpaxioVerso.renderer.render(window.SpaxioVerso.scene, window.SpaxioVerso.camera);
     }
  }
-     
+    
+    
     
         
     
@@ -5044,6 +5022,7 @@ window.addEventListener('resize', () => {
 /** 3. IA Y RASTREO **/
 
 function encenderRastreadorFacialOMNI() {
+    // Inicializamos Holistic para capturar rostro y manos en simultáneo
     holisticIA = new Holistic({
         locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/holistic/${file}`
     });
@@ -5052,35 +5031,46 @@ function encenderRastreadorFacialOMNI() {
         modelComplexity: 1,
         smoothLandmarks: true,
         refineFaceLandmarks: true,
-        enableHandLandmarks: true 
+        enableHandLandmarks: true
     });
 
     holisticIA.onResults((results) => {
-        // 1. Guardamos todo el paquete de resultados en el objeto global
-        window.SpaxioVerso.poseResults = results;
-
-        // 2. Rastreo Facial
+        // --- Rastreo del Rostro ---
         if (results.faceLandmarks) {
             const nariz = results.faceLandmarks[4];
             rotacionRostro.y = (nariz.x - 0.5) * -2.5;
             rotacionRostro.x = (nariz.y - 0.4) * 2.5;
         }
 
-        // 3. Rastreo de Manos (si existiera lógica manual extra)
+        // --- Rastreo Manual Directo (Izquierda) ---
         if (results.leftHandLandmarks) {
-            posicionManos.left.set((results.leftHandLandmarks[0].x - 0.5) * 5, -(results.leftHandLandmarks[0].y - 0.5) * 5, 0);
+            posicionManos.left.set(
+                (results.leftHandLandmarks[0].x - 0.5) * 5,
+                -(results.leftHandLandmarks[0].y - 0.5) * 5,
+                0
+            );
         }
+        
+        // --- Rastreo Manual Directo (Derecha) ---
         if (results.rightHandLandmarks) {
-            posicionManos.right.set((results.rightHandLandmarks[0].x - 0.5) * 5, -(results.rightHandLandmarks[0].y - 0.5) * 5, 0);
+            posicionManos.right.set(
+                (results.rightHandLandmarks[0].x - 0.5) * 5,
+                -(results.rightHandLandmarks[0].y - 0.5) * 5,
+                0
+            );
         }
     });
 
+    // Inicialización y arranque de la cámara
     camaraMediaPipe = new Camera(videoElementOculto, {
         onFrame: async () => await holisticIA.send({ image: videoElementOculto }),
-        width: 480, height: 360
+        width: 480, 
+        height: 360
     });
     camaraMediaPipe.start();
- }
+     }
+
+    
 
     
 
