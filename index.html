@@ -4972,19 +4972,32 @@ loader3D.load('/assets/avatar_local.glb', (gltf) => {
 
 // 2. En el bucle de animación, verifica la pose
 
-     function animarSpaxioVerso() {
-    spaxioAnimFrameId = requestAnimationFrame(animarSpaxioVerso);
+     const applyRotationAdvanced = (bone, eulerData, multiplier = 1) => {
+    // 1. Verificación: Si no hay hueso o no hay datos, salimos sin romper nada
+    if (!bone || !eulerData) return;
 
-    // 1. Mover Cuello
-    if (window.SpaxioVerso.avatar && SpaxioAvatarController.huesos.cuello) {
-        SpaxioAvatarController.huesos.cuello.rotation.y = THREE.MathUtils.lerp(
-            SpaxioAvatarController.huesos.cuello.rotation.y, rotacionRostro.y || 0, 0.1
-        );
+    if (!bone.userData.hasHelper) {
+        const axesHelper = new THREE.AxesHelper(0.5);
+        bone.add(axesHelper);
+        bone.userData.hasHelper = true;
     }
 
-    // 2. Procesar Cuerpo
+    const euler = new THREE.Euler(
+        eulerData.x * multiplier, 
+        eulerData.y * multiplier, 
+        eulerData.z * multiplier, 
+        'XYZ'
+    );
+    bone.quaternion.setFromEuler(euler);
+};
+
+function animarSpaxioVerso() {
+    spaxioAnimFrameId = requestAnimationFrame(animarSpaxioVerso);
+
     const poseResults = window.SpaxioVerso.poseResults;
-    if (poseResults && poseResults.poseWorldLandmarks) {
+    
+    // 2. BLINDAJE: Solo procesamos si tenemos los 33 puntos completos
+    if (poseResults && poseResults.poseLandmarks && poseResults.poseLandmarks.length >= 33) {
         
         const riggedPose = window.Kalidokit.Pose.solve(
             poseResults.poseWorldLandmarks, 
@@ -4992,27 +5005,16 @@ loader3D.load('/assets/avatar_local.glb', (gltf) => {
             { runtime: "mediapipe", enableLegs: false }
         );
 
+        // 3. SEGURIDAD: Solo aplicamos si el Solver devolvió datos válidos
         if (riggedPose) {
-            // Función interna rápida para aplicar
-            const apply = (bone, data, mult) => {
-                if(bone && data) {
-                    bone.rotation.set(data.x * mult, data.y * mult, data.z * mult);
-                }
-            };
-
-            // Aplicamos multiplicador 5 a brazos y 2 al torso
-            apply(SpaxioAvatarController.huesos.brazoIzq, riggedPose.LeftUpperArm, 5);
-            apply(SpaxioAvatarController.huesos.codoIzq, riggedPose.LeftLowerArm, 5);
-            apply(SpaxioAvatarController.huesos.manoIzq, riggedPose.LeftHand, 5);
-            
-            apply(SpaxioAvatarController.huesos.brazoDer, riggedPose.RightUpperArm, 5);
-            apply(SpaxioAvatarController.huesos.codoDer, riggedPose.RightLowerArm, 5);
-            apply(SpaxioAvatarController.huesos.manoDer, riggedPose.RightHand, 5);
-            
-            apply(SpaxioAvatarController.huesos.torso, riggedPose.Hips, 2);
+            // Verificamos propiedad por propiedad antes de aplicar
+            if(riggedPose.LeftUpperArm) applyRotationAdvanced(SpaxioAvatarController.huesos.brazoIzq, riggedPose.LeftUpperArm, 1);
+            if(riggedPose.RightUpperArm) applyRotationAdvanced(SpaxioAvatarController.huesos.brazoDer, riggedPose.RightUpperArm, 1);
+            if(riggedPose.Hips) applyRotationAdvanced(SpaxioAvatarController.huesos.torso, riggedPose.Hips, 1);
         }
     }
-    
+
+
     // --- IMPORTANTE: EL RENDER SIEMPRE VA AFUERA ---
     if (window.SpaxioVerso.renderer && window.SpaxioVerso.scene && window.SpaxioVerso.camera) {
         window.SpaxioVerso.renderer.render(window.SpaxioVerso.scene, window.SpaxioVerso.camera);
