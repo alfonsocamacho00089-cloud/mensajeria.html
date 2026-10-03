@@ -129,17 +129,24 @@
         }
 
         .header { 
-            background: rgba(32, 44, 51, 0.3);
-            padding: 0 20px;    
-            display: flex;
-            align-items: center;
-            flex-shrink: 0; 
-            height: 60px;
-            z-index: 10;
-            position: relative;
-            backdrop-filter: blur(5px); 
-            -webkit-backdrop-filter: blur(10px);
-        }
+    background: rgba(32, 44, 51, 0.3); /* Bajamos de 0.9 a 0.7 para que sea más claro */
+   
+    padding: 0 20px;    
+    display: flex;
+    align-items: center;
+    flex-shrink: 0; 
+    height: 60px;
+   
+ 
+ 
+ 
+    z-index: 10;
+    position: relative;
+ /* LA MAGIA DEL CRISTAL */
+    backdrop-filter: blur(5px); 
+    -webkit-backdrop-filter: blur(10px); /* OBLIGATORIO para iPhone y muchos Android */
+    
+}
 
         .header-content {
             display: flex;
