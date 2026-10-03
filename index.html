@@ -21,69 +21,86 @@
     <script src="https://cdn.jsdelivr.net/npm/eruda"></script>
     <script>eruda.init();</script>
 
-    <style>
+    
+
+                    <style>
         * {
+
             box-sizing: border-box;
             -webkit-tap-highlight-color: transparent;
-        }
-
-        body {
-            font-family: sans-serif;
-            background-color: #000000;
-            background-image: url('./assets/logo.webp');  
-            background-attachment: fixed;
-            background-position: center;
-            background-size: cover;
-            background-repeat: no-repeat;
             margin: 0;
-            width: 100%;
-            display: flex;
-            flex-direction: column;
-            left: 0;
-            height: 100vh;
-            height: 100svh;
-            overflow: hidden;
-            position: fixed;
+            padding: 0;
         }
+body {
+    font-family: sans-serif;
+    background-color: #000000;
+    /* Usamos la imagen aquí para que sea global */
+    background-image: url('./assets/logo.webp');  
+    background-attachment: fixed; /* LA CLAVE: El fondo no se mueve con el scroll */
+    background-position: center;
+    background-size: cover;
+    background-repeat: no-repeat;
+    margin: 0;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+ 
+    left: 0;
+    height: 100vh;
+    height: 100svh; /* Altura segura para móviles */
+    overflow: hidden;
+    position: fixed; /* Evita que el navegador desplace toda la pantalla */
+}
 
-        #chat-box {
-            background: transparent !important;
-            flex: 1;
-            flex-shrink: 1;
-            overflow-y: auto;
-            padding: 15px;
-            padding-bottom: 135px !important;
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-            position: relative;
-            background: #0b141a;
-            touch-action: pan-y;
-            -webkit-overflow-scrolling: touch;
-            mask-image: linear-gradient(to bottom, black 85%, transparent 95%);
-            -webkit-mask-image: linear-gradient(to bottom, black 85%, transparent 95%);
-            overscroll-behavior-y: contain;
-        }
-            
-        .fondo-estatico {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            background-image: linear-gradient(rgba(11, 20, 26, 0.3), rgba(11, 20, 26, 0.3)), url('./assets/logo.webp');
-            background-repeat: no-repeat;
-            background-position: center;
-            background-size: cover; 
-            z-index: -1; 
-            pointer-events: none;
-            touch-action: none; 
-            overflow: hidden;
-        }
+#chat-box {
+   background: transparent !important;
+    flex: 1;
+    flex-shrink: 1;
+    overflow-y: auto;
+    padding: 15px;
+    padding-bottom: 135px !important;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    position: relative; /* Necesario para el fondo */
+    background: #0b141a; /* Color base oscuro */
+ 
+ 
+  
+    touch-action: pan-y; /* Permite scroll solo de arriba a abajo */
+    -webkit-overflow-scrolling: touch;
+    
+    /* ... tus estilos ... */
+    mask-image: linear-gradient(to bottom, black 85%, transparent 95%);
+    -webkit-mask-image: linear-gradient(to bottom, black 85%, transparent 95%);
+    overscroll-behavior-y: contain;  /* Bloquea que el scroll mueva el fondo */
+}
+    
+     .fondo-estatico {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-image: linear-gradient(rgba(11, 20, 26, 0.3), rgba(11, 20, 26, 0.3)), 
+                      url('./assets/logo.webp');
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: cover; 
+    z-index: -1; 
+    pointer-events: none;
+    
+    /* AÑADE ESTO PARA SINCRONIZAR */
+    touch-action: none; 
+    overflow: hidden;
+     }
 
-        .contenedor-flotante {
+
+
+/* --- INPUT AREA --- */
+.contenedor-flotante {
     position: absolute; /* Se queda pegado a la pantalla, no al chat */
-    bottom: 0;
+    bottom: 60px;
     left: 0;
     width: 100%;
     display: flex;
@@ -99,37 +116,32 @@
     -webkit-backdrop-filter: blur(5px);
 }
 
-        .input-wrapper {
+ .input-wrapper {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    background: rgba(32, 44, 51, 0.9); /* Fondo gris */
+    border-radius: 25px;
+    padding: 5px 10px;
+    border: 1px solid rgba(255, 215, 0, 0.3); /* Borde dorado sutil */
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+ }
+     
+        
+        /* --- CONTENEDORES DE VISTAS (APP PRINCIPAL) --- */
+        .app-view {
+            display: none;
             flex: 1;
-            display: flex;
-            align-items: center;
-            background: rgba(32, 44, 51, 0.9);
-            border-radius: 25px;
-            padding: 5px 10px;
-            border: 1px solid rgba(255, 215, 0, 0.3);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            flex-direction: column;
+            height: calc(100vh - 120px);
+            overflow-y: auto;
+            position: relative;
         }
-            
-        .barra-flotante-premium {
-            position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 92%;
-            max-width: 450px;
-            background: rgba(32, 44, 51, 0.8);
-            backdrop-filter: blur(15px);
-            -webkit-backdrop-filter: blur(15px);
+        .app-view.active-view {
             display: flex;
-            justify-content: space-around;
-            align-items: center;
-            padding: 10px 5px;
-            border-radius: 25px;
-            border: 1px solid rgba(255, 215, 0, 0.3);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-            z-index: 30001;
         }
 
+        /* --- ESTILOS DE CHAT --- */
         .header { 
     background: rgba(32, 44, 51, 0.3); /* Bajamos de 0.9 a 0.7 para que sea más claro */
    
@@ -148,244 +160,70 @@
     backdrop-filter: blur(5px); 
     -webkit-backdrop-filter: blur(10px); /* OBLIGATORIO para iPhone y muchos Android */
     
-}
-
-        .header-content {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            flex: 1;
         }
+     
 
-        .foto-perfil {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            object-fit: cover;
-            background-color: #555;
-        }
-
-        .user-info {
-            display: flex;
-            flex-direction: column;
-        }
-
+            .header-content { display: flex; align-items: center; gap: 12px; flex: 1; cursor: pointer; }
+        .foto-perfil { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; background-color: #555; }
+        
         #nombre-dueño-header {
-            background: rgba(26, 26, 26, 0.3); 
-            font-size: 16px;
-            font-weight: 500;
-            margin: 0;
-            color: white;
-            line-height: 1.2;
-            backdrop-filter: blur(5px); 
-            -webkit-backdrop-filter: blur(10px);
+            font-size: 16px; font-weight: 500; margin: 0; color: white;
         }
 
         #msg-text {
-            flex: 1;
-            background: transparent;
-            border: none;
-            outline: none;
-            color: white;
-            padding: 10px 5px;
-            height: 40px;
-            max-height: 120px;
-            resize: none;
+            flex: 1; background: transparent; border: none; outline: none;
+            color: white; padding: 10px 5px; height: 40px; max-height: 120px; resize: none;
         }
 
         .msg-burbuja { 
-            max-width: 85%; 
-            width: fit-content; 
-            padding: 8px 15px 8px 15px !important; 
-            border-radius: 12px; 
-            font-size: 16px !important; 
-            position: relative; 
-            word-wrap: break-word; 
-            margin-bottom: 2px;
-            display: inline-block;
-            line-height: 1.2;
+            max-width: 85%; width: fit-content; 
+            padding: 8px 15px !important; border-radius: 12px; 
+            font-size: 16px !important; position: relative; word-wrap: break-word; margin-bottom: 2px;
         }
+        .msg-derecha { align-self: flex-end; background: linear-gradient(135deg, rgba(0, 92, 75, 0.9), rgba(0, 77, 64, 0.9)); color: #fff; border-bottom-right-radius: 15px; }
+        .msg-izquierda { align-self: flex-start; background: rgba(32, 44, 51, 0.8); color: #fff; border-bottom-left-radius: 20px; }
 
-        .msg-info {
-            display: flex;
-            align-items: center;
-            white-space: nowrap;
-            float: right !important;
-            font-size: 12px !important;
-            opacity: 0.7;
-            margin-top: 2px !important;
-            margin-left: 10px;
-            gap: 3px;
+        /* --- ESTILOS CALCULADORA / DROPISAPP --- */
+        .calc-body { padding: 15px; background: rgba(11, 20, 26, 0.95); flex: 1; overflow-y: auto; }
+        .top-wrapper { display: flex; justify-content: center; width: 100%; margin-bottom: 15px; }
+        .top-box { background-color: rgba(255,255,255,0.08); width: 100%; max-width: 400px; padding: 15px; border-radius: 20px; border: 1px solid rgba(255,215,0,0.2); }
+        .input-wrapper-main { width: 100%; position: relative; display: flex; align-items: center; margin-top: 5px; }
+        .input-wrapper-main input { width: 100%; padding: 10px 10px 10px 40px; border-radius: 50px; border: none; background-color: #ffd700; font-weight: bold; font-size: 1.1em; color: #000; text-align: center; }
+        .bs-inside { position: absolute; left: 6px; background: #000; color: #fff; font-size: 10px; width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; border-radius: 50%; font-weight: bold; z-index: 2; }
+
+        .bottom-row { display: flex; justify-content: space-between; gap: 10px; margin-top: 15px; }
+        .card-wrapper { width: 48%; display: flex; flex-direction: column; align-items: center; cursor: pointer; padding: 10px; border-radius: 15px; background: rgba(255,255,255,0.05); border: 1px solid #333; transition: 0.3s; }
+        .card-wrapper.selected { background-color: rgba(255, 215, 0, 0.15); border: 1px solid #ffd700; }
+        .fixed-title { color: #ffd700; font-size: 0.7em; margin-bottom: 5px; text-transform: uppercase; font-weight: bold; }
+        
+        .field-top { width: 100%; position: relative; height: 45px; }
+        .field-top input { width: 100%; padding: 8px 8px 8px 35px; border-radius: 25px; border: none; font-weight: bold; font-size: 1em; text-align: center; background-color: #6b8e23; color: white; }
+
+        .container-calc { max-width: 400px; margin: 0 auto; background-color: rgba(26,26,26,0.9); padding: 20px; border-radius: 20px; border: 1px solid rgba(255,215,0,0.2); }
+        .field { margin-bottom: 15px; }
+        .field label { display: block; margin-bottom: 5px; font-size: 0.75em; color: #ffd700; font-weight: bold; text-transform: uppercase; }
+        .field input { width: 100%; padding: 12px; border-radius: 12px; border: none; text-align: center; font-size: 1.1em; background-color: #fff; color: #000; outline: none; font-weight: bold; }
+        .field input[readonly] { background-color: #1e3a1e; color: #eaffea; }
+
+        /* --- BARRA DE NAVEGACIÓN INFERIOR SUPREMA --- */
+        .barra-flotante-premium {
+            position: fixed; bottom: 0; left: 0;
+            width: 100%; background: rgba(15, 22, 27, 0.95);
+            backdrop-filter: blur(15px);
+            display: flex; justify-content: space-around; align-items: center;
+            padding: 8px 5px; border-top: 1px solid rgba(255, 215, 0, 0.3);
+            z-index: 30001; height: 60px;
         }
-
-        .msg-derecha { 
-            align-self: flex-end; 
-            background: linear-gradient(135deg, rgba(0, 92, 75, 0.8) 0%, rgba(0, 77, 64, 0.8) 100%);
-            color: #ffffff; 
-            border-bottom-right-radius: 15px; 
-            border-top-right-radius: 2px;
-        }
-
-        .msg-izquierda { 
-            align-self: flex-start; 
-            background: rgba(32, 44, 51, 0.6); 
-            color: #ffffff; 
-            border-bottom-left-radius: 20px; 
-            border-top-left-radius: 2px;
-        }
-
-        .menu-mensaje {
-            position: absolute;
-            display: none;
-            background: rgba(11, 20, 26, 0.95);
-            backdrop-filter: blur(10px);
-            border: 1px solid #ffd700;
-            border-radius: 12px;
-            z-index: 15000 !important;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-            min-width: 100px;
-            top: 0; 
-            left: 0;
-        }
-
-        .menu-mensaje div {
-            padding: 12px 20px;
-            color: white;
-            font-size: 14px;
-            cursor: pointer;
-            border-bottom: 0.5px solid rgba(255, 215, 0, 0.1);
-        }
-
-        .menu-mensaje div:last-child {
-            border-bottom: none;
-        }
-
-        .menu-mensaje div:hover {
-            background: rgba(255, 215, 0, 0.2);
-        }
-
-        .modal {
-            display: none; 
-            position: fixed; 
-            top: 0; 
-            left: 0; 
-            width: 100%; 
-            height: 100%; 
-            background: #000000;
-            z-index: 1000; 
-            transition: all 0.5s ease;
-        }
-
-        .modal-content { 
-            background-color: #0b141a;
-            background-image: linear-gradient(rgba(11, 20, 26, 0.9), rgba(11, 20, 26, 0.9)), url('./assets/logo.webp');
-            background-size: cover;
-            background-position: center;
-            background-attachment: fixed;
-            width: 100%; 
-            display: flex;
-            flex-direction: column;
-            color: white; 
-            height: 100dvh; 
-            margin: 0;
-            overflow: hidden;
-            justify-content: space-between;
-        }
-
-        .fila-contacto {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            padding: 10px;
-            cursor: pointer;
-            background: rgba(32, 44, 51, 0.05);
-            transition: background 0.3s ease;
-            text-align: left;
-        }
-
-        .fila-contacto:hover {
-            background: rgba(255, 215, 0, 0.1) !important;
-        }
-
-        #cuerpo-modal-lista {
-            flex-grow: 1;
-            overflow-y: auto;
-            background: transparent;
-            padding-bottom: 100px !important;
-        }
-
-        .btn-back-clean {
-            background: transparent;
-            border: none;
-            outline: none;
-            color: white;
-            font-size: 20px;
-            padding: 5px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
         .btn-nav {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            color: #8696a0;
-            text-decoration: none;
-            font-size: 11px;
-            font-weight: 500;
-            flex: 1;
-            cursor: pointer;
-            transition: 0.3s;
+            display: flex; flex-direction: column; align-items: center;
+            color: #8696a0; text-decoration: none; font-size: 11px; font-weight: 500;
+            cursor: pointer; transition: 0.3s; flex: 1;
         }
+        .btn-nav.active { color: #ffd700; text-shadow: 0 0 8px rgba(255,215,0,0.4); }
+        .btn-nav i { font-size: 18px; margin-bottom: 3px; }
 
-        .btn-nav.active, .btn-nav:active {
-            color: #ffd700;
-        }
-
-        .encriptado-box {
-            background-color: rgba(28, 28, 28, 0.9);
-            border-radius: 10px;
-            padding: 12px;
-            margin: 70px auto 0px auto;
-            width: 90%;
-            max-width: 400px;
-            text-align: center;
-            border: none;
-            display: none;
-            position: relative;
-            z-index: 1;
-        }
-
-        #chat-box .encriptado-box {
-            display: block !important;
-        }
-
-        .encriptado-box p {
-            color: #d4af37;
-            font-size: 0.85rem;
-            margin: 0;
-            line-height: 1.4;
-        }
-
-        .resaltado-oro {
-            font-weight: bold;
-            text-decoration: underline;
-            cursor: pointer;
-        }
-
-        .contador-nube {
-            background: #ffd700;
-            color: white;
-            border-radius: 50%;
-            padding: 2px 7px;
-            font-size: 12px;
-            font-weight: bold;
-            min-width: 15px;
-            text-align: center;
-            margin-left: auto;
-        }
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 40000; justify-content: center; align-items: center; }
+        .modal-content { background: #0b141a; border: 1px solid #ffd700; width: 90%; max-width: 380px; padding: 20px; border-radius: 20px; color: white; text-align: center; }
     </style>
 </head>
 
