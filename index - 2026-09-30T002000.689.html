@@ -1117,31 +1117,22 @@ margin: 0;
                    align-items: center; justify-content: center;">
             + 
         </button>
-
-<!-- ==================== BARRA DE NAVEGACIÓN INFERIOR UNIFICADA ==================== -->
-    <div class="barra-flotante-premium">
-        <div class="btn-nav active" onclick="switchView('chat', this)">
-            <i>💬</i><span>Chat</span>
-        </div>
+<div class="btn-nav" 
+     id="btn-nav-flow" 
+     data-contacto='{"id_sistema":"26fmetp4Q4WJ","nombre":"Spaxio","apellido":"Flow","estado":"activo"}'
+     onclick="cargarConversacionCon(JSON.parse(this.dataset.contacto).id_sistema)">
         <div class="btn-nav" onclick="switchView('calc', this)">
             <i>📊</i><span>Tasas / Calc</span>
         </div>
-        <div class="btn-nav" onclick="switchView('contacts', this)">
-            <i>👥</i><span>Agenda</span>
-        </div>
+
+    <div class="btn-nav active" onclick="document.getElementById('modal-agenda-completa').style.display='none'">
+        <span>💬</span><span>Chat</span>
     </div>
-     <!-- Ejemplo en tu HTML principal -->
-<div id="vista-chat" class="app-view active-view">
-    <!-- Todo el contenido de tu chat actual va aquí -->
-</div>
+    <div class="btn-nav" onclick="abrirAjustes()">
+        <span>⚙️</span><span>Ajustes</span>
+    </div>
+    </div>
 
-<div id="vista-calc" class="app-view">
-    <!-- Contenido de Tasas / Calc -->
-</div>
-
-<div id="vista-contacts" class="app-view">
-    <!-- Contenido de Agenda -->
-</div>
  <div id="modal-nuevocontacto" class="modal" style="display: none; align-items: center; justify-content: center; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #1e222b; z-index: 30000;">
     
           <div class="modal-cover" style="position: relative; width: 100vw; height: 100vh; padding: 50px 30px 50px 30px; box-sizing: border-box; background: #1e222b; border-radius: 0px; text-align: center; border: 0px solid #333; box-shadow: 0 0 20px rgba(0,0,0,0.5);">                                                
@@ -1349,15 +1340,11 @@ margin: 0;
             document.querySelectorAll('.app-view').forEach(v => v.classList.remove('active-view'));
             document.querySelectorAll('.btn-nav').forEach(b => b.classList.remove('active'));
 
-            if (viewName === 'chat') document.getElementById('view-chat').classList.add('active-view');
-            if (viewName === 'calc') {
+            if (viewName === 'calc') document.getElementById('view-chat').classList.add('active-view');
+            {
                 document.getElementById('view-calc').classList.add('active-view');
                 cargarTasasDropdown();
-            }
-            if (viewName === 'contacts') {
-                document.getElementById('view-contacts').classList.add('active-view');
-                pintarAgendaContactos();
-            }
+     {
             el.classList.add('active');
      }       
 
