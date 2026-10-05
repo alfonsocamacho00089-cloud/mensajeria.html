@@ -1120,18 +1120,17 @@ margin: 0;
     </div>
 
 <!-- Ejemplo para Spaxio Flow -->
-<div class="btn-nav" 
-     id="btn-nav-flow" 
-     data-contacto='{"id_sistema":"26fmetp4Q4WJ","nombre":"Spaxio","apellido":"Flow","estado":"activo"}'
-     onclick="cargarConversacionCon(JSON.parse(this.dataset.contacto).id_sistema)">
-        <span style="text-shadow: 0 0 8px #00d4ff;">🌊</span><span style="color: #00d4ff;">Spaxio Flow</span>
-    </div>
-
+<div class="btn-nav" >
+     
 
 
     <div class="btn-nav active" onclick="document.getElementById('modal-agenda-completa').style.display='none'">
         <span>💬</span><span>Chat</span>
     </div>
+
+ <div class="btn-nav" onclick="abrirTasas()">
+    <span>📊</span><span>Tasas</span>
+ </div>
     <div class="btn-nav" onclick="abrirAjustes()">
         <span>⚙️</span><span>Ajustes</span>
     </div>
@@ -1281,7 +1280,62 @@ margin: 0;
         <div id="mensajes-live" style="display: flex; flex-direction: column; gap: 5px;"></div>
     </div>
 </div>
-  
+  <!-- Modal de Tasas -->
+<div id="modal-tasas" class="modal-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; justify-content: center; align-items: center; padding: 15px;" onclick="if(event.target === this) cerrarTasas()">
+    
+    <div class="app-view" style="position: relative; width: 100%; max-width: 400px; max-height: 90vh; overflow-y: auto; background: #121212; border-radius: 12px; border: 1px solid #333;">
+        
+        <!-- Botón de Cerrar Modal -->
+        <button onclick="cerrarTasas()" style="position: absolute; top: 15px; right: 15px; background: transparent; border: none; color: #ffd700; font-size: 22px; cursor: pointer; z-index: 10;">&times;</button>
+
+        <div class="header" style="justify-content: space-between; padding: 15px 20px;">
+            <span style="font-weight: bold; color: #ffd700; font-size: 18px; text-transform: uppercase;">Real Market Elite</span>
+            <div onclick="abrirModalQR()" style="cursor: pointer; color: #ffd700; font-size: 20px;"><i class="fas fa-qrcode"></i></div>
+        </div>
+
+        <div class="calc-body" style="padding: 15px;">
+            <div class="top-wrapper">
+                <div class="top-box">
+                    <div class="fixed-title" style="text-align: center;">Tasa USDT P2P</div>
+                    <div class="input-wrapper-main">
+                        <span class="bs-inside">Bs</span>
+                        <input type="text" id="p2pRate" readonly>
+                    </div>
+
+                    <div class="bottom-row">
+                        <div class="card-wrapper selected" id="cardBCV" onclick="selectTasa('bcv')">
+                            <div class="fixed-title">Tasa BCV</div>
+                            <div class="field-top">
+                                <input type="number" id="bcvRate" readonly>
+                            </div>
+                        </div> 
+                        <div class="card-wrapper" id="cardEuro" onclick="selectTasa('euro')">
+                            <div class="fixed-title">Tasa EURO</div>
+                            <div class="field-top">
+                                <input type="number" id="euroRate" readonly>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="container-calc">
+                <div class="field">
+                    <label>Precio Producto (USD)</label>
+                    <input type="number" id="priceUSD" placeholder="0.00" inputmode="decimal">
+                </div>
+                <div class="field">
+                    <label id="labelVES">Bolívares + IGTF</label>
+                    <input type="text" id="totalVES" readonly>
+                </div>
+                <div class="field">
+                    <label>Total USDT</label>
+                    <input type="text" id="totalUSDT" readonly>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
     
     <script>
      
@@ -1575,7 +1629,13 @@ async function recuperarCuentaConID() {
         alert("Error al registrar. Revisa tu conexión.");
     }
 }
-                                      
+     function abrirTasas() {
+    document.getElementById('modal-tasas').style.display = 'flex';
+}
+
+function cerrarTasas() {
+    document.getElementById('modal-tasas').style.display = 'none';
+     }                                 
 
 // --- 4. ANTENA SATELITAL ---
 async function activarAntena() {
