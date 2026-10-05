@@ -57,7 +57,18 @@ body {
     overflow: hidden;
     position: fixed; /* Evita que el navegador desplace toda la pantalla */
 }
-
+/* --- CONTENEDORES DE VISTAS (APP PRINCIPAL) --- */
+        .app-view {
+            display: none;
+            flex: 1;
+            flex-direction: column;
+            height: calc(100vh - 120px);
+            overflow-y: auto;
+            position: relative;
+        }
+        .app-view.active-view {
+            display: flex;
+      }
 #chat-box {
    background: transparent !important;
     flex: 1;
@@ -1107,35 +1118,18 @@ margin: 0;
             + 
         </button>
 
-<div class="barra-flotante-premium">
-    <div class="btn-nav" onclick="abrirAgendaCompleta();">
-        <span>👥</span><span>Contactos</span>
+<!-- ==================== BARRA DE NAVEGACIÓN INFERIOR UNIFICADA ==================== -->
+    <div class="barra-flotante-premium">
+        <div class="btn-nav active" onclick="switchView('chat', this)">
+            <i>💬</i><span>Chat</span>
+        </div>
+        <div class="btn-nav" onclick="switchView('calc', this)">
+            <i>📊</i><span>Tasas / Calc</span>
+        </div>
+        <div class="btn-nav" onclick="switchView('contacts', this)">
+            <i>👥</i><span>Agenda</span>
+        </div>
     </div>
-    
-    <div class="btn-nav" 
-     id="btn-nav-harvis" 
-     data-contacto='{"id_sistema":"uo4kb3tGHH7J","nombre":"H.A.R.V.I.S.","apellido":"1.0","estado":"activo"}'
-     onclick="cargarConversacionCon(JSON.parse(this.dataset.contacto).id_sistema)">
-        <span style="text-shadow: 0 0 8px #ffd700;">🤖</span><span style="color: #ffd700;">H.A.R.V.I.S.</span>
-    </div>
-
-<!-- Ejemplo para Spaxio Flow -->
-<div class="btn-nav" 
-     id="btn-nav-flow" 
-     data-contacto='{"id_sistema":"26fmetp4Q4WJ","nombre":"Spaxio","apellido":"Flow","estado":"activo"}'
-     onclick="cargarConversacionCon(JSON.parse(this.dataset.contacto).id_sistema)">
-        <span style="text-shadow: 0 0 8px #00d4ff;">🌊</span><span style="color: #00d4ff;">Spaxio Flow</span>
-    </div>
-
-
-
-    <div class="btn-nav active" onclick="document.getElementById('modal-agenda-completa').style.display='none'">
-        <span>💬</span><span>Chat</span>
-    </div>
-    <div class="btn-nav" onclick="abrirAjustes()">
-        <span>⚙️</span><span>Ajustes</span>
-    </div>
-</div>
      
  <div id="modal-nuevocontacto" class="modal" style="display: none; align-items: center; justify-content: center; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #1e222b; z-index: 30000;">
     
@@ -1281,6 +1275,56 @@ margin: 0;
         <div id="mensajes-live" style="display: flex; flex-direction: column; gap: 5px;"></div>
     </div>
 </div>
+  <!-- ==================== VISTA 2: CALCULADORA Y TASAS (DROPISAPP) ==================== -->
+    <div id="view-calc" class="app-view">
+        <div class="header" style="justify-content: space-between; padding: 0 20px;">
+            <span style="font-weight: bold; color: #ffd700; font-size: 18px; text-transform: uppercase;">Real Market Elite</span>
+            <div onclick="abrirModalQR()" style="cursor: pointer; color: #ffd700; font-size: 20px;"><i class="fas fa-qrcode"></i></div>
+        </div>
+
+        <div class="calc-body">
+            <div class="top-wrapper">
+                <div class="top-box">
+                    <div class="fixed-title" style="text-align: center;">Tasa USDT P2P</div>
+                    <div class="input-wrapper-main">
+                        <span class="bs-inside">Bs</span>
+                        <input type="text" id="p2pRate" readonly>
+                    </div>
+
+                    <div class="bottom-row">
+                        <div class="card-wrapper selected" id="cardBCV" onclick="selectTasa('bcv')">
+                            <div class="fixed-title">Tasa BCV</div>
+                            <div class="field-top">
+                                <input type="number" id="bcvRate" readonly>
+                            </div>
+                        </div> 
+                        <div class="card-wrapper" id="cardEuro" onclick="selectTasa('euro')">
+                            <div class="fixed-title">Tasa EURO</div>
+                            <div class="field-top">
+                                <input type="number" id="euroRate" readonly>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="container-calc">
+                <div class="field">
+                    <label>Precio Producto (USD)</label>
+                    <input type="number" id="priceUSD" placeholder="0.00" inputmode="decimal">
+                </div>
+                <div class="field">
+                    <label id="labelVES">Bolívares + IGTF</label>
+                    <input type="text" id="totalVES" readonly>
+                </div>
+                <div class="field">
+                    <label>Total USDT</label>
+                    <input type="text" id="totalUSDT" readonly>
+                </div>
+            </div>
+        </div>
+    </div>
+
   
     
     <script>
@@ -1289,7 +1333,22 @@ margin: 0;
     alert("🚨 ERROR DETECTADO:\n\n" + message + "\n\nArchivo: " + source + "\nLínea: " + lineno);
     return false;
 };
-                
+         // --- CONTROL DE VISTAS UNIFICADAS ---
+        function switchView(viewName, el) {
+            document.querySelectorAll('.app-view').forEach(v => v.classList.remove('active-view'));
+            document.querySelectorAll('.btn-nav').forEach(b => b.classList.remove('active'));
+
+            if (viewName === 'chat') document.getElementById('view-chat').classList.add('active-view');
+            if (viewName === 'calc') {
+                document.getElementById('view-calc').classList.add('active-view');
+                cargarTasasDropdown();
+            }
+            if (viewName === 'contacts') {
+                document.getElementById('view-contacts').classList.add('active-view');
+                pintarAgendaContactos();
+            }
+            el.classList.add('active');
+     }       
 
         // 1. CONFIGURACIÓN Y REGISTRO DE ANTENA (INDISPENSABLE PARA EL TOKEN)
         
