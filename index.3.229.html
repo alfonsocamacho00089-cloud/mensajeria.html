@@ -503,7 +503,106 @@ button#btn-enviar:active {
 <body>
  
     
+    <div id="pantalla-carga" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; display: flex; align-items: center; justify-content: center; z-index: 999999; transition: opacity 0.5s ease;">      
+
+          </div>
+ 
+<div class="header" id="chat-header">
+    <div class="header-content" onclick="abrirPerfilContacto()" style="cursor: pointer;">
+        <button onclick="manejarBotonIdentidad(); event.stopPropagation();" class="btn-back-clean">
+            <span style="display: inline-block; transform: scaleX(-1);">➔</span>
+        </button>
+        <img src="https://via.placeholder.com/40" id="foto-perfil-header" class="foto-perfil">
+        
+        <div class="user-info">
+            <h1 id="nombre-dueño-header">SpaceChat</h1>
+        </div>
+    </div>
+
+    <div style="display: flex; align-items: center; gap: 15px; flex-shrink: 0;">
+        <button onclick="iniciarLlamadaSatelital('voz')" 
+                style="background: none; border: none; color: #ffd700; font-size: 20px; cursor: pointer; padding: 5px; transition: transform 0.2s;"
+                onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
+            📞
+        </button>
+        <button onclick="iniciarLlamadaSatelital('video')" 
+                style="background: none; border: none; color: #ffd700; font-size: 22px; cursor: pointer; padding: 5px; transition: transform 0.2s;"
+                onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
+            📹
+        </button>
+    </div>
+</div>
+
+ <div id="chat-box">
+ </div>
+ <div id="aviso-seguridad" class="encriptado-box">
+    <p>
+        <i class="fas fa-lock"></i> 
+        Las mensajes en este chat están cifrados de extremo a extremo. Solo las personas en este chat pueden leerlos. 
+        <span class="resaltado-oro">Más información.</span>
+    </p>
+ </div>
+
+<div id="modal-perfil" class="modal" style="display:none; padding: 15px; background: #1e222b; z-index: 25000; box-sizing: border-box; text-align: center;">
     
+    <button onclick="document.getElementById('modal-perfil').style.display='none'" 
+            style="background: transparent; border: none; color: white; font-size: 24px; transform: scaleX(-1); cursor: pointer; padding: 0; position: absolute; top: 15px; left: 15px;">➔</button>
+
+    <div class="modal-cover" style="display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; min-height: 80vh;">
+      
+        <img id="perfil-foto-grande" src="" style="width: 150px; height: 150px; border: 1px solid #ffd700; margin-bottom: 15px; object-fit: cover;">
+        
+        <h2 id="perfil-nombre" style="color: white; margin-bottom: 20px; font-size: 24px; font-weight: bold;">Arturo Martinez</h2>
+       
+        <button onclick="eliminarChatEspecifico(); event.stopPropagation();" 
+                style="width: 180px; padding: 10px; background: transparent; border: none; color: #8696a0; font-size: 14px; font-weight: 500; cursor: pointer;">
+            Vaciar chat 
+        </button>
+
+        <button onclick="eliminarContactoDeAgenda(); event.stopPropagation();" 
+                style="width: 180px; padding: 10px; background: transparent; border: none; color: #8696a0; font-size: 14px; font-weight: 500; cursor: pointer; margin-top: 5px;">
+            Eliminar 
+        </button>
+    </div>
+</div>
+ 
+ <div id="menu-acciones" class="menu-mensaje">
+    <div onclick="accionMensaje('responder')">↩️ Responder</div>
+    <div onclick="accionMensaje('editar')">✏️ Editar</div>
+    <div onclick="accionMensaje('copiar-id')">👤 Guardar ID</div>
+    <div onclick="accionMensaje('borrar')" style="color: #ff5c5c;">🗑️ Borrar</div>
+ </div>
+
+<div class="contenedor-flotante">
+    <div class="input-wrapper">
+        <button class="icon-btn" onclick="document.getElementById('modal-tienda').style.display='block'">
+            <span>😊</span>
+        </button>
+        
+        <textarea 
+            id="msg-text" 
+            placeholder="Mensaje" 
+            inputmode="text" 
+            enterkeyhint="send"
+            contenteditable="true"
+            role="textbox"
+            oninput="this.style.height='40px'; this.style.height=this.scrollHeight+'px';"></textarea>
+            
+        <label class="icon-btn" for="input-archivo">
+            <span>📎</span>
+            <input type="file" id="input-archivo" style="display: none;" onchange="prepararEnvioMedia(this, 'archivo')">
+        </label>
+
+        <label class="icon-btn" for="input-foto">
+            <span>📷</span>
+            <input type="file" id="input-foto" accept="image/*" style="display: none;" onchange="prepararEnvioMedia(this, 'foto')">
+        </label>
+    </div>
+    
+    <button id="btn-accion-dinamica" onclick="ejecutarAccionBoton()" style="flex-shrink: 0; background: #ffd700; border: none; width: 40px; height: 40px; border-radius: 50%; transition: all 0.2s ease;">
+        <span id="icono-accion" style="color: #000; font-weight: bold; font-size: 16px;">🎙️</span>
+    </button>
+</div>
     
     
             
@@ -621,59 +720,7 @@ button#btn-enviar:active {
             + 
         </button>
 
-<div class="barra-flotante-premium">
-    <div class="btn-nav" onclick="abrirAgendaCompleta();">
-        <span>👥</span><span>Contactos</span>
-    </div>
-    
-    <div class="btn-nav" 
-     id="btn-nav-harvis" 
-     data-contacto='{"id_sistema":"uo4kb3tGHH7J","nombre":"H.A.R.V.I.S.","apellido":"1.0","estado":"activo"}'
-     onclick="cargarConversacionCon(JSON.parse(this.dataset.contacto).id_sistema)">
-        <span style="text-shadow: 0 0 8px #ffd700;">🤖</span><span style="color: #ffd700;">H.A.R.V.I.S.</span>
-    </div>
-
-<!-- Ejemplo para Spaxio Flow -->
-<div class="btn-nav" 
-     id="btn-nav-flow" 
-     data-contacto='{"id_sistema":"26fmetp4Q4WJ","nombre":"Spaxio","apellido":"Flow","estado":"activo"}'
-     onclick="cargarConversacionCon(JSON.parse(this.dataset.contacto).id_sistema)">
-        <span style="text-shadow: 0 0 8px #00d4ff;">🌊</span><span style="color: #00d4ff;">Spaxio Flow</span>
-    </div>
-
-
-
-    <div class="btn-nav active" onclick="document.getElementById('modal-agenda-completa').style.display='none'">
-        <span>💬</span><span>Chat</span>
-    </div>
-    <div class="btn-nav" onclick="abrirAjustes()">
-        <span>⚙️</span><span>Ajustes</span>
-    </div>
-</div>
-     
- <div id="modal-nuevocontacto" class="modal" style="display: none; align-items: center; justify-content: center; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #1e222b; z-index: 30000;">
-    
-          <div class="modal-cover" style="position: relative; width: 100vw; height: 100vh; padding: 50px 30px 50px 30px; box-sizing: border-box; background: #1e222b; border-radius: 0px; text-align: center; border: 0px solid #333; box-shadow: 0 0 20px rgba(0,0,0,0.5);">                                                
-        
-<div style="display: flex; align-items: center;justify-content: flex-start; margin-left: 20px; gap: 15px; margin-bottom: 20px;">
-    
-    <button onclick="cerrarModalNuevo()" style="background: transparent; border: none; color: white; font-size: 20px; cursor: pointer;">
-         <span style="display: inline-block; transform: scaleX(-1);">➔</span>
-    </button>
-
-    <h3 style="color: #ffd700; margin: 0;">NUEVO CONTACTO</h3>
-
-</div>
-        
-        <input type="text" id="nuevo-nombre" placeholder="Nombre" 
-            onfocus="this.style.boxShadow='0 0 5px #ffd700'; this.style.borderColor='#ffd700';" 
-            onblur="this.style.boxShadow='none'; this.style.borderColor='#999';"
-             style="width: 100%; padding: 18px; margin-bottom: 15px; background: #2a2f3a; color: white; border: 1px solid #999; border-radius: 8px; box-sizing: border-box; outline: none;">
-        
-        <input type="text" id="nuevo-apellido-contacto" placeholder="Apellido"
-        onfocus="this.style.boxShadow='0 0 5px #ffd700'; this.style.borderColor='#ffd700';" 
-            onblur="this.style.boxShadow='none'; this.style.borderColor='#999';"
-            style="width: 100%; padding: 18px; margin-bottom: 15px; background: #2a2f3a; color: white; border: 1px solid #999; border-radius: 8px; box-sizing: border-box; outline: none;">
+ style="width: 100%; padding: 18px; margin-bottom: 15px; background: #2a2f3a; color: white; border: 1px solid #999; border-radius: 8px; box-sizing: border-box; outline: none;">
 
         <input type="text" id="target-id" placeholder="ID Space (Ej: 12345)" 
         onfocus="this.style.boxShadow='0 0 5px #ffd700'; this.style.borderColor='#ffd700';" 
@@ -741,61 +788,55 @@ button#btn-enviar:active {
         <button id="btn-colgar-llamada" style="width: 65px; height: 65px; border-radius: 50%; background: #b71c1c; border: 2px solid #b71c1c; color: white; font-size: 24px; cursor: pointer;">❌</button>
     </div>
    </div>
-  <div class="harvis-container">
-    <div class="harvis-orb-glow">
-        <button id="harvisBtn" class="harvis-ball">
-            🤖
-        </button>
-    </div>
-    
-    <div id="harvisStatus" class="harvis-status">H.A.R.V.I.S. en espera...</div>
-    <div id="harvisSubtitle" class="harvis-subtitle"></div>
-  </div>
-
-
-<div id="modal-spaxio" class="modal-cristal-oscuro" style="display: none;">
-    <div class="spaxio-header">
-        <h3 style="color: #ffd700; margin: 0; text-shadow: 0 0 5px rgba(255, 215, 0, 0.5);">🎬 Estudio Spaxio</h3>
-        <button onclick="cerrarModalSpaxio()" class="btn-cerrar-dorado">✖</button>
-    </div>
-<div class="spaxio-selector">
-    <select id="modo-spaxio" onchange="configurarModo(this.value)">
-        <option value="video">🎥 Crear Reel</option>
-        <option value="live">🔴 Empezar Directo</option>
-    </select>
-</div>
-    <div id="vista-spaxio-live" class="spaxio-content">
-        <div class="contenedor-camara-preview">
-            <video id="video-preview-spaxio" autoplay muted playsinline></video>
-            <div class="overlay-camara">
-                <span class="badge-live-offline">OFFLINE</span>
-            </div>
-        </div>
-        <button class="btn-accion-dorado" onclick="iniciarSpaxioLive()">▶ Empezar Directo</button>
-    </div>
-</div>
-    
-<div id="banner-live-container" style="display: none; background: #1a1a1a; padding: 10px; border-bottom: 2px solid #ffd700;">
-    <div style="display: flex; justify-content: space-between; align-items: center;">
-        <span style="color: #ffd700; font-weight: bold;">🔴 EN VIVO</span>
-        <button onclick="abrirPlayerLive()" style="background: #ffd700; border: none; padding: 5px 15px; border-radius: 5px; cursor: pointer;">Ver ahora</button>
-    </div>
-</div>
-
-<div id="modal-video-live" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #000; z-index: 9999; flex-direction: column;">
-    <div style="display: flex; justify-content: space-between; padding: 10px; background: #1a1a1a; align-items: center;">
-        <h3 style="color: #ffd700; margin: 0;">🔴 Transmisión en Vivo</h3>
-        <button onclick="cerrarPlayerLive()" style="background: transparent; color: white; border: none; font-size: 20px;">✖</button>
-    </div>
-    <div id="contenedor-iframe-live" style="width: 100%; aspect-ratio: 16 / 9;"></div>
-    <div style="padding: 15px; border-bottom: 1px solid #333;">
-        <button onclick="darLike()" style="background: none; border: 1px solid #ffd700; color: #ffd700; padding: 8px 15px; border-radius: 20px;">❤️ Me gusta (<span id="contador-likes">0</span>)</button>
-    </div>
-    <div id="chat-live-mini" style="flex: 1; padding: 10px; overflow-y: auto; color: white; background: #0a0a0a;">
-        <div id="mensajes-live" style="display: flex; flex-direction: column; gap: 5px;"></div>
-    </div>
-</div>
   
+    
+
+    <div class="barra-flotante-premium">
+    <div class="btn-nav" onclick="abrirAgendaCompleta();">
+        <span>👥</span><span>Contactos</span>
+    </div>
+
+<!-- Ejemplo para Spaxio Flow -->
+<div class="btn-nav" 
+     id="btn-nav-flow" 
+     data-contacto='{"id_sistema":"26fmetp4Q4WJ","nombre":"Spaxio","apellido":"Flow","estado":"activo"}'
+     onclick="cargarConversacionCon(JSON.parse(this.dataset.contacto).id_sistema)">
+        <span style="text-shadow: 0 0 8px #00d4ff;">🌊</span><span style="color: #00d4ff;">Spaxio Flow</span>
+    </div>
+
+    <div class="btn-nav active" onclick="document.getElementById('modal-agenda-completa').style.display='none'">
+        <span>💬</span><span>Chat</span>
+    </div>
+    <div class="btn-nav" onclick="abrirAjustes()">
+        <span>⚙️</span><span>Ajustes</span>
+    </div>
+</div>
+     
+ <div id="modal-nuevocontacto" class="modal" style="display: none; align-items: center; justify-content: center; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #1e222b; z-index: 30000;">
+    
+          <div class="modal-cover" style="position: relative; width: 100vw; height: 100vh; padding: 50px 30px 50px 30px; box-sizing: border-box; background: #1e222b; border-radius: 0px; text-align: center; border: 0px solid #333; box-shadow: 0 0 20px rgba(0,0,0,0.5);">                                                
+        
+<div style="display: flex; align-items: center;justify-content: flex-start; margin-left: 20px; gap: 15px; margin-bottom: 20px;">
+    
+    <button onclick="cerrarModalNuevo()" style="background: transparent; border: none; color: white; font-size: 20px; cursor: pointer;">
+         <span style="display: inline-block; transform: scaleX(-1);">➔</span>
+    </button>
+
+    <h3 style="color: #ffd700; margin: 0;">NUEVO CONTACTO</h3>
+
+</div>
+        
+        <input type="text" id="nuevo-nombre" placeholder="Nombre" 
+            onfocus="this.style.boxShadow='0 0 5px #ffd700'; this.style.borderColor='#ffd700';" 
+            onblur="this.style.boxShadow='none'; this.style.borderColor='#999';"
+             style="width: 100%; padding: 18px; margin-bottom: 15px; background: #2a2f3a; color: white; border: 1px solid #999; border-radius: 8px; box-sizing: border-box; outline: none;">
+        
+        <input type="text" id="nuevo-apellido-contacto" placeholder="Apellido"
+        onfocus="this.style.boxShadow='0 0 5px #ffd700'; this.style.borderColor='#ffd700';" 
+            onblur="this.style.boxShadow='none'; this.style.borderColor='#999';">
+  </div>
+</div>
+
     
     <script>
      
