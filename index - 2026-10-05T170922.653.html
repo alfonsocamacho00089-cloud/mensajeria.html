@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="SpaceChat & DropisApp">
+    <link rel="apple-touch-icon" href="assets/logo.png">
+    <link rel="manifest" href="/manifest.json">    
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no">
+    <title>SpaceChat Omni - Real Market Elite</title>
+    
+    <!-- Dependencias Esenciales -->
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-messaging-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-storage-compat.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script> 
+    <script src="https://cdn.jsdelivr.net/npm/protobufjs@7.2.4/dist/protobuf.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <script src="https://cdn.jsdelivr.net/npm/eruda"></script>
+    <script>eruda.init();</script>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            margin: 0;
+            padding: 0;
+        }
+body {
+    font-family: sans-serif;
+    background-color: #000000;
+    /* Usamos la imagen aquí para que sea global */
+    background-image: url('./assets/logo.webp');  
+    background-attachment: fixed; /* LA CLAVE: El fondo no se mueve con el scroll */
+    background-position: center;
+    background-size: cover;
+    background-repeat: no-repeat;
+    margin: 0;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+ 
+    left: 0;
+    height: 100vh;
+    height: 100svh; /* Altura segura para móviles */
+    overflow: hidden;
+    position: fixed; /* Evita que el navegador desplace toda la pantalla */
+}
+
+#chat-box {
+   background: transparent !important;
+    flex: 1;
+    flex-shrink: 1;
+    overflow-y: auto;
+    padding: 15px;
+    padding-bottom: 135px !important;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    position: relative; /* Necesario para el fondo */
+    background: #0b141a; /* Color base oscuro */
+ 
+ 
+  
+    touch-action: pan-y; /* Permite scroll solo de arriba a abajo */
+    -webkit-overflow-scrolling: touch;
+    
+    /* ... tus estilos ... */
+    mask-image: linear-gradient(to bottom, black 85%, transparent 95%);
+    -webkit-mask-image: linear-gradient(to bottom, black 85%, transparent 95%);
+    overscroll-behavior-y: contain;  /* Bloquea que el scroll mueva el fondo */
+}
+    
+     .fondo-estatico {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-image: linear-gradient(rgba(11, 20, 26, 0.3), rgba(11, 20, 26, 0.3)), 
+                      url('./assets/logo.webp');
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: cover; 
+    z-index: -1; 
+    pointer-events: none;
+    
+    /* AÑADE ESTO PARA SINCRONIZAR */
+    touch-action: none; 
+    overflow: hidden;
+     }
+
+
+
+/* --- INPUT AREA --- */
+.contenedor-flotante {
+    position: absolute; /* Se queda pegado a la pantalla, no al chat */
+    bottom: 60px;
+    left: 0;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    gap: 8px;
+    z-index: 100;
+    pointer-events: auto; /* IMPORTANTE: Para que puedas hacer clic en el input */
+    
+    /* Efecto para que parezca que la foto sigue debajo */
+    background: rgba(0, 0, 0, 0.1); 
+    backdrop-filter: blur(5px); /* Opcional: desenfoca un poco para legibilidad */
+    -webkit-backdrop-filter: blur(5px);
+}
+
+ .input-wrapper {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    background: rgba(32, 44, 51, 0.9); /* Fondo gris */
+    border-radius: 25px;
+    padding: 5px 10px;
+    border: 1px solid rgba(255, 215, 0, 0.3); /* Borde dorado sutil */
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+ }
+     
+        
+        /* --- CONTENEDORES DE VISTAS (APP PRINCIPAL) --- */
+        .app-view {
+            display: none;
+            flex: 1;
+            flex-direction: column;
+            height: calc(100vh - 120px);
+            overflow-y: auto;
+            position: relative;
+        }
+        .app-view.active-view {
+            display: flex;
+        }
+
+        /* --- ESTILOS DE CHAT --- */
+        .header { 
+    background: rgba(32, 44, 51, 0.3); /* Bajamos de 0.9 a 0.7 para que sea más claro */
+   
+    padding: 0 20px;    
+    display: flex;
+    align-items: center;
+    flex-shrink: 0; 
+    height: 60px;
+   
+ 
+ 
+ 
+    z-index: 10;
+    position: relative;
+ /* LA MAGIA DEL CRISTAL */
+    backdrop-filter: blur(5px); 
+    -webkit-backdrop-filter: blur(10px); /* OBLIGATORIO para iPhone y muchos Android */
+    
+        }
+     
+
+            .header-content { display: flex; align-items: center; gap: 12px; flex: 1; cursor: pointer; }
+        .foto-perfil { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; background-color: #555; }
+        
+        #nombre-dueño-header {
+            font-size: 16px; font-weight: 500; margin: 0; color: white;
+        }
+
+        #msg-text {
+            flex: 1; background: transparent; border: none; outline: none;
+            color: white; padding: 10px 5px; height: 40px; max-height: 120px; resize: none;
+        }
+
+        .msg-burbuja { 
+            max-width: 85%; width: fit-content; 
+            padding: 8px 15px !important; border-radius: 12px; 
+            font-size: 16px !important; position: relative; word-wrap: break-word; margin-bottom: 2px;
+        }
+        .msg-derecha { align-self: flex-end; background: linear-gradient(135deg, rgba(0, 92, 75, 0.9), rgba(0, 77, 64, 0.9)); color: #fff; border-bottom-right-radius: 15px; }
+        .msg-izquierda { align-self: flex-start; background: rgba(32, 44, 51, 0.8); color: #fff; border-bottom-left-radius: 20px; }
+
+        /* --- ESTILOS CALCULADORA / DROPISAPP --- */
+        .calc-body { padding: 15px; background: rgba(11, 20, 26, 0.95); flex: 1; overflow-y: auto; }
+        .top-wrapper { display: flex; justify-content: center; width: 100%; margin-bottom: 15px; }
+        .top-box { background-color: rgba(255,255,255,0.08); width: 100%; max-width: 400px; padding: 15px; border-radius: 20px; border: 1px solid rgba(255,215,0,0.2); }
+        .input-wrapper-main { width: 100%; position: relative; display: flex; align-items: center; margin-top: 5px; }
+        .input-wrapper-main input { width: 100%; padding: 10px 10px 10px 40px; border-radius: 50px; border: none; background-color: #ffd700; font-weight: bold; font-size: 1.1em; color: #000; text-align: center; }
+        .bs-inside { position: absolute; left: 6px; background: #000; color: #fff; font-size: 10px; width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; border-radius: 50%; font-weight: bold; z-index: 2; }
+
+        .bottom-row { display: flex; justify-content: space-between; gap: 10px; margin-top: 15px; }
+        .card-wrapper { width: 48%; display: flex; flex-direction: column; align-items: center; cursor: pointer; padding: 10px; border-radius: 15px; background: rgba(255,255,255,0.05); border: 1px solid #333; transition: 0.3s; }
+        .card-wrapper.selected { background-color: rgba(255, 215, 0, 0.15); border: 1px solid #ffd700; }
+        .fixed-title { color: #ffd700; font-size: 0.7em; margin-bottom: 5px; text-transform: uppercase; font-weight: bold; }
+        
+        .field-top { width: 100%; position: relative; height: 45px; }
+        .field-top input { width: 100%; padding: 8px 8px 8px 35px; border-radius: 25px; border: none; font-weight: bold; font-size: 1em; text-align: center; background-color: #6b8e23; color: white; }
+
+        .container-calc { max-width: 400px; margin: 0 auto; background-color: rgba(26,26,26,0.9); padding: 20px; border-radius: 20px; border: 1px solid rgba(255,215,0,0.2); }
+        .field { margin-bottom: 15px; }
+        .field label { display: block; margin-bottom: 5px; font-size: 0.75em; color: #ffd700; font-weight: bold; text-transform: uppercase; }
+        .field input { width: 100%; padding: 12px; border-radius: 12px; border: none; text-align: center; font-size: 1.1em; background-color: #fff; color: #000; outline: none; font-weight: bold; }
+        .field input[readonly] { background-color: #1e3a1e; color: #eaffea; }
+
+        /* --- BARRA DE NAVEGACIÓN INFERIOR SUPREMA --- */
+        .barra-flotante-premium {
+            position: fixed; bottom: 0; left: 0;
+            width: 100%; background: rgba(15, 22, 27, 0.95);
+            backdrop-filter: blur(15px);
+            display: flex; justify-content: space-around; align-items: center;
+            padding: 8px 5px; border-top: 1px solid rgba(255, 215, 0, 0.3);
+            z-index: 30001; height: 60px;
+        }
+        .btn-nav {
+            display: flex; flex-direction: column; align-items: center;
+            color: #8696a0; text-decoration: none; font-size: 11px; font-weight: 500;
+            cursor: pointer; transition: 0.3s; flex: 1;
+        }
+        .btn-nav.active { color: #ffd700; text-shadow: 0 0 8px rgba(255,215,0,0.4); }
+        .btn-nav i { font-size: 18px; margin-bottom: 3px; }
+
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 40000; justify-content: center; align-items: center; }
+        .modal-content { background: #0b141a; border: 1px solid #ffd700; width: 90%; max-width: 380px; padding: 20px; border-radius: 20px; color: white; text-align: center; }
+    </style>
+</head>
+
+<body>
+    <div id="pantalla-carga" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; display: flex; align-items: center; justify-content: center; z-index: 999999; transition: opacity 0.5s ease;"></div>
+    <div class="fondo-estatico"></div>
+
+    <!-- ==================== VISTA 1: CHAT SPACECHAT ==================== -->
+    <div id="view-chat" class="app-view active-view">
+        <div class="header">
+            <div class="header-content" onclick="abrirPerfilContacto()">
+                <button onclick="manejarBotonIdentidad(); event.stopPropagation();" class="btn-back-clean" style="background:transparent; border:none; color:#ffd700; font-size:20px; cursor:pointer;">
+                    <span style="display: inline-block; transform: scaleX(-1);">➔</span>
+                </button>
+                <img src="https://via.placeholder.com/40" id="foto-perfil-header" class="foto-perfil">
+                <div class="user-info">
+                    <h1 id="nombre-dueño-header">SpaceChat</h1>
+                </div>
+            </div>
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <button onclick="iniciarLlamadaSatelital('voz')" style="background: none; border: none; color: #ffd700; font-size: 18px; cursor: pointer;">📞</button>
+                <button onclick="iniciarLlamadaSatelital('video')" style="background: none; border: none; color: #ffd700; font-size: 20px; cursor: pointer;">📹</button>
+            </div>
+        </div>
+
+        <div id="chat-box"></div>
+
+        <div class="contenedor-flotante">
+            <div class="input-wrapper">
+                <textarea id="msg-text" placeholder="Escribe un mensaje..." inputmode="text" enterkeyhint="send" oninput="this.style.height='40px'; this.style.height=this.scrollHeight+'px';"></textarea>
+                <label for="input-foto" style="cursor:pointer; padding:0 8px; font-size:18px;">📷</label>
+                <input type="file" id="input-foto" accept="image/*" style="display: none;" onchange="prepararEnvioMedia(this, 'foto')">
+            </div>
+            <button onclick="enviarMensajeSatelital()" style="flex-shrink: 0; background: #ffd700; border: none; width: 42px; height: 42px; border-radius: 50%; display:flex; align-items:center; justify-content:center; cursor:pointer; font-weight:bold; color:#000;">➤</button>
+        </div>
+    </div>
+
+    <!-- ==================== VISTA 2: CALCULADORA Y TASAS (DROPISAPP) ==================== -->
+    <div id="view-calc" class="app-view">
+        <div class="header" style="justify-content: space-between; padding: 0 20px;">
+            <span style="font-weight: bold; color: #ffd700; font-size: 18px; text-transform: uppercase;">Real Market Elite</span>
+            <div onclick="abrirModalQR()" style="cursor: pointer; color: #ffd700; font-size: 20px;"><i class="fas fa-qrcode"></i></div>
+        </div>
+
+        <div class="calc-body">
+            <div class="top-wrapper">
+                <div class="top-box">
+                    <div class="fixed-title" style="text-align: center;">Tasa USDT P2P</div>
+                    <div class="input-wrapper-main">
+                        <span class="bs-inside">Bs</span>
+                        <input type="text" id="p2pRate" readonly>
+                    </div>
+
+                    <div class="bottom-row">
+                        <div class="card-wrapper selected" id="cardBCV" onclick="selectTasa('bcv')">
+                            <div class="fixed-title">Tasa BCV</div>
+                            <div class="field-top">
+                                <input type="number" id="bcvRate" readonly>
+                            </div>
+                        </div> 
+                        <div class="card-wrapper" id="cardEuro" onclick="selectTasa('euro')">
+                            <div class="fixed-title">Tasa EURO</div>
+                            <div class="field-top">
+                                <input type="number" id="euroRate" readonly>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="container-calc">
+                <div class="field">
+                    <label>Precio Producto (USD)</label>
+                    <input type="number" id="priceUSD" placeholder="0.00" inputmode="decimal">
+                </div>
+                <div class="field">
+                    <label id="labelVES">Bolívares + IGTF</label>
+                    <input type="text" id="totalVES" readonly>
+                </div>
+                <div class="field">
+                    <label>Total USDT</label>
+                    <input type="text" id="totalUSDT" readonly>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== VISTA 3: AGENDA / CONTACTOS ==================== -->
+    <div id="view-contacts" class="app-view">
+        <div class="header" style="justify-content: space-between; padding: 0 20px;">
+            <h3 style="color: #ffd700; margin: 0;">👥 Mi Agenda Space</h3>
+            <button onclick="abrirModalNuevo()" style="background:#ffd700; border:none; border-radius:50%; width:35px; height:35px; font-weight:bold; cursor:pointer;">+</button>
+        </div>
+        <div style="padding: 15px; flex:1; overflow-y:auto;" id="lista-contactos">
+            <p style="color:#8696a0; text-align:center;">Cargando contactos...</p>
+        </div>
+    </div>
+
+    <!-- ==================== BARRA DE NAVEGACIÓN INFERIOR UNIFICADA ==================== -->
+    <div class="barra-flotante-premium">
+        <div class="btn-nav active" onclick="switchView('chat', this)">
+            <i>💬</i><span>Chat</span>
+        </div>
+        <div class="btn-nav" onclick="switchView('calc', this)">
+            <i>📊</i><span>Tasas / Calc</span>
+        </div>
+        <div class="btn-nav" onclick="switchView('contacts', this)">
+            <i>👥</i><span>Agenda</span>
+        </div>
+    </div>
+
+    <!-- MODALES DE IDENTIDAD Y QR -->
+    <div id="modal-qr" class="modal">
+        <div class="modal-content">
+            <h3 style="color: #ffd700; margin-bottom: 15px;">Mi Identidad Space</h3>
+            <div id="contenedor-qr" style="background: white; padding: 15px; border-radius: 12px; display: inline-block; margin-bottom: 15px;"></div>
+            <button onclick="document.getElementById('modal-qr').style.display='none'" style="width: 100%; padding: 12px; background: #ffd700; color: #000; border: none; border-radius: 10px; font-weight: bold; cursor: pointer;">CERRAR</button>
+        </div>
+    </div>
+
+    <script>
+        // --- CONTROL DE VISTAS UNIFICADAS ---
+        function switchView(viewName, el) {
+            document.querySelectorAll('.app-view').forEach(v => v.classList.remove('active-view'));
+            document.querySelectorAll('.btn-nav').forEach(b => b.classList.remove('active'));
+
+            if (viewName === 'chat') document.getElementById('view-chat').classList.add('active-view');
+            if (viewName === 'calc') {
+                document.getElementById('view-calc').classList.add('active-view');
+                cargarTasasDropdown();
+            }
+            if (viewName === 'contacts') {
+                document.getElementById('view-contacts').classList.add('active-view');
+                pintarAgendaContactos();
+            }
+            el.classList.add('active');
+        }
+
+        // --- NÚCLEO FIREBASE & INDEXEDDB (SPACECHAT) ---
+        const firebaseConfig = {
+            apiKey: "AIzaSyCaUyhX2iBMl4A5xeKeu4SeE6HClp4V1s",
+            authDomain: "real-market-elite-2025.firebaseapp.com",
+            projectId: "real-market-elite-2025",
+            databaseURL: "https://real-market-elite-2025-default-rtdb.firebaseio.com",
+            messagingSenderId: "226489002778",
+            appId: "1:226489002778:web:6722d21a9e78b33b5b1aa3"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        // IndexedDB v11 Setup
+        function abrirDB() {
+            return new Promise((resolve, reject) => {
+                const request = indexedDB.open("DropisDB", 11);
+                request.onupgradeneeded = (e) => {
+                    const db = e.target.result;
+                    if (!db.objectStoreNames.contains('mensajes')) db.createObjectStore('mensajes', { autoIncrement: true });
+                    if (!db.objectStoreNames.contains('perfiles')) db.createObjectStore('perfiles', { keyPath: 'id' });
+                };
+                request.onsuccess = () => resolve(request.result);
+                request.onerror = () => reject("Error DB");
+            });
+        }
+
+        async function guardarLocal(tabla, datos) {
+            const dbInstance = await abrirDB();
+            return new Promise((resolve) => {
+                const tx = dbInstance.transaction(tabla, 'readwrite');
+                tx.objectStore(tabla).put(datos);
+                tx.oncomplete = () => resolve(true);
+            });
+        }
+
+        async function obtenerTodo(tabla) {
+            const dbInstance = await abrirDB();
+            return new Promise((resolve) => {
+                const tx = dbInstance.transaction(tabla, 'readonly');
+                const req = tx.objectStore(tabla).getAll();
+                req.onsuccess = () => resolve(req.result);
+            });
+        }
+
+        // --- MOTOR DE TASAS (DROPISAPP INTEGRADOR) ---
+        let tApi = { bcv: 36.5, euro: 39.2, p2p: 41.5 };
+        let tasaSeleccionada = 'bcv';
+
+        function selectTasa(tipo) {
+            tasaSeleccionada = tipo;
+            document.getElementById('cardBCV').classList.toggle('selected', tipo === 'bcv');
+            document.getElementById('cardEuro').classList.toggle('selected', tipo === 'euro');
+            calcularTasasPanel();
+        }
+
+        async function cargarTasasDropdown() {
+            try {
+                const res = await fetch("https://raw.githubusercontent.com/alfonsocamacho00089-cloud/BcvEuroapp.py/main/Bcveuro_vigente.json");
+                const data = await res.json();
+                if (data && data.length > 0) {
+                    tApi.bcv = parseFloat(data[0].precio_dolar) || 36.5;
+                    tApi.euro = parseFloat(data[0].precio_euro) || 39.2;
+                }
+            } catch (e) { console.log("Usando tasas predeterminadas BCV"); }
+
+            try {
+                const resP = await fetch("https://raw.githubusercontent.com/alfonsocamacho00089-cloud/P2papp.py/main/p2p.json");
+                const dataP = await resP.json();
+                if (dataP && dataP.binance_p2p) {
+                    tApi.p2p = Math.max(...Object.values(dataP.binance_p2p.ventas_sell)) || 41.5;
+                }
+            } catch (e) { console.log("Usando tasas P2P base"); }
+
+            document.getElementById('bcvRate').value = tApi.bcv.toFixed(2);
+            document.getElementById('euroRate').value = tApi.euro.toFixed(2);
+            document.getElementById('p2pRate').value = tApi.p2p.toFixed(2);
+            calcularTasasPanel();
+        }
+
+        function calcularTasasPanel() {
+            const pUSD = parseFloat(document.getElementById('priceUSD').value) || 0;
+            const tBase = (tasaSeleccionada === 'bcv') ? tApi.bcv : tApi.euro;
+            const nombreTasa = (tasaSeleccionada === 'bcv') ? "BCV" : "EURO";
+
+            const baseBS = pUSD * tBase;
+            const igtfBS = baseBS * 0.03;
+            const totalBS = baseBS + igtfBS;
+            const totalUSDT = tApi.p2p > 0 ? (totalBS / tApi.p2p) : 0;
+
+            document.getElementById('labelVES').textContent = `${nombreTasa} ${baseBS.toLocaleString('es-VE', {minimumFractionDigits:2})} + IGTF`;
+            document.getElementById('totalVES').value = totalBS.toLocaleString('es-VE', {minimumFractionDigits:2}) + " Bs";
+            document.getElementById('totalUSDT').value = totalUSDT.toFixed(2);
+        }
+
+        document.getElementById('priceUSD').addEventListener('input', calcularTasasPanel);
+
+        // --- MENSAJERÍA Y CHAT BASE ---
+        async function enviarMensajeSatelital() {
+            const inputMsg = document.querySelector('#msg-text');
+            const msg = inputMsg ? inputMsg.value.trim() : "";
+            if (!msg) return;
+
+            pintarMensaje(msg, 'msg-derecha', null, 'enviado', 'msg_' + Date.now());
+            inputMsg.value = "";
+            inputMsg.style.height = '40px';
+        }
+
+        function pintarMensaje(texto, clase, hora, status, id) {
+            const box = document.getElementById('chat-box');
+            if (!box) return;
+            const div = document.createElement('div');
+            div.className = `mensaje msg-burbuja ${clase}`;
+            div.innerHTML = `<span>${texto}</span><div style="font-size:10px; opacity:0.7; text-align:right; margin-top:2px;">${hora || 'Ahora'}</div>`;
+            box.appendChild(div);
+            box.scrollTop = box.scrollHeight;
+        }
+
+        async function pintarAgendaContactos() {
+            const lista = document.getElementById('lista-contactos');
+            if (!lista) return;
+            const contactos = JSON.parse(localStorage.getItem('mis_contactos')) || [];
+            lista.innerHTML = "";
+            
+            if(contactos.length === 0) {
+                lista.innerHTML = '<p style="color:#8696a0; text-align:center;">No hay contactos guardados.</p>';
+                return;
+            }
+
+            contactos.forEach(c => {
+                lista.innerHTML += `<div style="background:#111; padding:12px; border-radius:10px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center;">
+                    <div><strong>${c.nombre}</strong><div style="font-size:11px; color:#8696a0;">ID: ${c.id}</div></div>
+                </div>`;
+            });
+        }
+
+        window.onload = () => {
+            const splash = document.getElementById('pantalla-carga');
+            if (splash) {
+                splash.style.opacity = '0';
+                setTimeout(() => splash.style.display = 'none', 500);
+            }
+            cargarTasasDropdown();
+        };
+    </script>
+</body>
+</html>
