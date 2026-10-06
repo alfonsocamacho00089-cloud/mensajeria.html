@@ -1131,7 +1131,6 @@ async function recuperarCuentaConID() {
     }
 }
                                       
-
 // --- 4. ANTENA SATELITAL ---
 async function activarAntena() {
     const miID = localStorage.getItem('mi_dropis_id');
@@ -1187,7 +1186,7 @@ try {
                 try {
                     const ping = new Audio('assets/ping-mensaje.mp3');
                     ping.volume = 1.0;
-                    ping.play().catch(err => console.log("📡 H.A.R.V.I.S.: Bloqueo temporal de audio."));
+                    ping.play().catch(err => console.log("📡 Bloqueo temporal de audio."));
                 } catch(e) {
                     console.error("Error al reproducir audio dinámico", e);
                 }
@@ -1216,7 +1215,7 @@ try {
                         });
                     }
                 } catch (e) { 
-                    console.error("❌ H.A.R.V.I.S. detectó un error en notificación:", e); 
+                    console.error("❌ Error en notificación:", e); 
                 }
             }
 
@@ -1229,12 +1228,12 @@ try {
             snapshot.ref.remove(); 
 
         } catch (e) { 
-            console.error("❌ H.A.R.V.I.S. detectó un error en Antena Principal:", e); 
+            console.error("❌ Error en Antena Principal:", e); 
         }
     }); 
      }
      
-       async function enviarMensajeSatelital(multimediaUrl = null, tipoMedia = 'texto') {
+     async function enviarMensajeSatelital(multimediaUrl = null, tipoMedia = 'texto') {
 
 const inputMsg = document.querySelector('#msg-text');
 
@@ -1247,7 +1246,7 @@ const msg = multimediaUrl ? multimediaUrl : (inputMsg ? inputMsg.value.trim() : 
      
   
      if (!inputTarget || !inputTarget.value) {
-        console.error("H.A.R.V.I.S.: No hay un satélite de destino (ID vacío)");
+        console.error("No hay un satélite de destino (ID vacío)");
         return;
     }
     const targetID = inputTarget.value.trim();
@@ -1386,8 +1385,8 @@ const cuerpoPeticion = {
         if (datosBackend && datosBackend.respuesta) {
             respuestaIA = datosBackend.respuesta;
         } else {
-            console.warn("⚠️ El backend no devolvió la propiedad 'respuesta':", datosBackend);
-            respuestaIA = "⚠️ H.A.R.V.I.S. no pudo procesar el formato del backend.";
+            console.warn("⚠️ El backend não devolvió la propiedad 'respuesta':", datosBackend);
+            respuestaIA = "⚠️ No se pudo procesar el formato del backend.";
         }
         
         if (typeof hablarHarvis === "function") {
@@ -1420,7 +1419,7 @@ const cuerpoPeticion = {
 
      // 3. 💾 EL BLINDAJE: Guardado persistente en IndexedDB para que NO se borre al salir
         if (typeof guardarLocal === "function") {
-            // Guardamos el registro del texto de H.A.R.V.I.S.
+            // Guardamos el registro del texto
             await guardarLocal('mensajes', { 
                 id: harvisMsgId, 
                 contactoId: targetID,
@@ -1444,7 +1443,7 @@ const cuerpoPeticion = {
                     ts: Date.now() + 1, // Le sumamos un milisegundo para que quede justo debajo del texto
                     hora: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })
                 });
-                console.log("✅ Nota de voz de H.A.R.V.I.S. respaldada con éxito en IndexedDB.");
+                console.log("✅ Nota de voz respaldada con éxito en IndexedDB.");
             }
         }
 
@@ -1486,6 +1485,8 @@ if ('serviceWorker' in navigator && Notification.permission === "granted") {
 } else {
     console.log("Notificaciones no permitidas por el usuario.");
      }
+
+            
 async function obtenerToken(registration) {
     try {
         const miVapidKey = 'BIrsA9YbBXfIuo4PTMrKRtuktRsK2RbK0XevupuofGGOUDy9w5VZ9yaXbZXsenXppmFsR62-2B7jBOG0Z8RdxvU';
