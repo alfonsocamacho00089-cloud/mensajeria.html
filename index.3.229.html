@@ -32,7 +32,7 @@
 <script>eruda.init();</script>
      <style>
    
-* {
+    * {
     box-sizing: border-box;
     -webkit-tap-highlight-color: transparent;
 }
@@ -40,8 +40,9 @@
 body {
     font-family: sans-serif;
     background-color: #000000;
+    /* Usamos la imagen aquí para que sea global */
     background-image: url('./assets/logo.webp');  
-    background-attachment: fixed;
+    background-attachment: fixed; /* LA CLAVE: El fondo no se mueve con el scroll */
     background-position: center;
     background-size: cover;
     background-repeat: no-repeat;
@@ -49,11 +50,12 @@ body {
     width: 100%;
     display: flex;
     flex-direction: column;
+ 
     left: 0;
     height: 100vh;
-    height: 100svh;
+    height: 100svh; /* Altura segura para móviles */
     overflow: hidden;
-    position: fixed;
+    position: fixed; /* Evita que el navegador desplace toda la pantalla */
 }
 
 #chat-box {
@@ -66,16 +68,21 @@ body {
     display: flex;
     flex-direction: column;
     gap: 5px;
-    position: relative;
-    background: #0b141a;
-    touch-action: pan-y;
+    position: relative; /* Necesario para el fondo */
+    background: #0b141a; /* Color base oscuro */
+ 
+ 
+  
+    touch-action: pan-y; /* Permite scroll solo de arriba a abajo */
     -webkit-overflow-scrolling: touch;
+    
+    /* ... tus estilos ... */
     mask-image: linear-gradient(to bottom, black 85%, transparent 95%);
     -webkit-mask-image: linear-gradient(to bottom, black 85%, transparent 95%);
-    overscroll-behavior-y: contain;
+    overscroll-behavior-y: contain;  /* Bloquea que el scroll mueva el fondo */
 }
     
-.fondo-estatico {
+     .fondo-estatico {
     position: fixed;
     top: 0;
     left: 0;
@@ -88,13 +95,17 @@ body {
     background-size: cover; 
     z-index: -1; 
     pointer-events: none;
+    
+    /* AÑADE ESTO PARA SINCRONIZAR */
     touch-action: none; 
     overflow: hidden;
-}
+     }
+
+
 
 /* --- INPUT AREA --- */
 .contenedor-flotante {
-    position: absolute;
+    position: absolute; /* Se queda pegado a la pantalla, no al chat */
     bottom: 0;
     left: 0;
     width: 100%;
@@ -103,22 +114,24 @@ body {
     padding: 10px;
     gap: 8px;
     z-index: 100;
-    pointer-events: auto;
+    pointer-events: auto; /* IMPORTANTE: Para que puedas hacer clic en el input */
+    
+    /* Efecto para que parezca que la foto sigue debajo */
     background: rgba(0, 0, 0, 0.1); 
-    backdrop-filter: blur(5px);
+    backdrop-filter: blur(5px); /* Opcional: desenfoca un poco para legibilidad */
     -webkit-backdrop-filter: blur(5px);
 }
 
-.input-wrapper {
+ .input-wrapper {
     flex: 1;
     display: flex;
     align-items: center;
-    background: rgba(32, 44, 51, 0.9);
+    background: rgba(32, 44, 51, 0.9); /* Fondo gris */
     border-radius: 25px;
     padding: 5px 10px;
-    border: 1px solid rgba(255, 215, 0, 0.3);
+    border: 1px solid rgba(255, 215, 0, 0.3); /* Borde dorado sutil */
     box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-}
+ }
      
 .barra-flotante-premium {
     position: fixed;
@@ -127,12 +140,16 @@ body {
     transform: translateX(-50%);
     width: 92%;
     max-width: 450px;
+    
     background: rgba(32, 44, 51, 0.8);
     backdrop-filter: blur(15px);
     -webkit-backdrop-filter: blur(15px);
+    
+    /* Cambiamos a FLEX para los botones */
     display: flex;
-    justify-content: space-around;
+    justify-content: space-around; /* Reparte los botones con espacio igual */
     align-items: center;
+    
     padding: 10px 5px;
     border-radius: 25px;
     border: 1px solid rgba(255, 215, 0, 0.3);
@@ -140,19 +157,29 @@ body {
     z-index: 30001;
 }
 
+   
 /* --- HEADER ESTILO WHATSAPP --- */
 .header { 
-    background: rgba(32, 44, 51, 0.3);
+    background: rgba(32, 44, 51, 0.3); /* Bajamos de 0.9 a 0.7 para que sea más claro */
+   
     padding: 0 20px;    
     display: flex;
     align-items: center;
     flex-shrink: 0; 
     height: 60px;
+   
+ 
+ 
+ 
     z-index: 10;
     position: relative;
+ /* LA MAGIA DEL CRISTAL */
     backdrop-filter: blur(5px); 
-    -webkit-backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px); /* OBLIGATORIO para iPhone y muchos Android */
+    
 }
+
+
 
 .header-content {
     display: flex;
@@ -160,6 +187,10 @@ body {
     gap: 12px;
     flex: 1;
 }
+ 
+
+
+
 
 .foto-perfil {
     width: 40px;
@@ -175,13 +206,13 @@ body {
 }
 
 #nombre-dueño-header {
-    background: rgba(26, 26, 26, 0.3); 
+ background: rgba(26, 26, 26, 0.3); 
     font-size: 16px;
     font-weight: 500;
     margin: 0;
     color: white;
     line-height: 1.2;
-    backdrop-filter: blur(5px); 
+     backdrop-filter: blur(5px); 
     -webkit-backdrop-filter: blur(10px);
 }
     
@@ -193,29 +224,31 @@ body {
 
 #msg-text {
     flex: 1;
-    background: transparent;
+    background: transparent; /* Se vuelve invisible para mostrar el fondo del padre */
     border: none;
     outline: none;
     color: white;
     padding: 10px 5px;
-    height: 40px;
+    height: 40px; /* Ajusta según prefieras */
     max-height: 120px;
     resize: none;
+    /* Quitamos box-shadow y backdrop-filter de aquí */
 }
 
 #btn-enviar {
     width: 50px;
     height: 50px;
     border-radius: 50%;
-    background: #ffd700;
+    background: #ffd700; /* Dorado sólido o con glass */
     display: flex;
     align-items: center;
     justify-content: center;
     box-shadow: 0 4px 15px rgba(0,0,0,0.3);
 }
 
+/* Efecto cuando pasas el dedo o el mouse */
 button#btn-enviar:active {
-    background: rgba(255, 215, 0, 0.6);
+    background: rgba(255, 215, 0, 0.6); /* Se oscurece un poco al tocarlo */
     transform: scale(0.9);
 }
      
@@ -225,29 +258,44 @@ button#btn-enviar:active {
     padding: 8px 15px 8px 15px !important; 
     border-radius: 12px; 
     font-size: 16px !important; 
+    
     position: relative; 
     word-wrap: break-word; 
     margin-bottom: 2px;
-    display: inline-block;
+    display: inline-block; /* <--- CAMBIA flex por block */
     line-height: 1.2;
+
 }
 
+
+
+
+
 .msg-info {
+  
     display: flex;
     align-items: center;
     white-space: nowrap;
-    float: right !important;
+ 
+  
+         
+    float: right !important; /* <--- Esto la manda a la derecha del texto */
     font-size: 12px !important;
     opacity: 0.7;
-    margin-top: 2px !important;
-    margin-left: 10px;
+    margin-top:2px !important; /* Ajusta para que baje un poquito y quede a nivel de la última línea */
+    margin-left: 10px; /* Separación del texto */
     gap: 3px;
+ 
 }
 
+
+
+ 
 .msg-derecha { 
     align-self: flex-end; 
     background: linear-gradient(135deg, rgba(0, 92, 75, 0.8) 0%, rgba(0, 77, 64, 0.8) 100%);
     color: #ffffff; 
+
     border-bottom-right-radius: 15px; 
     border-top-right-radius: 2px;
 }
@@ -257,37 +305,50 @@ button#btn-enviar:active {
     background: rgba(32, 44, 51, 0.6); 
     color: #ffffff; 
     border-bottom-left-radius: 20px; 
-    border-top-left-radius: 2px;
+    
+     border-top-left-radius: 2px;
 }
 
+/* Si el mensaje de la izquierda va seguido de otro de la izquierda */
 .msg-izquierda + .msg-izquierda {
-    border-top-left-radius: 4px;
+    border-top-left-radius: 4px; /* Hace que la esquina de arriba sea más cuadrada */
 }
 
+/* Si el mensaje de la derecha va seguido de otro de la derecha */
 .msg-derecha + .msg-derecha {
     border-top-right-radius: 4px;
 }
+      
+
+
+
 
 .menu-mensaje {
-    position: absolute;
+    position: absolute; /* O absolute, según tu lógica de JS */
     display: none;
-    background: rgba(11, 20, 26, 0.95);
-    backdrop-filter: blur(10px);
-    border: 1px solid #ffd700;
+    background: rgba(11, 20, 26, 0.95); /* Color oscuro sólido para que resalte sobre Goku */
+    backdrop-filter: blur(10px); /* Efecto de desenfoque premium */
+    border: 1px solid #ffd700; /* Borde dorado para tu estética Black & Gold */
     border-radius: 12px;
-    z-index: 15000 !important;
+    z-index: 15000 !important; /* Esto lo pone por encima de TODO */
     box-shadow: 0 4px 15px rgba(0,0,0,0.5);
     min-width: 100px;
+    
+
+
+
+    
+    /* Estas líneas ayudan a que no aparezca en la esquina de arriba por defecto */
     top: 0; 
     left: 0;
-}
+     }
 
 .menu-mensaje div {
-    padding: 12px 20px;
+    padding: 12px 20px; /* Un poco más de espacio para el dedo */
     color: white;
     font-size: 14px;
     cursor: pointer;
-    border-bottom: 0.5px solid rgba(255, 215, 0, 0.1);
+    border-bottom: 0.5px solid rgba(255, 215, 0, 0.1); /* Separador sutil */
 }
 
 .menu-mensaje div:last-child {
@@ -295,33 +356,15 @@ button#btn-enviar:active {
 }
 
 .menu-mensaje div:hover {
-    background: rgba(255, 215, 0, 0.2);
+    background: rgba(255, 215, 0, 0.2); /* Resalte dorado al pasar el dedo */
 }
-
-#mi-id-display { 
-    font-size: 11px; 
-    color: #0b141a; 
-    margin-top: 5px; 
-    font-family: monospace; 
-    letter-spacing: 0.5px; 
-    text-transform: none; 
-}
-
-.btn-qr-dropis { 
-    position: absolute; 
-    right: 15px; 
-    top: 50%; 
-    transform: translateY(-50%); 
-    background: #ffd700; 
-    border: none; 
-    border-radius: 50%; 
-    width: 35px; 
-    height: 35px; 
-    cursor: pointer; 
-    font-size: 18px; 
-}
+        #mi-id-display { font-size: 11px; color: #0b141a; margin-top: 5px; font-family: monospace; letter-spacing: 0.5px; text-transform: none; }
+        .btn-qr-dropis { position: absolute; right: 15px; top: 50%; transform: translateY(-50%); background: #ffd700; border: none; border-radius: 50%; width: 35px; height: 35px; cursor: pointer; font-size: 18px; }
         
-/* MODALES */
+        /* MODALES */
+        /* 1. EL CONTENEDOR (Ocupa toda la pantalla) */
+/* 1. EL FONDO NEGRO DETRÁS DEL MODAL */
+/* EL MODAL: Usa 'dvh' para que ignore el teclado y no se encoja */
 .modal {
     display: none; 
     position: fixed; 
@@ -330,49 +373,72 @@ button#btn-enviar:active {
     width: 100%; 
     height: 100%; 
     background: #000000;
+    
     z-index: 1000; 
     transition: all 0.5s ease;
 }
 
+
+     
+/* 2. EL CONTENIDO (Pantalla Completa con Fondo) */
 .modal-content { 
     background-color: #0b141a;
+    /* Aplicamos el fondo con el logo igual que en tu chat */
     background-image: linear-gradient(rgba(11, 20, 26, 0.9), rgba(11, 20, 26, 0.9)), 
                       url('./assets/logo.webp');
     background-size: cover;
     background-position: center;
     background-attachment: fixed;
+    
     width: 100%; 
+    
     display: flex;
-    flex-direction: column;
+    
+    flex-direction: column; /* Esto permite que el header esté arriba y el botón abajo */
     color: white; 
     animation: fadeIn 0.4s ease; 
-    height: 100dvh;
-    margin: 0;
+    
+    height: 100dvh; /* Usa el alto dinámico para móviles */
+margin: 0;
+    
+    /* Agrega estas dos líneas: */
     overflow: hidden;
     justify-content: space-between;
 }
-
+/* 3. LAS FILAS DE CONTACTOS (Estilo WhatsApp) */
 .fila-contacto {
     display: flex;
     align-items: center;
     gap: 15px;
     padding: 10px;
     cursor: pointer;
-    background: rgba(32, 44, 51, 0.05);
+    background: rgba(32, 44, 51, 0.05); /* Fondo semi-transparente para ver el logo atrás */
+    
     transition: background 0.3s ease;
-    text-align: left;
+    text-align: left; /* Alinea el texto a la izquierda */
 }
 
+
+/* El efecto dorado suave cuando pasas el dedo o el mouse */
 .fila-contacto:hover {
     background: rgba(255, 215, 0, 0.1) !important;
 }
 
 #cuerpo-modal-lista {
-    flex-grow: 1;
-    overflow-y: auto;
+    flex-grow: 1; /* Estira este div para llenar el vacío */
+    overflow-y: auto; /* Permite scroll si hay muchos contactos */
     background: transparent; 
 }
+     
 
+
+/* Animaciones */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* Las reglas de las animaciones (van afuera de las llaves) */
 @keyframes fadeIn {
     from { opacity: 0; }
     to { opacity: 1; }
@@ -383,8 +449,11 @@ button#btn-enviar:active {
     to { transform: translateY(0); opacity: 1; }
 }
 
+                /* Estilo para el botón dentro de la barra amarilla */
+
+   /* Cambiamos el nombre a .btn-modal-contacto para que no choque con el otro */
 .btn-modal-contacto { 
-    position: absolute;
+    position:absolute;
     top: 70px;            
     right: 20px;          
     background: #ffd700; 
@@ -402,11 +471,11 @@ button#btn-enviar:active {
 }
 
 #cuerpo-modal-lista {
-    padding-bottom: 100px !important;
+    padding-bottom: 100px !important; /* Espacio extra para que la barra no tape nada */
 }
      
 .contador-nube {
-    background: #ffd700;
+    background:  #ffd700; /* Verde tipo WhatsApp */
     color: white;
     border-radius: 50%;
     padding: 2px 7px;
@@ -414,57 +483,68 @@ button#btn-enviar:active {
     font-weight: bold;
     min-width: 15px;
     text-align: center;
-    margin-left: auto;
+    margin-left: auto; /* Lo empuja a la derecha */
 }
-
 .btn-back-clean {
-    background: transparent;
-    border: none;
-    outline: none;
-    color: white;
-    font-size: 20px;
-    padding: 5px;
+    background: transparent; /* Quita el color de fondo */
+    border: none;            /* Quita el borde */
+    outline: none;           /* Quita el borde de enfoque al hacer clic */
+    color: white;            /* Color de la flechita */
+    font-size: 20px;         /* Tamaño de la flecha */
+    padding: 5px;           /* Espacio para que sea fácil de tocar con el dedo */
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
 }
 
+
+     
+
+/* Estilo para los botones individuales dentro de la barra */
 .btn-nav {
     display: flex;
     flex-direction: column;
     align-items: center;
-    color: #8696a0;
+    color: #8696a0; /* Color gris suave para los no seleccionados */
     text-decoration: none;
     font-size: 11px;
     font-weight: 500;
     flex: 1;
     cursor: pointer;
     transition: 0.3s;
-}
+}.
 
+/* El botón que esté activo o cuando lo toques */
 .btn-nav.active, .btn-nav:active {
-    color: #ffd700;
+    color: #ffd700; /* Dorado para resaltar */
 }
 
 .btn-nav i {
-    font-size: 20px;
+    font-size: 20px; /* Tamaño para los iconos */
     margin-bottom: 4px;
 }
-
+/* Efecto opcional al tocarlo */
 .btn-back-clean:active {
-    opacity: 0.6;
+    opacity: 0.6;            /* Se pone un poco transparente al presionarlo */
 }
 
-#mi-foto-previa {
+       /* Un estilo limpio para que la foto siempre se vea */
+/* Solo afecta a estos dos elementos, no toca las fotos del chat */
+ #mi-foto-previa {
     width: 45px !important;
     height: 45px !important;
     border-radius: 50% !important;
     object-fit: cover !important;
-    border: none;
-    flex-shrink: 0;
-}
+    border: none
+    flex-shrink: 0; /* Evita que se aplaste si el nombre es largo */
+     
+      
+    
+    
+     }
 
+/* 1. La plantilla original SE QUEDA OCULTA para que no flote abajo */
 .encriptado-box {
     background-color: rgba(28, 28, 28, 0.9);
     border-radius: 10px;
@@ -474,36 +554,332 @@ button#btn-enviar:active {
     max-width: 400px;
     text-align: center;
     border: none;
-    display: none;
+    
+    display: none; /* <-- CAMBIADO A NONE: El original no se debe ver */
     position: relative;
     z-index: 1;
 }
 
+/* 2. NUEVA REGLA: El clon que entre al chat sí se vuelve visible */
 #chat-box .encriptado-box {
-    display: block !important;
+    display: block !important; /* Fuerza a que se muestre SOLO dentro del chat */
 }
 
+/* Conserva tus otros estilos igual */
 .encriptado-box p {
     color: #d4af37;
     font-size: 0.85rem;
     margin: 0;
     line-height: 1.4;
 }
-
 .resaltado-oro {
     font-weight: bold;
     text-decoration: underline;
     cursor: pointer;
 }
-</style>
-    
+
+  /* Contenedor flotante de H.A.R.V.I.S. */
+.harvis-container {
+    background: #000000;
+    padding: 20px;
+    border-radius: 15px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 0 25px rgba(0, 0, 0, 0.9);
+    font-family: sans-serif;
+    max-width: 300px;
+    margin: 20px auto;
+    border: 1px solid #333;
+}
+
+/* El aura dorada */
+.harvis-orb-glow {
+    position: relative;
+    width: 90px;
+    height: 90px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 0 15px rgba(255, 215, 0, 0.2);
+    transition: all 0.5s ease;
+}
+
+/* El botón central */
+.harvis-ball {
+    width: 75px;
+    height: 75px;
+    border-radius: 50%;
+    background: #111111;
+    border: 2px solid #FFD700;
+    color: #FFD700;
+    font-size: 28px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 0 15px rgba(255, 215, 0, 0.3);
+    outline: none;
+    transition: all 0.3s ease;
+}
+
+/* Animación cuando lo tocas y está escuchando */
+.harvis-container.listening .harvis-orb-glow {
+    box-shadow: 0 0 35px #FFD700, 0 0 60px rgba(255, 215, 0, 0.4);
+    animation: pulsoHarvis 1.5s infinite ease-in-out;
+}
+
+@keyframes pulsoHarvis {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+/* Textos de la interfaz */
+.harvis-status {
+    color: #B8860B;
+    font-size: 12px;
+    margin-top: 12px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    font-weight: bold;
+}
+
+.harvis-subtitle {
+    color: #FFFFFF;
+    font-size: 14px;
+    margin-top: 8px;
+    text-align: center;
+    font-style: italic;
+    min-height: 20px;
+}
+
+/* --- MODAL ESTUDIO SPAXIO --- */
+.modal-cristal-oscuro {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(10, 10, 10, 0.85); /* Fondo oscuro translúcido */
+    backdrop-filter: blur(12px); /* Efecto Glassmorphism */
+    -webkit-backdrop-filter: blur(12px);
+    z-index: 40000;
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+.spaxio-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 15px;
+    border-bottom: 1px solid rgba(255, 215, 0, 0.3);
+}
+
+.btn-cerrar-dorado {
+    background: transparent;
+    border: none;
+    color: #ffd700;
+    font-size: 24px;
+    cursor: pointer;
+}
+
+.spaxio-tabs {
+    display: flex;
+    margin: 20px 0;
+    background: rgba(0, 0, 0, 0.5);
+    border-radius: 15px;
+    padding: 5px;
+    border: 1px solid rgba(255, 215, 0, 0.2);
+}
+
+.spaxio-tab {
+    flex: 1;
+    padding: 12px;
+    background: transparent;
+    border: none;
+    color: #888;
+    font-weight: bold;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.spaxio-tab.activa {
+    background: #ffd700;
+    color: #000;
+    box-shadow: 0 0 10px rgba(255, 215, 0, 0.4);
+}
+
+/* Contenedor de la cámara */
+.contenedor-camara-preview {
+    width: 100%;
+    height: 60vh; /* Ocupa buena parte de la pantalla */
+    background: #000;
+    border-radius: 20px;
+    overflow: hidden;
+    position: relative;
+    border: 2px solid rgba(255, 215, 0, 0.5);
+    margin-bottom: 20px;
+}
+
+#video-preview-spaxio {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.overlay-camara {
+    position: absolute;
+    top: 15px;
+    left: 15px;
+}
+
+.badge-live-offline {
+    background: rgba(0,0,0,0.6);
+    color: #fff;
+    padding: 5px 10px;
+    border-radius: 8px;
+    font-size: 12px;
+    border: 1px solid #555;
+}
+
+/* Zona de subida */
+.zona-drop-video {
+    height: 60vh;
+    border: 2px dashed rgba(255, 215, 0, 0.5);
+    border-radius: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background: rgba(255, 215, 0, 0.05);
+    margin-bottom: 20px;
+    position: relative;
+}
+
+#input-subir-spaxio {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+}
+
+.btn-accion-dorado {
+    width: 100%;
+    padding: 15px;
+    background: linear-gradient(135deg, #FFD700 0%, #B8860B 100%);
+    color: #000;
+    border: none;
+    border-radius: 15px;
+    font-size: 18px;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(255, 215, 0, 0.4);
+ }
+      
+/* --- BOTÓN CENTRAL SPAXIOLIVE --- */
+.btn-live-center {
+    position: relative;
+    top: -15px; /* Lo subimos para que rompa la barra flotante */
+    width: 55px;
+    height: 55px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    z-index: 30002;
+    transition: transform 0.2s ease;
+}
+
+.btn-live-center:active {
+    transform: scale(0.9);
+}
+
+.live-icon {
+    width: 45px;
+    height: 45px;
+    background: linear-gradient(135deg, #FFD700 0%, #B8860B 100%);
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #000;
+    font-size: 22px;
+    font-weight: 900;
+    box-shadow: 0 4px 15px rgba(255, 215, 0, 0.5);
+    z-index: 2;
+}
+
+/* El anillo brillante animado alrededor del botón */
+.live-ring {
+    position: absolute;
+    width: 55px;
+    height: 55px;
+    border-radius: 50%;
+    border: 2px solid rgba(255, 215, 0, 0.4);
+    animation: pulse-ring 2s infinite ease-out;
+    z-index: 1;
+}
+
+@keyframes pulse-ring {
+    0% { transform: scale(0.9); box-shadow: 0 0 0 0 rgba(255, 215, 0, 0.7); }
+    70% { transform: scale(1.3); box-shadow: 0 0 0 10px rgba(255, 215, 0, 0); }
+    100% { transform: scale(0.9); box-shadow: 0 0 0 0 rgba(255, 215, 0, 0); }
+ }
+
+      .notificacion-live-bubble {
+    background: #000; /* Estilo Black & Gold */
+    border: 2px solid #D4AF37; 
+    color: #FFF;
+    padding: 10px;
+    border-radius: 20px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    animation: pulso 2s infinite;
+}
+
+@keyframes pulso {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+      }
+
+.notificacion-live-bubble {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    margin-bottom: 10px;
+}
+
+.btn-unirse {
+    background: #ffcc00; /* Dorado, como tus otros botones */
+    border: none;
+    padding: 5px 15px;
+    border-radius: 5px;
+    font-weight: bold;
+    cursor: pointer;
+}
+      
+    </style>
 
 </head>
 
 <body>
  
     
-    <div id="pantalla-carga" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; display: flex; align-items: center; justify-content: center; z-index: 999999; transition: opacity 0.5s ease;">      
+    
+    
+    
+            <div id="pantalla-carga" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; display: flex; align-items: center; justify-content: center; z-index: 999999; transition: opacity 0.5s ease;">      
 
           </div>
  
@@ -518,7 +894,18 @@ button#btn-enviar:active {
             <h1 id="nombre-dueño-header">SpaceChat</h1>
         </div>
     </div>
+<!-- En tu header, añade este botón antes de los de llamada -->
+<div style="display: flex; align-items: center; gap: 15px; flex-shrink: 0;">
+    <!-- Botón para abrir el Estudio Spaxio (el modal que ya tienes) -->
+    <button onclick="abrirModalSpaxio()" 
+            style="background: rgba(255, 215, 0, 0.1); border: 1px solid #ffd700; border-radius: 50%; width: 35px; height: 35px; cursor: pointer; color: #ffd700;">
+        ✨
+    </button>
+    
+    </div>
 
+ <div id="contenedor-notificaciones-live"></div>
+ 
     <div style="display: flex; align-items: center; gap: 15px; flex-shrink: 0;">
         <button onclick="iniciarLlamadaSatelital('voz')" 
                 style="background: none; border: none; color: #ffd700; font-size: 20px; cursor: pointer; padding: 5px; transition: transform 0.2s;"
@@ -573,21 +960,24 @@ button#btn-enviar:active {
     <div onclick="accionMensaje('borrar')" style="color: #ff5c5c;">🗑️ Borrar</div>
  </div>
 
+
+
+
 <div class="contenedor-flotante">
     <div class="input-wrapper">
-        <button class="icon-btn" onclick="document.getElementById('modal-tienda').style.display='block'">
-            <span>😊</span>
-        </button>
+        <!-- Busca este botón en tu HTML y cambia el onclick por este -->
+<button class="icon-btn" onclick="document.getElementById('modal-tienda').style.display='block'">
+    <span>😊</span>
+</button>
         
         <textarea 
-            id="msg-text" 
-            placeholder="Mensaje" 
-            inputmode="text" 
-            enterkeyhint="send"
-            contenteditable="true"
-            role="textbox"
-            oninput="this.style.height='40px'; this.style.height=this.scrollHeight+'px';"></textarea>
-            
+    id="msg-text" 
+    placeholder="Mensaje" 
+    inputmode="text" 
+    enterkeyhint="send"
+    contenteditable="true"
+    role="textbox"
+    oninput="this.style.height='40px'; this.style.height=this.scrollHeight+'px';"></textarea>
         <label class="icon-btn" for="input-archivo">
             <span>📎</span>
             <input type="file" id="input-archivo" style="display: none;" onchange="prepararEnvioMedia(this, 'archivo')">
@@ -600,12 +990,9 @@ button#btn-enviar:active {
     </div>
     
     <button id="btn-accion-dinamica" onclick="ejecutarAccionBoton()" style="flex-shrink: 0; background: #ffd700; border: none; width: 40px; height: 40px; border-radius: 50%; transition: all 0.2s ease;">
-        <span id="icono-accion" style="color: #000; font-weight: bold; font-size: 16px;">🎙️</span>
+    <span id="icono-accion" style="color: #000; font-weight: bold; font-size: 16px;">🎙️</span>
     </button>
 </div>
-    
-    
-            
    
  <div class="fondo-estatico"></div>
 
@@ -720,7 +1107,59 @@ button#btn-enviar:active {
             + 
         </button>
 
- style="width: 100%; padding: 18px; margin-bottom: 15px; background: #2a2f3a; color: white; border: 1px solid #999; border-radius: 8px; box-sizing: border-box; outline: none;">
+<div class="barra-flotante-premium">
+    <div class="btn-nav" onclick="abrirAgendaCompleta();">
+        <span>👥</span><span>Contactos</span>
+    </div>
+    
+    <div class="btn-nav" 
+     id="btn-nav-harvis" 
+     data-contacto='{"id_sistema":"uo4kb3tGHH7J","nombre":"H.A.R.V.I.S.","apellido":"1.0","estado":"activo"}'
+     onclick="cargarConversacionCon(JSON.parse(this.dataset.contacto).id_sistema)">
+        <span style="text-shadow: 0 0 8px #ffd700;">🤖</span><span style="color: #ffd700;">H.A.R.V.I.S.</span>
+    </div>
+
+<!-- Ejemplo para Spaxio Flow -->
+<div class="btn-nav" 
+     id="btn-nav-flow" 
+     data-contacto='{"id_sistema":"26fmetp4Q4WJ","nombre":"Spaxio","apellido":"Flow","estado":"activo"}'
+     onclick="cargarConversacionCon(JSON.parse(this.dataset.contacto).id_sistema)">
+        <span style="text-shadow: 0 0 8px #00d4ff;">🌊</span><span style="color: #00d4ff;">Spaxio Flow</span>
+    </div>
+
+
+
+    <div class="btn-nav active" onclick="document.getElementById('modal-agenda-completa').style.display='none'">
+        <span>💬</span><span>Chat</span>
+    </div>
+    <div class="btn-nav" onclick="abrirAjustes()">
+        <span>⚙️</span><span>Ajustes</span>
+    </div>
+</div>
+     
+ <div id="modal-nuevocontacto" class="modal" style="display: none; align-items: center; justify-content: center; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #1e222b; z-index: 30000;">
+    
+          <div class="modal-cover" style="position: relative; width: 100vw; height: 100vh; padding: 50px 30px 50px 30px; box-sizing: border-box; background: #1e222b; border-radius: 0px; text-align: center; border: 0px solid #333; box-shadow: 0 0 20px rgba(0,0,0,0.5);">                                                
+        
+<div style="display: flex; align-items: center;justify-content: flex-start; margin-left: 20px; gap: 15px; margin-bottom: 20px;">
+    
+    <button onclick="cerrarModalNuevo()" style="background: transparent; border: none; color: white; font-size: 20px; cursor: pointer;">
+         <span style="display: inline-block; transform: scaleX(-1);">➔</span>
+    </button>
+
+    <h3 style="color: #ffd700; margin: 0;">NUEVO CONTACTO</h3>
+
+</div>
+        
+        <input type="text" id="nuevo-nombre" placeholder="Nombre" 
+            onfocus="this.style.boxShadow='0 0 5px #ffd700'; this.style.borderColor='#ffd700';" 
+            onblur="this.style.boxShadow='none'; this.style.borderColor='#999';"
+             style="width: 100%; padding: 18px; margin-bottom: 15px; background: #2a2f3a; color: white; border: 1px solid #999; border-radius: 8px; box-sizing: border-box; outline: none;">
+        
+        <input type="text" id="nuevo-apellido-contacto" placeholder="Apellido"
+        onfocus="this.style.boxShadow='0 0 5px #ffd700'; this.style.borderColor='#ffd700';" 
+            onblur="this.style.boxShadow='none'; this.style.borderColor='#999';"
+            style="width: 100%; padding: 18px; margin-bottom: 15px; background: #2a2f3a; color: white; border: 1px solid #999; border-radius: 8px; box-sizing: border-box; outline: none;">
 
         <input type="text" id="target-id" placeholder="ID Space (Ej: 12345)" 
         onfocus="this.style.boxShadow='0 0 5px #ffd700'; this.style.borderColor='#ffd700';" 
@@ -788,55 +1227,61 @@ button#btn-enviar:active {
         <button id="btn-colgar-llamada" style="width: 65px; height: 65px; border-radius: 50%; background: #b71c1c; border: 2px solid #b71c1c; color: white; font-size: 24px; cursor: pointer;">❌</button>
     </div>
    </div>
-  
+  <div class="harvis-container">
+    <div class="harvis-orb-glow">
+        <button id="harvisBtn" class="harvis-ball">
+            🤖
+        </button>
+    </div>
     
-
-    <div class="barra-flotante-premium">
-    <div class="btn-nav" onclick="abrirAgendaCompleta();">
-        <span>👥</span><span>Contactos</span>
-    </div>
-
-<!-- Ejemplo para Spaxio Flow -->
-<div class="btn-nav" 
-     id="btn-nav-flow" 
-     data-contacto='{"id_sistema":"26fmetp4Q4WJ","nombre":"Spaxio","apellido":"Flow","estado":"activo"}'
-     onclick="cargarConversacionCon(JSON.parse(this.dataset.contacto).id_sistema)">
-        <span style="text-shadow: 0 0 8px #00d4ff;">🌊</span><span style="color: #00d4ff;">Spaxio Flow</span>
-    </div>
-
-    <div class="btn-nav active" onclick="document.getElementById('modal-agenda-completa').style.display='none'">
-        <span>💬</span><span>Chat</span>
-    </div>
-    <div class="btn-nav" onclick="abrirAjustes()">
-        <span>⚙️</span><span>Ajustes</span>
-    </div>
-</div>
-     
- <div id="modal-nuevocontacto" class="modal" style="display: none; align-items: center; justify-content: center; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #1e222b; z-index: 30000;">
-    
-          <div class="modal-cover" style="position: relative; width: 100vw; height: 100vh; padding: 50px 30px 50px 30px; box-sizing: border-box; background: #1e222b; border-radius: 0px; text-align: center; border: 0px solid #333; box-shadow: 0 0 20px rgba(0,0,0,0.5);">                                                
-        
-<div style="display: flex; align-items: center;justify-content: flex-start; margin-left: 20px; gap: 15px; margin-bottom: 20px;">
-    
-    <button onclick="cerrarModalNuevo()" style="background: transparent; border: none; color: white; font-size: 20px; cursor: pointer;">
-         <span style="display: inline-block; transform: scaleX(-1);">➔</span>
-    </button>
-
-    <h3 style="color: #ffd700; margin: 0;">NUEVO CONTACTO</h3>
-
-</div>
-        
-        <input type="text" id="nuevo-nombre" placeholder="Nombre" 
-            onfocus="this.style.boxShadow='0 0 5px #ffd700'; this.style.borderColor='#ffd700';" 
-            onblur="this.style.boxShadow='none'; this.style.borderColor='#999';"
-             style="width: 100%; padding: 18px; margin-bottom: 15px; background: #2a2f3a; color: white; border: 1px solid #999; border-radius: 8px; box-sizing: border-box; outline: none;">
-        
-        <input type="text" id="nuevo-apellido-contacto" placeholder="Apellido"
-        onfocus="this.style.boxShadow='0 0 5px #ffd700'; this.style.borderColor='#ffd700';" 
-            onblur="this.style.boxShadow='none'; this.style.borderColor='#999';">
+    <div id="harvisStatus" class="harvis-status">H.A.R.V.I.S. en espera...</div>
+    <div id="harvisSubtitle" class="harvis-subtitle"></div>
   </div>
+
+
+<div id="modal-spaxio" class="modal-cristal-oscuro" style="display: none;">
+    <div class="spaxio-header">
+        <h3 style="color: #ffd700; margin: 0; text-shadow: 0 0 5px rgba(255, 215, 0, 0.5);">🎬 Estudio Spaxio</h3>
+        <button onclick="cerrarModalSpaxio()" class="btn-cerrar-dorado">✖</button>
+    </div>
+<div class="spaxio-selector">
+    <select id="modo-spaxio" onchange="configurarModo(this.value)">
+        <option value="video">🎥 Crear Reel</option>
+        <option value="live">🔴 Empezar Directo</option>
+    </select>
+</div>
+    <div id="vista-spaxio-live" class="spaxio-content">
+        <div class="contenedor-camara-preview">
+            <video id="video-preview-spaxio" autoplay muted playsinline></video>
+            <div class="overlay-camara">
+                <span class="badge-live-offline">OFFLINE</span>
+            </div>
+        </div>
+        <button class="btn-accion-dorado" onclick="iniciarSpaxioLive()">▶ Empezar Directo</button>
+    </div>
+</div>
+    
+<div id="banner-live-container" style="display: none; background: #1a1a1a; padding: 10px; border-bottom: 2px solid #ffd700;">
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+        <span style="color: #ffd700; font-weight: bold;">🔴 EN VIVO</span>
+        <button onclick="abrirPlayerLive()" style="background: #ffd700; border: none; padding: 5px 15px; border-radius: 5px; cursor: pointer;">Ver ahora</button>
+    </div>
 </div>
 
+<div id="modal-video-live" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #000; z-index: 9999; flex-direction: column;">
+    <div style="display: flex; justify-content: space-between; padding: 10px; background: #1a1a1a; align-items: center;">
+        <h3 style="color: #ffd700; margin: 0;">🔴 Transmisión en Vivo</h3>
+        <button onclick="cerrarPlayerLive()" style="background: transparent; color: white; border: none; font-size: 20px;">✖</button>
+    </div>
+    <div id="contenedor-iframe-live" style="width: 100%; aspect-ratio: 16 / 9;"></div>
+    <div style="padding: 15px; border-bottom: 1px solid #333;">
+        <button onclick="darLike()" style="background: none; border: 1px solid #ffd700; color: #ffd700; padding: 8px 15px; border-radius: 20px;">❤️ Me gusta (<span id="contador-likes">0</span>)</button>
+    </div>
+    <div id="chat-live-mini" style="flex: 1; padding: 10px; overflow-y: auto; color: white; background: #0a0a0a;">
+        <div id="mensajes-live" style="display: flex; flex-direction: column; gap: 5px;"></div>
+    </div>
+</div>
+  
     
     <script>
      
@@ -1131,6 +1576,7 @@ async function recuperarCuentaConID() {
     }
 }
                                       
+
 // --- 4. ANTENA SATELITAL ---
 async function activarAntena() {
     const miID = localStorage.getItem('mi_dropis_id');
@@ -1186,7 +1632,7 @@ try {
                 try {
                     const ping = new Audio('assets/ping-mensaje.mp3');
                     ping.volume = 1.0;
-                    ping.play().catch(err => console.log("📡 Bloqueo temporal de audio."));
+                    ping.play().catch(err => console.log("📡 H.A.R.V.I.S.: Bloqueo temporal de audio."));
                 } catch(e) {
                     console.error("Error al reproducir audio dinámico", e);
                 }
@@ -1215,7 +1661,7 @@ try {
                         });
                     }
                 } catch (e) { 
-                    console.error("❌ Error en notificación:", e); 
+                    console.error("❌ H.A.R.V.I.S. detectó un error en notificación:", e); 
                 }
             }
 
@@ -1228,12 +1674,12 @@ try {
             snapshot.ref.remove(); 
 
         } catch (e) { 
-            console.error("❌ Error en Antena Principal:", e); 
+            console.error("❌ H.A.R.V.I.S. detectó un error en Antena Principal:", e); 
         }
     }); 
      }
      
-     async function enviarMensajeSatelital(multimediaUrl = null, tipoMedia = 'texto') {
+       async function enviarMensajeSatelital(multimediaUrl = null, tipoMedia = 'texto') {
 
 const inputMsg = document.querySelector('#msg-text');
 
@@ -1246,7 +1692,7 @@ const msg = multimediaUrl ? multimediaUrl : (inputMsg ? inputMsg.value.trim() : 
      
   
      if (!inputTarget || !inputTarget.value) {
-        console.error("No hay un satélite de destino (ID vacío)");
+        console.error("H.A.R.V.I.S.: No hay un satélite de destino (ID vacío)");
         return;
     }
     const targetID = inputTarget.value.trim();
@@ -1385,8 +1831,8 @@ const cuerpoPeticion = {
         if (datosBackend && datosBackend.respuesta) {
             respuestaIA = datosBackend.respuesta;
         } else {
-            console.warn("⚠️ El backend não devolvió la propiedad 'respuesta':", datosBackend);
-            respuestaIA = "⚠️ No se pudo procesar el formato del backend.";
+            console.warn("⚠️ El backend no devolvió la propiedad 'respuesta':", datosBackend);
+            respuestaIA = "⚠️ H.A.R.V.I.S. no pudo procesar el formato del backend.";
         }
         
         if (typeof hablarHarvis === "function") {
@@ -1419,7 +1865,7 @@ const cuerpoPeticion = {
 
      // 3. 💾 EL BLINDAJE: Guardado persistente en IndexedDB para que NO se borre al salir
         if (typeof guardarLocal === "function") {
-            // Guardamos el registro del texto
+            // Guardamos el registro del texto de H.A.R.V.I.S.
             await guardarLocal('mensajes', { 
                 id: harvisMsgId, 
                 contactoId: targetID,
@@ -1443,7 +1889,7 @@ const cuerpoPeticion = {
                     ts: Date.now() + 1, // Le sumamos un milisegundo para que quede justo debajo del texto
                     hora: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })
                 });
-                console.log("✅ Nota de voz respaldada con éxito en IndexedDB.");
+                console.log("✅ Nota de voz de H.A.R.V.I.S. respaldada con éxito en IndexedDB.");
             }
         }
 
@@ -1485,8 +1931,6 @@ if ('serviceWorker' in navigator && Notification.permission === "granted") {
 } else {
     console.log("Notificaciones no permitidas por el usuario.");
      }
-
-            
 async function obtenerToken(registration) {
     try {
         const miVapidKey = 'BIrsA9YbBXfIuo4PTMrKRtuktRsK2RbK0XevupuofGGOUDy9w5VZ9yaXbZXsenXppmFsR62-2B7jBOG0Z8RdxvU';
@@ -3332,8 +3776,68 @@ function actualizarUIUIGrabando(estaGrabando) {
     }
      }
 
+// =================================================================
+// 1. REGISTRO FIJO DE H.A.R.V.I.S. COMO UN CONTACTO NORMAL
+// =================================================================
+// Recuerda registrar este ID exacto en tu IndexedDB o array de contactos
+const contactoHarvisFijo = {
+    id: "uo4kb3tGHH7J",
+    nombre: "H.A.R.V.I.S. 1.0",
+    avatar: "🤖",
+    estado: "Copiloto YouSpace en línea"
+};
 
 
+// =================================================================
+// 2. SISTEMAS NATIVOS DE VOZ (Audio y Altavoz del Teléfono)
+// =================================================================
+
+// Hace que el teléfono hable (Bocina)
+
+
+        function hablarHarvis(texto, alTerminar) {
+    const synth = window.speechSynthesis;
+    synth.cancel(); // Limpia cualquier audio trabado
+
+    // 1. Limpieza estricta de Markdown
+    let textoLimpio = texto
+        .replace(/\*/g, '')
+        .replace(/#/g, '')
+        .replace(/-/g, '')
+        .replace(/[\uE000-\uF8FF]|\uD83C[\uDC00-\uDFFF]|\uD83D[\uDC00-\uDFFF]|[\u2011-\u26FF]|\uD83E[\uDC00-\uDFFF]/g, '');
+
+    const utterance = new SpeechSynthesisUtterance(textoLimpio);
+    
+    // 2. Traer todas las voces instaladas en tu Xiaomi
+    const voces = synth.getVoices();
+
+    // 3. BUSCADOR AUTOMÁTICO DE TU VOZ DE HOMBRE
+    // Filtramos las voces en español buscando las palabras clave de los paquetes masculinos de Google
+    const vozDeHombre = voces.find(v => 
+        v.lang.includes('es') && 
+        (v.name.includes('Google') || v.name.includes('Natural')) &&
+        (v.name.includes('Voz 2') || v.name.includes('Voz 3') || v.name.includes('male') || v.name.includes('B') || v.name.includes('C'))
+    );
+
+    // Si encontró la voz de hombre descargada, se la asignamos a HARVIS
+    if (vozDeHombre) {
+        utterance.voice = vozDeHombre;
+        console.log("¡H.A.R.V.I.S está usando la voz local montada!: " + vozDeHombre.name);
+    } else {
+        // Si no la encuentra, usa el respaldo por defecto de tu idioma
+        utterance.lang = 'es-Es';
+    }
+
+    // 4. Configuración de estilo elegante para tu asistente
+    utterance.rate = 1.02; // Un toque sutil de velocidad
+    utterance.pitch = 1.0; // Bajamos el tono para que suene más grave, imponente y con estilo "JARVIS"
+
+    if (alTerminar) {
+        utterance.onend = () => alTerminar();
+    }
+    
+    synth.speak(utterance);
+     }
 
 
 // Hace que el teléfono escuche (Micrófono nativo)
@@ -3355,7 +3859,442 @@ function escucharVozPedro(alRecibirTexto) {
         
         alRecibirTexto(resultadoTexto);
     };
+     }
+
+
+// =================================================================
+// 3. CEREBRO RESPONDEDOR LOCAL DE H.A.R.V.I.S.
+// =================================================================
+function procesarRespuestaHarvis(mensajeRecibidoDePedro) {
+    setTimeout(() => {
+        const respuestaRobot = "Entendido señor Peres, procesando comando en YouSpace de forma local.";
+        
+        // A) H.A.R.V.I.S. te responde hablando por los altavoces del celular
+        hablarHarvis(respuestaRobot);
+        
+        // B) PINTAR EN PANTALLA: Aquí usas tu función nativa para renderizar 
+        // el mensaje en el chat (por ejemplo, enviándolo a tu contenedor de mensajes).
+
+    }, 1000);
 }
+
+
+// =================================================================
+// 4. INTEGRACIÓN REAL EN TU FUNCIÓN DE ENVIAR MENSAJES
+// =================================================================
+// Busca tu función nativa de envío (la que activas con el Enter o tu evento)
+// e integra este control exacto:
+
+// =================================================================
+// 1. CONFIGURACIÓN INICIAL Y FILTRO DE ENVÍO NATIVO
+// =================================================================
+
+// =================================================================
+// CONFIGURACIÓN DEL MONITOR DE CONTROL DE FLUJO Y TOKENS
+// =================================================================
+const CONFIG_MONITOR = {
+  limiteEstimadoDiario: 50000, // Ajusta este techo según tu cuota libre en AI Studio
+  totalTokensConsumidos: 0
+};
+
+function actualizarMonitorAPI(tokensAcumuladosEnPeticion, estado = 'success', mensajeError = '') {
+  const txtLast = document.getElementById('tokens-last');
+  const txtTotal = document.getElementById('tokens-total');
+  const barraCuota = document.getElementById('quota-bar');
+  const txtStatus = document.getElementById('widget-status-text');
+  const indicadorEstado = document.querySelector('.status-dot');
+
+  if (!txtLast || !txtTotal || !barraCuota || !txtStatus || !indicadorEstado) return;
+
+  if (estado === 'loading') {
+    indicadorEstado.className = 'status-dot loading';
+    txtStatus.innerText = 'Consultando a Gemini...';
+    return;
+  }
+
+  if (estado === 'error') {
+    indicadorEstado.className = 'status-dot error';
+    txtStatus.innerText = mensajeError || 'Error de conexión';
+    console.error(`[API Monitor] Fallo en procesamiento: ${mensajeError}`);
+    return;
+  }
+
+  // Flujo exitoso: Renderizado de consumo real
+  indicadorEstado.className = 'status-dot online';
+  txtLast.innerText = tokensAcumuladosEnPeticion;
+  CONFIG_MONITOR.totalTokensConsumidos += tokensAcumuladosEnPeticion;
+  txtTotal.innerText = CONFIG_MONITOR.totalTokensConsumidos;
+
+  const porcentaje = Math.min((CONFIG_MONITOR.totalTokensConsumidos / CONFIG_MONITOR.limiteEstimadoDiario) * 100, 100);
+  barraCuota.style.width = `${porcentaje}%`;
+  txtStatus.innerText = `Consumo: ${porcentaje.toFixed(1)}% del límite`;
+
+  // Salida limpia para Eruda en tu teléfono
+  console.log(`%c[H.A.R.V.I.S. 1.0] +${tokensAcumuladosEnPeticion} tokens | Total acumulado: ${CONFIG_MONITOR.totalTokensConsumidos}`, 'color: #d4af37; font-weight: bold;');
+}
+
+// =================================================================
+// 1. CONTROLADOR DE ENVÍO DE MENSAJES (FLUX PRINCIPAL)
+// =================================================================
+function funcionDeEnvioRealDeTuApp(textoDelMensaje) {
+    const inputTarget = document.getElementById('targetID') || document.getElementById('target-id');
+    const usuarioEnPantalla = inputTarget ? inputTarget.value : ""; 
+    const targetID = usuarioEnPantalla;
+
+    if (usuarioEnPantalla === "harvis_user_system") {
+        
+        const campoTexto = document.getElementById('msg-text');
+        if (campoTexto) {
+            campoTexto.value = "";
+            campoTexto.style.height = '40px'; 
+        }
+
+        if (typeof activarEscuchaAtentaHarvis === "function") {
+            activarEscuchaAtentaHarvis();
+        }
+
+        if (!textoDelMensaje || typeof textoDelMensaje !== "string" || textoDelMensaje.includes("data:audio") || textoDelMensaje.startsWith("GkXf")) {
+            if (typeof escucharVozPedro === "function") {
+                console.log("🎙️ Filtro H.A.R.V.I.S.: Detectado archivo de audio. Forzando transcripción nativa...");
+                escucharVozPedro((textoConvertido) => {
+                    if (textoConvertido && textoConvertido.trim() !== "") {
+                        if (campoTexto) campoTexto.value = textoConvertido;
+                        funcionDeEnvioRealDeTuApp(textoConvertido); 
+                    }
+                });
+            }
+            return; 
+        }
+
+        // Ejecutar procesamiento con el Asistente
+        procesarRespuestaHarvis(textoDelMensaje, targetID);
+
+    } else {
+        console.log("Mensaje enviado a contacto regular vía Firebase/IndexedDB:", textoDelMensaje);
+    }
+}
+
+// =================================================================
+// 2. CONEXIÓN SEGURA Y PROCESAMIENTO CON TU BACKEND EN VERCEL
+// =================================================================
+ // =================================================================
+// 🌟 VARIABLE GLOBAL (DEBE IR AQUÍ: FUERA Y ARRIBA DE LA FUNCIÓN)
+// =================================================================
+
+
+// =================================================================
+// CONEXIÓN SEGURA Y PROCESAMIENTO CON TU BACKEND EN VERCEL
+// =================================================================
+// =================================================================
+// 🔒 CONTROLADORES GLOBALES (Ponlos al inicio de tu archivo de scripts)
+// =================================================================
+let harvisProcesandoPeticion = false;       // El cerrojo contra ráfagas de voz
+let mensajePendientePorSaturacion = null;   // El buzón de mensajes en cola
+
+// =================================================================
+// 🧠 CEREBRO DE H.A.R.V.I.S.: CONEXIÓN Y PROCESAMIENTO CON VERCEL
+// =================================================================
+async function procesarRespuestaHarvis(msg, targetID) {
+    
+    // 🛡️ CERROJO: Si el micrófono manda ráfagas repetidas en el mismo segundo, rebotan aquí
+    if (harvisProcesandoPeticion) {
+        console.warn("⚠️ H.A.R.V.I.S. bloqueó una petición duplicada por ráfaga de voz.");
+        return;
+    }
+
+    // Cerramos el cerrojo y encendemos el monitor visual
+    harvisProcesandoPeticion = true;
+    if (typeof actualizarMonitorAPI === "function") {
+        actualizarMonitorAPI(0, 'loading');
+    }
+
+    try {
+        const urlBackend = "/api/chat"; 
+        const llaveLocal = localStorage.getItem('spacechat_crypto_key') || "";
+
+        // Guardamos lo que dijo Pedro en el historial de memoria local
+        historialHarvisVercel.push({ role: "user", parts: [{ text: msg }] });
+
+        const cuerpoPeticion = {
+            chatHistory: historialHarvisVercel,
+            userKey: llaveLocal 
+        };
+
+        const respuestaServidor = await fetch(urlBackend, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(cuerpoPeticion)
+        });
+
+        // Verificación defensiva de red
+        if (!respuestaServidor.ok) {
+            throw new Error(`Código de respuesta de red: ${respuestaServidor.status}`);
+        }
+
+
+
+
+const datosBackend = await respuestaServidor.json();
+const harvisMsgId = "msg_harvis_" + Date.now();
+let respuestaIA = "Sistemas listos, Pedro.";
+
+if (datosBackend && datosBackend.respuesta) {
+    respuestaIA = datosBackend.respuesta;
+
+    // 🛡️ DETECTOR DEFENSIVO PARA EL TEXTO DE ERROR
+    if (respuestaIA.includes("GOOGLE API ERROR") || respuestaIA.includes("[Código 429]") || respuestaIA.includes("[Código 503]")) {
+        mensajePendientePorSaturacion = msg; 
+        
+        if (typeof pintarMensaje === "function") {
+            pintarMensaje(`💥 Servidor saturado (Límite 429). Mensaje guardado en cola.`, 'msg-izquierda', null, 'leido', harvisMsgId, 'texto');
+        }
+        
+        if (typeof actualizarMonitorAPI === "function") {
+            actualizarMonitorAPI(0, 'error', 'Error 429: Rate Limit');
+        }
+        
+        const txtStatus = document.getElementById('widget-status-text');
+        if (txtStatus) {
+            txtStatus.innerHTML = `
+                <span style="color:#ff3333; display:block; margin-bottom:4px;">Límite Excedido</span>
+                <button onclick="DespacharMensajeEnCola()" style="background:transparent; border:1px solid #d4af37; color:#d4af37; border-radius:4px; font-size:9px; padding:2px 6px; cursor:pointer;">
+                    🔄 Reintentar Mensaje
+                </button>
+            `;
+        }
+        harvisProcesandoPeticion = false; // Liberamos cerrojo antes de salir
+        return; 
+    }
+} else {
+    console.warn("⚠️ El backend no devolvió la propiedad 'respuesta':", datosBackend);
+    respuestaIA = "⚠️ H.A.R.V.I.S. no pudo procesar el formato del backend.";
+}
+
+// 1. Historial de sesión en memoria
+historialHarvisVercel.push({ role: "model", parts: [{ text: respuestaIA }] });
+if (historialHarvisVercel.length > 8) {
+    historialHarvisVercel.splice(0, 2); 
+}
+
+// 2. Pintamos el texto en vivo de inmediato
+if (typeof pintarMensaje === "function") {
+    pintarMensaje(respuestaIA, 'msg-izquierda', null, 'leido', harvisMsgId, 'texto');
+
+// 🔥 AÑADE ESTO:
+if (targetID === "26fmetp4Q4WJ") {
+    // Disparamos la notificación sin intermediarios
+await inyectarNotificacionHarvis(respuestaIA);
+}
+// 3. Procesamiento y Renderizado del Audio en Vivo
+let tieneAudioServer = false;
+let urlParaGuardar = null;
+
+if (datosBackend && datosBackend.audioBase64) {
+    try {
+        const byteCharacters = atob(datosBackend.audioBase64);
+        const byteNumbers = new Uint8Array(byteCharacters.length);
+        for (let i = 0; i < byteCharacters.length; i++) {
+            byteNumbers[i] = byteCharacters.charCodeAt(i);
+        }
+        
+        const archivoHarvis = new File([byteNumbers], `harvis_voz_${Date.now()}.mp3`, { type: 'audio/mpeg' });
+        urlParaGuardar = URL.createObjectURL(archivoHarvis);
+
+        const idBurbujaAudio = harvisMsgId + "_audio";
+
+        // 🎨 PRIMERO: Pintamos el reproductor en el chat usando el blob fresco de memoria
+        if (typeof pintarMensaje === "function") {
+            pintarMensaje(urlParaGuardar, 'msg-izquierda', null, 'leido', idBurbujaAudio, 'audio');
+        }
+        
+        // 🔊 SEGUNDO: Buscamos el reproductor recién pintado en la pantalla y le damos Play en vivo
+        // Le damos un mini "setTimeout" de 50ms para asegurar que el navegador ya dibujó el elemento en el DOM
+        setTimeout(() => {
+            const reproductorEnPantalla = document.getElementById(idBurbujaAudio) || document.querySelector(`[data-id="${idBurbujaAudio}"] audio`) || document.querySelector(`audio[src="${urlParaGuardar}"]`);
+            
+            if (reproductorEnPantalla) {
+                console.log("✅ H.A.R.V.I.S: Reproduciendo audio directamente desde la burbuja visual.");
+                reproductorEnPantalla.play().catch(e => console.log("Autoplay de burbuja bloqueado por el navegador:", e));
+            } else {
+                // Respaldo por si el DOM tardó más de la cuenta en renderizar la burbuja
+                console.warn("⚠️ No se encontró la burbuja en el DOM a tiempo, usando respaldo de audio invisible.");
+                const audioHarvis = new Audio(urlParaGuardar);
+                audioHarvis.play().catch(e => console.log("Autoplay de respaldo bloqueado:", e));
+            }
+        }, 50);
+        
+        if (typeof prepararEnvioMedia === "function") {
+            prepararEnvioMedia({ files: [archivoHarvis] }, 'audio');
+        }
+        tieneAudioServer = true;
+    } catch (errAudio) {
+        console.error("Error procesando binario de audio de ElevenLabs:", errAudio);
+    }
+}
+
+// Respaldo nativo si falla ElevenLabs o viene vacío
+if (!tieneAudioServer && typeof hablarHarvis === "function") {
+    hablarHarvis(respuestaIA);
+     }
+     
+// 4. Renderizado de Imagen (Pollinations)
+// 3. Imagen (tu lógica existente)
+    
+            if (datosBackend.imagenUrl) {
+                const estructuraImagenHtml = `<img src="${datosBackend.imagenUrl}" style="width:100%; border-radius:12px; border: 2px solid #FFD700; box-shadow: 0 0 15px rgba(255,217,0,0.5); margin-top:8px;" alt="YouSpace Art">`;
+                pintarMensaje(estructuraImagenHtml, 'msg-izquierda', null, 'leido', harvisMsgId + "_img", 'texto');
+            }
+ }
+
+// 5. Guardado Inteligente en Base de Datos (IndexedDB)
+if (typeof guardarLocal === "function") {
+    // Guardamos el mensaje de texto principal
+    await guardarLocal('mensajes', { 
+        id: harvisMsgId, 
+        contactoId: targetID,
+        texto: datosBackend && datosBackend.imagenUrl ? `${respuestaIA} [Imagen Arte]` : respuestaIA, 
+        clase: 'msg-izquierda', 
+        status: 'leido',
+        tipo: 'texto',
+        ts: Date.now(),
+        hora: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })
+    });
+
+    // 🎙️ CLAVE DE LA BURBUJA PERSISTENTE: Guardamos el Base64 puro en el campo 'texto'
+    if (tieneAudioServer && datosBackend.audioBase64) {
+        await guardarLocal('mensajes', {
+            id: harvisMsgId + "_audio_db",
+            contactoId: targetID,
+            texto: `data:audio/mpeg;base64,${datosBackend.audioBase64}`, // 👈 Guardamos el Data URI completo, ¡este no caduca!
+            clase: 'msg-izquierda',
+            status: 'leido',
+            tipo: 'audio', // Le avisa a tu renderizador del historial que monte la burbuja de audio
+            ts: Date.now() + 1,
+            hora: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })
+        });
+    }
+}
+
+// 6. Monitor de API
+if (typeof actualizarMonitorAPI === "function") {
+    const tokensUtilizados = (datosBackend && datosBackend.usage && datosBackend.usage.totalTokenCount) ? datosBackend.usage.totalTokenCount : 0;
+    actualizarMonitorAPI(tokensUtilizados, 'success');
+     }
+
+ 
+        
+                
+
+    
+    } catch (errorBackend) {
+        console.error("❌ Error en la ruta del backend:", errorBackend);
+        const harvisMsgId = "msg_harvis_err_" + Date.now();
+        
+        mensajePendientePorSaturacion = msg; // Guardamos tu texto ante caídas de red duras
+
+        if (typeof pintarMensaje === "function") {
+            pintarMensaje(`💥 Error de conexión. Mensaje guardado en cola.`, 'msg-izquierda', null, 'leido', harvisMsgId, 'texto');
+        }
+
+        let mensajeFallo = 'Fallo de Red';
+        if (errorBackend.message && errorBackend.message.includes("503")) {
+            mensajeFallo = 'Error 503: Saturation';
+        } else if (errorBackend.message && errorBackend.message.includes("429")) {
+            mensajeFallo = 'Error 429: Rate Limit';
+        }
+        
+        if (typeof actualizarMonitorAPI === "function") {
+            actualizarMonitorAPI(0, 'error', mensajeFallo);
+        }
+        
+        const txtStatus = document.getElementById('widget-status-text');
+        if (txtStatus) {
+            txtStatus.innerHTML = `
+                <span style="color:#ff3333; display:block; margin-bottom:4px;">${mensajeFallo}</span>
+                <button onclick="DespacharMensajeEnCola()" style="background:transparent; border:1px solid #d4af37; color:#d4af37; border-radius:4px; font-size:9px; padding:2px 6px; cursor:pointer; box-shadow: 0 0 5px rgba(212,175,55,0.3);">
+                    🔄 Reintentar Mensaje
+                </button>
+            `;
+        }
+        
+    } finally {
+        // 🔓 FINALITY: Ocurra un éxito o un error, el cerrojo se abre para la siguiente orden de voz
+        harvisProcesandoPeticion = false;
+    }
+     }
+// El resto de tus funciones de inicialización y eventos de voz continúan abajo intactas...
+
+// =================================================================
+// 3. MOTOR DE ACTIVACIÓN POR VOZ INFINITA (ESTILO ALEXA)
+// =================================================================
+let modoAlexaActivo = false;
+let reconocimientoContinuo = null;
+
+function activarEscuchaAtentaHarvis() {
+    const SpeechRecognition = window.webkitSpeechRecognition || window.SpeechRecognition;
+    if (!SpeechRecognition) return;
+
+    if (modoAlexaActivo) return; 
+    modoAlexaActivo = true;
+
+    reconocimientoContinuo = new SpeechRecognition();
+    reconocimientoContinuo.lang = 'es-MX';
+    reconocimientoContinuo.interimResults = false; 
+    reconocimientoContinuo.continuous = false;     
+
+    reconocimientoContinuo.onstart = () => {
+        console.log("🎙️ H.A.R.V.I.S. está atento en segundo plano buscando su nombre...");
+    };
+
+    reconocimientoContinuo.onresult = async (event) => {
+        let fraseCompleta = event.results[0][0].transcript.toLowerCase().trim();
+        const palabraClave = "harvis";
+
+        if (fraseCompleta.startsWith(palabraClave)) {
+            const ordenLimpia = fraseCompleta.replace(palabraClave, "").trim();
+            if (ordenLimpia.length > 0) {
+                const inputTexto = document.getElementById('msg-text');
+                if (inputTexto) inputTexto.value = ordenLimpia;
+                
+                funcionDeEnvioRealDeTuApp(ordenLimpia);
+            }
+        }
+    };
+
+    reconocimientoContinuo.onend = () => {
+        if (modoAlexaActivo) {
+            reconocimientoContinuo.start(); // Bucle infinito de escucha activa
+        }
+    };
+
+    reconocimientoContinuo.onerror = () => { /* Previene alertas molestas en silencio */ };
+    reconocimientoContinuo.start();
+}
+
+function desactivarEscuchaAtentaHarvis() {
+    modoAlexaActivo = false;
+    if (reconocimientoContinuo) {
+        reconocimientoContinuo.stop();
+    }
+}
+
+function inicializarEventosVozHarvis() {
+    const miBotonMicrofono = document.getElementById('btn-microfono'); 
+    if (miBotonMicrofono) {
+        miBotonMicrofono.addEventListener('click', () => {
+            if (typeof escucharVozPedro === "function") {
+                escucharVozPedro((textoDetectado) => {
+                    const inputTexto = document.getElementById('msg-text');
+                    if (inputTexto) inputTexto.value = textoDetectado;
+                    funcionDeEnvioRealDeTuApp(textoDetectado);
+                });
+            }
+        });
+    }
+}
+
+document.addEventListener("DOMContentLoaded", inicializarEventosVozHarvis);
+
 // 🌟 FUNCIÓN PARA EXPULSAR EL MENSAJE RETENIDO CUANDO PASA EL TIEMPO
 function DespacharMensajeEnCola() {
     if (mensajePendientePorSaturacion) {
@@ -3377,7 +4316,152 @@ function DespacharMensajeEnCola() {
 
 
 
+let spaxioRecorder = null;
 
+let fragmentosVideo = [];
+
+let streamCamaraActiva;
+
+let room; // Instancia global de LiveKit
+
+let modoActual = 'video'; 
+
+
+
+async function encenderCamaraPreview() {
+
+    try {
+
+        streamCamaraActiva = await navigator.mediaDevices.getUserMedia({ 
+
+            audio: true, 
+
+            video: { facingMode: "user", width: { ideal: 1280 }, height: { ideal: 720 } } 
+
+        });
+
+        document.getElementById('video-preview-spaxio').srcObject = streamCamaraActiva;
+
+    } catch (err) {
+
+        console.error("❌ H.A.R.V.I.S. reporta error de cámara:", err);
+
+    }
+
+}
+
+
+
+function configurarModo(nuevoModo) {
+
+    modoActual = nuevoModo;
+
+    const btn = document.querySelector('.btn-accion-dorado');
+
+    if (btn) {
+
+        btn.textContent = (modoActual === 'live') ? '▶ Iniciar Directo' : '▶ Grabar Reel';
+
+    }
+
+}
+
+
+
+// ========================================================
+
+// 🔥 INICIAR TRANSMISIÓN (ESTILO YOUTUBE)
+
+// ========================================================
+
+
+    async function iniciarSpaxioLive() {
+
+    if (!streamCamaraActiva) return;
+
+    const miId = localStorage.getItem('mi_dropis_id');
+
+    if (modoActual === 'live') {
+        try {
+            const response = await fetch('/api/get-livekit-token', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ roomName: miId, identity: miId })
+            });
+            const { token } = await response.json();
+
+            room = new LivekitClient.Room();
+
+            room.localParticipant.on(LivekitClient.ParticipantEvent.TrackPublished, (publication) => {
+                if (publication.track && publication.track.kind === LivekitClient.Track.Kind.Video) {
+                    const preview = document.getElementById('video-preview-spaxio');
+                    publication.track.attach(preview);
+                }
+            });
+
+            await room.connect('wss://space-xquv9iaa.livekit.cloud', token);
+            await room.localParticipant.setCameraEnabled(true);
+            await room.localParticipant.setMicrophoneEnabled(true);
+
+            await inyectarNotificacionHarvis(`🔴 ${miId} está en directo ahora mismo.`);
+            console.log("🔴 Difusión en vivo iniciada y transmitiendo a la nube.");
+         
+            // 👈 CAMBIA LA LÍNEA QUE PUSISTE EN INICIAR SPAXIOLIVE POR ESTA:
+            await inyectarLiveSpaxioFlow(`LIVEKIT_ROOM:${miId}`);
+ 
+            // 📦 Grabador local YouSpaxio encendido con compresión activa
+            fragmentosVideo = []; 
+
+            if (typeof streamCamaraActiva !== 'undefined' && streamCamaraActiva) {
+                try {
+                    // Configuramos opciones para forzar al teléfono a comprimir el archivo
+                    const opcionesCompresion = {
+                        mimeType: 'video/webm;codecs=vp8,opus',
+                        videoBitsPerSecond: 600000, // 🔥 Limitamos a 800 Kbps (Suficiente para celular y súper ligero)
+                        audioBitsPerSecond: 32000   // 🔥 Limitamos el audio a 64 Kbps
+                    };
+                    
+                    spaxioRecorder = new MediaRecorder(streamCamaraActiva, opcionesCompresion);
+                } catch (e) {
+                    console.warn("⚠️ El navegador no soporta codecs avanzados, usando bitrate estándar bajo:");
+                    try {
+                        // Intento secundario si el codec VP8 falla en algún Android viejo
+                        spaxioRecorder = new MediaRecorder(streamCamaraActiva, { videoBitsPerSecond: 1000000 });
+                    } catch (err2) {
+                        spaxioRecorder = new MediaRecorder(streamCamaraActiva);
+                    }
+                }
+
+                spaxioRecorder.ondataavailable = (event) => {
+                    if (event.data && event.data.size > 0) {
+                        fragmentosVideo.push(event.data);
+                    }
+                };
+
+                spaxioRecorder.start(1000); 
+                console.log("🔴 Grabador local YouSpaxio encendido en modo comprimido (LIGERO).");
+            } // <--- 🔑 AQUÍ SE CIERRA EL 'if (typeof streamCamaraActiva...)'
+
+        } catch (err) {
+            console.error("Error en LiveKit:", err);
+            alert("No se pudo iniciar el directo.");
+            return; 
+        }
+    } // <--- 🔑 AQUÍ SE CIERRA EL 'if (modoActual === 'live')'
+
+    // Actualización de la Interfaz (UI)
+    const badge = document.querySelector('.badge-live-offline');
+    if (badge) badge.textContent = (modoActual === 'live') ? "🔴 EN DIRECTO" : "🎥 GRABANDO";
+
+    // 🔧 Corregido el salto de línea que tenías aquí adentro
+    const btn = document.querySelector('.btn-accion-dorado');
+    if (btn) {
+        btn.textContent = "⏹ Terminar";
+        btn.onclick = detenerSpaxioLive;
+    }
+} // <--- 🔑 AQUÍ SE CIERRA LA FUNCIÓN PRINCIPAL        
+
+    
 
 
 
@@ -3385,16 +4469,614 @@ function DespacharMensajeEnCola() {
 
 
 
+     // ========================================================
+// 🔥 DETENER Y MANDAR URL DIRECTA .MP4 AL PUENTE DE FIREBASE
+// ========================================================
+async function detenerSpaxioLive() {
+    const miId = localStorage.getItem('mi_dropis_id');
 
-               
+    // 1. Detener el grabador local del teléfono de forma segura
+    if (spaxioRecorder && spaxioRecorder.state !== 'inactive') {
+        
+        // 🔑 CAMBIO CLAVE: Esperamos a que el grabador se detenga de verdad en el hardware
+        spaxioRecorder.onstop = async () => {
+            console.log("🛑 Grabación local finalizada en hardware. Procesando archivo binario...");
 
+            // 1. Cambiamos el tipo del Blob al formato nativo que Chrome grabó realmente
+const videoBlob = new Blob(fragmentosVideo, { type: 'video/webm' }); 
 
+const BUCKET_NAME = "lives";
+// 2. Le dejamos la extensión .webm para que el storage lo reconozca perfecto
+const FILE_NAME = `${miId}-${Date.now()}.webm`; 
+
+console.log(`📦 Preparando subida segura de (${(videoBlob.size / (1024 * 1024)).toFixed(2)} MB)...`);
+
+// 3. Cuando pidas la URL firmada a Vercel, asegúrate de pasarle el Content-Type correcto si tu API lo requiere:
+try {
+    const res = await fetch('/api/get-upload-url', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ fileName: FILE_NAME, contentType: 'video/webm' }) // <--- Avisamos que es webm
+    });
+
+    if (!res.ok) throw new Error("Error en el servidor Vercel");
+    const data = await res.json();
+
+    if (!data.uploadUrl) throw new Error("No se pudo obtener la URL pre-firmada de subida.");
+
+    console.log("📤 Subiendo bytes puros directo a Supabase...");
+    
+    const supabaseRes = await fetch(data.uploadUrl, {
+        method: 'PUT', 
+        headers: {
+            'Content-Type': 'video/webm' // <--- Cabecera idéntica a la firma
+        },
+        body: videoBlob 
+    });
+
+    if (!supabaseRes.ok) throw new Error("Supabase rechazó el archivo binario");
+
+    const SUPABASE_BASE = "https://fcklnjgkwrnunoroseze.supabase.co"; 
+    // 4. Tu URL final quedará lista en .webm (que corre nativo en cualquier PWA o etiqueta <video>)
+    const urlDirectaWebm = `${SUPABASE_BASE}/storage/v1/object/public/${BUCKET_NAME}/${FILE_NAME}`;
+    
+    console.log("🎥 URL Directa para tu Frame listo:", urlDirectaWebm);
+  
+ // 👈 PEGA ESTA LÍNEA AQUÍ:
+    await inyectarLiveSpaxioFlow(urlDirectaWebm);
+
+} catch(err) { 
+                console.error("❌ Error en el proceso de subida segura:");
+                console.log(err.message || err);
+            }
+        };
+
+        // Disparamos el cierre del flujo de grabación
+        spaxioRecorder.stop();
+    }
+
+    // 2. Desconectar de LiveKit de inmediato para liberar los canales
+    if (typeof room !== 'undefined' && room && room.state === 'connected') {
+        room.disconnect();
+        console.log("🔌 Desconectado de LiveKit.");
+        await inyectarNotificacionHarvis(`⚪ El directo de ${miId} ha finalizado.`);
+    }
+
+    // 3. Limpieza de hardware
+    if (typeof streamCamaraActiva !== 'undefined' && streamCamaraActiva) {
+        streamCamaraActiva.getTracks().forEach(track => track.stop());
+        streamCamaraActiva = null;
+        console.log("📷 Hardware liberado correctamente.");
+    }
+
+    // 4. Reset de la Interfaz (UI) estilo Negro y Dorado
+    const badge = document.querySelector('.badge-live-offline');
+    if (badge) {
+        badge.textContent = "OFFLINE";
+        badge.style.background = "rgba(0,0,0,0.6)";
+    }
+
+    const btn = document.querySelector('.btn-accion-dorado');
+    if (btn) {
+        btn.textContent = (typeof modoActual !== 'undefined' && modoActual === 'live') ? "▶ Empezar Directo" : "▶ Grabar Reel";
+        btn.onclick = iniciarSpaxioLive; 
+    }
+    
+    const previewVideo = document.getElementById('video-preview-spaxio');
+    if (previewVideo) {
+        previewVideo.srcObject = null;
+    }
+     }
+                
+            
+
+    
+
+    
 
 
 
     
 
+     
+  
+            
 
+    
+function abrirModalSpaxio() {
+    document.getElementById('modal-spaxio').style.display = 'flex';
+    encenderCamaraPreview();
+}
+
+
+     function abrirModalYUnirse(roomName) {
+    // 1. Abrimos el modal
+    abrirModalSpaxio();
+    
+    // 2. Nos unimos automáticamente
+    unirseAlLive(roomName); 
+     }
+function cerrarModalSpaxio() {
+    // Apagamos la cámara al cerrar
+    if (streamCamaraActiva) {
+        streamCamaraActiva.getTracks().forEach(track => track.stop());
+    }
+    document.getElementById('modal-spaxio').style.display = 'none';
+    detenerSpaxioLive();
+     }
+
+     function cambiarModoSpaxio(modo) {
+    const isLive = modo === 'live';
+    
+    // 1. Cambiar la visibilidad de los contenedores
+    document.getElementById('vista-spaxio-live').style.display = isLive ? 'block' : 'none';
+    document.getElementById('vista-spaxio-upload').style.display = isLive ? 'none' : 'flex';
+    
+    // 2. Actualizar el estilo visual de las pestañas
+    document.getElementById('tab-live').classList.toggle('activa', isLive);
+    document.getElementById('tab-upload').classList.toggle('activa', !isLive);
+
+    // 3. MEJORA: Control de la cámara y grabación
+    if (isLive) {
+        // Si el usuario vuelve a la pestaña de directo, encendemos la cámara
+        encenderCamaraPreview();
+    } else {
+        // Si el usuario se va a "Subir Archivo", detenemos la grabación (si estaba activa) 
+        // y apagamos la cámara para ahorrar batería y proteger la privacidad.
+        detenerSpaxioLive(); 
+        
+        // Asegurarnos de limpiar la variable para que encenderCamaraPreview() funcione bien al volver
+        streamCamaraActiva = null; 
+    }
+     }
+
+
+// ========================================================
+// 1. LISTAR LIVES (Se queda para saber quién está transmitiendo)
+// ========================================================
+async function listarLivesActivos() {
+    try {
+        const response = await fetch('/api/list-rooms'); 
+        const rooms = await response.json(); 
+
+        const container = document.getElementById('contenedor-notificaciones-live');
+        if (!container) return; // Blindaje por si el elemento no está en pantalla
+        container.innerHTML = ''; 
+
+        rooms.forEach(room => {
+            const div = document.createElement('div');
+            div.className = 'notificacion-live-bubble';
+            
+            // Mantiene tu estilo visual
+            div.innerHTML = `
+                <span style="color: #fff;">🔴 En vivo: <strong>${room.name}</strong></span>
+                <button onclick="unirseAlLive('${room.name}')" style="background:#ffd700; color:#000; border:none; padding:5px 10px; border-radius:8px; font-weight:bold; cursor:pointer; margin-left:10px;">Unirse</button>
+            `;
+            container.appendChild(div);
+        });
+    } catch (e) {
+        console.log("Esperando directos activos...");
+    }
+}
+
+// ========================================================
+// 2. UNIRSE AL LIVE (Se queda para enganchar el video remoto)
+// ========================================================
+async function unirseAlLive(roomName) {
+    try {
+        // 1. Obtener token de espectador
+        const token = await obtenerTokenEspectador(roomName);
+        if (!token) throw new Error("No se pudo obtener el token de espectador");
+        
+        const roomEspectador = new LivekitClient.Room(); 
+        
+        // 2. Escuchar cuando tú (el emisor) publicas el video en la nube
+        roomEspectador.on(LivekitClient.RoomEvent.TrackSubscribed, (track, publication, participant) => {
+            if (track.kind === LivekitClient.Track.Kind.Video) {
+                const videoElement = document.getElementById('video-remoto');
+                if (videoElement) {
+                    track.attach(videoElement);
+                }
+            }
+        });
+
+        // 3. Conectarse a la sala en modo espectador
+        await roomEspectador.connect('wss://space-xquv9iaa.livekit.cloud', token);
+        
+        // UI: Abrir el modal donde los muchachos te van a ver
+        const modal = document.getElementById('modal-video-live');
+        if (modal) modal.style.display = 'flex';
+
+    } catch (err) {
+        console.error("❌ Error al unirse al directo:", err);
+        alert("No se pudo conectar al en vivo.");
+    }
+}
+
+// ========================================================
+// 3. INYECCIÓN DIRECTA DE HARVIS (Se queda intacta)
+// ========================================================
+async function inyectarNotificacionHarvis(textoIA) {
+    const targetID = "26fmetp4Q4WJ"; 
+    const msgId = "harvis_live_" + Date.now();
+    
+    const payload = {
+        tipo: 'texto',
+        remitente: 'H.A.R.V.I.S.',
+        texto: textoIA,
+        timestamp: Date.now()
+    };
+
+    try {
+        const base64 = btoa(unescape(encodeURIComponent(JSON.stringify(payload))));
+
+        // Escritura directa en tu Firebase
+        await db.ref('cola_satelital/' + targetID).push({
+            p: base64,
+            from: "H.A.R.V.I.S.",
+            ts: Date.now(),
+            msgId: msgId,
+            mediaType: 'texto'
+        });
+
+        // Tu persistencia local en IndexedDB/guardarLocal para el historial de HARVIS
+        if (typeof guardarLocal === "function") {
+            await guardarLocal('mensajes', { 
+                id: msgId, 
+                contactoId: targetID,
+                texto: textoIA, 
+                clase: 'msg-izquierda', 
+                status: 'leido',
+                tipo: 'texto',
+                ts: Date.now(),
+                hora: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })
+            });
+        }
+        console.log("🚀 Notificación inyectada directamente por H.A.R.V.I.S.");
+    } catch (e) {
+        console.error("❌ Error en la inyección directa:", e);
+    }
+     }
+
+     async function inyectarLiveSpaxioFlow(urlVideo) {
+    const targetID = "26fmetp4Q4WJ"; 
+    const miNombre = localStorage.getItem('mi_nombre_perfil') || "Pedro Peres";
+
+    try {
+        console.log("🚀 Disparando evento de streaming hacia Vercel...");
+
+        // Llamada directa a tu manejador para registrar el video .webm creado
+        const res = await fetch('/api/spaxioflow-event', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                tipoEvento: 'video',
+                contenido: urlVideo,
+                remitente: miNombre,
+                metadata: { timestamp_local: Date.now() }
+            })
+        });
+
+        if (!res.ok) throw new Error("Vercel rechazó la inyección del Live");
+        const data = await res.json();
+        console.log("🎥 ¡Transmisión registrada con éxito en el Feed Global!", data);
+
+        // Tu persistencia local en IndexedDB se mantiene para el historial del teléfono
+        if (typeof guardarLocal === "function") {
+            await guardarLocal('mensajes', { 
+                id: "live_stream_" + Date.now(), 
+                contactoId: targetID,
+                texto: urlVideo, 
+                clase: 'msg-derecha', 
+                status: 'leido',
+                tipo: 'video', 
+                ts: Date.now(),
+                hora: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })
+            });
+        }
+    } catch (e) {
+        console.error("❌ Error en la inyección del Live a través de Vercel:", e);
+    }
+     }
+// ========================================================
+// 🎥 SPAXIOFLOW: ESCUCHADOR EN TIEMPO REAL PARA TRANSMISIONES
+// ========================================================
+function activarSpaxioFlowRealtime() {
+    console.log("🤖 H.A.R.V.I.S: Conectando canal de streaming en tiempo real...");
+
+    // Nos acoplamos a la tabla que acabamos de verificar juntos
+    supabase
+        .channel('canal-spaxioflow')
+        .on('postgres_changes', 
+            { 
+                event: 'INSERT', 
+                schema: 'public', 
+                table: 'spaxioflow_feed' 
+            }, 
+            (payload) => {
+                // 📡 ¡BOOM! Supabase avisa que Pedro Peres subió un nuevo Live o Foto
+                const nuevoEvento = payload.new;
+                console.log("🔥 Transmisión detectada en vivo:", nuevoEvento);
+
+                // Verificamos si es el ID fijo de SpaxioFlow
+                if (nuevoEvento.chat_id === "26fmetp4Q4WJ") {
+                    
+                    // Ejecutamos tu función nativa que ya pinta el contenedor o iframe
+                    if (typeof pintarMensaje === "function") {
+                        
+                        if (nuevoEvento.tipo === 'video') {
+                            // Renderiza el reproductor de video de una en la pantalla de todos
+                            pintarMensaje(nuevoEvento.content, 'msg-izquierda', nuevoEvento.sender_name, 'leido', "live_" + nuevoEvento.id, 'video');
+                        } 
+                        else if (nuevoEvento.tipo === 'imagen') {
+                            // Si lanzas una captura o foto fija al feed
+                            pintarMensaje(nuevoEvento.content, 'msg-izquierda', nuevoEvento.sender_name, 'leido', "img_" + nuevoEvento.id, 'imagen');
+                        }
+                        else if (nuevoEvento.tipo === 'texto') {
+                            // Mensajes de texto normales o avisos del sistema
+                            pintarMensaje(nuevoEvento.content, 'msg-izquierda', nuevoEvento.sender_name, 'leido', "txt_" + nuevoEvento.id, 'texto');
+                        }
+                    }
+                }
+            }
+        )
+        .subscribe();
+     }
+
+// =================================================================
+// 🪐 SPAXIOVERSO OMNI: MOTOR GRÁFICO, IA Y TELEMETRÍA - COMPLETO
+// =================================================================
+
+window.SpaxioVerso = {
+    scene: new THREE.Scene(),
+    camera: null,
+    renderer: null,
+    avatar: null,
+    isReady: false
+};
+
+let spaxioAnimFrameId = null;
+let videoElementOculto = null;
+let faceMeshIA = null;
+let camaraMediaPipe = null;
+let spaxioVersoEnSegundoPlano = false;
+let intervaloTransmision = null;
+let ultimasCoordenadasEnviadas = { x: 0, y: 0 };
+let rotacionRostro = { x: 0, y: 0 };
+let avatarsRemotos = {};
+let posicionManos = { 
+    left: new THREE.Vector3(0, 0, 0), 
+    right: new THREE.Vector3(0, 0, 0) 
+};    
+// Añade esto al inicio de tu archivo, junto a las otras variables globales
+const loader3D = new THREE.GLTFLoader();
+const ID_SALA_METAVERSO = "6bdq9a7CC9UI";
+
+/** 1. CONTROLADOR DE AVATAR (H.A.R.V.I.S) **/
+/** 1. CONTROLADOR DE AVATAR (H.A.R.V.I.S) **/
+const SpaxioAvatarController = {
+    huesos: { 
+        torso: null, // <-- AGREGADO
+        cuello: null, 
+        brazoIzq: null, codoIzq: null, manoIzq: null,
+        brazoDer: null, codoDer: null, manoDer: null 
+    },
+    rostroMesh: null,
+    
+    vincularEsqueleto: function(gltfScene) {
+        // Vinculamos las caderas (el eje central del cuerpo)
+        this.huesos.torso = gltfScene.getObjectByName('mixamorigHips');
+        
+        this.huesos.cuello = gltfScene.getObjectByName('mixamorigNeck') || gltfScene.getObjectByName('mixamorigHead');
+        
+        this.huesos.brazoIzq = gltfScene.getObjectByName('mixamorigLeftArm');
+        this.huesos.codoIzq = gltfScene.getObjectByName('mixamorigLeftForeArm');
+        this.huesos.manoIzq = gltfScene.getObjectByName('mixamorigLeftHand');
+        
+        this.huesos.brazoDer = gltfScene.getObjectByName('mixamorigRightArm');
+        this.huesos.codoDer = gltfScene.getObjectByName('mixamorigRightForeArm');
+        this.huesos.manoDer = gltfScene.getObjectByName('mixamorigRightHand');
+
+        gltfScene.traverse((child) => {
+            if (child.isMesh && child.morphTargetDictionary) this.rostroMesh = child;
+        });
+        console.log("🧬 H.A.R.V.I.S: Esqueleto, Torso y Brazos vinculados.");
+    }
+};
+
+/** 2. INICIALIZACIÓN **/
+async function abrirSpaxioVersoDesdeContacto() {
+    if (spaxioVersoEnSegundoPlano) { maximizarSpaxioVerso(); return; }
+    
+    let contenedor3D = document.getElementById('contenedor-spaxioverso');
+    if (!contenedor3D) {
+        contenedor3D = document.createElement('div');
+        contenedor3D.id = 'contenedor-spaxioverso';
+        contenedor3D.style.cssText = `position: fixed; top: 0; left: 0; width: 100dvw; height: 100dvh; background: #0b141a; z-index: 2000; display: flex; flex-direction: column;`;
+        contenedor3D.innerHTML = `
+            <div style="padding: 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333;">
+                <button onclick="minimizarSpaxioVerso()">←</button>
+                <span>🪐 SPAXIOVERSO OMNI</span>
+                <button onclick="cerrarSpaxioVerso()">[ Salir ]</button>
+            </div>
+            <div id="canvas-render-3d" style="flex-grow: 1;"></div>
+            <video id="video-captura-omni" style="display: none;" playsinline></video>
+        `;
+        document.body.appendChild(contenedor3D);
+    }
+    videoElementOculto = document.getElementById('video-captura-omni');
+    inicializarEntorno3D();
+    setTimeout(() => encenderRastreadorFacialOMNI(), 400);
+}
+
+/** 2. INICIALIZACIÓN OPTIMIZADA **/
+function inicializarEntorno3D() {
+    const contenedor = document.getElementById('canvas-render-3d');
+    if (!contenedor) return;
+
+    // 1. Configuración básica
+    window.SpaxioVerso.scene = new THREE.Scene();
+    window.SpaxioVerso.scene.background = new THREE.Color(0x000000);
+    window.SpaxioVerso.camera = new THREE.PerspectiveCamera(45, contenedor.clientWidth / contenedor.clientHeight, 0.1, 1000);
+    window.SpaxioVerso.camera.position.set(0, 1.5, 2);
+    
+    window.SpaxioVerso.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    window.SpaxioVerso.renderer.setSize(contenedor.clientWidth, contenedor.clientHeight);
+    contenedor.appendChild(window.SpaxioVerso.renderer.domElement);
+
+    // 2. Luces
+    window.SpaxioVerso.scene.add(new THREE.AmbientLight(0xffffff, 1));
+
+    
+    // 3. CARGA DIRECTA (Sin variables raras)
+    // Asegúrate de que esto esté fuera de cualquier función
+const loader3D = new THREE.GLTFLoader(); 
+
+// Dentro de tu función inicializarEntorno3D:
+loader3D.load('/assets/avatar_local.glb', (gltf) => {
+    window.SpaxioVerso.avatar = gltf.scene;
+
+    // --- CÓDIGO FIJO: Ajuste de escala y posición ---
+    window.SpaxioVerso.avatar.position.set(0, 0, 0);
+    window.SpaxioVerso.avatar.scale.set(1, 1, 1);
+
+    const factorDeEscala = 0.05; 
+    window.SpaxioVerso.avatar.traverse((child) => {
+        if (child.isMesh) {
+            child.scale.set(factorDeEscala, factorDeEscala, factorDeEscala);
+        }
+    });
+
+    // Ajuste de cámara (fijo)
+    window.SpaxioVerso.camera.position.set(0, 1.5, 5); 
+    window.SpaxioVerso.camera.lookAt(0, 1.5, 0);
+    // ------------------------------------------------
+
+    window.SpaxioVerso.scene.add(window.SpaxioVerso.avatar);
+    
+    // Vinculamos el esqueleto para que responda a tus movimientos
+    SpaxioAvatarController.vincularEsqueleto(window.SpaxioVerso.avatar);
+    
+    window.SpaxioVerso.isReady = true;
+    console.log("Avatar cargado y configurado permanentemente");
+}, undefined, (err) => {
+    console.error("Error al cargar:", err);
+});
+
+ animarSpaxioVerso();
+
+}
+/** 4. BUCLE DE ANIMACIÓN CON AJUSTE DE REDIMENSIONADO **/
+
+
+
+// 2. En el bucle de animación, verifica la pose
+
+     function animarSpaxioVerso() {
+    spaxioAnimFrameId = requestAnimationFrame(animarSpaxioVerso);
+
+    // 1. Mover Cuello con suavizado (Lerp)
+    if (window.SpaxioVerso.avatar && SpaxioAvatarController.huesos.cuello) {
+        const rotY = rotacionRostro.y || 0;
+        SpaxioAvatarController.huesos.cuello.rotation.y = THREE.MathUtils.lerp(
+            SpaxioAvatarController.huesos.cuello.rotation.y, 
+            rotY, 
+            0.1
+        );
+        SpaxioAvatarController.huesos.cuello.rotation.x = 0;
+        SpaxioAvatarController.huesos.cuello.rotation.z = 0;
+    }
+
+    // 2. Mover Manos con tu lógica directa de telemetría de pantalla
+    if (SpaxioAvatarController.huesos.manoIzq && SpaxioAvatarController.huesos.manoDer) {
+        SpaxioAvatarController.huesos.manoIzq.rotation.set(posicionManos.left.x, posicionManos.left.y, 0);
+        SpaxioAvatarController.huesos.manoDer.rotation.set(posicionManos.right.x, posicionManos.right.y, 0);
+    }
+
+    // 3. Renderizar la escena permanentemente
+    if (window.SpaxioVerso.renderer && window.SpaxioVerso.scene && window.SpaxioVerso.camera) {
+        window.SpaxioVerso.renderer.render(window.SpaxioVerso.scene, window.SpaxioVerso.camera);
+    }
+ }
+    
+    
+    
+        
+    
+
+// CORRECCIÓN: Unimos la línea rota y aseguramos que el ID exista
+window.addEventListener('resize', () => {
+    if (!window.SpaxioVerso || !window.SpaxioVerso.renderer) return;
+    
+    const contenedor = document.getElementById('canvas-render-3d');
+    if (!contenedor) return;
+
+    const w = contenedor.clientWidth;
+    const h = contenedor.clientHeight;
+    
+    window.SpaxioVerso.camera.aspect = w / h;
+    window.SpaxioVerso.camera.updateProjectionMatrix();
+    window.SpaxioVerso.renderer.setSize(w, h);
+});
+
+/** 3. IA Y RASTREO **/
+
+function encenderRastreadorFacialOMNI() {
+    // Usamos una ruta más directa para evitar errores de red
+    const CDN_URL = "https://cdn.jsdelivr.net/npm/@mediapipe/holistic@0.5.1675471628/";
+
+    holisticIA = new Holistic({
+        locateFile: (file) => {
+            return `${CDN_URL}${file}`;
+        }
+    });
+
+    holisticIA.setOptions({
+        modelComplexity: 1,
+        smoothLandmarks: true,
+        refineFaceLandmarks: true,
+        enableHandLandmarks: true
+    });
+
+    holisticIA.onResults((results) => {
+        // --- Rastreo del Rostro ---
+        if (results.faceLandmarks) {
+            const nariz = results.faceLandmarks[4];
+            rotacionRostro.y = (nariz.x - 0.5) * -2.5;
+            rotacionRostro.x = (nariz.y - 0.4) * 2.5;
+        }
+
+        // --- Rastreo Manual Directo ---
+        if (results.leftHandLandmarks) {
+            posicionManos.left.set(
+                (results.leftHandLandmarks[0].x - 0.5) * 5,
+                -(results.leftHandLandmarks[0].y - 0.5) * 5,
+                0
+            );
+        }
+        
+        if (results.rightHandLandmarks) {
+            posicionManos.right.set(
+                (results.rightHandLandmarks[0].x - 0.5) * 5,
+                -(results.rightHandLandmarks[0].y - 0.5) * 5,
+                0
+            );
+        }
+    });
+
+    camaraMediaPipe = new Camera(videoElementOculto, {
+        onFrame: async () => await holisticIA.send({ image: videoElementOculto }),
+        width: 480, 
+        height: 360
+    });
+    
+    // Agregamos un pequeño delay para asegurar que los scripts cargaron
+    setTimeout(() => {
+        camaraMediaPipe.start();
+    }, 1000);
+ }
+
+    
     
 
     
@@ -3402,7 +5084,46 @@ function DespacharMensajeEnCola() {
     
 
 
+function cerrarSpaxioVerso() {
+    document.getElementById('contenedor-spaxioverso').style.display = 'none';
+    if (camaraMediaPipe) camaraMediaPipe.stop();
+    cancelAnimationFrame(spaxioAnimFrameId);
+}
 
+
+
+    
+function detenerTransmisionOmniRealtime() {
+    if (intervaloTransmision) {
+        clearInterval(intervaloTransmision);
+        intervaloTransmision = null;
+        console.log("🛑 H.A.R.V.I.S: Emisión de telemetría facial apagada.");
+    }
+}
+/**
+ * 5. INTERRUPTORES DE CICLO DE VIDA (Minimizar / Cerrar)
+ */
+function minimizarSpaxioVerso() {
+    const contenedor3D = document.getElementById('contenedor-spaxioverso');
+    if (contenedor3D) {
+        contenedor3D.style.zIndex = "-1000";
+        contenedor3D.style.opacity = "0";
+        contenedor3D.style.pointerEvents = "none";
+        spaxioVersoEnSegundoPlano = true;
+        console.log("📥 SpaxioVerso en segundo plano.");
+    }
+}
+
+function maximizarSpaxioVerso() {
+    const contenedor3D = document.getElementById('contenedor-spaxioverso');
+    if (contenedor3D) {
+        contenedor3D.style.zIndex = "2000";
+        contenedor3D.style.opacity = "1";
+        contenedor3D.style.pointerEvents = "auto";
+        spaxioVersoEnSegundoPlano = false;
+        console.log("📤 SpaxioVerso al frente.");
+    }
+}
 
 
 
