@@ -919,9 +919,12 @@ margin: 0;
         </button>
     </div>
 </div>-->
- <div class="btn-nav-cal" onclick="switchView('calc', this)">
-    <i>📊</i><span>Tasas / Calc</span>
- </div>
+<button onclick="abrirCalculadora()" 
+                style="background: none; border: none; color: #ffd700; font-size: 22px; cursor: pointer; padding: 5px; transition: transform 0.2s;"
+                onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
+            📊
+        </button>
+</div>
 
  <div id="chat-box">
  </div>
@@ -1110,26 +1113,16 @@ margin: 0;
             + 
         </button>
 
+
 <div class="barra-flotante-premium">
     <div class="btn-nav" onclick="abrirAgendaCompleta();">
         <span>👥</span><span>Contactos</span>
     </div>
     
-    <div class="btn-nav" 
-     id="btn-nav-harvis" 
-     data-contacto='{"id_sistema":"uo4kb3tGHH7J","nombre":"H.A.R.V.I.S.","apellido":"1.0","estado":"activo"}'
-     onclick="cargarConversacionCon(JSON.parse(this.dataset.contacto).id_sistema)">
-        <span style="text-shadow: 0 0 8px #ffd700;">🤖</span><span style="color: #ffd700;">H.A.R.V.I.S.</span>
-    </div>
 
-<!-- Ejemplo para Spaxio Flow -->
-<div class="btn-nav" 
-     id="btn-nav-flow" 
-     data-contacto='{"id_sistema":"26fmetp4Q4WJ","nombre":"Spaxio","apellido":"Flow","estado":"activo"}'
-     onclick="cargarConversacionCon(JSON.parse(this.dataset.contacto).id_sistema)">
-        <span style="text-shadow: 0 0 8px #00d4ff;">🌊</span><span style="color: #00d4ff;">Spaxio Flow</span>
-    </div>
-
+<div class="btn-nav" onclick="abrirCalculadora();">
+        <span>📊</span><span>Calculadora</span>
+</div>
 
 
     <div class="btn-nav active" onclick="document.getElementById('modal-agenda-completa').style.display='none'">
@@ -1287,10 +1280,13 @@ margin: 0;
 
 
   
-<div id="view-calc" class="app-view">
+<div id="modal-cal" class="modal-cal" style="display: none;">
+    <div class="modal-contenido">
+        <!-- Tus elementos y botones de la calculadora -->
+        
         <div class="header" style="justify-content: space-between; padding: 0 20px;">
             <span style="font-weight: bold; color: #ffd700; font-size: 18px; text-transform: uppercase;">Real Market Elite</span>
-            <div onclick="abrirModalQR()" style="cursor: pointer; color: #ffd700; font-size: 20px;"><i class="fas fa-qrcode"></i></div>
+            <div onclick="abrirCalculadora()" style="cursor: pointer; color: #ffd700; font-size: 20px;"><i class="fas fa-qrcode"></i></div>
         </div>
 
         <div class="calc-body">
@@ -1328,18 +1324,19 @@ margin: 0;
     alert("🚨 ERROR DETECTADO:\n\n" + message + "\n\nArchivo: " + source + "\nLínea: " + lineno);
     return false;
 };
-         function switchView(viewName, element) {
-    // Oculta todas las vistas
-    document.querySelectorAll('.app-view').forEach(view => {
-        view.style.display = 'none';
-    });
-    
-    // Muestra específicamente la vista que coincide con el ID (ej: view-calc)
-    const targetView = document.getElementById('view-' + viewName);
-    if (targetView) {
-        targetView.style.display = 'block';
+         function abrirCalculadora() {
+    const modalCalc = document.getElementById('modal-calculadora');
+    if (modalCalc) {
+        modalCalc.style.display = 'block'; // O el estilo flex/grid que uses para mostrarlo
     }
-     }       
+}
+
+function cerrarCalculadora() {
+    const modalCalc = document.getElementById('modal-calculadora');
+    if (modalCalc) {
+        modalCalc.style.display = 'none';
+    }
+     }
 
         // 1. CONFIGURACIÓN Y REGISTRO DE ANTENA (INDISPENSABLE PARA EL TOKEN)
         
