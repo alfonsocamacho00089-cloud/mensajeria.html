@@ -1327,6 +1327,59 @@ margin: 0;
     alert("🚨 ERROR DETECTADO:\n\n" + message + "\n\nArchivo: " + source + "\nLínea: " + lineno);
     return false;
 };
+
+     // --- MOTOR DE TASAS (DROPISAPP INTEGRADOR) ---
+        let tApi = { bcv: 36.5, euro: 39.2, p2p: 41.5 };
+        let tasaSeleccionada = 'bcv';
+
+        function selectTasa(tipo) {
+            tasaSeleccionada = tipo;
+            document.getElementById('cardBCV').classList.toggle('selected', tipo === 'bcv');
+            document.getElementById('cardEuro').classList.toggle('selected', tipo === 'euro');
+            calcularTasasPanel();
+        }
+
+        async function cargarTasasDropdown() {
+            try {
+                const res = await fetch("https://raw.githubusercontent.com/alfonsocamacho00089-cloud/BcvEuroapp.py/main/Bcveuro_vigente.json");
+                const data = await res.json();
+                if (data && data.length > 0) {
+                    tApi.bcv = parseFloat(data[0].precio_dolar) || 36.5;
+                    tApi.euro = parseFloat(data[0].precio_euro) || 39.2;
+                }
+            } catch (e) { console.log("Usando tasas predeterminadas BCV"); }
+
+            try {
+                const resP = await fetch("https://raw.githubusercontent.com/alfonsocamacho00089-cloud/P2papp.py/main/p2p.json");
+                const dataP = await resP.json();
+                if (dataP && dataP.binance_p2p) {
+                    tApi.p2p = Math.max(...Object.values(dataP.binance_p2p.ventas_sell)) || 41.5;
+                }
+            } catch (e) { console.log("Usando tasas P2P base"); }
+
+            document.getElementById('bcvRate').value = tApi.bcv.toFixed(2);
+            document.getElementById('euroRate').value = tApi.euro.toFixed(2);
+            document.getElementById('p2pRate').value = tApi.p2p.toFixed(2);
+            calcularTasasPanel();
+        }
+
+        function calcularTasasPanel() {
+            const pUSD = parseFloat(document.getElementById('priceUSD').value) || 0;
+            const tBase = (tasaSeleccionada === 'bcv') ? tApi.bcv : tApi.euro;
+            const nombreTasa = (tasaSeleccionada === 'bcv') ? "BCV" : "EURO";
+
+            const baseBS = pUSD * tBase;
+            const igtfBS = baseBS * 0.03;
+            const totalBS = baseBS + igtfBS;
+            const totalUSDT = tApi.p2p > 0 ? (totalBS / tApi.p2p) : 0;
+
+            document.getElementById('labelVES').textContent = `${nombreTasa} ${baseBS.toLocaleString('es-VE', {minimumFractionDigits:2})} + IGTF`;
+            document.getElementById('totalVES').value = totalBS.toLocaleString('es-VE', {minimumFractionDigits:2}) + " Bs";
+            document.getElementById('totalUSDT').value = totalUSDT.toFixed(2);
+        }
+
+        document.getElementById('priceUSD').addEventListener('input', calcularTasasPanel);
+     
          function abrirCalculadora() {
     const modalCalc = document.getElementById('modal-calculadora');
     if (modalCalc) {
