@@ -1561,9 +1561,15 @@ margin: 0;
          function abrirCalculadora() {
     const modalCalc = document.getElementById('modal-calculadora');
     if (modalCalc) {
-        modalCalc.style.display = 'flex'; // Usamos flex o block según prefieras para centrarlo
+        modalCalc.style.display = 'flex';
+        // Forzamos la carga de tasas y el cálculo justo cuando se abre el modal
+        if (typeof cargarTasasDropdown === 'function') {
+            cargarTasasDropdown();
+        } else {
+            calcularTasasPanel();
+        }
     }
-}
+     }
 
 function cerrarCalculadora() {
     const modalCalc = document.getElementById('modal-calculadora');
