@@ -1148,10 +1148,11 @@ margin: 0;
         <span>💬</span><span>Chat</span>
     </div>
     <!-- Botón agregado para abrir el modal Spaxio -->
-    <div class="btn-nav" onclick="abrirSpaxio();">
+    
+    <div class="btn-nav" onclick="abrirSpaxiocard();">
         <span>🪐</span><span>Spaxio</span>
     </div>
-</div>
+    </div>
      
  <div id="modal-nuevocontacto" class="modal" style="display: none; align-items: center; justify-content: center; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #1e222b; z-index: 30000;">
     
@@ -1359,16 +1360,16 @@ margin: 0;
 
 
 <!-- ==================== MODAL PRINCIPAL: SPAXIOGIFSCARD ==================== -->
-<div id="modal-spaxio" class="modal" style="display: none;">
+<div id="modal-spaxiocard" class="modal" style="display: none;">
     <div class="modal-content" style="text-align: center; max-width: 400px; margin: auto;">
         
-        <!-- Cabecera del Modal (Igual a la calculadora) -->
+        <!-- Cabecera del Modal -->
         <div class="header" style="display: flex; justify-content: space-between; align-items: center; padding: 10px 20px; border-bottom: 1px solid #1f2235; margin-bottom: 15px;">
             <div style="text-align: left;">
                 <span style="font-size: 18px; font-weight: bold; letter-spacing: 2px; color: #5b61e2; text-transform: uppercase;">Spaxiogifscard</span>
                 <p style="color: #63688a; margin: 2px 0 0 0; font-size: 11px;">Gifs Card sin comisiones bancarias</p>
             </div>
-            <div onclick="cerrarSpaxio()" style="cursor: pointer; color: #5b61e2; font-size: 20px; font-weight: bold;">✕</div>
+            <div onclick="cerrarSpaxiocard()" style="cursor: pointer; color: #5b61e2; font-size: 20px; font-weight: bold;">✕</div>
         </div>
 
         <!-- Cuerpo de la Tarjeta -->
@@ -1388,7 +1389,7 @@ margin: 0;
         </div>
 
         <!-- Botón de Cerrar inferior -->
-        <button onclick="cerrarSpaxio()" style="margin: 20px; padding: 12px; background: #5b61e2; color: #fff; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; width: calc(100% - 40px);">Cerrar</button>
+        <button onclick="cerrarSpaxiocard()" style="margin: 20px; padding: 12px; background: #5b61e2; color: #fff; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; width: calc(100% - 40px);">Cerrar</button>
     </div>
 </div>
 
@@ -1442,7 +1443,9 @@ margin: 0;
     return false;
 };
 
-     // --- LÓGICA DE SPAXIOGIFSCARD (MODAL) ---
+     
+
+// --- LÓGICA DE SPAXIOGIFSCARD (MODAL) ---
 
 const usuarioSesionSpaxio = {
     id: "V-26123456",
@@ -1452,17 +1455,17 @@ const usuarioSesionSpaxio = {
 };
 
 // Abrir el modal principal de Spaxio desde la barra
-function abrirSpaxio() {
-    const modal = document.getElementById('modal-spaxio');
+function abrirSpaxiocard() {
+    const modal = document.getElementById('modal-spaxiocard');
     if (modal) {
         modal.style.display = 'block';
-        inicializarSpaxioCard(); // Carga los datos y el QR automáticamente al abrir
+        inicializarSpaxiocard(); // Carga los datos y el QR automáticamente al abrir
     }
 }
 
 // Cerrar el modal principal de Spaxio
-function cerrarSpaxio() {
-    const modal = document.getElementById('modal-spaxio');
+function cerrarSpaxiocard() {
+    const modal = document.getElementById('modal-spaxiocard');
     if (modal) {
         modal.style.display = 'none';
     }
@@ -1470,7 +1473,7 @@ function cerrarSpaxio() {
 }
 
 // Inicializador de datos y QR
-function inicializarSpaxioCard() {
+function inicializarSpaxiocard() {
     const elBalance = document.getElementById('balanceVisual');
     const elTitular = document.getElementById('nombreTitular');
     const elTxtQR = document.getElementById('idTextoQR');
@@ -1492,7 +1495,7 @@ function inicializarSpaxioCard() {
     }
 }
 
-// Control de Submodales interni (Cargar, Pagar, QR)
+// Control de Submodales (Cargar, Pagar, QR)
 function abrirSubModalSpace(idModal) {
     const overlay = document.getElementById('blurOverlay');
     const modal = document.getElementById(idModal);
@@ -1523,7 +1526,9 @@ async function procesarCargaBanco() {
     
     usuarioSesionSpaxio.saldo += monto;
     const elBalance = document.getElementById('balanceVisual');
-    if (elBalance) elBalance.innerText = "Bs. " + usuarioSesionSpaxio.saldo.toLocaleString('es-VE', {minimumFractionDigits: 2});
+    if (elBalance) {
+        elBalance.innerText = "Bs. " + usuarioSesionSpaxio.saldo.toLocaleString('es-VE', {minimumFractionDigits: 2});
+    }
     cerrarTodosLosModalesSpace();
 }
 
@@ -1544,7 +1549,9 @@ async function procesarEnvioInterno() {
 
     usuarioSesionSpaxio.saldo -= monto;
     const elBalance = document.getElementById('balanceVisual');
-    if (elBalance) elBalance.innerText = "Bs. " + usuarioSesionSpaxio.saldo.toLocaleString('es-VE', {minimumFractionDigits: 2});
+    if (elBalance) {
+        elBalance.innerText = "Bs. " + usuarioSesionSpaxio.saldo.toLocaleString('es-VE', {minimumFractionDigits: 2});
+    }
     cerrarTodosLosModalesSpace();
      }
 
