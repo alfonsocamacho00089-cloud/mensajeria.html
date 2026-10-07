@@ -868,6 +868,25 @@ margin: 0;
     font-weight: bold;
     cursor: pointer;
 }
+      /* --- ESTILOS DE SPAXIOGIFSCARD / PASARELA --- */
+        .tarjeta-space { background: linear-gradient(135deg, #161722, #25283d); border: 1px solid #323657; border-radius: 16px; padding: 25px; width: 320px; margin: 30px auto; box-shadow: 0 8px 24px rgba(0,0,0,0.5); text-align: left; }
+        .balance-txt { font-size: 32px; font-weight: bold; margin: 15px 0 5px 0; color: #00ffcc; }
+        
+        .btn-space { background-color: #5b61e2; color: #fff; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-weight: bold; margin: 10px 5px; transition: 0.3s; }
+        .btn-space:hover { background-color: #474cb8; }
+        .btn-danger { background-color: #cf3c3c; }
+        .btn-danger:hover { background-color: #a82e2e; }
+
+        .overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 999; backdrop-filter: blur(4px); }
+        .modal-space { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background-color: #12131c; border: 1px solid #323657; border-radius: 16px; padding: 30px; z-index: 1000; width: 340px; box-shadow: 0 10px 30px rgba(0,0,0,0.7); }
+        
+        .modal-space input, .modal-space select { width: 93%; padding: 12px; margin-bottom: 15px; background-color: #1a1c29; border: 1px solid #323657; border-radius: 8px; color: #fff; font-size: 14px; }
+        .modal-space input:focus, .modal-space select:focus { border-color: #5b61e2; outline: none; }
+        
+        .qr-container { background: #fff; padding: 15px; width: 150px; height: 150px; margin: 15px auto; border-radius: 12px; display: flex; align-items: center; justify-content: center; }
+        .qr-container img { max-width: 100%; }
+
+
       
     </style>
 
@@ -1338,7 +1357,70 @@ margin: 0;
 </div>
 
 
+<!-- ==================== VISTA SPAXIOGIFSCARD ==================== -->
+    <div id="view-spaxio" class="app-view" style="text-align: center; padding: 15px;">
+        <header style="padding: 10px 0; border-bottom: 1px solid #1f2235; margin-bottom: 15px;">
+            <div style="font-size: 22px; font-weight: bold; letter-spacing: 2px; color: #5b61e2;">Spaxiogifscard</div>
+            <p style="color: #63688a; margin: 5px 0 0 0; font-size: 12px;">Gifs Card sin comisiones bancarias</p>
+        </header>
 
+        <div class="tarjeta-space">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <span style="font-size: 12px; color: #63688a; text-transform: uppercase;">Spaxio Gifs Card Prepagada</span>🪐
+            </div>
+            <div class="balance-txt" id="balanceVisual">Bs. 0,00</div>
+            <div style="color: #63688a; font-size: 12px; margin-bottom: 20px;" id="nombreTitular">ID: Cargando...</div>
+            <div style="font-family: monospace; letter-spacing: 3px; font-size: 16px; text-align: right;">**** **** **** 7890</div>
+        </div>
+
+        <button class="btn-space" onclick="abrirModalSpace('modalCargar')">📥 Cargar puntos desde Banco</button>
+        <button class="btn-space" onclick="abrirModalSpace('modalPagar')">🪙 Canjear puntos</button>
+        <br>
+        <button class="btn-space" style="background-color: #1a1c29; border: 1px solid #323657;" onclick="abrirModalSpace('modalMiQR')">📷 Mostrar mi QR para Cobrar</button>
+    </div>
+
+    <!-- Capa de Oscurecimiento (Overlay Global) -->
+    <div id="blurOverlay" class="overlay" onclick="cerrarTodosLosModalesSpace()"></div>
+
+    <!-- MODAL 1: RECARGA -->
+    <div id="modalCargar" class="modal-space">
+        <h3 style="margin-top: 0; color: #00ffcc;">📥 Sumar Puntos</h3>
+        <p style="color: #63688a; font-size: 12px; margin-bottom: 20px;">Canjes de puntos directo a tu tarjeta spaxio</p>
+        
+        <select id="bancoOrigen">
+            <option value="0102">Banco de Venezuela (BDV)</option>
+            <option value="0105">Banco Mercantil</option>
+            <option value="0134">Banesco</option>
+        </select>
+        <input type="number" id="montoCargar" placeholder="Monto en Bolívares (VES)">
+        <input type="text" id="tokenOTP" placeholder="Código de Pago Móvil (Clave/OTP)">
+        
+        <button class="btn-space" onclick="procesarCargaBanco()">Confirmar Carga</button>
+        <button class="btn-space btn-danger" onclick="cerrarTodosLosModalesSpace()">Cancelar</button>
+    </div>
+
+    <!-- MODAL 2: CANJEO / ENVÍO -->
+    <div id="modalPagar" class="modal-space">
+        <h3 style="margin-top: 0; color: #5b61e2;">🪙 Traspaso Inmediato</h3>
+        <p style="color: #63688a; font-size: 12px; margin-bottom: 20px;">Introduce el ID del usuario o escanea. Sin recargos.</p>
+        
+        <input type="text" id="idReceptor" placeholder="ID o Cédula del Destinatario">
+        <input type="number" id="montoEnviar" placeholder="Monto a Enviar (VES)">
+        
+        <button class="btn-space" onclick="procesarEnvioInterno()">Canje de puntos</button>
+        <button class="btn-space btn-danger" onclick="cerrarTodosLosModalesSpace()">Cerrar</button>
+    </div>
+
+    <!-- MODAL 3: QR -->
+    <div id="modalMiQR" class="modal-space">
+        <h3 style="margin-top: 0; color: #fff;">🪐 Tu Código de Canje</h3>
+        <p style="color: #63688a; font-size: 12px;">Muestra este código para recibir puntos al instante.</p>
+        
+        <div class="qr-container" id="espacioQR"></div>
+        
+        <div id="idTextoQR" style="font-weight: bold; color: #00ffcc; margin-bottom: 15px;"></div>
+        <button class="btn-space btn-danger" onclick="cerrarTodosLosModalesSpace()">Ocultar QR</button>
+    </div>
     
     <script>
      
@@ -1346,7 +1428,84 @@ margin: 0;
     alert("🚨 ERROR DETECTADO:\n\n" + message + "\n\nArchivo: " + source + "\nLínea: " + lineno);
     return false;
 };
+// --- LÓGICA DE SPAXIOGIFSCARD ---
+        const usuarioSesionSpaxio = {
+            id: "V-26123456",
+            nombre: "Arturo Martinez",
+            tokenTarjetaUbii: "tok_space_card_arturo_9988",
+            saldo: 2500.00
+        };
 
+        // Inicializador de datos y QR al cargar la app
+        function inicializarSpaxioCard() {
+            const elBalance = document.getElementById('balanceVisual');
+            const elTitular = document.getElementById('nombreTitular');
+            const elTxtQR = document.getElementById('idTextoQR');
+            
+            if (elBalance) elBalance.innerText = "Bs. " + usuarioSesionSpaxio.saldo.toLocaleString('es-VE', {minimumFractionDigits: 2});
+            if (elTitular) elTitular.innerText = "ID: " + usuarioSesionSpaxio.id + " | " + usuarioSesionSpaxio.nombre;
+            if (elTxtQR) elTxtQR.innerText = usuarioSesionSpaxio.id;
+            
+            const contenedorQR = document.getElementById("espacioQR");
+            if (contenedorQR && typeof QRCode !== 'undefined') {
+                contenedorQR.innerHTML = "";
+                new QRCode(contenedorQR, {
+                    text: usuarioSesionSpaxio.id,
+                    width: 150,
+                    height: 150,
+                    colorDark : "#0d0e15",
+                    colorLight : "#ffffff"
+                });
+            }
+        }
+
+        function abrirModalSpace(idModal) {
+            const overlay = document.getElementById('blurOverlay');
+            const modal = document.getElementById(idModal);
+            if (overlay) overlay.style.display = 'block';
+            if (modal) modal.style.display = 'block';
+        }
+
+        function cerrarTodosLosModalesSpace() {
+            const overlay = document.getElementById('blurOverlay');
+            if (overlay) overlay.style.display = 'none';
+            ['modalCargar', 'modalPagar', 'modalMiQR'].forEach(id => {
+                const m = document.getElementById(id);
+                if (m) m.style.display = 'none';
+            });
+        }
+
+        async function procesarCargaBanco() {
+            const banco = document.getElementById('bancoOrigen').value;
+            const monto = parseFloat(document.getElementById('montoCargar').value);
+            const otp = document.getElementById('tokenOTP').value;
+
+            if(!monto || !otp) { alert("Por favor, llena todos los campos técnicos."); return; }
+
+            alert("API UBII: Jalando Bs. " + monto + " desde el banco tradicional hacia tu Tarjeta Space.");
+            
+            usuarioSesionSpaxio.saldo += monto;
+            const elBalance = document.getElementById('balanceVisual');
+            if (elBalance) elBalance.innerText = "Bs. " + usuarioSesionSpaxio.saldo.toLocaleString('es-VE', {minimumFractionDigits: 2});
+            cerrarTodosLosModalesSpace();
+        }
+
+        async function procesarEnvioInterno() {
+            const receptor = document.getElementById('idReceptor').value;
+            const monto = parseFloat(document.getElementById('montoEnviar').value);
+
+            if(!receptor || !monto) { alert("Datos incompletos."); return; }
+            if(monto > usuarioSesionSpaxio.saldo) { alert("Saldo insuficiente en tu tarjeta."); return; }
+
+            alert("API UBII: Traspasando Bs. " + monto + " netos hacia el ID: " + receptor);
+
+            usuarioSesionSpaxio.saldo -= monto;
+            const elBalance = document.getElementById('balanceVisual');
+            if (elBalance) elBalance.innerText = "Bs. " + usuarioSesionSpaxio.saldo.toLocaleString('es-VE', {minimumFractionDigits: 2});
+            cerrarTodosLosModalesSpace();
+        }
+
+        // Si usas un sistema de pestañas (switchView), recuerda llamar a inicializarSpaxioCard() cuando el usuario abra esta sección.
      // --- MOTOR DE TASAS (DROPISAPP INTEGRADOR) ---
         let tApi = { bcv: 36.5, euro: 39.2, p2p: 41.5 };
         let tasaSeleccionada = 'bcv';
