@@ -1282,13 +1282,14 @@ margin: 0;
   
 <div id="modal-calculadora" class="modal" style="display: none;">
     <div class="modal-content">
-        <!-- Tus elementos y botones de la calculadora -->
+        <!-- Cabecera del Modal -->
         <div class="header" style="justify-content: space-between; padding: 0 20px;">
             <span style="font-weight: bold; color: #ffd700; font-size: 18px; text-transform: uppercase;">Real Market Elite</span>
             <div onclick="cerrarCalculadora()" style="cursor: pointer; color: #ffd700; font-size: 20px;">✕</div>
         </div>
 
         <div class="calc-body" style="padding: 20px; color: white;">
+            <!-- 1. Primero las tarjetas de tasas (P2P, BCV, Euro) -->
             <div class="top-wrapper">
                 <div class="top-box">
                     <div class="fixed-title" style="text-align: center;">Tasa USDT P2P</div>
@@ -1313,8 +1314,26 @@ margin: 0;
                     </div>
                 </div>
             </div>
+
+            <!-- 2. Después los campos de cálculo (Precio USD, Bolívares, USDT) -->
+            <div class="container-calc" style="margin-top: 15px;">
+                <div class="field">
+                    <label>Precio Producto (USD)</label>
+                    <input type="number" id="priceUSD" placeholder="0.00" inputmode="decimal">
+                </div>
+                <div class="field">
+                    <label id="labelVES">Bolívares + IGTF</label>
+                    <input type="text" id="totalVES" readonly>
+                </div>
+                <div class="field">
+                    <label>Total USDT</label>
+                    <input type="text" id="totalUSDT" readonly>
+                </div>
+            </div>
         </div>
-        <button onclick="cerrarCalculadora()" style="margin: 20px; padding: 12px; background: #ffd700; border: none; border-radius: 8px; font-weight: bold; cursor: pointer;">Cerrar</button>
+
+        <!-- Botón de Cerrar -->
+        <button onclick="cerrarCalculadora()" style="margin: 0 20px 20px 20px; padding: 12px; background: #ffd700; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; width: calc(100% - 40px);">Cerrar</button>
     </div>
 </div>
 
