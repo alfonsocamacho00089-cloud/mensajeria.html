@@ -1430,12 +1430,13 @@ margin: 0;
     <h3 style="margin-top: 0; color: #fff;">🪐 Tu Código de Canje</h3>
     <p style="color: #63688a; font-size: 12px;">Muestra este código para recibir puntos al instante.</p>
     
-    <div class="qr-container" id="espacioQR" style="margin: 15px 0; display: inline-block;"></div>
-    
-    <div id="idTextoQR" style="font-weight: bold; color: #00ffcc; margin-bottom: 15px;"></div>
-    <button class="btn-space btn-danger" onclick="cerrarTodosLosModalesSpace()" style="width: 100%; padding: 10px; cursor: pointer;">Ocultar QR</button>
+    <!-- Contenedor donde se dibuja el QR -->
+<div id="contenedor-qr-spaxiocard" style="background: white; padding: 10px; border-radius: 8px; display: inline-block;"></div>
+
+<!-- Texto opcional para mostrar el ID en pantalla -->
+<span id="spaxiocard-id-display" style="font-size: 11px; font-family: monospace; letter-spacing: 0.5px;"></span>s="btn-space btn-danger" onclick="cerrarTodosLosModalesSpace()" style="width: 100%; padding: 10px; cursor: pointer;">Ocultar QR</button>
 </div>
-    
+    <!-- Contenedor donde se dibuja el QR -->
     <script>
      
  window.onerror = function(message, source, lineno, colno, error) {
@@ -1454,6 +1455,7 @@ const usuarioSesionSpaxio = {
     saldo: 2500.00
 };
 
+     
 // Abrir el modal principal de Spaxio desde la barra
 function abrirSpaxiocard() {
     const modal = document.getElementById('modal-spaxiocard');
@@ -1494,7 +1496,39 @@ function inicializarSpaxiocard() {
         });
     }
 }
+function generarQRSpaxioCardOriginal() {
+    const contenedorQR = document.getElementById('contenedor-qr-spaxiocard');
+    const displayID = document.getElementById('spaxiocard-id-display');
+    
+    if (!contenedorQR) return;
+    contenedorQR.innerHTML = ''; // Limpia por si ya había uno
 
+    // Obtiene tu ID unificado actual de la app (el mismo que usa el chat o el sistema)
+    const miID = localStorage.getItem('mi_dropis_id') || localStorage.getItem('spaxiocard_id');
+    
+    if (!miID) {
+        console.warn("No se encontró un ID activo.");
+        return;
+    }
+
+    if (displayID) {
+        displayID.innerText = miID;
+    }
+
+    // Genera el QR exactamente igual que en el resto de tu app
+    try {
+        new QRCode(contenedorQR, {
+            text: miID,
+            width: 150,
+            height: 150,
+            colorDark: "#000000",
+            colorLight: "#ffffff",
+            correctLevel: QRCode.CorrectLevel.H
+        });
+    } catch (error) {
+        console.error("Error al generar el QR en SpaxioCard:", error);
+    }
+     }
 // Control de Submodales (Cargar, Pagar, QR)
 function abrirSubModalSpace(idModal) {
     const overlay = document.getElementById('blurOverlay');
