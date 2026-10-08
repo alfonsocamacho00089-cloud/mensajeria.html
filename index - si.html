@@ -1428,15 +1428,19 @@ margin: 0;
 <!-- SUBMODAL 3: QR -->
 <div id="modalMiQR" class="modal-space" style="display: none; text-align: center;">
     <h3 style="margin-top: 0; color: #fff;">🪐 Tu Código de Canje</h3>
-    <p style="color: #63688a; font-size: 12px;">Muestra este código para recibir puntos al instante.</p>
+    <p style="color: #63688a; font-size: 12px; margin-bottom: 15px;">Muestra este código para recibir puntos al instante.</p>
     
     <!-- Contenedor donde se dibuja el QR -->
-<div id="contenedor-qr-spaxiocard" style="background: white; padding: 10px; border-radius: 8px; display: inline-block;"></div>
+    <div id="contenedor-qr-spaxiocard" style="background: white; padding: 10px; border-radius: 8px; display: inline-block; margin-bottom: 12px;"></div>
 
-<!-- Texto opcional para mostrar el ID en pantalla -->
-<span id="spaxiocard-id-display" style="font-size: 11px; font-family: monospace; letter-spacing: 0.5px;"></span>s="btn-space btn-danger" onclick="cerrarTodosLosModalesSpace()" style="width: 100%; padding: 10px; cursor: pointer;">Ocultar QR</button>
+    <!-- Texto para mostrar el ID en pantalla -->
+    <div style="margin-bottom: 20px;">
+        <span id="spaxiocard-id-display" style="font-size: 12px; color: #ffd700; font-family: monospace; letter-spacing: 0.5px; font-weight: bold;"></span>
+    </div>
+
+    <!-- Botón para cerrar -->
+    <button class="btn-space btn-danger" onclick="cerrarTodosLosModalesSpace()" style="width: 100%; padding: 10px; cursor: pointer;">Ocultar QR</button>
 </div>
-    <!-- Contenedor donde se dibuja el QR -->
     <script>
      
  window.onerror = function(message, source, lineno, colno, error) {
@@ -1529,14 +1533,44 @@ function generarQRSpaxioCardOriginal() {
         console.error("Error al generar el QR en SpaxioCard:", error);
     }
      }
+
 // Control de Submodales (Cargar, Pagar, QR)
 function abrirSubModalSpace(idModal) {
     const overlay = document.getElementById('blurOverlay');
     const modal = document.getElementById(idModal);
     if (overlay) overlay.style.display = 'block';
     if (modal) modal.style.display = 'block';
-}
 
+    // 🔥 SI ABRES EL MODAL DE QR, GENERAMOS EL CÓDIGO Y EL ID AQUÍ
+    if (idModal === 'modalMiQR') {
+        const contenedorQR = document.getElementById('contenedor-qr-spaxiocard');
+        const displayID = document.getElementById('spaxiocard-id-display');
+        
+        if (contenedorQR) {
+            contenedorQR.innerHTML = ''; // Limpia QR anterior
+
+            // Usamos el ID de tu sesión o el registrado en localStorage igual que el resto de tu app
+            const miID = (typeof usuarioSesionSpaxio !== 'undefined' ? usuarioSesionSpaxio.id : null) || localStorage.getItem('mi_dropis_id') || "SPAXIO-USER";
+            
+            if (displayID) {
+                displayID.innerText = "ID: " + miID;
+            }
+
+            try {
+                new QRCode(contenedorQR, {
+                    text: miID,
+                    width: 150,
+                    height: 150,
+                    colorDark: "#0d0e15",
+                    colorLight: "#ffffff",
+                    correctLevel: QRCode.CorrectLevel.H
+                });
+            } catch (e) {
+                console.error("Error al generar el QR:", e);
+            }
+        }
+    }
+     }
 function cerrarTodosLosModalesSpace() {
     const overlay = document.getElementById('blurOverlay');
     if (overlay) overlay.style.display = 'none';
