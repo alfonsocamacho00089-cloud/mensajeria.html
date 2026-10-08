@@ -1574,6 +1574,45 @@ function abrirSubModalSpace(idModal) {
         }
     }
      }
+     function generarMiQRSpaxioCard() {
+    const contenedorQR = document.getElementById('contenedor-qr-spaxiocard');
+    const displayID = document.getElementById('spaxiocard-id-display');
+    
+    if (!contenedorQR) return;
+    
+    contenedorQR.innerHTML = ''; // Limpia QR anterior
+
+    const miID = (typeof usuarioSesionSpaxio !== 'undefined' ? usuarioSesionSpaxio.id : null) || localStorage.getItem('mi_dropis_id') || "SPAXIO-USER";
+    
+    if (displayID) {
+        displayID.innerText = "ID: " + miID;
+    }
+
+    try {
+        new QRCode(contenedorQR, {
+            text: miID,
+            width: 150,
+            height: 150,
+            colorDark: "#000000",
+            colorLight: "#ffffff",
+            correctLevel: QRCode.CorrectLevel.H
+        });
+    } catch (e) {
+        console.error("Error al generar el QR:", e);
+    }
+     }
+     function abrirSubModalSpace(idModal) {
+    const overlay = document.getElementById('blurOverlay');
+    const modal = document.getElementById(idModal);
+    
+    if (overlay) overlay.style.display = 'block';
+    if (modal) modal.style.display = 'block';
+
+    // 🔥 LLAMA A LA FUNCIÓN AQUÍ MISMO CUANDO SE ABRA EL MODAL DEL QR
+    if (idModal === 'modalMiQR') {
+        generarMiQRSpaxioCard();
+    }
+     }
 function cerrarTodosLosModalesSpace() {
     const overlay = document.getElementById('blurOverlay');
     if (overlay) overlay.style.display = 'none';
