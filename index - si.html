@@ -1479,12 +1479,23 @@ margin: 0;
     <button class="btn-space btn-danger" onclick="cerrarTodosLosModalesSpace()" style="width: 100%; padding: 10px; cursor: pointer;">Cancelar</button>
 </div>
 
+
 <!-- SUBMODAL 2: CANJEO / ENVÍO -->
 <div id="modalPagar" class="modal-space" style="display: none;">
     <h3 style="margin-top: 0; color: #5b61e2;">🪙 Traspaso Inmediato</h3>
     <p style="color: #63688a; font-size: 12px; margin-bottom: 20px;">Introduce el ID del usuario o escanea. Sin recargos.</p>
     
     <input type="text" id="idReceptor" placeholder="ID o Cédula del Destinatario" style="width: 100%; padding: 8px; margin-bottom: 10px;">
+    
+    <!-- 📷 BOTÓN PARA ABRIR LA CÁMARA (Aquí lo verás al abrir el modal de pago) -->
+    <button class="btn-space" type="button" onclick="iniciarLectorQR()" style="background: #323657; color: #fff; width: 100%; margin-bottom: 10px; padding: 10px; cursor: pointer; border: none; border-radius: 6px;">📷 Escanear QR con Cámara</button>
+
+    <!-- 📷 CONTENEDOR DE LA CÁMARA (Empieza oculto y aparece al presionar el botón de arriba) -->
+    <div id="lector-qr-container" style="display: none; width: 100%; margin-bottom: 10px; border-radius: 8px; overflow: hidden; background: #000; border: 1px solid #5b61e2;">
+        <video id="preview-camara" style="width: 100%; height: 180px; object-fit: cover; display: block;"></video>
+        <button type="button" onclick="detenerLectorQR()" style="background: #ff4d4d; color: #fff; border: none; width: 100%; padding: 8px; cursor: pointer; font-weight: bold;">Cerrar Cámara</button>
+    </div>
+
     <input type="number" id="montoEnviar" placeholder="Monto a Enviar (VES)" style="width: 100%; padding: 8px; margin-bottom: 15px;">
     
     <button class="btn-space" onclick="procesarEnvioInterno()" style="width: 100%; padding: 10px; margin-bottom: 8px; cursor: pointer;">Canje de puntos</button>
@@ -1559,7 +1570,8 @@ function generarMiQRSpaxioCard() {
     if (!contenedorQR) return;
     contenedorQR.innerHTML = ''; // Limpia QR anterior
 
-    const miID = (typeof usuarioSesionSpaxio !== 'undefined' ? usuarioSesionSpaxio.id : null) || localStorage.getItem('mi_dropis_id') || "SPAXIO-USER";
+    // Toma el ID real que viene del chat/perfil guardado en el navegador
+    const miID = localStorage.getItem('mi_dropis_id') || localStorage.getItem('spaxiocard_id') || "SPAXIO-USER";
     
     if (displayID) {
         displayID.innerText = "ID: " + miID;
@@ -1577,7 +1589,7 @@ function generarMiQRSpaxioCard() {
     } catch (e) {
         console.error("Error al generar el QR:", e);
     }
-}
+     }
 
 // Control único de Apertura de Submodales (Cargar, Pagar, QR)
 function abrirSubModalSpace(idModal) {
