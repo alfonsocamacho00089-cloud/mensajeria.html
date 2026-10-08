@@ -1534,7 +1534,60 @@ const usuarioSesionSpaxio = {
     tokenTarjetaUbii: "tok_space_card_arturo_9988",
     saldo: 2500.00
 };
+let streamCamara = null;
 
+async function iniciarLectorQR() {
+    const contenedor = document.getElementById('lector-qr-container');
+    const video = document.getElementById('preview-camara');
+    
+    if (!contenedor || !video) return;
+    contenedor.style.display = 'block';
+
+    try {
+        // Pide acceso a la cámara trasera del dispositivo
+        streamCamara = await navigator.mediaDevices.getUserMedia({ 
+            video: { facingMode: "environment" } 
+        });
+        video.srcObject = streamCamara;
+        video.setAttribute("playsinline", true);
+        video.play();
+
+        // Nota: Si en tu proyecto ya usas una librería específica como html5-qrcode, 
+        // aquí inicializarías el lector apuntando al elemento de video.
+        console.log("Cámara de escaneo activada.");
+        
+    } catch (err) {
+        console.error("Error al acceder a la cámara:", err);
+        alert("No se pudo acceder a la cámara. Revisa los permisos.");
+        contenedor.style.display = 'none';
+    }
+}
+
+function detenerLectorQR() {
+    const contenedor = document.getElementById('lector-qr-container');
+    const video = document.getElementById('preview-camara');
+
+    if (streamCamara) {
+        streamCamara.getTracks().forEach(track => track.stop());
+        streamCamara = null;
+    }
+    if (video) {
+        video.srcObject = null;
+    }
+    if (contenedor) {
+        contenedor.style.display = 'none';
+    }
+}
+
+// Función para cuando detectes el texto del ID escaneado y lo pongas en tu input de pago
+function alEscanearIDExitoso(idDetectado) {
+    const inputReceptor = document.getElementById('idReceptor');
+    if (inputReceptor) {
+        inputReceptor.value = idDetectado; // Rellena el campo automáticamente
+    }
+    detenerLectorQR();
+    alert("¡QR escaneado con éxito! ID: " + idDetectado);
+     }
 // Abrir el modal principal de Spaxio desde la barra
 function abrirSpaxiocard() {
     const modal = document.getElementById('modal-spaxiocard');
