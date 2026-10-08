@@ -1480,6 +1480,7 @@ margin: 0;
 </div>
 
 
+
 <!-- SUBMODAL 2: CANJEO / ENVÍO -->
 <div id="modalPagar" class="modal-space" style="display: none;">
     <h3 style="margin-top: 0; color: #5b61e2;">🪙 Traspaso Inmediato</h3>
@@ -1487,10 +1488,10 @@ margin: 0;
     
     <input type="text" id="idReceptor" placeholder="ID o Cédula del Destinatario" style="width: 100%; padding: 8px; margin-bottom: 10px;">
     
-    <!-- 📷 BOTÓN PARA ABRIR LA CÁMARA (Aquí lo verás al abrir el modal de pago) -->
+    <!-- Botón de la cámara -->
     <button class="btn-space" type="button" onclick="iniciarLectorQR()" style="background: #323657; color: #fff; width: 100%; margin-bottom: 10px; padding: 10px; cursor: pointer; border: none; border-radius: 6px;">📷 Escanear QR con Cámara</button>
 
-    <!-- 📷 CONTENEDOR DE LA CÁMARA (Empieza oculto y aparece al presionar el botón de arriba) -->
+    <!-- Contenedor de la cámara -->
     <div id="lector-qr-container" style="display: none; width: 100%; margin-bottom: 10px; border-radius: 8px; overflow: hidden; background: #000; border: 1px solid #5b61e2;">
         <video id="preview-camara" style="width: 100%; height: 180px; object-fit: cover; display: block;"></video>
         <button type="button" onclick="detenerLectorQR()" style="background: #ff4d4d; color: #fff; border: none; width: 100%; padding: 8px; cursor: pointer; font-weight: bold;">Cerrar Cámara</button>
