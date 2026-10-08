@@ -1534,28 +1534,31 @@ function generarQRSpaxioCardOriginal() {
     }
      }
 
-// Control de Submodales (Cargar, Pagar, QR)
+// Función para abrir el submodal del QR en SpaxioCard y pintarlo automáticamente
 function abrirSubModalSpace(idModal) {
     const overlay = document.getElementById('blurOverlay');
     const modal = document.getElementById(idModal);
+    
     if (overlay) overlay.style.display = 'block';
     if (modal) modal.style.display = 'block';
 
-    // 🔥 SI ABRES EL MODAL DE QR, GENERAMOS EL CÓDIGO Y EL ID AQUÍ
+    // Si el submodal que se está abriendo es el de tu QR (modalMiQR)
     if (idModal === 'modalMiQR') {
         const contenedorQR = document.getElementById('contenedor-qr-spaxiocard');
         const displayID = document.getElementById('spaxiocard-id-display');
         
         if (contenedorQR) {
-            contenedorQR.innerHTML = ''; // Limpia QR anterior
+            contenedorQR.innerHTML = ''; // Limpia por si ya tenía un QR viejo
 
-            // Usamos el ID de tu sesión o el registrado en localStorage igual que el resto de tu app
+            // Obtiene el ID de la sesión actual o de localStorage (el mismo que usa el resto de tu app)
             const miID = (typeof usuarioSesionSpaxio !== 'undefined' ? usuarioSesionSpaxio.id : null) || localStorage.getItem('mi_dropis_id') || "SPAXIO-USER";
             
+            // Pinta el ID en tu span de texto
             if (displayID) {
                 displayID.innerText = "ID: " + miID;
             }
 
+            // Genera el código QR dentro del contenedor que me pasaste
             try {
                 new QRCode(contenedorQR, {
                     text: miID,
@@ -1570,7 +1573,7 @@ function abrirSubModalSpace(idModal) {
             }
         }
     }
-}
+     }
 function cerrarTodosLosModalesSpace() {
     const overlay = document.getElementById('blurOverlay');
     if (overlay) overlay.style.display = 'none';
