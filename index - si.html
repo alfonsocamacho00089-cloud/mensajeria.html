@@ -26,9 +26,11 @@
 <script src="https://cdn.jsdelivr.net/npm/livekit-client/dist/livekit-client.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-<script src="https://cdn.jsdelivr.net/npm/kalidokit@1.1.5/dist/kalidokit.umd.js"></script>
+ <script src="https://cdn.jsdelivr.net/npm/kalidokit@1.1.5/dist/kalidokit.umd.js"></script>
 
-<script src="https://cdn.jsdelivr.net/npm/eruda"></script>
+ <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
+
+ <script src="https://cdn.jsdelivr.net/npm/eruda"></script>
 <script>eruda.init();</script>
      <style>
    
@@ -1419,80 +1421,17 @@ margin: 0;
     <p style="color: #63688a; font-size: 12px; margin-bottom: 20px;">Introduce el ID del usuario o escanea. Sin recargos.</p>
     
     <input type="text" id="idReceptor" placeholder="ID o Cédula del Destinatario" style="width: 100%; padding: 8px; margin-bottom: 10px;">
-    <input type="number" id="montoEnviar" placeholder="Monto a Enviar (VES)" style="width: 100%; padding: 8px; margin-bottom: 15px;">
-    
-    <button class="btn-space" onclick="procesarEnvioInterno()" style="width: 100%; padding: 10px; margin-bottom: 8px; cursor: pointer;">Canje de puntos</button>
-    <button class="btn-space btn-danger" onclick="cerrarTodosLosModalesSpace()" style="width: 100%; padding: 10px; cursor: pointer;">Cerrar</button>
-</div>
+    <button type="button" class="btn-space" onclick="document.getElementById('inputQRGaleria').click()" style="background: #323657; color: #fff; font-weight: bold; width: 100%; margin-bottom: 10px; padding: 10px; cursor: pointer; border: none; border-radius: 6px;">📁 Buscar QR en Galería</button>
+<input type="file" id="inputQRGaleria" accept="image/*" style="display: none;" onchange="procesarQRGaleria(this)">
+    <!-- 📷 BOTÓN DE CÁMARA EN VIVO -->
+    <button type="button" class="btn-space" onclick="iniciarLectorQR()" style="background: #ffd700; color: #000; font-weight: bold; width: 100%; margin-bottom: 8px; padding: 10px; cursor: pointer; border: none; border-radius: 6px;">📷 Escanear con Cámara</button>
 
-<!-- ==================== MODAL PRINCIPAL: SPAXIOGIFSCARD ==================== -->
-<div id="modal-spaxiocard" class="modal" style="display: none;">
-    <div class="modal-content" style="text-align: center; max-width: 400px; margin: auto;">
-        
-        <!-- Cabecera del Modal -->
-        <div class="header" style="display: flex; justify-content: space-between; align-items: center; padding: 10px 20px; border-bottom: 1px solid #1f2235; margin-bottom: 15px;">
-            <div style="text-align: left;">
-                <span style="font-size: 18px; font-weight: bold; letter-spacing: 2px; color: #5b61e2; text-transform: uppercase;">Spaxiogifscard</span>
-                <p style="color: #63688a; margin: 2px 0 0 0; font-size: 11px;">Gifs Card sin comisiones bancarias</p>
-            </div>
-            <div onclick="cerrarSpaxiocard()" style="cursor: pointer; color: #5b61e2; font-size: 20px; font-weight: bold;">✕</div>
-        </div>
+    <!-- 🖼️ BOTÓN PARA SUBIR QR DESDE LA GALERÍA -->
+    <button type="button" class="btn-space" onclick="document.getElementById('inputQRGaleria').click()" style="background: #323657; color: #fff; font-weight: bold; width: 100%; margin-bottom: 10px; padding: 10px; cursor: pointer; border: none; border-radius: 6px;">📁 Buscar QR en Galería</button>
+    <input type="file" id="inputQRGaleria" accept="image/*" style="display: none;" onchange="procesarQRGaleria(this)">
 
-        <!-- Cuerpo de la Tarjeta -->
-        <div style="padding: 0 20px;">
-            <div class="tarjeta-space" style="margin-bottom: 20px; text-align: left; padding: 15px; background: #151828; border-radius: 12px;">
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <span style="font-size: 12px; color: #63688a; text-transform: uppercase;">Spaxio Gifs Card Prepagada</span>🪐
-                </div>
-                <div class="balance-txt" id="balanceVisual" style="font-size: 24px; font-weight: bold; color: #fff; margin: 10px 0;">Bs. 0,00</div>
-                <div style="color: #63688a; font-size: 12px; margin-bottom: 15px;" id="nombreTitular">ID: Cargando...</div>
-                <div style="font-family: monospace; letter-spacing: 3px; font-size: 14px; text-align: right; color: #a5a9c7;">**** **** **** 7890</div>
-            </div>
-
-            <button class="btn-space" onclick="abrirSubModalSpace('modalCargar')" style="width: 100%; margin-bottom: 10px; padding: 10px; cursor: pointer;">📥 Cargar puntos desde Banco</button>
-            <button class="btn-space" onclick="abrirSubModalSpace('modalPagar')" style="width: 100%; margin-bottom: 10px; padding: 10px; cursor: pointer;">🪙 Canjear puntos</button>
-            <button class="btn-space" style="width: 100%; background-color: #1a1c29; border: 1px solid #323657; padding: 10px; cursor: pointer; color: #fff;" onclick="abrirSubModalSpace('modalMiQR')">📷 Mostrar mi QR para Cobrar</button>
-        </div>
-
-        <!-- Botón de Cerrar inferior -->
-        <button onclick="cerrarSpaxiocard()" style="margin: 20px; padding: 12px; background: #5b61e2; color: #fff; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; width: calc(100% - 40px);">Cerrar</button>
-    </div>
-</div>
-
-<!-- Capa de Oscurecimiento (Overlay Global para submodales) -->
-<div id="blurOverlay" class="overlay" style="display: none;" onclick="cerrarTodosLosModalesSpace()"></div>
-
-<!-- SUBMODAL 1: RECARGA -->
-<div id="modalCargar" class="modal-space" style="display: none;">
-    <h3 style="margin-top: 0; color: #00ffcc;">📥 Sumar Puntos</h3>
-    <p style="color: #63688a; font-size: 12px; margin-bottom: 20px;">Canjes de puntos directo a tu tarjeta spaxio</p>
-    
-    <select id="bancoOrigen" style="width: 100%; padding: 8px; margin-bottom: 10px;">
-        <option value="0102">Banco de Venezuela (BDV)</option>
-        <option value="0105">Banco Mercantil</option>
-        <option value="0134">Banesco</option>
-    </select>
-    <input type="number" id="montoCargar" placeholder="Monto en Bolívares (VES)" style="width: 100%; padding: 8px; margin-bottom: 10px;">
-    <input type="text" id="tokenOTP" placeholder="Código de Pago Móvil (Clave/OTP)" style="width: 100%; padding: 8px; margin-bottom: 15px;">
-    
-    <button class="btn-space" onclick="procesarCargaBanco()" style="width: 100%; padding: 10px; margin-bottom: 8px; cursor: pointer;">Confirmar Carga</button>
-    <button class="btn-space btn-danger" onclick="cerrarTodosLosModalesSpace()" style="width: 100%; padding: 10px; cursor: pointer;">Cancelar</button>
-</div>
-
-
-
-<!-- SUBMODAL 2: CANJEO / ENVÍO -->
-<div id="modalPagar" class="modal-space" style="display: none;">
-    <h3 style="margin-top: 0; color: #5b61e2;">🪙 Traspaso Inmediato</h3>
-    <p style="color: #63688a; font-size: 12px; margin-bottom: 20px;">Introduce el ID del usuario o escanea. Sin recargos.</p>
-    
-    <input type="text" id="idReceptor" placeholder="ID o Cédula del Destinatario" style="width: 100%; padding: 8px; margin-bottom: 10px;">
-    
-    <!-- Botón de la cámara -->
-    <button class="btn-space" type="button" onclick="iniciarLectorQR()" style="background: #323657; color: #fff; width: 100%; margin-bottom: 10px; padding: 10px; cursor: pointer; border: none; border-radius: 6px;">📷 Escanear QR con Cámara</button>
-
-    <!-- Contenedor de la cámara -->
-    <div id="lector-qr-container" style="display: none; width: 100%; margin-bottom: 10px; border-radius: 8px; overflow: hidden; background: #000; border: 1px solid #5b61e2;">
+    <!-- CONTENEDOR DE LA CÁMARA -->
+    <div id="lector-qr-container" style="display: none; width: 100%; margin-bottom: 10px; border-radius: 8px; overflow: hidden; background: #000; border: 1px solid #ffd700;">
         <video id="preview-camara" style="width: 100%; height: 180px; object-fit: cover; display: block;"></video>
         <button type="button" onclick="detenerLectorQR()" style="background: #ff4d4d; color: #fff; border: none; width: 100%; padding: 8px; cursor: pointer; font-weight: bold;">Cerrar Cámara</button>
     </div>
