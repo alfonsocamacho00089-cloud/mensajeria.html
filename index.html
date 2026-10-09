@@ -1662,7 +1662,8 @@ function alEscanearIDExitoso(idDetectado) {
      }
 // Abrir el modal principal de Spaxio desde la barra
 function abrirSpaxiocard() {
-    const modal = document.getElementById('modal-spaxiocard');
+    alert("¡Entró a la función de la tarjeta!"); // <--- Pon esto temporalmente
+ const modal = document.getElementById('modal-spaxiocard');
     if (modal) {
         modal.style.display = 'block';
         inicializarSpaxiocard(); 
@@ -1680,6 +1681,7 @@ function cerrarSpaxiocard() {
 
 // Inicializador de datos de la tarjeta
 function inicializarSpaxiocard() {
+ 
     const elBalance = document.getElementById('balanceVisual');
     const elTitular = document.getElementById('nombreTitular');
     
