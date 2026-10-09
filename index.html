@@ -2881,8 +2881,10 @@ window.onload = async () => {
             }
         });
 
-        if (typeof activarAntena === "function") activarAntena();
-        manejarBotonIdentidad(); abrirSpaxiocard();
+        if (typeof abrirSpaxiocard === "function") abrirSpaxiocard();
+      
+if (typeof activarAntena === "function") activarAntena();
+// manejarBotonIdentidad(); <---- Comenta o borra esta línea para que no abra el chat    manejarBotonIdentidad(); abrirSpaxiocard();
     } else {
         // --- CASO 2: NO HAY REGISTRO (USUARIO NUEVO) ---
         const modalRegistro = document.getElementById('modal-registro');
