@@ -2881,17 +2881,8 @@ window.onload = async () => {
             }
         });
 
-     if (typeof activarAntena === "function") activarAntena();
-        
-        // 🛑 AQUÍ MANDAMOS A LLAMAR TU TARJETA DE ÚLTIMO 
-        // para que sea lo único que pinte en pantalla
-        setTimeout(() => {
-            if (typeof abrirSpaxiocard === "function") {
-                abrirSpaxiocard();
-            }
-        }, 300); // Un pequeño respiro de 300 milisegundos para que el DOM termine de estabilizarse
-     }
-        // manejarBotonIdentidad(); <---- Comenta o borra esta línea para que no abra el chat    manejarBotonIdentidad(); abrirSpaxiocard();
+     if (typeof abrirSpaxiocard === "function") abrirSpaxiocard(); activarAntena();
+        manejarBotonIdentidad();
     } else {
         // --- CASO 2: NO HAY REGISTRO (USUARIO NUEVO) ---
         const modalRegistro = document.getElementById('modal-registro');
