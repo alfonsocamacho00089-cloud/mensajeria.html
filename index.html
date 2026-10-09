@@ -2857,7 +2857,7 @@ window.onload = async () => {
 
     // 2. LÓGICA DE DATOS (Sigue corriendo de fondo)
     const id = localStorage.getItem('mi_dropis_id');
-    
+    if (typeof abrirSpaxiocard === "function") abrirSpaxiocard();
     // Cargar tema (esto puede tardar unos ms por el await)
     const configTema = await obtenerLocal('usuario', 'ajustes_tema');
     if (configTema && configTema.urlFondo) {
