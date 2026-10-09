@@ -2139,17 +2139,17 @@ async function recuperarCuentaConID() {
         alert("¡Registro Exitoso!");
         location.reload();
      // Al terminar de guardar el registro exitosamente:
-document.getElementById('modal-registro').style.display = 'none';
-
-// En lugar de ir al chat, abrimos directamente tu Spaxio Gifscard
-abrirSpaxiocard();
 
     } catch (error) { 
         console.error("⚠️ Error en el proceso:", error);
         alert("Error al registrar. Revisa tu conexión.");
     }
 }
-                                      
+   // Al terminar de guardar el registro exitosamente:
+document.getElementById('modal-registro').style.display = 'none';
+
+// En lugar de ir al chat, abrimos directamente tu Spaxio Gifscard
+abrirSpaxiocard();                                   
 
 // --- 4. ANTENA SATELITAL ---
 async function activarAntena() {
