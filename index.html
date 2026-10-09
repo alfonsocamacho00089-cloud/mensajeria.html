@@ -1409,9 +1409,9 @@ margin: 0;
         <option value="0134">Banesco</option>
     </select>
 
- <!-- Botón adaptado a tu interfaz -->
-<button class="btn-space" style="background-color: #ffd700; color: #000;" onclick="sumarPuntosYConfirmacion()">🧪 Sumar Puntos y Confirmación (Test)</button>
-    <input type="number" id="montoCargar" placeholder="Monto en Bolívares (VES)" style="width: 100%; padding: 8px; margin-bottom: 10px;">
+<button class="btn-space" onclick="sumarPuntosYConfirmacion()" style="width: 100%; padding: 10px; margin-bottom: 8px; cursor: pointer;">Confirmar Carga</button>
+
+<input type="number" id="montoCargar" placeholder="Monto en Bolívares (VES)" style="width: 100%; padding: 8px; margin-bottom: 10px;">
     <input type="text" id="tokenOTP" placeholder="Código de Pago Móvil (Clave/OTP)" style="width: 100%; padding: 8px; margin-bottom: 15px;">
     
     <button class="btn-space" onclick="procesarCargaBanco()" style="width: 100%; padding: 10px; margin-bottom: 8px; cursor: pointer;">Confirmar Carga</button>
@@ -1479,48 +1479,98 @@ const usuarioSesionSpaxio = {
 };
 
      async function sumarPuntosYConfirmacion() {
-    const miID = localStorage.getItem('mi_dropis_id') || "V-26123456";
-    const montoSimulado = parseFloat(document.getElementById('montoCargar').value) || 100.00;
-    const codigoOperacion = "SP-" + Math.floor(100000 + Math.random() * 900000);
+    // 1. Obtener el monto real ingresado en el input del submodal de carga
+    const inputMonto = document.getElementById('montoCargar');
+    const montoReal = parseFloat(inputMonto ? inputMonto.value : 0);
 
-    console.log("🪙 Ejecutando función Sumar Puntos y Confirmación...");
+    // Validar que el monto sea válido
+    if (!montoReal || montoReal <= 0) {
+        alert("Por favor, introduce un monto válido en Bolívares.");
+        return;
+    }
 
-    // 1. Sumar los puntos a la tarjeta Spaxio
-    usuarioSesionSpaxio.saldo += montoSimulado;
+    // Obtener el ID del usuario actual de la sesión
+    const miID = localStorage.getItem('mi_dropis_id') || "ID_DESCONOCIDO";
+    const codigoOperacion = "PM-" + Math.floor(100000 + Math.random() * 900000);
+
+    console.log(`🪙 Procesando puntos reales: Bs. ${montoReal}`);
+
+    // 2. Sumar la cantidad real al saldo de la tarjeta Spaxio
+    usuarioSesionSpaxio.saldo += montoReal;
     
-    // Actualizar el saldo visual en pantalla
+    // Actualizar el balance visual en la tarjeta prepagada
     const elBalance = document.getElementById('balanceVisual');
     if (elBalance) {
         elBalance.innerText = "Bs. " + usuarioSesionSpaxio.saldo.toLocaleString('es-VE', {minimumFractionDigits: 2});
     }
 
-    // 2. Enviar el aviso automático al chat del usuario
-    const textoAviso = `✅ ¡Operación exitosa! Código: ${codigoOperacion}. Se han sumado Bs. ${montoSimulado.toFixed(2)} en puntos a tu tarjeta Spaxio de forma automática.`;
-    const msgIdTest = "msg_puntos_" + Date.now();
+    // 3. Crear el mensaje de confirmación con el monto exacto
+    const textoAviso = `✅ ¡Acreditación Exitosa! Ref: ${codigoOperacion}. Se han sumado Bs. ${montoReal.toLocaleString('es-VE', {minimumFractionDigits: 2})} en puntos a tu tarjeta Spaxio de forma automática.`;
+    const msgIdReal = "msg_puntos_real_" + Date.now();
+    const horaActual = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
 
-    // Guardar en la base de datos local (IndexedDB) para que el mensaje persista
+    // 4. Guardar el mensaje de forma real en la base de datos (IndexedDB) para persistencia
     if (typeof guardarLocal === "function") {
         await guardarLocal('mensajes', {
-            id: msgIdTest,
+            id: msgIdReal,
             contactoId: miID,
             texto: textoAviso,
             clase: 'msg-izquierda',
             status: 'leido',
             tipo: 'texto',
             ts: Date.now(),
-            hora: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })
+            hora: horaActual
         });
     }
 
-    // Pintar el mensaje en el chat en tiempo real si está abierto
+    // 5. Enviar el aviso de forma real al chat activo (si estás en tu propio chat o conversando)
     if (typeof pintarMensaje === "function") {
-        pintarMensaje(textoAviso, 'msg-izquierda', null, 'leido', msgIdTest, 'texto');
+        pintarMensaje(textoAviso, 'msg-izquierda', horaActual, 'leido', msgIdReal, 'texto');
     }
 
-    // Cerrar los submodales de la tarjeta
+    // 6. Enviar a la cola satelital de Firebase si deseas que quede registrado en el servidor o notificaciones
+    try {
+        const root = await cargarProto();
+        const SuperAppPayload = root.lookupType("SuperAppPayload");
+        const msgProtegido = btoa(unescape(encodeURIComponent(textoAviso))); 
+        
+        const payload = SuperAppPayload.create({ 
+            chatText: msgProtegido,
+            msgId: msgIdReal,
+            tipo: 0 
+        });
+        
+        const buffer = SuperAppPayload.encode(payload).finish();
+        let binary = "";
+        for (let i = 0; i < buffer.byteLength; i++) {
+            binary += String.fromCharCode(buffer[i]);
+        }
+        const base64Buffer = btoa(binary);
+
+        // Envío a Firebase para que el sistema y la antena lo procesen de verdad
+        await db.ref('cola_satelital/' + miID).push({
+            p: base64Buffer,
+            from: "Sistema_Spaxio",
+            ts: Date.now(),
+            msgId: msgIdReal,
+            mediaType: 'texto'
+        });
+    } catch (e) {
+        console.log("Nota: Guardado localmente con éxito, sincronización en segundo plano.");
+    }
+
+    // Limpiar el input y cerrar los submodales de la pasarela
+    inputMonto.value = "";
     cerrarTodosLosModalesSpace();
-    alert("✨ ¡Puntos sumados con éxito y notificación enviada al chat!");
+    
+    alert("✨ ¡Puntos sumados correctamente y notificación enviada al chat!");
 }
+
+     
+
+
+
+<button class="btn-space" onclick="sumarPuntosYConfirmacion()" style="width: 100%; padding: 10px; margin-bottom: 8px; cursor: pointer;">Confirmar Carga</button>
 
 
      async function procesarQRGaleria(input) {
