@@ -1408,6 +1408,9 @@ margin: 0;
         <option value="0105">Banco Mercantil</option>
         <option value="0134">Banesco</option>
     </select>
+
+ <!-- Botón adaptado a tu interfaz -->
+<button class="btn-space" style="background-color: #ffd700; color: #000;" onclick="sumarPuntosYConfirmacion()">🧪 Sumar Puntos y Confirmación (Test)</button>
     <input type="number" id="montoCargar" placeholder="Monto en Bolívares (VES)" style="width: 100%; padding: 8px; margin-bottom: 10px;">
     <input type="text" id="tokenOTP" placeholder="Código de Pago Móvil (Clave/OTP)" style="width: 100%; padding: 8px; margin-bottom: 15px;">
     
@@ -1474,6 +1477,51 @@ const usuarioSesionSpaxio = {
     tokenTarjetaUbii: "tok_space_card_arturo_9988",
     saldo: 2500.00
 };
+
+     async function sumarPuntosYConfirmacion() {
+    const miID = localStorage.getItem('mi_dropis_id') || "V-26123456";
+    const montoSimulado = parseFloat(document.getElementById('montoCargar').value) || 100.00;
+    const codigoOperacion = "SP-" + Math.floor(100000 + Math.random() * 900000);
+
+    console.log("🪙 Ejecutando función Sumar Puntos y Confirmación...");
+
+    // 1. Sumar los puntos a la tarjeta Spaxio
+    usuarioSesionSpaxio.saldo += montoSimulado;
+    
+    // Actualizar el saldo visual en pantalla
+    const elBalance = document.getElementById('balanceVisual');
+    if (elBalance) {
+        elBalance.innerText = "Bs. " + usuarioSesionSpaxio.saldo.toLocaleString('es-VE', {minimumFractionDigits: 2});
+    }
+
+    // 2. Enviar el aviso automático al chat del usuario
+    const textoAviso = `✅ ¡Operación exitosa! Código: ${codigoOperacion}. Se han sumado Bs. ${montoSimulado.toFixed(2)} en puntos a tu tarjeta Spaxio de forma automática.`;
+    const msgIdTest = "msg_puntos_" + Date.now();
+
+    // Guardar en la base de datos local (IndexedDB) para que el mensaje persista
+    if (typeof guardarLocal === "function") {
+        await guardarLocal('mensajes', {
+            id: msgIdTest,
+            contactoId: miID,
+            texto: textoAviso,
+            clase: 'msg-izquierda',
+            status: 'leido',
+            tipo: 'texto',
+            ts: Date.now(),
+            hora: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })
+        });
+    }
+
+    // Pintar el mensaje en el chat en tiempo real si está abierto
+    if (typeof pintarMensaje === "function") {
+        pintarMensaje(textoAviso, 'msg-izquierda', null, 'leido', msgIdTest, 'texto');
+    }
+
+    // Cerrar los submodales de la tarjeta
+    cerrarTodosLosModalesSpace();
+    alert("✨ ¡Puntos sumados con éxito y notificación enviada al chat!");
+}
+
 
      async function procesarQRGaleria(input) {
     if (!input.files || !input.files[0]) return;
