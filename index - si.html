@@ -1474,6 +1474,42 @@ const usuarioSesionSpaxio = {
     tokenTarjetaUbii: "tok_space_card_arturo_9988",
     saldo: 2500.00
 };
+
+     async function procesarQRGaleria(input) {
+    if (!input.files || !input.files[0]) return;
+    
+    const archivo = input.files[0];
+    const lector = new FileReader();
+
+    lector.onload = function(e) {
+        const imagen = new Image();
+        imagen.src = e.target.result;
+        
+        imagen.onload = function() {
+            // Creamos un lienzo invisible para leer los píxeles de la imagen del QR
+            const canvas = document.createElement('canvas');
+            const contexto = canvas.getContext('2d');
+            canvas.width = imagen.width;
+            canvas.height = imagen.height;
+            
+            contexto.drawImage(imagen, 0, 0, canvas.width, canvas.height);
+            const datosImagen = contexto.getImageData(0, 0, canvas.width, canvas.height);
+            
+            // Usamos jsQR para decodificar la matriz de puntos de tu captura
+            const codigoQR = jsQR(datosImagen.data, datosImagen.width, datosImagen.height);
+            
+            if (codigoQR) {
+                document.getElementById('idReceptor').value = codigoQR.data;
+                alert("¡QR leído con éxito! ID: " + codigoQR.data);
+            } else {
+                alert("No se pudo descifrar el QR. Asegúrate de recortar bien la imagen para que solo se vea el código.");
+            }
+        };
+    };
+    lector.readAsDataURL(archivo);
+    input.value = '';
+     }
+     
 let streamCamara = null;
 
 async function iniciarLectorQR() {
