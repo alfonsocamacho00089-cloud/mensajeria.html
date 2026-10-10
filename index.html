@@ -2090,18 +2090,7 @@ async function recuperarCuentaConID() {
     const hash = Math.random().toString(36).substring(2, 7).toUpperCase(); 
     const idUnico = Math.random().toString(36).substring(2, 9) + hash; 
 
-// 1. Ocultamos el modal de registro
-document.getElementById('modal-registro').style.display = 'none';
 
-// 2. En lugar de abrir el chat, abrimos directamente tu tarjeta a la fuerza:
-const modalSpaxio = document.getElementById('modal-spaxiocard');
-if (modalSpaxio) {
-    modalSpaxio.style.setProperty('display', 'flex', 'important');
-    if (typeof inicializarSpaxiocard === "function") {
-        inicializarSpaxiocard();
-    }
-     }
-     
     // 2. GUARDADO LOCAL
     const datosUsuario = { 
         id: 'perfil_propietario', 
@@ -2890,7 +2879,7 @@ window.onload = async () => {
             }
         });
 
-     if (typeof abrirSpaxiocard === "function") abrirSpaxiocard(); activarAntena();
+     if (typeof activarAntena === "function") activarAntena();
         manejarBotonIdentidad();
     } else {
         // --- CASO 2: NO HAY REGISTRO (USUARIO NUEVO) ---
