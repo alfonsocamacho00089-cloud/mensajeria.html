@@ -1668,6 +1668,26 @@ function abrirSpaxiocard() {
         inicializarSpaxiocard(); 
     }
 }
+     // Abrir el modal principal de Spaxio desde la barra
+function abrirSpaxiocard() {
+    // 1. Apagamos preventivamente el modal de contactos/QR para que no estorbe
+    const modalQr = document.getElementById('modal-qr');
+    if (modalQr) modalQr.style.display = 'none';
+
+    // 2. Forzamos la apertura de la tarjeta con la capa máxima y posición absoluta/fixed
+    const modal = document.getElementById('modal-spaxiocard');
+    if (modal) {
+        modal.style.setProperty('display', 'block', 'important');
+        modal.style.setProperty('z-index', '999999', 'important');
+        modal.style.setProperty('position', 'fixed', 'important');
+        modal.style.setProperty('top', '0', 'important');
+        modal.style.setProperty('left', '0', 'important');
+        modal.style.setProperty('width', '100%', 'important');
+        modal.style.setProperty('height', '100%', 'important');
+        
+        inicializarSpaxiocard(); 
+    }
+}
 
 // Cerrar el modal principal de Spaxio
 function cerrarSpaxiocard() {
