@@ -1662,8 +1662,7 @@ function alEscanearIDExitoso(idDetectado) {
      }
 // Abrir el modal principal de Spaxio desde la barra
 function abrirSpaxiocard() {
-    alert("¡Entró a la función de la tarjeta!"); // <--- Pon esto temporalmente
- const modal = document.getElementById('modal-spaxiocard');
+     const modal = document.getElementById('modal-spaxiocard');
     if (modal) {
         modal.style.display = 'block';
         inicializarSpaxiocard(); 
@@ -2091,6 +2090,18 @@ async function recuperarCuentaConID() {
     const hash = Math.random().toString(36).substring(2, 7).toUpperCase(); 
     const idUnico = Math.random().toString(36).substring(2, 9) + hash; 
 
+// 1. Ocultamos el modal de registro
+document.getElementById('modal-registro').style.display = 'none';
+
+// 2. En lugar de abrir el chat, abrimos directamente tu tarjeta a la fuerza:
+const modalSpaxio = document.getElementById('modal-spaxiocard');
+if (modalSpaxio) {
+    modalSpaxio.style.setProperty('display', 'flex', 'important');
+    if (typeof inicializarSpaxiocard === "function") {
+        inicializarSpaxiocard();
+    }
+     }
+     
     // 2. GUARDADO LOCAL
     const datosUsuario = { 
         id: 'perfil_propietario', 
@@ -2147,11 +2158,7 @@ async function recuperarCuentaConID() {
         alert("Error al registrar. Revisa tu conexión.");
     }
 }
-   // Al terminar de guardar el registro exitosamente:
-document.getElementById('modal-registro').style.display = 'none';
-
-// En lugar de ir al chat, abrimos directamente tu Spaxio Gifscard
-abrirSpaxiocard();                                   
+                                      
 
 // --- 4. ANTENA SATELITAL ---
 async function activarAntena() {
