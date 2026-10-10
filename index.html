@@ -2084,36 +2084,50 @@ async function recuperarCuentaConID() {
      async function ejecutarRegistroCompleto() {
     const nombre = document.getElementById('reg-nombre').value.trim();
     const apellido = document.getElementById('reg-apellido').value.trim();
-    
-    if (!nombre || !apellido) return alert("Completa los datos");
+    const cedulaInput = document.getElementById('reg-cedula').value.trim(); // Cédula o RIF
 
-    // 1. GENERACIÓN DEL ID EXACTO (12 caracteres)
+    // Validación limpia de los campos obligatorios
+    if (!nombre || !apellido || !cedulaInput) {
+        return alert("Por favor completa Nombre, Apellido y tu Cédula o RIF.");
+    }
+
+    // 1. EL ID DE SISTEMA (Sigue intacto para el chat y la antena Firebase)
     const hash = Math.random().toString(36).substring(2, 7).toUpperCase(); 
-    const idUnico = Math.random().toString(36).substring(2, 9) + hash; 
+    const idSistemaChat = Math.random().toString(36).substring(2, 9) + hash; 
 
-
-    // 2. GUARDADO LOCAL
+    // 2. GUARDADO LOCAL (Incluyendo la Cédula/RIF para la pasarela)
     const datosUsuario = { 
         id: 'perfil_propietario', 
-        dropis_id: idUnico, 
+        dropis_id: idSistemaChat, // ID interno del chat
+        cedula_rif: cedulaInput,  // 👈 ID OFICIAL DE LA SPAXIOCARD
         nombre: nombre, 
         apellido: apellido, 
         fecha: Date.now() 
     };
 
     try {
-        localStorage.setItem('mi_dropis_id', idUnico);
-        await guardarLocal('usuario', datosUsuario);
-        await guardarLocal('perfiles', { id: idUnico, nombre, apellido, foto: null });
+        // Guardamos el ID de chat en localStorage para la app
+        localStorage.setItem('mi_dropis_id', idSistemaChat);
+        // Guardamos la Cédula para que la Spaxiocard la lea directo
+        localStorage.setItem('spaxiocard_cedula', cedulaInput);
 
-        // 3. ACTUALIZAR INTERFAZ (Sin que el error de display detenga el proceso)
+        await guardarLocal('usuario', datosUsuario);
+        await guardarLocal('perfiles', { 
+            id: idSistemaChat, 
+            nombre, 
+            apellido, 
+            cedula: cedulaInput, 
+            foto: null 
+        });
+
+        // 3. ACTUALIZAR INTERFAZ
         document.getElementById('modal-registro').style.display = 'none';
         const elDisplay = document.getElementById('mi-id-display');
         if (elDisplay) {
-            elDisplay.textContent = "Tu ID: " + idUnico;
+            elDisplay.textContent = "ID Chat: " + idSistemaChat;
         }
 
-        // 4. OBTENER TOKEN Y REGISTRAR EN FIREBASE
+        // 4. OBTENER TOKEN DE NOTIFICACIONES
         const registration = await navigator.serviceWorker.ready;
         let token = null;
         try {
@@ -2125,9 +2139,10 @@ async function recuperarCuentaConID() {
             console.log("Error obteniendo token, se usará 'sin_token'");
         }
 
-        // 5. ENVÍO OBLIGATORIO A FIREBASE
-        await db.ref('usuarios/' + idUnico).set({
-            id_sistema: idUnico,
+        // 5. ENVÍO A FIREBASE (Registrando ambos identificadores en la nube)
+        await db.ref('usuarios/' + idSistemaChat).set({
+            id_sistema: idSistemaChat,
+            cedula_rif: cedulaInput, // Vinculado en la nube
             nombre: nombre,
             apellido: apellido,
             fcm_token: token || "sin_token",
@@ -2136,18 +2151,21 @@ async function recuperarCuentaConID() {
             timestamp: firebase.database.ServerValue.TIMESTAMP
         });
 
-        console.log("✅ Sincronizado en Firebase: " + idUnico);
+        console.log("✅ Sincronizado en Firebase con Cédula/RIF: " + cedulaInput);
         
-        // Un pequeño aviso y recarga para confirmar que terminó
         alert("¡Registro Exitoso!");
-        location.reload();
-     // Al terminar de guardar el registro exitosamente:
+
+        // 🚀 AQUÍ APLICAS TU CIRUGÍA: 
+        // En vez de un location.reload(), ocultas el registro y abres tu Spaxiocard de frente
+        if (typeof abrirSpaxiocard === "function") {
+            abrirSpaxiocard();
+        }
 
     } catch (error) { 
         console.error("⚠️ Error en el proceso:", error);
         alert("Error al registrar. Revisa tu conexión.");
     }
-}
+     }
                                       
 
 // --- 4. ANTENA SATELITAL ---
@@ -2848,7 +2866,8 @@ function aplicarFotoCapa(id, src) {
    
  
 // Reemplaza el bloque final por este:
-window.onload = async () => {
+
+        window.onload = async () => {
     // 1. EJECUCIÓN INMEDIATA DEL SPLASH (No espera a nadie)
     const splash = document.getElementById('pantalla-carga');
     if (splash) {
@@ -2860,38 +2879,48 @@ window.onload = async () => {
         }, 100); 
     }
 
-    // 2. LÓGICA DE DATOS (Sigue corriendo de fondo)
+    // 2. LÓGICA DE DATOS
+    const cedulaGuardada = localStorage.getItem('spaxiocard_cedula');
     const id = localStorage.getItem('mi_dropis_id');
-    if (typeof abrirSpaxiocard === "function") abrirSpaxiocard();
-    // Cargar tema (esto puede tardar unos ms por el await)
+
+    // Cargar tema
     const configTema = await obtenerLocal('usuario', 'ajustes_tema');
     if (configTema && configTema.urlFondo) {
         document.body.style.backgroundImage = `url('${configTema.urlFondo}')`;
         document.body.style.backgroundSize = "cover";
     }
 
-    if (id) {
-        // Recuperar foto local
-        const miPerfil = await obtenerLocal('perfiles', id);
-        if (miPerfil && miPerfil.foto) {
-            const headerFoto = document.getElementById('foto-perfil-header');
-            if (headerFoto) headerFoto.src = miPerfil.foto;
+    // 3. VALIDACIÓN DE USUARIO REGISTRADO (Por ID o por Cédula)
+    if (id || cedulaGuardada) {
+        // Recuperar foto local si existe ID
+        if (id) {
+            const miPerfil = await obtenerLocal('perfiles', id);
+            if (miPerfil && miPerfil.foto) {
+                const headerFoto = document.getElementById('foto-perfil-header');
+                if (headerFoto) headerFoto.src = miPerfil.foto;
+            }
+
+            // Sincronizar Firebase silenciosamente
+            db.ref('usuarios/' + id).once('value').then(snapshot => {
+                const data = snapshot.val();
+                if (data && data.foto) {
+                    guardarLocal('perfiles', { id: id, foto: data.foto, nombre: data.nombre });
+                }
+            });
         }
 
-        // Sincronizar Firebase (Sin await para que no bloquee)
-        db.ref('usuarios/' + id).once('value').then(snapshot => {
-            const data = snapshot.val();
-            if (data && data.foto) {
-                guardarLocal('perfiles', { id: id, foto: data.foto, nombre: data.nombre });
-            }
-        });
+        // 📡 Activar antena de mensajes de fondo
+        if (typeof activarAntena === "function") activarAntena();
 
-     if (typeof activarAntena === "function") activarAntena();
-        manejarBotonIdentidad();
+        // 💳 Abrir la Spaxiocard como pantalla principal
+        if (typeof abrirSpaxiocard === "function") {
+            abrirSpaxiocard();
+        }
+
     } else {
         // --- CASO 2: NO HAY REGISTRO (USUARIO NUEVO) ---
         const modalRegistro = document.getElementById('modal-registro');
-        if(modalRegistro) modalRegistro.style.display = 'flex';
+        if (modalRegistro) modalRegistro.style.display = 'flex';
 
         if ('Notification' in window) {
             Notification.requestPermission().then(permiso => {
@@ -2918,7 +2947,9 @@ window.onload = async () => {
             });
         }
     } 
-}; // <--- ¡AQUÍ ESTÁ! Esta es la llave y el paréntesis que faltaban para cerrar el onload
+};
+
+// <--- ¡AQUÍ ESTÁ! Esta es la llave y el paréntesis que faltaban para cerrar el onload
 document.addEventListener("DOMContentLoaded", function() {
     // Seleccionamos los modales rebeldes
     const modalTienda = document.getElementById('modal-tienda');
