@@ -2662,10 +2662,16 @@ function procesarQRScanner(contenido) {
     pintarAgendaContactos();
      }
      
-/*async function cargarConversacionCon(idDestino, nombreDestino, fotoDestino) {
-    const box = document.getElementById('chat-box');
-    if (!box) return;*/
+async function cargarConversacionCon(idDestino, nombreDestino, fotoDestino) {
+    // 🛡️ BLOQUEO SUPREMO: Si el modal de la tarjeta Spaxio está abierto, PROHIBIDO abrir el chat
+    const modalSpaxioCard = document.getElementById('modal-spaxiocard');
+    if (modalSpaxioCard && window.getComputedStyle(modalSpaxioCard).display === 'block') {
+        console.log("🛑 El chat intentó abrirse automáticamente, pero fue bloqueado por la Spaxiocard.");
+        return;
+    }
 
+    const box = document.getElementById('chat-box');
+    if (!box) return;
     // 1. Limpiar pantalla
     box.innerHTML = ""; 
     
