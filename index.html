@@ -870,25 +870,7 @@ margin: 0;
     font-weight: bold;
     cursor: pointer;
 }
-      /* --- ESTILOS DE SPAXIOGIFSCARD / PASARELA --- */
-        .tarjeta-space { background: linear-gradient(135deg, #161722, #25283d); border: 1px solid #323657; border-radius: 16px; padding: 25px; width: 320px; margin: 30px auto; box-shadow: 0 8px 24px rgba(0,0,0,0.5); text-align: left; }
-        .balance-txt { font-size: 32px; font-weight: bold; margin: 15px 0 5px 0; color: #00ffcc; }
-        
-        .btn-space { background-color: #5b61e2; color: #fff; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-weight: bold; margin: 10px 5px; transition: 0.3s; }
-        .btn-space:hover { background-color: #474cb8; }
-        .btn-danger { background-color: #cf3c3c; }
-        .btn-danger:hover { background-color: #a82e2e; }
-
-        .overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 999; backdrop-filter: blur(4px); }
-        .modal-space { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background-color: #12131c; border: 1px solid #323657; border-radius: 16px; padding: 30px; z-index: 1000; width: 340px; box-shadow: 0 10px 30px rgba(0,0,0,0.7); }
-        
-        .modal-space input, .modal-space select { width: 93%; padding: 12px; margin-bottom: 15px; background-color: #1a1c29; border: 1px solid #323657; border-radius: 8px; color: #fff; font-size: 14px; }
-        .modal-space input:focus, .modal-space select:focus { border-color: #5b61e2; outline: none; }
-        
-        .qr-container { background: #fff; padding: 15px; width: 150px; height: 150px; margin: 15px auto; border-radius: 12px; display: flex; align-items: center; justify-content: center; }
-        .qr-container img { max-width: 100%; }
-
-
+      
       
     </style>
 
@@ -1668,35 +1650,7 @@ function abrirSpaxiocard() {
         inicializarSpaxiocard(); 
     }
 }
-     // Abrir el modal principal de Spaxio desde la barra
-// Abrir el modal principal de Spaxio de forma limpia y definitiva
-function abrirSpaxiocard() {
-    console.log("🪐 Abriendo Spaxio Card...");
-
-    // 1. Apagamos preventivamente el modal de contactos/QR para que no estorbe
-    const modalQr = document.getElementById('modal-qr');
-    if (modalQr) modalQr.style.setProperty('display', 'none', 'important');
-
-    // 2. Forzamos la apertura de la tarjeta con la capa máxima y posición fija
-    const modal = document.getElementById('modal-spaxiocard');
-    if (modal) {
-        modal.style.setProperty('display', 'block', 'important');
-        modal.style.setProperty('z-index', '999999', 'important');
-        modal.style.setProperty('position', 'fixed', 'important');
-        modal.style.setProperty('top', '0', 'important');
-        modal.style.setProperty('left', '0', 'important');
-        modal.style.setProperty('width', '100%', 'important');
-        modal.style.setProperty('height', '100%', 'important');
-        
-        // Inicializamos los datos y el QR de la tarjeta
-        if (typeof inicializarSpaxiocard === "function") {
-            inicializarSpaxiocard(); 
-        }
-        if (typeof generarMiQRSpaxioCard === "function") {
-            generarMiQRSpaxioCard();
-        }
-    }
-}
+     
 
 // Cerrar el modal principal de Spaxio
 function cerrarSpaxiocard() {
