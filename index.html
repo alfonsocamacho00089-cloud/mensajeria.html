@@ -1669,12 +1669,15 @@ function abrirSpaxiocard() {
     }
 }
      // Abrir el modal principal de Spaxio desde la barra
+// Abrir el modal principal de Spaxio de forma limpia y definitiva
 function abrirSpaxiocard() {
+    console.log("🪐 Abriendo Spaxio Card...");
+
     // 1. Apagamos preventivamente el modal de contactos/QR para que no estorbe
     const modalQr = document.getElementById('modal-qr');
-    if (modalQr) modalQr.style.display = 'none';
+    if (modalQr) modalQr.style.setProperty('display', 'none', 'important');
 
-    // 2. Forzamos la apertura de la tarjeta con la capa máxima y posición absoluta/fixed
+    // 2. Forzamos la apertura de la tarjeta con la capa máxima y posición fija
     const modal = document.getElementById('modal-spaxiocard');
     if (modal) {
         modal.style.setProperty('display', 'block', 'important');
@@ -1685,9 +1688,15 @@ function abrirSpaxiocard() {
         modal.style.setProperty('width', '100%', 'important');
         modal.style.setProperty('height', '100%', 'important');
         
-        inicializarSpaxiocard(); 
+        // Inicializamos los datos y el QR de la tarjeta
+        if (typeof inicializarSpaxiocard === "function") {
+            inicializarSpaxiocard(); 
+        }
+        if (typeof generarMiQRSpaxioCard === "function") {
+            generarMiQRSpaxioCard();
+        }
     }
-     }
+}
 
 // Cerrar el modal principal de Spaxio
 function cerrarSpaxiocard() {
