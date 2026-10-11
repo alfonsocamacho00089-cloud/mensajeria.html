@@ -906,7 +906,9 @@ margin: 0;
  
 <div class="header" id="chat-header">
     <div class="header-content" onclick="abrirPerfilContacto()" style="cursor: pointer;">
-        
+        <button onclick="cerrarchat(); event.stopPropagation();" class="btn-back-clean">
+            <span style="display: inline-block; transform: scaleX(-1);">➔</span>
+        </button>
         <img src="https://via.placeholder.com/40" id="foto-perfil-header" class="foto-perfil">
         
         <div class="user-info">
@@ -1483,7 +1485,11 @@ const usuarioSesionSpaxio = {
     tokenTarjetaUbii: "tok_space_card_arturo_9988",
     saldo: 2500.00
 };
-
+function cerrarchat () {
+    const modal = document.getElementById('modal-qr');
+    if (modal) {
+        modal.style.display = 'none';
+     }
      async function sumarPuntosYConfirmacion() {
     // 1. Obtener el monto real ingresado en el input del submodal de carga
     const inputMonto = document.getElementById('montoCargar');
