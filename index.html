@@ -2553,12 +2553,12 @@ async function obtenerToken(registration) {
      }
 // --- 5. LÓGICA DE INTERFAZ Y QR ---
  async function manejarBotonIdentidad() {
-    const id = localStorage.getItem('mi_dropis_id');
+    const cedulaGuardada = localStorage.getItem('spaxiocard_cedula');
     const nombre = localStorage.getItem('mi_nombre') || "Usuario";
 
-    if (id) {
-        // 1. Mostrar el modal de inmediato
-        const modal = document.getElementById('modal-qr');
+    if (cedulaGuardada) {
+        // 1. Mostrar el modal de Spaxiocard de inmediato
+        const modal = document.getElementById('modal-spaxiocard');
         if (modal) modal.style.display = 'flex';
 
         // 2. RENDERIZAR EL QR PRIMERO (Para que no haya espera)
