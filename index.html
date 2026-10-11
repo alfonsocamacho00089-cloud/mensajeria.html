@@ -515,7 +515,7 @@ margin: 0;
     flex: 1;
     cursor: pointer;
     transition: 0.3s;
-}.
+}
 
 /* El botón que esté activo o cuando lo toques */
 .btn-nav.active, .btn-nav:active {
@@ -538,7 +538,7 @@ margin: 0;
     height: 45px !important;
     border-radius: 50% !important;
     object-fit: cover !important;
-    border: none
+    border: none;
     flex-shrink: 0; /* Evita que se aplaste si el nombre es largo */
      
       
@@ -1471,6 +1471,7 @@ margin: 0;
     alert("🚨 ERROR DETECTADO:\n\n" + message + "\n\nArchivo: " + source + "\nLínea: " + lineno);
     return false;
 };
+      
 
      
 // --- LÓGICA DE SPAXIOGIFSCARD (MODAL) ---
@@ -2513,7 +2514,7 @@ const cuerpoPeticion = {
         
 
      // --- BLOQUE: ENVIAR MENSAJE (NOTIFICAR) ---
-if ('serviceWorker' in navigator && Notification.permission === "granted") {
+/*if ('serviceWorker' in navigator && Notification.permission === "granted") {
     navigator.serviceWorker.ready.then(registration => {
         registration.showNotification("SpaceChat: " + emisorID, {
             body: textoReal,
@@ -2526,7 +2527,7 @@ if ('serviceWorker' in navigator && Notification.permission === "granted") {
     }).catch(err => console.log("Notificación bloqueada o fallida"));
 } else {
     console.log("Notificaciones no permitidas por el usuario.");
-     }
+     }*/
 async function obtenerToken(registration) {
     try {
         const miVapidKey = 'BIrsA9YbBXfIuo4PTMrKRtuktRsK2RbK0XevupuofGGOUDy9w5VZ9yaXbZXsenXppmFsR62-2B7jBOG0Z8RdxvU';
@@ -3275,7 +3276,8 @@ function pintarMensaje(contenido, clase, hora, status, id, tipo = 'texto') {
 
     // Nota: Ya no hace falta el código del localStorage (clave chat_emisorID)
     // porque ahora tu función cargarConversacionCon lee directo de la v10.
-     }// <--- ESTA LLAVE CIERRA LA FUNCIÓN 
+      } 
+      // <--- ESTA LLAVE CIERRA LA FUNCIÓN 
       
 // Función para ejecutar las acciones del menú
 function accionMensaje(tipo) {
@@ -3320,8 +3322,8 @@ function accionMensaje(tipo) {
     }
  
     document.getElementById('menu-acciones').style.display = 'none';
-}
- 
+
+      }
 // Esta función es para que el borrado sea REAL y no vuelvan al recargar
 
 async function borrarMensajeDeMemoria(idMensajeV10, elementoHTML) {
@@ -4475,12 +4477,14 @@ function escucharVozPedro(alRecibirTexto) {
         alRecibirTexto(resultadoTexto);
     };
      }
+      
+      
 
 
 // =================================================================
 // 3. CEREBRO RESPONDEDOR LOCAL DE H.A.R.V.I.S.
 // =================================================================
-function procesarRespuestaHarvis(mensajeRecibidoDePedro) {
+/*function procesarRespuestaHarvis(mensajeRecibidoDePedro) {
     setTimeout(() => {
         const respuestaRobot = "Entendido señor Peres, procesando comando en YouSpace de forma local.";
         
@@ -4492,7 +4496,7 @@ function procesarRespuestaHarvis(mensajeRecibidoDePedro) {
 
     }, 1000);
 }
-
+*/
 
 // =================================================================
 // 4. INTEGRACIÓN REAL EN TU FUNCIÓN DE ENVIAR MENSAJES
@@ -4546,9 +4550,9 @@ function actualizarMonitorAPI(tokensAcumuladosEnPeticion, estado = 'success', me
 
   // Salida limpia para Eruda en tu teléfono
   console.log(`%c[H.A.R.V.I.S. 1.0] +${tokensAcumuladosEnPeticion} tokens | Total acumulado: ${CONFIG_MONITOR.totalTokensConsumidos}`, 'color: #d4af37; font-weight: bold;');
-}
 
-// =================================================================
+      }
+//=================================================================
 // 1. CONTROLADOR DE ENVÍO DE MENSAJES (FLUX PRINCIPAL)
 // =================================================================
 function funcionDeEnvioRealDeTuApp(textoDelMensaje) {
@@ -5820,7 +5824,11 @@ if (typeof window !== "undefined" && window.speechSynthesis) {
         window.speechSynthesis.getVoices();
     };
      }
-     
+      
+      
+      
+      
+      
 </script>
 </body>
 </html>
