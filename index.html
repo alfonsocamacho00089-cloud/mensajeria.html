@@ -1199,53 +1199,56 @@ margin: 0;
         <p style="color: #8696a0; margin: 2px 0 0 0; font-size: 11px;">Cálculo de tasas y conversión en vivo</p>
     </div>
 
-    <!-- Cuerpo de la calculadora -->
-    <div class="calc-body" style="background: #151828; border: 1px solid #323657; border-radius: 12px; padding: 15px; color: white; text-align: left;">
-        
-        <!-- Tasas (P2P, BCV, Euro) -->
-        <div class="top-wrapper">
-            <div class="top-box">
-                <div class="fixed-title" style="text-align: center; font-size: 12px; color: #63688a; margin-bottom: 5px;">Tasa USDT P2P</div>
-                <div class="input-wrapper-main" style="margin-bottom: 10px;">
-                    <span class="bs-inside">Bs</span>
-                    <input type="text" id="p2pRate" readonly style="width: 100%; padding: 8px; background: #12131c; color: #00ffcc; border: 1px solid #323657; border-radius: 8px; font-weight: bold;">
-                </div>
+       
 
-                <div class="bottom-row" style="display: flex; gap: 10px;">
-                    <div class="card-wrapper selected" id="cardBCV" onclick="selectTasa('bcv')" style="flex: 1; cursor: pointer;">
-                        <div class="fixed-title" style="font-size: 11px; color: #63688a;">Tasa BCV</div>
-                        <div class="field-top">
-                            <input type="number" id="bcvRate" readonly style="width: 100%; padding: 6px; background: #12131c; color: #fff; border: 1px solid #323657; border-radius: 6px;">
-                        </div>
-                    </div> 
-                    <div class="card-wrapper" id="cardEuro" onclick="selectTasa('euro')" style="flex: 1; cursor: pointer;">
-                        <div class="fixed-title" style="font-size: 11px; color: #63688a;">Tasa EURO</div>
-                        <div class="field-top">
-                            <input type="number" id="euroRate" readonly style="width: 100%; padding: 6px; background: #12131c; color: #fff; border: 1px solid #323657; border-radius: 6px;">
+        <div class="calc-body" style="padding: 20px; color: white;">
+            <!-- 1. Primero las tarjetas de tasas (P2P, BCV, Euro) -->
+            <div class="top-wrapper">
+                <div class="top-box">
+                    <div class="fixed-title" style="text-align: center;">Tasa USDT P2P</div>
+                    <div class="input-wrapper-main">
+                        <span class="bs-inside">Bs</span>
+                        <input type="text" id="p2pRate" readonly>
+                    </div>
+
+                    <div class="bottom-row">
+                        <div class="card-wrapper selected" id="cardBCV" onclick="selectTasa('bcv')">
+                            <div class="fixed-title">Tasa BCV</div>
+                            <div class="field-top">
+                                <input type="number" id="bcvRate" readonly>
+                            </div>
+                        </div> 
+                        <div class="card-wrapper" id="cardEuro" onclick="selectTasa('euro')">
+                            <div class="fixed-title">Tasa EURO</div>
+                            <div class="field-top">
+                                <input type="number" id="euroRate" readonly>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
+
+            <!-- 2. Después los campos de cálculo (Precio USD, Bolívares, USDT) -->
+            <div class="container-calc" style="margin-top: 15px;">
+                <div class="field">
+                    <label>Precio Producto (USD)</label>
+                    <input type="number" id="priceUSD" placeholder="0.00" inputmode="decimal">
+                </div>
+                <div class="field">
+                    <label id="labelVES">Bolívares + IGTF</label>
+                    <input type="text" id="totalVES" readonly>
+                </div>
+                <div class="field">
+                    <label>Total USDT</label>
+                    <input type="text" id="totalUSDT" readonly>
+                </div>
+            </div>
         </div>
 
-        <!-- Campos de cálculo -->
-        <div class="container-calc" style="margin-top: 15px;">
-            <div class="field" style="margin-bottom: 10px;">
-                <label style="font-size: 12px; color: #8696a0;">Precio Producto (USD)</label>
-                <input type="number" id="priceUSD" placeholder="0.00" inputmode="decimal" style="width: 100%; padding: 8px; background: #1a1c29; color: #fff; border: 1px solid #323657; border-radius: 8px;">
-            </div>
-            <div class="field" style="margin-bottom: 10px;">
-                <label id="labelVES" style="font-size: 12px; color: #8696a0;">Bolívares + IGTF</label>
-                <input type="text" id="totalVES" readonly style="width: 100%; padding: 8px; background: #1a1c29; color: #fff; border: 1px solid #323657; border-radius: 8px;">
-            </div>
-            <div class="field">
-                <label style="font-size: 12px; color: #8696a0;">Total USDT</label>
-                <input type="text" id="totalUSDT" readonly style="width: 100%; padding: 8px; background: #1a1c29; color: #fff; border: 1px solid #323657; border-radius: 8px;">
-            </div>
-        </div>
-
+        <!-- Botón de Cerrar -->
+        <button onclick="cerrarCalculadora()" style="margin: 0 20px 20px 20px; padding: 12px; background: #ffd700; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; width: calc(100% - 40px);">Cerrar</button>
     </div>
-</div>
+    </div>
 <!-- ============================================================== -->
      
         <div id="cuerpo-modal-lista" style="flex-grow: 1; overflow-y: auto; padding: 0 15px 100px 15px;">
