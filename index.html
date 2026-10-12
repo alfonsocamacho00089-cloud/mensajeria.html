@@ -2096,69 +2096,6 @@ async function recuperarCuentaConID() {
     }
 }
 
-     async function ejecutarRegistroCompleto() {
-    const nombre = document.getElementById('reg-nombre').value.trim();
-    const apellido = document.getElementById('reg-apellido').value.trim();
-    const cedulaInput = document.getElementById('reg-cedula').value.trim(); // Cédula o RIF
-
-    // Validación limpia de los campos obligatorios
-    if (!nombre || !apellido || !cedulaInput) {
-        return alert("Por favor completa Nombre, Apellido y tu Cédula o RIF.");
-    }
-
-    // 1. EL ID DE SISTEMA (Sigue intacto para el chat y la antena Firebase)
-    const hash = Math.random().toString(36).substring(2, 7).toUpperCase(); 
-    const idSistemaChat = Math.random().toString(36).substring(2, 9) + hash; 
-
-    // 2. GUARDADO LOCAL (Incluyendo la Cédula/RIF para la pasarela)
-    const datosUsuario = { 
-        id: 'perfil_propietario', 
-        dropis_id: idSistemaChat, // ID interno del chat
-        cedula_rif: cedulaInput,  // 👈 ID OFICIAL DE LA SPAXIOCARD
-        nombre: nombre, 
-        apellido: apellido, 
-        fecha: Date.now() 
-    };
-
-    try {
-        // Guardamos el ID de chat en localStorage para la app
-        localStorage.setItem('mi_dropis_id', idSistemaChat);
-        // Guardamos la Cédula para que la Spaxiocard la lea directo
-        localStorage.setItem('spaxiocard_cedula', cedulaInput);
-
-        await guardarLocal('usuario', datosUsuario);
-        await guardarLocal('perfiles', { 
-            id: idSistemaChat, 
-            nombre, 
-            apellido, 
-            cedula: cedulaInput, 
-            foto: null 
-        });
-
-        // 3. ACTUALIZAR INTERFAZ
-        document.getElementById('modal-registro').style.display = 'none';
-        const elDisplay = document.getElementById('mi-id-display');
-        if (elDisplay) {
-            elDisplay.textContent = "ID Chat: " + idSistemaChat;
-        }
-
-        // 4. OBTENER TOKEN DE NOTIFICACIONES
-        const registration = await navigator.serviceWorker.ready;
-        let token = null;
-        try {
-            token = await messaging.getToken({ 
-                vapidKey: 'BIrsA9YbBXfIuo4PTMrKRtuktRsK2RbK0XevupuofGGOUDy9w5VZ9yaXbZXsenXppmFsR62-2B7jBOG0Z8RdxvU',
-                serviceWorkerRegistration: registration 
-            });
-        } catch (e) {
-            console.log("Error obteniendo token, se usará 'sin_token'");
-        }
-
-        // 5. ENVÍO A FIREBASE (Registrando ambos identificadores en la nube)
-        await db.ref('usuarios/' + idSistemaChat).set({
-            id_sistema: idSistemaChat,
-            cedula_rif: cedulaInput, // Vinculado en la nube
-            nombre: nombre,
 async function ejecutarRegistroCompleto() {
     const nombre = document.getElementById('reg-nombre').value.trim();
     const apellido = document.getElementById('reg-apellido').value.trim();
