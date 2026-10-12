@@ -1119,10 +1119,28 @@ margin: 0;
            </div>
         </div>
 
+<!-- ============================================================== -->
+            <!-- 3. 🪐 SECCIÓN INTEGRADA: SPAXIOGIFSCARD (Debajo de los contactos) -->
+            <!-- ============================================================== -->
+            <div id="seccion-spaxiocard-integrada" style="margin-top: 80vh; border-top: 1px solid rgba(255,215,0,0.2); padding-top: 20px; text-align: center;">
+                
+                <div style="text-align: left; margin-bottom: 15px;">
+                    <span style="font-size: 16px; font-weight: bold; letter-spacing: 1px; color: #5b61e2; text-transform: uppercase;">Spaxiogifscard</span>
+                    <p style="color: #8696a0; margin: 2px 0 0 0; font-size: 11px;">Gifs Card sin comisiones bancarias</p>
+                </div>
 
+                <!-- Tarjeta Visual -->
+                <div class="tarjeta-space" style="margin-bottom: 15px; text-align: left; padding: 15px; background: #151828; border-radius: 12px; width: 100%;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <span style="font-size: 12px; color: #63688a; text-transform: uppercase;">Spaxio Gifs Card Prepagada</span>🪐
+                    </div>
+                    <div class="balance-txt" id="balanceVisual" style="font-size: 22px; font-weight: bold; color: #fff; margin: 10px 0;">Bs. 0,00</div>
+                    <div style="color: #63688a; font-size: 12px; margin-bottom: 15px;" id="nombreTitular">ID: Cargando...</div>
+                    <div style="font-family: monospace; letter-spacing: 3px; font-size: 13px; text-align: right; color: #a5a9c7;">**** **** **** 7890</div>
+                </div>
      
      <!-- ============================================================== -->
-<!-- SUBMODALES INTEGRADOS DENTRO DEL MODAL QR -->
+<!-- 4. SUBMODALES INTEGRADOS DENTRO DEL MODAL QR -->
 <!-- ============================================================== -->
 
 <!-- 1. Submodal Cargar (Oculto por defecto) -->
@@ -1213,10 +1231,9 @@ margin: 0;
     </div>
     <!-- Botón agregado para abrir el modal Spaxio -->
     
-    <div class="btn-nav" onclick="abrirSpaxiocard();">
-        <span>🪐</span><span>Spaxio</span>
-    </div>
-    </div>
+    <div class="btn-nav" onclick="document.getElementById('seccion-spaxiocard-integrada').scrollIntoView({ behavior: 'smooth' }); inicializarSpaxiocard();">
+    <span>🪐</span><span>Spaxio</span>
+</div>
      
  <div id="modal-nuevocontacto" class="modal" style="display: none; align-items: center; justify-content: center; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #1e222b; z-index: 30000;">
     
