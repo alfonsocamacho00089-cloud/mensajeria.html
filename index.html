@@ -1119,8 +1119,70 @@ margin: 0;
            </div>
         </div>
 
+
      
-     
+     <!-- ============================================================== -->
+<!-- SUBMODALES INTEGRADOS DENTRO DEL MODAL QR -->
+<!-- ============================================================== -->
+
+<!-- 1. Submodal Cargar (Oculto por defecto) -->
+<div id="submodal-cargar" style="display: none; background: #1a1c29; border: 1px solid #323657; border-radius: 12px; padding: 20px; margin-top: 15px; text-align: left;">
+    <h3 style="margin-top: 0; color: #00ffcc; font-size: 16px;">📥 Sumar Puntos</h3>
+    <p style="color: #63688a; font-size: 12px; margin-bottom: 15px;">Canjes de puntos directo a tu tarjeta spaxio</p>
+    
+    <select id="bancoOrigen" style="width: 100%; padding: 8px; margin-bottom: 10px; background: #12131c; color: #fff; border: 1px solid #323657; border-radius: 8px;">
+        <option value="0102">Banco de Venezuela (BDV)</option>
+        <option value="0105">Banco Mercantil</option>
+        <option value="0134">Banesco</option>
+    </select>
+
+    <button class="btn-space" style="background-color: #ffd700; color: #000; width:100%; margin-bottom:10px;" onclick="sumarPuntosYConfirmacion()">🧪 Sumar Puntos (Test)</button>
+    <input type="number" id="montoCargar" placeholder="Monto en Bolívares (VES)" style="width: 100%; padding: 8px; margin-bottom: 10px; background: #12131c; color: #fff; border: 1px solid #323657; border-radius: 8px;">
+    <input type="text" id="tokenOTP" placeholder="Código de Pago Móvil (Clave/OTP)" style="width: 100%; padding: 8px; margin-bottom: 15px; background: #12131c; color: #fff; border: 1px solid #323657; border-radius: 8px;">
+    
+    <button class="btn-space" onclick="procesarCargaBanco()" style="width: 100%; padding: 10px; margin-bottom: 8px; cursor: pointer;">Confirmar Carga</button>
+    <button class="btn-space btn-danger" onclick="cerrarSubModalIntegrado('submodal-cargar')" style="width: 100%; padding: 10px; cursor: pointer;">Cerrar</button>
+</div>
+
+<!-- 2. Submodal Pagar / Canjear (Oculto por defecto) -->
+<div id="submodal-pagar" style="display: none; background: #1a1c29; border: 1px solid #323657; border-radius: 12px; padding: 20px; margin-top: 15px; text-align: left;">
+    <h3 style="margin-top: 0; color: #5b61e2; font-size: 16px;">🪙 Traspaso Inmediato</h3>
+    <p style="color: #63688a; font-size: 12px; margin-bottom: 15px;">Introduce el ID del usuario o escanea.</p>
+    
+    <input type="text" id="idReceptor" placeholder="ID o Cédula del Destinatario" style="width: 100%; padding: 8px; margin-bottom: 10px; background: #12131c; color: #fff; border: 1px solid #323657; border-radius: 8px;">
+    
+    <button type="button" class="btn-space" onclick="iniciarLectorQR()" style="background: #ffd700; color: #000; font-weight: bold; width: 100%; margin-bottom: 8px; padding: 10px; cursor: pointer; border: none; border-radius: 6px;">📷 Escanear con Cámara</button>
+    <button type="button" class="btn-space" onclick="document.getElementById('inputQRGaleria').click()" style="background: #323657; color: #fff; font-weight: bold; width: 100%; margin-bottom: 10px; padding: 10px; cursor: pointer; border: none; border-radius: 6px;">📁 Buscar QR en Galería</button>
+    <input type="file" id="inputQRGaleria" accept="image/*" style="display: none;" onchange="procesarQRGaleria(this)">
+
+    <div id="lector-qr-container" style="display: none; width: 100%; margin-bottom: 10px; border-radius: 8px; overflow: hidden; background: #000; border: 1px solid #ffd700;">
+        <video id="preview-camara" style="width: 100%; height: 180px; object-fit: cover; display: block;"></video>
+        <button type="button" onclick="detenerLectorQR()" style="background: #ff4d4d; color: #fff; border: none; width: 100%; padding: 8px; cursor: pointer; font-weight: bold;">Cerrar Cámara</button>
+    </div>
+
+    <input type="number" id="montoEnviar" placeholder="Monto a Enviar (VES)" style="width: 100%; padding: 8px; margin-bottom: 15px; background: #12131c; color: #fff; border: 1px solid #323657; border-radius: 8px;">
+    
+    <button class="btn-space" onclick="procesarEnvioInterno()" style="width: 100%; padding: 10px; margin-bottom: 8px; cursor: pointer;">Canje de puntos</button>
+    <button class="btn-space btn-danger" onclick="cerrarSubModalIntegrado('submodal-pagar')" style="width: 100%; padding: 10px; cursor: pointer;">Cerrar</button>
+</div>
+
+<!-- 3. Submodal Mi QR (Oculto por defecto) -->
+<div id="submodal-miqr" style="display: none; background: #1a1c29; border: 1px solid #323657; border-radius: 12px; padding: 20px; margin-top: 15px; text-align: center;">
+    <h3 style="margin-top: 0; color: #fff; font-size: 16px;">🪐 Tu Código de Canje</h3>
+    <p style="color: #63688a; font-size: 12px; margin-bottom: 15px;">Muestra este código para recibir puntos.</p>
+    
+    <div id="contenedor-qr-spaxiocard" style="background: white; padding: 10px; border-radius: 8px; display: inline-block; margin-bottom: 12px;"></div>
+
+    <div style="margin-bottom: 20px;">
+        <span id="spaxiocard-id-display" style="font-size: 12px; color: #ffd700; font-family: monospace; font-weight: bold;"></span>
+    </div>
+
+    <button class="btn-space btn-danger" onclick="cerrarSubModalIntegrado('submodal-miqr')" style="width: 100%; padding: 10px; cursor: pointer;">Ocultar QR</button>
+</div>
+<!-- ============================================================== -->
+     <button class="btn-space" onclick="abrirSubModalIntegrado('submodal-cargar')" style="...">📥 Cargar puntos desde Banco</button>
+<button class="btn-space" onclick="abrirSubModalIntegrado('submodal-pagar')" style="...">🪙 Canjear puntos</button>
+<button class="btn-space" onclick="abrirSubModalIntegrado('submodal-miqr')" style="...">📷 Mostrar mi QR para Cobrar</button>
 
         <button onclick="abrirModalNuevoContacto()" 
             style="position: absolute; right: 20px; bottom: 100px; 
@@ -1468,7 +1530,32 @@ margin: 0;
     return false;
 };
 
-     
+     function abrirSubModalIntegrado(idSubModal) {
+    // Ocultamos los tres por si acaso hay alguno abierto
+    document.getElementById('submodal-cargar').style.display = 'none';
+    document.getElementById('submodal-pagar').style.display = 'none';
+    document.getElementById('submodal-miqr').style.display = 'none';
+
+    // Mostramos el que eligió el usuario
+    const modalSeleccionado = document.getElementById(idSubModal);
+    if (modalSeleccionado) {
+        modalSeleccionado.style.display = 'block';
+        modalSeleccionado.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    // Si es el QR, lo generamos de una vez
+    if (idSubModal === 'submodal-miqr') {
+        generarMiQRSpaxioCard();
+    }
+}
+
+function cerrarSubModalIntegrado(idSubModal) {
+    const modal = document.getElementById(idSubModal);
+    if (modal) {
+        modal.style.display = 'none';
+        document.getElementById('seccion-spaxiocard-integrada').scrollIntoView({ behavior: 'smooth' });
+    }
+     }
 // --- LÓGICA DE SPAXIOGIFSCARD (MODAL) ---
 
 const usuarioSesionSpaxio = {
