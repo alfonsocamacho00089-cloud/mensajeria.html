@@ -1315,16 +1315,36 @@ margin: 0;
 </div>      
 <!-- ============================================================== -->
      
-        <div id="cuerpo-modal-lista" style="flex-grow: 1; overflow-y: auto; padding: 0 15px 100px 15px;">
-            <div id="seccion-mi-qr" style="display: none; padding: 20px; flex-direction: column; align-items: center; border-bottom: 1px solid #444;">
-                <div id="contenedor-qr" style="background: white; padding: 10px; border-radius: 10px;"></div>
-                <button onclick="document.getElementById('seccion-mi-qr').style.display='none'" style="margin-top: 10px; color: #ffd700; background: transparent; border: none; cursor: pointer;">[ Ocultar QR ]</button>
-            </div>
-            <h4 style="color: #ffd700; margin: 20px 0 10px 0; font-size: 14px; text-shadow: 1px 1px 2px black;">CONTACTOS</h4>
-            <div id="lista-contactos">
-           </div>
+        <!-- ==================== PANEL LATERAL DE CONTACTOS ==================== -->
+<div id="seccion-panel-contactos-lateral">
+    <!-- Cabecera del Panel de Contactos con tu Flechita exacta -->
+    <div style="background: rgba(32, 44, 51, 0.5); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(15px); color: #ffffff; padding: 15px; font-weight: 900; text-transform: uppercase; text-align: left; border-bottom: 1px solid #333; display: flex; justify-content: space-between; align-items: center;">
+        <div style="display: flex; align-items: center; gap: 12px;">
+            <!-- Tu flechita reutilizada para cerrar/deslizar -->
+            <button onclick="togglePanelContactosLateral()" style="background: transparent; border: none; color: white; font-size: 20px; cursor: pointer; padding: 0;">
+                <span style="display: inline-block; transform: scaleX(-1);">➔</span>
+            </button>
+            <span style="color: #ffd700; font-size: 15px;">CONTACTOS</span>
         </div>
+        <div onclick="abrirModalNuevoContacto()" style="cursor: pointer; color: #ffd700; font-size: 24px; padding: 0 5px;" title="Nuevo Contacto">+</div>
+    </div>
 
+    <!-- Contenedor QR personal opcional dentro del panel -->
+    <div id="seccion-mi-qr" style="display: none; padding: 15px; flex-direction: column; align-items: center; border-bottom: 1px solid #444;">
+        <div id="contenedor-qr" style="background: white; padding: 10px; border-radius: 10px;"></div>
+        <button onclick="document.getElementById('seccion-mi-qr').style.display='none'" style="margin-top: 10px; color: #ffd700; background: transparent; border: none; cursor: pointer;">[ Ocultar QR ]</button>
+    </div>
+
+    <!-- Lista de contactos con scroll independiente y libre -->
+    <div style="flex-grow: 1; overflow-y: auto; padding: 15px; -webkit-overflow-scrolling: touch;">
+        <div id="lista-contactos"></div>
+    </div>
+</div>
+
+<!-- Botón flotante en la pantalla principal para abrir este panel lateral -->
+<button class="btn-abrir-contactos-lateral" onclick="togglePanelContactosLateral()" title="Abrir Contactos">
+    👥
+</button>
 <!-- ============================================================== -->
             
 
@@ -1416,16 +1436,27 @@ margin: 0;
                     style="background: transparent; border: none; color: white; font-size: 24px;">✕</button>
         </div>
         
-<div id="seccion-calculadora-integrada" style="display: flex; flex-direction: column; width: 100%; padding: 15px 0; margin-top: 20px; border-top: 1px solid rgba(255,215,0,0.2);">
+</div>
+         
+         <!-- ==================== PANEL LATERAL CALCULADORA ==================== -->
+<div id="seccion-calculadora-integrada">
     
-    <!-- Título de la sección -->
-    <div style="text-align: left; margin-bottom: 15px;">
-        <span style="font-size: 16px; font-weight: bold; letter-spacing: 1px; color: #ffd700; text-transform: uppercase;">Real Market Elite</span>
-        <p style="color: #8696a0; margin: 2px 0 0 0; font-size: 11px;">Cálculo de tasas y conversión en vivo</p>
+    <!-- Cabecera del Panel con tu Flechita exacta -->
+    <div style="background: rgba(32, 44, 51, 0.5); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(15px); color: #ffffff; padding: 15px; font-weight: 900; text-transform: uppercase; text-align: left; border-bottom: 1px solid #333; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 10;">
+        <div style="display: flex; align-items: center; gap: 12px;">
+            <!-- Tu flechita reutilizada para cerrar/deslizar -->
+            <button onclick="cerrarCalculadora()" style="background: transparent; border: none; color: white; font-size: 20px; cursor: pointer; padding: 0;">
+                <span style="display: inline-block; transform: scaleX(-1);">➔</span>
+            </button>
+            <span style="color: #ffd700; font-size: 15px;">Real Market Elite</span>
+        </div>
     </div>
 
+    <!-- Contenido interno de la calculadora -->
+    <div style="padding: 15px; flex-grow: 1;">
+        <p style="color: #8696a0; margin: 0 0 15px 0; font-size: 11px;">Cálculo de tasas y conversión en vivo</p>
 
-        <div class="calc-body" style="padding: 20px; color: white;">
+        <div class="calc-body" style="color: white;">
             <!-- 1. Primero las tarjetas de tasas (P2P, BCV, Euro) -->
             <div class="top-wrapper">
                 <div class="top-box">
@@ -1468,9 +1499,11 @@ margin: 0;
                 </div>
             </div>
         </div>
+    </div>
 
-        <!-- Botón de Cerrar -->
-        <button onclick="cerrarCalculadora()" style="margin: 0 20px 20px 20px; padding: 12px; background: #ffd700; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; width: calc(100% - 40px);">Cerrar</button>
+    <!-- Botón de Cerrar inferior -->
+    <div style="padding: 15px; background: rgba(11,20,26,0.8);">
+        <button onclick="cerrarCalculadora()" style="padding: 12px; background: #ffd700; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; color: #000;">Cerrar Panel</button>
     </div>
 </div>
 
@@ -1576,6 +1609,19 @@ margin: 0;
     return false;
 };
 
+             function togglePanelContactosLateral() {
+    const panel = document.getElementById('seccion-panel-contactos-lateral');
+    if (panel) {
+        panel.classList.toggle('abierto');
+        
+        // Si se abre, aseguramos pintar la agenda de inmediato
+        if (panel.classList.contains('abierto')) {
+            if (typeof pintarAgendaContactos === "function") {
+                pintarAgendaContactos();
+            }
+        }
+    }
+             }
      function abrirSubModalIntegrado(idSubModal) {
     // Ocultamos los tres por si acaso hay alguno abierto
     document.getElementById('submodal-cargar').style.display = 'none';
