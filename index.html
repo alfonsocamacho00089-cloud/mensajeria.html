@@ -430,7 +430,8 @@ margin: 0;
     flex-grow: 1; /* Estira este div para llenar el vacío */
     overflow-y: auto; /* Permite scroll si hay muchos contactos */
     background: transparent; 
-}
+   -webkit-overflow-scrolling: touch;
+ }
      
 
 
@@ -473,7 +474,7 @@ margin: 0;
 }
 
 #cuerpo-modal-lista {
-    padding-bottom: 100px !important; /* Espacio extra para que la barra no tape nada */
+    padding-bottom: 140px !important; /* Espacio extra para que la barra no tape nada */
 }
      
 .contador-nube {
@@ -1188,7 +1189,39 @@ margin: 0;
 <button class="btn-space" onclick="abrirSubModalIntegrado('submodal-cargar')" style="width: 100%; margin-bottom: 10px; padding: 10px; cursor: pointer;">📥 Cargar puntos desde Banco</button>
 <button class="btn-space" onclick="abrirSubModalIntegrado('submodal-pagar')" style="width: 100%; margin-bottom: 10px; padding: 10px; cursor: pointer;">🪙 Canjear puntos</button>
 <button class="btn-space" onclick="abrirSubModalIntegrado('submodal-miqr')" style="width: 100%; background-color: #1a1c29; border: 1px solid #323657; padding: 10px; cursor: pointer; color: #fff;">📷 Mostrar mi QR para Cobrar</button>
-             
+       <!-- ==================== SECCIÓN: SPAXIOSHOPPING ==================== -->
+<div style="width: 100%; margin-top: 20px; text-align: left; padding: 0 5px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+        <span style="font-size: 13px; font-weight: bold; color: #ffd700; text-transform: uppercase; letter-spacing: 1px;">🛍️ SpaxioShopping</span>
+        <span style="font-size: 10px; color: #8696a0;">Comercios Afiliados</span>
+    </div>
+
+    <!-- Contenedor deslizable de productos/comercios -->
+    <div style="display: flex; gap: 10px; overflow-x: auto; padding-bottom: 5px; scrollbar-width: none;">
+        
+        <!-- Tarjeta de Comercio 1 -->
+        <div style="min-width: 110px; background: #151828; border: 1px solid #323657; border-radius: 10px; padding: 8px; text-align: center; flex-shrink: 0; cursor: pointer;">
+            <div style="font-size: 22px; margin-bottom: 4px;">🍔</div>
+            <div style="font-size: 11px; color: #fff; font-weight: bold;">Space Burger</div>
+            <div style="font-size: 10px; color: #00ffcc; margin-top: 2px;">-10% Puntos</div>
+        </div>
+
+        <!-- Tarjeta de Comercio 2 -->
+        <div style="min-width: 110px; background: #151828; border: 1px solid #323657; border-radius: 10px; padding: 8px; text-align: center; flex-shrink: 0; cursor: pointer;">
+            <div style="font-size: 22px; margin-bottom: 4px;">☕</div>
+            <div style="font-size: 11px; color: #fff; font-weight: bold;">Café Galaxia</div>
+            <div style="font-size: 10px; color: #ffd700; margin-top: 2px;">Cashback</div>
+        </div>
+
+        <!-- Tarjeta de Comercio 3 -->
+        <div style="min-width: 110px; background: #151828; border: 1px solid #323657; border-radius: 10px; padding: 8px; text-align: center; flex-shrink: 0; cursor: pointer;">
+            <div style="font-size: 22px; margin-bottom: 4px;">🛒</div>
+            <div style="font-size: 11px; color: #fff; font-weight: bold;">Market Express</div>
+            <div style="font-size: 10px; color: #00ffcc; margin-top: 2px;">Delivery Gratis</div>
+        </div>
+
+    </div>
+</div>      
 <!-- ============================================================== -->
      
         <div id="cuerpo-modal-lista" style="flex-grow: 1; overflow-y: auto; padding: 0 15px 100px 15px;">
