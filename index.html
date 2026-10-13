@@ -1972,24 +1972,27 @@ async function procesarEnvioInterno() {
         document.getElementById('priceUSD').addEventListener('input', calcularTasasPanel);
      
          function abrirCalculadora() {
-    const modalCalc = document.getElementById('modal-calculadora');
+    const modalCalc = document.getElementById('seccion-calculadora-integrada');
     if (modalCalc) {
-        modalCalc.style.display = 'flex';
-        // Forzamos la carga de tasas y el cálculo justo cuando se abre el modal
-        if (typeof cargarTasasDropdown === 'function') {
-            cargarTasasDropdown();
-        } else {
-            calcularTasasPanel();
+        modalCalc.classList.toggle('abierto'); // Hace exactamente lo mismo que el de contactos
+        
+        // Si se abre, cargamos las tasas de inmediato
+        if (modalCalc.classList.contains('abierto')) {
+            if (typeof cargarTasasDropdown === 'function') {
+                cargarTasasDropdown();
+            } else {
+                calcularTasasPanel();
+            }
         }
     }
-     }
+}
 
 function cerrarCalculadora() {
-    const modalCalc = document.getElementById('modal-calculadora');
+    const modalCalc = document.getElementById('seccion-calculadora-integrada');
     if (modalCalc) {
-        modalCalc.style.display = 'none';
+        modalCalc.classList.remove('abierto'); // Oculta el panel deslizándolo hacia la derecha
     }
-     }
+             }
 
         // 1. CONFIGURACIÓN Y REGISTRO DE ANTENA (INDISPENSABLE PARA EL TOKEN)
         
