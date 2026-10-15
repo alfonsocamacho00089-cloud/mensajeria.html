@@ -2409,6 +2409,16 @@ const base64 = btoa(binary);
         
                 // Pintamos y guardamos pasando el tipo corregido localmente primero
         pintarMensaje(msg, 'msg-derecha', null, 'enviado', msgId, tipoValidado);
+     await guardarLocal('mensajes', {
+    id: msgId,
+    contactoId: targetID,
+    texto: msg,
+    clase: 'msg-derecha',
+    status: 'enviado',
+    tipo: tipoValidado,
+    ts: Date.now(),
+    hora: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })
+});
         
         // 🔥 CONEXIÓN SUPREMA AL BACKEND DE VERCEL PARA EL FEED GLOBAL
         if (targetID === "26fmetp4Q4WJ") {
