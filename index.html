@@ -2877,7 +2877,30 @@ async function cargarConversacionCon(idDestino, nombreDestino, fotoDestino) {
      }
     // 3. Buscamos los mensajes de ESE contacto en LocalStorage
     // ... (final de la función cargarConversacionCon)
-
+async function limpiarMensajesAntiguos(contactoId, limiteMaximo = 200) {
+    try {
+        const todos = await obtenerTodo('mensajes');
+        const delChat = todos.filter(m => String(m.contactoId) === String(contactoId));
+        
+        // Si superamos el límite (ej. 200 mensajes)
+        if (delChat.length > limiteMaximo) {
+            // Ordenamos del más antiguo al más reciente usando su timestamp (ts)
+            delChat.sort((a, b) => (a.ts || 0) - (b.ts || 0));
+            
+            // Calculamos cuántos mensajes exceden el límite
+            const excessCount = delChat.length - limiteMaximo;
+            const mensajesAEliminar = delChat.slice(0, excessCount);
+            
+            // Los borramos de IndexedDB uno por uno
+            for (const msg of mensajesAEliminar) {
+                await borrarLocal('mensajes', msg.id); // Asegúrate de que 'borrarLocal' sea tu función para eliminar en IndexedDB
+            }
+            console.log(`🧹 Se limpiaron ${mensajesAEliminar.length} mensajes antiguos de este chat.`);
+        }
+    } catch (e) {
+        console.error("Error en la limpieza automática:", e);
+    }
+             }
      
   async function pintarAgendaContactos() {
     const lista = document.getElementById('lista-contactos');
