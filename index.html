@@ -1591,18 +1591,7 @@ margin: 0;
     return false;
 };
 
-       // Cuando el usuario presiona el botón de enviar en SpaxioFlow
-async function procesarEnvioSpaxioFlow(contenido, tipoContenido) {
-    const targetID = "26fmetp4Q4WJ"; // El ID fijo del feed público de SpaxioFlow
-    
-    // Usas tu misma función universal de envío pasando el contenido y el tipo ('texto', 'foto', 'video', etc.)
-    if (typeof enviarMensajeSatelital === "function") {
-        await enviarMensajeSatelital(contenido, targetID, tipoContenido);
-    } else {
-        // O la función que maneje tu infraestructura de envío
-        await enviarMensajeSatelitalOInfraestructura(contenido, targetID, tipoContenido);
-    }
-             }
+       
              
              function togglePanelContactosLateral() {
     const panel = document.getElementById('seccion-panel-contactos-lateral');
@@ -5543,14 +5532,50 @@ async function inyectarNotificacionHarvis(textoIA) {
         console.error("❌ Error en la inyección del Live a través de Vercel:", e);
     }
      }
-// ========================================================
-// 🎥 SPAXIOFLOW: ESCUCHADOR EN TIEMPO REAL PARA TRANSMISIONES
-// ========================================================
+
+// 1. Variable para llevar registro de IDs únicos (mantenemos una sola vez)
+const mensajesProcesados = new Set();
+
+function pintarFeedSeguro(listaMensajes, idContenedorReal) {
+    const contenedor = document.getElementById(idContenedorReal); 
+    if (!contenedor) return;
+    
+    contenedor.innerHTML = ''; 
+    mensajesProcesados.clear();
+
+    listaMensajes.forEach(msg => {
+        if (!mensajesProcesados.has(msg.id)) {
+            mensajesProcesados.add(msg.id);
+            pintarMensaje(msg); 
+        }
+    });
+}
+
+// 2. Envío de SpaxioFlow
+async function procesarEnvioSpaxioFlow(contenido, tipoContenido) {
+    const targetID = "26fmetp4Q4WJ"; 
+    
+    if (typeof enviarMensajeSatelital === "function") {
+        await enviarMensajeSatelital(contenido, targetID, tipoContenido);
+    } else {
+        await enviarMensajeSatelitalOInfraestructura(contenido, targetID, tipoContenido);
+    }
+}
+
+
+// 3. TIEMPO REAL BLINDADO (¡Evita que se multipliquen los canales!)
+let canalSpaxioFlowActivo = null;
 
 function activarSpaxioFlowRealtime() {
     console.log("🤖 H.A.R.V.I.S: Conectando canal de streaming en tiempo real...");
 
-    supabase
+    // 🔴 IMPORTANTE: Si ya había un canal abierto, lo eliminamos primero para matar el eco
+    if (canalSpaxioFlowActivo) {
+        supabase.removeChannel(canalSpaxioFlowActivo);
+        canalSpaxioFlowActivo = null;
+    }
+
+    canalSpaxioFlowActivo = supabase
         .channel('canal-spaxioflow')
         .on('postgres_changes', 
             { 
@@ -5560,23 +5585,18 @@ function activarSpaxioFlowRealtime() {
             }, 
             (payload) => {
                 const nuevoEvento = payload.new;
-                console.log("🔥 Transmisión detectada en vivo:", nuevoEvento);
-
-                // Verificamos que sea el ID de SpaxioFlow y que el chat esté abierto actualmente
                 const targetInput = document.querySelector('#target-id');
                 const chatAbiertoActualmente = targetInput ? targetInput.value : "";
 
                 if (nuevoEvento.chat_id === "26fmetp4Q4WJ" && chatAbiertoActualmente === "26fmetp4Q4WJ") {
-                    
                     const msgIdLive = "live_rt_" + nuevoEvento.id;
                     
-                    // Validamos si ya existe en pantalla para evitar duplicados
+                    // Validamos que no esté duplicado en el DOM
                     if (!document.getElementById(msgIdLive)) {
                         let tipoMapeado = 'texto';
                         if (nuevoEvento.tipo === 'video') tipoMapeado = 'video';
                         if (nuevoEvento.tipo === 'imagen') tipoMapeado = 'foto';
 
-                        // Usamos TU propia función pintarMensaje intacta
                         pintarMensaje(
                             nuevoEvento.content, 
                             'msg-izquierda', 
@@ -5590,26 +5610,8 @@ function activarSpaxioFlowRealtime() {
             }
         )
         .subscribe();
-}
-
-             // Variable para llevar registro de IDs únicos y evitar duplicados en pantalla
-const mensajesProcesados = new Set();
-
-function pintarFeedSeguro(listaMensajes) {
-    const contenedor = document.getElementById('tu-contenedor-feed-id'); // Reemplaza por el ID real de tu contenedor en el HTML
-    if (!contenedor) return;
-    
-    // Limpiamos el contenedor para que no se repita la estructura anterior
-    contenedor.innerHTML = ''; 
-    mensagensProcesados.clear();
-
-    listaMensajes.forEach(msg => {
-        if (!mensajesProcesados.has(msg.id)) {
-            mensajesProcesados.add(msg.id);
-            pintarMensaje(msg); // Tu función original que dibuja la tarjeta
-        }
-    });
-}
+             }
+             
 // =================================================================
 // 🪐 SPAXIOVERSO OMNI: MOTOR GRÁFICO, IA Y TELEMETRÍA - COMPLETO
 // =================================================================
