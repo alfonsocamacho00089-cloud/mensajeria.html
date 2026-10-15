@@ -1598,6 +1598,19 @@ margin: 0;
     return false;
 };
 
+       // Cuando el usuario presiona el botón de enviar en SpaxioFlow
+async function procesarEnvioSpaxioFlow(contenido, tipoContenido) {
+    const targetID = "26fmetp4Q4WJ"; // El ID fijo del feed público de SpaxioFlow
+    
+    // Usas tu misma función universal de envío pasando el contenido y el tipo ('texto', 'foto', 'video', etc.)
+    if (typeof enviarMensajeSatelital === "function") {
+        await enviarMensajeSatelital(contenido, targetID, tipoContenido);
+    } else {
+        // O la función que maneje tu infraestructura de envío
+        await enviarMensajeSatelitalOInfraestructura(contenido, targetID, tipoContenido);
+    }
+             }
+             
              function togglePanelContactosLateral() {
     const panel = document.getElementById('seccion-panel-contactos-lateral');
     if (panel) {
