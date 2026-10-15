@@ -2810,28 +2810,25 @@ async function cargarConversacionCon(idDestino, nombreDestino, fotoDestino) {
         const box = document.getElementById('chat-box');
         if (box) box.innerHTML = ""; 
 
-     // 🔥 INTERCEPCIÓN MAESTRA CON UNA SOLA PETICIÓN LIMPIA
+     // 🔥 INTERCEPCIÓN MAESTRA SPAXIOFLOW (Estilo Red Social / Sincronizado al chat normal)
         if (idDestino === "26fmetp4Q4WJ") {
-            console.log("📱 Abriendo feed estilo Red Social desde la caché local...");
+            console.log("🌊 Abriendo SpaxioFlow (Modo Feed Local-First)...");
             
-            // 1. CARGA LOCAL INSTANTÁNEA (Como Twitter/IG al abrir la app sin internet)
+            // 1. CARGA LOCAL INSTANTÁNEA (Idéntico a un chat normal para que vuele al abrir)
             const todosLosMensajes = await obtenerTodo('mensajes');
             const postsLocales = todosLosMensajes.filter(m => String(m.contactoId) === "26fmetp4Q4WJ");
 
-            // Ordenamos por timestamp real para que los más nuevos queden en su posición correcta de feed
-            postsLocales.sort((a, b) => a.ts - b.ts);
+            // Orden cronológico estricto de red social (del más viejo al más nuevo)
+            postsLocales.sort((a, b) => (a.ts || 0) - (b.ts || 0));
 
+            // Tomamos los últimos 50 para mantener la app ligera
             const ultimos50 = postsLocales.slice(-50);
 
-            if (typeof renderizarMensajes === "function") {
-                renderizarMensajes(ultimos50);
-            } else {
-                ultimos50.forEach(m => {
-                    pintarMensaje(m.texto, m.clase, m.hora, m.status || 'leido', m.id, m.tipo || 'texto');
-                });
-            }
+            ultimos50.forEach(m => {
+                pintarMensaje(m.texto, m.clase, m.hora, m.status || 'leido', m.id, m.tipo || 'texto');
+            });
 
-            // 2. ACTUALIZACIÓN INTELIGENTE DE FEED (Una sola vez por sesión o al refrescar)
+            // 2. PETICIÓN ÚNICA DE RED (Protegida por sessionStorage para que no golpee Supabase en cada clic)
             if (!sessionStorage.getItem('_spaxioFlowCargado')) {
                 sessionStorage.setItem('_spaxioFlowCargado', 'true');
                 
@@ -2839,11 +2836,10 @@ async function cargarConversacionCon(idDestino, nombreDestino, fotoDestino) {
                     .then(res => res.json())
                     .then(async posts => {
                         if (posts && Array.isArray(posts)) {
-                            // Recorremos los posts que trae la red social
                             for (const post of posts) {
                                 const msgId = "feed_" + post.id;
                                 
-                                // Guardamos con upsert: si ya existe el ID del post, IndexedDB lo actualiza limpiamente
+                                // Guardado seguro (IndexedDB actualiza si ya existe el ID, evitando duplicados)
                                 await guardarLocal('mensajes', {
                                     id: msgId,
                                     contactoId: "26fmetp4Q4WJ",
@@ -2855,11 +2851,12 @@ async function cargarConversacionCon(idDestino, nombreDestino, fotoDestino) {
                                     hora: post.sender_name || 'H.A.R.V.I.S.'
                                 });
                             }
-                            console.log("🔄 Feed sincronizado con el servidor exitosamente.");
+                            console.log("🔄 Feed sincronizado silenciosamente de fondo.");
                         }
                     })
-                    .catch(err => console.error("⚠️ Error actualizando feed:", err));
+                    .catch(err => console.error("⚠️ Error actualizando SpaxioFlow de fondo:", err));
             }
+             
              
         
         } else {
