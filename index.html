@@ -865,14 +865,7 @@ margin: 0;
     margin-bottom: 10px;
 }
 
-.btn-unirse {
-    background: #ffcc00; /* Dorado, como tus otros botones */
-    border: none;
-    padding: 5px 15px;
-    border-radius: 5px;
-    font-weight: bold;
-    cursor: pointer;
-}
+
       /* --- ESTILOS DE SPAXIOGIFSCARD / PASARELA --- */
         .tarjeta-space { background: linear-gradient(135deg, #161722, #25283d); border: 1px solid #323657; border-radius: 16px; padding: 25px; width: 320px; margin: 30px auto; box-shadow: 0 8px 24px rgba(0,0,0,0.5); text-align: left; }
         .balance-txt { font-size: 32px; font-weight: bold; margin: 15px 0 5px 0; color: #00ffcc; }
@@ -5135,7 +5128,8 @@ let streamCamaraActiva;
 let room; // Instancia global de LiveKit
 
 let modoActual = 'video'; 
-
+let room = null;          // Para cuando transmites tú
+let viewerRoom = null;    // Para cuando eres espectador
 
 
 async function encenderCamaraPreview() {
@@ -5380,19 +5374,7 @@ try {
                 
             
 
-    
 
-    
-
-
-
-    
-
-     
-  
-            
-
-    
 function abrirModalSpaxio() {
     document.getElementById('modal-spaxio').style.display = 'flex';
     encenderCamaraPreview();
@@ -5469,39 +5451,7 @@ async function listarLivesActivos() {
     }
 }
 
-// ========================================================
-// 2. UNIRSE AL LIVE (Se queda para enganchar el video remoto)
-// ========================================================
-async function unirseAlLive(roomName) {
-    try {
-        // 1. Obtener token de espectador
-        const token = await obtenerTokenEspectador(roomName);
-        if (!token) throw new Error("No se pudo obtener el token de espectador");
-        
-        const roomEspectador = new LivekitClient.Room(); 
-        
-        // 2. Escuchar cuando tú (el emisor) publicas el video en la nube
-        roomEspectador.on(LivekitClient.RoomEvent.TrackSubscribed, (track, publication, participant) => {
-            if (track.kind === LivekitClient.Track.Kind.Video) {
-                const videoElement = document.getElementById('video-remoto');
-                if (videoElement) {
-                    track.attach(videoElement);
-                }
-            }
-        });
 
-        // 3. Conectarse a la sala en modo espectador
-        await roomEspectador.connect('wss://space-xquv9iaa.livekit.cloud', token);
-        
-        // UI: Abrir el modal donde los muchachos te van a ver
-        const modal = document.getElementById('modal-video-live');
-        if (modal) modal.style.display = 'flex';
-
-    } catch (err) {
-        console.error("❌ Error al unirse al directo:", err);
-        alert("No se pudo conectar al en vivo.");
-    }
-}
 
 // ========================================================
 // 3. INYECCIÓN DIRECTA DE HARVIS (Se queda intacta)
