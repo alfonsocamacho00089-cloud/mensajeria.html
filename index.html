@@ -3080,6 +3080,11 @@ window.onload = async () => {
         });
 
         if (typeof activarAntena === "function") activarAntena();
+             
+     // 🔥 AGREGAR ESTA LÍNEA AQUÍ PARA EL TIEMPO REAL DE SPAXIOFLOW:
+        if (typeof activarSpaxioFlowRealtime === "function") {
+            activarSpaxioFlowRealtime();
+             }
         manejarBotonIdentidad();
     } else {
         // --- CASO 2: NO HAY REGISTRO (USUARIO NUEVO) ---
@@ -5586,10 +5591,10 @@ async function inyectarNotificacionHarvis(textoIA) {
 // ========================================================
 // 🎥 SPAXIOFLOW: ESCUCHADOR EN TIEMPO REAL PARA TRANSMISIONES
 // ========================================================
+
 function activarSpaxioFlowRealtime() {
     console.log("🤖 H.A.R.V.I.S: Conectando canal de streaming en tiempo real...");
 
-    // Nos acoplamos a la tabla que acabamos de verificar juntos
     supabase
         .channel('canal-spaxioflow')
         .on('postgres_changes', 
@@ -5599,35 +5604,38 @@ function activarSpaxioFlowRealtime() {
                 table: 'spaxioflow_feed' 
             }, 
             (payload) => {
-                // 📡 ¡BOOM! Supabase avisa que Pedro Peres subió un nuevo Live o Foto
                 const nuevoEvento = payload.new;
                 console.log("🔥 Transmisión detectada en vivo:", nuevoEvento);
 
-                // Verificamos si es el ID fijo de SpaxioFlow
-                if (nuevoEvento.chat_id === "26fmetp4Q4WJ") {
+                // Verificamos que sea el ID de SpaxioFlow y que el chat esté abierto actualmente
+                const targetInput = document.querySelector('#target-id');
+                const chatAbiertoActualmente = targetInput ? targetInput.value : "";
+
+                if (nuevoEvento.chat_id === "26fmetp4Q4WJ" && chatAbiertoActualmente === "26fmetp4Q4WJ") {
                     
-                    // Ejecutamos tu función nativa que ya pinta el contenedor o iframe
-                    if (typeof pintarMensaje === "function") {
-                        
-                        if (nuevoEvento.tipo === 'video') {
-                            // Renderiza el reproductor de video de una en la pantalla de todos
-                            pintarMensaje(nuevoEvento.content, 'msg-izquierda', nuevoEvento.sender_name, 'leido', "live_" + nuevoEvento.id, 'video');
-                        } 
-                        else if (nuevoEvento.tipo === 'imagen') {
-                            // Si lanzas una captura o foto fija al feed
-                            pintarMensaje(nuevoEvento.content, 'msg-izquierda', nuevoEvento.sender_name, 'leido', "img_" + nuevoEvento.id, 'imagen');
-                        }
-                        else if (nuevoEvento.tipo === 'texto') {
-                            // Mensajes de texto normales o avisos del sistema
-                            pintarMensaje(nuevoEvento.content, 'msg-izquierda', nuevoEvento.sender_name, 'leido', "txt_" + nuevoEvento.id, 'texto');
-                        }
+                    const msgIdLive = "live_rt_" + nuevoEvento.id;
+                    
+                    // Validamos si ya existe en pantalla para evitar duplicados
+                    if (!document.getElementById(msgIdLive)) {
+                        let tipoMapeado = 'texto';
+                        if (nuevoEvento.tipo === 'video') tipoMapeado = 'video';
+                        if (nuevoEvento.tipo === 'imagen') tipoMapeado = 'foto';
+
+                        // Usamos TU propia función pintarMensaje intacta
+                        pintarMensaje(
+                            nuevoEvento.content, 
+                            'msg-izquierda', 
+                            new Date(nuevoEvento.created_at || Date.now()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true }), 
+                            'leido', 
+                            msgIdLive, 
+                            tipoMapeado
+                        );
                     }
                 }
             }
         )
         .subscribe();
-     }
-
+}
 // =================================================================
 // 🪐 SPAXIOVERSO OMNI: MOTOR GRÁFICO, IA Y TELEMETRÍA - COMPLETO
 // =================================================================
