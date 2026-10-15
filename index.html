@@ -2857,7 +2857,7 @@ async function cargarConversacionCon(idDestino, nombreDestino, fotoDestino) {
                     })
                     .catch(err => console.error("⚠️ Error en petición única de red:", err));
             }
-        }
+        
         } else {
             // 🔒 LÓGICA OPTIMIZADA: Últimos 50 mensajes para chats privados
             const todosLosMensajes = await obtenerTodo('mensajes');
