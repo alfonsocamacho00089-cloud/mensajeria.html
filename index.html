@@ -5614,7 +5614,7 @@ function activarSpaxioFlowRealtime() {
              let feedCargado = false;
 
 async function cargarSpaxioFlowUnaSolaPeticion() {
-    const contenedor = document.getElementById('tu-contenedor-feed');
+    const contenedor = document.getElementById('chat-box');
     if (!contenedor) return;
 
     // Si ya se cargó en esta sesión, evitamos hacer otra petición innecesaria
@@ -5627,20 +5627,29 @@ async function cargarSpaxioFlowUnaSolaPeticion() {
     contenedor.innerHTML = ""; 
 
     try {
-        // Tu única petición a Supabase o caché
+        // Petición única a Supabase
         const { data, error } = await supabase.from('spaxioflow').select('*');
         if (error) throw error;
 
-        if (data) {
+        if (data && Array.isArray(data)) {
             data.forEach(msg => {
-                pintarMensaje(msg.content, ...); // Tu lógica de pintado
+                // Usamos tu función real de pintado sin romper la sintaxis
+                pintarMensaje(
+                    msg.content || msg.texto, 
+                    'msg-izquierda', 
+                    new Date(msg.created_at || Date.now()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true }), 
+                    'leido', 
+                    'feed_' + msg.id, 
+                    msg.tipo || 'texto'
+                );
             });
-            feedCargado = true; // Marcamos que ya se hizo la petición inicial
+            feedCargado = true; // Marcamos que ya se hizo la petición inicial única
         }
     } catch (err) {
         console.error("Error al cargar:", err);
     }
-                      }
+}
+                      
 // =================================================================
 // 🪐 SPAXIOVERSO OMNI: MOTOR GRÁFICO, IA Y TELEMETRÍA - COMPLETO
 // =================================================================
