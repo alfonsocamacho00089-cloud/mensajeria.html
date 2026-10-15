@@ -1304,20 +1304,8 @@ margin: 0;
         <!-- ==================== PANEL LATERAL DE CONTACTOS ==================== -->
 <div id="seccion-panel-contactos-lateral">
 
- <div class="btn-nav" 
-     id="btn-nav-harvis" 
-     data-contacto='{"id_sistema":"uo4kb3tGHH7J","nombre":"H.A.R.V.I.S.","apellido":"1.0","estado":"activo"}'
-     onclick="cargarConversacionCon(JSON.parse(this.dataset.contacto).id_sistema)">
-        <span style="text-shadow: 0 0 8px #ffd700;">🤖</span><span style="color: #ffd700;">H.A.R.V.I.S.</span>
-    </div>
-
-<!-- Ejemplo para Spaxio Flow -->
-<div class="btn-nav" 
-     id="btn-nav-flow" 
-     data-contacto='{"id_sistema":"26fmetp4Q4WJ","nombre":"Spaxio","apellido":"Flow","estado":"activo"}'
-     onclick="cargarConversacionCon(JSON.parse(this.dataset.contacto).id_sistema)">
-        <span style="text-shadow: 0 0 8px #00d4ff;">🌊</span><span style="color: #00d4ff;">Spaxio Flow</span>
-</div>
+ 
+ 
     <!-- Cabecera del Panel de Contactos con tu Flechita exacta -->
     <div style="background: rgba(32, 44, 51, 0.5); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(15px); color: #ffffff; padding: 15px; font-weight: 900; text-transform: uppercase; text-align: left; border-bottom: 1px solid #333; display: flex; justify-content: space-between; align-items: center;">
         <div style="display: flex; align-items: center; gap: 12px;">
@@ -1373,7 +1361,20 @@ margin: 0;
 <div class="btn-nav" onclick="abrirCalculadora();">
         <span>🪙</span><span>Bcv/Euro/Usdt</span>
 </div>
+<div class="btn-nav" 
+     id="btn-nav-harvis" 
+     data-contacto='{"id_sistema":"uo4kb3tGHH7J","nombre":"H.A.R.V.I.S.","apellido":"1.0","estado":"activo"}'
+     onclick="cargarConversacionCon(JSON.parse(this.dataset.contacto).id_sistema)">
+        <span style="text-shadow: 0 0 8px #ffd700;">🤖</span><span style="color: #ffd700;">H.A.R.V.I.S.</span>
+    </div>
 
+<!-- Ejemplo para Spaxio Flow -->
+<div class="btn-nav" 
+     id="btn-nav-flow" 
+     data-contacto='{"id_sistema":"26fmetp4Q4WJ","nombre":"Spaxio","apellido":"Flow","estado":"activo"}'
+     onclick="cargarConversacionCon(JSON.parse(this.dataset.contacto).id_sistema)">
+        <span style="text-shadow: 0 0 8px #00d4ff;">🌊</span><span style="color: #00d4ff;">Spaxio Flow</span>
+</div>
     
     <!-- Botón agregado para abrir el modal Spaxio -->
     
