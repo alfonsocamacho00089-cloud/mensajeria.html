@@ -1354,19 +1354,13 @@ margin: 0;
  </div>
 
 
-<div class="btn-nav" 
-     id="btn-nav-harvis" 
-     data-contacto='{"id_sistema":"uo4kb3tGHH7J","nombre":"H.A.R.V.I.S.","apellido":"1.0","estado":"activo"}'
-     onclick="cargarConversacionCon(JSON.parse(this.dataset.contacto).id_sistema)">
-        <span>🤖</span><span>H.A.R.V.I.S.</span>
-    </div>
-
-<!-- Ejemplo para Spaxio Flow -->
-<div class="btn-nav" 
-     id="btn-nav-flow" 
-     data-contacto='{"id_sistema":"26fmetp4Q4WJ","nombre":"Spaxio","apellido":"Flow","estado":"activo"}'
-     onclick="cargarConversacionCon(JSON.parse(this.dataset.contacto).id_sistema)">
-        <span>🌊</span><span>Spaxio Flow</span>
+ <div class="btn-nav" onclick="togglePanelContactosLateral();">
+        <span>💬</span><span>Chat</span></div>
+<div class="btn-nav" onclick="abrirAgendaCompleta();">
+        <span>👥</span><span>Contactos</span>
+</div>
+<div class="btn-nav" onclick="abrirCalculadora();">
+        <span>🪙</span><span>Bcv/Euro/Usdt</span>
 </div>
     
     <!-- Botón agregado para abrir el modal Spaxio -->
