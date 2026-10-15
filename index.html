@@ -5130,7 +5130,14 @@ let streamCamaraActiva;
 let modoActual = 'video'; 
 let room = null;          // Para cuando transmites tú
 let viewerRoom = null;    // Para cuando eres espectador
+// Variables globales de control para LiveKit
+let room = null;          
+let viewerRoom = null;    
 
+// Silenciar la ráfaga de telemetría inútil en la consola de Eruda
+if (typeof LivekitClient !== 'undefined' && LivekitClient.setGlobalLogLevel) {
+    LivekitClient.setGlobalLogLevel('warn');
+}
 
 async function encenderCamaraPreview() {
 
@@ -5585,6 +5592,25 @@ function activarSpaxioFlowRealtime() {
             }
         )
         .subscribe();
+}
+
+             // Variable para llevar registro de IDs únicos y evitar duplicados en pantalla
+const mensajesProcesados = new Set();
+
+function pintarFeedSeguro(listaMensajes) {
+    const contenedor = document.getElementById('tu-contenedor-feed-id'); // Reemplaza por el ID real de tu contenedor en el HTML
+    if (!contenedor) return;
+    
+    // Limpiamos el contenedor para que no se repita la estructura anterior
+    contenedor.innerHTML = ''; 
+    mensagensProcesados.clear();
+
+    listaMensajes.forEach(msg => {
+        if (!mensajesProcesados.has(msg.id)) {
+            mensajesProcesados.add(msg.id);
+            pintarMensaje(msg); // Tu función original que dibuja la tarjeta
+        }
+    });
 }
 // =================================================================
 // 🪐 SPAXIOVERSO OMNI: MOTOR GRÁFICO, IA Y TELEMETRÍA - COMPLETO
