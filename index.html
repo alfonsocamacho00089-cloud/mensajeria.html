@@ -2817,18 +2817,39 @@ async function cargarConversacionCon(idDestino, nombreDestino, fotoDestino) {
                 });
             }
         } else {
-            // 🔒 LÓGICA ORIGINAL DE CHATS PRIVADOS (Mantiene tu IndexedDB intacto)
+            // 🔒 LÓGICA OPTIMIZADA DE CHATS PRIVADOS (Últimos 50 + DocumentFragment)
             const todosLosMensajes = await obtenerTodo('mensajes');
             const mensajesFiltrados = todosLosMensajes.filter(m => String(m.contactoId) === String(idDestino));
 
-            if (typeof renderizarMensajes === "function") {
-                renderizarMensajes(mensajesFiltrados);
-            } else {
-                mensajesFiltrados.forEach(m => {
-                    pintarMensaje(m.texto, m.clase, m.hora, m.status || 'enviado', m.id, m.tipo || 'texto');
-                });
-            }
-        }
+            // Tomamos solo los últimos 50 mensajes para que no pese
+            const ultimos50 = mensajesFiltrados.slice(-50);
+            const fragment = document.createDocumentFragment();
+
+            ultimos50.forEach(m => {
+                const div = document.createElement('div');
+                div.className = "mensaje msg-burbuja " + m.clase;
+                div.id = m.id || ("msg_" + Date.now());
+
+                const horaFinal = m.hora || "";
+                const checkHTML = m.clase === 'msg-derecha' ? `<span style="margin-left:5px; font-size:10px;">${m.status === 'leido' ? '✓✓' : '✓'}</span>` : '';
+                
+                let cuerpoHTML = `<span class="texto-msg">${m.texto || ""}</span>`;
+                if (m.tipo === 'foto' || (typeof m.texto === 'string' && m.texto.includes('i.ibb.co'))) {
+                    cuerpoHTML = `<img src="${m.texto}" style="max-width:180px; border-radius:12px; display:block;">`;
+                }
+
+                div.innerHTML = `
+                    ${cuerpoHTML}
+                    <div class="msg-info">
+                        <span>${horaFinal}</span>
+                        ${checkHTML}
+                    </div>
+                `;
+                
+                fragment.appendChild(div);
+            });
+
+            box.appendChild(fragment);
     } catch (e) {
         console.error("❌ Error cargando mensajes del feed:", e);
      }
