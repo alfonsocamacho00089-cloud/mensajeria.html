@@ -3095,8 +3095,8 @@ async function cargarProto() {
 
           let mensajeSeleccionado = null;
                
- function pintarMensaje(textoReal, tipo, horaFinal, checkHTML = '', esEnviado = false) {
-      const box = document.getElementById('chat-box');
+ function pintarMensaje(contenido, clase, hora, status, id, tipo = 'texto') {
+    const box = document.getElementById('chat-box');
     if (!box) return;
 
     let textoReal = (typeof contenido === 'object') ? (contenido.texto || "") : contenido;
@@ -3126,11 +3126,32 @@ async function cargarProto() {
     
     const esCosaNueva = textoReal.includes('youtube.com/') || textoReal.includes('youtu.be/') || 
                     textoReal.includes('tiktok.com/') || textoReal.includes('facebook.com/') || 
-                    textoReal.includes('supabase.co') ||  ||
+                    textoReal.includes('supabase.co') || textoReal.startsWith('LIVEKIT_ROOM:') ||
                     tipo === 'video' || tipo === 'audio' || tipo === 'sticker' || tipo === 'stickers' ||
                     textoReal.startsWith('blob:') || textoReal.startsWith('data:audio'); 
 
-    
+    const esSpaxio = (tipo === 'system_content' || id.includes('spaxio_')); 
+
+    if (esSpaxio) {
+        // ----------------------------------------------------
+        // CAMINO 3: EL MODO INMERSIVO SPAXIO (Estilo TikTok)
+        // ----------------------------------------------------
+        div.style.background = 'transparent';
+        div.style.boxShadow = 'none';
+        div.style.padding = '0px';
+        div.style.width = '100%';
+
+        div.innerHTML = `
+            <div style="width: 100%; border-radius: 15px; overflow: hidden; border: 2px solid #ffd700; background: #000;">
+                <video src="${contenido.videoUrl}" controls playsinline style="width: 100%; display: block;"></video>
+                <div style="padding: 10px; color: #ffd700; font-weight: bold;">${contenido.titulo || 'Spaxio Content'}</div>
+            </div>
+            <div style="font-size:10px; opacity:0.6; text-align:right; margin-top:4px; color: #fff;">
+                ${horaFinal}
+            </div>
+        `;
+        box.appendChild(div);
+        box.scrollTop = box.scrollHeight;
     } 
     else if (esCosaNueva) {
         // ----------------------------------------------------
@@ -3151,7 +3172,6 @@ async function cargarProto() {
         
         box.appendChild(div);
         box.scrollTop = box.scrollHeight;
-             }
 
         requestAnimationFrame(() => {
             const contenedorCuerpo = div.querySelector('.cuerpo-mensaje-dinamico');
