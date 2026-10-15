@@ -2828,33 +2828,40 @@ async function cargarConversacionCon(idDestino, nombreDestino, fotoDestino) {
 
             // 2. ACTUALIZACIÓN SILENCIOSA EN SEGUNDO PLANO (Vercel / Supabase)
             fetch('/api/get-spaxioflow-feed')
-                .then(res => res.json())
-                .then(async posts => {
-                    if (posts && Array.isArray(posts)) {
-                        for (const post of posts) {
-                            const msgId = "feed_" + post.id;
-                            // Guardamos en IndexedDB preservando el sender_name exactamente como lo tenías
-                            await guardarLocal('mensajes', {
-                                id: msgId,
-                                contactoId: "26fmetp4Q4WJ",
-                                texto: post.content,
-                                clase: 'msg-izquierda',
-                                status: 'leido',
-                                tipo: post.tipo || 'texto',
-                                ts: post.created_at ? new Date(post.created_at).getTime() : Date.now(),
-                                hora: post.sender_name || 'H.A.R.V.I.S.' // 👈 AQUÍ MANTENEMOS EL NOMBRE DEL EMISOR
-                            });
-                        }
-                        
-                        // 🧹 LIMPIEZA AUTOMÁTICA (Máximo 200 posts en SpaxioFlow)
-                        if (typeof limpiarMensajesAntiguos === "function") {
-                            await limpiarMensajesAntiguos("26fmetp4Q4WJ", 200);
-                        }
-                        
-                        console.log("🔄 Feed global sincronizado y guardado localmente.");
-                    }
-                })
-                .catch(err => console.error("⚠️ Error actualizando el feed en segundo plano:", err));
+    .then(res => res.json())
+    .then(async posts => {
+        if (posts && Array.isArray(posts)) {
+            for (const post of posts) {
+                const msgId = "feed_" + post.id;
+                
+                // 🛑 VALIDACIÓN DE EXISTENCIA: Verificamos si ya está guardado localmente
+                const existeLocal = await obtenerLocal('mensajes', msgId);
+                
+                if (!existeLocal) {
+                    // Si NO existe, lo guardamos por primera vez
+                    await guardarLocal('mensajes', {
+                        id: msgId,
+                        contactoId: "26fmetp4Q4WJ",
+                        texto: post.content,
+                        clase: 'msg-izquierda',
+                        status: 'leido',
+                        tipo: post.tipo || 'texto',
+                        ts: post.created_at ? new Date(post.created_at).getTime() : Date.now(),
+                        hora: post.sender_name || 'H.A.R.V.I.S.'
+                    });
+                }
+            }
+            
+            // 🧹 LIMPIEZA AUTOMÁTICA (Máximo 200 posts)
+            if (typeof limpiarMensajesAntiguos === "function") {
+                await limpiarMensajesAntiguos("26fmetp4Q4WJ", 200);
+            }
+            
+            console.log("🔄 Feed sincronizado sin duplicar registros existentes.");
+        }
+    })
+    .catch(err => console.error("⚠️ Error actualizando el feed en segundo plano:", err));
+        
         } else {
             // 🔒 LÓGICA OPTIMIZADA: Últimos 50 mensajes para chats privados
             const todosLosMensajes = await obtenerTodo('mensajes');
