@@ -2827,9 +2827,8 @@ async function cargarConversacionCon(idDestino, nombreDestino, fotoDestino) {
 
             // 2. UNA SOLA PETICIÓN ÚNICA A LA RED (Controlada por bandera o reemplazo limpio)
             // Verificamos si ya hicimos esta petición de red recientemente en la sesión
-            if (!window._spaxioFlowYaPidoRed) {
-                window._spaxioFlowYaPidoRed = true; // Candado para que sea UNA SOLA vez por sesión
-                
+            if (!sessionStorage.getItem('_spaxioFlowCargado')) {
+                sessionStorage.setItem('_spaxioFlowCargado', 'true'); // Candado persistente por sesión
                 fetch('/api/get-spaxioflow-feed')
                     .then(res => res.json())
                     .then(async posts => {
