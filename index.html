@@ -2812,34 +2812,38 @@ async function cargarConversacionCon(idDestino, nombreDestino, fotoDestino) {
 
      // 🔥 INTERCEPCIÓN MAESTRA CON UNA SOLA PETICIÓN LIMPIA
         if (idDestino === "26fmetp4Q4WJ") {
-            console.log("📡 Cargando SpaxioFlow desde la caché local del teléfono...");
+            console.log("📱 Abriendo feed estilo Red Social desde la caché local...");
             
-            // 1. CARGA INSTANTÁNEA DESDE INDEXEDDB (Para que el usuario no espere)
+            // 1. CARGA LOCAL INSTANTÁNEA (Como Twitter/IG al abrir la app sin internet)
             const todosLosMensajes = await obtenerTodo('mensajes');
             const postsLocales = todosLosMensajes.filter(m => String(m.contactoId) === "26fmetp4Q4WJ");
 
-            if (postsLocales.length > 0) {
-                const ultimos50 = postsLocales.slice(-50);
+            // Ordenamos por timestamp real para que los más nuevos queden en su posición correcta de feed
+            postsLocales.sort((a, b) => a.ts - b.ts);
+
+            const ultimos50 = postsLocales.slice(-50);
+
+            if (typeof renderizarMensajes === "function") {
+                renderizarMensajes(ultimos50);
+            } else {
                 ultimos50.forEach(m => {
                     pintarMensaje(m.texto, m.clase, m.hora, m.status || 'leido', m.id, m.tipo || 'texto');
                 });
             }
 
-            // 2. UNA SOLA PETICIÓN ÚNICA A LA RED (Controlada por bandera o reemplazo limpio)
-            // Verificamos si ya hicimos esta petición de red recientemente en la sesión
+            // 2. ACTUALIZACIÓN INTELIGENTE DE FEED (Una sola vez por sesión o al refrescar)
             if (!sessionStorage.getItem('_spaxioFlowCargado')) {
-                sessionStorage.setItem('_spaxioFlowCargado', 'true'); // Candado persistente por sesión
+                sessionStorage.setItem('_spaxioFlowCargado', 'true');
+                
                 fetch('/api/get-spaxioflow-feed')
                     .then(res => res.json())
                     .then(async posts => {
                         if (posts && Array.isArray(posts)) {
-                            // Opcional: Limpiamos los mensajes viejos de SpaxioFlow en local para meter los frescos de Supabase limpios
-                            // (Esto evita que se queden arrastrando duplicados antiguos en IndexedDB)
-                            
+                            // Recorremos los posts que trae la red social
                             for (const post of posts) {
                                 const msgId = "feed_" + post.id;
                                 
-                                // Guardamos con upsert lógico (si ya existe con el mismo ID, se sobrescribe limpio sin duplicar)
+                                // Guardamos con upsert: si ya existe el ID del post, IndexedDB lo actualiza limpiamente
                                 await guardarLocal('mensajes', {
                                     id: msgId,
                                     contactoId: "26fmetp4Q4WJ",
@@ -2851,11 +2855,12 @@ async function cargarConversacionCon(idDestino, nombreDestino, fotoDestino) {
                                     hora: post.sender_name || 'H.A.R.V.I.S.'
                                 });
                             }
-                            console.log("🔄 Red consultada una sola vez. Datos sincronizados limpiamente.");
+                            console.log("🔄 Feed sincronizado con el servidor exitosamente.");
                         }
                     })
-                    .catch(err => console.error("⚠️ Error en petición única de red:", err));
+                    .catch(err => console.error("⚠️ Error actualizando feed:", err));
             }
+             
         
         } else {
             // 🔒 LÓGICA OPTIMIZADA: Últimos 50 mensajes para chats privados
