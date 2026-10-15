@@ -2810,58 +2810,54 @@ async function cargarConversacionCon(idDestino, nombreDestino, fotoDestino) {
         const box = document.getElementById('chat-box');
         if (box) box.innerHTML = ""; 
 
-        // 🔥 INTERCEPCIÓN MAESTRA CON ESTRATEGIA OFFLINE-FIRST (SpaxioFlow)
+     // 🔥 INTERCEPCIÓN MAESTRA CON UNA SOLA PETICIÓN LIMPIA
         if (idDestino === "26fmetp4Q4WJ") {
             console.log("📡 Cargando SpaxioFlow desde la caché local del teléfono...");
             
-            // 1. CARGA INSTANTÁNEA DESDE INDEXEDDB (Limitado a los últimos 50)
+            // 1. CARGA INSTANTÁNEA DESDE INDEXEDDB (Para que el usuario no espere)
             const todosLosMensajes = await obtenerTodo('mensajes');
             const postsLocales = todosLosMensajes.filter(m => String(m.contactoId) === "26fmetp4Q4WJ");
 
             if (postsLocales.length > 0) {
                 const ultimos50 = postsLocales.slice(-50);
                 ultimos50.forEach(m => {
-                    // Pinta respetando tu estructura original con el nombre del emisor
                     pintarMensaje(m.texto, m.clase, m.hora, m.status || 'leido', m.id, m.tipo || 'texto');
                 });
             }
 
-            // 2. ACTUALIZACIÓN SILENCIOSA EN SEGUNDO PLANO (Vercel / Supabase)
-            fetch('/api/get-spaxioflow-feed')
-    .then(res => res.json())
-    .then(async posts => {
-        if (posts && Array.isArray(posts)) {
-            for (const post of posts) {
-                const msgId = "feed_" + post.id;
+            // 2. UNA SOLA PETICIÓN ÚNICA A LA RED (Controlada por bandera o reemplazo limpio)
+            // Verificamos si ya hicimos esta petición de red recientemente en la sesión
+            if (!window._spaxioFlowYaPidoRed) {
+                window._spaxioFlowYaPidoRed = true; // Candado para que sea UNA SOLA vez por sesión
                 
-                // 🛑 VALIDACIÓN DE EXISTENCIA: Verificamos si ya está guardado localmente
-                const existeLocal = await obtenerLocal('mensajes', msgId);
-                
-                if (!existeLocal) {
-                    // Si NO existe, lo guardamos por primera vez
-                    await guardarLocal('mensajes', {
-                        id: msgId,
-                        contactoId: "26fmetp4Q4WJ",
-                        texto: post.content,
-                        clase: 'msg-izquierda',
-                        status: 'leido',
-                        tipo: post.tipo || 'texto',
-                        ts: post.created_at ? new Date(post.created_at).getTime() : Date.now(),
-                        hora: post.sender_name || 'H.A.R.V.I.S.'
-                    });
-                }
+                fetch('/api/get-spaxioflow-feed')
+                    .then(res => res.json())
+                    .then(async posts => {
+                        if (posts && Array.isArray(posts)) {
+                            // Opcional: Limpiamos los mensajes viejos de SpaxioFlow en local para meter los frescos de Supabase limpios
+                            // (Esto evita que se queden arrastrando duplicados antiguos en IndexedDB)
+                            
+                            for (const post of posts) {
+                                const msgId = "feed_" + post.id;
+                                
+                                // Guardamos con upsert lógico (si ya existe con el mismo ID, se sobrescribe limpio sin duplicar)
+                                await guardarLocal('mensajes', {
+                                    id: msgId,
+                                    contactoId: "26fmetp4Q4WJ",
+                                    texto: post.content,
+                                    clase: 'msg-izquierda',
+                                    status: 'leido',
+                                    tipo: post.tipo || 'texto',
+                                    ts: post.created_at ? new Date(post.created_at).getTime() : Date.now(),
+                                    hora: post.sender_name || 'H.A.R.V.I.S.'
+                                });
+                            }
+                            console.log("🔄 Red consultada una sola vez. Datos sincronizados limpiamente.");
+                        }
+                    })
+                    .catch(err => console.error("⚠️ Error en petición única de red:", err));
             }
-            
-            // 🧹 LIMPIEZA AUTOMÁTICA (Máximo 200 posts)
-            if (typeof limpiarMensajesAntiguos === "function") {
-                await limpiarMensajesAntiguos("26fmetp4Q4WJ", 200);
-            }
-            
-            console.log("🔄 Feed sincronizado sin duplicar registros existentes.");
         }
-    })
-    .catch(err => console.error("⚠️ Error actualizando el feed en segundo plano:", err));
-        
         } else {
             // 🔒 LÓGICA OPTIMIZADA: Últimos 50 mensajes para chats privados
             const todosLosMensajes = await obtenerTodo('mensajes');
