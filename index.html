@@ -3096,31 +3096,61 @@ async function cargarProto() {
           let mensajeSeleccionado = null;
                
  function pintarMensaje(textoReal, tipo, horaFinal, checkHTML = '', esEnviado = false) {
-    const box = document.getElementById('chat-box');
+      const box = document.getElementById('chat-box');
     if (!box) return;
 
-    const div = document.createElement('div');
-    // Si esEnviado es true, usa 'msg-derecha', de lo contrario 'msg-izquierda'
-    div.className = esEnviado ? 'mensaje msg-derecha' : 'mensaje msg-izquierda';
-
-    let cuerpoHTML = "";
+    let textoReal = (typeof contenido === 'object') ? (contenido.texto || "") : contenido;
     
-    if (tipo === 'foto' || tipo === 'sticker' || tipo === 'stickers') {
-        cuerpoHTML = `<img src="${textoReal}" style="max-width:180px; border-radius:12px; display:block; border: none; background:#000">`;
-    } else {
-        cuerpoHTML = `<span class="texto-msg">${textoReal}</span>`;
+    // Elimina los saltos de línea que H.A.R.V.I.S. pueda haber puesto
+    textoReal = textoReal.replace(/[\r\n]+/g, '');
+
+    // Detector de GIFs y Multimedia
+    if (textoReal.includes('i.ibb.co') || textoReal.includes('firebasestorage') || textoReal.includes('.gif') || textoReal.includes('giphy.com')) {
+        tipo = 'foto';
     }
 
-    div.innerHTML = `
-        ${cuerpoHTML}
-        <div class="msg-info">
-            <span>${horaFinal || ''}</span>
-            ${checkHTML}
-        </div>
-    `;
+    const match = textoReal.match(/IMAGEN:(https?:\/\/[^\s\]]+)/i);
+    if (match) {
+        tipo = 'foto';
+        textoReal = match[1]; 
+    }
 
-    box.appendChild(div);
-    box.scrollTop = box.scrollHeight;
+    const div = document.createElement('div');
+    div.className = "mensaje msg-burbuja " + clase; 
+    div.id = id;
+
+    const horaFinal = hora || new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
+    const checkHTML = clase === 'msg-derecha' ? `<span style="margin-left:5px; font-size:10px;">${status === 'leido' ? '✓✓' : '✓'}</span>` : '';
+    
+    console.log("Intentando pintar tipo:", tipo, "con contenido:", contenido);
+    
+    const esCosaNueva = textoReal.includes('youtube.com/') || textoReal.includes('youtu.be/') || 
+                    textoReal.includes('tiktok.com/') || textoReal.includes('facebook.com/') || 
+                    textoReal.includes('supabase.co') ||  ||
+                    tipo === 'video' || tipo === 'audio' || tipo === 'sticker' || tipo === 'stickers' ||
+                    textoReal.startsWith('blob:') || textoReal.startsWith('data:audio'); 
+
+    
+    } 
+    else if (esCosaNueva) {
+        // ----------------------------------------------------
+        // CAMINO 1: LAS COSAS NUEVAS (Redes y Multimedia pesada)
+        // ----------------------------------------------------
+        div.style.background = 'transparent';
+        div.style.backgroundColor = 'transparent';
+        div.style.boxShadow = 'none';
+        div.style.border = 'none';
+        div.style.padding = '4px';
+
+        div.innerHTML = `
+            <div class="cuerpo-mensaje-dinamico"></div>
+            <div style="font-size:10px; opacity:0.6; text-align:right; margin-top:4px; color: #fff;">
+                ${horaFinal} ${checkHTML}
+            </div>
+        `;
+        
+        box.appendChild(div);
+        box.scrollTop = box.scrollHeight;
              }
 
         requestAnimationFrame(() => {
