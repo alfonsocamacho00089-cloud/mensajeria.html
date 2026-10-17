@@ -2853,7 +2853,7 @@ async function cargarConversacionCon(idDestino, nombreDestino, fotoDestino) {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    tipoEvento: tipoValidado,
+                    tipoEvento: tipoFinal,
                     contenido: msg,
                     remitente: miNombre,
                     sender_id: miUserId
