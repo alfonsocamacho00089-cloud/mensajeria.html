@@ -2812,43 +2812,53 @@ async function cargarConversacionCon(idDestino, nombreDestino, fotoDestino) {
 
      // 🔥 INTERCEPCIÓN MAESTRA SPAXIOFLOW (Estilo Red Social / Sincronizado al chat normal)
         if (idDestino === "26fmetp4Q4WJ") {
-    console.log("📡 Cargando SpaxioFlow desde la caché local del teléfono...");
+    console.log("📡 Cargando SpaxioFlow...");
     
-    // 1. Limpiamos el chat antes de pintar para evitar acumulación visual
-    const chatBox = document.getElementById('chat-box');
-    if (chatBox) chatBox.innerHTML = "";
+    const box = document.getElementById('chat-box');
+    if (box) {
+        // 1. LIMPIAR EL CONTENEDOR OBLIGATORIAMENTE PARA QUE NO SE ACUMULE NADA
+        box.innerHTML = "";
+    }
 
-    // 2. CARGA INSTANTÁNEA DESDE INDEXEDDB
+    // 2. CARGAR DESDE INDEXEDDB
     const todosLosMensajes = await obtenerTodo('mensajes');
     const postsLocales = todosLosMensajes.filter(m => String(m.contactoId) === "26fmetp4Q4WJ");
 
-    // Ordenamos por timestamp para mantener el orden cronológico del feed
+    // Ordenar cronológicamente por timestamp
     postsLocales.sort((a, b) => (a.ts || 0) - (b.ts || 0));
 
-    if (postsLocales.length > 0) {
-        postsLocales.forEach(m => {
-            // Pintamos directamente asegurando el ID único local
-            pintarMensaje(m.texto, m.clase, m.hora, m.status || 'leido', m.id, m.tipo || 'texto');
-        });
-    }
+    // Usar un Set temporal para evitar pintar IDs repetidos en esta misma sesión de carga
+    const idsPintadosEnEstaSesion = new Set();
 
-    // 3. CONSULTA A SUPABASE (SÓLO PARA AGREGAR LO QUE REALMENTE FALTE)
+    postsLocales.forEach(m => {
+        if (m.id && !idsPintadosEnEstaSesion.has(m.id)) {
+            idsPintadosEnEstaSesion.add(m.id);
+            pintarMensaje(m.texto, m.clase, m.hora, m.status || 'leido', m.id, m.tipo || 'texto');
+        }
+    });
+
+    // 3. CONSULTAR A SUPABASE EN SEGUNDO PLANO
     fetch('/api/get-spaxioflow-feed')
         .then(res => res.json())
         .then(async posts => {
             if (posts && Array.isArray(posts)) {
                 for (const post of posts) {
-                    // Usamos exactamente la misma estructura de ID que en el resto de tu app
                     const msgId = "feed_" + post.id;
                     
-                    // Verificamos si este ID exacto ya existe en la base de datos local
-                    const yaExisteLocal = await obtenerLocal('mensajes', msgId);
-                    
-                    if (yaExisteLocal) {
-                        continue; // Si ya está guardado, lo saltamos y no hacemos nada
+                    // Si ya se pintó o ya existe localmente, lo ignoramos por completo
+                    if (idsPintadosEnEstaSesion.has(msgId)) {
+                        continue;
                     }
 
-                    const nuevoObjetoMensaje = {
+                    const existeEnLocal = await obtenerLocal('mensajes', msgId);
+                    if (existeEnLocal) {
+                        idsPintadosEnEstaSesion.add(msgId);
+                        continue;
+                    }
+
+                    // Si es totalmente nuevo, lo guardamos y pintamos
+                    idsPintadosEnEstaSesion.add(msgId);
+                    await guardarLocal('mensajes', {
                         id: msgId,
                         contactoId: "26fmetp4Q4WJ",
                         texto: post.content,
@@ -2857,18 +2867,13 @@ async function cargarConversacionCon(idDestino, nombreDestino, fotoDestino) {
                         tipo: post.tipo || 'texto',
                         ts: post.created_at ? new Date(post.created_at).getTime() : Date.now(),
                         hora: post.sender_name || 'H.A.R.V.I.S.'
-                    };
+                    });
 
-                    // Guardamos en IndexedDB únicamente el contenido nuevo
-                    await guardarLocal('mensajes', nuevoObjetoMensaje);
-
-                    // Lo pintamos al final del feed
                     pintarMensaje(post.content, 'msg-izquierda', null, 'leido', msgId, post.tipo || 'texto');
                 }
             }
         })
-        .catch(err => console.error("⚠️ Error actualizando el feed de SpaxioFlow:", err));
-             
+        .catch(err => console.error("⚠️ Error en feed:", err));
              
         
         } else {
