@@ -956,6 +956,20 @@ margin: 0;
         .field label { display: block; margin-bottom: 5px; font-size: 0.75em; color: #ffd700; font-weight: bold; text-transform: uppercase; }
         .field input { width: 100%; padding: 12px; border-radius: 12px; border: none; text-align: center; font-size: 1.1em; background-color: #fff; color: #000; outline: none; font-weight: bold; }
         .field input[readonly] { background-color: #1e3a1e; color: #eaffea; }
+
+/* Ocultar panel o flujo derecho en Spaxio Flow */
+.spaxio-flow-container.single-column .flow-right,
+.spaxio-flow-container.single-column .panel-derecho {
+    display: none !important;
+}
+
+/* Forzar que el flujo izquierdo ocupe el 100% del ancho disponible */
+.spaxio-flow-container.single-column .flow-left,
+.spaxio-flow-container.single-column .panel-izquierdo {
+    width: 100% !important;
+    max-width: 100% !important;
+    flex: 1 1 100% !important;
+}
       
     </style>
 
@@ -5619,7 +5633,33 @@ function activarSpaxioFlowRealtime() {
              }
              let feedCargado = false;
 
+// Función para inicializar Spaxio Flow de forma independiente (solo flujo izquierdo)
+function inicializarSpaxioFlowIndependiente() {
+    const contenedorPrincipal = document.querySelector('.spaxio-flow-container');
+    
+    if (contenedorPrincipal) {
+        // Añadir la clase que aplica los estilos de columna única
+        contenedorPrincipal.classList.add('single-column');
+    }
 
+    // Inicializar exclusivamente los componentes del flujo izquierdo
+    if (typeof renderizarFlujoIzquierdo === 'function') {
+        renderizarFlujoIzquierdo();
+    } else {
+        console.log("⚡ Spaxio Flow: Renderizando componentes del flujo izquierdo de forma aislada.");
+    }
+
+    // Opcional: Desvincular o limpiar cualquier listener del panel derecho para evitar consumo de recursos
+    const panelDerecho = document.querySelector('.flow-right, .panel-derecho');
+    if (panelDerecho) {
+        panelDerecho.innerHTML = ''; // Limpia elementos innecesarios en memoria
+    }
+}
+
+// Ejecutar al cargar la vista
+document.addEventListener('DOMContentLoaded', () => {
+    inicializarSpaxioFlowIndependiente();
+});
                       
 // =================================================================
 // 🪐 SPAXIOVERSO OMNI: MOTOR GRÁFICO, IA Y TELEMETRÍA - COMPLETO
