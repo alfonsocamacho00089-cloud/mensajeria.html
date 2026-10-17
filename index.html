@@ -2884,6 +2884,7 @@ if (idDestino === "26fmetp4Q4WJ") {
 
 // 🔥 2. ENVÍO INSTANTÁNEO AL FEED (Aparece de una vez a la izquierda)
 if (idDestino === "26fmetp4Q4WJ") {
+    const miUserId = localStorage.getItem('mi_dropis_id') || "anonimo";
     const miNombre = localStorage.getItem('mi_nombre_perfil') || "Pedro Peres"; 
     
     let tipoFinal = tipoValidado;
@@ -2901,6 +2902,7 @@ if (idDestino === "26fmetp4Q4WJ") {
         tipo: tipoFinal,
         ts: Date.now(),
         hora: miNombre
+        
     };
 
     await guardarLocal('mensajes', nuevoPostLocal);
@@ -2913,7 +2915,8 @@ if (idDestino === "26fmetp4Q4WJ") {
         body: JSON.stringify({
             tipoEvento: tipoFinal,
             contenido: msg,
-            remitente: miNombre
+            remitente: miNombre,
+            sender_id: miUserId
         })
     })
     .then(res => res.json())
