@@ -2844,6 +2844,32 @@ async function cargarConversacionCon(idDestino, nombreDestino, fotoDestino) {
             }
              }
 
+// 🔥 CONEXIÓN SUPREMA AL BACKEND DE VERCEL PARA EL FEED GLOBAL
+        if (targetID === "26fmetp4Q4WJ") {
+            const miNombre = localStorage.getItem('mi_nombre_perfil') || "Pedro Peres"; 
+            const miUserId = localStorage.getItem('mi_dropis_id') || "anonimo";
+
+            fetch('/api/spaxioflow-event', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    tipoEvento: tipoValidado,
+                    contenido: msg,
+                    remitente: miNombre,
+                    sender_id: miUserId
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                console.log("📡 Feed actualizado vía Vercel:", data);
+                
+                // 🚀 RECARGA INSTANTÁNEA: Vuelve a invocar la función de carga en el mismo instante
+                cargarConversacionCon("26fmetp4Q4WJ", "Spaxio Flow");
+            })
+            .catch(err => console.error("❌ Fallo al actualizar feed desde el teléfono:", err));
+            
+             }
+             
              else {
             // 🔒 LÓGICA OPTIMIZADA: Últimos 50 mensajes para chats privados
             const todosLosMensajes = await obtenerTodo('mensajes');
