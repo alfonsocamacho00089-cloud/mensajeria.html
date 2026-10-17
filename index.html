@@ -2843,10 +2843,11 @@ async function cargarConversacionCon(idDestino, nombreDestino, fotoDestino) {
                 });
 
              // 🚀 RECARGA INSTANTÁNEA: Vuelve a invocar la función con sus parámetros correctos
-            cargarConversacionCon("26fmetp4Q4WJ", "Spaxio Flow", null);   
+            cargarConversacionCon(JSON.parse(this.dataset.contacto).id_sistema) ;  
+             }
              }
             
-            }
+            
         
              
              else {
