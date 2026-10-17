@@ -2445,20 +2445,19 @@ const base64 = btoa(binary);
         // 🔥 CONEXIÓN SUPREMA AL BACKEND DE VERCEL PARA EL FEED GLOBAL
         if (targetID === "26fmetp4Q4WJ") {
             const miNombre = localStorage.getItem('mi_nombre_perfil') || "Pedro Peres"; 
-            
-            // Mapeamos los tipos para que tu base de datos los reciba limpios
-            let tipoFinal = tipoValidado;
-            if (tipoValidado === 'stickers' || tipoValidado === 'media') tipoFinal = 'imagen';
+            const miUserId = localStorage.getItem('mi_dropis_id') || "anonimo";
 
-            fetch('/api/spaxioflow-event', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    tipoEvento: tipoFinal,
-                    contenido: msg,
-                    remitente: miNombre
-                })
-            })
+fetch('/api/spaxioflow-event', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+        tipoEvento: tipoFinal,
+        contenido: msg,
+        remitente: miNombre,
+        sender_id: miUserId
+    })
+})
+            
             .then(res => res.json())
             .then(data => console.log("📡 Feed actualizado vía Vercel:", data))
             .catch(err => console.error("❌ Fallo al actualizar feed desde el teléfono:", err));
@@ -2894,16 +2893,15 @@ if (idDestino === "26fmetp4Q4WJ") {
 
     // Guardar y pintar AL INSTANTE
     const nuevoPostLocal = {
-        id: idUnicoLocal,
-        contactoId: "26fmetp4Q4WJ",
-        texto: msg,
-        clase: 'msg-izquierda',
-        status: 'leido',
-        tipo: tipoFinal,
-        ts: Date.now(),
-        hora: miNombre
-        
-    };
+    id: idUnicoLocal,
+    contactoId: "26fmetp4Q4WJ",
+    texto: msg,
+    clase: 'msg-derecha',
+    status: 'leido',
+    tipo: tipoFinal,
+    ts: Date.now(),
+    hora: miNombre
+};
 
     await guardarLocal('mensajes', nuevoPostLocal);
     pintarMensaje(msg, 'msg-izquierda', null, 'leido', idUnicoLocal, tipoFinal);
@@ -5695,7 +5693,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const miUserId = localStorage.getItem('mi_dropis_id');
     console.log("🔌 Conectando al canal en tiempo real de SpaxioFlow...");
 
-    // Evitamos duplicar canales cerrando el anterior si existía
     if (window.supabaseFlowChannel) {
         supabaseClient.removeChannel(window.supabaseFlowChannel);
     }
@@ -5708,19 +5705,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 event: 'INSERT',
                 schema: 'public',
                 table: 'spaxioflow_feed',
-                filter: `chat_id=eq.${chatIdActual}`,
-                sender_id: miUserId
+                filter: `chat_id=eq.${chatIdActual}`
             },
             (payload) => {
                 const nuevoMensaje = payload.new;
-                console.log("⚡ Nuevo mensaje recibido en tiempo real:", nuevoMensaje);
-
-                // Validar si el mensaje lo envié yo o lo envió otro usuario
                 const esMio = nuevoMensaje.sender_id === miUserId;
                 const claseBurbuja = esMio ? 'msg-derecha' : 'msg-izquierda';
                 const msgIdUnico = "rt_" + nuevoMensaje.id;
 
-                // Evitar duplicados visuales si ya se pintó localmente
                 if (!document.getElementById(msgIdUnico)) {
                     pintarMensaje(
                         nuevoMensaje.content, 
