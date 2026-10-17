@@ -2843,7 +2843,8 @@ async function cargarConversacionCon(idDestino, nombreDestino, fotoDestino) {
                 });
 
              // 🚀 RECARGA INSTANTÁNEA: Vuelve a invocar la función de carga en el mismo instante
-                cargarConversacionCon()
+                    cargarConversacionCon(contacto.id, contacto.nombre, contacto.foto);   
+             }
             
             }
              }
