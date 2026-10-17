@@ -2811,24 +2811,19 @@ async function cargarConversacionCon(idDestino, nombreDestino, fotoDestino) {
         if (box) box.innerHTML = ""; 
 
 
-                // 🔥 1. INTERCEPCIÓN MAESTRA SPAXIOFLOW (Carga limpia y offline-first desde IndexedDB + Supabase)
+// 🔥 1. CARGA LIMPIA Y OFFLINE-FIRST DE SPAXIOFLOW
 if (idDestino === "26fmetp4Q4WJ") {
     console.log("📡 Cargando SpaxioFlow...");
     
     const box = document.getElementById('chat-box');
-    if (box) {
-        // Limpiar el contenedor obligatoriamente para que no se acumule nada
-        box.innerHTML = "";
-    }
+    if (box) box.innerHTML = "";
 
-    // Cargar desde IndexedDB
+    // 1. Cargar datos locales desde IndexedDB
     const todosLosMensajes = await obtenerTodo('mensajes');
     const postsLocales = todosLosMensajes.filter(m => String(m.contactoId) === "26fmetp4Q4WJ");
 
-    // Ordenar cronológicamente por timestamp
     postsLocales.sort((a, b) => (a.ts || 0) - (b.ts || 0));
 
-    // Set temporal para evitar pintar IDs repetidos en esta misma sesión de carga
     const idsPintadosEnEstaSesion = new Set();
 
     postsLocales.forEach(m => {
@@ -2838,7 +2833,7 @@ if (idDestino === "26fmetp4Q4WJ") {
         }
     });
 
-    // Consultar a Supabase en segundo plano para sincronizar nuevos posts
+    // 2. Sincronizar en segundo plano con Supabase a través de Vercel
     fetch('/api/get-spaxioflow-feed')
         .then(res => res.json())
         .then(async posts => {
@@ -2846,9 +2841,7 @@ if (idDestino === "26fmetp4Q4WJ") {
                 for (const post of posts) {
                     const msgId = "feed_" + post.id;
                     
-                    if (idsPintadosEnEstaSesion.has(msgId)) {
-                        continue;
-                    }
+                    if (idsPintadosEnEstaSesion.has(msgId)) continue;
 
                     const existeEnLocal = await obtenerLocal('mensajes', msgId);
                     if (existeEnLocal) {
@@ -2875,7 +2868,7 @@ if (idDestino === "26fmetp4Q4WJ") {
         .catch(err => console.error("⚠️ Error en feed:", err));
 }
 
-// 🔥 2. ENVÍO INSTANTÁNEO AL FEED (Pintado inmediato a la izquierda + Supabase)
+// 🔥 2. ENVÍO INSTANTÁNEO AL FEED (Aparece de una vez a la izquierda)
 if (idDestino === "26fmetp4Q4WJ") {
     const miNombre = localStorage.getItem('mi_nombre_perfil') || "Pedro Peres"; 
     
@@ -2884,7 +2877,7 @@ if (idDestino === "26fmetp4Q4WJ") {
 
     const idUnicoLocal = "feed_local_" + Date.now();
 
-    // Guardar y pintar AL INSTANTE como post del feed (izquierda)
+    // Guardar y pintar AL INSTANTE
     const nuevoPostLocal = {
         id: idUnicoLocal,
         contactoId: "26fmetp4Q4WJ",
@@ -2899,7 +2892,7 @@ if (idDestino === "26fmetp4Q4WJ") {
     await guardarLocal('mensajes', nuevoPostLocal);
     pintarMensaje(msg, 'msg-izquierda', null, 'leido', idUnicoLocal, tipoFinal);
 
-    // Enviar en segundo plano a Supabase a través de Vercel
+    // Subida en segundo plano a Supabase
     fetch('/api/spaxioflow-event', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -2913,6 +2906,7 @@ if (idDestino === "26fmetp4Q4WJ") {
     .then(data => console.log("📡 Subido a Supabase con éxito:", data))
     .catch(err => console.error("❌ Fallo al subir al feed:", err));
              }
+
              else {
             // 🔒 LÓGICA OPTIMIZADA: Últimos 50 mensajes para chats privados
             const todosLosMensajes = await obtenerTodo('mensajes');
@@ -3190,40 +3184,7 @@ async function cargarProto() {
     return root;
      }
 
-     function pintarPostSpaxioFlow(item) {
-    // Contenedor específico para el feed (puedes cambiar el ID según tu HTML)
-    const feedContainer = document.getElementById('spaxioflow-feed-container') || document.getElementById('chat-box');
-    if (!feedContainer) return;
-
-    const postDiv = document.createElement('div');
-    postDiv.className = 'spaxioflow-post-card'; // Clase independiente para estilizar el feed
-
-    let mediaHTML = '';
-    if (item.mediaUrl) {
-        if (item.tipoMedia === 'video') {
-            mediaHTML = `<video src="${item.mediaUrl}" controls style="width:100%; border-radius:8px; margin-top:8px;"></video>`;
-        } else {
-            mediaHTML = `<img src="${item.mediaUrl}" style="width:100%; border-radius:8px; margin-top:8px;" alt="Media de SpaxioFlow">`;
-        }
-    }
-
-    postDiv.innerHTML = `
-        <div class="post-header" style="display:flex; justify-content:space-between; margin-bottom:6px;">
-            <strong>${item.autor || 'Spaxio User'}</strong>
-            <span style="font-size:11px; opacity:0.7;">${item.tiempo || ''}</span>
-        </div>
-        <div class="post-body">
-            <p style="margin:0;">${item.texto || ''}</p>
-            ${mediaHTML}
-        </div>
-        <div class="post-footer" style="margin-top:8px; display:flex; gap:10px;">
-            <button onclick="interactuarPost('${item.id}', 'like')" style="background:none; border:1px solid #d4af37; color:#d4af37; border-radius:4px; padding:2px 8px; cursor:pointer;">❤️ ${item.likes || 0}</button>
-        </div>
-    `;
-
-    feedContainer.appendChild(postDiv);
-    feedContainer.scrollTop = feedContainer.scrollHeight;
-             }
+     
 // --- 5. LÓGICA DE INTERFAZ CORREGIDA ---
 // Variable necesaria para que el menú sepa a qué mensaje le diste clic
 
@@ -5604,16 +5565,7 @@ function pintarFeedSeguro(listaMensajes, idContenedorReal) {
     });
 }
 
-// 2. Envío de SpaxioFlow
-async function procesarEnvioSpaxioFlow(contenido, tipoContenido) {
-    const targetID = "26fmetp4Q4WJ"; 
-    
-    if (typeof enviarMensajeSatelital === "function") {
-        await enviarMensajeSatelital(contenido, targetID, tipoContenido);
-    } else {
-        await enviarMensajeSatelitalOInfraestructura(contenido, targetID, tipoContenido);
-    }
-}
+
 
 
 // 3. TIEMPO REAL BLINDADO (¡Evita que se multipliquen los canales!)
@@ -5666,42 +5618,7 @@ function activarSpaxioFlowRealtime() {
              }
              let feedCargado = false;
 
-async function cargarSpaxioFlowUnaSolaPeticion() {
-    const contenedor = document.getElementById('chat-box');
-    if (!contenedor) return;
 
-    // Si ya se cargó en esta sesión, evitamos hacer otra petición innecesaria
-    if (feedCargado) {
-        console.log("⚡ Usando feed ya existente en memoria (sin repetición de red).");
-        return;
-    }
-
-    // Limpiamos la pantalla por seguridad la primera vez
-    contenedor.innerHTML = ""; 
-
-    try {
-        // Petición única a Supabase
-        const { data, error } = await supabase.from('spaxioflow').select('*');
-        if (error) throw error;
-
-        if (data && Array.isArray(data)) {
-            data.forEach(msg => {
-                // Usamos tu función real de pintado sin romper la sintaxis
-                pintarMensaje(
-                    msg.content || msg.texto, 
-                    'msg-izquierda', 
-                    new Date(msg.created_at || Date.now()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true }), 
-                    'leido', 
-                    'feed_' + msg.id, 
-                    msg.tipo || 'texto'
-                );
-            });
-            feedCargado = true; // Marcamos que ya se hizo la petición inicial única
-        }
-    } catch (err) {
-        console.error("Error al cargar:", err);
-    }
-}
                       
 // =================================================================
 // 🪐 SPAXIOVERSO OMNI: MOTOR GRÁFICO, IA Y TELEMETRÍA - COMPLETO
