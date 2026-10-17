@@ -2828,103 +2828,20 @@ async function cargarConversacionCon(idDestino, nombreDestino, fotoDestino) {
         if (box) box.innerHTML = ""; 
 
 
-// 🔥 1. CARGA LIMPIA Y OFFLINE-FIRST DE SPAXIOFLOW
-if (idDestino === "26fmetp4Q4WJ") {
-    console.log("📡 Cargando SpaxioFlow...");
-    
-    const box = document.getElementById('chat-box');
-    if (box) box.innerHTML = "";
+// 🔥 INTERCEPCIÓN MAESTRA CON VERCEL (Cero errores de variables indefinidas)
+        if (idDestino === "26fmetp4Q4WJ") {
+            console.log("📡 Cargando historial global de SpaxioFlow desde Vercel...");
+            
+            const res = await fetch('/api/get-spaxioflow-feed');
+            if (!res.ok) throw new Error("Fallo al obtener el feed desde el backend");
+            const posts = await res.json();
 
-    // 1. Cargar datos locales desde IndexedDB
-    const todosLosMensajes = await obtenerTodo('mensajes');
-    const postsLocales = todosLosMensajes.filter(m => String(m.contactoId) === "26fmetp4Q4WJ");
-
-    postsLocales.sort((a, b) => (a.ts || 0) - (b.ts || 0));
-
-    const idsPintadosEnEstaSesion = new Set();
-
-    postsLocales.forEach(m => {
-        if (m.id && !idsPintadosEnEstaSesion.has(m.id)) {
-            idsPintadosEnEstaSesion.add(m.id);
-            pintarMensaje(m.texto, m.clase, m.hora, m.status || 'leido', m.id, m.tipo || 'texto');
-        }
-    });
-
-    // 2. Sincronizar en segundo plano con Supabase a través de Vercel
-    fetch('/api/get-spaxioflow-feed')
-        .then(res => res.json())
-        .then(async posts => {
             if (posts && Array.isArray(posts)) {
-                for (const post of posts) {
-                    const msgId = "feed_" + post.id;
-                    
-                    if (idsPintadosEnEstaSesion.has(msgId)) continue;
-
-                    const existeEnLocal = await obtenerLocal('mensajes', msgId);
-                    if (existeEnLocal) {
-                        idsPintadosEnEstaSesion.add(msgId);
-                        continue;
-                    }
-
-                    idsPintadosEnEstaSesion.add(msgId);
-                    await guardarLocal('mensajes', {
-                        id: msgId,
-                        contactoId: "26fmetp4Q4WJ",
-                        texto: post.content,
-                        clase: 'msg-izquierda',
-                        status: 'leido',
-                        tipo: post.tipo || 'texto',
-                        ts: post.created_at ? new Date(post.created_at).getTime() : Date.now(),
-                        hora: post.sender_name || 'H.A.R.V.I.S.'
-                    });
-
-                    pintarMensaje(post.content, 'msg-izquierda', null, 'leido', msgId, post.tipo || 'texto');
-                }
+                posts.forEach(post => {
+                    // Pinta los videos, imágenes y textos almacenados globalmente
+                    pintarMensaje(post.content, 'msg-izquierda', post.sender_name || 'H.A.R.V.I.S.', 'leido', "feed_" + post.id, post.tipo);
+                });
             }
-        })
-        .catch(err => console.error("⚠️ Error en feed:", err));
-}
-
-// 🔥 2. ENVÍO INSTANTÁNEO AL FEED (Aparece de una vez a la izquierda)
-if (idDestino === "26fmetp4Q4WJ") {
-    const miUserId = localStorage.getItem('mi_dropis_id') || "anonimo";
-    const miNombre = localStorage.getItem('mi_nombre_perfil') || "Pedro Peres"; 
-    
-    let tipoFinal = tipoValidado;
-    if (tipoValidado === 'stickers' || tipoValidado === 'media') tipoFinal = 'imagen';
-
-    const idUnicoLocal = "feed_local_" + Date.now();
-
-    // Guardar y pintar AL INSTANTE
-    const nuevoPostLocal = {
-    id: idUnicoLocal,
-    contactoId: "26fmetp4Q4WJ",
-    texto: msg,
-    clase: 'msg-derecha',
-    status: 'leido',
-    tipo: tipoFinal,
-    ts: Date.now(),
-    hora: miNombre
-};
-
-    await guardarLocal('mensajes', nuevoPostLocal);
-    pintarMensaje(msg, 'msg-izquierda', null, 'leido', idUnicoLocal, tipoFinal);
-
-    // Subida en segundo plano a Supabase
-    fetch('/api/spaxioflow-event', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-            tipoEvento: tipoFinal,
-            contenido: msg,
-            remitente: miNombre,
-            sender_id: miUserId
-        })
-    })
-    .then(res => res.json())
-    .then(data => console.log("📡 Subido a Supabase con éxito:", data))
-    .catch(err => console.error("❌ Fallo al subir al feed:", err));
- return;
              }
 
              else {
