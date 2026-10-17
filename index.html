@@ -2842,18 +2842,12 @@ async function cargarConversacionCon(idDestino, nombreDestino, fotoDestino) {
                     pintarMensaje(post.content, 'msg-izquierda', post.sender_name || 'H.A.R.V.I.S.', 'leido', "feed_" + post.id, post.tipo);
                 });
 
-             // 🚀 RECARGA INSTANTÁNEA: Vuelve a invocar la función de carga en el mismo instante
-                    cargarConversacionCon(contacto.id, contacto.nombre, contacto.foto);   
+             // 🚀 RECARGA INSTANTÁNEA: Vuelve a invocar la función con sus parámetros correctos
+            cargarConversacionCon("26fmetp4Q4WJ", "Spaxio Flow", null);   
              }
             
             }
-             }
-
-
-             
-
-                
-             
+        
              
              else {
             // 🔒 LÓGICA OPTIMIZADA: Últimos 50 mensajes para chats privados
