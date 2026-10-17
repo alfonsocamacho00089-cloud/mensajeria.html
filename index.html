@@ -2841,17 +2841,18 @@ async function cargarConversacionCon(idDestino, nombreDestino, fotoDestino) {
                     // Pinta los videos, imágenes y textos almacenados globalmente
                     pintarMensaje(post.content, 'msg-izquierda', post.sender_name || 'H.A.R.V.I.S.', 'leido', "feed_" + post.id, post.tipo);
                 });
+
+             // 🚀 RECARGA INSTANTÁNEA: Vuelve a invocar la función de carga en el mismo instante
+                cargarConversacionCon()
+            
             }
              }
 
 
              
 
-                // 🚀 RECARGA INSTANTÁNEA: Vuelve a invocar la función de carga en el mismo instante
-                cargarConversacionCon()
-            
-            
-             }
+                
+             
              
              else {
             // 🔒 LÓGICA OPTIMIZADA: Últimos 50 mensajes para chats privados
