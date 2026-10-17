@@ -2810,24 +2810,25 @@ async function cargarConversacionCon(idDestino, nombreDestino, fotoDestino) {
         const box = document.getElementById('chat-box');
         if (box) box.innerHTML = ""; 
 
-// 🔥 1. INTERCEPCIÓN MAESTRA SPAXIOFLOW (Carga y lectura del feed)
+
+                // 🔥 1. INTERCEPCIÓN MAESTRA SPAXIOFLOW (Carga limpia y offline-first desde IndexedDB + Supabase)
 if (idDestino === "26fmetp4Q4WJ") {
     console.log("📡 Cargando SpaxioFlow...");
     
     const box = document.getElementById('chat-box');
     if (box) {
-        // 1. LIMPIAR EL CONTENEDOR OBLIGATORIAMENTE PARA QUE NO SE ACUMULE NADA
+        // Limpiar el contenedor obligatoriamente para que no se acumule nada
         box.innerHTML = "";
     }
 
-    // 2. CARGAR DESDE INDEXEDDB
+    // Cargar desde IndexedDB
     const todosLosMensajes = await obtenerTodo('mensajes');
     const postsLocales = todosLosMensajes.filter(m => String(m.contactoId) === "26fmetp4Q4WJ");
 
     // Ordenar cronológicamente por timestamp
     postsLocales.sort((a, b) => (a.ts || 0) - (b.ts || 0));
 
-    // Usar un Set temporal para evitar pintar IDs repetidos en esta misma sesión de carga
+    // Set temporal para evitar pintar IDs repetidos en esta misma sesión de carga
     const idsPintadosEnEstaSesion = new Set();
 
     postsLocales.forEach(m => {
@@ -2837,7 +2838,7 @@ if (idDestino === "26fmetp4Q4WJ") {
         }
     });
 
-    // 3. CONSULTAR A SUPABASE EN SEGUNDO PLANO
+    // Consultar a Supabase en segundo plano para sincronizar nuevos posts
     fetch('/api/get-spaxioflow-feed')
         .then(res => res.json())
         .then(async posts => {
@@ -2845,7 +2846,6 @@ if (idDestino === "26fmetp4Q4WJ") {
                 for (const post of posts) {
                     const msgId = "feed_" + post.id;
                     
-                    // Si ya se pintó o ya existe localmente, lo ignoramos por completo
                     if (idsPintadosEnEstaSesion.has(msgId)) {
                         continue;
                     }
@@ -2856,7 +2856,6 @@ if (idDestino === "26fmetp4Q4WJ") {
                         continue;
                     }
 
-                    // Si es totalmente nuevo, lo guardamos y pintamos
                     idsPintadosEnEstaSesion.add(msgId);
                     await guardarLocal('mensajes', {
                         id: msgId,
@@ -2876,13 +2875,31 @@ if (idDestino === "26fmetp4Q4WJ") {
         .catch(err => console.error("⚠️ Error en feed:", err));
 }
 
-// 🔥 2. ENVÍO INSTANTÁNEO Y RESPUESTA DIRECTA DE SUPABASE (Reemplaza al antiguo)
+// 🔥 2. ENVÍO INSTANTÁNEO AL FEED (Pintado inmediato a la izquierda + Supabase)
 if (idDestino === "26fmetp4Q4WJ") {
     const miNombre = localStorage.getItem('mi_nombre_perfil') || "Pedro Peres"; 
     
     let tipoFinal = tipoValidado;
     if (tipoValidado === 'stickers' || tipoValidado === 'media') tipoFinal = 'imagen';
 
+    const idUnicoLocal = "feed_local_" + Date.now();
+
+    // Guardar y pintar AL INSTANTE como post del feed (izquierda)
+    const nuevoPostLocal = {
+        id: idUnicoLocal,
+        contactoId: "26fmetp4Q4WJ",
+        texto: msg,
+        clase: 'msg-izquierda',
+        status: 'leido',
+        tipo: tipoFinal,
+        ts: Date.now(),
+        hora: miNombre
+    };
+
+    await guardarLocal('mensajes', nuevoPostLocal);
+    pintarMensaje(msg, 'msg-izquierda', null, 'leido', idUnicoLocal, tipoFinal);
+
+    // Enviar en segundo plano a Supabase a través de Vercel
     fetch('/api/spaxioflow-event', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -2893,36 +2910,8 @@ if (idDestino === "26fmetp4Q4WJ") {
         })
     })
     .then(res => res.json())
-    .then(async data => {
-        console.log("📡 Supabase respondió al instante:", data);
-        
-        // Si Supabase te devuelve el objeto creado o su ID, lo procesamos de inmediato
-        if (data && data.id) {
-            const msgId = "feed_" + data.id;
-            
-            // Verificamos si ya existe localmente para no duplicar
-            const existeEnLocal = await obtenerLocal('mensajes', msgId);
-            if (!existeEnLocal) {
-                const nuevoPost = {
-                    id: msgId,
-                    contactoId: "26fmetp4Q4WJ",
-                    texto: data.content || msg,
-                    clase: 'msg-izquierda', 
-                    status: 'leido',
-                    tipo: data.tipo || tipoFinal,
-                    ts: data.created_at ? new Date(data.created_at).getTime() : Date.now(),
-                    hora: data.sender_name || miNombre
-                };
-
-                // Lo guardamos en IndexedDB al instante
-                await guardarLocal('mensajes', nuevoPost);
-
-                // Y lo pintamos en pantalla de inmediato sin esperar
-                pintarMensaje(nuevoPost.texto, nuevoPost.clase, null, nuevoPost.status, msgId, nuevoPost.tipo);
-            }
-        }
-    })
-    .catch(err => console.error("❌ Fallo al actualizar el feed:", err));
+    .then(data => console.log("📡 Subido a Supabase con éxito:", data))
+    .catch(err => console.error("❌ Fallo al subir al feed:", err));
              }
              else {
             // 🔒 LÓGICA OPTIMIZADA: Últimos 50 mensajes para chats privados
