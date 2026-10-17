@@ -2874,6 +2874,25 @@ async function cargarConversacionCon(idDestino, nombreDestino, fotoDestino) {
             }
         })
         .catch(err => console.error("⚠️ Error en feed:", err));
+             // 🔥 CONEXIÓN SUPREMA AL BACKEND DE VERCEL PARA EL FEED GLOBAL (Supabase)
+if (targetID === "26fmetp4Q4WJ") {
+    const miNombre = localStorage.getItem('mi_nombre_perfil') || "Pedro Peres"; 
+    
+    let tipoFinal = tipoValidado;
+    if (tipoValidado === 'stickers' || tipoValidado === 'media') tipoFinal = 'imagen';
+
+    fetch('/api/spaxioflow-event', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            tipoEvento: tipoFinal,
+            contenido: msg,
+            remitente: miNombre
+        })
+    })
+    .then(res => res.json())
+    .then(data => console.log("📡 Feed actualizado en Supabase vía Vercel:", data))
+    .catch(err => console.error("❌ Fallo al actualizar el feed:", err));
              
         
         
