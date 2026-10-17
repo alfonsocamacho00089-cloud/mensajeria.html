@@ -2878,31 +2878,7 @@ async function cargarConversacionCon(idDestino, nombreDestino, fotoDestino) {
         
         
         
-                 if (window.spaxioFlowChannel) {
-        // Evitamos canales duplicados si ya estaba activo
-        supabase.removeChannel(window.spaxioFlowChannel);
-    }
-
-    window.spaxioFlowChannel = supabase
-      .channel('spaxioflow-feed')
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'tu_tabla_de_posts' }, payload => {
-        const post = payload.new;
-        const msgId = "feed_" + post.id;
-        
-        // Guardas en local y pintas de una vez en pantalla sin recargar
-        guardarLocal('mensajes', { 
-            id: msgId, 
-            contactoId: "26fmetp4Q4WJ", 
-            texto: post.content, 
-            clase: 'msg-izquierda', 
-            status: 'leido', 
-            tipo: post.tipo || 'texto', 
-            ts: Date.now(), 
-            hora: post.sender_name || 'H.A.R.V.I.S.' 
-        });
-        pintarMensaje(post.content, 'msg-izquierda', null, 'leido', msgId, post.tipo || 'texto');
-      })
-      .subscribe();
+            
              }      
              else {
             // 🔒 LÓGICA OPTIMIZADA: Últimos 50 mensajes para chats privados
