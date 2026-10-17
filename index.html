@@ -2810,8 +2810,8 @@ async function cargarConversacionCon(idDestino, nombreDestino, fotoDestino) {
         const box = document.getElementById('chat-box');
         if (box) box.innerHTML = ""; 
 
-     // 🔥 INTERCEPCIÓN MAESTRA SPAXIOFLOW (Estilo Red Social / Sincronizado al chat normal)
-        if (idDestino === "26fmetp4Q4WJ") {
+// 🔥 1. INTERCEPCIÓN MAESTRA SPAXIOFLOW (Carga y lectura del feed)
+if (idDestino === "26fmetp4Q4WJ") {
     console.log("📡 Cargando SpaxioFlow...");
     
     const box = document.getElementById('chat-box');
@@ -2874,8 +2874,9 @@ async function cargarConversacionCon(idDestino, nombreDestino, fotoDestino) {
             }
         })
         .catch(err => console.error("⚠️ Error en feed:", err));
-             }
-             // 🔥 CONEXIÓN SUPREMA AL BACKEND DE VERCEL PARA EL FEED GLOBAL (Supabase)
+}
+
+// 🔥 2. ENVÍO INSTANTÁNEO Y RESPUESTA DIRECTA DE SUPABASE (Reemplaza al antiguo)
 if (idDestino === "26fmetp4Q4WJ") {
     const miNombre = localStorage.getItem('mi_nombre_perfil') || "Pedro Peres"; 
     
@@ -2892,12 +2893,37 @@ if (idDestino === "26fmetp4Q4WJ") {
         })
     })
     .then(res => res.json())
-    .then(data => console.log("📡 Feed actualizado en Supabase vía Vercel:", data))
-    .catch(err => console.error("❌ Fallo al actualizar el feed:", err));
-             
+    .then(async data => {
+        console.log("📡 Supabase respondió al instante:", data);
         
+        // Si Supabase te devuelve el objeto creado o su ID, lo procesamos de inmediato
+        if (data && data.id) {
+            const msgId = "feed_" + data.id;
             
-             }      
+            // Verificamos si ya existe localmente para no duplicar
+            const existeEnLocal = await obtenerLocal('mensajes', msgId);
+            if (!existeEnLocal) {
+                const nuevoPost = {
+                    id: msgId,
+                    contactoId: "26fmetp4Q4WJ",
+                    texto: data.content || msg,
+                    clase: 'msg-izquierda', 
+                    status: 'leido',
+                    tipo: data.tipo || tipoFinal,
+                    ts: data.created_at ? new Date(data.created_at).getTime() : Date.now(),
+                    hora: data.sender_name || miNombre
+                };
+
+                // Lo guardamos en IndexedDB al instante
+                await guardarLocal('mensajes', nuevoPost);
+
+                // Y lo pintamos en pantalla de inmediato sin esperar
+                pintarMensaje(nuevoPost.texto, nuevoPost.clase, null, nuevoPost.status, msgId, nuevoPost.tipo);
+            }
+        }
+    })
+    .catch(err => console.error("❌ Fallo al actualizar el feed:", err));
+             }
              else {
             // 🔒 LÓGICA OPTIMIZADA: Últimos 50 mensajes para chats privados
             const todosLosMensajes = await obtenerTodo('mensajes');
