@@ -5708,7 +5708,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 event: 'INSERT',
                 schema: 'public',
                 table: 'spaxioflow_feed',
-                filter: `chat_id=eq.${chatIdActual}`
+                filter: `chat_id=eq.${chatIdActual}`,
+                sender_id: miUserId
             },
             (payload) => {
                 const nuevoMensaje = payload.new;
