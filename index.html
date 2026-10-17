@@ -5660,7 +5660,81 @@ function inicializarSpaxioFlowIndependiente() {
 document.addEventListener('DOMContentLoaded', () => {
     inicializarSpaxioFlowIndependiente();
 });
-                      
+    async function enviarMensajeSpaxioFlow(chatId, tipoContenido, contenidoUrlOrText) {
+    const miUserId = localStorage.getItem('mi_dropis_id') || "anonimo";
+    const miNombre = localStorage.getItem('mi_nombre') || "Pedro Peres";
+
+    try {
+        const { data, error } = await supabaseClient
+            .from('spaxioflow_feed')
+            .insert([
+                {
+                    chat_id: chatId,             // "26fmetp4Q4WJ"
+                    sender_id: miUserId,         // ID único de la cuenta en la App
+                    sender_name: miNombre,       // Nombre del emisor
+                    tipo: tipoContenido,         // 'foto', 'video' o 'texto'
+                    content: contenidoUrlOrText, // URL o texto
+                    meta_info: {}
+                }
+            ]);
+
+        if (error) {
+            console.error("❌ Error al insertar en Supabase:", error.message);
+            return;
+        }
+        console.log("✅ Mensaje enviado a SpaxioFlow con éxito.");
+    } catch (err) {
+        console.error("❌ Excepción al enviar mensaje:", err);
+    }
+             }
+
+             function iniciarEscuchaTiempoRealSpaxioFlow(chatIdActual) {
+    const miUserId = localStorage.getItem('mi_dropis_id');
+    console.log("🔌 Conectando al canal en tiempo real de SpaxioFlow...");
+
+    // Evitamos duplicar canales cerrando el anterior si existía
+    if (window.supabaseFlowChannel) {
+        supabaseClient.removeChannel(window.supabaseFlowChannel);
+    }
+
+    window.supabaseFlowChannel = supabaseClient
+        .channel('public:spaxioflow_feed')
+        .on(
+            'postgres_changes',
+            {
+                event: 'INSERT',
+                schema: 'public',
+                table: 'spaxioflow_feed',
+                filter: `chat_id=eq.${chatIdActual}`
+            },
+            (payload) => {
+                const nuevoMensaje = payload.new;
+                console.log("⚡ Nuevo mensaje recibido en tiempo real:", nuevoMensaje);
+
+                // Validar si el mensaje lo envié yo o lo envió otro usuario
+                const esMio = nuevoMensaje.sender_id === miUserId;
+                const claseBurbuja = esMio ? 'msg-derecha' : 'msg-izquierda';
+                const msgIdUnico = "rt_" + nuevoMensaje.id;
+
+                // Evitar duplicados visuales si ya se pintó localmente
+                if (!document.getElementById(msgIdUnico)) {
+                    pintarMensaje(
+                        nuevoMensaje.content, 
+                        claseBurbuja, 
+                        new Date(nuevoMensaje.created_at || Date.now()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true }), 
+                        'leido', 
+                        msgIdUnico, 
+                        nuevoMensaje.tipo || 'texto'
+                    );
+                }
+            }
+        )
+        .subscribe((status) => {
+            if (status === 'SUBSCRIBED') {
+                console.log("✨ ¡Suscrito al Realtime de Supabase con éxito!");
+            }
+        });
+             }
 // =================================================================
 // 🪐 SPAXIOVERSO OMNI: MOTOR GRÁFICO, IA Y TELEMETRÍA - COMPLETO
 // =================================================================
