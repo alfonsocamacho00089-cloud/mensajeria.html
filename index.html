@@ -2446,7 +2446,10 @@ const base64 = btoa(binary);
         if (targetID === "26fmetp4Q4WJ") {
             const miNombre = localStorage.getItem('mi_nombre_perfil') || "Pedro Peres"; 
             const miUserId = localStorage.getItem('mi_dropis_id') || "anonimo";
-
+// Mapeamos los tipos para que tu base de datos los reciba limpios
+            let tipoFinal = tipoValidado;
+            if (tipoValidado === 'stickers' || tipoValidado === 'media') tipoFinal = 'imagen';
+             
 fetch('/api/spaxioflow-event', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
