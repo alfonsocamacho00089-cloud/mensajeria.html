@@ -2842,8 +2842,7 @@ async function cargarConversacionCon(idDestino, nombreDestino, fotoDestino) {
                     pintarMensaje(post.content, 'msg-izquierda', post.sender_name || 'H.A.R.V.I.S.', 'leido', "feed_" + post.id, post.tipo);
                 });
 
-                // 🚀 RECARGA INSTANTÁNEA: Vuelve a invocar la función con sus parámetros correctos
-                cargarConversacionCon("26fmetp4Q4WJ", "Spaxio Flow", null);   
+                   
             }
             
         } else {
@@ -5448,46 +5447,34 @@ async function inyectarNotificacionHarvis(textoIA) {
     }
      }
 
-     async function inyectarLiveSpaxioFlow(urlVideo) {
+async function inyectarLiveSpaxioFlow(urlVideo) {
     const targetID = "26fmetp4Q4WJ"; 
     const miNombre = localStorage.getItem('mi_nombre_perfil') || "Pedro Peres";
 
     try {
-        console.log("🚀 Disparando evento de streaming hacia Vercel...");
-
-        // Llamada directa a tu manejador para registrar el video .webm creado
         const res = await fetch('/api/spaxioflow-event', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 tipoEvento: 'video',
                 contenido: urlVideo,
-                remitente: miNombre,
-                metadata: { timestamp_local: Date.now() }
+                remitente: miNombre
             })
         });
 
-        if (!res.ok) throw new Error("Vercel rechazó la inyección del Live");
-        const data = await res.json();
-        console.log("🎥 ¡Transmisión registrada con éxito en el Feed Global!", data);
-
-        // Tu persistencia local en IndexedDB se mantiene para el historial del teléfono
-        if (typeof guardarLocal === "function") {
-            await guardarLocal('mensajes', { 
-                id: "live_stream_" + Date.now(), 
-                contactoId: targetID,
-                texto: urlVideo, 
-                clase: 'msg-derecha', 
-                status: 'leido',
-                tipo: 'video', 
-                ts: Date.now(),
-                hora: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })
-            });
+        if (res.ok) {
+            console.log("🎥 ¡Publicación guardada en Vercel!");
+            
+            // 🚀 AQUÍ SÍ SE PUEDE:
+            // Como ya se guardó en la base de datos, recargamos el chat UNA SOLA VEZ
+            cargarConversacionCon("26fmetp4Q4WJ", "Spaxio Flow", null);
         }
     } catch (e) {
-        console.error("❌ Error en la inyección del Live a través de Vercel:", e);
+        console.error("Error al enviar:", e);
     }
-     }
+}
+             
+     
 
 // 1. Variable para llevar registro de IDs únicos (mantenemos una sola vez)
 const mensajesProcesados = new Set();
