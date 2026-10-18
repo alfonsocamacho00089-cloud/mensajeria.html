@@ -2872,28 +2872,25 @@ async function cargarConversacionCon(idDestino, nombreDestino, fotoDestino) {
              }
 } else {
 
-                 try {
-        const box = document.getElementById('chat-box');
-        if (box) box.innerHTML = ""; 
+                 // 🔒 LÓGICA UNIFICADA: Carga instantánea desde IndexedDB (Cero fetch bloqueante al entrar)
+const todosLosMensajes = await obtenerTodo('mensajes');
+const mensajesFiltrados = todosLosMensajes.filter(m => String(m.contactoId) === String(idDestino));
 
-        // 🔒 LÓGICA UNIFICADA: Carga instantánea desde IndexedDB (Cero fetch bloqueante al entrar)
-        const todosLosMensajes = await obtenerTodo('mensajes');
-        const mensajesFiltrados = todosLosMensajes.filter(m => String(m.contactoId) === String(idDestino));
+const ultimos50 = mensajesFiltrados.slice(-50);
 
-        const ultimos50 = mensajesFiltrados.slice(-50);
+if (typeof renderizarMensajes === "function") {
+    renderizarMensajes(ultimos50);
+} else {
+    ultimos50.forEach(m => {
+        pintarMensaje(m.texto, m.clase, m.hora, m.status || 'enviado', m.id, m.tipo || 'texto');
+    });
+}
 
-        if (typeof renderizarMensajes === "function") {
-            renderizarMensajes(ultimos50);
-        } else {
-            ultimos50.forEach(m => {
-                pintarMensaje(m.texto, m.clase, m.hora, m.status || 'enviado', m.id, m.tipo || 'texto');
-            });
-        }
+// 📡 Si es SpaxioFlow, sincronizamos con Vercel de forma silenciosa en segundo plano
+if (idDestino === "26fmetp4Q4WJ") {
+    sincronizarSpaxioFlowBackground();
+}
 
-        // 📡 Si es SpaxioFlow, sincronizamos con Vercel de forma silenciosa en segundo plano
-        if (idDestino === "26fmetp4Q4WJ") {
-            sincronizarSpaxioFlowBackground();
-        }
 
     } catch (e) {
         console.error("❌ Error cargando mensajes del feed:", e);
