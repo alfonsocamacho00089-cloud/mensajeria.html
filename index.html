@@ -2847,7 +2847,7 @@ async function cargarConversacionCon(idDestino, nombreDestino, fotoDestino) {
      
     posts.forEach(async (post) => {
         const idContenido = "feed_" + post.id;
-        
+        const nombreRemitente = post.sender_name || 'H.A.R.V.I.S.';
         // 🚀 SOLO DIBUJA SI EL ELEMENTO NO EXISTE EN LA PANTALLA
         if (!document.getElementById(idContenido)) {
             const miUserId = localStorage.getItem('mi_dropis_id');
