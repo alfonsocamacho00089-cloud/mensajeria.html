@@ -2860,14 +2860,14 @@ async function cargarConversacionCon(idDestino, nombreDestino, fotoDestino) {
                     texto: post.content,
                     clase: 'msg-izquierda',
                     status: 'leido',
-                    
+                    nombreRemitente,
                     tipo: post.tipo || 'texto',
                     ts: new Date(post.created_at || Date.now()).getTime(),
                     hora: new Date(post.created_at || Date.now()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })
                 });
             }
 
-                pintarMensaje(post.content, 'msg-izquierda', nombreRemitente, post.sender_name || 'H.A.R.V.I.S.', 'leido', "feed_" + post.id, post.tipo);
+                pintarMensaje(post.content, 'msg-izquierda', 'nombreRemitente', post.sender_name || 'H.A.R.V.I.S.', 'leido', "feed_" + post.id, post.tipo);
                  }
     });
              }
