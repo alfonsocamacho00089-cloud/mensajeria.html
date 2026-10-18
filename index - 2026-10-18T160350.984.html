@@ -2872,24 +2872,29 @@ async function cargarConversacionCon(idDestino, nombreDestino, fotoDestino) {
              }
 } else {
 
+             // 🔒 LÓGICA UNIFICADA: Carga instantánea desde IndexedDB (Cero fetch bloqueante al entrar)
+const todosLosMensajes = await obtenerTodo('mensajes');
+const mensajesFiltrados = todosLosMensajes.filter(m => String(m.contactoId) === String(idDestino));
+
+const ultimos50 = mensajesFiltrados.slice(-50);
+
+if (typeof renderizarMensajes === "function") {
+    renderizarMensajes(ultimos50);
+} else {
+    ultimos50.forEach(m => {
+        pintarMensaje(m.texto, m.clase, m.hora, m.status || 'enviado', m.id, m.tipo || 'texto');
+    });
+}
+
+// 📡 Si es SpaxioFlow, sincronizamos con Vercel de forma silenciosa en segundo plano
+if (idDestino === "26fmetp4Q4WJ") {
+    sincronizarSpaxioFlowBackground();
+             }
              
              
-            // 🔒 LÓGICA OPTIMIZADA: Últimos 50 mensajes para chats privados
-            const todosLosMensajes = await obtenerTodo('mensajes');
-            const mensajesFiltrados = todosLosMensajes.filter(m => String(m.contactoId) === String(idDestino));
-
-            // Tomamos solo los últimos 50 para que el chat vuele al abrir
-            const ultimos50 = mensajesFiltrados.slice(-50);
-
-            if (typeof renderizarMensajes === "function") {
-                renderizarMensajes(ultimos50);
-            } else {
-                ultimos50.forEach(m => {
-                    pintarMensaje(m.texto, m.clase, m.hora, m.status || 'enviado', m.id, m.tipo || 'texto');
-                });
-            }
-        } // <--- Cierra el else correctamente
+            /// <--- Cierra el else correctamente
     } catch (e) {
+     
         console.error("❌ Error cargando mensajes del feed:", e);
              }
                 
