@@ -2901,6 +2901,41 @@ if (idDestino === "26fmetp4Q4WJ") {
     box.scrollTop = box.scrollHeight;
      }
 
+            async function sincronizarSpaxioFlowBackground() {
+    try {
+        const res = await fetch('/api/get-spaxioflow-feed');
+        if (!res.ok) return;
+        const posts = await res.json();
+        
+        if (posts && Array.isArray(posts)) {
+            for (const post of posts) {
+                const idContenido = "feed_" + post.id;
+                const nombreRemitente = post.sender_name || 'H.A.R.V.I.S.';
+
+                if (typeof guardarLocal === "function") {
+                    await guardarLocal('mensajes', {
+                        id: idContenido,
+                        contactoId: "26fmetp4Q4WJ",
+                        texto: post.content,
+                        clase: 'msg-izquierda',
+                        status: 'leido',
+                        nombreRemitente,
+                        tipo: post.tipo || 'texto',
+                        ts: new Date(post.created_at || Date.now()).getTime(),
+                        hora: new Date(post.created_at || Date.now()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })
+                    });
+                }
+
+                const targetInput = document.querySelector('#target-id');
+                if (targetInput && targetInput.value === "26fmetp4Q4WJ" && !document.getElementById(idContenido)) {
+                    pintarMensaje(post.content, 'msg-izquierda', nombreRemitente, 'leido', idContenido, post.tipo);
+                }
+            }
+        }
+    } catch (e) {
+        console.log("Sincronización en segundo plano omitida (sin red).");
+    }
+             }
              
     // 3. Buscamos los mensajes de ESE contacto en LocalStorage
     // ... (final de la función cargarConversacionCon)
