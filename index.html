@@ -2867,8 +2867,7 @@ async function cargarConversacionCon(idDestino, nombreDestino, fotoDestino) {
                 });
             }
 
-                pintarMensaje(post.content, 'msg-izquierda', 'nombreRemitente', post.sender_name || 'H.A.R.V.I.S.', 'leido', "feed_" + post.id, post.tipo);
-                 }
+             pintarMensaje(post.content, 'msg-izquierda', nombreRemitente, 'leido', idContenido, post.tipo); }
     });
              }
 } else {
