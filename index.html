@@ -2837,22 +2837,37 @@ async function cargarConversacionCon(idDestino, nombreDestino, fotoDestino) {
 
 // 🔥 INTERCEPCIÓN MAESTRA CON VERCEL (Cero errores de variables indefinidas)
         if (idDestino === "26fmetp4Q4WJ") {
-            console.log("📡 Cargando historial global de SpaxioFlow desde Vercel...");
+    console.log("📡 Cargando historial global de SpaxioFlow desde Vercel...");
+    
+    const res = await fetch('/api/get-spaxioflow-feed');
+    if (!res.ok) throw new Error("Fallo al obtener el feed desde el backend");
+    const posts = await res.json();
+
+    if (posts && Array.isArray(posts)) {
+        // ❌ ELIMINAMOS EL box.innerHTML = ""; (Para que NO borre nada de la pantalla)
+        
+        posts.forEach(post => {
+            const idContenido = "feed_" + post.id;
             
-            const res = await fetch('/api/get-spaxioflow-feed');
-            if (!res.ok) throw new Error("Fallo al obtener el feed desde el backend");
-            const posts = await res.json();
+            // 🚀 SOLO DIBUJA SI EL ELEMENTO NO EXISTE EN LA PANTALLA
+            if (!document.getElementById(idContenido)) {
+                // Evaluamos si el mensaje es del usuario actual o de alguien más
+                const miUserId = localStorage.getItem('mi_dropis_id');
+                const esMio = post.sender_id === miUserId;
+                const claseBurbuja = esMio ? 'msg-derecha' : 'msg-izquierda';
 
-            if (posts && Array.isArray(posts)) {
-                posts.forEach(post => {
-                    // Pinta los videos, imágenes y textos almacenados globalmente
-                    pintarMensaje(post.content, 'msg-izquierda', post.sender_name || 'H.A.R.V.I.S.', 'leido', "feed_" + post.id, post.tipo);
-                });
-
-                   
+                pintarMensaje(
+                    post.content, 
+                    claseBurbuja, 
+                    new Date(post.created_at || Date.now()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true }), 
+                    'leido', 
+                    idContenido, 
+                    post.tipo || 'texto'
+                );
             }
-            
-        } else {
+        });
+    }
+ } else {
 
              
              
