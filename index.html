@@ -2872,10 +2872,11 @@ async function cargarConversacionCon(idDestino, nombreDestino, fotoDestino) {
              }
 } else {
 
-                 // 🔒 LÓGICA UNIFICADA: Carga instantánea desde IndexedDB (Cero fetch bloqueante al entrar)
+                 // 🔒 LÓGICA UNIFICADA: Carga instantánea desde IndexedDB para cualquier chat o feed
 const todosLosMensajes = await obtenerTodo('mensajes');
 const mensajesFiltrados = todosLosMensajes.filter(m => String(m.contactoId) === String(idDestino));
 
+// Tomamos solo los últimos 50 para que vuele al abrir
 const ultimos50 = mensajesFiltrados.slice(-50);
 
 if (typeof renderizarMensajes === "function") {
@@ -2886,10 +2887,11 @@ if (typeof renderizarMensajes === "function") {
     });
 }
 
-// 📡 Si es SpaxioFlow, sincronizamos con Vercel de forma silenciosa en segundo plano
+// 📡 Si es SpaxioFlow, lanzamos la sincronización con Vercel en segundo plano sin bloquear
 if (idDestino === "26fmetp4Q4WJ") {
     sincronizarSpaxioFlowBackground();
 }
+
 
 
     } catch (e) {
