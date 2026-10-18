@@ -2860,14 +2860,20 @@ async function cargarConversacionCon(idDestino, nombreDestino, fotoDestino) {
                     texto: post.content,
                     clase: 'msg-izquierda',
                     status: 'leido',
+                    remitente: nombreRemitente,
                     tipo: post.tipo || 'texto',
                     ts: new Date(post.created_at || Date.now()).getTime(),
                     hora: new Date(post.created_at || Date.now()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })
                 });
             }
-
-            pintarMensaje(post.content, 'msg-izquierda', post.sender_name || 'H.A.R.V.I.S.', 'leido', idContenido, post.tipo);
-        }
+pintarMensaje(
+                post.content, 
+                'msg-izquierda', 
+                nombreRemitente, // 👈 Aquí va el nombre intacto
+                'leido', 
+                idContenido, 
+                post.tipo
+                 }
     });
              }
 } else {
