@@ -2827,75 +2827,29 @@ async function cargarConversacionCon(idDestino, nombreDestino, fotoDestino) {
         const box = document.getElementById('chat-box');
         if (box) box.innerHTML = ""; 
 
-// 🔥 INTERCEPCIÓN MAESTRA CON VERCEL, CACHÉ LOCAL Y LIMPIEZA DE PANTALLA
-if (idDestino === "26fmetp4Q4WJ") {
-    console.log("📡 Cargando SpaxioFlow...");
 
-    // 1. Limpiamos la pantalla de inmediato para evitar duplicados al entrar/salir
-    const box = document.getElementById('chat-box');
-    if (box) box.innerHTML = "";
+// 🔥 INTERCEPCIÓN MAESTRA CON VERCEL (Cero errores de variables indefinidas)
+        if (idDestino === "26fmetp4Q4WJ") {
+            console.log("📡 Cargando historial global de SpaxioFlow desde Vercel...");
+            
+            const res = await fetch('/api/get-spaxioflow-feed');
+            if (!res.ok) throw new Error("Fallo al obtener el feed desde el backend");
+            const posts = await res.json();
 
-    // 2. Buscamos y pintamos TODO lo que ya tenemos guardado localmente en el teléfono (Tus mensajes a la derecha y los de Supabase a la izquierda)
-    const todosLosMensajesLocales = await obtenerTodo('mensajes');
-    const postsLocales = todosLosMensajesLocales.filter(m => String(m.contactoId) === "26fmetp4Q4WJ");
+            if (posts && Array.isArray(posts)) {
+                posts.forEach(post => {
+                    // Pinta los videos, imágenes y textos almacenados globalmente
+                    pintarMensaje(post.content, 'msg-izquierda', post.sender_name || 'H.A.R.V.I.S.', 'leido', "feed_" + post.id, post.tipo);
+                });
 
-    // Ordenamos por timestamp para que mantengan su orden cronológico exacto
-    postsLocales.sort((a, b) => (a.ts || 0) - (b.ts || 0));
-
-    postsLocales.forEach(post => {
-        // Respetamos la clase original con la que se guardó ('msg-izquierda' o 'msg-derecha')
-        pintarMensaje(post.texto, post.clase, post.hora, post.status || 'leido', post.id, post.tipo || 'texto');
-    });
-
-    // 3. Petición silenciosa a Vercel para buscar solo lo NUEVO que otros hayan enviado
-    try {
-        const res = await fetch('/api/get-spaxioflow-feed');
-        if (!res.ok) throw new Error("Fallo al obtener el feed desde el backend");
-        const postsNuevos = await res.json();
-
-        if (postsNuevos && Array.isArray(postsNuevos)) {
-            const actualesEnBD = await obtenerTodo('mensajes');
-            const idsGuardados = new Set(actualesEnBD.map(m => String(m.id)));
-
-            let hayNuevosParaGuardar = false;
-
-            for (const post of postsNuevos) {
-                const idUnicoPost = "feed_" + post.id;
-
-                // Candado: Si el post de Vercel no está en el teléfono, lo guardamos
-                if (!idsGuardados.has(idUnicoPost)) {
-                    hayNuevosParaGuardar = true;
-
-                    const objetoGuardado = {
-                        id: idUnicoPost,
-                        contactoId: "26fmetp4Q4WJ",
-                        texto: post.content,
-                        clase: 'msg-izquierda', // Lo que viene de Supabase siempre va a la izquierda
-                        status: 'leido',
-                        tipo: post.tipo || 'texto',
-                        ts: post.timestamp || Date.now(),
-                        hora: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })
-                    };
-
-                    await guardarLocal('mensajes', objetoGuardado);
-                }
-            }
-
-            // 🚀 RECARGA INSTANTÁNEA: Si Vercel trajo algo nuevo, refrescamos la vista automáticamente como si hubieras salido y entrado
-            if (hayNuevosParaGuardar) {
-                console.log("✨ Nuevos elementos detectados, actualizando pantalla al instante...");
+                // 🚀 RECARGA INSTANTÁNEA: Vuelve a invocar la función con sus parámetros correctos
                 cargarConversacionCon("26fmetp4Q4WJ", "Spaxio Flow", null);   
             }
-        }
-    } catch (errRed) {
-        console.error("❌ Error al sincronizar con Vercel:", errRed);
-    }
-             }
-        
-
+            
+        } else {
 
              
-             else {
+             
             // 🔒 LÓGICA OPTIMIZADA: Últimos 50 mensajes para chats privados
             const todosLosMensajes = await obtenerTodo('mensajes');
             const mensajesFiltrados = todosLosMensajes.filter(m => String(m.contactoId) === String(idDestino));
