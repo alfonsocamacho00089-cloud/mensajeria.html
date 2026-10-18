@@ -2464,15 +2464,17 @@ fetch('/api/spaxioflow-event', {
             
             .then(res => res.json())
             .then(data => console.log("📡 Feed actualizado vía Vercel:", data))
-            .catch(err => console.error("❌ Fallo al actualizar feed desde el teléfono:", err));
-           // Justo cuando Vercel te responde que ya se guardó con éxito:
 
-    // 🚀 AQUÍ ESTÁ EL TRUCO: Invocamos tu misma función de carga de inmediato
+ // 🚀 AQUÍ ESTÁ EL TRUCO: Invocamos tu misma función de carga de inmediato
     // El setTimeout de 500ms le da el "segundo de gracia" que da el salir y entrar
     setTimeout(() => {
         cargarConversacionCon("26fmetp4Q4WJ", "Spaxio Flow", null);
     }, 500);
 }) 
+            .catch(err => console.error("❌ Fallo al actualizar feed desde el teléfono:", err));
+           // Justo cuando Vercel te responde que ya se guardó con éxito:
+
+    
         } else if (targetID !== "uo4kb3tGHH7J") {
             // 🛡️ REGLA DE ORO: Si es un contacto normal, sigue usando la cola satelital tradicional
             await db.ref('cola_satelital/' + targetID).push({
