@@ -2938,16 +2938,30 @@ function iniciarPollingSpaxioFlow() {
     }, 6000);
              }
 
-         async function sincronizarSpaxioFlowBackground() {
+         
+        // Variable global o local para el cursor de red
+let ultimoIdSpaxioFlow = 0;
+
+async function sincronizarSpaxioFlowBackground() {
     try {
-        const res = await fetch('/api/get-spaxioflow-feed');
+        // A NIVEL DE RED: Si ya tenemos un ID, solo pedimos lo nuevo al servidor
+        const url = ultimoIdSpaxioFlow > 0 
+            ? `/api/get-spaxioflow-feed?since_id=${ultimoIdSpaxioFlow}` 
+            : '/api/get-spaxioflow-feed';
+
+        const res = await fetch(url);
         if (!res.ok) return;
         const posts = await res.json();
         
-        if (posts && Array.isArray(posts)) {
+        if (posts && Array.isArray(posts) && posts.length > 0) {
             for (const post of posts) {
                 const idContenido = "feed_" + post.id;
                 const nombreRemitente = post.sender_name || 'H.A.R.V.I.S.';
+
+                // Actualizamos el cursor de red con el ID más alto recibido
+                if (post.id > ultimoIdSpaxioFlow) {
+                    ultimoIdSpaxioFlow = post.id;
+                }
 
                 // 1. Guardamos en IndexedDB (si ya existe, lo pisa limpio con el mismo id)
                 if (typeof guardarLocal === "function") {
@@ -2978,7 +2992,7 @@ function iniciarPollingSpaxioFlow() {
     } catch (e) {
         console.log("Sincronización silenciosa omitida (sin red).");
     }
-             }   
+             }
              
     // 3. Buscamos los mensajes de ESE contacto en LocalStorage
     // ... (final de la función cargarConversacionCon)
