@@ -2954,7 +2954,7 @@ function iniciarPollingSpaxioFlow() {
                 const esMio = String(post.sender_id) === String(miUserId);
                 const claseMensaje = esMio ? 'msg-derecha' : 'msg-izquierda';
 
-                // 1. Guardamos el post oficial del servidor en IndexedDB
+                // 1. Guardamos el post oficial del servidor en IndexedDB silenciosamente
                 if (typeof guardarLocal === "function") {
                     await guardarLocal('mensajes', {
                         id: idContenido,
@@ -2978,13 +2978,7 @@ function iniciarPollingSpaxioFlow() {
                     await eliminarLocal('mensajes', msgLocal.id);
                 }
             }
-
-            // 3. Refrescamos la vista de SpaxioFlow limpiamente si está abierto
-            const targetInput = document.querySelector('#target-id');
-            if (targetInput && targetInput.value === "26fmetp4Q4WJ") {
-                // Volvemos a invocar la carga para que pinte solo los únicos limpios
-                cargarConversacionCon("26fmetp4Q4WJ", "Spaxio Flow", null);
-            }
+            // (Ya no llamamos a cargarConversacionCon aquí para evitar bucles o parpadeos en pantalla)
         }
     } catch (e) {
         console.log("Sincronización silenciosa omitida (sin red).");
