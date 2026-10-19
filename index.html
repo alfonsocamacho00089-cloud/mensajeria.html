@@ -2837,39 +2837,32 @@ async function cargarConversacionCon(idDestino, nombreDestino, fotoDestino) {
              
 
 
-// 🔒 LÓGICA DEFINITIVA CON LA VARIABLE 'POST' CORREGIDA
-const contenedorChat = document.getElementById('chat-box') || document.getElementById('box-mensajes');
-
+// 🔒 LÓGICA DE MAPEO Y CARGA UNIFICADA (Copia esto en el index 2)
 const todosLosMensajes = await obtenerTodo('mensajes');
 const mensajesFiltrados = todosLosMensajes.filter(m => String(m.contactoId) === String(idDestino));
 
-// Filtro estricto de duplicados en memoria
-const mapaUnicos = new Map();
-mensajesFiltrados.forEach(m => mapaUnicos.set(m.id, m));
-const mensajesUnicos = Array.from(mapaUnicos.values());
+// 🗺️ AQUÍ ESTÁ EL MAPEO QUE TE FALTABA EN EL INDEX 2:
+const mapaMensajes = new Map();
+mensajesFiltrados.forEach(msg => {
+    mapaMensajes.set(msg.id || msg.timestamp, msg); // Clave única preservada
+});
 
-// Orden cronológico correcto
+// Convertimos el mapa de nuevo a un array ordenado cronológicamente
+const mensajesUnicos = Array.from(mapaMensajes.values());
 mensajesUnicos.sort((a, b) => (a.ts || 0) - (b.ts || 0));
 
-// Tomamos los últimos 50 limpios
+// Tomamos los últimos 50 limpios para que la interfaz vuele
 const ultimos50 = mensajesUnicos.slice(-50);
 
-// Limpiamos la pantalla una sola vez
+const contenedorChat = document.getElementById('chat-box');
 if (contenedorChat) contenedorChat.innerHTML = "";
 
 ultimos50.forEach(m => {
-    const post = {
-        id: m.id,
-        content: m.texto,
-        tipo: m.tipo || 'texto',
-        clase: m.clase,
-        hora: m.hora,
-        status: m.status
-    };
-    pintarMensaje(post.content, post.clase, post.hora, post.status || 'enviado', post.id, post.tipo);
+    pintarMensaje(m.texto, m.clase, m.hora, m.status || 'enviado', m.id, m.tipo || 'texto');
 });
 
 if (contenedorChat) contenedorChat.scrollTop = contenedorChat.scrollHeight;
+
 // 📡 Sincronización silenciosa en segundo plano
 if (idDestino === "26fmetp4Q4WJ") {
     iniciarPollingSpaxioFlow();
