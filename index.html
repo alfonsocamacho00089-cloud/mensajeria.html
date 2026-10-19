@@ -2945,17 +2945,22 @@ function iniciarPollingSpaxioFlow() {
         const posts = await res.json();
         
         if (posts && Array.isArray(posts)) {
+            const miUserId = localStorage.getItem('mi_dropis_id');
+
             for (const post of posts) {
                 const idContenido = "feed_" + post.id;
                 const nombreRemitente = post.sender_name || 'H.A.R.V.I.S.';
+                
+                const esMio = String(post.sender_id) === String(miUserId);
+                const claseMensaje = esMio ? 'msg-derecha' : 'msg-izquierda';
 
-                // 1. Guardamos en IndexedDB (si ya existe, lo pisa limpio con el mismo id)
+                // 1. Guardamos el post oficial del servidor en IndexedDB
                 if (typeof guardarLocal === "function") {
                     await guardarLocal('mensajes', {
                         id: idContenido,
                         contactoId: "26fmetp4Q4WJ",
                         texto: post.content,
-                        clase: 'msg-izquierda',
+                        clase: claseMensaje,
                         status: 'leido',
                         nombreRemitente,
                         tipo: post.tipo || 'texto',
@@ -2963,16 +2968,22 @@ function iniciarPollingSpaxioFlow() {
                         hora: new Date(post.created_at || Date.now()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })
                     });
                 }
+            }
 
-                // 2. Si el feed está abierto y el post es nuevo, lo añadimos al DOM al instante sin parpadeos
-                const targetInput = document.querySelector('#target-id');
-                const esFeedAbierto = targetInput && targetInput.value === "26fmetp4Q4WJ";
-                
-                if (esFeedAbierto && !document.getElementById(idContenido)) {
-                    pintarMensaje(post.content, 'msg-izquierda', nombreRemitente, 'leido', idContenido, post.tipo);
-                    const box = document.getElementById('chat-box') || document.getElementById('box-mensajes');
-                    if (box) box.scrollTop = box.scrollHeight;
+            // 🧹 2. LIMPIEZA AUTOMÁTICA: Borramos cualquier mensaje temporal local (msg_...) 
+            // de SpaxioFlow porque el servidor ya trajo la versión oficial con id "feed_..."
+            const todosLosLocales = await obtenerTodo('mensajes');
+            for (const msgLocal of todosLosLocales) {
+                if (msgLocal.contactoId === "26fmetp4Q4WJ" && String(msgLocal.id).startsWith('msg_')) {
+                    await eliminarLocal('mensajes', msgLocal.id);
                 }
+            }
+
+            // 3. Refrescamos la vista de SpaxioFlow limpiamente si está abierto
+            const targetInput = document.querySelector('#target-id');
+            if (targetInput && targetInput.value === "26fmetp4Q4WJ") {
+                // Volvemos a invocar la carga para que pinte solo los únicos limpios
+                cargarConversacionCon("26fmetp4Q4WJ", "Spaxio Flow", null);
             }
         }
     } catch (e) {
