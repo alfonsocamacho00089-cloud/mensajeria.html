@@ -2853,11 +2853,10 @@ mensajesUnicos.sort((a, b) => (a.ts || 0) - (b.ts || 0));
 const ultimos50 = mensajesUnicos.slice(-50);
 
 // Limpiamos la pantalla una sola vez
-if (contenedorChat) contenedorChat.innerHTML = "";
-
 ultimos50.forEach(m => {
-    pintarMensaje(post.content, 'msg-izquierda', nombreRemitente, 'leido', idContenido, post.tipo); }
-
+    pintarMensaje(post.content, 'msg-izquierda', nombreRemitente, 'leido', idContenido, post.tipo); 
+});
+     
 if (contenedorChat) contenedorChat.scrollTop = contenedorChat.scrollHeight;
 
 // 📡 Sincronización silenciosa en segundo plano
