@@ -2835,38 +2835,36 @@ async function cargarConversacionCon(idDestino, nombreDestino, fotoDestino) {
         if (box) box.innerHTML = ""; 
 
 
-// 🔥 INTERCEPCIÓN MAESTRA CON VERCEL
-// 🔒 LÓGICA DEFINITIVA: Carga instantánea desde IndexedDB limpia de duplicados
-const box = document.getElementById('chat-box') || document.getElementById('box-mensajes');
+// 🔒 LÓGICA DEFINITIVA SIN COLISIONES DE VARIABLES
+const contenedorChat = document.getElementById('chat-box') || document.getElementById('box-mensajes');
 
 const todosLosMensajes = await obtenerTodo('mensajes');
 const mensajesFiltrados = todosLosMensajes.filter(m => String(m.contactoId) === String(idDestino));
 
-// 🛑 FILTRO DE DUPLICADOS: Esto garantiza que si hay 15 posts, sean exactamente 15 únicos
+// Filtro estricto de duplicados en memoria
 const mapaUnicos = new Map();
 mensajesFiltrados.forEach(m => mapaUnicos.set(m.id, m));
 const mensajesUnicos = Array.from(mapaUnicos.values());
 
-// Ordenamos por timestamp por seguridad (más antiguos arriba, nuevos abajo)
+// Orden cronológico correcto
 mensajesUnicos.sort((a, b) => (a.ts || 0) - (b.ts || 0));
 
-// Tomamos los últimos 50 reales
+// Tomamos los últimos 50 limpios
 const ultimos50 = mensajesUnicos.slice(-50);
 
-// Limpiamos la caja una sola vez antes de pintar de golpe
-if (box) box.innerHTML = "";
+// Limpiamos la pantalla una sola vez
+if (contenedorChat) contenedorChat.innerHTML = "";
 
 ultimos50.forEach(m => {
     pintarMensaje(m.texto, m.clase, m.hora, m.status || 'enviado', m.id, m.tipo || 'texto');
 });
 
-// Hacemos scroll al final
-if (box) box.scrollTop = box.scrollHeight;
+if (contenedorChat) contenedorChat.scrollTop = contenedorChat.scrollHeight;
 
-// 📡 Sincronización silenciosa en segundo plano con Vercel
+// 📡 Sincronización silenciosa en segundo plano
 if (idDestino === "26fmetp4Q4WJ") {
     sincronizarSpaxioFlowBackground();
-}
+             }
 
              
 
