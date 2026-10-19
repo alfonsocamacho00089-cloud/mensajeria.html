@@ -2837,7 +2837,7 @@ async function cargarConversacionCon(idDestino, nombreDestino, fotoDestino) {
              
 
 
-// 🔒 LÓGICA DEFINITIVA SIN COLISIONES DE VARIABLES
+// 🔒 LÓGICA DEFINITIVA CON LA VARIABLE 'POST' CORREGIDA
 const contenedorChat = document.getElementById('chat-box') || document.getElementById('box-mensajes');
 
 const todosLosMensajes = await obtenerTodo('mensajes');
@@ -2854,42 +2854,42 @@ mensajesUnicos.sort((a, b) => (a.ts || 0) - (b.ts || 0));
 // Tomamos los últimos 50 limpios
 const ultimos50 = mensajesUnicos.slice(-50);
 
+// Limpiamos la pantalla una sola vez
+if (contenedorChat) contenedorChat.innerHTML = "";
 
-
-             
-// Limpiamos la pantalla y pintamos los mensajes usando 'post' correctamente
 ultimos50.forEach(m => {
-    // 1. Declaramos primero las variables base de los datos
-    const contenidoPost = m.content || m.texto || "";
+    // 1. Declaramos las propiedades del mensaje primero
+    const contenidoPost = m.texto || m.content || "";
     const tipoPost = m.tipo || 'texto';
-    const nombreRemitente = m.sender_name || m.nombreRemitente || 'H.A.R.V.I.S.';
+    const nombreRemitente = m.nombreRemitente || 'H.A.R.V.I.S.';
 
-    // 2. Definimos el objeto 'post' antes de usarlo
+    // 2. Definimos el objeto 'post' PRIMERO antes de llamarlo
     const post = {
         id: m.id || Date.now(),
         contenido: contenidoPost,
         tipo: tipoPost
     };
 
-    // 3. Ahora sí podemos usar post.id de forma segura
+    // 3. Ahora usamos post.id de forma segura para el ID de contenido
     const idContenido = "feed_" + post.id;
 
-    // 4. Renderizado limpio
+    // 4. Renderizamos manteniendo tu estructura intacta
     pintarMensaje(
         post.contenido, 
-        'msg-izquierda', 
-        nombreRemitente, 
-        'leido', 
+        m.clase || 'msg-izquierda', 
+        m.hora, 
+        m.status || 'enviado', 
         idContenido, 
         post.tipo
-    ); 
+    );
 });
+
 if (contenedorChat) contenedorChat.scrollTop = contenedorChat.scrollHeight;
 
 // 📡 Sincronización silenciosa en segundo plano
 if (idDestino === "26fmetp4Q4WJ") {
     iniciarPollingSpaxioFlow();
-             }
+}
 
              
 
