@@ -2836,24 +2836,38 @@ async function cargarConversacionCon(idDestino, nombreDestino, fotoDestino) {
 
 
 // 🔥 INTERCEPCIÓN MAESTRA CON VERCEL
-// 🔒 LÓGICA UNIFICADA: Carga instantánea desde IndexedDB (Cero fetch bloqueante al entrar)
+// 🔒 LÓGICA DEFINITIVA: Carga instantánea desde IndexedDB limpia de duplicados
+const box = document.getElementById('chat-box') || document.getElementById('box-mensajes');
+
 const todosLosMensajes = await obtenerTodo('mensajes');
 const mensajesFiltrados = todosLosMensajes.filter(m => String(m.contactoId) === String(idDestino));
 
-const ultimos50 = mensajesFiltrados.slice(-50);
+// 🛑 FILTRO DE DUPLICADOS: Esto garantiza que si hay 15 posts, sean exactamente 15 únicos
+const mapaUnicos = new Map();
+mensajesFiltrados.forEach(m => mapaUnicos.set(m.id, m));
+const mensajesUnicos = Array.from(mapaUnicos.values());
 
-if (typeof renderizarMensajes === "function") {
-    renderizarMensajes(ultimos50);
-} else {
-    ultimos50.forEach(m => {
-        pintarMensaje(m.texto, m.clase, m.hora, m.status || 'enviado', m.id, m.tipo || 'texto');
-    });
-}
+// Ordenamos por timestamp por seguridad (más antiguos arriba, nuevos abajo)
+mensajesUnicos.sort((a, b) => (a.ts || 0) - (b.ts || 0));
 
-// 📡 Si es SpaxioFlow, sincronizamos con Vercel de forma silenciosa en segundo plano
+// Tomamos los últimos 50 reales
+const ultimos50 = mensajesUnicos.slice(-50);
+
+// Limpiamos la caja una sola vez antes de pintar de golpe
+if (box) box.innerHTML = "";
+
+ultimos50.forEach(m => {
+    pintarMensaje(m.texto, m.clase, m.hora, m.status || 'enviado', m.id, m.tipo || 'texto');
+});
+
+// Hacemos scroll al final
+if (box) box.scrollTop = box.scrollHeight;
+
+// 📡 Sincronización silenciosa en segundo plano con Vercel
 if (idDestino === "26fmetp4Q4WJ") {
     sincronizarSpaxioFlowBackground();
-             }
+}
+
              
 
     } catch (e) {
@@ -2912,6 +2926,7 @@ if (idDestino === "26fmetp4Q4WJ") {
                 const idContenido = "feed_" + post.id;
                 const nombreRemitente = post.sender_name || 'H.A.R.V.I.S.';
 
+                // 1. Guardamos en IndexedDB (si ya existe, lo pisa limpio con el mismo id)
                 if (typeof guardarLocal === "function") {
                     await guardarLocal('mensajes', {
                         id: idContenido,
@@ -2926,16 +2941,22 @@ if (idDestino === "26fmetp4Q4WJ") {
                     });
                 }
 
+                // 2. Si el feed está abierto y el post es nuevo, lo añadimos al DOM al instante sin parpadeos
                 const targetInput = document.querySelector('#target-id');
-                if (targetInput && targetInput.value === "26fmetp4Q4WJ" && !document.getElementById(idContenido)) {
+                const esFeedAbierto = targetInput && targetInput.value === "26fmetp4Q4WJ";
+                
+                if (esFeedAbierto && !document.getElementById(idContenido)) {
                     pintarMensaje(post.content, 'msg-izquierda', nombreRemitente, 'leido', idContenido, post.tipo);
+                    const box = document.getElementById('chat-box') || document.getElementById('box-mensajes');
+                    if (box) box.scrollTop = box.scrollHeight;
                 }
             }
         }
     } catch (e) {
-        console.log("Sincronización en segundo plano omitida (sin red).");
+        console.log("Sincronización silenciosa omitida (sin red).");
     }
              }
+             
              
     // 3. Buscamos los mensajes de ESE contacto en LocalStorage
     // ... (final de la función cargarConversacionCon)
