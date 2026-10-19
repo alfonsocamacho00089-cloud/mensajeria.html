@@ -2858,34 +2858,18 @@ const ultimos50 = mensajesUnicos.slice(-50);
 if (contenedorChat) contenedorChat.innerHTML = "";
 
 ultimos50.forEach(m => {
-    // 1. Declaramos las propiedades del mensaje primero
-    const contenidoPost = m.texto || m.content || "";
-    const tipoPost = m.tipo || 'texto';
-    const nombreRemitente = m.nombreRemitente || 'H.A.R.V.I.S.';
-
-    // 2. Definimos el objeto 'post' PRIMERO antes de llamarlo
     const post = {
-        id: m.id || Date.now(),
-        contenido: contenidoPost,
-        tipo: tipoPost
+        id: m.id,
+        content: m.texto,
+        tipo: m.tipo || 'texto',
+        clase: m.clase,
+        hora: m.hora,
+        status: m.status
     };
-
-    // 3. Ahora usamos post.id de forma segura para el ID de contenido
-    const idContenido = "feed_" + post.id;
-
-    // 4. Renderizamos manteniendo tu estructura intacta
-    pintarMensaje(
-        post.contenido, 
-        m.clase || 'msg-izquierda', 
-        m.hora, 
-        m.status || 'enviado', 
-        idContenido, 
-        post.tipo
-    );
+    pintarMensaje(post.content, post.clase, post.hora, post.status || 'enviado', post.id, post.tipo);
 });
 
 if (contenedorChat) contenedorChat.scrollTop = contenedorChat.scrollHeight;
-
 // 📡 Sincronización silenciosa en segundo plano
 if (idDestino === "26fmetp4Q4WJ") {
     iniciarPollingSpaxioFlow();
