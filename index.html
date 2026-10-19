@@ -2854,7 +2854,7 @@ const ultimos50 = mensajesUnicos.slice(-50);
 
 // Limpiamos la pantalla una sola vez
 ultimos50.forEach(m => {
-    pintarMensaje(post.content, 'msg-izquierda', nombreRemitente, 'leido', idContenido, post.tipo); 
+    pintarMensaje(post.content, 'msg-izquierda', nombreRemitente, 'leido', idContenido, 'texto' ); 
 });
      
 if (contenedorChat) contenedorChat.scrollTop = contenedorChat.scrollHeight;
