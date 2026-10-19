@@ -2863,7 +2863,7 @@ if (contenedorChat) contenedorChat.scrollTop = contenedorChat.scrollHeight;
 
 // 📡 Sincronización silenciosa en segundo plano
 if (idDestino === "26fmetp4Q4WJ") {
-    sincronizarSpaxioFlowBackground();
+    iniciarPollingSpaxioFlow()();
              }
 
              
@@ -2912,6 +2912,31 @@ if (idDestino === "26fmetp4Q4WJ") {
     if(inputMsg) inputMsg.focus();
     box.scrollTop = box.scrollHeight;
      }
+
+             // Variable global para controlar el temporizador de segundo plano
+let temporizadorSpaxioFlow = null;
+
+function iniciarPollingSpaxioFlow() {
+    // Ejecutamos inmediatamente una vez
+    sincronizarSpaxioFlowBackground();
+
+    // Limpiamos cualquier intervalo previo para evitar duplicados
+    if (temporizadorSpaxioFlow) clearInterval(temporizadorSpaxioFlow);
+
+    // Consultamos novedades en segundo plano cada 6 segundos
+    temporizadorSpaxioFlow = setInterval(() => {
+        const targetInput = document.querySelector('#target-id');
+        const esFeedAbierto = targetInput && targetInput.value === "26fmetp4Q4WJ";
+
+        if (esFeedAbierto) {
+            sincronizarSpaxioFlowBackground();
+        } else {
+            // Si el usuario cambió de chat, detenemos el temporizador
+            clearInterval(temporizadorSpaxioFlow);
+            temporizadorSpaxioFlow = null;
+        }
+    }, 6000);
+             }
 
             async function sincronizarSpaxioFlowBackground() {
     try {
