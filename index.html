@@ -2879,16 +2879,20 @@ async function cargarConversacionCon(idDestino, nombreDestino, fotoDestino) {
             const mensajesFiltrados = todosLosMensajes.filter(m => String(m.contactoId) === String(idDestino));
 
             // Tomamos solo los últimos 50 para que el chat vuele al abrir
-            const ultimos50 = mensajesFiltrados.slice(-50);
+            const ultimos10 = mensajesFiltrados.slice(-10);
 
             if (typeof renderizarMensajes === "function") {
                 renderizarMensajes(ultimos50);
             } else {
-                ultimos50.forEach(m => {
+                ultimos10.forEach(m => {
                     pintarMensaje(m.texto, m.clase, m.hora, m.status || 'enviado', m.id, m.tipo || 'texto');
                 });
             }
-        } // <--- Cierra el else correctamente
+        } 
+     
+          // <--- Cierra el else correctamente
+   iniciarRealtimeSpaxioFlow("26fmetp4Q4WJ");
+             }
     } catch (e) {
         console.error("❌ Error cargando mensajes del feed:", e);
              }
@@ -5471,7 +5475,65 @@ async function inyectarNotificacionHarvis(textoIA) {
         console.error("❌ Error en la inyección directa:", e);
     }
      }
+// 1. Suscribirte a los cambios en tiempo real de SpaxioFlow en Supabase
+function iniciarRealtimeSpaxioFlow(conversacionId) {
+    // Nos aseguramos de tener la instancia de supabase activa
+    if (typeof supabase === 'undefined') {
+        console.warn("Supabase SDK no está disponible todavía.");
+        return;
+    }
 
+    supabase
+      .channel(`room:${conversacionId}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT', // Escucha únicamente cuando se inserte una nueva publicación
+          schema: 'public',
+          table: 'spaxioflow_feed', // <--- Tu tabla unificada de SpaxioFlow
+          filter: `chat_id=eq.${conversacionId}` // Filtra por el chat activo (ej. "26fmetp4Q4WJ")
+        },
+        (payload) => {
+          const nuevoMensaje = payload.new;
+          
+          // ¡Magia! Inyectamos quirúrgicamente el post nuevo sin recargar ni tocar el DOM anterior
+          anexarUnicoMensajeAlFeed(nuevoMensaje);
+        }
+      )
+      .subscribe();
+}
+
+// 2. Función quirúrgica para pintar solo el mensaje nuevo (Cero lag, cero parpadeo)
+function anexarUnicoMensajeAlFeed(msg) {
+    const contenedor = document.getElementById('chat-box');
+    if (!contenedor) return;
+
+    const msgIdUnico = "rt_" + msg.id;
+
+    // Evitar duplicados por si el cliente actual fue el que envió la publicación
+    if (document.getElementById(msgIdUnico)) return;
+
+    const miUserId = localStorage.getItem('mi_dropis_id');
+    const esMio = msg.sender_id === miUserId;
+    const claseBurbuja = esMio ? 'msg-derecha' : 'msg-izquierda';
+    
+    // Mapeamos el tipo de contenido que viene de Supabase
+    let tipoMapeado = 'texto';
+    if (msg.tipo === 'video') tipoMapeado = 'video';
+    if (msg.tipo === 'imagen' || msg.tipo === 'foto') tipoMapeado = 'foto';
+
+    const horaFormateada = new Date(msg.created_at || Date.now()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
+
+    // Llamamos directamente a tu potente función 'pintarMensaje' ya existente en este index
+    pintarMensaje(
+        msg.content, 
+        claseBurbuja, 
+        horaFormateada, 
+        'leido', 
+        msgIdUnico, 
+        tipoMapeado
+    );
+}
 async function inyectarLiveSpaxioFlow(urlVideo) {
     const targetID = "26fmetp4Q4WJ"; 
     const miNombre = localStorage.getItem('mi_nombre_perfil') || "Pedro Peres";
