@@ -2862,9 +2862,16 @@ ultimos50.forEach(m => {
 if (contenedorChat) contenedorChat.scrollTop = contenedorChat.scrollHeight;
 
 // 📡 Sincronización silenciosa en segundo plano
+// Dentro de tu función que carga la conversación / chat:
 if (idDestino === "26fmetp4Q4WJ") {
-    iniciarPollingSpaxioFlow();
-             }
+    // 1. Cargas el historial inicial de los posts (si ya tienes una función para eso, déjala o cárgala aquí)
+    if (typeof cargarFeedSpaxioFlow === 'function') {
+        cargarFeedSpaxioFlow(idDestino);
+    }
+
+    // 2. Activas el nuevo sistema en tiempo real de Supabase
+    inicializarSpaxioFlowIndependiente();
+}
 
              
 
@@ -5502,58 +5509,6 @@ function pintarFeedSeguro(listaMensajes, idContenedorReal) {
     });
 }
 
-// ==========================================
-// MÓDULO SPAXIO FLOW (ACTUALIZADO - TIEMPO REAL)
-// ==========================================
-
-function inicializarSpaxioFlowIndependiente() {
-    const chatIdActual = window.currentChatId || "26fmetp4Q4WJ";
-    iniciarEscuchaTiempoRealSpaxioFlow(chatIdActual);
-}
-
-async function enviarMensajeSpaxioFlow(chatId, tipoContenido, contenidoUrlOrText) {
-    const { data, error } = await supabaseClient
-        .from('spaxioflow_posts')
-        .insert([{ 
-            chat_id: chatId, 
-            tipo: tipoContenido, 
-            contenido: contenidoUrlOrText, 
-            created_at: new Date().toISOString() 
-        }]);
-
-    if (error) throw error;
-    return data;
-}
-
-function iniciarEscuchaTiempoRealSpaxioFlow(chatIdActual) {
-    if (!window.supabaseClient) return;
-
-    // Limpiar canal previo si ya existía para evitar duplicidad de eventos
-    if (window.spaxioFlowChannel) {
-        supabaseClient.removeChannel(window.spaxioFlowChannel);
-    }
-
-    window.spaxioFlowChannel = supabaseClient
-        .channel(`spaxioflow-chat-${chatIdActual}`)
-        .on(
-            'postgres_changes',
-            {
-                event: 'INSERT',
-                schema: 'public',
-                table: 'spaxioflow_posts',
-                filter: `chat_id=eq.${chatIdActual}`
-            },
-            (payload) => {
-                // Renderizado reactivo directo al recibir un nuevo post
-                renderizarNuevoPostSpaxioFlow(payload.new);
-            }
-        )
-        .subscribe();
-}
-
-// Nota: Las antiguas funciones de polling (como iniciarPollingSpaxioFlow, 
-// sincronizarSpaxioFlowBackground o intervalos con setInterval) han sido 
-// completamente removidas de este bloque para optimizar el rendimiento y la batería.
 
 
 // 3. TIEMPO REAL BLINDADO (¡Evita que se multipliquen los canales!)
@@ -5605,7 +5560,105 @@ function activarSpaxioFlowRealtime() {
         .subscribe();
              }
              let feedCargado = false;
+// ==========================================
+// MÓDULO SPAXIO FLOW (HÍBRIDO Y SEGURO)
+// ==========================================
 
+function inicializarSpaxioFlowIndependiente() {
+    const contenedorPrincipal = document.querySelector('.spaxio-flow-container');
+    
+    if (contenedorPrincipal) {
+        contenedorPrincipal.classList.add('single-column');
+    }
+
+    if (typeof renderizarFlujoIzquierdo === 'function') {
+        renderizarFlujoIzquierdo();
+    }
+
+    const chatIdActual = window.currentChatId || "26fmetp4Q4WJ";
+    iniciarEscuchaTiempoRealSpaxioFlow(chatIdActual);
+}
+
+// Ejecutar al cargar la vista
+document.addEventListener('DOMContentLoaded', () => {
+    inicializarSpaxioFlowIndependiente();
+});
+
+// Función de envío respetando tu tabla real de Supabase y tus datos de usuario
+async function enviarMensajeSpaxioFlow(chatId, tipoContenido, contenidoUrlOrText) {
+    const miUserId = localStorage.getItem('mi_dropis_id') || "anonimo";
+    const miNombre = localStorage.getItem('mi_nombre') || "Pedro Peres";
+
+    try {
+        const { data, error } = await supabaseClient
+            .from('spaxioflow_feed') // Mantenemos tu tabla correcta
+            .insert([
+                {
+                    chat_id: chatId,             
+                    sender_id: miUserId,         
+                    sender_name: miNombre,       
+                    tipo: tipoContenido,         
+                    content: contenidoUrlOrText, // Mantenemos tu columna correcta
+                    meta_info: {}
+                }
+            ]);
+
+        if (error) {
+            console.error("❌ Error al insertar en Supabase:", error.message);
+            return null;
+        }
+        console.log("✅ Mensaje enviado a SpaxioFlow con éxito.");
+        return data;
+    } catch (err) {
+        console.error("❌ Excepción al enviar mensaje:", err);
+        return null;
+    }
+}
+
+// Escucha en tiempo real limpia y optimizada (sin polling) vinculada a tu tabla real
+function iniciarEscuchaTiempoRealSpaxioFlow(chatIdActual) {
+    const miUserId = localStorage.getItem('mi_dropis_id');
+    
+    if (!window.supabaseClient) return;
+
+    if (window.supabaseFlowChannel) {
+        supabaseClient.removeChannel(window.supabaseFlowChannel);
+    }
+
+    window.supabaseFlowChannel = supabaseClient
+        .channel(`spaxioflow-chat-${chatIdActual}`)
+        .on(
+            'postgres_changes',
+            {
+                event: 'INSERT',
+                schema: 'public',
+                table: 'spaxioflow_feed', // Mantenemos tu tabla correcta
+                filter: `chat_id=eq.${chatIdActual}`
+            },
+            (payload) => {
+                const nuevoMensaje = payload.new;
+                const esMio = nuevoMensaje.sender_id === miUserId;
+                const claseBurbuja = esMio ? 'msg-derecha' : 'msg-izquierda';
+                const msgIdUnico = "rt_" + nuevoMensaje.id;
+
+                if (!document.getElementById(msgIdUnico)) {
+                    if (typeof pintarMensaje === 'function') {
+                        pintarMensaje(
+                            nuevoMensaje.content, 
+                            claseBurbuja, 
+                            new Date(nuevoMensaje.created_at || Date.now()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true }), 
+                            'leido', 
+                            msgIdUnico, 
+                            nuevoMensaje.tipo || 'texto'
+                        );
+                    }
+                }
+            }
+        )
+        .subscribe((status) => {
+            console.log(`Estado Realtime SpaxioFlow: ${status}`);
+        });
+}
 
 // =================================================================
 // 🪐 SPAXIOVERSO OMNI: MOTOR GRÁFICO, IA Y TELEMETRÍA - COMPLETO
