@@ -2857,29 +2857,30 @@ const ultimos50 = mensajesUnicos.slice(-50);
 
 
              
-// Limpiamos la pantalla y pintamos los mensajes declarando las propiedades del post
+// Limpiamos la pantalla y pintamos los mensajes usando 'post' correctamente
 ultimos50.forEach(m => {
-    // Declaramos explícitamente las variables basándonos en el elemento actual del array
-    const contenidoPost = m.content || m.texto; // Adaptable por si usa .content o .texto
-    const tipoPost = m.tipo || 'texto';         // Tipo por defecto si no viene definido
-    const idContenido = "feed_" + post.id;
-    const nombreRemitente = post.sender_name || 'H.A.R.V.I.S.';
-    // Si necesitas que la variable literal se llame post para mantener compatibilidad estricta:
+    // 1. Declaramos primero las variables base de los datos
+    const contenidoPost = m.content || m.texto || "";
+    const tipoPost = m.tipo || 'texto';
+    const nombreRemitente = m.sender_name || m.nombreRemitente || 'H.A.R.V.I.S.';
+
+    // 2. Definimos el objeto 'post' antes de usarlo
     const post = {
+        id: m.id || Date.now(),
         contenido: contenidoPost,
         tipo: tipoPost
     };
 
+    // 3. Ahora sí podemos usar post.id de forma segura
+    const idContenido = "feed_" + post.id;
 
-    
-             
-    // Renderizado limpio utilizando las propiedades declaradas
+    // 4. Renderizado limpio
     pintarMensaje(
         post.contenido, 
         'msg-izquierda', 
         nombreRemitente, 
         'leido', 
-        idContenido,          // Usamos el id real del mensaje 'm' (o idContenido si es fijo)
+        idContenido, 
         post.tipo
     ); 
 });
