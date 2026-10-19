@@ -5484,7 +5484,7 @@ function iniciarRealtimeSpaxioFlow(conversacionId) {
         return;
     }
 
-    supabase
+    supabaseClient
       .channel(`room:${conversacionId}`)
       .on(
         'postgres_changes',
