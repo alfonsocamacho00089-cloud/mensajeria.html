@@ -2854,12 +2854,16 @@ mensajesUnicos.sort((a, b) => (a.ts || 0) - (b.ts || 0));
 // Tomamos los últimos 50 limpios
 const ultimos50 = mensajesUnicos.slice(-50);
 
+
+
+             
 // Limpiamos la pantalla y pintamos los mensajes declarando las propiedades del post
 ultimos50.forEach(m => {
     // Declaramos explícitamente las variables basándonos en el elemento actual del array
     const contenidoPost = m.content || m.texto; // Adaptable por si usa .content o .texto
     const tipoPost = m.tipo || 'texto';         // Tipo por defecto si no viene definido
-    
+    const idContenido = "feed_" + post.id;
+    const nombreRemitente = post.sender_name || 'H.A.R.V.I.S.';
     // Si necesitas que la variable literal se llame post para mantener compatibilidad estricta:
     const post = {
         contenido: contenidoPost,
@@ -2867,12 +2871,7 @@ ultimos50.forEach(m => {
     };
 
 ultimos50.forEach(m => {
-    pintarMensaje(post.content, 'msg-izquierda', nombreRemitente, 'leido', idContenido, post.tipo); 
-});
-ultimos50.forEach(m => {
-    pintarMensaje(m.texto, m.clase, m.hora, m.status || 'enviado', m.id, m.tipo || 'texto');
-});
-
+    
              
     // Renderizado limpio utilizando las propiedades declaradas
     pintarMensaje(
@@ -2880,7 +2879,7 @@ ultimos50.forEach(m => {
         'msg-izquierda', 
         nombreRemitente, 
         'leido', 
-        m.id,          // Usamos el id real del mensaje 'm' (o idContenido si es fijo)
+        idContenido,          // Usamos el id real del mensaje 'm' (o idContenido si es fijo)
         post.tipo
     ); 
 });
