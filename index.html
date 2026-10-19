@@ -2856,8 +2856,7 @@ const ultimos50 = mensajesUnicos.slice(-50);
 if (contenedorChat) contenedorChat.innerHTML = "";
 
 ultimos50.forEach(m => {
-    pintarMensaje(m.texto, m.clase, m.hora, m.status || 'enviado', m.id, m.tipo || 'texto');
-});
+    pintarMensaje(post.content, 'msg-izquierda', nombreRemitente, 'leido', idContenido, post.tipo); }
 
 if (contenedorChat) contenedorChat.scrollTop = contenedorChat.scrollHeight;
 
