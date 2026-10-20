@@ -2462,7 +2462,7 @@ const base64 = btoa(binary);
             const tempId = 'temp_' + Date.now();
 
 // 2. Pintas localmente pasándole ese ID temporal al elemento HTML
-pintarMensaje(data, tempId);
+
          // 🛡️ BARRIDO QUIRÚRGICO DE DOM: Eliminamos la tarjeta borrador local
           const tempElement = document.getElementById(tempId);
       if (tempElement) {
@@ -2497,7 +2497,7 @@ fetch('/api/spaxioflow-event', {
                 mediaType: tipoValidado 
             });
      }
-
+pintarMensaje(data, tempId);
 // === CONEXIÓN SEGURA RUTA HACIA EL BACKEND EN VERCEL ===
 // === CONEXIÓN SEGURA RUTA HACIA EL BACKEND EN VERCEL ===
 if (targetID === "uo4kb3tGHH7J") {
