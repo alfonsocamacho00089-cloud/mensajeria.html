@@ -2456,10 +2456,12 @@ const base64 = btoa(binary);
         
 // 🔥 CONEXIÓN SUPREMA AL BACKEND DE VERCEL PARA EL FEED GLOBAL
 // 🔥 CONEXIÓN SUPREMA AL BACKEND DE VERCEL PARA EL FEED GLOBAL
-if (targetID === "26fmetp4Q4WJ") {
+
+    
+
+    if (targetID === "26fmetp4Q4WJ") {
     const miNombre = localStorage.getItem('mi_nombre_perfil') || "Pedro Peres"; 
     const miUserId = localStorage.getItem('mi_dropis_id') || "anonimo";
-    
     // 🚀 AGREGA ESTO AQUÍ:
     pintarMensaje(msg, 'msg-derecha', null, 'enviado', msgId, tipoValidado);
 
@@ -2475,18 +2477,22 @@ if (targetID === "26fmetp4Q4WJ") {
     }
     // ----------------------------------------
 
+    
+    // Mapeamos los tipos para que tu base de datos los reciba limpios
     let tipoFinal = tipoValidado;
     if (tipoValidado === 'stickers' || tipoValidado === 'media') tipoFinal = 'imagen';
 
+    // 1. Preparamos el objeto de forma segura antes de enviar
     const mensajeSeguro = {
         contenido: msg || "",
         tipoEvento: tipoFinal || "texto",
         remitente: miNombre,
-        sender_id: miUserId, 
+        sender_id: miUserId, // <--- Esto es lo que le dice a la interfaz que TÚ mandaste la foto
         user_id: miUserId,
         created_at: new Date().toISOString()
     };
 
+    // 2. Mandas a Vercel
     fetch('/api/spaxioflow-event', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -2495,8 +2501,21 @@ if (targetID === "26fmetp4Q4WJ") {
     .then(res => res.json())
     .then(respuestaServidor => {
         console.log("📡 Servidor confirmó:", respuestaServidor);
+        
+        // 3. ¡LISTO! Pintamos tu pantalla usando el objeto seguro
+        
     })
     .catch(err => console.error("❌ Error:", err));
+
+} else if (targetID !== "uo4kb3tGHH7J") {
+    // 🛡️ REGLA DE ORO: Si es un contacto normal, sigue usando la cola satelital tradicional
+    await db.ref('cola_satelital/' + targetID).push({
+        p: base64,
+        from: miID,
+        ts: Date.now(),
+        msgId: msgId,
+        mediaType: tipoValidado 
+    });
              }
 
 // === CONEXIÓN SEGURA RUTA HACIA EL BACKEND EN VERCEL ===
