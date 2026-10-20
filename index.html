@@ -2483,7 +2483,8 @@ fetch('/api/spaxioflow-event', {
     
     // 3. ¡LISTO! Aquí mismo, pintas tu propia pantalla usando la misma función del vecino
     // (Si el backend te devuelve el objeto creado, úsalo; si no, usas tu payloadData)
-    anexarUnicoMensajeAlFeed(data.mensajeGuardado || payloadData);
+    // 3. ¡LISTO! Aquí mismo, pintas tu propia pantalla usando tu función real:
+pintarMensaje(data.mensajeGuardado || payloadData);
 })
 .catch(err => console.error("❌ Error:", err));
 
