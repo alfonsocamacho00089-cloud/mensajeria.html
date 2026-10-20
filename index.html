@@ -2477,11 +2477,7 @@ fetch('/api/spaxioflow-event', {
 .then(data => {
     console.log("📡 Feed actualizado vía Vercel:", data);
     
-    // 🚀 Aquí dentro es donde va, justo cuando Vercel dice que OK:
-    setTimeout(() => {
-        cargarConversacionCon("26fmetp4Q4WJ", "Spaxio Flow", null);
-    }, 500);
-})
+   
 .catch(err => console.error("❌ Fallo al actualizar feed desde el teléfono:", err));
     
         } else if (targetID !== "uo4kb3tGHH7J") {
@@ -2896,7 +2892,7 @@ async function cargarConversacionCon(idDestino, nombreDestino, fotoDestino) {
             const ultimos10 = mensajesFiltrados.slice(-10);
 
             if (typeof renderizarMensajes === "function") {
-                renderizarMensajes(ultimos50);
+                renderizarMensajes(ultimos10);
             } else {
                 ultimos10.forEach(m => {
                     pintarMensaje(m.texto, m.clase, m.hora, m.status || 'enviado', m.id, m.tipo || 'texto');
@@ -5664,33 +5660,7 @@ function activarSpaxioFlowRealtime() {
              }
              let feedCargado = false;
 
-// Función para inicializar Spaxio Flow de forma independiente (solo flujo izquierdo)
-function inicializarSpaxioFlowIndependiente() {
-    const contenedorPrincipal = document.querySelector('.spaxio-flow-container');
-    
-    if (contenedorPrincipal) {
-        // Añadir la clase que aplica los estilos de columna única
-        contenedorPrincipal.classList.add('single-column');
-    }
 
-    // Inicializar exclusivamente los componentes del flujo izquierdo
-    if (typeof renderizarFlujoIzquierdo === 'function') {
-        renderizarFlujoIzquierdo();
-    } else {
-        console.log("⚡ Spaxio Flow: Renderizando componentes del flujo izquierdo de forma aislada.");
-    }
-
-    // Opcional: Desvincular o limpiar cualquier listener del panel derecho para evitar consumo de recursos
-    const panelDerecho = document.querySelector('.flow-right, .panel-derecho');
-    if (panelDerecho) {
-        panelDerecho.innerHTML = ''; // Limpia elementos innecesarios en memoria
-    }
-}
-
-// Ejecutar al cargar la vista
-document.addEventListener('DOMContentLoaded', () => {
-    inicializarSpaxioFlowIndependiente();
-});
     async function enviarMensajeSpaxioFlow(chatId, tipoContenido, contenidoUrlOrText) {
     const miUserId = localStorage.getItem('mi_dropis_id') || "anonimo";
     const miNombre = localStorage.getItem('mi_nombre') || "Pedro Peres";
