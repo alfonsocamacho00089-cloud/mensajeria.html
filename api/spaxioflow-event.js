@@ -4,8 +4,7 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Método no permitido' });
   }
 
-  const { tipoEvento, contenido, metadata } = req.body;
-  const supabaseUrl = process.env.SUPABASE_URL;
+  const { tipoEvento, contenido, metadata, sender_id, user_id, remitente } = req.body;  const supabaseUrl = process.env.SUPABASE_URL;
   const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY; // Usamos la master key para escritura directa
 
   if (!supabaseUrl || !supabaseKey) {
@@ -25,6 +24,7 @@ export default async function handler(req, res) {
     // 🧠 Formateo Estructurado del Evento administrado por la lógica de tu ecosistema
     const nuevoEvento = {
       chat_id: chatTargetID,
+      sender_id: sender_id || user_id || "anonimo", // 👈 ESTA ES LA ÚNICA LÍNEA NUEVA A INCLUIR
       // 🔥 AHORA ES DINÁMICO: Si le pasas un remitente en el body lo usa, si no, usa H.A.R.V.I.S. por defecto
       sender_name: req.body.remitente || "H.A.R.V.I.S.", 
       tipo: tipoEvento,         // 'texto', 'imagen', 'video'
