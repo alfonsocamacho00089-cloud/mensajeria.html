@@ -2482,8 +2482,8 @@ fetch('/api/spaxioflow-event', {
     body: JSON.stringify(mensajeSeguro)
 })
 .then(res => res.json())
-.then(mensajeSeguro => {
-    console.log("📡 Servidor confirmó:", mensajeSeguro);
+.then(respuestaServidor => {
+    console.log("📡 Servidor confirmó:", respuestaServidor);
     
     // 3. ¡LISTO! Aquí mismo, pintas tu propia pantalla usando la misma función del vecino
     // (Si el backend te devuelve el objeto creado, úsalo; si no, usas tu payloadData)
