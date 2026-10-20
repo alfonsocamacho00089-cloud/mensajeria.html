@@ -5559,7 +5559,7 @@ function iniciarRealtimeSpaxioFlow(conversacionId) {
 
             // Si pasa este filtro, ahora sí se pinta (solo para mensajes del vecino)
             pintarMensaje(nuevoMensaje);
-}
+
      
         
         }
@@ -5633,22 +5633,7 @@ async function inyectarLiveSpaxioFlow(urlVideo) {
      
 
 // 1. Variable para llevar registro de IDs únicos (mantenemos una sola vez)
-const mensajesProcesados = new Set();
 
-function pintarFeedSeguro(listaMensajes, idContenedorReal) {
-    const contenedor = document.getElementById(idContenedorReal); 
-    if (!contenedor) return;
-    
-    contenedor.innerHTML = ''; 
-    mensajesProcesados.clear();
-
-    listaMensajes.forEach(msg => {
-        if (!mensajesProcesados.has(msg.id)) {
-            mensajesProcesados.add(msg.id);
-            pintarMensaje(msg); 
-        }
-    });
-}
 
 
 
@@ -5704,33 +5689,7 @@ function activarSpaxioFlowRealtime() {
              let feedCargado = false;
 
 
-    async function enviarMensajeSpaxioFlow(chatId, tipoContenido, contenidoUrlOrText) {
-    const miUserId = localStorage.getItem('mi_dropis_id') || "anonimo";
-    const miNombre = localStorage.getItem('mi_nombre') || "Pedro Peres";
-
-    try {
-        const { data, error } = await supabaseClient
-            .from('spaxioflow_feed')
-            .insert([
-                {
-                    chat_id: chatId,             // "26fmetp4Q4WJ"
-                    sender_id: miUserId,         // ID único de la cuenta en la App
-                    sender_name: miNombre,       // Nombre del emisor
-                    tipo: tipoContenido,         // 'foto', 'video' o 'texto'
-                    content: contenidoUrlOrText, // URL o texto
-                    meta_info: {}
-                }
-            ]);
-
-        if (error) {
-            console.error("❌ Error al insertar en Supabase:", error.message);
-            return;
-        }
-        console.log("✅ Mensaje enviado a SpaxioFlow con éxito.");
-    } catch (err) {
-        console.error("❌ Excepción al enviar mensaje:", err);
-    }
-             }
+    
 
              
 // =================================================================
