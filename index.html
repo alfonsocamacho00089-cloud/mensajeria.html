@@ -3217,25 +3217,43 @@ async function cargarProto() {
 
     if (esSpaxio) {
         // ----------------------------------------------------
-        // CAMINO 3: EL MODO INMERSIVO SPAXIO (Estilo TikTok)
+        // CAMINO 3: EL MODO INMERSIVO SPAXIO (Estilo TikTok o Media)
         // ----------------------------------------------------
         div.style.background = 'transparent';
         div.style.boxShadow = 'none';
         div.style.padding = '0px';
         div.style.width = '100%';
 
+        // Blindaje: Verificamos si 'contenido' es un objeto con videoUrl o un string directo (foto/texto)
+        let renderHTML = '';
+        
+        if (typeof contenido === 'object' && contenido !== null && contenido.videoUrl) {
+            // Es un video formal
+            renderHTML = `
+                <div style="width: 100%; border-radius: 15px; overflow: hidden; border: 2px solid #ffd700; background: #000;">
+                    <video src="${contenido.videoUrl}" controls playsinline style="width: 100%; display: block;"></video>
+                    <div style="padding: 10px; color: #ffd700; font-weight: bold;">${contenido.titulo || 'Spaxio Content'}</div>
+                </div>`;
+        } else {
+            // Es una foto (base64) o un mensaje de texto normal en Spaxio
+            const mediaSrc = typeof contenido === 'string' ? contenido : (contenido.contenido || '');
+            
+            if (mediaSrc.startsWith('data:image') || mediaSrc.startsWith('http')) {
+                renderHTML = `<img src="${mediaSrc}" style="width: 100%; border-radius: 15px; display: block;" />`;
+            } else {
+                renderHTML = `<div style="padding: 10px; color: #fff;">${mediaSrc}</div>`;
+            }
+        }
+
         div.innerHTML = `
-            <div style="width: 100%; border-radius: 15px; overflow: hidden; border: 2px solid #ffd700; background: #000;">
-                <video src="${contenido.videoUrl}" controls playsinline style="width: 100%; display: block;"></video>
-                <div style="padding: 10px; color: #ffd700; font-weight: bold;">${contenido.titulo || 'Spaxio Content'}</div>
-            </div>
+            ${renderHTML}
             <div style="font-size:10px; opacity:0.6; text-align:right; margin-top:4px; color: #fff;">
                 ${horaFinal}
             </div>
         `;
         box.appendChild(div);
         box.scrollTop = box.scrollHeight;
-    } 
+ }
     else if (esCosaNueva) {
         // ----------------------------------------------------
         // CAMINO 1: LAS COSAS NUEVAS (Redes y Multimedia pesada)
