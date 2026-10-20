@@ -5527,7 +5527,7 @@ function iniciarRealtimeSpaxioFlow(conversacionId) {
             anexarUnicoMensajeAlFeed(nuevoMensaje);
         }
     )
-    .subscribe();
+   
         .subscribe((status, err) => {
             if (status === 'SUBSCRIBED') {
                 console.log(`[SpaxioFlow Enterprise] Canal ${channelName} suscrito correctamente.`);
