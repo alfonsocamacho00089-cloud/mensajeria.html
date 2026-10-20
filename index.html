@@ -2461,21 +2461,32 @@ const base64 = btoa(binary);
 // Mapeamos los tipos para que tu base de datos los reciba limpios
             let tipoFinal = tipoValidado;
             if (tipoValidado === 'stickers' || tipoValidado === 'media') tipoFinal = 'imagen';
-             
+             // 1. Al presionar enviar, NO pintas nada localmente a la carrera. 
+// Solo preparas los datos:
+const payloadData = {
+    tipoEvento: tipoFinal,
+    contenido: msg,
+    remitente: miNombre,
+    sender_id: miUserId,
+    created_at: new Date().toISOString() // o el timestamp que uses
+};
+
+// 2. Mandas a Vercel
 fetch('/api/spaxioflow-event', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-        tipoEvento: tipoFinal,
-        contenido: msg,
-        remitente: miNombre,
-        sender_id: miUserId
-    })
+    body: JSON.stringify(payloadData)
 })
-            
-            .then(res => res.json())
-            .then(data => console.log("📡 Feed actualizado vía Vercel:", data))
-            .catch(err => console.error("❌ Fallo al actualizar feed desde el teléfono:", err));
+.then(res => res.json())
+.then(data => {
+    console.log("📡 Servidor confirmó:", data);
+    
+    // 3. ¡LISTO! Aquí mismo, pintas tu propia pantalla usando la misma función del vecino
+    // (Si el backend te devuelve el objeto creado, úsalo; si no, usas tu payloadData)
+    anexarUnicoMensajeAlFeed(data.mensajeGuardado || payloadData);
+})
+.catch(err => console.error("❌ Error:", err));
+
             
         } else if (targetID !== "uo4kb3tGHH7J") {
             // 🛡️ REGLA DE ORO: Si es un contacto normal, sigue usando la cola satelital tradicional
