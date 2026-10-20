@@ -3182,8 +3182,7 @@ async function cargarProto() {
     const box = document.getElementById('chat-box');
     if (!box) return;
 
-    let textoReal = (typeof contenido === 'object') ? (contenido.texto || "") : contenido;
-    
+    let textoReal = (typeof contenido === 'object') ? (contenido.content || contenido.texto || "") : contenido;
     // Elimina los saltos de línea que H.A.R.V.I.S. pueda haber puesto
     textoReal = textoReal.replace(/[\r\n]+/g, '');
 
