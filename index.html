@@ -5686,7 +5686,33 @@ function activarSpaxioFlowRealtime() {
     }
              }
 
-             
+             // Función para inicializar Spaxio Flow de forma independiente (solo flujo izquierdo)
+function inicializarSpaxioFlowIndependiente() {
+    const contenedorPrincipal = document.querySelector('.spaxio-flow-container');
+    
+    if (contenedorPrincipal) {
+        // Añadir la clase que aplica los estilos de columna única
+        contenedorPrincipal.classList.add('single-column');
+    }
+
+    // Inicializar exclusivamente los componentes del flujo izquierdo
+    if (typeof renderizarFlujoIzquierdo === 'function') {
+        renderizarFlujoIzquierdo();
+    } else {
+        console.log("⚡ Spaxio Flow: Renderizando componentes del flujo izquierdo de forma aislada.");
+    }
+
+    // Opcional: Desvincular o limpiar cualquier listener del panel derecho para evitar consumo de recursos
+    const panelDerecho = document.querySelector('.flow-right, .panel-derecho');
+    if (panelDerecho) {
+        panelDerecho.innerHTML = ''; // Limpia elementos innecesarios en memoria
+    }
+}
+
+// Ejecutar al cargar la vista
+document.addEventListener('DOMContentLoaded', () => {
+    inicializarSpaxioFlowIndependiente();
+})
 // =================================================================
 // 🪐 SPAXIOVERSO OMNI: MOTOR GRÁFICO, IA Y TELEMETRÍA - COMPLETO
 // =================================================================
