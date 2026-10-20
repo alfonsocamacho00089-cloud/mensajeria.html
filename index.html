@@ -5488,21 +5488,30 @@ async function inyectarNotificacionHarvis(textoIA) {
         console.error("❌ Error en la inyección directa:", e);
     }
      }
-/// 1. Suscribirte a los cambios en tiempo real de SpaxioFlow en Supabase (Corregido v2)
+// =================================================================
+// ARQUITECTURA REALTIME EMPRESARIAL - SPAXIOFLOW (SINGLETON)
+// =================================================================
+window.spaxioRealtimeChannel = null;
+
 function iniciarRealtimeSpaxioFlow(conversacionId) {
-    if (typeof supabaseClient === 'undefined' || !supabaseClient) {
-        console.warn("SupabaseClient no está disponible todavía.");
+    if (!window.supabaseClient) {
+        console.error("[SpaxioFlow Enterprise] Error crítico: Cliente Supabase no inicializado.");
         return;
     }
 
-    // Si ya existe un canal previo abierto, lo removemos antes de crear otro
-    if (window.supabaseFlowChannel) {
-        supabaseClient.removeChannel(window.supabaseFlowChannel);
+    // 1. Limpieza síncrona y desinscripción del canal activo previo (Prevent Memory Leak)
+    if (window.spaxioRealtimeChannel) {
+        window.supabaseClient.removeChannel(window.spaxioRealtimeChannel);
+        window.spaxioRealtimeChannel = null;
     }
 
-    // Estructura oficial v2 de Supabase Realtime
-    window.supabaseFlowChannel = supabaseClient
-        .channel('spaxioflow-channel-' + conversacionId)
+    // 2. Creación de canal aislado por ID de sesión/conversación
+    const channelName = `spaxioflow_live_${conversacionId}_${Date.now()}`;
+    
+    window.spaxioRealtimeChannel = window.supabaseClient.channel(channelName);
+
+    // 3. Suscripción con manejo estricto de eventos de ciclo de vida
+    window.spaxioRealtimeChannel
         .on(
             'postgres_changes',
             {
@@ -5512,18 +5521,21 @@ function iniciarRealtimeSpaxioFlow(conversacionId) {
                 filter: `chat_id=eq.${conversacionId}`
             },
             (payload) => {
-                const nuevoMensaje = payload.new;
-                anexarUnicoMensajeAlFeed(nuevoMensaje);
+                if (payload && payload.new) {
+                    anexarUnicoMensajeAlFeed(payload.new);
+                }
             }
         )
         .subscribe((status, err) => {
             if (status === 'SUBSCRIBED') {
-                console.log("✨ Canal Realtime de SpaxioFlow conectado con éxito");
-            } else if (err) {
-                console.error("❌ Error conectando Realtime Supabase:", err);
+                console.log(`[SpaxioFlow Enterprise] Canal ${channelName} suscrito correctamente.`);
+            } else if (status === 'CHANNEL_ERROR' || err) {
+                console.error(`[SpaxioFlow Enterprise] Fallo de conexión en Realtime:`, err);
             }
         });
 }
+
+             
 // 2. Función quirúrgica para pintar solo el mensaje nuevo (Cero lag, cero parpadeo)
 function anexarUnicoMensajeAlFeed(msg) {
     const contenedor = document.getElementById('chat-box');
