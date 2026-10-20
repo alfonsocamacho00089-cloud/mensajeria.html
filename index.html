@@ -5557,8 +5557,11 @@ function iniciarRealtimeSpaxioFlow(conversacionId) {
                 return; 
             }
 
+
+            // Si es de otro usuario, lo dibuja en el feed de inmediato
+            anexarUnicoMensajeAlFeed(nuevoMensaje);
             // Si pasa este filtro, ahora sí se pinta (solo para mensajes del vecino)
-            pintarMensaje(nuevoMensaje);
+            
 
      
         
