@@ -2455,54 +2455,49 @@ const base64 = btoa(binary);
 });
         
 // 🔥 CONEXIÓN SUPREMA AL BACKEND DE VERCEL PARA EL FEED GLOBAL
-        if (targetID === "26fmetp4Q4WJ") {
-            const miNombre = localStorage.getItem('mi_nombre_perfil') || "Pedro Peres"; 
-            const miUserId = localStorage.getItem('mi_dropis_id') || "anonimo";
-// Mapeamos los tipos para que tu base de datos los reciba limpios
-            let tipoFinal = tipoValidado;
-            if (tipoValidado === 'stickers' || tipoValidado === 'media') tipoFinal = 'imagen';
+// 🔥 CONEXIÓN SUPREMA AL BACKEND DE VERCEL PARA EL FEED GLOBAL
+if (targetID === "26fmetp4Q4WJ") {
+    const miNombre = localStorage.getItem('mi_nombre_perfil') || "Pedro Peres"; 
+    const miUserId = localStorage.getItem('mi_dropis_id') || "anonimo";
     
-         
+    // Mapeamos los tipos para que tu base de datos los reciba limpios
+    let tipoFinal = tipoValidado;
+    if (tipoValidado === 'stickers' || tipoValidado === 'media') tipoFinal = 'imagen';
 
-// 3. ¡LISTO! Pintamos tu pantalla de forma blindada contra undefined:
-const mensajeSeguro = data.mensajeGuardado || {
-    contenido: msg || "",
-    tipoEvento: tipoFinal || "texto",
-    remitente: miNombre,
-    sender_id: miUserId,
-    created_at: new Date().toISOString()
-};
+    // 1. Preparamos el objeto de forma segura antes de enviar
+    const mensajeSeguro = {
+        contenido: msg || "",
+        tipoEvento: tipoFinal || "texto",
+        remitente: miNombre,
+        sender_id: miUserId,
+        created_at: new Date().toISOString()
+    };
 
-// Llamas a tu función de pintado pasándole el objeto limpio
+    // 2. Mandas a Vercel
+    fetch('/api/spaxioflow-event', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(mensajeSeguro)
+    })
+    .then(res => res.json())
+    .then(respuestaServidor => {
+        console.log("📡 Servidor confirmó:", respuestaServidor);
+        
+        // 3. ¡LISTO! Pintamos tu pantalla usando el objeto seguro
+        pintarMensaje(mensajeSeguro);
+    })
+    .catch(err => console.error("❌ Error:", err));
 
-// 2. Mandas a Vercel
-fetch('/api/spaxioflow-event', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(mensajeSeguro)
-})
-.then(res => res.json())
-.then(respuestaServidor => {
-    console.log("📡 Servidor confirmó:", respuestaServidor);
-    
-    // 3. ¡LISTO! Aquí mismo, pintas tu propia pantalla usando la misma función del vecino
-    // (Si el backend te devuelve el objeto creado, úsalo; si no, usas tu payloadData)
-    // 3. ¡LISTO! Aquí mismo, pintas tu propia pantalla usando tu función real:
-pintarMensaje(mensajeSeguro);
-})
-.catch(err => console.error("❌ Error:", err));
-
-            
-        } else if (targetID !== "uo4kb3tGHH7J") {
-            // 🛡️ REGLA DE ORO: Si es un contacto normal, sigue usando la cola satelital tradicional
-            await db.ref('cola_satelital/' + targetID).push({
-                p: base64,
-                from: miID,
-                ts: Date.now(),
-                msgId: msgId,
-                mediaType: tipoValidado 
-            });
-             }
+} else if (targetID !== "uo4kb3tGHH7J") {
+    // 🛡️ REGLA DE ORO: Si es un contacto normal, sigue usando la cola satelital tradicional
+    await db.ref('cola_satelital/' + targetID).push({
+        p: base64,
+        from: miID,
+        ts: Date.now(),
+        msgId: msgId,
+        mediaType: tipoValidado 
+    });
+}
 
 // === CONEXIÓN SEGURA RUTA HACIA EL BACKEND EN VERCEL ===
 // === CONEXIÓN SEGURA RUTA HACIA EL BACKEND EN VERCEL ===
