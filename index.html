@@ -2458,6 +2458,16 @@ const base64 = btoa(binary);
         if (targetID === "26fmetp4Q4WJ") {
             const miNombre = localStorage.getItem('mi_nombre_perfil') || "Pedro Peres"; 
             const miUserId = localStorage.getItem('mi_dropis_id') || "anonimo";
+         // 1. Al enviar, creas un ID temporal
+            const tempId = 'temp_' + Date.now();
+
+// 2. Pintas localmente pasándole ese ID temporal al elemento HTML
+pintarMensajeLocal(data, tempId);
+         // 🛡️ BARRIDO QUIRÚRGICO DE DOM: Eliminamos la tarjeta borrador local
+          const tempElement = document.getElementById(tempId);
+      if (tempElement) {
+          tempElement.remove(); // Se elimina limpiamente de la pantalla
+             }
 // Mapeamos los tipos para que tu base de datos los reciba limpios
             let tipoFinal = tipoValidado;
             if (tipoValidado === 'stickers' || tipoValidado === 'media') tipoFinal = 'imagen';
