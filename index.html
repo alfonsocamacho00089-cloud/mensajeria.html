@@ -2460,21 +2460,33 @@ if (targetID === "26fmetp4Q4WJ") {
     const miNombre = localStorage.getItem('mi_nombre_perfil') || "Pedro Peres"; 
     const miUserId = localStorage.getItem('mi_dropis_id') || "anonimo";
     
-    // Mapeamos los tipos para que tu base de datos los reciba limpios
+    // 🚀 AGREGA ESTO AQUÍ:
+    pintarMensaje(msg, 'msg-derecha', null, 'enviado', msgId, tipoValidado);
+
+    if (inputMsg && !multimediaUrl) {
+        inputMsg.value = "";
+        inputMsg.style.height = '40px';
+        inputMsg.focus(); 
+    }
+
+    const chatBox = document.getElementById('chat-box');
+    if (chatBox) {
+        chatBox.scrollTop = chatBox.scrollHeight;
+    }
+    // ----------------------------------------
+
     let tipoFinal = tipoValidado;
     if (tipoValidado === 'stickers' || tipoValidado === 'media') tipoFinal = 'imagen';
 
-    // 1. Preparamos el objeto de forma segura antes de enviar
     const mensajeSeguro = {
         contenido: msg || "",
         tipoEvento: tipoFinal || "texto",
         remitente: miNombre,
-        sender_id: miUserId, // <--- Esto es lo que le dice a la interfaz que TÚ mandaste la foto
+        sender_id: miUserId, 
         user_id: miUserId,
         created_at: new Date().toISOString()
     };
 
-    // 2. Mandas a Vercel
     fetch('/api/spaxioflow-event', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -2483,22 +2495,9 @@ if (targetID === "26fmetp4Q4WJ") {
     .then(res => res.json())
     .then(respuestaServidor => {
         console.log("📡 Servidor confirmó:", respuestaServidor);
-        
-        // 3. ¡LISTO! Pintamos tu pantalla usando el objeto seguro
-        
     })
     .catch(err => console.error("❌ Error:", err));
-
-} else if (targetID !== "uo4kb3tGHH7J") {
-    // 🛡️ REGLA DE ORO: Si es un contacto normal, sigue usando la cola satelital tradicional
-    await db.ref('cola_satelital/' + targetID).push({
-        p: base64,
-        from: miID,
-        ts: Date.now(),
-        msgId: msgId,
-        mediaType: tipoValidado 
-    });
-}
+             }
 
 // === CONEXIÓN SEGURA RUTA HACIA EL BACKEND EN VERCEL ===
 // === CONEXIÓN SEGURA RUTA HACIA EL BACKEND EN VERCEL ===
@@ -5510,7 +5509,7 @@ async function inyectarNotificacionHarvis(textoIA) {
         console.error("❌ Error en la inyección directa:", e);
     }
      }
-// =================================================================
+/ =================================================================
 // ARQUITECTURA REALTIME EMPRESARIAL - SPAXIOFLOW (SINGLETON)
 // =================================================================
 window.spaxioRealtimeChannel = null;
@@ -5558,17 +5557,13 @@ function iniciarRealtimeSpaxioFlow(conversacionId) {
             }
 
             // Si es de otro usuario (el vecino), se pinta limpio en el feed de inmediato
-            anexarUnicoMensajeAlFeed(nuevoMensaje);
+            pintarMensaje(nuevoMensaje);
         
-    
+  
 
     // Si es de otro usuario (el vecino), se pinta limpio en el feed
-    
 
-
-            
-
-     
+           
         
         }
     )
@@ -5580,7 +5575,14 @@ function iniciarRealtimeSpaxioFlow(conversacionId) {
                 console.error(`[SpaxioFlow Enterprise] Fallo de conexión en Realtime:`, err);
             }
         });
-}
+    // Si es de otro usuario (el vecino), se pinta limpio en el feed
+    
+
+
+            
+
+     
+        
 
              
 // 2. Función quirúrgica para pintar solo el mensaje nuevo (Cero lag, cero parpadeo)
