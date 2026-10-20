@@ -2454,57 +2454,38 @@ const base64 = btoa(binary);
     hora: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })
 });
         
-// 2. Pintas localmente pasándole ese ID temporal al elemento HTML
 // 🔥 CONEXIÓN SUPREMA AL BACKEND DE VERCEL PARA EL FEED GLOBAL
-if (targetID === "26fmetp4Q4WJ") {
-    const miNombre = localStorage.getItem('mi_nombre_perfil') || "id"; 
-    const miUserId = localStorage.getItem('mi_dropis_id') || "anonimo";
-    
-    // 1. Creamos el ID temporal único para esta tarjeta local
-    const tempId = 'temp_' + Date.now();
-
-    // 2. ⚡ AQUí LLAMAS A TU FUNCIÓN DE PINTADO LOCAL PASÁNDOLE EL tempId
-    // (Ejemplo: pintarMensajeLocal(msg, tipoFinal, tempId);)
-    // Asegúrate de que tu función de pintado le ponga id="${tempId}" al elemento HTML.
-
-    let tipoFinal = tipoValidado;
-    if (tipoValidado === 'stickers' || tipoValidado === 'media') tipoFinal = 'imagen';
-     
-    // 3. Lanzamos el fetch a Vercel
-    fetch('/api/spaxioflow-event', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-            tipoEvento: tipoFinal,
-            contenido: msg,
-            remitente: miNombre,
-            sender_id: miUserId
-        })
+        if (targetID === "26fmetp4Q4WJ") {
+            const miNombre = localStorage.getItem('mi_nombre_perfil') || "Pedro Peres"; 
+            const miUserId = localStorage.getItem('mi_dropis_id') || "anonimo";
+// Mapeamos los tipos para que tu base de datos los reciba limpios
+            let tipoFinal = tipoValidado;
+            if (tipoValidado === 'stickers' || tipoValidado === 'media') tipoFinal = 'imagen';
+             
+fetch('/api/spaxioflow-event', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+        tipoEvento: tipoFinal,
+        contenido: msg,
+        remitente: miNombre,
+        sender_id: miUserId
     })
-    .then(res => res.json())
-    .then(data => {
-        console.log("📡 Feed actualizado vía Vercel:", data);
-
-        // 🛡️ BARRIDO QUIRÚRGICO DE DOM: 
-        // ¡Aquí es donde debe ir! Cuando el servidor confirma, borramos la tarjeta borrador local
-        // porque el canal en tiempo real (o la respuesta) ya traerá el mensaje definitivo.
-        const tempElement = document.getElementById(tempId);
-        if (tempElement) {
-            tempElement.remove(); 
-            console.log("[SpaxioFlow] Tarjeta temporal eliminada limpiamente.");
-        }
-    })
-    .catch(err => console.error("❌ Fallo al actualizar feed desde el teléfono:", err));
-    
-} else if (targetID !== "uo4kb3tGHH7J") {
-    // 🛡️ REGLA DE ORO: Si es un contacto normal, usa la cola tradicional
-    await db.ref('cola_satelital/' + targetID).push({
-        p: base64,
-        from: miID,
-        ts: Date.now(),
-        msgId: msgId,
-        mediaType: tipoValidado 
-    });
+})
+            
+            .then(res => res.json())
+            .then(data => console.log("📡 Feed actualizado vía Vercel:", data))
+            .catch(err => console.error("❌ Fallo al actualizar feed desde el teléfono:", err));
+            
+        } else if (targetID !== "uo4kb3tGHH7J") {
+            // 🛡️ REGLA DE ORO: Si es un contacto normal, sigue usando la cola satelital tradicional
+            await db.ref('cola_satelital/' + targetID).push({
+                p: base64,
+                from: miID,
+                ts: Date.now(),
+                msgId: msgId,
+                mediaType: tipoValidado 
+            });
              }
 
 // === CONEXIÓN SEGURA RUTA HACIA EL BACKEND EN VERCEL ===
@@ -5524,20 +5505,29 @@ function iniciarRealtimeSpaxioFlow(conversacionId) {
 
     // 3. Suscripción con manejo estricto de eventos de ciclo de vida
     window.spaxioRealtimeChannel
-        .on(
-            'postgres_changes',
-            {
-                event: 'INSERT',
-                schema: 'public',
-                table: 'spaxioflow_feed',
-                filter: `chat_id=eq.${conversacionId}`
-            },
-            (payload) => {
-                if (payload && payload.new) {
-                    anexarUnicoMensajeAlFeed(payload.new);
-                }
+    .on(
+        'postgres_changes',
+        {
+            event: 'INSERT',
+            schema: 'public',
+            table: 'spaxioflow_feed',
+            filter: `chat_id=eq.${conversacionId}`
+        },
+        (payload) => {
+            const nuevoMensaje = payload.new;
+            const miUserId = localStorage.getItem('mi_dropis_id') || "anonimo";
+
+            // 🛡️ IGNORAR EL ECO PROPIO
+            if (nuevoMensaje.sender_id === miUserId) {
+                console.log("⚡ [SpaxioFlow] Eco propio ignorado (ya está pintado localmente).");
+                return; 
             }
-        )
+
+            // Si es de otro usuario, lo dibuja en el feed de inmediato
+            anexarUnicoMensajeAlFeed(nuevoMensaje);
+        }
+    )
+    .subscribe();
         .subscribe((status, err) => {
             if (status === 'SUBSCRIBED') {
                 console.log(`[SpaxioFlow Enterprise] Canal ${channelName} suscrito correctamente.`);
