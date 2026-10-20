@@ -5545,22 +5545,25 @@ function iniciarRealtimeSpaxioFlow(conversacionId) {
         },
 
 (payload) => {
-            const nuevoMensaje = payload.new;
-            const miUserId = localStorage.getItem('mi_dropis_id') || "anonimo";
+    const nuevoMensaje = payload.new || {};
+    const miUserId = localStorage.getItem('mi_dropis_id') || "anonimo";
 
-            // 🛑 IMPRIME ESTO EN CONSOLA PARA VER QUÉ ESTÁ PASANDO
-            console.log("🔍 Comparando IDs en Realtime -> Mensaje sender_id:", nuevoMensaje.sender_id, "| Mi ID:", miUserId);
+    // 🛡️ Buscamos el ID del emisor probando las variantes más comunes de la BD
+    const idEmisorRealtime = nuevoMensaje.sender_id || nuevoMensaje.user_id || nuevoMensaje.remitente;
 
-            // Blindaje estricto (comparamos strings limpios)
-            if (String(nuevoMensaje.sender_id).trim() === String(miUserId).trim()) {
-                console.log("⚡ [SpaxioFlow] Eco propio interceptado y bloqueado con éxito.");
-                return; 
-            }
+    console.log("🔍 Realtime detectó emisor:", idEmisorRealtime, "| Mi ID:", miUserId);
+
+    // Si coincide con tu ID, es tu propio eco: ¡lo bloqueamos de inmediato!
+    if (idEmisorRealtime && String(idEmisorRealtime).trim() === String(miUserId).trim()) {
+        console.log("⚡ [SpaxioFlow] Eco propio bloqueado con éxito.");
+        return; 
+    }
+
+    // Si es de otro usuario (el vecino), se pinta limpio en el feed
+    pintarMensaje(nuevoMensaje);
+             
 
 
-            // Si es de otro usuario, lo dibuja en el feed de inmediato
-            anexarUnicoMensajeAlFeed(nuevoMensaje);
-            // Si pasa este filtro, ahora sí se pinta (solo para mensajes del vecino)
             
 
      
