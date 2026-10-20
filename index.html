@@ -2482,7 +2482,7 @@ fetch('/api/spaxioflow-event', {
     body: JSON.stringify(mensajeSeguro)
 })
 .then(res => res.json())
-.then(data => {
+.then(mensajeSeguro => {
     console.log("📡 Servidor confirmó:", mensajeSeguro);
     
     // 3. ¡LISTO! Aquí mismo, pintas tu propia pantalla usando la misma función del vecino
