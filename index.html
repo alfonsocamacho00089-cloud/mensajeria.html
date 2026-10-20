@@ -2461,21 +2461,25 @@ const base64 = btoa(binary);
 // Mapeamos los tipos para que tu base de datos los reciba limpios
             let tipoFinal = tipoValidado;
             if (tipoValidado === 'stickers' || tipoValidado === 'media') tipoFinal = 'imagen';
-             // 1. Al presionar enviar, NO pintas nada localmente a la carrera. 
-// Solo preparas los datos:
-const payloadData = {
-    tipoEvento: tipoFinal,
-    contenido: msg,
+    
+         
+
+// 3. ¡LISTO! Pintamos tu pantalla de forma blindada contra undefined:
+const mensajeSeguro = data.mensajeGuardado || {
+    contenido: msg || "",
+    tipoEvento: tipoFinal || "texto",
     remitente: miNombre,
     sender_id: miUserId,
-    created_at: new Date().toISOString() // o el timestamp que uses
+    created_at: new Date().toISOString()
 };
+
+// Llamas a tu función de pintado pasándole el objeto limpio
 
 // 2. Mandas a Vercel
 fetch('/api/spaxioflow-event', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payloadData)
+    body: JSON.stringify(mensajeSeguro)
 })
 .then(res => res.json())
 .then(data => {
@@ -2484,7 +2488,7 @@ fetch('/api/spaxioflow-event', {
     // 3. ¡LISTO! Aquí mismo, pintas tu propia pantalla usando la misma función del vecino
     // (Si el backend te devuelve el objeto creado, úsalo; si no, usas tu payloadData)
     // 3. ¡LISTO! Aquí mismo, pintas tu propia pantalla usando tu función real:
-pintarMensaje(data.mensajeGuardado || payloadData);
+pintarMensaje(mensajeSeguro);
 })
 .catch(err => console.error("❌ Error:", err));
 
