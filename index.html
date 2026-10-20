@@ -2845,7 +2845,7 @@ async function cargarConversacionCon(idDestino, nombreDestino, fotoDestino) {
 
     if (posts && Array.isArray(posts)) {
      
-    posts.forEach(async (post) => {
+    for (const post of posts) {
         const idContenido = "feed_" + post.id;
         const nombreRemitente = post.sender_name || 'H.A.R.V.I.S.';
         // 🚀 SOLO DIBUJA SI EL ELEMENTO NO EXISTE EN LA PANTALLA
@@ -5553,9 +5553,6 @@ async function inyectarLiveSpaxioFlow(urlVideo) {
         if (res.ok) {
             console.log("🎥 ¡Publicación guardada en Vercel!");
             
-            // 🚀 AQUÍ SÍ SE PUEDE:
-            // Como ya se guardó en la base de datos, recargamos el chat UNA SOLA VEZ
-            cargarConversacionCon("26fmetp4Q4WJ", "Spaxio Flow", null);
         }
     } catch (e) {
         console.error("Error al enviar:", e);
