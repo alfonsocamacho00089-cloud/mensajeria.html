@@ -2507,7 +2507,9 @@ const base64 = btoa(binary);
     })
     .catch(err => console.error("❌ Error:", err));
 
-} else if (targetID !== "uo4kb3tGHH7J") {
+} else {
+     
+             if (targetID !== "uo4kb3tGHH7J") {
     // 🛡️ REGLA DE ORO: Si es un contacto normal, sigue usando la cola satelital tradicional
     await db.ref('cola_satelital/' + targetID).push({
         p: base64,
