@@ -32,6 +32,18 @@
 
  <script src="https://cdn.jsdelivr.net/npm/eruda"></script>
 <script>eruda.init();</script>
+
+ <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+  // Tu URL pública de Supabase (esta no es secreta, es la dirección de tu proyecto)
+  const SUPABASE_URL = "https://fcklnjgkwrnunoroseze.supabase.co";
+  
+  // Pega aquí únicamente la llave "anon" / "public" que aparece en tu panel de Supabase
+  const SUPABASE_ANON_KEY = "sb_publishable_5hnn7yZwjtyk5ZLTrnO-2Q_8MJ6DPLR"; 
+  
+  const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+</script>
+ 
      <style>
    
     * {
