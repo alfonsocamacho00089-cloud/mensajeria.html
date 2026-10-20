@@ -5523,8 +5523,11 @@ async function inyectarNotificacionHarvis(textoIA) {
         console.error("❌ Error en la inyección directa:", e);
     }
      }
-// =================================================================
-// ARQUITECTURA REALTIME EMPRESARIAL - SPAXIOFLOW (SINGLETON)
+
+    console.log("🔍 Realtime detectó emisor:", idEmisorRealtime, "| Mi ID:", miUserId);
+
+             // =================================================================
+// ARQUITECTURA REALTIME EMPRESARIAL - SPAXIOFLOW (SINGLETON BLINDADO)
 // =================================================================
 window.spaxioRealtimeChannel = null;
 
@@ -5534,20 +5537,18 @@ function iniciarRealtimeSpaxioFlow(conversacionId) {
         return;
     }
 
-    // 1. Limpieza síncrona y desinscripción del canal activo previo (Prevent Memory Leak)
+    // 1. Limpieza síncrona estricta del canal activo previo para evitar duplicar WebSockets
     if (window.spaxioRealtimeChannel) {
         window.supabaseClient.removeChannel(window.spaxioRealtimeChannel);
         window.spaxioRealtimeChannel = null;
     }
 
-    // 2. Creación de canal aislado por ID de sesión/conversación
+    // 2. Creación de canal aislado único
     const channelName = `spaxioflow_live_${conversacionId}_${Date.now()}`;
-    
     window.spaxioRealtimeChannel = window.supabaseClient.channel(channelName);
 
-    // 3. Suscripción con manejo estricto de eventos de ciclo de vida
-    window.spaxioRealtimeChannel
-    .on(
+    // 3. Suscripción estricta al evento INSERT
+    window.spaxioRealtimeChannel.on(
         'postgres_changes',
         {
             event: 'INSERT',
@@ -5555,43 +5556,38 @@ function iniciarRealtimeSpaxioFlow(conversacionId) {
             table: 'spaxioflow_feed',
             filter: `chat_id=eq.${conversacionId}`
         },
+        (payload) => {
+            const nuevoMensaje = payload.new || {};
+            const miUserId = String(localStorage.getItem('mi_dropis_id') || "anonimo").trim();
 
-(payload) => {
-    const nuevoMensaje = payload.new || {};
-    const miUserId = localStorage.getItem('mi_dropis_id') || "anonimo";
+            // 🛡️ Blindaje Antieco unificado (comprobamos todas las variantes posibles del ID)
+            const idEmisorRealtime = String(
+                nuevoMensaje.sender_id || 
+                nuevoMensaje.user_id || 
+                nuevoMensaje.remitente || ""
+            ).trim();
 
-    // 🛡️ Buscamos el ID del emisor probando las variantes más comunes de la BD
-    const idEmisorRealtime = nuevoMensaje.sender_id || nuevoMensaje.user_id || nuevoMensaje.remitente;
+            console.log("🔍 Realtime detectó emisor:", idEmisorRealtime, "| Mi ID:", miUserId);
 
-    console.log("🔍 Realtime detectó emisor:", idEmisorRealtime, "| Mi ID:", miUserId);
+            // Si el mensaje lo enviaste TÚ, el socket lo ignora obligatoriamente
+            if (idEmisorRealtime && idEmisorRealtime === miUserId) {
+                console.log("⚡ [SpaxioFlow] Eco propio bloqueado con éxito.");
+                return; 
+            }
 
-    // Si coincide con tu ID, es tu propio eco: ¡lo bloqueamos de inmediato!
-    if (idEmisorRealtime && String(idEmisorRealtime).trim() === String(miUserId).trim()) {
-        console.log("⚡ [SpaxioFlow] Eco propio bloqueado con éxito.");
-        return; 
-    }
-
-    // Si es de otro usuario (el vecino), se pinta limpio en el feed
-    pintarMensaje(nuevoMensaje);
-             
-
-
-            
-
-     
-        
+            // Si es de otro usuario, se pinta limpio en el feed de inmediato
+            // Usamos tu función optimizada para renderizar un único mensaje sin parpadeo
+            anexarUnicoMensajeAlFeed(nuevoMensaje);
         }
     )
-   
-        .subscribe((status, err) => {
-            if (status === 'SUBSCRIBED') {
-                console.log(`[SpaxioFlow Enterprise] Canal ${channelName} suscrito correctamente.`);
-            } else if (status === 'CHANNEL_ERROR' || err) {
-                console.error(`[SpaxioFlow Enterprise] Fallo de conexión en Realtime:`, err);
-            }
-        });
-}
-
+    .subscribe((status, err) => {
+        if (status === 'SUBSCRIBED') {
+            console.log(`[SpaxioFlow Enterprise] Canal ${channelName} suscrito correctamente.`);
+        } else if (status === 'CHANNEL_ERROR' || err) {
+            console.error(`[SpaxioFlow Enterprise] Fallo de conexión en Realtime:`, err);
+        }
+    });
+ }
              
 // 2. Función quirúrgica para pintar solo el mensaje nuevo (Cero lag, cero parpadeo)
 function anexarUnicoMensajeAlFeed(msg) {
