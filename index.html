@@ -5543,18 +5543,25 @@ function iniciarRealtimeSpaxioFlow(conversacionId) {
             table: 'spaxioflow_feed',
             filter: `chat_id=eq.${conversacionId}`
         },
-        (payload) => {
+
+(payload) => {
             const nuevoMensaje = payload.new;
             const miUserId = localStorage.getItem('mi_dropis_id') || "anonimo";
 
-            // 🛡️ IGNORAR EL ECO PROPIO
-            if (nuevoMensaje.sender_id === miUserId) {
-                console.log("⚡ [SpaxioFlow] Eco propio ignorado (ya está pintado localmente).");
+            // 🛑 IMPRIME ESTO EN CONSOLA PARA VER QUÉ ESTÁ PASANDO
+            console.log("🔍 Comparando IDs en Realtime -> Mensaje sender_id:", nuevoMensaje.sender_id, "| Mi ID:", miUserId);
+
+            // Blindaje estricto (comparamos strings limpios)
+            if (String(nuevoMensaje.sender_id).trim() === String(miUserId).trim()) {
+                console.log("⚡ [SpaxioFlow] Eco propio interceptado y bloqueado con éxito.");
                 return; 
             }
 
-            // Si es de otro usuario, lo dibuja en el feed de inmediato
-            anexarUnicoMensajeAlFeed(nuevoMensaje);
+            // Si pasa este filtro, ahora sí se pinta (solo para mensajes del vecino)
+            pintarMensaje(nuevoMensaje);
+}
+     
+        
         }
     )
    
@@ -5725,33 +5732,7 @@ function activarSpaxioFlowRealtime() {
     }
              }
 
-             // Función para inicializar Spaxio Flow de forma independiente (solo flujo izquierdo)
-function inicializarSpaxioFlowIndependiente() {
-    const contenedorPrincipal = document.querySelector('.spaxio-flow-container');
-    
-    if (contenedorPrincipal) {
-        // Añadir la clase que aplica los estilos de columna única
-        contenedorPrincipal.classList.add('single-column');
-    }
-
-    // Inicializar exclusivamente los componentes del flujo izquierdo
-    if (typeof renderizarFlujoIzquierdo === 'function') {
-        renderizarFlujoIzquierdo();
-    } else {
-        console.log("⚡ Spaxio Flow: Renderizando componentes del flujo izquierdo de forma aislada.");
-    }
-
-    // Opcional: Desvincular o limpiar cualquier listener del panel derecho para evitar consumo de recursos
-    const panelDerecho = document.querySelector('.flow-right, .panel-derecho');
-    if (panelDerecho) {
-        panelDerecho.innerHTML = ''; // Limpia elementos innecesarios en memoria
-    }
-}
-
-// Ejecutar al cargar la vista
-document.addEventListener('DOMContentLoaded', () => {
-    inicializarSpaxioFlowIndependiente();
-})
+             
 // =================================================================
 // 🪐 SPAXIOVERSO OMNI: MOTOR GRÁFICO, IA Y TELEMETRÍA - COMPLETO
 // =================================================================
