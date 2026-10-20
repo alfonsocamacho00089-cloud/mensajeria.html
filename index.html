@@ -2469,7 +2469,8 @@ if (targetID === "26fmetp4Q4WJ") {
         contenido: msg || "",
         tipoEvento: tipoFinal || "texto",
         remitente: miNombre,
-        sender_id: miUserId,
+        sender_id: miUserId, // <--- Esto es lo que le dice a la interfaz que TÚ mandaste la foto
+        user_id: miUserId,
         created_at: new Date().toISOString()
     };
 
