@@ -5695,33 +5695,7 @@ function activarSpaxioFlowRealtime() {
              let feedCargado = false;
 
 
-async function enviarMensajeSpaxioFlow(chatId, tipoContenido, contenidoUrlOrText) {
-    const miUserId = localStorage.getItem('mi_dropis_id') || "anonimo";
-    const miNombre = localStorage.getItem('mi_nombre') || "Pedro Peres";
 
-    try {
-        const { data, error } = await supabaseClient
-            .from('spaxioflow_feed')
-            .insert([
-                {
-                    chat_id: chatId,             // "26fmetp4Q4WJ"
-                    sender_id: miUserId,         // ID único de la cuenta en la App
-                    sender_name: miNombre,       // Nombre del emisor
-                    tipo: tipoContenido,         // 'foto', 'video' o 'texto'
-                    content: contenidoUrlOrText, // URL o texto
-                    meta_info: {}
-                }
-            ]);
-
-        if (error) {
-            console.error("❌ Error al insertar en Supabase:", error.message);
-            return;
-        }
-        console.log("✅ Mensaje enviado a SpaxioFlow con éxito.");
-    } catch (err) {
-        console.error("❌ Excepción al enviar mensaje:", err);
-    }
-             }
              
              
 // =================================================================
