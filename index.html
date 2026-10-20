@@ -5695,7 +5695,57 @@ function activarSpaxioFlowRealtime() {
              let feedCargado = false;
 
 
+    // 1. CUANDO ABRES SPAXIOFLOW (Configuración del Header)
+function abrirSpaxioFlow() {
+    // Forzamos el identificador visual en el header
+    const headerTitle = document.querySelector('.header-title') || document.getElementById('chat-title');
+    if (headerTitle) {
+        headerTitle.innerText = "SpaxioFlow 🚀";
+    }
     
+    // Guardamos o establecemos el ID activo del chat global
+    window.activeChatID = "26fmetp4Q4WJ";
+}
+
+// 2. CUANDO ENVÍAS EL MENSAJE (Garantizando que NUNCA vaya sin ID)
+function enviarMensajeSpaxioFlow(msg, tipoValidado) {
+    const miNombre = localStorage.getItem('mi_nombre_perfil') || "Pedro Peres"; 
+    const miUserId = localStorage.getItem('mi_dropis_id'); // Asegúrate que este ID exista en tu localStorage
+
+    // Validación de seguridad empresarial: Si no hay ID, lo detenemos antes de corromper la BD
+    if (!miUserId) {
+        console.error("❌ Error crítico: No se encontró el 'mi_dropis_id' en localStorage.");
+        return;
+    }
+
+    let tipoFinal = tipoValidado;
+    if (tipoValidado === 'stickers' || tipoValidado === 'media') tipoFinal = 'imagen';
+
+    // Construimos el payload blindado con los IDs obligatorios
+    const payloadData = {
+        chat_id: "26fmetp4Q4WJ", // <--- ID del canal global
+        sender_id: miUserId,     // <--- Tu ID real (Adiós al undefined)
+        remitente: miNombre,
+        tipoEvento: tipoFinal,
+        contenido: msg,
+        created_at: new Date().toISOString()
+    };
+
+    // Petición limpia a Vercel
+    fetch('/api/spaxioflow-event', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payloadData)
+    })
+    .then(res => res.json())
+    .then(respuestaServidor => {
+        console.log("📡 Servidor confirmó el envío con ID de emisor:", miUserId);
+        
+        // Pintamos localmente una sola vez usando el objeto seguro
+        pintarMensaje(payloadData);
+    })
+    .catch(err => console.error("❌ Error en envío satelital:", err));
+}
 
              
 // =================================================================
