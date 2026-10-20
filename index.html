@@ -3182,8 +3182,8 @@ async function cargarProto() {
     const box = document.getElementById('chat-box');
     if (!box) return;
 let textoReal = (typeof contenido === 'object' && contenido !== null) ? (contenido.content || contenido.texto || contenido.contenido || "") : (contenido || "");
-    
-textoReal = textoReal.replace(/[\r\n]+/g, '');
+ 
+textoReal = String(textoReal.replace)(/[\r\n]+/g, '');
   // Elimina los saltos de línea que H.A.R.V.I.S. pueda haber puesto
     
     // Detector de GIFs y Multimedia
