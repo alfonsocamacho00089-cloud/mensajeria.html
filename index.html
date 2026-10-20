@@ -2474,12 +2474,9 @@ fetch('/api/spaxioflow-event', {
 })
             
             .then(res => res.json())
-.then(data => {
-    console.log("📡 Feed actualizado vía Vercel:", data);
-    
-             } 
-.catch(err => console.error("❌ Fallo al actualizar feed desde el teléfono:", err));
-    
+            .then(data => console.log("📡 Feed actualizado vía Vercel:", data))
+            .catch(err => console.error("❌ Fallo al actualizar feed desde el teléfono:", err));
+            
         } else if (targetID !== "uo4kb3tGHH7J") {
             // 🛡️ REGLA DE ORO: Si es un contacto normal, sigue usando la cola satelital tradicional
             await db.ref('cola_satelital/' + targetID).push({
