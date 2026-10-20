@@ -3183,8 +3183,7 @@ async function cargarProto() {
     if (!box) return;
 let textoReal = (typeof contenido === 'object' && contenido !== null) ? (contenido.content || contenido.texto || contenido.contenido || "") : (contenido || "");
  
-textoReal = String(textoReal.replace)(/[\r\n]+/g, '');
-  // Elimina los saltos de línea que H.A.R.V.I.S. pueda haber puesto
+textoReal = String(textoReal); // Elimina los saltos de línea que H.A.R.V.I.S. pueda haber puesto
     
     // Detector de GIFs y Multimedia
     if (textoReal.includes('i.ibb.co') || textoReal.includes('firebasestorage') || textoReal.includes('.gif') || textoReal.includes('giphy.com')) {
