@@ -2510,11 +2510,7 @@ if (targetID === "26fmetp4Q4WJ") {
     const miNombre = localStorage.getItem('mi_nombre_perfil') || "Pedro Peres"; 
     const miUserId = localStorage.getItem('mi_dropis_id') || "anonimo";
     // Si es Spaxio Flow, usamos su contenedor; de lo contrario, null (no hace nada en los chats normales)
-const contenedorFinal = (msg.contactoId === "26fmetp4Q4WJ" || idDestino === "26fmetp4Q4WJ")
-    ? document.getElementById('chat-box-flow')
-    : null;
-
-if (contenedorFinal) contenedorFinal.prepend(div);
+    const contenedorFinal = document.getElementById('chat-box-flow');
              
     // Mapeamos los tipos para que tu base de datos los reciba limpios
     let tipoFinal = tipoValidado;
@@ -3240,10 +3236,16 @@ async function cargarProto() {
 
           let mensajeSeleccionado = null;
                
- function pintarMensaje(contenido, clase, hora, status, id, tipo = 'texto') {
-    const box = document.getElementById('chat-box');
+ 
+function pintarMensaje(contenido, clase, hora, status, id, tipo = 'texto') {
+    const targetInput = document.querySelector('#target-id');
+    const esSpaxioFlow = targetInput && targetInput.value === "26fmetp4Q4WJ";
+    
+    // Elige dinámicamente el contenedor según el chat activo
+    const box = esSpaxioFlow ? document.getElementById('chat-box-flow') : document.getElementById('chat-box');
     if (!box) return;
 
+             
     let textoReal = (typeof contenido === 'object') ? (contenido.texto || "") : contenido;
     
     // Elimina los saltos de línea que H.A.R.V.I.S. pueda haber puesto
