@@ -5561,21 +5561,20 @@ function iniciarRealtimeSpaxioFlow(conversacionId) {
             const nuevoMensaje = payload.new || {};
             const miUserId = localStorage.getItem('mi_dropis_id') || "anonimo";
 
-            // 🛡️ Buscamos el ID del emisor con total seguridad
-            const idEmisorRealtime = mensajeSeguro.sender_id || mensajeSeguro.user_id || mensajeSeguro.remitente;
+            // 🛡️ BLINDAJE SEGURO: Evita que explote si nuevoMensaje viene vacío
+            const idEmisorRealtime = nuevoMensaje?.sender_id || nuevoMensaje?.user_id || nuevoMensaje?.remitente || "";
 
             console.log("🔍 Realtime detectó emisor:", idEmisorRealtime, "| Mi ID:", miUserId);
 
-            // ⚡ BLINDAJE ANTIECO: Si el mensaje lo enviaste TÚ, el socket lo ignora porque ya lo pintaste al enviar.
+            // ⚡ BLINDAJE ANTIECO
             if (idEmisorRealtime && String(idEmisorRealtime).trim() === String(miUserId).trim()) {
                 console.log("⚡ [SpaxioFlow] Eco propio bloqueado con éxito.");
                 return; 
             }
 
-            // Si es de otro usuario (el vecino), se pinta limpio en el feed de inmediato
-            pintarMensaje(mensajeSeguro);
-        
-    
+            // Si es de otro usuario, se pinta limpio
+            pintarMensaje(nuevoMensaje.content || nuevoMensaje);
+ 
 
     // Si es de otro usuario (el vecino), se pinta limpio en el feed
     
@@ -5666,54 +5665,7 @@ async function inyectarLiveSpaxioFlow(urlVideo) {
 
 
 // 3. TIEMPO REAL BLINDADO (¡Evita que se multipliquen los canales!)
-let canalSpaxioFlowActivo = null;
 
-function activarSpaxioFlowRealtime() {
-    console.log("🤖 H.A.R.V.I.S: Conectando canal de streaming en tiempo real...");
-
-    // 🔴 IMPORTANTE: Si ya había un canal abierto, lo eliminamos primero para matar el eco
-    if (canalSpaxioFlowActivo) {
-        supabase.removeChannel(canalSpaxioFlowActivo);
-        canalSpaxioFlowActivo = null;
-    }
-
-    canalSpaxioFlowActivo = supabase
-        .channel('canal-spaxioflow')
-        .on('postgres_changes', 
-            { 
-                event: 'INSERT', 
-                schema: 'public', 
-                table: 'spaxioflow_feed' 
-            }, 
-            (payload) => {
-                const nuevoEvento = payload.new;
-                const targetInput = document.querySelector('#target-id');
-                const chatAbiertoActualmente = targetInput ? targetInput.value : "";
-
-                if (nuevoEvento.chat_id === "26fmetp4Q4WJ" && chatAbiertoActualmente === "26fmetp4Q4WJ") {
-                    const msgIdLive = "live_rt_" + nuevoEvento.id;
-                    
-                    // Validamos que no esté duplicado en el DOM
-                    if (!document.getElementById(msgIdLive)) {
-                        let tipoMapeado = 'texto';
-                        if (nuevoEvento.tipo === 'video') tipoMapeado = 'video';
-                        if (nuevoEvento.tipo === 'imagen') tipoMapeado = 'foto';
-
-                        pintarMensaje(
-                            nuevoEvento.content, 
-                            'msg-izquierda', 
-                            new Date(nuevoEvento.created_at || Date.now()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true }), 
-                            'leido', 
-                            msgIdLive, 
-                            tipoMapeado
-                        );
-                    }
-                }
-            }
-        )
-        .subscribe();
-             }
-             let feedCargado = false;
 
 
 
