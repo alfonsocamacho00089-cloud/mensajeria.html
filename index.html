@@ -3295,7 +3295,7 @@ async function cargarProto() {
                 ${horaFinal}
             </div>
         `;
-        box.appendChild(div);
+        box.prepend()(div);
         box.scrollTop = box.scrollHeight;
  }
     else if (esCosaNueva) {
