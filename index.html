@@ -2503,7 +2503,34 @@ const base64 = btoa(binary);
 if (targetID === "26fmetp4Q4WJ") {
     const miNombre = localStorage.getItem('mi_nombre_perfil') || "Pedro Peres"; 
     const miUserId = localStorage.getItem('mi_dropis_id') || "anonimo";
-    
+    const esMio = msg.sender_id === miUserId;
+    const claseBurbuja = esMio || 'msg-izquierda';
+
+    // Mapeamos el tipo de contenido que viene de Supabase
+    let tipoMapeado = 'texto';
+    if (msg.tipo === 'video') tipoMapeado = 'video';
+    if (msg.tipo === 'imagen' || msg.tipo === 'foto') tipoMapeado = 'foto';
+
+    const horaFormateada = new Date(msg.created_at || Date.now()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
+
+    // Llamamos directamente a tu potente función 'pintarMensaje' ya existente en este index
+    pintarMensaje(
+        msg.content, 
+        claseBurbuja, 
+        horaFormateada, 
+        'leido', 
+        msgIdUnico, 
+        tipoMapeado
+    );
+
+// Opción A: Aplicarlo directo al elemento #chat-box
+const chatBox = document.querySelector('.spaxio-flow-bubble-box #chat-box');
+if (chatBox) {
+    chatBox.style.flexDirection = 'column-reverse';
+    chatBox.style.justifyContent = 'flex-end';
+}
+ 
+             }
     // Mapeamos los tipos para que tu base de datos los reciba limpios
     let tipoFinal = tipoValidado;
     if (tipoValidado === 'stickers' || tipoValidado === 'media') tipoFinal = 'imagen';
@@ -5606,11 +5633,7 @@ function iniciarRealtimeSpaxioFlow(conversacionId) {
             anexarUnicoMensajeAlFeed(nuevoMensaje);
             // Si pasa este filtro, ahora sí se pinta (solo para mensajes del vecino)
             // Opción A: Aplicarlo directo al elemento #chat-box
-const chatBox = document.querySelector('.spaxio-flow-bubble-box #chat-box');
-if (chatBox) {
-    chatBox.style.flexDirection = 'column-reverse';
-    chatBox.style.justifyContent = 'flex-end';
-     }
+
 
      
         
@@ -5657,7 +5680,17 @@ function anexarUnicoMensajeAlFeed(msg) {
         msgIdUnico, 
         tipoMapeado
     );
+
+// Opción A: Aplicarlo directo al elemento #chat-box
+const chatBox = document.querySelector('.spaxio-flow-bubble-box #chat-box');
+if (chatBox) {
+    chatBox.style.flexDirection = 'column-reverse';
+    chatBox.style.justifyContent = 'flex-end';
 }
+ 
+}
+
+       
 async function inyectarLiveSpaxioFlow(urlVideo) {
     const targetID = "26fmetp4Q4WJ"; 
     const miNombre = localStorage.getItem('mi_nombre_perfil') || "Pedro Peres";
