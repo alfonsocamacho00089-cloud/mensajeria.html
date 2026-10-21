@@ -2906,11 +2906,13 @@ async function cargarConversacionCon(idDestino, nombreDestino, fotoDestino) {
 // 🔥 INTERCEPCIÓN MAESTRA CON VERCEL
         if (idDestino === "26fmetp4Q4WJ") {
          // Activar modo feed en el chat-box al abrir Spaxio Flow
-const box = document.getElementById('chat-box-flow');
-    if (box) {
-        // Puedes agregar una clase o dejarlo listo para recibir el feed
-        box.classList.add('spaxio-flow-activo');
-             }
+// En lugar de limpiar solo el chat-box genérico, haz esto:
+const box = (idDestino === "26fmetp4Q4WJ") 
+    ? document.getElementById('chat-box-flow') 
+    : document.getElementById('chat-box');
+
+if (box) box.innerHTML = "";
+         
     console.log("📡 Cargando historial global de SpaxioFlow desde Vercel...");
     
     const res = await fetch('/api/get-spaxioflow-feed');
@@ -3315,7 +3317,7 @@ function pintarMensaje(contenido, clase, hora, status, id, tipo = 'texto') {
                 ${horaFinal}
             </div>
         `;
-        box.prepend(div);
+        box.appendChild(div);
         box.scrollTop = box.scrollHeight;
  }
     else if (esCosaNueva) {
