@@ -5590,8 +5590,8 @@ function anexarUnicoMensajeAlFeed(msg) {
 
     const miUserId = localStorage.getItem('mi_dropis_id');
     const esMio = msg.sender_id === miUserId;
-    const claseBurbuja = esMio ?? 'msg-izquierda';
-    
+    const claseBurbuja = esMio || 'msg-izquierda';
+
     // Mapeamos el tipo de contenido que viene de Supabase
     let tipoMapeado = 'texto';
     if (msg.tipo === 'video') tipoMapeado = 'video';
