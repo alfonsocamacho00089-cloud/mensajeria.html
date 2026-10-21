@@ -2509,8 +2509,12 @@ const base64 = btoa(binary);
 if (targetID === "26fmetp4Q4WJ") {
     const miNombre = localStorage.getItem('mi_nombre_perfil') || "Pedro Peres"; 
     const miUserId = localStorage.getItem('mi_dropis_id') || "anonimo";
-    
- 
+    // Si es Spaxio Flow, usamos su contenedor; de lo contrario, null (no hace nada en los chats normales)
+const contenedorFinal = (msg.contactoId === "26fmetp4Q4WJ" || idDestino === "26fmetp4Q4WJ")
+    ? document.getElementById('chat-box-flow')
+    : null;
+
+if (contenedorFinal) contenedorFinal.prepend(div);
              
     // Mapeamos los tipos para que tu base de datos los reciba limpios
     let tipoFinal = tipoValidado;
