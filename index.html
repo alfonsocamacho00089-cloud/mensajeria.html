@@ -981,7 +981,38 @@ margin: 0;
     max-width: 100% !important;
     flex: 1 1 100% !important;
 }
-      
+
+/* Estas reglas solo se activan dentro de SpaxioFlow gracias al selector padre */
+.spaxio-flow-bubble-box .msg-burbuja { 
+    max-width: 85%; 
+    width: fit-content; 
+    padding: 8px 15px 8px 15px !important; 
+    border-radius: 12px; 
+    font-size: 16px !important; 
+    position: relative; 
+    word-wrap: break-word; 
+    margin-bottom: 2px;
+    display: inline-block; 
+    line-height: 1.2;
+}
+
+.spaxio-flow-bubble-box .msg-derecha { 
+    align-self: flex-end; 
+    background: linear-gradient(135deg, rgba(0, 150, 255, 0.8) 0%, rgba(0, 100, 200, 0.8) 100%); 
+    color: #ffffff; 
+    border-bottom-right-radius: 15px; 
+    border-top-right-radius: 2px;
+}
+
+.spaxio-flow-bubble-box .msg-izquierda { 
+    align-self: flex-start; 
+    background: rgba(32, 44, 51, 0.6); 
+    color: #ffffff; 
+    border-bottom-left-radius: 20px; 
+    border-top-left-radius: 2px;
+      }
+
+ 
     </style>
 
 </head>
@@ -1049,6 +1080,13 @@ margin: 0;
         <span class="resaltado-oro">Más información.</span>
     </p>
  </div>
+
+ <!-- Contenedor exclusivo para SpaxioFlow -->
+<div class="spaxio-flow-bubble-box">
+    <div id="chat-box">
+        <!-- Aquí dentro se pintarán las burbujas de SpaxioFlow -->
+    </div>
+</div>
 
 <div id="modal-perfil" class="modal" style="display:none; padding: 15px; background: #1e222b; z-index: 25000; box-sizing: border-box; text-align: center;">
     
