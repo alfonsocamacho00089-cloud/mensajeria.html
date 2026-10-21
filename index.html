@@ -2897,29 +2897,18 @@ function procesarQRScanner(contenido) {
     document.getElementById('modal-nuevocontacto').style.display = 'none';
     pintarAgendaContactos();
      }
-    aviso de seguridad en Spaxio Flow
-    
-    
-    
-async function cargarConversacionCon(idDestino, nombreDestino, fotoDestino) {
-    const box = document.getElementById('chat-box');
-    if (!box) return;
 
-    // 1. Limpiar pantalla
-    box.innerHTML = ""; 
-    
-    // 2. Guardar el ID del contacto en el input oculto
+             async function cargarConversacionCon(idDestino, nombreDestino, fotoDestino) {
+    const boxChatNormal = document.getElementById('chat-box');
+    const boxSpaxioFlow = document.querySelector('.spaxio-flow-bubble-box');
     const targetInput = document.querySelector('#target-id');
-    if (targetInput) targetInput.value = idDestino;
-
-    // 3. Poner el nombre en el Header (usando TU ID: nombre-dueño-header)
     const headerNombre = document.getElementById('nombre-dueño-header');
-    if (headerNombre) {
-        headerNombre.innerText = nombreDestino;
-    }
+    const avisoSec = document.getElementById('aviso-seguridad');
 
-     
-    // 4. Lógica de tu FOTO original (Mantiene el DIV con inicial o la IMG)
+    if (targetInput) targetInput.value = idDestino;
+    if (headerNombre) headerNombre.innerText = nombreDestino;
+
+    // Actualización segura de la foto de perfil del Header
     const imgHeader = document.getElementById('foto-perfil-header');
     if (imgHeader) {
         if (fotoDestino && fotoDestino !== "") {
@@ -2932,104 +2921,101 @@ async function cargarConversacionCon(idDestino, nombreDestino, fotoDestino) {
             }
         } else {
             const inicial = nombreDestino ? nombreDestino.charAt(0).toUpperCase() : '?';
-            imgHeader.outerHTML = `<div id="foto-perfil-header" class="foto-perfil" style="width:40px; height:40px; border-radius:50%; background:#ffd700; color:#000; display:flex; align-items:center; justify-content:center; font-weight:900; border:2px solid #000; text-shadow: none !important;">${inicial}</div>`;
+            imgHeader.outerHTML = `<div id="foto-perfil-header" class="foto-perfil" style="width:40px; height:40px; border-radius:50%; background:#ffd700; color:#000; display:flex; align-items:center; justify-content:center; font-weight:900; border:2px solid #000;">${inicial}</div>`;
         }
     }
 
-        
-// 5. CARGA DESDE v10 (IndexedDB)
-    localStorage.removeItem('chat_' + idDestino);
-
     try {
-        const box = document.getElementById('chat-box');
-        if (box) box.innerHTML = ""; 
+        // =========================================================
+        // CASO 1: SPAXIO FLOW (ID: 26fmetp4Q4WJ)
+        // =========================================================
+        if (idDestino === "26fmetp4Q4WJ") {
+            if (avisoSec) avisoSec.style.display = 'none';
+            if (boxChatNormal) boxChatNormal.style.display = 'none';
+            if (boxSpaxioFlow) boxSpaxioFlow.classList.add('activo');
 
+            const boxFlow = document.getElementById('chat-box-flow');
+            if (boxFlow) boxFlow.innerHTML = "";
+            
+            console.log("📡 Cargando historial global de SpaxioFlow desde Vercel...");
+            const res = await fetch('/api/get-spaxioflow-feed');
+            if (!res.ok) throw new Error("Fallo al obtener el feed desde el backend");
+            const posts = await res.json();
 
-
-// 🔥 INTERCEPCIÓN MAESTRA CON VERCEL
-if (idDestino === "26fmetp4Q4WJ") {
-    const avisoSec = document.getElementById('aviso-seguridad');
-    if (avisoSec) avisoSec.style.display = 'none';
-
-    // 🌟 NUEVO: Ocultar el chat normal y activar la caja de Spaxio Flow limpiamente
-    const boxChatNormal = document.getElementById('chat-box');
-    const boxSpaxioFlow = document.querySelector('.spaxio-flow-bubble-box');
-    
-    if (boxChatNormal) boxChatNormal.style.display = 'none';
-    if (boxSpaxioFlow) boxSpaxioFlow.classList.add('activo'); // <--- AQUÍ ESTÁ LA CLAVE
-
-    
-    // 2. Limpiar el contenedor de Spaxio Flow
-    const box = document.getElementById('chat-box-flow');
-    if (box) box.innerHTML = "";
-       
-    console.log("📡 Cargando historial global de SpaxioFlow desde Vercel...");
-    
-    const res = await fetch('/api/get-spaxioflow-feed');
-    if (!res.ok) throw new Error("Fallo al obtener el feed desde el backend");
-    const posts = await res.json();
-
-    if (posts && Array.isArray(posts)) {
-     
-    for (const post of posts) {
-        const idContenido = "feed_" + post.id;
-        const nombreRemitente = post.sender_name || 'H.A.R.V.I.S.';
-        // 🚀 SOLO DIBUJA SI EL ELEMENTO NO EXISTE EN LA PANTALLA
-        if (!document.getElementById(idContenido)) {
-            const miUserId = localStorage.getItem('mi_dropis_id');
-            const esMio = post.sender_id === miUserId;
-
-            if (typeof guardarLocal === "function") {
-                await guardarLocal('mensajes', {
-                    id: idContenido,
-                    contactoId: "26fmetp4Q4WJ",
-                    texto: post.content,
-                    clase: 'msg-izquierda',
-                    status: 'leido',
-                    nombreRemitente,
-                    tipo: post.tipo || 'texto',
-                    ts: new Date(post.created_at || Date.now()).getTime(),
-                    hora: new Date(post.created_at || Date.now()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })
-                });
+            if (posts && Array.isArray(posts)) {
+                for (const post of posts) {
+                    const idContenido = "feed_" + post.id;
+                    const nombreRemitente = post.sender_name || 'H.A.R.V.I.S.';
+                    
+                    if (!document.getElementById(idContenido)) {
+                        const miUserId = localStorage.getItem('mi_dropis_id');
+                        
+                        if (typeof guardarLocal === "function") {
+                            await guardarLocal('mensajes', {
+                                id: idContenido,
+                                contactoId: "26fmetp4Q4WJ",
+                                texto: post.content,
+                                clase: 'msg-izquierda',
+                                status: 'leido',
+                                nombreRemitente,
+                                tipo: post.tipo || 'texto',
+                                ts: new Date(post.created_at || Date.now()).getTime(),
+                                hora: new Date(post.created_at || Date.now()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })
+                            });
+                        }
+                        pintarMensaje(post.content, 'msg-izquierda', nombreRemitente, 'leido', idContenido, post.tipo); 
+                    }
+                }
             }
+            iniciarRealtimeSpaxioFlow("26fmetp4Q4WJ");
 
-             pintarMensaje(post.content, 'msg-izquierda', nombreRemitente, 'leido', idContenido, post.tipo); }
-             
-             }
-             }
-         iniciarRealtimeSpaxioFlow("26fmetp4Q4WJ");
-             
-} else {
+        } else {
+            // =========================================================
+            // CASO 2: CHATS PRIVADOS O ASISTENTE H.A.R.V.I.S.
+            // =========================================================
+            if (boxChatNormal) boxChatNormal.style.display = 'flex';
+            if (avisoSec) avisoSec.style.display = 'block';
+            if (boxSpaxioFlow) boxSpaxioFlow.classList.remove('activo');
 
-             
-             const boxChatNormal = document.getElementById('chat-box');
-    const boxSpaxioFlow = document.querySelector('.spaxio-flow-bubble-box');
-    
-     
-            // 🔒 LÓGICA OPTIMIZADA: Últimos 50 mensajes para chats privados
+            if (boxChatNormal) boxChatNormal.innerHTML = "";
+
             const todosLosMensajes = await obtenerTodo('mensajes');
             const mensajesFiltrados = todosLosMensajes.filter(m => String(m.contactoId) === String(idDestino));
+            const ultimosMensajes = mensajesFiltrados.slice(-20); // Ajustado a 20 para optimizar rendimiento
 
-            // Tomamos solo los últimos 50 para que el chat vuele al abrir
-            const ultimos10 = mensajesFiltrados.slice(-10);
-           if (boxChatNormal) boxChatNormal.style.display = 'flex';
-           if (boxSpaxioFlow) boxSpaxioFlow.classList.remove('activo'); // <--- AQUÍ SE QUITA LA CLASE
-           
-            if (typeof renderizarMensajes === "function") {
-                renderizarMensajes(ultimos10);
-            } else {
-                ultimos10.forEach(m => {
-                    pintarMensaje(m.texto, m.clase, m.hora, m.status || 'enviado', m.id, m.tipo || 'texto');
-                });
+            ultimosMensajes.forEach(m => {
+                pintarMensaje(m.texto, m.clase, m.hora, m.status || 'enviado', m.id, m.tipo || 'texto');
+            });
+
+            // Inserción del aviso de seguridad cifrado clonado en chats normales
+            if (boxChatNormal && avisoSec) {
+                const copiaVieja = boxChatNormal.querySelector('.encriptado-box');
+                if (copiaVieja) copiaVieja.remove();
+
+                const avisoClonado = avisoSec.cloneNode(true);
+                avisoClonado.style.display = 'block';
+                boxChatNormal.prepend(avisoClonado);
             }
-        } 
-     
-          // <--- Cierra el else correctamente
-   
+        }
+
+        // Limpieza final de notificaciones no leídas
+        localStorage.setItem('unread_' + idDestino, 0);
+        if (typeof pintarAgendaContactos === "function") pintarAgendaContactos();
+
+        const inputMsg = document.getElementById('msg-text');
+        if (inputMsg) inputMsg.focus();
+
     } catch (e) {
-        console.error("❌ Error cargando mensajes del feed:", e);
+        console.error("❌ Error crítico en cargarConversacionCon:", e);
+    }
              }
-     
+    
+    
+    
+ 
+       
+    
+
                 
         // =========================================================
     // EL AVISO CLONADO (Al final de cargarConversacionCon)
