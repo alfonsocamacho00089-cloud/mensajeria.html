@@ -5605,7 +5605,12 @@ function iniciarRealtimeSpaxioFlow(conversacionId) {
             // Si es de otro usuario, lo dibuja en el feed de inmediato
             anexarUnicoMensajeAlFeed(nuevoMensaje);
             // Si pasa este filtro, ahora sí se pinta (solo para mensajes del vecino)
-            
+            // Opción A: Aplicarlo directo al elemento #chat-box
+const chatBox = document.querySelector('.spaxio-flow-bubble-box #chat-box');
+if (chatBox) {
+    chatBox.style.flexDirection = 'column-reverse';
+    chatBox.style.justifyContent = 'flex-end';
+     }
 
      
         
