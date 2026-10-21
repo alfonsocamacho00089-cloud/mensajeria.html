@@ -5639,7 +5639,7 @@ function iniciarRealtimeSpaxioFlow(conversacionId) {
              
 // 2. Función quirúrgica para pintar solo el mensaje nuevo (Cero lag, cero parpadeo)
 function anexarUnicoMensajeAlFeed(msg) {
-    const contenedor = document.getElementById('chat-box');
+    const contenedor = document.getElementById('chat-box-flow');
     if (!contenedor) return;
 
     const msgIdUnico = "rt_" + msg.id;
