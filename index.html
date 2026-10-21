@@ -982,63 +982,70 @@ margin: 0;
     flex: 1 1 100% !important;
 }
 
-/* Estas reglas solo se activan dentro de SpaxioFlow gracias al selector padre */
-.spaxio-flow-bubble-box .msg-burbuja { 
-    max-width: 85%; 
-    width: fit-content; 
-    padding: 8px 15px 8px 15px !important; 
-    border-radius: 12px; 
-    font-size: 16px !important; 
-    position: relative; 
-    word-wrap: break-word; 
-    margin-bottom: 2px;
-    display: inline-block; 
-    line-height: 1.2;
+/* ========================================================= */
+/* --- ESTILOS AISLADOS Y SEGUROS PARA SPAXIO FLOW --- */
+/* ========================================================= */
+
+.spaxio-flow-bubble-box {
+    position: relative !important;
+    flex: 1 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important;
+    height: 100% !important;
+    width: 100% !important;
+    background: transparent !important;
 }
 
-      /* Asegura que el flujo invierta las burbujas para que la nueva quede arriba */
+/* Contenedor interno con scroll táctil nativo y máscara superior limpia */
+.spaxio-flow-bubble-box #chat-box-flow {
+    flex: 1 !important;
+    overflow-y: auto !important;
+    display: flex !important;
+    flex-direction: column !important; /* Flujo normal para permitir el scroll natural con los dedos */
+    gap: 5px !important;
+    position: relative !important;
+    
+    /* Propiedades táctiles obligatorias para móviles */
+    touch-action: pan-y !important;
+    -webkit-overflow-scrolling: touch !important;
+    overscroll-behavior-y: contain !important;
+    z-index: 5 !important;
+
+    /* Máscara de desvanecido superior e inferior (tope superior suave y base limpia) */
+    mask-image: linear-gradient(to bottom, transparent 5%, black 15%, black 85%, transparent 95%) !important;
+    -webkit-mask-image: linear-gradient(to bottom, transparent 5%, black 15%, black 85%, transparent 95%) !important;
+}
+
+/* Estructura de burbujas exclusivas dentro de Spaxio Flow para evitar choques */
+.spaxio-flow-bubble-box .msg-burbuja { 
+    max-width: 85% !important; 
+    width: fit-content !important; 
+    padding: 8px 15px !important; 
+    border-radius: 12px !important; 
+    font-size: 16px !important; 
+    position: relative !important; 
+    word-wrap: break-word !important; 
+    margin-bottom: 2px !important;
+    display: inline-block !important; 
+    line-height: 1.2 !important;
+}
 
 .spaxio-flow-bubble-box .msg-derecha { 
-    align-self: flex-end; 
-    background: linear-gradient(135deg, rgba(0, 150, 255, 0.8) 0%, rgba(0, 100, 200, 0.8) 100%); 
-    color: #ffffff; 
-    border-bottom-right-radius: 15px; 
-    border-top-right-radius: 2px;
+    align-self: flex-end !important; 
+    background: linear-gradient(135deg, rgba(0, 150, 255, 0.8) 0%, rgba(0, 100, 200, 0.8) 100%) !important; 
+    color: #ffffff !important; 
+    border-bottom-right-radius: 15px !important; 
+    border-top-right-radius: 2px !important;
 }
 
 .spaxio-flow-bubble-box .msg-izquierda { 
-    align-self: flex-start; 
-    background: rgba(32, 44, 51, 0.6); 
-    color: #ffffff; 
-    border-bottom-left-radius: 20px; 
-    border-top-left-radius: 2px;
-      }
-/* --- CORRECCIÓN TÁCTIL PARA SPAXIO FLOW --- */
-.spaxio-flow-bubble-box {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-    position: relative;
-    height: 100%;
-}
-
-#chat-box-flow {
-    flex: 1 !important;
-    overflow-y: auto !important;
-    padding: 15px;
-    padding-bottom: 70px !important;
-    display: flex !important;
-    flex-direction: column !important; /* Volvemos al flujo normal para que el scroll táctil funcione natural */
-    gap: 5px;
-    position: relative;
-    touch-action: pan-y !important; /* Habilita el desplazamiento vertical con el dedo */
-    -webkit-overflow-scrolling: touch !important; /* Suaviza el scroll en iOS y Android */
-    overscroll-behavior-y: contain !important;
-    z-index: 5;
- mask-image: linear-gradient(to bottom, transparent 5%, black 15%, black 85%, transparent 95%);
-    -webkit-mask-image: linear-gradient(to bottom, transparent 5%, black 15%, black 85%, transparent 95%);
-      }
+    align-self: flex-start !important; 
+    background: rgba(32, 44, 51, 0.6) !important; 
+    color: #ffffff !important; 
+    border-bottom-left-radius: 20px !important; 
+    border-top-left-radius: 2px !important;
+                                                                                   }
 
  
     </style>
