@@ -1011,7 +1011,7 @@ margin: 0;
     border-bottom-left-radius: 20px; 
     border-top-left-radius: 2px;
       }
-.spaxio-flow-bubble-box #chat-box {
+.spaxio-flow-bubble-box #chat-box-flow {
     mask-image: linear-gradient(to bottom, transparent 5%, black 15%, black 75%, transparent 95%);
     -webkit-mask-image: linear-gradient(to bottom, transparent 5%, black 15%, black 75%, transparent 95%);
     overscroll-behavior-y: contain;
@@ -1089,7 +1089,7 @@ margin: 0;
 
  <!-- Contenedor exclusivo para SpaxioFlow -->
 <div class="spaxio-flow-bubble-box">
-    <div id="chat-box" style="display: flex; flex-direction: column-reverse; justify-content: flex-end;">
+    <div id="chat-box-flow" style="display: flex; flex-direction: column-reverse; justify-content: flex-end;">
         <!-- Aquí dentro se pintarán las burbujas de SpaxioFlow -->
     </div>
 </div>
@@ -2900,7 +2900,7 @@ async function cargarConversacionCon(idDestino, nombreDestino, fotoDestino) {
 // 🔥 INTERCEPCIÓN MAESTRA CON VERCEL
         if (idDestino === "26fmetp4Q4WJ") {
          // Activar modo feed en el chat-box al abrir Spaxio Flow
-const box = document.getElementById('chat-box');
+const box = document.getElementById('chat-box-flow');
 if (box) {
     box.prepend();
  }
