@@ -2914,14 +2914,14 @@ async function cargarConversacionCon(idDestino, nombreDestino, fotoDestino) {
     } catch (e) {
         console.error("❌ Error cargando mensajes del feed:", e);
              }
-                
-        // =========================================================
+          // =========================================================
     // EL AVISO CLONADO (Al final de cargarConversacionCon)
     // =========================================================
     const chatBox = document.getElementById('chat-box');
     const avisoOriginal = document.getElementById('aviso-seguridad');
     
-    if (chatBox && avisoOriginal) {
+    // 🛡️ REGLA: Solo se clona si el chat abierto NO es Spaxio Flow ("26fmetp4Q4WJ")
+    if (chatBox && avisoOriginal && idDestino !== "26fmetp4Q4WJ") {
         // 1. Eliminamos cualquier copia vieja que haya quedado por si acaso
         const copiaVieja = chatBox.querySelector('.encriptado-box');
         if (copiaVieja) copiaVieja.remove();
@@ -2934,8 +2934,8 @@ async function cargarConversacionCon(idDestino, nombreDestino, fotoDestino) {
         
         // 4. Lo inyectamos arriba de los mensajes
         chatBox.prepend(avisoClonado);
-    }
-
+             }      
+        
 
 
 
