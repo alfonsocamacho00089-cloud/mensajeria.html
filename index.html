@@ -997,11 +997,7 @@ margin: 0;
 }
 
       /* Asegura que el flujo invierta las burbujas para que la nueva quede arriba */
-#chat-box-flow {
-    display: flex !important;
-    flex-direction: column-reverse !important; 
-    justify-content: flex-end !important;
-      }
+
 .spaxio-flow-bubble-box .msg-derecha { 
     align-self: flex-end; 
     background: linear-gradient(135deg, rgba(0, 150, 255, 0.8) 0%, rgba(0, 100, 200, 0.8) 100%); 
@@ -1017,13 +1013,30 @@ margin: 0;
     border-bottom-left-radius: 20px; 
     border-top-left-radius: 2px;
       }
-.spaxio-flow-bubble-box #chat-box-flow {
-    mask-image: linear-gradient(to bottom, transparent 5%, black 15%, black 85%, transparent 95%);
-    -webkit-mask-image: linear-gradient(to bottom, transparent 5%, black 15%, black 85%, transparent 95%);
-    overscroll-behavior-y: contain;
-    flex-direction: column-reverse !important; /* Invierte el orden: el primero llega arriba */
-    justify-content: flex-end; /* Empuja los elementos hacia arriba */
-      }
+/* --- CORRECCIÓN TÁCTIL PARA SPAXIO FLOW --- */
+.spaxio-flow-bubble-box {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    position: relative;
+    height: 100%;
+}
+
+#chat-box-flow {
+    flex: 1 !important;
+    overflow-y: auto !important;
+    padding: 15px;
+    padding-bottom: 70px !important;
+    display: flex !important;
+    flex-direction: column !important; /* Volvemos al flujo normal para que el scroll táctil funcione natural */
+    gap: 5px;
+    position: relative;
+    touch-action: pan-y !important; /* Habilita el desplazamiento vertical con el dedo */
+    -webkit-overflow-scrolling: touch !important; /* Suaviza el scroll en iOS y Android */
+    overscroll-behavior-y: contain !important;
+    z-index: 5;
+}
  
     </style>
 
