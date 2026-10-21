@@ -996,6 +996,12 @@ margin: 0;
     line-height: 1.2;
 }
 
+      /* Asegura que el flujo invierta las burbujas para que la nueva quede arriba */
+#chat-box-flow {
+    display: flex !important;
+    flex-direction: column-reverse !important; 
+    justify-content: flex-end !important;
+      }
 .spaxio-flow-bubble-box .msg-derecha { 
     align-self: flex-end; 
     background: linear-gradient(135deg, rgba(0, 150, 255, 0.8) 0%, rgba(0, 100, 200, 0.8) 100%); 
@@ -2901,9 +2907,10 @@ async function cargarConversacionCon(idDestino, nombreDestino, fotoDestino) {
         if (idDestino === "26fmetp4Q4WJ") {
          // Activar modo feed en el chat-box al abrir Spaxio Flow
 const box = document.getElementById('chat-box-flow');
-if (box) {
-    box.prepend();
- }
+    if (box) {
+        // Puedes agregar una clase o dejarlo listo para recibir el feed
+        box.classList.add('spaxio-flow-activo');
+             }
     console.log("📡 Cargando historial global de SpaxioFlow desde Vercel...");
     
     const res = await fetch('/api/get-spaxioflow-feed');
