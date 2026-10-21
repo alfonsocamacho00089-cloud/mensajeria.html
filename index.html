@@ -5562,7 +5562,7 @@ function iniciarRealtimeSpaxioFlow(conversacionId) {
             const miUserId = localStorage.getItem('mi_dropis_id') || "anonimo";
 
             // 🛡️ Buscamos el ID del emisor con total seguridad
-            const idEmisorRealtime = nuevoMensaje.sender_id || nuevoMensaje.user_id || nuevoMensaje.remitente;
+            const idEmisorRealtime = mensajeSeguro.sender_id || mensajeSeguro.user_id || mensajeSeguro.remitente;
 
             console.log("🔍 Realtime detectó emisor:", idEmisorRealtime, "| Mi ID:", miUserId);
 
@@ -5573,7 +5573,7 @@ function iniciarRealtimeSpaxioFlow(conversacionId) {
             }
 
             // Si es de otro usuario (el vecino), se pinta limpio en el feed de inmediato
-            pintarMensaje(nuevoMensaje);
+            pintarMensaje(mensajeSeguro);
         
     
 
