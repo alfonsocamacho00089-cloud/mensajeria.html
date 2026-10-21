@@ -986,10 +986,16 @@ margin: 0;
 /* --- FIX DEFINITIVO DE TOPE Y POSICIONAMIENTO SPAXIO FLOW --- */
 /* ========================================================= */
 
+/* Ocultar por defecto el contenedor de Spaxio Flow para que no interfiera en chats normales */
 .spaxio-flow-bubble-box {
+    display: none !important;
+}
+
+/* Solo se muestra cuando la clase 'activo' esté presente con su estructura exacta */
+.spaxio-flow-bubble-box.activo {
     position: relative !important;
     width: 100% !important;
-    height: calc(100svh - 130px) !important; /* Calza exacto entre header y barra flotante */
+    height: calc(100svh - 130px) !important; /* Calza exacto entre header y barra flotante[cite: 1] */
     display: flex !important;
     flex-direction: column !important;
     overflow: hidden !important;
@@ -999,15 +1005,15 @@ margin: 0;
 }
 
 /* Ocultar cualquier clon del aviso de seguridad dentro de Spaxio Flow */
-.spaxio-flow-bubble-box .encriptado-box,
-.spaxio-flow-bubble-box #aviso-seguridad {
+.spaxio-flow-bubble-box.activo .encriptado-box,
+.spaxio-flow-bubble-box.activo #aviso-seguridad {
     display: none !important;
     margin: 0 !important;
     height: 0 !important;
     padding: 0 !important;
 }
 
-.spaxio-flow-bubble-box #chat-box-flow {
+.spaxio-flow-bubble-box.activo #chat-box-flow {
     flex: 1 !important;
     width: 100% !important;
     height: 100% !important;
@@ -1018,16 +1024,15 @@ margin: 0;
     justify-content: flex-start !important;
     gap: 10px !important;
     
-    /* Scroll táctil fluido */
+    /* Scroll táctil fluido[cite: 1] */
     touch-action: pan-y !important;
     -webkit-overflow-scrolling: touch !important;
     overscroll-behavior-y: contain !important;
 
-    /* Desvanecido sutil arriba (4%) para que la tarjeta llegue bien arriba sin el parche negro */
+    /* Desvanecido sutil arriba (4%) para que la tarjeta llegue bien arriba[cite: 1] */
     mask-image: linear-gradient(to bottom, transparent 0%, black 4%, black 92%, transparent 100%) !important;
     -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 4%, black 92%, transparent 100%) !important;
       }
-
 /* Estructura de burbujas exclusivas dentro de Spaxio Flow para evitar choques */
 .spaxio-flow-bubble-box .msg-burbuja { 
     max-width: 85% !important; 
