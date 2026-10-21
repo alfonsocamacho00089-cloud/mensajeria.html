@@ -3186,17 +3186,7 @@ async function cargarProto() {
     
     // Elimina los saltos de línea que H.A.R.V.I.S. pueda haber puesto
     textoReal = textoReal.replace(/[\r\n]+/g, '');
-const esSpaxioFlow = (id && (id.includes('feed_') || id.includes('live_rt_')));
 
-    // 2. Crear el div y asignarle sus estilos desde el inicio
-    const div = document.createElement('div');
-    if (esSpaxioFlow) {
-        div.className = "mensaje msg-spaxio-flow-tarjeta"; 
-        div.style.cssText = "width: 100% !important; max-width: 100% !important; margin: 8px 0 !important; align-self: stretch !important; background: rgba(21, 24, 40, 0.85) !important; border: 1px solid rgba(255, 215, 0, 0.2) !important; border-radius: 16px !important; padding: 12px !important;";
-    } else {
-        div.className = "mensaje msg-burbuja " + clase; 
-    }
-    div.id = id;
   
     // Detector de GIFs y Multimedia
     if (textoReal.includes('i.ibb.co') || textoReal.includes('firebasestorage') || textoReal.includes('.gif') || textoReal.includes('giphy.com')) {
@@ -3210,14 +3200,18 @@ const esSpaxioFlow = (id && (id.includes('feed_') || id.includes('live_rt_')));
     }
 
     const div = document.createElement('div');
-    div.className = "mensaje msg-burbuja " + clase; 
-    div.id = id;
+div.className = "mensaje msg-burbuja " + clase; 
+div.id = id;
 
-    const horaFinal = hora || new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
-    const checkHTML = clase === 'msg-derecha' ? `<span style="margin-left:5px; font-size:10px;">${status === 'leido' ? '✓✓' : '✓'}</span>` : '';
-    
-    console.log("Intentando pintar tipo:", tipo, "con contenido:", contenido);
-    
+if (id && (id.includes('feed_') || id.includes('live_rt_'))) {
+    div.className = "mensaje msg-spaxio-flow-tarjeta";
+    div.style.cssText = "width: 100% !important; max-width: 100% !important; margin: 8px 0 !important; align-self: stretch !important; background: rgba(21, 24, 40, 0.85) !important; border: 1px solid rgba(255, 215, 0, 0.2) !important; border-radius: 16px !important; padding: 12px !important;";
+}
+
+const horaFinal = hora || new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
+const checkHTML = clase === 'msg-derecha' ? `<span style="margin-left:5px; font-size:10px;">${status === 'leido' ? '✓✓' : '✓'}</span>` : '';
+
+console.log("Intentando pintar tipo:", tipo, "con contenido:", contenido);
     const esCosaNueva = textoReal.includes('youtube.com/') || textoReal.includes('youtu.be/') || 
                     textoReal.includes('tiktok.com/') || textoReal.includes('facebook.com/') || 
                     textoReal.includes('supabase.co') || textoReal.startsWith('LIVEKIT_ROOM:') ||
