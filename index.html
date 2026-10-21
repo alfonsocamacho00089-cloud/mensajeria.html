@@ -2931,12 +2931,7 @@ async function cargarConversacionCon(idDestino, nombreDestino, fotoDestino) {
 
 // 🔥 INTERCEPCIÓN MAESTRA CON VERCEL
         if (idDestino === "26fmetp4Q4WJ") {
-         // Activar modo feed en el chat-box al abrir Spaxio Flow
-// En lugar de limpiar solo el chat-box genérico, haz esto:
-const box = (idDestino === "26fmetp4Q4WJ") 
-    ? document.getElementById('chat-box-flow') 
-    : document.getElementById('chat-box');
-
+         const box = document.getElementById('chat-box-flow');
 if (box) box.innerHTML = "";
          
     console.log("📡 Cargando historial global de SpaxioFlow desde Vercel...");
