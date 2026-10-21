@@ -5574,12 +5574,7 @@ function iniciarRealtimeSpaxioFlow(conversacionId) {
 
             // Si es de otro usuario, se pinta limpio
             pintarMensaje(
-    nuevoMensaje.content || nuevoMensaje.texto || "", 
-    'msg-izquierda', 
-    null, 
-    'leido', 
-    "rt_" + nuevoMensaje.id, 
-    nuevoMensaje.tipo || 'texto'
+    anexarUnicoMensajeAlFeed
 );
     // Si es de otro usuario (el vecino), se pinta limpio en el feed
     
