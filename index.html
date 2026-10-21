@@ -2930,9 +2930,21 @@ async function cargarConversacionCon(idDestino, nombreDestino, fotoDestino) {
 
 
 // 🔥 INTERCEPCIÓN MAESTRA CON VERCEL
-        if (idDestino === "26fmetp4Q4WJ") {
-         const box = document.getElementById('chat-box-flow');
-if (box) box.innerHTML = "";
+if (idDestino === "26fmetp4Q4WJ") {
+    // 1. Ocultar el aviso de seguridad en Spaxio Flow
+    const avisoSec = document.getElementById('aviso-seguridad');
+    if (avisoSec) avisoSec.style.display = 'none';
+
+    // 2. Limpiar el contenedor de Spaxio Flow
+    const box = document.getElementById('chat-box-flow');
+    if (box) box.innerHTML = "";
+    
+    // ... resto de tu código de Spaxio Flow ...
+} else {
+    // Si entra a cualquier otro chat privado, asegúrate de volver a mostrar el aviso
+    const avisoSec = document.getElementById('aviso-seguridad');
+    if (avisoSec) avisoSec.style.display = 'block';
+ }= "";
          
     console.log("📡 Cargando historial global de SpaxioFlow desde Vercel...");
     
