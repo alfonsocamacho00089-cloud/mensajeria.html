@@ -3005,16 +3005,16 @@ if (idDestino === "26fmetp4Q4WJ") {
              const boxChatNormal = document.getElementById('chat-box');
     const boxSpaxioFlow = document.querySelector('.spaxio-flow-bubble-box');
     
-    if (boxChatNormal) boxChatNormal.style.display = 'flex';
-    if (boxSpaxioFlow) boxSpaxioFlow.classList.remove('activo'); // <--- AQUÍ SE QUITA LA CLASE
-    
+     
             // 🔒 LÓGICA OPTIMIZADA: Últimos 50 mensajes para chats privados
             const todosLosMensajes = await obtenerTodo('mensajes');
             const mensajesFiltrados = todosLosMensajes.filter(m => String(m.contactoId) === String(idDestino));
 
             // Tomamos solo los últimos 50 para que el chat vuele al abrir
             const ultimos10 = mensajesFiltrados.slice(-10);
-
+           if (boxChatNormal) boxChatNormal.style.display = 'flex';
+           if (boxSpaxioFlow) boxSpaxioFlow.classList.remove('activo'); // <--- AQUÍ SE QUITA LA CLASE
+           
             if (typeof renderizarMensajes === "function") {
                 renderizarMensajes(ultimos10);
             } else {
