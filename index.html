@@ -1012,9 +1012,11 @@ margin: 0;
     border-top-left-radius: 2px;
       }
 .spaxio-flow-bubble-box #chat-box {
-    mask-image: linear-gradient(to bottom, transparent 5%, black 15%, black 85%, transparent 95%);
-    -webkit-mask-image: linear-gradient(to bottom, transparent 5%, black 15%, black 85%, transparent 95%);
+    mask-image: linear-gradient(to bottom, transparent 5%, black 15%, black 75%, transparent 95%);
+    -webkit-mask-image: linear-gradient(to bottom, transparent 5%, black 15%, black 75%, transparent 95%);
     overscroll-behavior-y: contain;
+    flex-direction: column-reverse !important; /* Invierte el orden: el primero llega arriba */
+    justify-content: flex-end; /* Empuja los elementos hacia arriba */
       }
  
     </style>
