@@ -2937,22 +2937,15 @@ async function cargarConversacionCon(idDestino, nombreDestino, fotoDestino) {
         if (box) box.innerHTML = ""; 
 
 
+
 // 🔥 INTERCEPCIÓN MAESTRA CON VERCEL
 if (idDestino === "26fmetp4Q4WJ") {
-    // 1. Ocultar el chat privado normal y su aviso de seguridad
-    const chatBoxNormal = document.getElementById('chat-box');
-    if (chatBoxNormal) chatBoxNormal.style.display = 'none';
+    
+    // 2. Limpiar el contenedor de Spaxio Flow
+    const box = document.getElementById('chat-box-flow');
+    if (box) box.innerHTML = "";
+    
 
-    const avisoSec = document.getElementById('aviso-seguridad');
-    if (avisoSec) avisoSec.style.display = 'none';
-
-    // 2. Mostrar exclusivamente el contenedor de Spaxio Flow
-    const flowBox = document.querySelector('.spaxio-flow-bubble-box');
-    if (flowBox) flowBox.style.display = 'flex';
-
-    // 3. Limpiar el contenedor de Spaxio Flow
-    const boxFlow = document.getElementById('chat-box-flow');
-    if (boxFlow) boxFlow.innerHTML = "";
          
     console.log("📡 Cargando historial global de SpaxioFlow desde Vercel...");
     
@@ -2961,58 +2954,59 @@ if (idDestino === "26fmetp4Q4WJ") {
     const posts = await res.json();
 
     if (posts && Array.isArray(posts)) {
-        for (const post of posts) {
-            const idContenido = "feed_" + post.id;
-            const nombreRemitente = post.sender_name || 'H.A.R.V.I.S.';
-            
-            if (!document.getElementById(idContenido)) {
-                const miUserId = localStorage.getItem('mi_dropis_id');
-                const esMio = post.sender_id === miUserId;
+     
+    for (const post of posts) {
+        const idContenido = "feed_" + post.id;
+        const nombreRemitente = post.sender_name || 'H.A.R.V.I.S.';
+        // 🚀 SOLO DIBUJA SI EL ELEMENTO NO EXISTE EN LA PANTALLA
+        if (!document.getElementById(idContenido)) {
+            const miUserId = localStorage.getItem('mi_dropis_id');
+            const esMio = post.sender_id === miUserId;
 
-                if (typeof guardarLocal === "function") {
-                    await guardarLocal('mensajes', {
-                        id: idContenido,
-                        contactoId: "26fmetp4Q4WJ",
-                        texto: post.content,
-                        clase: 'msg-izquierda',
-                        status: 'leido',
-                        nombreRemitente,
-                        tipo: post.tipo || 'texto',
-                        ts: new Date(post.created_at || Date.now()).getTime(),
-                        hora: new Date(post.created_at || Date.now()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })
-                    });
-                }
-
-                pintarMensaje(post.content, 'msg-izquierda', nombreRemitente, 'leido', idContenido, post.tipo); 
+            if (typeof guardarLocal === "function") {
+                await guardarLocal('mensajes', {
+                    id: idContenido,
+                    contactoId: "26fmetp4Q4WJ",
+                    texto: post.content,
+                    clase: 'msg-izquierda',
+                    status: 'leido',
+                    nombreRemitente,
+                    tipo: post.tipo || 'texto',
+                    ts: new Date(post.created_at || Date.now()).getTime(),
+                    hora: new Date(post.created_at || Date.now()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })
+                });
             }
-        }
-    }
-    iniciarRealtimeSpaxioFlow("26fmetp4Q4WJ");
+
+             pintarMensaje(post.content, 'msg-izquierda', nombreRemitente, 'leido', idContenido, post.tipo); }
+             
+             }
+             }
+         iniciarRealtimeSpaxioFlow("26fmetp4Q4WJ");
              
 } else {
-    // 🔒 SI ES UN CHAT PRIVADO NORMAL:
-    // Mostramos el chat normal y ocultamos por completo Spaxio Flow
-    const chatBoxNormal = document.getElementById('chat-box');
-    if (chatBoxNormal) chatBoxNormal.style.display = 'flex';
 
-    const flowBox = document.querySelector('.spaxio-flow-bubble-box');
-    if (flowBox) flowBox.style.display = 'none';
+             
+             
+            // 🔒 LÓGICA OPTIMIZADA: Últimos 50 mensajes para chats privados
+            const todosLosMensajes = await obtenerTodo('mensajes');
+            const mensajesFiltrados = todosLosMensajes.filter(m => String(m.contactoId) === String(idDestino));
 
-    const avisoSec = document.getElementById('aviso-seguridad');
-    if (avisoSec) avisoSec.style.display = 'block';
+            // Tomamos solo los últimos 50 para que el chat vuele al abrir
+            const ultimos10 = mensajesFiltrados.slice(-10);
 
-    // Carga normal de mensajes privados...
-    const todosLosMensajes = await obtenerTodo('mensajes');
-    const mensajesFiltrados = todosLosMensajes.filter(m => String(m.contactoId) === String(idDestino));
-    const ultimos10 = mensajesFiltrados.slice(-10);
-
-    if (typeof renderizarMensajes === "function") {
-        renderizarMensajes(ultimos10);
-    } else {
-        ultimos10.forEach(m => {
-            pintarMensaje(m.texto, m.clase, m.hora, m.status || 'enviado', m.id, m.tipo || 'texto');
-        });
-    }
+            if (typeof renderizarMensajes === "function") {
+                renderizarMensajes(ultimos10);
+            } else {
+                ultimos10.forEach(m => {
+                    pintarMensaje(m.texto, m.clase, m.hora, m.status || 'enviado', m.id, m.tipo || 'texto');
+                });
+            }
+        } 
+     
+          // <--- Cierra el else correctamente
+   
+    } catch (e) {
+        console.error("❌ Error cargando mensajes del feed:", e);
              }
      
                 
