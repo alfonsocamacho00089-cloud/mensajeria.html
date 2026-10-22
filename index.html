@@ -3202,29 +3202,36 @@ async function cargarProto() {
     }
 
 const div = document.createElement('div');
+div.id = id;
 
-// 1. Detectamos de forma limpia si es una tarjeta de Spaxio Flow (por ID o por tipo de contenedor)
-const esSpaxioFlow = id && (id.includes('feed_') || id.includes('live_rt_') || id.startsWith('rt_'));
+// 1. Definimos las clases primero
+const esSpaxioFlow = id && (id.includes('feed_') || id.includes('live_rt_') || id.startsWith('rt_') || id.includes('feed_local_'));
 
 if (esSpaxioFlow) {
-    // Para Spaxio Flow forzamos la clase de tarjeta ancha y unificada
     div.className = "mensaje msg-spaxio-flow-tarjeta";
     div.style.cssText = "width: 100% !important; max-width: 100% !important; margin: 8px 0 !important; align-self: stretch !important; background: rgba(21, 24, 40, 0.85) !important; border: 1px solid rgba(255, 215, 0, 0.2) !important; border-radius: 16px !important; padding: 12px !important;";
 } else {
-    // Para tus chats privados normales, se queda tal cual con su burbuja de derecha o izquierda
     div.className = "mensaje msg-burbuja " + clase; 
 }
 
-div.id = id;
-
 const horaFinal = hora || new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
-// Si es Spaxio Flow, omitimos los checks de visto molestos en el feed si prefieres un look más limpio de red social
 const checkHTML = (!esSpaxioFlow && clase === 'msg-derecha') ? `<span style="margin-left:5px; font-size:10px;">${status === 'leido' ? '✓✓' : '✓'}</span>` : '';
 
 console.log("Intentando pintar tipo:", tipo, "con contenido:", contenido, "| ¿Es Spaxio Flow?:", esSpaxioFlow);
 
-// 🎯 Y forzamos el scroll arriba de inmediato para ver lo nuevo
+// 2. Aquí construyes tu `div.innerHTML` o manejas los Caminos (Camino 1, Camino 2, etc.)
+// ... (tu código de innerHTML o multimedia va aquí) ...
+
+// 3. 🎯 LA INSERCIÓN DEFINITIVA (Hacerla al final, una vez que el div ya está listo):
+if (esSpaxioFlow) {
+    // 🌊 SI ES SPAXIO FLOW: Nace arriba y el scroll se queda arriba
+    box.prepend(div);
     box.scrollTop = 0;
+} else {
+    // 💬 SI ES CHAT NORMAL: Se comporta como WhatsApp (al fondo)
+    box.appendChild(div);
+    box.scrollTop = box.scrollHeight;
+}
              
   const esCosaNueva = textoReal.includes('youtube.com/') || textoReal.includes('youtu.be/') || 
                     textoReal.includes('tiktok.com/') || textoReal.includes('facebook.com/') || 
