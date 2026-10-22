@@ -5620,19 +5620,21 @@ function anexarUnicoMensajeAlFeed(msg) {
 
     const horaFormateada = new Date(msg.created_at || Date.now()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
 
-    // Llamamos directamente a tu potente función 'pintarMensaje' ya existente en este index
-    pintarMensaje(
-        msg.content, 
-        claseBurbuja, 
-        horaFormateada, 
-        'leido', 
-        msgIdUnico, 
-        tipoMapeado
-    );
-// 🎯 Y forzamos el scroll arriba de inmediato para ver lo nuevo
-    contenedor.scrollTop = 0;
- 
-}
+    const div = document.createElement('div');
+    div.className = "mensaje msg-spaxio-flow-tarjeta";
+    div.id = msgIdUnico;
+    div.style.cssText = "width: 100% !important; max-width: 100% !important; margin: 8px 0 !important; background: rgba(21, 24, 40, 0.85) !important; border: 1px solid rgba(255, 215, 0, 0.2) !important; border-radius: 16px !important; padding: 12px !important;";
+    
+    div.innerHTML = `
+        <div style="font-weight: bold; color: #ffd700; margin-bottom: 5px;">${msg.sender_name || 'Usuario'}</div>
+        <div style="color: #fff;">${msg.content}</div>
+        <div style="font-size:10px; opacity:0.6; text-align:right; margin-top:4px;">${horaFormateada}</div>
+    `;
+
+    // ✅ LA CLAVE PARA QUE QUEDE ANCLADO ARRIBA:
+    contenedor.prepend(div);
+    contenedor.scrollTop = 0; // El scroll se clava arriba mostrando la publicación más reciente
+ }
             
 async function inyectarLiveSpaxioFlow(urlVideo) {
     const targetID = "26fmetp4Q4WJ"; 
