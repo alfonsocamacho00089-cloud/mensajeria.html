@@ -3270,7 +3270,7 @@ console.log("Intentando pintar tipo:", tipo, "con contenido:", contenido, "| ¿E
                 ${horaFinal}
             </div>
         `;
-        box.appendChild(div);
+        chatBox.prepend(elementoMensaje);
         box.scrollTop = box.scrollHeight;
  }
     else if (esCosaNueva) {
@@ -3290,7 +3290,7 @@ console.log("Intentando pintar tipo:", tipo, "con contenido:", contenido, "| ¿E
             </div>
         `;
         
-        chatBox.prepend(elementoMensaje);
+        box.appendChild(div);
         box.scrollTop = box.scrollHeight;
 
         requestAnimationFrame(() => {
