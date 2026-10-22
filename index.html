@@ -3270,9 +3270,10 @@ console.log("Intentando pintar tipo:", tipo, "con contenido:", contenido, "| ¿E
                 ${horaFinal}
             </div>
         `;
-        chatBox.prepend(elementoMensaje);
-        box.scrollTop = box.scrollHeight;
- }
+        chatBox.prepend(contenido); // O el nombre de la variable de tu elemento
+        box.scrollTop = 0;          // 🚀 Directo arriba para ver lo nuevo al instante
+
+             }
     else if (esCosaNueva) {
         // ----------------------------------------------------
         // CAMINO 1: LAS COSAS NUEVAS (Redes y Multimedia pesada)
