@@ -2852,6 +2852,7 @@ async function cargarConversacionCon(idDestino, nombreDestino, fotoDestino) {
         if (box) box.innerHTML = ""; 
 
 // 🔥 INTERCEPCIÓN MAESTRA CON VERCEL
+// 🔥 INTERCEPCIÓN MAESTRA CON VERCEL
 if (idDestino === "26fmetp4Q4WJ") {
     console.log("📡 Cargando historial global de SpaxioFlow desde Vercel...");
     
@@ -2861,29 +2862,28 @@ if (idDestino === "26fmetp4Q4WJ") {
         const posts = await res.json();
         
         const postsInvertidos = [...posts].reverse();
-        const chatBox = document.getElementById('chat-box');
-
         for (const post of postsInvertidos) {
             const idContenido = "feed_" + post.id;
             const nombreRemitente = post.sender_name || 'H.A.R.V.I.S.';
             
             // 🚀 SOLO DIBUJA SI EL ELEMENTO NO EXISTE EN LA PANTALLA
             if (!document.getElementById(idContenido)) {
-                // Aquí deberías llamar a tu función de pintado o lógica de historial unitaria
-                // (Ej: pintarMensaje o equivalente que uses para los posts)
+                // Aquí iría la lógica para dibujar el post en pantalla...
             }
+        }
         
-
-        // Activamos el realtime una sola vez al terminar de cargar el historial
         iniciarRealtimeSpaxioFlow("26fmetp4Q4WJ");
-
+       
+        // 🚀 AÑADE ESTA LÍNEA AL TERMINAR DE CARGAR EL HISTORIAL:
+        const chatBox = document.getElementById('chat-box');
         if (chatBox) {
             chatBox.scrollTop = chatBox.scrollHeight;
         }
-        
+
     } catch (e) {
         console.error("❌ Error cargando mensajes del feed:", e);
     }
+             }
 
     // =========================================================
     // EL AVISO CLONADO (Al final de cargarConversacionCon)
