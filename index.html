@@ -4665,18 +4665,7 @@ function escucharVozPedro(alRecibirTexto) {
 // =================================================================
 // 3. CEREBRO RESPONDEDOR LOCAL DE H.A.R.V.I.S.
 // =================================================================
-function procesarRespuestaHarvis(mensajeRecibidoDePedro) {
-    setTimeout(() => {
-        const respuestaRobot = "Entendido señor Peres, procesando comando en YouSpace de forma local.";
-        
-        // A) H.A.R.V.I.S. te responde hablando por los altavoces del celular
-        hablarHarvis(respuestaRobot);
-        
-        // B) PINTAR EN PANTALLA: Aquí usas tu función nativa para renderizar 
-        // el mensaje en el chat (por ejemplo, enviándolo a tu contenedor de mensajes).
 
-    }, 1000);
-}
 
 
 // =================================================================
@@ -4689,49 +4678,8 @@ function procesarRespuestaHarvis(mensajeRecibidoDePedro) {
 // 1. CONFIGURACIÓN INICIAL Y FILTRO DE ENVÍO NATIVO
 // =================================================================
 
-// =================================================================
-// CONFIGURACIÓN DEL MONITOR DE CONTROL DE FLUJO Y TOKENS
-// =================================================================
-const CONFIG_MONITOR = {
-  limiteEstimadoDiario: 50000, // Ajusta este techo según tu cuota libre en AI Studio
-  totalTokensConsumidos: 0
-};
 
-function actualizarMonitorAPI(tokensAcumuladosEnPeticion, estado = 'success', mensajeError = '') {
-  const txtLast = document.getElementById('tokens-last');
-  const txtTotal = document.getElementById('tokens-total');
-  const barraCuota = document.getElementById('quota-bar');
-  const txtStatus = document.getElementById('widget-status-text');
-  const indicadorEstado = document.querySelector('.status-dot');
 
-  if (!txtLast || !txtTotal || !barraCuota || !txtStatus || !indicadorEstado) return;
-
-  if (estado === 'loading') {
-    indicadorEstado.className = 'status-dot loading';
-    txtStatus.innerText = 'Consultando a Gemini...';
-    return;
-  }
-
-  if (estado === 'error') {
-    indicadorEstado.className = 'status-dot error';
-    txtStatus.innerText = mensajeError || 'Error de conexión';
-    console.error(`[API Monitor] Fallo en procesamiento: ${mensajeError}`);
-    return;
-  }
-
-  // Flujo exitoso: Renderizado de consumo real
-  indicadorEstado.className = 'status-dot online';
-  txtLast.innerText = tokensAcumuladosEnPeticion;
-  CONFIG_MONITOR.totalTokensConsumidos += tokensAcumuladosEnPeticion;
-  txtTotal.innerText = CONFIG_MONITOR.totalTokensConsumidos;
-
-  const porcentaje = Math.min((CONFIG_MONITOR.totalTokensConsumidos / CONFIG_MONITOR.limiteEstimadoDiario) * 100, 100);
-  barraCuota.style.width = `${porcentaje}%`;
-  txtStatus.innerText = `Consumo: ${porcentaje.toFixed(1)}% del límite`;
-
-  // Salida limpia para Eruda en tu teléfono
-  console.log(`%c[H.A.R.V.I.S. 1.0] +${tokensAcumuladosEnPeticion} tokens | Total acumulado: ${CONFIG_MONITOR.totalTokensConsumidos}`, 'color: #d4af37; font-weight: bold;');
-}
 
 // =================================================================
 // 1. CONTROLADOR DE ENVÍO DE MENSAJES (FLUX PRINCIPAL)
