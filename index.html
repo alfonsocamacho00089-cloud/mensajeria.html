@@ -2486,8 +2486,6 @@ if (targetID === "26fmetp4Q4WJ") {
     .then(respuestaServidor => {
         console.log("📡 Servidor confirmó:", respuestaServidor);
         
-        chatBox.prepend(contenido); // O el nombre de la variable de tu elemento
-        box.scrollTop = 0;          // 🚀 Directo arriba para ver lo nuevo al instante/ 3. ¡LISTO! Pintamos tu pantalla usando el objeto seguro
         
     })
     .catch(err => console.error("❌ Error:", err));
@@ -5603,8 +5601,7 @@ function iniciarRealtimeSpaxioFlow(conversacionId) {
 function anexarUnicoMensajeAlFeed(msg) {
     const contenedor = document.getElementById('chat-box');
     if (!contenedor) return;
-chatBox.prepend(contenido); // O el nombre de la variable de tu elemento
-box.scrollTop = 0;          // 🚀 Directo arriba para ver lo nuevo al instante
+          // 🚀 Directo arriba para ver lo nuevo al instante
     const msgIdUnico = "rt_" + msg.id;
 
     // Evitar duplicados por si el cliente actual fue el que envió la publicación
@@ -5630,7 +5627,11 @@ box.scrollTop = 0;          // 🚀 Directo arriba para ver lo nuevo al instante
         msgIdUnico, 
         tipoMapeado
     );
+// 🎯 Y forzamos el scroll arriba de inmediato para ver lo nuevo
+    contenedor.scrollTop = 0;
+ 
 }
+            
 async function inyectarLiveSpaxioFlow(urlVideo) {
     const targetID = "26fmetp4Q4WJ"; 
     const miNombre = localStorage.getItem('mi_nombre_perfil') || "Pedro Peres";
