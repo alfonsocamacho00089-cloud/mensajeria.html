@@ -2861,8 +2861,7 @@ async function cargarConversacionCon(idDestino, nombreDestino, fotoDestino) {
     if (!res.ok) throw new Error("Fallo al obtener el feed desde el backend");
     const posts = await res.json();
 
-    const postsInvertidos = [...posts].reverse();
-     
+    const postsInvertidos = posts.sort((a, b) => new Date(b.created_at) - new Date(new Date(a.created_at)));
 for (const post of postsInvertidos) {
         const idContenido = "feed_" + post.id;
         const nombreRemitente = post.sender_name || 'H.A.R.V.I.S.';
