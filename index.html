@@ -3290,7 +3290,7 @@ console.log("Intentando pintar tipo:", tipo, "con contenido:", contenido, "| ¿E
             </div>
         `;
         
-        box.appendChild(div);
+        chatBox.prepend(elementoMensaje);
         box.scrollTop = box.scrollHeight;
 
         requestAnimationFrame(() => {
