@@ -2852,29 +2852,46 @@ async function cargarConversacionCon(idDestino, nombreDestino, fotoDestino) {
         if (box) box.innerHTML = ""; 
 
 
+
 // 🔥 INTERCEPCIÓN MAESTRA CON VERCEL
-// 🔥 INTERCEPCIÓN MAESTRA CON VERCEL
-        if (idDestino === "26fmetp4Q4WJ") {
+if (idDestino === "26fmetp4Q4WJ") {
     console.log("📡 Cargando historial global de SpaxioFlow desde Vercel...");
     
     const res = await fetch('/api/get-spaxioflow-feed');
     if (!res.ok) throw new Error("Fallo al obtener el feed desde el backend");
     const posts = await res.json();
-const postsInvertidos = [...posts].reverse();
-         for (const post of postsInvertidos) {
+
+    const postsInvertidos = [...posts].reverse();
+     
+    for (const post of postsInvertidos) {
         const idContenido = "feed_" + post.id;
         const nombreRemitente = post.sender_name || 'H.A.R.V.I.S.';
-        // 🚀 SOLO DIBUJA SI EL ELEMENTO NO EXISTE EN LA PANTALLA
-        if (!document.getElementById(idContenido)) {
-            
-             
-         iniciarRealtimeSpaxioFlow("26fmetp4Q4WJ");
-       
-         // 🚀 AÑADE ESTA LÍNEA AL TERMINAR DE CARGAR EL HISTORIAL:
-document.getElementById('chat-box').scrollTop = box.scrollHeight;
-         
-             
         
+        // 🚀 Dibujamos directamente desde la respuesta de la API sin tocar IndexedDB
+        if (!document.getElementById(idContenido)) {
+             pintarMensaje(post.content, "", nombreRemitente, 'leido', idContenido, post.tipo); 
+        }
+    }
+             
+    iniciarRealtimeSpaxioFlow("26fmetp4Q4WJ");
+    
+    // Forzamos el scroll arriba para ver la publicación más nueva
+    document.getElementById('chat-box').scrollTop = 0;
+         
+} else {
+    // 🔒 LÓGICA OPTIMIZADA: Solo para chats privados normales (fuera de SpaxioFlow)
+    const todosLosMensajes = await obtenerTodo('mensajes');
+    const mensajesFiltrados = todosLosMensajes.filter(m => String(m.contactoId) === String(idDestino));
+
+    const ultimos10 = mensajesFiltrados.slice(-10);
+
+    if (typeof renderizarMensajes === "function") {
+        renderizarMensajes(ultimos10);
+    } else {
+        ultimos10.forEach(m => {
+            pintarMensaje(m.texto, m.clase, m.hora, m.status || 'enviado', m.id, m.tipo || 'texto');
+        });
+    }
              }
           // =========================================================
     // EL AVISO CLONADO (Al final de cargarConversacionCon)
@@ -5576,9 +5593,7 @@ function anexarUnicoMensajeAlFeed(msg) {
     if (document.getElementById(msgIdUnico)) return;
 
     const miUserId = localStorage.getItem('mi_dropis_id');
-    const esMio = msg.sender_id === miUserId;
-    const claseBurbuja = esMio || 'msg-izquierda';
-
+    
     // Mapeamos el tipo de contenido que viene de Supabase
     let tipoMapeado = 'texto';
     if (msg.tipo === 'video') tipoMapeado = 'video';
