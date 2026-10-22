@@ -2851,75 +2851,71 @@ async function cargarConversacionCon(idDestino, nombreDestino, fotoDestino) {
         const box = document.getElementById('chat-box');
         if (box) box.innerHTML = ""; 
 
-
-
 // 🔥 INTERCEPCIÓN MAESTRA CON VERCEL
-        if (idDestino === "26fmetp4Q4WJ") {
+if (idDestino === "26fmetp4Q4WJ") {
     console.log("📡 Cargando historial global de SpaxioFlow desde Vercel...");
     
-    const res = await fetch('/api/get-spaxioflow-feed');
-    if (!res.ok) throw new Error("Fallo al obtener el feed desde el backend");
-    const posts = await res.json();
-    
-         const postsInvertidos = [...posts].reverse();
-         for (const post of postsInvertidos) {
-        const idContenido = "feed_" + post.id;
-        const nombreRemitente = post.sender_name || 'H.A.R.V.I.S.';
-        // 🚀 SOLO DIBUJA SI EL ELEMENTO NO EXISTE EN LA PANTALLA
-        if (!document.getElementById(idContenido)) {
+    try {
+        const res = await fetch('/api/get-spaxioflow-feed');
+        if (!res.ok) throw new Error("Fallo al obtener el feed desde el backend");
+        const posts = await res.json();
+        
+        const postsInvertidos = [...posts].reverse();
+        const chatBox = document.getElementById('chat-box');
+
+        for (const post of postsInvertidos) {
+            const idContenido = "feed_" + post.id;
+            const nombreRemitente = post.sender_name || 'H.A.R.V.I.S.';
             
-            
-         iniciarRealtimeSpaxioFlow("26fmetp4Q4WJ");
-       
-         // 🚀 AÑADE ESTA LÍNEA AL TERMINAR DE CARGAR EL HISTORIAL:
- 
-         document.getElementById('chat-box').scrollTop = box.scrollHeight;
-         
-            
-             
+            // 🚀 SOLO DIBUJA SI EL ELEMENTO NO EXISTE EN LA PANTALLA
+            if (!document.getElementById(idContenido)) {
+                // Aquí deberías llamar a tu función de pintado o lógica de historial unitaria
+                // (Ej: pintarMensaje o equivalente que uses para los posts)
+            }
+        }
+
+        // Activamos el realtime una sola vez al terminar de cargar el historial
+        iniciarRealtimeSpaxioFlow("26fmetp4Q4WJ");
+
+        if (chatBox) {
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+        
     } catch (e) {
         console.error("❌ Error cargando mensajes del feed:", e);
-             }
-          // =========================================================
+    }
+
+    // =========================================================
     // EL AVISO CLONADO (Al final de cargarConversacionCon)
     // =========================================================
     const chatBox = document.getElementById('chat-box');
     const avisoOriginal = document.getElementById('aviso-seguridad');
     
-    // 🛡️ REGLA: Solo se clona si el chat abierto NO es Spaxio Flow ("26fmetp4Q4WJ")
     if (chatBox && avisoOriginal && idDestino !== "26fmetp4Q4WJ") {
-        // 1. Eliminamos cualquier copia vieja que haya quedado por si acaso
         const copiaVieja = chatBox.querySelector('.encriptado-box');
         if (copiaVieja) copiaVieja.remove();
 
-        // 2. TRUCO DE ORO: clonamos el aviso original (true significa copiar también el texto de adentro)
         const avisoClonado = avisoOriginal.cloneNode(true);
-        
-        // 3. Le aseguramos el display block por si acaso
         avisoClonado.style.display = 'block'; 
-        
-        // 4. Lo inyectamos arriba de los mensajes
         chatBox.prepend(avisoClonado);
-             }      
-        
+    }      
 
-
-
-     
     // 6. UI y Notificaciones
     localStorage.setItem('unread_' + idDestino, 0);
     if (typeof pintarAgendaContactos === "function") pintarAgendaContactos();
     
-    // Cerrar modales (Agenda o QR)
     if (typeof cerrarModalQR === 'function') cerrarModalQR();
     const modalAgenda = document.getElementById('modal-agenda');
     if (modalAgenda) modalAgenda.style.display = 'none';
 
-    // Foco en el teclado y Scroll
     const inputMsg = document.getElementById('msg-text');
-    if(inputMsg) inputMsg.focus();
-    box.scrollTop = box.scrollHeight;
-     }
+    if (inputMsg) inputMsg.focus();
+    
+    const box = document.getElementById('chat-box');
+    if (box) box.scrollTop = box.scrollHeight;
+             }
+
+
     // 3. Buscamos los mensajes de ESE contacto en LocalStorage
     // ... (final de la función cargarConversacionCon)
 async function limpiarMensajesAntiguos(contactoId, limiteMaximo = 200) {
@@ -5568,20 +5564,15 @@ function iniciarRealtimeSpaxioFlow(conversacionId) {
         });
 }
 
-             
-// 2. Función quirúrgica para pintar solo el mensaje nuevo (Cero lag, cero parpadeo)
-function anexarUnicoMensajeAlFeed(msg) {
+        function anexarUnicoMensajeAlFeed(msg) {
     const contenedor = document.getElementById('chat-box');
     if (!contenedor) return;
-          // 🚀 Directo arriba para ver lo nuevo al instante
+    
     const msgIdUnico = "rt_" + msg.id;
 
-    // Evitar duplicados por si el cliente actual fue el que envió la publicación
+    // Evitar duplicados
     if (document.getElementById(msgIdUnico)) return;
 
-    const miUserId = localStorage.getItem('mi_dropis_id');
-    const esMio = msg.sender_id === miUserId;
-    
     // Mapeamos el tipo de contenido que viene de Supabase
     let tipoMapeado = 'texto';
     if (msg.tipo === 'video') tipoMapeado = 'video';
@@ -5600,10 +5591,11 @@ function anexarUnicoMensajeAlFeed(msg) {
         <div style="font-size:10px; opacity:0.6; text-align:right; margin-top:4px;">${horaFormateada}</div>
     `;
 
-    // ✅ LA CLAVE PARA QUE QUEDE ANCLADO ARRIBA:
+    // ✅ ANCLADO ARRIBA EN TIEMPO REAL:
     contenedor.prepend(div);
-    contenedor.scrollTop = 0; // El scroll se clava arriba mostrando la publicación más reciente
- }
+    contenedor.scrollTop = 0; 
+             }     
+
             
 async function inyectarLiveSpaxioFlow(urlVideo) {
     const targetID = "26fmetp4Q4WJ"; 
