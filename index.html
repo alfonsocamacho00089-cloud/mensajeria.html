@@ -2414,8 +2414,8 @@ const msg = multimediaUrl ? multimediaUrl : (inputMsg ? inputMsg.value.trim() : 
     if (!msg) return; 
 
     // Si el destino es Spaxio Flow, el ID nace con 'feed_local_' para que pintarMensaje lo detecte como tarjeta al instante
-const targetID = inputTarget.value.trim();
-const msgId = (targetID === "26fmetp4Q4WJ") ? "feed_local_" + Date.now() : "msg_" + Date.now();
+
+   const msgId = (targetID === "26fmetp4Q4WJ") ? "feed_local_" + Date.now() : "msg_" + Date.now();
 
     // INTERCEPCIÓN MAESTRA: Si vas a enviar un gif, lo pintamos localmente como sticker
     const tipoValidado = (tipoMedia === 'gifs') ? 'stickers' : tipoMedia;
