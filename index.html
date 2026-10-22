@@ -5668,61 +5668,12 @@ async function inyectarLiveSpaxioFlow(urlVideo) {
              
      
 
-// 1. Variable para llevar registro de IDs únicos (mantenemos una sola vez)
 
 
 
 
 
-// 3. TIEMPO REAL BLINDADO (¡Evita que se multipliquen los canales!)
-let canalSpaxioFlowActivo = null;
 
-function activarSpaxioFlowRealtime() {
-    console.log("🤖 H.A.R.V.I.S: Conectando canal de streaming en tiempo real...");
-
-    // 🔴 IMPORTANTE: Si ya había un canal abierto, lo eliminamos primero para matar el eco
-    if (canalSpaxioFlowActivo) {
-        supabase.removeChannel(canalSpaxioFlowActivo);
-        canalSpaxioFlowActivo = null;
-    }
-
-    canalSpaxioFlowActivo = supabase
-        .channel('canal-spaxioflow')
-        .on('postgres_changes', 
-            { 
-                event: 'INSERT', 
-                schema: 'public', 
-                table: 'spaxioflow_feed' 
-            }, 
-            (payload) => {
-                const nuevoEvento = payload.new;
-                const targetInput = document.querySelector('#target-id');
-                const chatAbiertoActualmente = targetInput ? targetInput.value : "";
-
-                if (nuevoEvento.chat_id === "26fmetp4Q4WJ" && chatAbiertoActualmente === "26fmetp4Q4WJ") {
-                    const msgIdLive = "live_rt_" + nuevoEvento.id;
-                    
-                    // Validamos que no esté duplicado en el DOM
-                    if (!document.getElementById(msgIdLive)) {
-                        let tipoMapeado = 'texto';
-                        if (nuevoEvento.tipo === 'video') tipoMapeado = 'video';
-                        if (nuevoEvento.tipo === 'imagen') tipoMapeado = 'foto';
-
-                        pintarMensaje(
-                            nuevoEvento.content, 
-                            'msg-izquierda', 
-                            new Date(nuevoEvento.created_at || Date.now()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true }), 
-                            'leido', 
-                            msgIdLive, 
-                            tipoMapeado
-                        );
-                    }
-                }
-            }
-        )
-        .subscribe();
-             }
-             let feedCargado = false;
 
 
     
