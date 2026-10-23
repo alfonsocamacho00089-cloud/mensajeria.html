@@ -3214,16 +3214,14 @@ async function cargarProto() {
     // (Aquí mantienes tu lógica interna para fotos, videos, textos, etc., pero al momento de insertar el div en el box evaluamos:)
 
     if (esSpaxioFlow) {
-        // 🌊 REGLA DE ORO PARA SPAXIO FLOW: Nace ARRIBA y el scroll se clava arriba
-        div.innerHTML = `
-            <div style="font-weight: bold; color: #ffd700; margin-bottom: 5px;">${clase === 'msg-derecha' ? (localStorage.getItem('mi_nombre_perfil') || 'Pedro Peres') : 'H.A.R.V.I.S.'}</div>
-            <div style="color: #fff; word-break: break-word;">${textoReal}</div>
-            <div style="font-size:10px; opacity:0.6; text-align:right; margin-top:4px; color: #fff;">${horaFinal}</div>
-        `;
-        box.prepend(div);
-        box.scrollTop = 0; // 🚀 Cero saltos al fondo
-        return; // Salimos para que no ejecute appendChild de chats normales
-    }
+    box.prepend(div);
+    // Doble pulso para ganarle al renderizado del navegador
+    box.scrollTop = 0;
+    setTimeout(() => { box.scrollTop = 0; }, 30);
+} else {
+    box.appendChild(div);
+    box.scrollTop = box.scrollHeight;
+             }
 
     // 💬 SI ES CHAT NORMAL DE WHATSAPP (Sigue su curso hacia abajo como siempre):
     // ... (tu código actual de esCosaNueva, esSpaxio, y chat normal con appendChild y scrollHeight)
