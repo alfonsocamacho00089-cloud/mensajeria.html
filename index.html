@@ -2859,11 +2859,12 @@ async function cargarConversacionCon(idDestino, nombreDestino, fotoDestino) {
     
     const res = await fetch('/api/get-spaxioflow-feed');
     if (!res.ok) throw new Error("Fallo al obtener el feed desde el backend");
-     
-         const data = await res.json();
+     const posts = await res.json();
+             
+         
          if (posts && Array.isArray(posts)) {
     const postsInvertidos = [posts].reverse();
-     postsInvertidos.forEach(post => {
+     
     const idContenido = "feed_" + post.id;
     const nombreRemitente = post.sender_name || 'H.A.R.V.I.S.';
     
