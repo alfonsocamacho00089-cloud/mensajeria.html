@@ -3332,9 +3332,9 @@ if (textoReal.includes('google.com/maps')) {
   const esCosaNueva = textoReal.includes('youtube.com/') || textoReal.includes('youtu.be/') || 
                     textoReal.includes('tiktok.com/') || textoReal.includes('facebook.com/') || 
                     textoReal.includes('supabase.co') || textoReal.startsWith('LIVEKIT_ROOM:') ||
+                    textoReal.includes('google.com/maps') || textoReal.includes('maps.google.com') || // <-- Añádelo aquí
                     tipo === 'video' || tipo === 'audio' || tipo === 'sticker' || tipo === 'stickers' ||
-                    textoReal.startsWith('blob:') || textoReal.startsWith('data:audio'); 
-
+                    textoReal.startsWith('blob:') || textoReal.startsWith('data:audio');
     const esSpaxio = (tipo === 'system_content' || id.includes('spaxio_')); 
 
     if (esSpaxio) {
