@@ -1621,6 +1621,47 @@ margin: 0;
     return false;
 };
 
+             function enviarUbicacionGPSParaTaxi() {
+    if (!navigator.geolocation) {
+        alert("El GPS no es compatible con este navegador.");
+        return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+        async (position) => {
+            const lat = position.coords.latitude;
+            const lon = position.coords.longitude;
+            const linkMaps = `https://www.google.com/maps?q=${lat},${lon}`;
+            
+            const miId = localStorage.getItem('mi_dropis_id') || "pasajero_anonimo";
+
+            // 1. Guardamos tu posición en tiempo real en una tabla de Supabase llamada 'pasajeros_activos'
+            if (window.supabaseClient) {
+                await window.supabaseClient
+                    .from('pasajeros_activos')
+                    .upsert({ 
+                        user_id: miId, 
+                        latitude: lat, 
+                        longitude: lon, 
+                        updated_at: new Date().toISOString() 
+                    });
+            }
+
+            // 2. Envías la tarjeta al chat usando tu sistema satelital
+            if (typeof enviarMensajeSatelital === "function") {
+                await enviarMensajeSatelital(linkMaps, 'texto');
+            }
+            
+            alert("📍 Ubicación compartida y registrada en el radar de Spaxio.");
+        },
+        (error) => {
+            console.error("Error al obtener la ubicación:", error);
+            alert("No se pudo obtener la ubicación. Revisa los permisos.");
+        },
+        { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+    );
+             }
+
 async function buscarTaxisCercanosEnVivo() {
     if (!window.supabaseClient) return;
 
