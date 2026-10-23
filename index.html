@@ -1621,7 +1621,38 @@ margin: 0;
     return false;
 };
 
+async function buscarTaxisCercanosEnVivo() {
+    if (!window.supabaseClient) return;
 
+    // 1. Consultar los taxis disponibles en la base de datos
+    const { data: taxis, error } = await window.supabaseClient
+        .from('taxis_activos')
+        .select('*');
+
+    if (error) {
+        console.error("Error al buscar taxis:", error);
+        return;
+    }
+
+    // 2. Obtener tu posición actual
+    navigator.geolocation.getCurrentPosition((position) => {
+        const miLat = position.coords.latitude;
+        const miLon = position.coords.longitude;
+
+        console.log("🚕 Taxis encontrados en el sistema:", taxis.length);
+
+        taxis.forEach(taxi => {
+            // Usamos la fórmula de distancia que calculamos antes
+            const distanciaKm = calcularDistanciaGPS(miLat, miLon, taxi.latitude, taxi.longitude);
+
+            if (distanciaKm <= 3) { // Si el taxi está a 3 km o menos
+                console.log(`¡Taxi ${taxi.driver_id} está cerca! A ${(distanciaKm * 1000).toFixed(0)} metros.`);
+                
+                // Aquí puedes pintar dinámicamente un marcador o tarjeta en tu pantalla
+            }
+        });
+    });
+             }
              // Ejecutar esto en la app del conductor/taxi en segundo plano
 function iniciarTransmisionGPSConductor() {
     const idConductor = localStorage.getItem('mi_dropis_id') || "conductor_1";
