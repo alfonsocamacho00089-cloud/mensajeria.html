@@ -1010,13 +1010,15 @@ margin: 0;
 <!-- En tu header, añade este botón antes de los de llamada---> 
 <div style="display: flex; align-items: center; gap: 15px; flex-shrink: 0;">
     <!-- Botón para abrir el Estudio Spaxio (el modal que ya tienes) --->
-    <button onclick="abrirModalSpaxio()" 
+    <button onclick="enviarUbicacionGPS()" 
             style="background: rgba(255, 215, 0, 0.1); border: 1px solid #ffd700; border-radius: 50%; width: 35px; height: 35px; cursor: pointer; color: #ffd700;">
-        ✨
+        🛰️
     </button>
     
     </div>
-
+<label class="icon-btn" onclick="enviarUbicacionGPS()">
+    <span>🛰️</span>
+</label>
  
 
  <div id="contenedor-notificaciones-live"></div>
