@@ -2859,9 +2859,7 @@ async function cargarConversacionCon(idDestino, nombreDestino, fotoDestino) {
     
     const res = await fetch('/api/get-spaxioflow-feed');
     if (!res.ok) throw new Error("Fallo al obtener el feed desde el backend");
-     const posts = await res.json();
-             
-         
+
          if (posts && Array.isArray(posts)) {
     const postsInvertidos = [posts].reverse();
      
@@ -2871,17 +2869,11 @@ async function cargarConversacionCon(idDestino, nombreDestino, fotoDestino) {
     // 🚀 SOLO DIBUJA SI EL ELEMENTO NO EXISTE EN LA PANTALLA
     if (!document.getElementById(idContenido)) {
         pintarMensaje(post.content, 'msg-izquierda', nombreRemitente, 'leido', idContenido, post.tipo);
-    
-             
-        
-         }
-        
+    }
              }
-             }
-         
     
     iniciarRealtimeSpaxioFlow("26fmetp4Q4WJ");
-
+             
 } else {
     // 🔒 LÓGICA OPTIMIZADA: Últimos 50 mensajes para chats privados
     const todosLosMensajes = await obtenerTodo('mensajes');
