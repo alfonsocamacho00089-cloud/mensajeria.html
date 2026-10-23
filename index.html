@@ -2853,9 +2853,11 @@ async function cargarConversacionCon(idDestino, nombreDestino, fotoDestino) {
 
 
 
-// 🔥 INTERCEPCIÓN MAESTRA CON VERCEL
-        if (idDestino === "26fmetp4Q4WJ") {
-    console.log("📡 Cargando historial global de SpaxioFlow desde Vercel...");
+// 🔥 INTERCEPCIÓN MAESTRA     
+             if (idDestino === "26fmetp4Q4WJ") {
+   
+              try {
+              console.log("📡 Cargando historial global de SpaxioFlow desde Vercel...");
     
     const res = await fetch('/api/get-spaxioflow-feed');
     if (!res.ok) throw new Error("Fallo al obtener el feed desde el backend");
@@ -2880,11 +2882,19 @@ async function cargarConversacionCon(idDestino, nombreDestino, fotoDestino) {
             }
              });
         }
-             
+        // 🎯 SCROLL FIJO ARRIBA (Solo para SpaxioFlow)
+        const box = document.getElementById('chat-box');
+        if (box) {
+            box.scrollTop = 0; 
+        }
+
         iniciarRealtimeSpaxioFlow("26fmetp4Q4WJ");
-       
-        
-} else {
+
+    } catch (e) {
+        console.error("❌ Error cargando mensajes del feed:", e);
+            
+              
+              }else {
     // 🔒 LÓGICA OPTIMIZADA: Últimos 50 mensajes para chats privados
     const todosLosMensajes = await obtenerTodo('mensajes');
     const mensajesFiltrados = todosLosMensajes.filter(m => String(m.contactoId) === String(idDestino));
@@ -2901,9 +2911,7 @@ async function cargarConversacionCon(idDestino, nombreDestino, fotoDestino) {
     }
 } 
 
-} catch (e) {
-    console.error("❌ Error cargando mensajes del feed:", e);
- }
+}
           // =========================================================
     // EL AVISO CLONADO (Al final de cargarConversacionCon)
     // =========================================================
