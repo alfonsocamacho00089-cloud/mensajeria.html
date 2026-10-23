@@ -1690,7 +1690,7 @@ function iniciarTransmisionGPSConductor() {
             const lat = position.coords.latitude;
             const lon = position.coords.longitude;
             const enlaceGoogleMaps = `https://www.google.com/maps?q=${lat},${lon}`;
-            
+            const mensajeGPS = `\n${enlaceGoogleMaps}`;
             
             // Envía la ubicación usando tu propio sistema de mensajes satelitales
             if (typeof enviarMensajeSatelital === "function") {
