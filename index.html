@@ -3182,12 +3182,8 @@ async function cargarProto() {
     if (!box) return;
 
     let textoReal = (typeof contenido === 'object') ? (contenido.texto || "") : contenido;
-    
-    // Elimina los saltos de línea que H.A.R.V.I.S. pueda haber puesto
     textoReal = textoReal.replace(/[\r\n]+/g, '');
 
-  
-    // Detector de GIFs y Multimedia
     if (textoReal.includes('i.ibb.co') || textoReal.includes('firebasestorage') || textoReal.includes('.gif') || textoReal.includes('giphy.com')) {
         tipo = 'foto';
     }
@@ -3198,38 +3194,39 @@ async function cargarProto() {
         textoReal = match[1]; 
     }
 
-const div = document.createElement('div');
-div.id = id;
+    const div = document.createElement('div');
+    div.id = id;
 
-// 1. Definimos las clases primero
-const esSpaxioFlow = id && (id.includes('feed_') || id.includes('live_rt_') || id.startsWith('rt_') || id.includes('feed_local_'));
+    // 1. Definimos si es Spaxio Flow
+    const esSpaxioFlow = id && (id.includes('feed_') || id.includes('live_rt_') || id.startsWith('rt_') || id.includes('feed_local_'));
 
-if (esSpaxioFlow) {
-    div.className = "mensaje msg-spaxio-flow-tarjeta";
-    div.style.cssText = "width: 100% !important; max-width: 100% !important; margin: 8px 0 !important; align-self: stretch !important; background: rgba(21, 24, 40, 0.85) !important; border: 1px solid rgba(255, 215, 0, 0.2) !important; border-radius: 16px !important; padding: 12px !important;";
-} else {
-    div.className = "mensaje msg-burbuja " + clase; 
-}
+    if (esSpaxioFlow) {
+        div.className = "mensaje msg-spaxio-flow-tarjeta";
+        div.style.cssText = "width: 100% !important; max-width: 100% !important; margin: 8px 0 !important; align-self: stretch !important; background: rgba(21, 24, 40, 0.85) !important; border: 1px solid rgba(255, 215, 0, 0.2) !important; border-radius: 16px !important; padding: 12px !important;";
+    } else {
+        div.className = "mensaje msg-burbuja " + clase; 
+    }
 
-const horaFinal = hora || new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
-const checkHTML = (!esSpaxioFlow && clase === 'msg-derecha') ? `<span style="margin-left:5px; font-size:10px;">${status === 'leido' ? '✓✓' : '✓'}</span>` : '';
+    const horaFinal = hora || new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
+    const checkHTML = (!esSpaxioFlow && clase === 'msg-derecha') ? `<span style="margin-left:5px; font-size:10px;">${status === 'leido' ? '✓✓' : '✓'}</span>` : '';
 
-console.log("Intentando pintar tipo:", tipo, "con contenido:", contenido, "| ¿Es Spaxio Flow?:", esSpaxioFlow);
+    // 2. CONSTRUCCIÓN DE CONTENIDO SEGÚN EL TIPO...
+    // (Aquí mantienes tu lógica interna para fotos, videos, textos, etc., pero al momento de insertar el div en el box evaluamos:)
 
-// 2. Aquí construyes tu `div.innerHTML` o manejas los Caminos (Camino 1, Camino 2, etc.)
-// ... (tu código de innerHTML o multimedia va aquí) ...
+    if (esSpaxioFlow) {
+        // 🌊 REGLA DE ORO PARA SPAXIO FLOW: Nace ARRIBA y el scroll se clava arriba
+        div.innerHTML = `
+            <div style="font-weight: bold; color: #ffd700; margin-bottom: 5px;">${clase === 'msg-derecha' ? (localStorage.getItem('mi_nombre_perfil') || 'Pedro Peres') : 'H.A.R.V.I.S.'}</div>
+            <div style="color: #fff; word-break: break-word;">${textoReal}</div>
+            <div style="font-size:10px; opacity:0.6; text-align:right; margin-top:4px; color: #fff;">${horaFinal}</div>
+        `;
+        box.prepend(div);
+        box.scrollTop = 0; // 🚀 Cero saltos al fondo
+        return; // Salimos para que no ejecute appendChild de chats normales
+    }
 
-// 3. 🎯 LA INSERCIÓN DEFINITIVA (Hacerla al final, una vez que el div ya está listo):
-if (esSpaxioFlow) {
-    // 🌊 SI ES SPAXIO FLOW: Nace arriba y el scroll se queda arriba
-    
-             
- box.prepend(contenido); // O el nombre de la variable de tu elemento
- box.scrollTop = 0;          // 🚀 Directo arriba para ver lo nuevo al instante
-             
-    // 💬 SI ES CHAT NORMAL: Se comporta como WhatsApp (al fondo)
-    
-}
+    // 💬 SI ES CHAT NORMAL DE WHATSAPP (Sigue su curso hacia abajo como siempre):
+    // ... (tu código actual de esCosaNueva, esSpaxio, y chat normal con appendChild y scrollHeight)
              
   const esCosaNueva = textoReal.includes('youtube.com/') || textoReal.includes('youtu.be/') || 
                     textoReal.includes('tiktok.com/') || textoReal.includes('facebook.com/') || 
