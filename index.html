@@ -2861,48 +2861,38 @@ async function cargarConversacionCon(idDestino, nombreDestino, fotoDestino) {
     if (!res.ok) throw new Error("Fallo al obtener el feed desde el backend");
 
          if (posts && Array.isArray(posts)) {
-     
     const postsInvertidos = [posts].reverse();
      
-        const idContenido = "feed_" + post.id;
-        const nombreRemitente = post.sender_name || 'H.A.R.V.I.S.';
-      
-         
-             // 🚀 SOLO DIBUJA SI EL ELEMENTO NO EXISTE EN LA PANTALLA
-            if (!document.getElementById(idContenido)) {
-                pintarMensaje(post.content, "", nombreRemitente, 'leido', idContenido, post.tipo); 
-            }
-       
-   
-     }
-           
-    }    
-        iniciarRealtimeSpaxioFlow("26fmetp4Q4WJ");
-       
-        // 🚀 Scroll arriba para ver la más nueva
-        document.getElementById('chat-box').scrollTop = 0;
+    const idContenido = "feed_" + post.id;
+    const nombreRemitente = post.sender_name || 'H.A.R.V.I.S.';
+    
+    // 🚀 SOLO DIBUJA SI EL ELEMENTO NO EXISTE EN LA PANTALLA
+    if (!document.getElementById(idContenido)) {
+        pintarMensaje(post.content, 'msg-izquierda', nombreRemitente, 'leido', idContenido, post.tipo);
+    }
+    
+    iniciarRealtimeSpaxioFlow("26fmetp4Q4WJ");
 
+} else {
+    // 🔒 LÓGICA OPTIMIZADA: Últimos 50 mensajes para chats privados
+    const todosLosMensajes = await obtenerTodo('mensajes');
+    const mensajesFiltrados = todosLosMensajes.filter(m => String(m.contactoId) === String(idDestino));
+
+    // Tomamos solo los últimos 50 para que el chat vuele al abrir
+    const ultimos10 = mensajesFiltrados.slice(-10);
+
+    if (typeof renderizarMensajes === "function") {
+        renderizarMensajes(ultimos10);
     } else {
-        // 🔒 LÓGICA OPTIMIZADA: Últimos 50 mensajes para chats privados
-        const todosLosMensajes = await obtenerTodo('mensajes');
-        const mensajesFiltrados = todosLosMensajes.filter(m => String(m.contactoId) === String(idDestino));
+        ultimos10.forEach(m => {
+            pintarMensaje(m.texto, m.clase, m.hora, m.status || 'enviado', m.id, m.tipo || 'texto');
+        });
+    }
+} 
 
-        const ultimos10 = mensajesFiltrados.slice(-10);
-
-        if (typeof renderizarMensajes === "function") {
-            renderizarMensajes(ultimos10);
-        } else {
-            ultimos10.forEach(m => {
-                pintarMensaje(m.texto, m.clase, m.hora, m.status || 'enviado', m.id, m.tipo || 'texto');
-            });
-            }
-        
-             }
-          // <--- Cierra el else correctamente
-   
-    } catch (e) {
-        console.error("❌ Error cargando mensajes del feed:", e);
-             }
+} catch (e) {
+    console.error("❌ Error cargando mensajes del feed:", e);
+ }
           // =========================================================
     // EL AVISO CLONADO (Al final de cargarConversacionCon)
     // =========================================================
