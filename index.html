@@ -2863,7 +2863,7 @@ async function cargarConversacionCon(idDestino, nombreDestino, fotoDestino) {
          const data = await res.json();
          if (posts && Array.isArray(posts)) {
     const postsInvertidos = [posts].reverse();
-     
+     postsInvertidos.forEach(post => {
     const idContenido = "feed_" + post.id;
     const nombreRemitente = post.sender_name || 'H.A.R.V.I.S.';
     
