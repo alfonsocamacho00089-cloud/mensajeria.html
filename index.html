@@ -2911,7 +2911,9 @@ async function cargarConversacionCon(idDestino, nombreDestino, fotoDestino) {
     }
 } 
 
-}
+} catch (e) {
+    console.error("❌ Error cargando mensajes del feed:", e);
+             }
           // =========================================================
     // EL AVISO CLONADO (Al final de cargarConversacionCon)
     // =========================================================
