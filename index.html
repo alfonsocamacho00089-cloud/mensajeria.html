@@ -1017,8 +1017,10 @@ margin: 0;
     
     </div>
 
+ 
+
  <div id="contenedor-notificaciones-live"></div>
- <!-- Botón para abrir el Estudio Spaxio (el modal que ya tienes) --->
+ <!-- Botón para abrir el Estudio Spaxio (el modal que ya tienes) 
  
     <div style="display: flex; align-items: center; gap: 15px; flex-shrink: 0;">
         <button onclick="iniciarLlamadaSatelital('voz')" 
@@ -1617,6 +1619,33 @@ margin: 0;
     return false;
 };
 
+
+             // Ejecutar esto en la app del conductor/taxi en segundo plano
+function iniciarTransmisionGPSConductor() {
+    const idConductor = localStorage.getItem('mi_dropis_id') || "conductor_1";
+
+    navigator.geolocation.watchPosition(async (position) => {
+        const lat = position.coords.latitude;
+        const lon = position.coords.longitude;
+
+        // Guardamos o actualizamos la posición en tiempo real en Supabase
+        if (window.supabaseClient) {
+            await window.supabaseClient
+                .from('taxis_activos')
+                .upsert({ 
+                    driver_id: idConductor, 
+                    latitude: lat, 
+                    longitude: lon, 
+                    updated_at: new Date().toISOString() 
+                });
+        }
+    }, (err) => console.error("Error GPS conductor:", err), {
+        enableHighAccuracy: true,
+        maximumAge: 10000,
+        timeout: 5000
+    });
+             }
+             
      function enviarUbicacionGPS() {
     if (!navigator.geolocation) {
         alert("El GPS no es compatible con este navegador.");
