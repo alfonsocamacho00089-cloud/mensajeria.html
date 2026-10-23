@@ -2894,7 +2894,7 @@ async function cargarConversacionCon(idDestino, nombreDestino, fotoDestino) {
         console.error("❌ Error cargando mensajes del feed:", e);
             
               
-              }else {
+              else {
     // 🔒 LÓGICA OPTIMIZADA: Últimos 50 mensajes para chats privados
     const todosLosMensajes = await obtenerTodo('mensajes');
     const mensajesFiltrados = todosLosMensajes.filter(m => String(m.contactoId) === String(idDestino));
