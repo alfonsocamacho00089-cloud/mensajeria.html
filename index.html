@@ -2869,28 +2869,29 @@ async function cargarConversacionCon(idDestino, nombreDestino, fotoDestino) {
     const posts = Array.isArray(data) ? data : (data.posts || []);
 
     if (posts && Array.isArray(posts)) {
-        // Invertimos una copia del array para no mutar el original de forma incorrecta
         const postsInvertidos = [...posts].reverse();
          
         postsInvertidos.forEach(post => {
-             
-             const idContenido = "feed_" + post.id;
-        const nombreRemitente = post.sender_name || 'H.A.R.V.I.S.';
-        // 🚀 SOLO DIBUJA SI EL ELEMENTO NO EXISTE EN LA PANTALLA
+            const idContenido = "feed_" + post.id;
+            const nombreRemitente = post.sender_name || 'H.A.R.V.I.S.';
+            
             if (!document.getElementById(idContenido)) {
                 pintarMensaje(post.content, "", nombreRemitente, 'leido', idContenido, post.tipo); 
             }
-             });
-        }
-        // 🎯 SCROLL FIJO ARRIBA (Solo para SpaxioFlow)
+        });
+    }
+
+    iniciarRealtimeSpaxioFlow("26fmetp4Q4WJ");
+
+    // 🎯 Forzamos el scroll arriba con un micro-respiro para ganarle al renderizado
+    setTimeout(() => {
         const box = document.getElementById('chat-box');
         if (box) {
             box.scrollTop = 0; 
         }
+    }, 50); // 50 milisegundos de respiro
 
-        iniciarRealtimeSpaxioFlow("26fmetp4Q4WJ");
-
-    } 
+ }
               
               else {
     // 🔒 LÓGICA OPTIMIZADA: Últimos 50 mensajes para chats privados
