@@ -2884,8 +2884,8 @@ async function cargarConversacionCon(idDestino, nombreDestino, fotoDestino) {
         iniciarRealtimeSpaxioFlow("26fmetp4Q4WJ");
        
         // 🚀 Scroll arriba para ver la más nueva
-        document.getElementById('chat-box').scrollTop = 0;
-             
+        document.getElementById('chat-box').scrollTop = chatBox.scrollHeight;
+         
 } else {
     // 🔒 LÓGICA OPTIMIZADA: Últimos 50 mensajes para chats privados
     const todosLosMensajes = await obtenerTodo('mensajes');
