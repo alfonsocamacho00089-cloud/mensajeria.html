@@ -3225,9 +3225,12 @@ if (esSpaxioFlow) {
     box.prepend(div);
     box.scrollTop = 0;
 } else {
+             
+ chatBox.prepend(contenido); // O el nombre de la variable de tu elemento
+ box.scrollTop = 0;          // 🚀 Directo arriba para ver lo nuevo al instante
+             
     // 💬 SI ES CHAT NORMAL: Se comporta como WhatsApp (al fondo)
-    box.appendChild(div);
-    box.scrollTop = box.scrollHeight;
+    
 }
              
   const esCosaNueva = textoReal.includes('youtube.com/') || textoReal.includes('youtu.be/') || 
@@ -3274,10 +3277,12 @@ if (esSpaxioFlow) {
                 ${horaFinal}
             </div>
         `;
-        chatBox.prepend(contenido); // O el nombre de la variable de tu elemento
-        box.scrollTop = 0;          // 🚀 Directo arriba para ver lo nuevo al instante
-
-             }
+        
+           
+     box.appendChild(div);
+    box.scrollTop = box.scrollHeight;
+             
+    }
     else if (esCosaNueva) {
         // ----------------------------------------------------
         // CAMINO 1: LAS COSAS NUEVAS (Redes y Multimedia pesada)
