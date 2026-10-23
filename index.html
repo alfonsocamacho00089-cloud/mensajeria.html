@@ -2854,44 +2854,70 @@ async function cargarConversacionCon(idDestino, nombreDestino, fotoDestino) {
 
 
 // 🔥 INTERCEPCIÓN MAESTRA CON VERCEL
-if (idDestino === "26fmetp4Q4WJ") {
+        if (idDestino === "26fmetp4Q4WJ") {
     console.log("📡 Cargando historial global de SpaxioFlow desde Vercel...");
     
     const res = await fetch('/api/get-spaxioflow-feed');
     if (!res.ok) throw new Error("Fallo al obtener el feed desde el backend");
     const posts = await res.json();
-    const postsInvertidos = [...posts].reverse();
-    
-    for (const post of postsInvertidos) {
+const postsInvertidos = [...posts].reverse();
+         for (const post of postsInvertidos) {
         const idContenido = "feed_" + post.id;
         const nombreRemitente = post.sender_name || 'H.A.R.V.I.S.';
-        
         // 🚀 SOLO DIBUJA SI EL ELEMENTO NO EXISTE EN LA PANTALLA
         if (!document.getElementById(idContenido)) {
-            pintarMensaje(post.content, "", nombreRemitente, 'leido', idContenido, post.tipo); 
-        }
-    }
-         
-    iniciarRealtimeSpaxioFlow("26fmetp4Q4WJ");
+            const miUserId = localStorage.getItem('mi_dropis_id');
+            const esMio = post.sender_id === miUserId;
+
+            if (typeof guardarLocal === "function") {
+                await guardarLocal('mensajes', {
+                    id: idContenido,
+                    contactoId: "26fmetp4Q4WJ",
+                    texto: post.content,
+                    clase: 'msg-izquierda',
+                    status: 'leido',
+                    nombreRemitente,
+                    tipo: post.tipo || 'texto',
+                    ts: new Date(post.created_at || Date.now()).getTime(),
+                    hora: new Date(post.created_at || Date.now()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })
+                });
+            }
+
+             pintarMensaje(post.content, 'msg-izquierda', nombreRemitente, 'leido', idContenido, post.tipo); }
+             
+             }
+             
+         iniciarRealtimeSpaxioFlow("26fmetp4Q4WJ");
        
-    // 🚀 Scroll arriba para ver la más nueva
-    document.getElementById('chat-box').scrollTop = 0;
+         // 🚀 AÑADE ESTA LÍNEA AL TERMINAR DE CARGAR EL HISTORIAL:
+document.getElementById('chat-box').scrollTop = box.scrollHeight;
+         
+             
+        
+             }else {
 
-} else {
-    // 🔒 LÓGICA OPTIMIZADA: Últimos 50 mensajes para chats privados
-    const todosLosMensajes = await obtenerTodo('mensajes');
-    const mensajesFiltrados = todosLosMensajes.filter(m => String(m.contactoId) === String(idDestino));
+             
+             
+            // 🔒 LÓGICA OPTIMIZADA: Últimos 50 mensajes para chats privados
+            const todosLosMensajes = await obtenerTodo('mensajes');
+            const mensajesFiltrados = todosLosMensajes.filter(m => String(m.contactoId) === String(idDestino));
 
-    // Tomamos solo los últimos 10 para que el chat vuele al abrir
-    const ultimos10 = mensajesFiltrados.slice(-10);
+            // Tomamos solo los últimos 50 para que el chat vuele al abrir
+            const ultimos10 = mensajesFiltrados.slice(-10);
 
-    if (typeof renderizarMensajes === "function") {
-        renderizarMensajes(ultimos10);
-    } else {
-        ultimos10.forEach(m => {
-            pintarMensaje(m.texto, m.clase, m.hora, m.status || 'enviado', m.id, m.tipo || 'texto');
-        });
-    }
+            if (typeof renderizarMensajes === "function") {
+                renderizarMensajes(ultimos10);
+            } else {
+                ultimos10.forEach(m => {
+                    pintarMensaje(m.texto, m.clase, m.hora, m.status || 'enviado', m.id, m.tipo || 'texto');
+                });
+            }
+        
+             }
+          // <--- Cierra el else correctamente
+   
+    } catch (e) {
+        console.error("❌ Error cargando mensajes del feed:", e);
              }
           // =========================================================
     // EL AVISO CLONADO (Al final de cargarConversacionCon)
