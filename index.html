@@ -3446,13 +3446,10 @@ if (textoReal.includes('google.com/maps')) {
              } else if (textoReal.includes('google.com/maps')) {
     tipo = 'gps';
     
-    // Extraemos las coordenadas del enlace (ej: q=10.3448,-67.0495553)
-    const matchCoords = textoReal.match(/q=([-\d.]+),([-\d.]+)/);
-    const coordenadas = matchCoords ? `${matchCoords[1]},${matchCoords[2]}` : "10.48,-66.9"; // Coordenadas por defecto si falla
-
+    
     cuerpoHTML = `
         <div style="background: rgba(32, 44, 51, 0.9); border: 1px solid #ffd700; border-radius: 12px; padding: 8px; text-align: center; max-width: 280px;">
-            <div style="font-size: 13px; color: #ffd700; font-weight: bold; margin-bottom: 6px;">📍 Ubicación en Vivo</div>
+            <div style="font-size: 13px; color: #ffd700; font-weight: bold; margin-bottom: 6px;">Aqui estoy </div>
             
             <!-- Visor del mapa incrustado directamente en el chat -->
             <iframe 
