@@ -2856,7 +2856,7 @@ async function cargarConversacionCon(idDestino, nombreDestino, fotoDestino) {
 // 🔥 INTERCEPCIÓN MAESTRA     
              if (idDestino === "26fmetp4Q4WJ") {
    
-              try {
+              
               console.log("📡 Cargando historial global de SpaxioFlow desde Vercel...");
     
     const res = await fetch('/api/get-spaxioflow-feed');
@@ -2890,9 +2890,7 @@ async function cargarConversacionCon(idDestino, nombreDestino, fotoDestino) {
 
         iniciarRealtimeSpaxioFlow("26fmetp4Q4WJ");
 
-    } catch (e) {
-        console.error("❌ Error cargando mensajes del feed:", e);
-            
+    } 
               
               else {
     // 🔒 LÓGICA OPTIMIZADA: Últimos 50 mensajes para chats privados
