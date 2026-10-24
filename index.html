@@ -1646,7 +1646,7 @@ function manejarModoTaxista(checkbox) {
     
             const miID = localStorage.getItem('mi_dropis_id');
              
-    if (!miIdReal) {
+    if (!miID) {
         alert("⚠️ No tienes un ID registrado. Regístrate primero en la app.");
         checkbox.checked = false; // Apaga el switch si no hay ID
         return;
@@ -1681,8 +1681,8 @@ function activarModoTaxista(miID) {
                     .upsert({ 
                         driver_id: miID, 
                       
-                        nombre: nombreConductor,
-                        foto: fotoConductor,
+                        nombre: nombre,
+                        foto: foto,
                         latitude: lat, 
                         longitude: lon, 
                         updated_at: new Date().toISOString() 
@@ -1719,7 +1719,7 @@ async function registrarOActualizarTaxi(idConductor, nombreConductor, fotoConduc
                 .upsert({ 
                     driver_id: miID, 
                     nombre: nombre,
-                    foto: fotoConductor,
+                    foto: foto,
                     latitude: lat, 
                     longitude: lon, 
                     updated_at: new Date().toISOString() 
@@ -1864,7 +1864,7 @@ function iniciarTransmisionGPSConductor() {
             await window.supabaseClient
                 .from('taxis_activos')
                 .upsert({ 
-                    driver_id: idConductor, 
+                    driver_id: miID, 
                     latitude: lat, 
                     longitude: lon, 
                     updated_at: new Date().toISOString() 
@@ -1985,7 +1985,7 @@ const usuarioSesionSpaxio = {
             tipo: 'texto',
             ts: Date.now(),
          
-            mhora: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })
+            hora: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })
         });
     }
 
