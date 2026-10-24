@@ -1699,16 +1699,17 @@ function activarModoTaxista(miID) {
 // 3. Función para apagar y limpiar el mapa
 function desactivarModoTaxista(miID) {
     if (intervaloModoTaxi) clearInterval(intervaloModoTaxi);
-    
-    if (window.supabaseClient && miID
+    if (window.supabaseClient && miID) {
+        await window.supabaseClient
             .from('taxis_activos')
+    
             .delete()
             .eq('driver_id', miID);
     }
     alert("Modo Taxista desactivado.");
              }
              // Esto lo ejecuta el conductor para registrarse y actualizar su posición en tiempo real
-async function registrarOActualizarTaxi(idConductor, nombreConductor, fotoConductor) {
+async function registrarOActualizarTaxi(miID, nombre, foto) {
     navigator.geolocation.getCurrentPosition(async (position) => {
         const lat = position.coords.latitude;
         const lon = position.coords.longitude;
