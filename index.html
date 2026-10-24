@@ -1636,6 +1636,21 @@ margin: 0;
     return false;
 };
 
+// Reemplaza esto con las variables reales del usuario que tengas logueado en tu PWA
+const idConductor = localStorage.getItem('mi_dropis_id') || "conductor_1";
+             
+            const miID = localStorage.getItem('mi_dropis_id');
+             
+function manejarModoTaxista(checkbox) {
+    if (checkbox.checked) {
+        // Enciende la transmisión GPS cada 10 segundos
+        activarModoTaxista(miIdConductor, miNombreConductor, miFotoConductor);
+    } else {
+        // Apaga la transmisión y se borra de Supabase
+        desactivarModoTaxista(miIdConductor);
+    }
+             }
+             
              // Esto lo ejecuta el conductor para registrarse y actualizar su posición en tiempo real
 async function registrarOActualizarTaxi(idConductor, nombreConductor, fotoConductor) {
     navigator.geolocation.getCurrentPosition(async (position) => {
@@ -1658,6 +1673,9 @@ async function registrarOActualizarTaxi(idConductor, nombreConductor, fotoConduc
     });
              }
 async function actualizarRadarTaxis() {
+
+      const idConductor = localStorage.getItem('mi_dropis_id') || "conductor_1";
+             
     if (!window.supabaseClient) {
         alert("Supabase no está conectado.");
         return;
