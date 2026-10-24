@@ -1631,6 +1631,27 @@ margin: 0;
     return false;
 };
 
+             // Esto lo ejecuta el conductor para registrarse y actualizar su posición en tiempo real
+async function registrarOActualizarTaxi(idConductor, nombreConductor, fotoConductor) {
+    navigator.geolocation.getCurrentPosition(async (position) => {
+        const lat = position.coords.latitude;
+        const lon = position.coords.longitude;
+
+        if (window.supabaseClient) {
+            await window.supabaseClient
+                .from('taxis_activos')
+                .upsert({ 
+                    driver_id: idConductor, 
+                    nombre: nombreConductor,
+                    foto: fotoConductor,
+                    latitude: lat, 
+                    longitude: lon, 
+                    updated_at: new Date().toISOString() 
+                });
+            console.log("🚕 Posición del taxi actualizada en Supabase");
+        }
+    });
+             }
 async function actualizarRadarTaxis() {
     if (!window.supabaseClient) {
         alert("Supabase no está conectado.");
