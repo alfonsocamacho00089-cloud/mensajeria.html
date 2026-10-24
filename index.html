@@ -1015,14 +1015,7 @@ margin: 0;
         🛰️
     </button>
     
-    <div style="background: #0b141a; padding: 15px; border-radius: 12px; border: 1px solid #FFD700; color: #fff; text-align: center; margin: 10px 0;">
-    <h3 style="color: #FFD700; margin-bottom: 10px; font-size: 16px;">🚖 Panel de Conductor</h3>
-    <label style="display: flex; align-items: center; justify-content: center; gap: 12px; cursor: pointer;">
-        <span style="font-size: 14px; font-weight: bold;">Activar Modo Taxista</span>
-        <!-- Un switch o checkbox estilizado -->
-        <input type="checkbox" id="switchTaxista" onchange="manejarModoTaxista(this)" style="width: 22px; height: 22px; accent-color: #FFD700; cursor: pointer;">
-    </label>
-    </div>
+
  
 
  <div id="contenedor-notificaciones-live"></div>
@@ -1044,7 +1037,8 @@ margin: 0;
 <button onclick="abrirCalculadora()" 
                 style="background: none; border: none; color: #ffd700; font-size: 22px; cursor: pointer; padding: 5px; transition: transform 0.2s;"
                 onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
-            📊
+            🪙
+           Usdt 
         </button>
 </div>
 
@@ -1169,12 +1163,19 @@ margin: 0;
      <div id="nombre-dueño-header-lista" style="background: rgba(32, 44, 51, 0.3); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(15px); color: #ffffff; padding: 15px; font-weight: 900; text-transform: uppercase; text-align: left; border-bottom: 1px solid #333; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 1001;">
             <span>SPACECHAT</span>
             <div style="display: flex; align-items: center; gap: 15px;">
-                <!-- Botón Supremo de Acceso al SpaxioVerso -->
-                <div onclick="abrirSpaxioVersoDesdeContacto()" title="Entrar al SpaxioVerso" style="cursor: pointer; color: #ffd700; font-size: 20px; padding: 0 5px; text-shadow: 0 0 8px #ffd700;">🪐</div>
+                <!-- Botón Supremo de Acceso al SpaxioVerso 
+                <div onclick="abrirSpaxioVersoDesdeContacto()" title="Entrar al SpaxioVerso" style="cursor: pointer; color: #ffd700; font-size: 20px; padding: 0 5px; text-shadow: 0 0 8px #ffd700;">🪐</div>--->
                 <div onclick="alternarVistaPerfil()" style="cursor: pointer; color: #ffd700; font-size: 22px; padding: 0 10px;">⋮</div>
             </div>
      </div>
-     
+         <div style="background: #0b141a; padding: 5px; border-radius: 12px; border: 1px solid #FFD700; color: #fff; text-align: center; margin: 10px 0;">
+    <h3 style="color: #FFD700; margin-bottom: 10px; font-size: 16px;">🚖 Panel de Conductor</h3>
+    <label style="display: flex; align-items: center; justify-content: center; gap: 12px; cursor: pointer;">
+        <span style="font-size: 14px; font-weight: bold;">🚕</span>
+        <!-- Un switch o checkbox estilizado -->
+        <input type="checkbox" id="switchTaxista" onchange="manejarModoTaxista(this)" style="width: 22px; height: 22px; accent-color: #FFD700; cursor: pointer;">
+    </label>
+         </div>
      <div id="seccion-mi-perfil" style="display: none; padding: 15px; background: #1e222b; border-bottom: 1px solid #1e222b;">
             <!-- Modifica el estilo del div que envuelve los inputs y el botón -->
 <div style="display: flex; flex-direction: column; align-items: center; width: 100%; text-align: center;">
