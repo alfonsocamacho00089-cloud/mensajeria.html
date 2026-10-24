@@ -1201,7 +1201,23 @@ margin: 0;
      </button>
     
     </div>
-
+<!-- Agrega este contenedor donde quieras mostrar el mapa de taxis cercanos -->
+<div id="radar-taxis-container" style="background: #0b141a; border: 2px solid #ffd700; border-radius: 15px; padding: 15px; text-align: center; margin: 15px auto; max-width: 350px;">
+    <h3 style="color: #ffd700; margin-top: 0; font-size: 16px;">🚕 Radar de Taxis Cercanos</h3>
+    
+    <!-- Mapa embebido que mostrará la posición en vivo -->
+    <iframe id="mapa-radar" 
+        width="100%" 
+        height="220" 
+        style="border:0; border-radius: 10px;" 
+        loading="lazy" 
+        src="https://maps.google.com/maps?q=10.48,-66.9&z=14&output=embed">
+    </iframe>
+    
+    <button onclick="actualizarRadarTaxis()" style="margin-top: 10px; padding: 8px 15px; background: #ffd700; color: #000; border: none; border-radius: 8px; font-weight: bold; cursor: pointer;">
+        🔄 Actualizar Taxis Cercanos
+    </button>
+</div>
  
 <!-- 3. 🪐 SECCIÓN INTEGRADA: SPAXIOGIFSCARD (Debajo de los contactos) -->
             <!-- ============================================================== -->
@@ -1611,23 +1627,7 @@ margin: 0;
         <div id="mensajes-live" style="display: flex; flex-direction: column; gap: 5px;"></div>
     </div>
 </div>
-<!-- Agrega este contenedor donde quieras mostrar el mapa de taxis cercanos -->
-<div id="radar-taxis-container" style="background: #0b141a; border: 2px solid #ffd700; border-radius: 15px; padding: 15px; text-align: center; margin: 15px auto; max-width: 350px;">
-    <h3 style="color: #ffd700; margin-top: 0; font-size: 16px;">🚕 Radar de Taxis Cercanos</h3>
-    
-    <!-- Mapa embebido que mostrará la posición en vivo -->
-    <iframe id="mapa-radar" 
-        width="100%" 
-        height="220" 
-        style="border:0; border-radius: 10px;" 
-        loading="lazy" 
-        src="https://maps.google.com/maps?q=10.48,-66.9&z=14&output=embed">
-    </iframe>
-    
-    <button onclick="actualizarRadarTaxis()" style="margin-top: 10px; padding: 8px 15px; background: #ffd700; color: #000; border: none; border-radius: 8px; font-weight: bold; cursor: pointer;">
-        🔄 Actualizar Taxis Cercanos
-    </button>
-</div>
+
 
             <script>
 
@@ -1637,7 +1637,51 @@ margin: 0;
     return false;
 };
 
+async function actualizarRadarTaxis() {
+    if (!window.supabaseClient) {
+        alert("Supabase no está conectado.");
+        return;
+    }
 
+    // 1. Obtenemos tu posición actual
+    navigator.geolocation.getCurrentPosition(async (position) => {
+        const miLat = position.coords.latitude;
+        const miLon = position.coords.longitude;
+
+        // 2. Consultamos los taxis activos en Supabase
+        const { data: taxis, error } = await window.supabaseClient
+            .from('taxis_activos')
+            .select('*');
+
+        if (error || !taxis || taxis.length === 0) {
+            alert("No hay taxis activos en este momento.");
+            return;
+        }
+
+        // Buscamos el taxi más cercano usando la fórmula de distancia
+        let taxiMasCercano = null;
+        let menorDistancia = 999999;
+
+        taxis.forEach(taxi => {
+            const distancia = calcularDistanciaGPS(miLat, miLon, taxi.latitude, taxi.longitude);
+            if (distancia < menorDistancia) {
+                menorDistancia = distancia;
+                taxiMasCercano = taxi;
+            }
+        });
+
+        if (taxiMasCercano) {
+            // 3. Actualizamos el mapa en tiempo real para que apunte al taxi más cercano
+            const iframeMapa = document.getElementById('mapa-radar');
+            if (iframeMapa) {
+                iframeMapa.src = `https://maps.google.com/maps?q=${taxiMasCercano.latitude},${taxiMasCercano.longitude}&z=16&output=embed`;
+            }
+            alert(`🚕 ¡Taxi encontrado! Está a ${(menorDistancia * 1000).toFixed(0)} metros de ti.`);
+        } else {
+            alert("No se encontraron taxis en las cercanías.");
+        }
+    });
+             }
 
              
              function enviarUbicacionGPSParaTaxi() {
