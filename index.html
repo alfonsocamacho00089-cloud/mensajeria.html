@@ -1700,7 +1700,7 @@ function activarModoTaxista(miID) {
 function desactivarModoTaxista(miID) {
     if (intervaloModoTaxi) clearInterval(intervaloModoTaxi);
     if (window.supabaseClient && miID) {
-        await window.supabaseClient
+        window.supabaseClient
             .from('taxis_activos')
     
             .delete()
