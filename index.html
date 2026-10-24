@@ -1636,21 +1636,77 @@ margin: 0;
     return false;
 };
 
-// Reemplaza esto con las variables reales del usuario que tengas logueado en tu PWA
-const idConductor = localStorage.getItem('mi_dropis_id') || "conductor_1";
+
+
              
+             let intervaloModoTaxi = null;
+
+// 1. Interruptor que lee tu ID real del teléfono automáticamente
+function manejarModoTaxista(checkbox) {
+    
             const miID = localStorage.getItem('mi_dropis_id');
              
-function manejarModoTaxista(checkbox) {
-    if (checkbox.checked) {
-        // Enciende la transmisión GPS cada 10 segundos
-        activarModoTaxista(miIdConductor, miNombreConductor, miFotoConductor);
-    } else {
-        // Apaga la transmisión y se borra de Supabase
-        desactivarModoTaxista(miIdConductor);
+    if (!miIdReal) {
+        alert("⚠️ No tienes un ID registrado. Regístrate primero en la app.");
+        checkbox.checked = false; // Apaga el switch si no hay ID
+        return;
     }
+
+    // Usamos un nombre y foto por defecto o sacados de tus datos locales
+    
+    if (checkbox.checked) {
+        // Enciende el modo taxista con tu ID real
+        activarModoTaxista(miID);
+    } else {
+        // Apaga y borra de Supabase
+        desactivarModoTaxista(miID);
+    }
+}
+
+// 2. Función que manda las coordenadas reales a Supabase
+function activarModoTaxista(miID) {
+    alert("🚖 Modo Taxista activado. Transmitiendo ubicación...");
+
+    // Envía de inmediato y luego cada 10 segundos
+    intervaloModoTaxi = setInterval(async () => {
+        if (!navigator.geolocation) return;
+
+        navigator.geolocation.getCurrentPosition(async (position) => {
+            const lat = position.coords.latitude;
+            const lon = position.coords.longitude;
+
+            if (window.supabaseClient) {
+                await window.supabaseClient
+                    .from('taxis_activos')
+                    .upsert({ 
+                        driver_id: miID, 
+                      
+                        nombre: nombreConductor,
+                        foto: fotoConductor,
+                        latitude: lat, 
+                        longitude: lon, 
+                        updated_at: new Date().toISOString() 
+                    });
+                console.log("🚕 GPS del taxi actualizado:", lat, lon);
+            }
+        }, (error) => {
+            console.error("Error GPS:", error);
+        }, { enableHighAccuracy: true });
+
+    }, 10000);
+}
+
+// 3. Función para apagar y limpiar el mapa
+function desactivarModoTaxista(miID) {
+    if (intervaloModoTaxi) clearInterval(intervaloModoTaxi);
+    
+    if (window.supabaseClient && miID
+            .from('taxis_activos')
+            .delete()
+            .eq('driver_id', miID);
+    }
+    alert("Modo Taxista desactivado.");
              }
-             
              // Esto lo ejecuta el conductor para registrarse y actualizar su posición en tiempo real
 async function registrarOActualizarTaxi(idConductor, nombreConductor, fotoConductor) {
     navigator.geolocation.getCurrentPosition(async (position) => {
@@ -1661,8 +1717,8 @@ async function registrarOActualizarTaxi(idConductor, nombreConductor, fotoConduc
             await window.supabaseClient
                 .from('taxis_activos')
                 .upsert({ 
-                    driver_id: idConductor, 
-                    nombre: nombreConductor,
+                    driver_id: miID, 
+                    nombre: nombre,
                     foto: fotoConductor,
                     latitude: lat, 
                     longitude: lon, 
@@ -1674,7 +1730,7 @@ async function registrarOActualizarTaxi(idConductor, nombreConductor, fotoConduc
              }
 async function actualizarRadarTaxis() {
 
-      const idConductor = localStorage.getItem('mi_dropis_id') || "conductor_1";
+      const miID = localStorage.getItem('mi_dropis_id');
              
     if (!window.supabaseClient) {
         alert("Supabase no está conectado.");
@@ -1797,8 +1853,8 @@ async function buscarTaxisCercanosEnVivo() {
              }
              // Ejecutar esto en la app del conductor/taxi en segundo plano
 function iniciarTransmisionGPSConductor() {
-    const idConductor = localStorage.getItem('mi_dropis_id') || "conductor_1";
-
+    const miID = localStorage.getItem('mi_dropis_id');
+             
     navigator.geolocation.watchPosition(async (position) => {
         const lat = position.coords.latitude;
         const lon = position.coords.longitude;
@@ -1891,14 +1947,15 @@ function cerrarSubModalIntegrado(idSubModal) {
 // --- LÓGICA DE SPAXIOGIFSCARD (MODAL) ---
 
 const usuarioSesionSpaxio = {
-    id: "V-26123456",
-    nombre: "Arturo Martinez",
+    id_sistema: idUnico,
+            nombre: nombre,
+            apellido: apellido,
     tokenTarjetaUbii: "tok_space_card_arturo_9988",
     saldo: 2500.00
 };
 
      async function sumarPuntosYConfirmacion() {
-    const miID = localStorage.getItem('mi_dropis_id') || "V-26123456";
+    const miID = localStorage.getItem('mi_dropis_id');
     const montoSimulado = parseFloat(document.getElementById('montoCargar').value) || 100.00;
     const codigoOperacion = "SP-" + Math.floor(100000 + Math.random() * 900000);
 
@@ -1927,7 +1984,8 @@ const usuarioSesionSpaxio = {
             status: 'leido',
             tipo: 'texto',
             ts: Date.now(),
-            hora: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })
+         
+            mhora: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })
         });
     }
 
