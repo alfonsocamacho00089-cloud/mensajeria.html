@@ -1664,7 +1664,7 @@ function manejarModoTaxista(checkbox) {
 }
 
 // 2. Función que manda las coordenadas reales a Supabase
-function activarModoTaxista(miID) {
+function activarModoTaxista(miID, nombre, foto) {
     alert("🚖 Modo Taxista activado. Transmitiendo ubicación...");
 
     // Envía de inmediato y luego cada 10 segundos
@@ -1697,7 +1697,7 @@ function activarModoTaxista(miID) {
 }
 
 // 3. Función para apagar y limpiar el mapa
-function desactivarModoTaxista(miID) {
+function desactivarModoTaxista(miID, nombre, foto) {
     if (intervaloModoTaxi) clearInterval(intervaloModoTaxi);
     if (window.supabaseClient && miID) {
         window.supabaseClient
@@ -1948,9 +1948,9 @@ function cerrarSubModalIntegrado(idSubModal) {
 // --- LÓGICA DE SPAXIOGIFSCARD (MODAL) ---
 
 const usuarioSesionSpaxio = {
-    id_sistema: idUnico,
-            nombre: nombre,
-            apellido: apellido,
+    //id_sistema idUnico
+           // nombre nombre
+            //apellido apellido
     tokenTarjetaUbii: "tok_space_card_arturo_9988",
     saldo: 2500.00
 };
