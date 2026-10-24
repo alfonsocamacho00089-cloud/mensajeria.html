@@ -1636,38 +1636,45 @@ margin: 0;
     return false;
 };
 
+let intervaloModoTaxi = null;
 
+// Función matemática para medir distancia entre dos puntos GPS en Kilómetros (Fórmula de Haversine)
+function calcularDistanciaGPS(lat1, lon1, lat2, lon2) {
+    const R = 6371; // Radio de la Tierra en km
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a = 
+        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+        Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
+        Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c; // Distancia en km
+}
 
-             
-             let intervaloModoTaxi = null;
-
-// 1. Interruptor que lee tu ID real del teléfono automáticamente
+// 1. Interruptor del conductor
 function manejarModoTaxista(checkbox) {
-    
-            const miID = localStorage.getItem('mi_dropis_id');
+    const miID = localStorage.getItem('mi_dropis_id');
              
     if (!miID) {
         alert("⚠️ No tienes un ID registrado. Regístrate primero en la app.");
-        checkbox.checked = false; // Apaga el switch si no hay ID
+        checkbox.checked = false;
         return;
     }
 
-    // Usamos un nombre y foto por defecto o sacados de tus datos locales
-    
     if (checkbox.checked) {
-        // Enciende el modo taxista con tu ID real
         activarModoTaxista(miID);
     } else {
-        // Apaga y borra de Supabase
         desactivarModoTaxista(miID);
     }
 }
 
-// 2. Función que manda las coordenadas reales a Supabase
-function activarModoTaxista(miID, nombre, foto) {
+// 2. Activación de transmisión automática con datos locales directos
+function activarModoTaxista(miID) {
     alert("🚖 Modo Taxista activado. Transmitiendo ubicación...");
 
-    // Envía de inmediato y luego cada 10 segundos
+    const miNombre = localStorage.getItem('mi_nombre') || "Conductor Spaxio";
+    const miFoto = localStorage.getItem('mi_foto') || "";
+
     intervaloModoTaxi = setInterval(async () => {
         if (!navigator.geolocation) return;
 
@@ -1680,9 +1687,8 @@ function activarModoTaxista(miID, nombre, foto) {
                     .from('taxis_activos')
                     .upsert({ 
                         driver_id: miID, 
-                      
-                        nombre: nombre,
-                        foto: foto,
+                        nombre: miNombre,
+                        foto: miFoto,
                         latitude: lat, 
                         longitude: lon, 
                         updated_at: new Date().toISOString() 
@@ -1696,18 +1702,101 @@ function activarModoTaxista(miID, nombre, foto) {
     }, 10000);
 }
 
-// 3. Función para apagar y limpiar el mapa
-function desactivarModoTaxista(miID, nombre, foto) {
+// 3. Desactivación de transmisión
+function desactivarModoTaxista(miID) {
     if (intervaloModoTaxi) clearInterval(intervaloModoTaxi);
+    
     if (window.supabaseClient && miID) {
         window.supabaseClient
             .from('taxis_activos')
-    
             .delete()
             .eq('driver_id', miID);
     }
     alert("Modo Taxista desactivado.");
-             }
+}
+
+// 4. Consulta e interacción del pasajero con el mapa
+async function actualizarRadarTaxis() {
+    if (!window.supabaseClient) {
+        alert("Supabase no está conectado.");
+        return;
+    }
+
+    navigator.geolocation.getCurrentPosition(async (position) => {
+        const miLat = position.coords.latitude;
+        const miLon = position.coords.longitude;
+
+        const { data: taxis, error } = await window.supabaseClient
+            .from('taxis_activos')
+            .select('*');
+
+        if (error || !taxis || taxis.length === 0) {
+            alert("No hay taxis activos en este momento.");
+            return;
+        }
+
+        let taxiMasCercano = null;
+        let menorDistancia = 999999;
+
+        taxis.forEach(taxi => {
+            const distancia = calcularDistanciaGPS(miLat, miLon, taxi.latitude, taxi.longitude);
+            if (distancia < menorDistancia) {
+                menorDistancia = distancia;
+                taxiMasCercano = taxi;
+            }
+        });
+
+        if (taxiMasCercano) {
+            const iframeMapa = document.getElementById('mapa-radar');
+            if (iframeMapa) {
+                iframeMapa.src = `https://maps.google.com/maps?q=${taxiMasCercano.latitude},${taxiMasCercano.longitude}&z=16&output=embed`;
+            }
+            
+            const distanciaMetros = (menorDistancia * 1000).toFixed(0);
+            if (confirm(`🚕 ¡Taxi encontrado!\n${taxiMasCercano.nombre} está a ${distanciaMetros} metros.\n\n¿Deseas abrir el chat con este conductor?`)) {
+                if (typeof cargarConversacionCon === "function") {
+                    cargarConversacionCon(taxiMasCercano.driver_id, taxiMasCercano.nombre, taxiMasCercano.foto);
+                }
+            }
+        } else {
+            alert("No se encontraron taxis en las cercanías.");
+        }
+    });
+}
+
+// 5. Envío directo de ubicación por chat
+function enviarUbicacionGPS() {
+    if (!navigator.geolocation) {
+        alert("El GPS no es compatible con este navegador.");
+        return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+        async (position) => {
+            const lat = position.coords.latitude;
+            const lon = position.coords.longitude;
+            const enlaceGoogleMaps = `https://www.google.com/maps?q=${lat},${lon}`;
+            const mensajeGPS = `\n${enlaceGoogleMaps}`;
+            
+            if (typeof enviarMensajeSatelital === "function") {
+                await enviarMensajeSatelital(mensajeGPS, 'texto');
+            }
+        },
+        (error) => {
+            console.error("Error al obtener la ubicación:", error);
+            alert("No se pudo obtener la ubicación. Revisa los permisos del GPS.");
+        },
+        { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+    );
+ }
+
+             
+             
+
+
+
+
+             
              // Esto lo ejecuta el conductor para registrarse y actualizar su posición en tiempo real
 async function registrarOActualizarTaxi(miID, nombre, foto) {
     navigator.geolocation.getCurrentPosition(async (position) => {
@@ -1729,96 +1818,11 @@ async function registrarOActualizarTaxi(miID, nombre, foto) {
         }
     });
              }
-async function actualizarRadarTaxis() {
 
-      const miID = localStorage.getItem('mi_dropis_id');
+
+        
              
-    if (!window.supabaseClient) {
-        alert("Supabase no está conectado.");
-        return;
-    }
-
-    // 1. Obtenemos tu posición actual
-    navigator.geolocation.getCurrentPosition(async (position) => {
-        const miLat = position.coords.latitude;
-        const miLon = position.coords.longitude;
-
-        // 2. Consultamos los taxis activos en Supabase
-        const { data: taxis, error } = await window.supabaseClient
-            .from('taxis_activos')
-            .select('*');
-
-        if (error || !taxis || taxis.length === 0) {
-            alert("No hay taxis activos en este momento.");
-            return;
-        }
-
-        // Buscamos el taxi más cercano usando la fórmula de distancia
-        let taxiMasCercano = null;
-        let menorDistancia = 999999;
-
-        taxis.forEach(taxi => {
-            const distancia = calcularDistanciaGPS(miLat, miLon, taxi.latitude, taxi.longitude);
-            if (distancia < menorDistancia) {
-                menorDistancia = distancia;
-                taxiMasCercano = taxi;
-            }
-        });
-
-        if (taxiMasCercano) {
-            // 3. Actualizamos el mapa en tiempo real para que apunte al taxi más cercano
-            const iframeMapa = document.getElementById('mapa-radar');
-            if (iframeMapa) {
-                iframeMapa.src = `https://maps.google.com/maps?q=${taxiMasCercano.latitude},${taxiMasCercano.longitude}&z=16&output=embed`;
-            }
-            alert(`🚕 ¡Taxi encontrado! Está a ${(menorDistancia * 1000).toFixed(0)} metros de ti.`);
-        } else {
-            alert("No se encontraron taxis en las cercanías.");
-        }
-    });
-             }
-
              
-             function enviarUbicacionGPSParaTaxi() {
-    if (!navigator.geolocation) {
-        alert("El GPS no es compatible con este navegador.");
-        return;
-    }
-
-    navigator.geolocation.getCurrentPosition(
-        async (position) => {
-            const lat = position.coords.latitude;
-            const lon = position.coords.longitude;
-            const linkMaps = `https://www.google.com/maps?q=${lat},${lon}`;
-            
-            const miId = localStorage.getItem('mi_dropis_id') || "pasajero_anonimo";
-
-            // 1. Guardamos tu posición en tiempo real en una tabla de Supabase llamada 'pasajeros_activos'
-            if (window.supabaseClient) {
-                await window.supabaseClient
-                    .from('pasajeros_activos')
-                    .upsert({ 
-                        user_id: miId, 
-                        latitude: lat, 
-                        longitude: lon, 
-                        updated_at: new Date().toISOString() 
-                    });
-            }
-
-            // 2. Envías la tarjeta al chat usando tu sistema satelital
-            if (typeof enviarMensajeSatelital === "function") {
-                await enviarMensajeSatelital(linkMaps, 'texto');
-            }
-            
-            alert("📍 Ubicación compartida y registrada en el radar de Spaxio.");
-        },
-        (error) => {
-            console.error("Error al obtener la ubicación:", error);
-            alert("No se pudo obtener la ubicación. Revisa los permisos.");
-        },
-        { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
-    );
-             }
 
 async function buscarTaxisCercanosEnVivo() {
     if (!window.supabaseClient) return;
@@ -1850,31 +1854,6 @@ async function buscarTaxisCercanosEnVivo() {
                 // Aquí puedes pintar dinámicamente un marcador o tarjeta en tu pantalla
             }
         });
-    });
-             }
-             // Ejecutar esto en la app del conductor/taxi en segundo plano
-function iniciarTransmisionGPSConductor() {
-    const miID = localStorage.getItem('mi_dropis_id');
-             
-    navigator.geolocation.watchPosition(async (position) => {
-        const lat = position.coords.latitude;
-        const lon = position.coords.longitude;
-
-        // Guardamos o actualizamos la posición en tiempo real en Supabase
-        if (window.supabaseClient) {
-            await window.supabaseClient
-                .from('taxis_activos')
-                .upsert({ 
-                    driver_id: miID, 
-                    latitude: lat, 
-                    longitude: lon, 
-                    updated_at: new Date().toISOString() 
-                });
-        }
-    }, (err) => console.error("Error GPS conductor:", err), {
-        enableHighAccuracy: true,
-        maximumAge: 10000,
-        timeout: 5000
     });
              }
              
