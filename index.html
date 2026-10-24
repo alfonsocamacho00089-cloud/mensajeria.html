@@ -1015,10 +1015,14 @@ margin: 0;
         🛰️
     </button>
     
+    <div style="background: #0b141a; padding: 15px; border-radius: 12px; border: 1px solid #FFD700; color: #fff; text-align: center; margin: 10px 0;">
+    <h3 style="color: #FFD700; margin-bottom: 10px; font-size: 16px;">🚖 Panel de Conductor</h3>
+    <label style="display: flex; align-items: center; justify-content: center; gap: 12px; cursor: pointer;">
+        <span style="font-size: 14px; font-weight: bold;">Activar Modo Taxista</span>
+        <!-- Un switch o checkbox estilizado -->
+        <input type="checkbox" id="switchTaxista" onchange="manejarModoTaxista(this)" style="width: 22px; height: 22px; accent-color: #FFD700; cursor: pointer;">
+    </label>
     </div>
-<label class="icon-btn" onclick="enviarUbicacionGPS()">
-    <span>🛰️</span>
-</label>
  
 
  <div id="contenedor-notificaciones-live"></div>
