@@ -327,7 +327,27 @@ reqInit.onupgradeneeded = (e) => {
     }
 };
 window.onload = () => {
-    activarAntena();
-    activarRastreoEstados();
-    cargarMensajes(); 
+    // 1. Candado de seguridad: Revisamos si el dispositivo tiene internet real
+    if (navigator.onLine) {
+        // SI HAY INTERNET: Ejecutamos todo tu ecosistema en la nube
+        activarAntena();
+        activarRastreoEstados();
+        cargarMensajes(); 
+        
+        // Cargamos las tasas del día desde Supabase y las guardamos en el teléfono
+        guardarTasasDelDiaLocalmente(); 
+    } else {
+        // NO HAY INTERNET: La app abre libre y activa los módulos locales
+        console.log("Spaxio iniciado en Modo Offline. Servidores en espera.");
+        
+        // 2. FUNCIÓN 1: Carga la calculadora cambiaria con los últimos datos guardados
+        inicializarCalculadoraLocal(); 
+        
+        // 3. FUNCIÓN 2: Prepara el lector QR del chofer para que reste los cupones en la memoria interna
+        activarEscanerAutobusOffline(); 
+        
+        // 4. FUNCIÓN 3: Muestra la interfaz de la tarjeta Spaxio Giftcard con el último saldo conocido
+        cargarUltimoSaldoMiacards();
+    }
 };
+
