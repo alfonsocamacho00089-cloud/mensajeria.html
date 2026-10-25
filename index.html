@@ -1218,12 +1218,10 @@ function seleccionarRol(rol) {
     
     if (rol === 'driver') {
         localStorage.setItem('es_taxista', 'true');
-     if (manejarModoTaxista) manejarModoTaxista.style.display = 'block';  
-        alert("🚖 Modo Conductor configurado. Tu panel de transmisión ha sido habilitado.");
+      alert("🚖 Modo Conductor configurado. Tu panel de transmisión ha sido habilitado.");
     } else {
         localStorage.setItem('es_taxista', 'false');
-     if (manejarModoTaxista) manejarModoTaxista.style.display = 'none';  // 🔴 Oculta el cuadrito si es usuario normal
-        alert("👤 Modo Usuario configurado. Bienvenido al radar de movilidad.");
+      alert("👤 Modo Usuario configurado. Bienvenido al radar de movilidad.");
     }
 
     // Ocultar modal de selección
