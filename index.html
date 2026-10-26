@@ -3309,16 +3309,17 @@ async function cargarConversacionCon(idDestino, nombreDestino, fotoDestino) {
     if (!res.ok) throw new Error("Fallo al obtener el feed desde el backend");
     const posts = await res.json();
 
-    const postsInvertidos = posts.sort((a, b) => new Date(b.created_at) - new Date(new Date(a.created_at)));
-for (const post of postsInvertidos) {
+    if (posts && Array.isArray(posts)) {
+     
+    for (const post of posts) {
         const idContenido = "feed_" + post.id;
         const nombreRemitente = post.sender_name || 'H.A.R.V.I.S.';
-      
+       
             if (!document.getElementById(idContenido)) {
                 pintarMensaje(post.content, "", nombreRemitente, 'leido', idContenido, post.tipo); 
             }
         });
-    
+             }
 
     iniciarRealtimeSpaxioFlow("26fmetp4Q4WJ");
 
