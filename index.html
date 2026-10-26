@@ -3074,7 +3074,7 @@ const cuerpoPeticion = {
         if (inputMsg && !multimediaUrl) {
             inputMsg.value = "";
             inputMsg.style.height = '36px';
-            inputMsg.focus(); 
+            
         }
 
     } catch (e) {
@@ -3378,10 +3378,7 @@ async function cargarConversacionCon(idDestino, nombreDestino, fotoDestino) {
     const modalAgenda = document.getElementById('modal-agenda');
     if (modalAgenda) modalAgenda.style.display = 'none';
 
-    // Foco en el teclado y Scroll
-    const inputMsg = document.getElementById('msg-text');
-    if(inputMsg) inputMsg.focus();
-    box.scrollTop = box.scrollHeight;
+    
      }
     // 3. Buscamos los mensajes de ESE contacto en LocalStorage
     // ... (final de la función cargarConversacionCon)
