@@ -6105,10 +6105,8 @@ function anexarUnicoMensajeAlFeed(msg) {
 
     const horaFormateada = new Date(msg.created_at || Date.now()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
 
-    // 🚀 AQUÍ ESTÁ EL CAMBIO: Reutilizamos tu función pintarMensaje existente
-    // Le pasamos el contenido, el remitente, la hora formateada, el ID único y el tipo de contenido.
+    const nombreRemitente = msg.sender_name || 'H.A.R.V.I.S.';
     pintarMensaje(msg.content, "", nombreRemitente, 'leido', msgIdUnico, msg.tipo || 'texto');
-}
     // ✅ LA CLAVE PARA QUE QUEDE ANCLADO ARRIBA:
     contenedor.prepend(div);
     contenedor.scrollTop = 0; // El scroll se clava arriba mostrando la publicación más reciente
