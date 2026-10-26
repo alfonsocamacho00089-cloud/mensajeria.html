@@ -6539,10 +6539,8 @@ if (typeof window !== "undefined" && window.speechSynthesis) {
     .then(() => console.log("Service Worker registrado con éxito"))
     .catch((err) => console.log("Error al registrar Service Worker", err));
              }
-     <script>
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('./sw.js');
-  }
+     
+  
 </script>
 
 </body>
