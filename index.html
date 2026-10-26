@@ -8,8 +8,8 @@
 <link rel="apple-touch-icon" href="assets/logo.png">
  <link rel="manifest" href="/manifest.json">    
  <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>SpaceChat</title> </head>
+ <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, interactive-widget=overlays-content">
+        <title>SpaceChat</title> </head>
   <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-messaging-compat.js"></script>
@@ -118,8 +118,9 @@ body {
 
 /* --- INPUT AREA --- */
 .contenedor-flotante {
-    position: absolute; /* Se queda pegado a la pantalla, no al chat */
-    bottom: 0;
+    position: fixed !important; /* Se queda anclado a la pantalla física, no al flujo del body */
+     
+ bottom: 0;
     left: 0;
     width: 100%;
     display: flex;
@@ -134,7 +135,7 @@ body {
     backdrop-filter: blur(5px); /* Opcional: desenfoca un poco para legibilidad */
     -webkit-backdrop-filter: blur(5px);
 }
-
+      
  .input-wrapper {
     flex: 1;
     display: flex;
@@ -6508,21 +6509,37 @@ function lanzarInstalacion() {
         });
     }
      }
+
 if (window.visualViewport) {
     const vv = window.visualViewport;
     const ajustarInterfaz = () => {
-        document.body.style.height = `${vv.height}px`;
-        document.body.style.top = `${vv.offsetTop}px`;
-        window.scrollTo(0, 0);
-        const chatBox = document.getElementById('chat-box');
-        if (chatBox) {
-            requestAnimationFrame(() => { chatBox.scrollTop = chatBox.scrollHeight; });
+        const targetInput = document.querySelector('#target-id');
+        const idActual = targetInput ? targetInput.value : "";
+
+        if (idActual === "26fmetp4Q4WJ") {
+            // 🌊 MODO SPAXIO FLOW: El teclado pasa por encima, el body no se encoge a la fuerza
+            // y evitamos que mueva el scroll del chat
+            document.body.style.height = '100svh';
+            window.scrollTo(0, 0);
+        } else {
+            // 💬 MODO CHAT NORMAL: Comportamiento tradicional de WhatsApp (empuja la pantalla)
+            document.body.style.height = `${vv.height}px`;
+            document.body.style.top = `${vv.offsetTop}px`;
+            window.scrollTo(0, 0);
+            
+            const chatBox = document.getElementById('chat-box');
+            if (chatBox) {
+                requestAnimationFrame(() => { chatBox.scrollTop = chatBox.scrollHeight; });
+            }
         }
     };
+
     vv.addEventListener('resize', ajustarInterfaz);
     vv.addEventListener('scroll', ajustarInterfaz);
-    ajustarInterfaz();
-     }
+ajustarInterfaz();
+}
+
+             
 
      // Esto fuerza al navegador a precargar las voces de tu Xiaomi en memoria
 if (typeof window !== "undefined" && window.speechSynthesis) {
