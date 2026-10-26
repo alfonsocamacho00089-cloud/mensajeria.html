@@ -6067,11 +6067,9 @@ function iniciarRealtimeSpaxioFlow(conversacionId) {
             console.log("🔍 Comparando IDs en Realtime -> Mensaje sender_id:", nuevoMensaje.sender_id, "| Mi ID:", miUserId);
 
             // Blindaje estricto (comparamos strings limpios)
-            if (String(nuevoMensaje.sender_id).trim() === String(miUserId).trim()) {
-                console.log("⚡ [SpaxioFlow] Eco propio interceptado y bloqueado con éxito.");
-                return; 
-            }
-
+           
+if (String(nuevoMensaje.sender_id).trim() === String(miUserId).trim()) {
+    }
 
             // Si es de otro usuario, lo dibuja en el feed de inmediato
             anexarUnicoMensajeAlFeed(nuevoMensaje);
