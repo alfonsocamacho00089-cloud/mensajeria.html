@@ -3504,10 +3504,8 @@ window.onload = async () => {
         }, 100); 
     }
 
-    // 2. LÓGICA DE DATOS (Sigue corriendo de fondo)
+    // 2. CARGAR TEMA Y PERFIL LOCAL (IndexedDB / LocalStorage)
     const id = localStorage.getItem('mi_dropis_id');
-    
-    // Cargar tema (esto puede tardar unos ms por el await)
     const configTema = await obtenerLocal('usuario', 'ajustes_tema');
     if (configTema && configTema.urlFondo) {
         document.body.style.backgroundImage = `url('${configTema.urlFondo}')`;
@@ -3522,16 +3520,20 @@ window.onload = async () => {
             if (headerFoto) headerFoto.src = miPerfil.foto;
         }
 
-        // Sincronizar Firebase (Sin await para que no bloquee)
-        db.ref('usuarios/' + id).once('value').then(snapshot => {
-            const data = snapshot.val();
-            if (data && data.foto) {
-                guardarLocal('perfiles', { id: id, foto: data.foto, nombre: data.nombre });
-            }
-        });
+        // Si hay internet intentamos sincronizar Firebase de fondo, si no, la app abre local sin bloquearse
+        if (navigator.onLine) {
+            db.ref('usuarios/' + id).once('value').then(snapshot => {
+                const data = snapshot.val();
+                if (data && data.foto) {
+                    guardarLocal('perfiles', { id: id, foto: data.foto, nombre: data.nombre });
+                }
+            }).catch(() => {});
+            if (typeof activarAntena === "function") activarAntena();
+        } else {
+            console.log("📡 Modo Offline detectado: Abriendo con base de datos local (IndexedDB).");
+        }
 
-        if (typeof activarAntena === "function") activarAntena();
-             manejarBotonIdentidad();
+        manejarBotonIdentidad();
      
     } else {
         // --- CASO 2: NO HAY REGISTRO (USUARIO NUEVO) ---
