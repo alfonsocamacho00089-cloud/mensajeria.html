@@ -14,3 +14,11 @@ firebase.initializeApp(firebaseConfig);
 // Hacer globales las instancias para que el resto de archivos las usen
 const db = firebase.database();
 const messaging = firebase.messaging();
+// Monitorear el estado de la red con Firebase para el modo offline
+db.ref('.info/connected').on('value', (snapshot) => {
+    if (snapshot.val() === false) {
+        console.log("🔌 Desconectado de Firebase: Trabajando con datos locales.");
+    } else {
+        console.log("🟢 Conectado al satélite de Firebase.");
+    }
+});
