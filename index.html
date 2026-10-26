@@ -2873,19 +2873,34 @@ for (let i = 0; i < len; i++) {
     binary += String.fromCharCode(buffer[i]);
 }
 const base64 = btoa(binary);
-        
-                // Pintamos y guardamos pasando el tipo corregido localmente primero
+        // 🌊 SI ES SPAXIO FLOW: No pintamos burbuja local de derecha, 
+    // dejamos que el servidor o el feed lo renderice arriba limpio.
+    if (targetID === "26fmetp4Q4WJ") {
+        await guardarLocal('mensajes', {
+            id: msgId,
+            contactoId: targetID,
+            texto: msg,
+            clase: 'msg-spaxio-flow-tarjeta',
+            status: 'leido',
+            tipo: tipoValidado,
+            ts: Date.now(),
+            hora: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })
+        });
+    } else {
+        // Para chats normales de WhatsApp, sí se pinta tu burbuja derecha habitual
         pintarMensaje(msg, 'msg-derecha', null, 'enviado', msgId, tipoValidado);
-     await guardarLocal('mensajes', {
-    id: msgId,
-    contactoId: targetID,
-    texto: msg,
-    clase: 'msg-derecha',
-    status: 'enviado',
-    tipo: tipoValidado,
-    ts: Date.now(),
-    hora: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })
-});
+        await guardarLocal('mensajes', {
+            id: msgId,
+            contactoId: targetID,
+            texto: msg,
+            clase: 'msg-derecha',
+            status: 'enviado',
+            tipo: tipoValidado,
+            ts: Date.now(),
+            hora: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })
+        });
+             }
+                
         
 // 🔥 CONEXIÓN SUPREMA AL BACKEND DE VERCEL PARA EL FEED GLOBAL
 // 🔥 CONEXIÓN SUPREMA AL BACKEND DE VERCEL PARA EL FEED GLOBAL
