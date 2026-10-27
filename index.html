@@ -6641,6 +6641,90 @@ window.dispararInstalacion = async () => {
         promptInstalacionNativa = null;
     }
 };
+        let deferredPrompt = null;
+
+window.addEventListener('beforeinstallprompt', (e) => {
+    // Evitamos el comportamiento por defecto de Chrome
+    e.preventDefault();
+    deferredPrompt = e;
+
+    // Verificamos que no exista ya el banner en pantalla para no duplicarlo
+    if (!document.getElementById('spaxio-install-toast')) {
+        // Creamos dinámicamente el contenedor flotante con tu estética Black & Gold
+        const toast = document.createElement('div');
+        toast.id = 'spaxio-install-toast';
+        toast.style.cssText = `
+            position: fixed;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 90%;
+            max-width: 380px;
+            background: rgba(11, 20, 26, 0.95);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 2px solid #ffd700;
+            color: #fff;
+            padding: 14px 18px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.9);
+            z-index: 999999;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-family: sans-serif;
+            animation: slideUpToast 0.4s ease;
+        `;
+
+        toast.innerHTML = `
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <span style="font-size: 22px;">🪐</span>
+                <div>
+                    <div style="font-weight: bold; color: #ffd700; font-size: 14px;">Instalar SpaceChat</div>
+                    <div style="font-size: 11px; color: #8696a0;">Acceso directo rápido y seguro</div>
+                </div>
+            </div>
+            <div style="display: flex; gap: 8px;">
+                <button id="btn-aceptar-pwa" style="
+                    background: #ffd700;
+                    color: #000;
+                    border: none;
+                    padding: 8px 14px;
+                    border-radius: 12px;
+                    font-weight: bold;
+                    font-size: 12px;
+                    cursor: pointer;
+                ">Instalar</button>
+                <button id="btn-cerrar-pwa" style="
+                    background: transparent;
+                    color: #8696a0;
+                    border: none;
+                    font-size: 16px;
+                    cursor: pointer;
+                    padding: 4px;
+                ">✕</button>
+            </div>
+        `;
+
+        document.body.appendChild(toast);
+
+        // Acción al hacer clic en el botón "Instalar" del banner flotante
+        document.getElementById('btn-aceptar-pwa').addEventListener('click', async () => {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                console.log(`Respuesta de instalación: ${outcome}`);
+                deferredPrompt = null;
+            }
+            toast.remove();
+        });
+
+        // Acción al cerrar el banner con la "X"
+        document.getElementById('btn-cerrar-pwa').addEventListener('click', () => {
+            toast.remove();
+        });
+    }
+});
 </script>
 
 </body>
