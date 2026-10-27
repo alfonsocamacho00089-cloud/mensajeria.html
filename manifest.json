@@ -4,7 +4,7 @@
   "description": "Mensajería",
   "icons": [
     {
-      "src": "assets/imagen-logo-nuevo.png",
+      "src": "assets/imagen-logos-nuevos.png",
       "type": "image/png",
       "sizes": "512x512",
       "purpose": "any maskable"
