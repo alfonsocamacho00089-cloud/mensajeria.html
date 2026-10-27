@@ -1,4 +1,4 @@
-const CACHE_NAME = 'spacechat-v1';
+const CACHE_NAME = 'spacechat-v2';
 const urlsToCache = [
   './',
   './index.html',
