@@ -1763,7 +1763,10 @@ window.addEventListener('DOMContentLoaded', () => {
         <div id="mensajes-live" style="display: flex; flex-direction: column; gap: 5px;"></div>
     </div>
 </div>
-
+<!-- Botón flotante para instalar la PWA (Oculto por defecto) -->
+<button id="btn-instalar-pwa" style="display: none; background: linear-gradient(135deg, #FFD700 0%, #B8860B 100%); color: #000; border: none; padding: 12px 20px; border-radius: 25px; font-weight: bold; font-size: 14px; cursor: pointer; box-shadow: 0 4px 15px rgba(255, 215, 0, 0.4); margin: 10px auto;">
+    📲 Instalar App Space
+</button>
 
             <script>
 
@@ -6573,7 +6576,49 @@ if (typeof window !== "undefined" && window.speechSynthesis) {
     .then(() => console.log("Service Worker registrado con éxito"))
     .catch((err) => console.log("Error al registrar Service Worker", err));
              }
-     
+     let eventoInstalacionDiferido = null;
+
+// 1. Capturar el evento automático de Chrome cuando detecta que la PWA está lista
+window.addEventListener('beforeinstallprompt', (e) => {
+    // Previene que Chrome intente mostrar su propio cartel/banner inferior
+    e.preventDefault();
+    
+    // Guarda el evento para usarlo cuando el usuario presione tu botón
+    eventoInstalacionDiferido = e;
+    
+    // Muestra tu botón personalizado
+    const btnInstalar = document.getElementById('btn-instalar-pwa');
+    if (btnInstalar) {
+        btnInstalar.style.display = 'block';
+    }
+    console.log("📲 Evento de instalación listo y capturado.");
+});
+
+// 2. Escuchar el clic en tu botón de instalación
+document.getElementById('btn-instalar-pwa')?.addEventListener('click', async () => {
+    if (!eventoInstalacionDiferido) {
+        alert("La aplicación ya está instalada o el navegador no soporta la instalación automática.");
+        return;
+    }
+    
+    // Dispara la ventana nativa de instalación de Android/Chrome
+    eventoInstalacionDiferido.prompt();
+    
+    // Espera la decisión del usuario
+    const { outcome } = await eventoInstalacionDiferido.userChoice;
+    console.log(`Respuesta del usuario a la instalación: ${outcome}`);
+    
+    // Limpia la variable y oculta el botón
+    eventoInstalacionDiferido = null;
+    document.getElementById('btn-instalar-pwa').style.display = 'none';
+});
+
+// 3. Detectar si la app ya fue instalada previamente
+window.addEventListener('appinstalled', () => {
+    console.log('🎉 ¡SpaceChat fue instalada con éxito!');
+    const btnInstalar = document.getElementById('btn-instalar-pwa');
+    if (btnInstalar) btnInstalar.style.display = 'none';
+});
   
 </script>
 
