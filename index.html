@@ -6619,7 +6619,28 @@ window.addEventListener('appinstalled', () => {
     const btnInstalar = document.getElementById('btn-instalar-pwa');
     if (btnInstalar) btnInstalar.style.display = 'none';
 });
-  
+  // Variable global para capturar el aviso del sistema
+let promptInstalacionNativa = null;
+
+window.addEventListener('beforeinstallprompt', (e) => {
+    // AQUÍ ESTÁ EL TRUCO: 
+    // NO usamos e.preventDefault() para que Chrome muestre 
+    // su propio mensaje/banner nativo de instalación automáticamente.
+    promptInstalacionNativa = e;
+    
+    console.log("🚀 El navegador ha activado el aviso nativo de instalación.");
+});
+
+// (Opcional) Si en algún momento el usuario interactúa con algo y quieres forzar 
+// que se abra ese aviso nativo guardado:
+window.dispararInstalacion = async () => {
+    if (promptInstalacionNativa) {
+        promptInstalacionNativa.prompt();
+        const resultado = await promptInstalacionNativa.userChoice;
+        console.log("Respuesta del usuario:", resultado.outcome);
+        promptInstalacionNativa = null;
+    }
+};
 </script>
 
 </body>
