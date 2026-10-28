@@ -1954,47 +1954,50 @@ window.addEventListener('DOMContentLoaded', () => {
     const contenedor = document.getElementById('contenedor-spaxioflow-stories');
     if (!contenedor) return;
     
-    contenedor.innerHTML = ''; // Limpiamos el "Cargando..."
+    // Limpiamos el contenedor ("Cargando...")
+    contenedor.innerHTML = ''; 
 
     if (!posts || posts.length === 0) {
-        contenedor.innerHTML = '<div style="color: #63688a; font-size: 11px; padding: 10px; text-align: center; width: 100%;">No hay historias disponibles</div>';
+        contenedor.innerHTML = '<div style="color: #63688a; font-size: 12px; padding: 10px; text-align: center;">No hay publicaciones aún...</div>';
         return;
     }
 
     posts.forEach(post => {
-        // Creamos la tarjeta estilo historia para cada post del feed
+        // Creamos la tarjeta dinámicamente con JavaScript real
         const tarjeta = document.createElement('div');
-        tarjeta.style.cssText = "min-width: 110px; background: #151828; border: 1px solid #323657; border-radius: 12px; padding: 10px; text-align: center; flex-shrink: 0; cursor: pointer; transition: 0.3s;";
-        
-        const contenido = post.content || post.contenido || '';
-        const remitente = post.sender_name || post.remitente || 'Usuario';
-        
-        // Verificamos si el post contiene una imagen o foto
-        const esImagen = contenido && (contenido.startsWith('data:image') || post.tipo === 'imagen' || post.tipo === 'foto' || contenido.includes('firebasestorage') || contenido.includes('i.ibb.co'));
+        tarjeta.style.cssText = "min-width: 110px; height: 130px; background: #151828; border: 1px solid #323657; border-radius: 12px; padding: 6px; text-align: center; flex-shrink: 0; cursor: pointer; display: flex; flex-direction: column; justify-content: space-between; overflow: hidden;";
 
-        let previewHTML = '';
-        if (esImagen) {
-            previewHTML = `<img src="${contenido}" style="width: 45px; height: 45px; border-radius: 50%; object-fit: cover; margin-bottom: 5px; border: 1px solid #ffd700; display: block; margin: 0 auto 5px auto;" />`;
+        // Verificamos si el post tiene una imagen o URL de media subida
+        let contenidoVisual = '';
+        const urlImagen = post.imagen_url || post.media_url || post.foto;
+
+        if (urlImagen) {
+            // Si hay imagen, la colocamos como fondo de la miniatura de la tarjeta
+            contenidoVisual = `<div style="width: 100%; height: 75px; background-image: url('${urlImagen}'); background-size: cover; background-position: center; border-radius: 8px;"></div>`;
         } else {
-            previewHTML = `<div style="font-size: 22px; margin-bottom: 4px;">🎬</div>`;
+            // Si no tiene imagen, ponemos un icono por defecto
+            contenidoVisual = `<div style="font-size: 24px; margin: auto; display: flex; align-items: center; justify-content: center; height: 75px;">🎬</div>`;
         }
 
+        // Estructura interna de la tarjeta
         tarjeta.innerHTML = `
-            ${previewHTML}
-            <div style="font-size: 11px; color: #fff; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 90px; margin: 0 auto;">${remitente}</div>
-            <div style="font-size: 9px; color: #00ffcc; margin-top: 2px;">Spaxio Story</div>
+            ${contenidoVisual}
+            <div style="font-size: 10px; color: #fff; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100px; margin: 2px auto;">${post.usuario_nombre || post.nombre || 'Usuario'}</div>
         `;
 
-        // Opcional: Si quieres que al hacer clic en una historia abra algo o cargue la conversación
-        tarjeta.onclick = () => {
-            if (typeof cargarConversacionCon === "function") {
-                cargarConversacionCon("26fmetp4Q4WJ"); // Abre Spaxio Flow
+        // Acción al hacer clic en la tarjeta (puedes adaptarla a tu función de abrir post)
+        tarjeta.onclick = function() {
+            if (typeof abrirDetallePost === 'function') {
+                abrirDetallePost(post.id);
+            } else {
+                console.log("Clic en post de:", post.id);
             }
         };
 
+        // Añadimos la tarjeta terminada al contenedor deslizable
         contenedor.appendChild(tarjeta);
     });
-}
+             }
             function toggleMenuHamburguesa() {
     const menu = document.getElementById('seccion-menu-hamburguesa');
     if (menu) {
