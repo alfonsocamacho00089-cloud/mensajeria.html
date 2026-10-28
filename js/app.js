@@ -5,7 +5,7 @@ const E_RECIBIDO = 2;
 const E_LEIDO = 3;    
 
 let protoRoot = null;
-const DB_VERSION = 9;
+const DB_VERSION = 10;
 let listenerActivo = null; // Para control de antena
 
 async function cargarProto() {
