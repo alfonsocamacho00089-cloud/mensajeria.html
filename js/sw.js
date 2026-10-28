@@ -1,9 +1,9 @@
-const CACHE_NAME = 'spacechat-v9';
+const CACHE_NAME = 'spacechat-v10';
 const urlsToCache = [
   './',
   './index.html',
   './assets/logo.webp',
-  './assets/imagen-logo-nuevo.png?v=9'
+  './assets/imagen-logo-nuevo.png?v=10'
 ];
 
 self.addEventListener('install', (event) => {
