@@ -1959,13 +1959,45 @@ window.addEventListener('DOMContentLoaded', () => {
     
     contenedor.innerHTML = ''; // Limpiamos el "Cargando..."
 
+    if (!posts || posts.length === 0) {
+        contenedor.innerHTML = '<div style="color: #63688a; font-size: 11px; padding: 10px; text-align: center; width: 100%;">No hay historias disponibles</div>';
+        return;
+    }
+
     posts.forEach(post => {
         // Creamos la tarjeta estilo historia para cada post del feed
-        const tarjeta = document.div; // o document.createElement('div')
-        // (Aquí armas el template con la imagen de perfil del usuario, su foto o video del post y su nombre)
-        // ...
+        const tarjeta = document.createElement('div');
+        tarjeta.style.cssText = "min-width: 110px; background: #151828; border: 1px solid #323657; border-radius: 12px; padding: 10px; text-align: center; flex-shrink: 0; cursor: pointer; transition: 0.3s;";
+        
+        const contenido = post.content || post.contenido || '';
+        const remitente = post.sender_name || post.remitente || 'Usuario';
+        
+        // Verificamos si el post contiene una imagen o foto
+        const esImagen = contenido && (contenido.startsWith('data:image') || post.tipo === 'imagen' || post.tipo === 'foto' || contenido.includes('firebasestorage') || contenido.includes('i.ibb.co'));
+
+        let previewHTML = '';
+        if (esImagen) {
+            previewHTML = `<img src="${contenido}" style="width: 45px; height: 45px; border-radius: 50%; object-fit: cover; margin-bottom: 5px; border: 1px solid #ffd700; display: block; margin: 0 auto 5px auto;" />`;
+        } else {
+            previewHTML = `<div style="font-size: 22px; margin-bottom: 4px;">🎬</div>`;
+        }
+
+        tarjeta.innerHTML = `
+            ${previewHTML}
+            <div style="font-size: 11px; color: #fff; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 90px; margin: 0 auto;">${remitente}</div>
+            <div style="font-size: 9px; color: #00ffcc; margin-top: 2px;">Spaxio Story</div>
+        `;
+
+        // Opcional: Si quieres que al hacer clic en una historia abra algo o cargue la conversación
+        tarjeta.onclick = () => {
+            if (typeof cargarConversacionCon === "function") {
+                cargarConversacionCon("26fmetp4Q4WJ"); // Abre Spaxio Flow
+            }
+        };
+
+        contenedor.appendChild(tarjeta);
     });
-              }
+}
             function toggleMenuHamburguesa() {
     const menu = document.getElementById('seccion-menu-hamburguesa');
     if (menu) {
