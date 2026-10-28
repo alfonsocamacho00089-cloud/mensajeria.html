@@ -3,7 +3,7 @@ const urlsToCache = [
   './',
   './index.html',
   './assets/logo.webp',
-  './assets/imagen-logo-nuevo.png?v=10'
+  './assets/imagen-logos-nuevos.png?v=10'
 ];
 
 self.addEventListener('install', (event) => {
