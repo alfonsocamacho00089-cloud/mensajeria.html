@@ -3601,9 +3601,9 @@ if (contenedorStories && posts.length > 0) {
     
     // Limitamos a los últimos 8 posts para que aparezcan uno al lado del otro
     posts.slice(0, 8).forEach(post => {
-        const idContenido = "feed_" + post.id;
-        const nombreRemitente = post.sender_name || 'H.A.R.V.I.S.';
-
+        const urlImg = post.content || post.tipo || post.foto || '';
+        const nombreUsr = post.sender_name || post.remitente || 'Usuario';
+        
      
         contenedorStories.innerHTML += `
             <div style="min-width: 110px; height: 130px; background: #151828; border: 1px solid #323657; border-radius: 12px; padding: 6px; text-align: center; flex-shrink: 0; cursor: pointer; display: flex; flex-direction: column; justify-content: space-between; overflow: hidden;">
