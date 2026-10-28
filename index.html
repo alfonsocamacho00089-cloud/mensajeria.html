@@ -3601,8 +3601,6 @@ if (contenedorStories && posts.length > 0) {
     
     // Limitamos a los últimos 8 posts para que aparezcan uno al lado del otro
     posts.slice(0, 8).forEach(post => {
-        const urlImg = post.imagen_url || post.media_url || post.foto || '';
-        const nombreUsr = post.sender_name || post.remitente || 'Usuario';
         const idContenido = "feed_" + post.id;
         const nombreRemitente = post.sender_name || 'H.A.R.V.I.S.';
 
