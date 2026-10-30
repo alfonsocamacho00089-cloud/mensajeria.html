@@ -59,7 +59,9 @@ body {
     
     
     
-    background: var(--bg-color); margin: 0;
+    background: var(--bg-color); 
+ color: var(--texto-color);
+ margin: 0;
     min-height: 100vh;
 
     
@@ -79,17 +81,25 @@ body {
     overflow: hidden;
     position: fixed; /* Evita que el navegador desplace toda la pantalla */
 }
+/* 1. Define los colores globales */
 :root {
-    --bg-color: #f0f2f5; /* Color cuando el teléfono está en modo claro */
-    --text-color: #000000;
+    --bg-principal: #ffffff;
+    --bg-tarjeta: #f0f2f5;
+    --texto-color: #000000;
 }
 
+/* 2. Cuando el teléfono activa modo oscuro, cambia las variables */
 @media (prefers-color-scheme: dark) {
     :root {
-        --bg-color: #222b35; /* Color cuando el teléfono está en modo oscuro */
-        --text-color: #ffffff;
+        --bg-principal: #181d24; /* El gris oscuro de tu captura */
+        --bg-tarjeta: #202732;
+        --texto-color: #ffffff;
     }
 }
+
+
+    
+
 #chat-box {
    background: transparent !important;
     flex: 1;
