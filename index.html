@@ -98,7 +98,22 @@ body {
     -webkit-mask-image: linear-gradient(to bottom, black 85%, transparent 95%);
     overscroll-behavior-y: contain;  /* Bloquea que el scroll mueva el fondo */
 }
-    
+    .fondo-estatico {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    /* Cambiamos la imagen por el degradado gris profesional */
+    background: radial-gradient(circle at center, #262c35 0%, #13161b 100%);
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: cover; 
+    z-index: -1; 
+    pointer-events: none;
+    touch-action: none; 
+    overflow: hidden;
+     }
      
 
 
