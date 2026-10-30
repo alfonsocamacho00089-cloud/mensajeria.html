@@ -1996,6 +1996,41 @@ window.addEventListener('DOMContentLoaded', () => {
     return false;
 };
 
+
+             function procesarEnlaceExternoDinamico(urlExterna, autorExterno) {
+    let tipoDetectado = "texto";
+    let contenidoFinal = urlExterna;
+
+    // 1. Detectar si es un video de YouTube automáticamente
+    if (urlExterna.includes('youtube.com/') || urlExterna.includes('youtu.be/')) {
+        tipoDetectado = "video";
+    } 
+    // 2. Detectar si es una imagen externa de internet
+    else if (urlExterna.match(/\.(jpeg|jpg|gif|png)$/) || urlExterna.includes('picsum.photos')) {
+        tipoDetectado = "foto";
+    }
+
+    // 2. Creamos el objeto dinámico para el feed
+    const itemExternoDinamico = {
+        id: "ext_" + Date.now(),
+        sender_name: autorExterno || "Feed Externo",
+        content: contenidoFinal,
+        tipo: tipoDetectado,
+        created_at: new Date().toISOString()
+    };
+
+    // 3. Lo guardamos en tu historial local para que no se pierda al refrescar
+    let misHistorias = JSON.parse(localStorage.getItem('spaxio_historias_locales') || '[]');
+    misHistorias.unshift(itemExternoDinamico);
+    localStorage.setItem('spaxio_historias_locales', JSON.stringify(misHistorias));
+
+    // 4. Lo pintamos al instante en tu SpaxioFlow usando tu misma lógica existente
+    if (typeof anexarUnicoMensajeAlFeed === 'function') {
+        anexarUnicoMensajeAlFeed(itemExternoDinamico);
+    }
+
+    console.log("🌐 Enlace externo cargado dinámicamente:", urlExterna);
+             }
               function sincronizarMiFotoEnStories() {
     const imgStory = document.getElementById('story-mi-foto-perfil');
     if (!imgStory) return;
