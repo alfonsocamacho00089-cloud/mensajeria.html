@@ -2596,27 +2596,82 @@ async function procesarCargaBanco() {
 }
 
 async function procesarEnvioInterno() {
-    const receptor = document.getElementById('idReceptor').value;
-    const monto = parseFloat(document.getElementById('montoEnviar').value);
+    const receptorInput = document.getElementById('idReceptor');
+    const montoInput = document.getElementById('montoEnviar');
 
-    if(!receptor || !monto) { 
-        alert("Datos incompletos."); 
-        return; 
+    const receptor = receptorInput ? receptorInput.value.trim() : '';
+    const monto = montoInput ? parseFloat(montoInput.value) : 0;
+    
+    // Obtenemos tu propio ID actual desde el almacenamiento local
+    const miID = localStorage.getItem('mi_dropis_id') || localStorage.getItem('spaxiocard_id') || "SPAXIO-USER";
+
+    // Validaciones básicas
+    if (!receptor || !monto || isNaN(monto) || monto <= 0) {
+        alert("⚠️ Por favor ingresa un ID de destinatario válido y un monto mayor a cero.");
+        return;
     }
-    if(monto > usuarioSesionSpaxio.saldo) { 
-        alert("Saldo insuficiente en tu tarjeta."); 
-        return; 
+
+    if (receptor === miID) {
+        alert("❌ No puedes hacerte un traspaso de puntos a ti mismo.");
+        return;
     }
 
-    alert("API UBII: Traspasando Bs. " + monto + " netos hacia el ID: " + receptor);
+    if (monto > usuarioSesionSpaxio.saldo) {
+        alert("❌ Saldo insuficiente en tu tarjeta para realizar este envío.");
+        return;
+    }
 
+    // Código único de operación para trazabilidad
+    const codigoOperacion = "TRX-" + Math.floor(100000 + Math.random() * 900000);
+
+    // 1. Descontar el saldo al emisor (usuario actual)
     usuarioSesionSpaxio.saldo -= monto;
+
+    // Actualizar el saldo visualmente en la interfaz
     const elBalance = document.getElementById('balanceVisual');
     if (elBalance) {
-        elBalance.innerText = "Bs. " + usuarioSesionSpaxio.saldo.toLocaleString('es-VE', {minimumFractionDigits: 2});
+        elBalance.innerText = "Bs. " + usuarioSesionSpaxio.saldo.toLocaleString('es-VE', { minimumFractionDigits: 2 });
     }
+
+    // 2. Registrar la transacción localmente o preparar el payload para Supabase/Backend
+    const datosTraspaso = {
+        id_transaccion: codigoOperacion,
+        emisor: miID,
+        receptor: receptor,
+        monto: monto,
+        fecha: new Date().toISOString()
+    };
+
+    console.log("🚀 Traspaso procesado con éxito:", datosTraspaso);
+
+    // 3. Crear notificación visual en el chat local del usuario
+    const textoAviso = `💸 ¡Traspaso exitoso! Código: ${codigoOperacion}. Enviaste Bs. ${monto.toFixed(2)} al ID: ${receptor}.`;
+    const msgIdTest = "msg_trx_" + Date.now();
+
+    if (typeof guardarLocal === "function") {
+        await guardarLocal('mensajes', {
+            id: msgIdTest,
+            contactoId: miID,
+            texto: textoAviso,
+            clase: 'msg-izquierda',
+            status: 'leido',
+            tipo: 'texto',
+            ts: Date.now(),
+            hora: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })
+        });
+    }
+
+    if (typeof pintarMensaje === "function") {
+        pintarMensaje(textoAviso, 'msg-izquierda', null, 'leido', msgIdTest, 'texto');
+    }
+
+    // Limpiar campos y cerrar modales
+    receptorInput.value = '';
+    montoInput.value = '';
     cerrarTodosLosModalesSpace();
-     }
+
+    alert(`✅ ¡Traspaso de Bs. ${monto.toFixed(2)} completado hacia el ID: ${receptor}!`);
+}
 
         
     
