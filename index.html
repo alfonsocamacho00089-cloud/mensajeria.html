@@ -2668,7 +2668,30 @@ async function procesarCargaBanco() {
     cerrarTodosLosModalesSpace();
 }
 
-      
+      async function enviarTransferenciaPorChat(receptorID, monto) {
+    const miID = localStorage.getItem('mi_dropis_id') || "SPAXIO-USER";
+    const codigoOperacion = "TRX-" + Math.floor(100000 + Math.random() * 900000);
+
+    // 1. Estructuramos el mensaje de transferencia
+    const mensajeTransaccion = {
+        id: "msg_trx_" + Date.now(),
+        emisor: miID,
+        receptor: receptorID,
+        texto: `💸 Comprobante de Traspaso: Bs. ${monto.toFixed(2)} (Ref: ${codigoOperacion})`,
+        tipo: 'spaxiocard_pago', // Tipo especial para que la app lo reconozca
+        monto: monto,
+        ts: Date.now()
+    };
+
+    // 2. Se envía por tu canal normal de Firebase del chat
+    // (Aquí usas tu misma función que ya sube los mensajes al chat de Firebase)
+    if (typeof enviarMensajeFirebase === "function") {
+        await enviarMensajeFirebase(mensajeTransaccion);
+    }
+
+    // 3. Del lado del receptor, cuando su chat detecte un mensaje tipo 'spaxiocard_pago' 
+    // donde él sea el receptor, su función de lectura sumará el saldo a su `usuarioSesionSpaxio.saldo` de inmediato.
+             }
     
 
 
