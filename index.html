@@ -55,14 +55,13 @@ body {
     
     
     /* Un degradado radial que simula el centro iluminado y los bordes oscuros de tu referencia */
-    background: radial-gradient(circle at center, #262c35 0%, #13161b 100%);
-    background-attachment: fixed;
+    
+    background: radial-gradient(circle at center, #1e293b 0%, #090d16 100%);   background-attachment: fixed;
     margin: 0;
     min-height: 100vh;
 
     
     /* Usamos la imagen aquí para que sea global */
-    background-image: url('./assets/logo.webp');  
     background-attachment: fixed; /* LA CLAVE: El fondo no se mueve con el scroll */
     background-position: center;
     background-size: cover;
@@ -176,10 +175,12 @@ body {
     /* Efecto para que parezca que la foto sigue debajo */
     
    
-    background: #0b141a; 
+    
+    background: rgba(17, 24, 39, 0.9);
+    border: 1px solid rgba(255, 215, 0, 0.4); /* Sube un poco el brillo del borde dorado */ 
   backdrop-filter: blur(5px); /* Opcional: desenfoca un poco para legibilidad */
     -webkit-backdrop-filter: blur(10px);
-}
+
     /* Cambiamos a FLEX para los botones */
     display: flex;
     justify-content: space-around; /* Reparte los botones con espacio igual */
@@ -419,10 +420,11 @@ button#btn-enviar:active {
      
 /* 2. EL CONTENIDO (Pantalla Completa con Fondo) */
 .modal-content { 
-    background-color: #0b141a;
+    
+    background-color: #111827;
+    background-image: none; /* Elimina rastro de imagen antigua */
     /* Aplicamos el fondo con el logo igual que en tu chat */
-    background-image: linear-gradient(rgba(11, 20, 26, 0.9), rgba(11, 20, 26, 0.9)), 
-                      url('./assets/logo.webp');
+    
     background-size: cover;
     background-position: center;
     background-attachment: fixed;
