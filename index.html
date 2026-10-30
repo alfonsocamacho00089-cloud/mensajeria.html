@@ -3139,8 +3139,7 @@ const miID = data.from;
                 if (textoReal.includes('audio') || tipoMediaRecibido === 'audio') {
                     
                  tipoMediaRecibido = 'audio';
-               if (textoReal.includes('|SPA_PAGO|')) { const m = parseFloat(textoReal.split('|SPA_PAGO|')[1]) || 0; usuarioSesionSpaxio.saldo += m; const b = document.getElementById('balanceVisual'); if (b) b.innerText = "Bs. " + usuarioSesionSpaxio.saldo.toLocaleString('es-VE', { minimumFractionDigits: 2 }); }
-                }
+            if (textoReal.includes('|SPA_PAGO|')) { const m = parseFloat(textoReal.split('|SPA_PAGO|')[1]) || 0; usuarioSesionSpaxio.saldo += m; if (typeof inicializarSpaxiocard === 'function') inicializarSpaxiocard(); } }
              
             }
 
