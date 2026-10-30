@@ -1997,72 +1997,45 @@ window.addEventListener('DOMContentLoaded', () => {
 };
 
 
-             // =================================================================
-// 🎬 SINCRONIZADOR AUTOMÁTICO DE VIDEOS GRATIS PARA SPAXIOFLOW
-// =================================================================
-async function probarApiPublicaVideosGratis() {
-    console.log("📡 Consultando API pública de videos de prueba...");
+             async function sincronizarVideosDesdeGitHub() {
+    // La URL raw de tu archivo JSON generado automáticamente en GitHub
+    const urlJsonGitHub = "https://raw.githubusercontent.com/TU_USUARIO/TU_REPO/main/videos_feed.json";
 
     try {
-        // API pública y gratuita con enlaces de video directos listos para reproducir
-        const respuesta = await fetch("https://gist.githubusercontent.com/pabloprieto/7f9e596b6d59b21f92e6/raw/ref.json");
-        const listaPublica = await respuesta.json();
+        const response = await fetch(urlJsonGitHub);
+        const videosNuevos = await response.json();
 
-        // Leemos tu almacenamiento local real de SpaxioFlow
         let misHistorias = JSON.parse(localStorage.getItem('spaxio_historias_locales') || '[]');
 
-        // Tomamos los primeros 3 videos del catálogo público
-        listaPublica.slice(0, 3).forEach((item, index) => {
-            const videoPublicoItem = {
-                id: "pub_free_" + Date.now() + "_" + index,
-                sender_name: item.user || "Canal Público Gratis",
-                tipo: "video", // Esto activa tu reproductor nativo en pintarMensaje
-                content: item.url || "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
-                created_at: new Date().toISOString()
-            };
+        // Recorremos los videos limpios que preparó Python
+        videosNuevos.forEach(video => {
+            // Verificamos que no esté duplicado en la memoria local
+            const existe = misHistorias.some(h => h.id === video.id);
+            if (!existe) {
+                misHistorias.unshift(video);
 
-            // Lo metemos al inicio de tus historias locales
-            misHistorias.unshift(videoPublicoItem);
-
-            // Lo inyectamos al instante en pantalla usando tu función exacta del index
-            if (typeof anexarUnicoMensajeAlFeed === 'function') {
-                anexarUnicoMensajeAlFeed(videoPublicoItem);
+                // Lo pintamos al instante en tu SpaxioFlow
+                if (typeof anexarUnicoMensajeAlFeed === 'function') {
+                    anexarUnicoMensajeAlFeed(video);
+                }
             }
         });
 
-        // Guardamos el bloque actualizado en tu localStorage real
+        // Actualizamos la memoria del teléfono
         localStorage.setItem('spaxio_historias_locales', JSON.stringify(misHistorias));
-        
-        console.log("🎬 ¡Videos públicos sincronizados al SpaxioFlow con éxito!");
-        alert("✨ ¡Videos públicos de prueba cargados y publicados en el feed!");
+        console.log("🎬 SpaxioFlow actualizado automáticamente desde el JSON de GitHub.");
 
     } catch (error) {
-        console.error("Error al conectar con la API pública:", error);
-        
-        // Plan B de emergencia si falla la red externa
-        publicarVideoMuestraLibre();
+        console.error("Error al sincronizar el feed automatizado:", error);
     }
 }
 
-// 🛡️ PLAN B DE EMERGENCIA (Video abierto garantizado)
-function publicarVideoMuestraLibre() {
-    const videoLibre = {
-        id: "libre_" + Date.now(),
-        sender_name: "Open Source Media",
-        tipo: "video",
-        content: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4",
-        created_at: new Date().toISOString()
-    };
+// Puedes ejecutar esto automáticamente cada vez que cargue tu app
+window.addEventListener('DOMContentLoaded', () => {
+    sincronizarVideosDesdeGitHub();
+});
 
-    let misHistorias = JSON.parse(localStorage.getItem('spaxio_historias_locales') || '[]');
-    misHistorias.unshift(videoLibre);
-    localStorage.setItem('spaxio_historias_locales', JSON.stringify(misHistorias));
-
-    if (typeof anexarUnicoMensajeAlFeed === 'function') {
-        anexarUnicoMensajeAlFeed(videoLibre);
-    }
-    alert("🎥 Video abierto de muestra inyectado localmente.");
-             }
+             
 
              
               function sincronizarMiFotoEnStories() {
