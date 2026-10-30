@@ -1997,39 +1997,37 @@ window.addEventListener('DOMContentLoaded', () => {
 };
 
 
-             function procesarEnlaceExternoDinamico(urlExterna, autorExterno) {
-    let tipoDetectado = "texto";
-    let contenidoFinal = urlExterna;
+             function publicarVideoExternoComoPostPropio(urlVideoExterno, nombreAutor, tituloVideo) {
+    // 1. Generamos un ID único para la publicación
+    const idUnicoPost = "post_auto_" + Date.now();
 
-    // 1. Detectar si es un video de YouTube automáticamente
-    if (urlExterna.includes('youtube.com/') || urlExterna.includes('youtu.be/')) {
-        tipoDetectado = "video";
-    } 
-    // 2. Detectar si es una imagen externa de internet
-    else if (urlExterna.match(/\.(jpeg|jpg|gif|png)$/) || urlExterna.includes('picsum.photos')) {
-        tipoDetectado = "foto";
-    }
-
-    // 2. Creamos el objeto dinámico para el feed
-    const itemExternoDinamico = {
-        id: "ext_" + Date.now(),
-        sender_name: autorExterno || "Feed Externo",
-        content: contenidoFinal,
-        tipo: tipoDetectado,
+    // 2. Creamos el objeto con la estructura exacta que lee tu feed (SpaxioFlow)
+    const nuevoPostFeed = {
+        id: idUnicoPost,
+        sender_name: nombreAutor || "Tendencia Global",
+        content: urlVideoExterno, // El enlace directo al archivo de video (.mp4, .webm, o stream)
+        tipo: "video",            // Esto le avisa a tu código que debe pintarlo como reproductor de video
         created_at: new Date().toISOString()
     };
 
-    // 3. Lo guardamos en tu historial local para que no se pierda al refrescar
+    // 3. Lo guardamos en el localStorage (tu memoria local de historias/feed)
     let misHistorias = JSON.parse(localStorage.getItem('spaxio_historias_locales') || '[]');
-    misHistorias.unshift(itemExternoDinamico);
-    localStorage.setItem('spaxio_historias_locales', JSON.stringify(misHistorias));
-
-    // 4. Lo pintamos al instante en tu SpaxioFlow usando tu misma lógica existente
-    if (typeof anexarUnicoMensajeAlFeed === 'function') {
-        anexarUnicoMensajeAlFeed(itemExternoDinamico);
+    misHistorias.unshift(nuevoPostFeed);
+    
+    try {
+        localStorage.setItem('spaxio_historias_locales', JSON.stringify(misHistorias));
+    } catch (err) {
+        console.error("Memoria llena:", err);
+        return;
     }
 
-    console.log("🌐 Enlace externo cargado dinámicamente:", urlExterna);
+    // 4. Lo inyectamos de inmediato en la pantalla usando tu función de renderizado
+    if (typeof anexarUnicoMensajeAlFeed === 'function') {
+        anexarUnicoMensajeAlFeed(nuevoPostFeed);
+    }
+
+    console.log(`🚀 ¡Video de "${nombreAutor}" publicado en el feed como si fuera una persona!`, tituloVideo);
+    alert(`🎬 ¡Nuevo video de "${nombreAutor}" publicado automáticamente en el feed!`);
              }
               function sincronizarMiFotoEnStories() {
     const imgStory = document.getElementById('story-mi-foto-perfil');
