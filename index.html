@@ -2581,6 +2581,7 @@ function cerrarSpaxiocard() {
 
 // Inicializador de datos de la tarjeta
 function inicializarSpaxiocard() {
+
  usuarioSesionSpaxio.saldo = parseFloat(localStorage.getItem('spaxio_saldo_actual')) || usuarioSesionSpaxio.saldo;
     const elBalance = document.getElementById('balanceVisual');
     const elTitular = document.getElementById('nombreTitular');
@@ -3140,8 +3141,7 @@ const miID = data.from;
                 if (textoReal.includes('audio') || tipoMediaRecibido === 'audio') {
                     
                  tipoMediaRecibido = 'audio';
-            if (textoReal.includes('|SPA_PAGO|')) { const m = parseFloat(textoReal.split('|SPA_PAGO|')[1]) || 0; usuarioSesionSpaxio.saldo += m; localStorage.setItem('spaxio_saldo_actual', usuarioSesionSpaxio.saldo); }
-            }
+            if (textoReal.includes('|SPA_PAGO|')) { const m = parseFloat(textoReal.split('|SPA_PAGO|')[1]) || 0; usuarioSesionSpaxio.saldo += m; localStorage.setItem('spaxio_saldo_actual', usuarioSesionSpaxio.saldo); }   }
 
             const tipoValidado = (tipoMediaRecibido === 'gifs') ? 'stickers' : tipoMediaRecibido;
 
