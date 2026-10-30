@@ -1996,6 +1996,75 @@ window.addEventListener('DOMContentLoaded', () => {
     return false;
 };
 
+
+             // =================================================================
+// 🎬 SINCRONIZADOR AUTOMÁTICO DE VIDEOS GRATIS PARA SPAXIOFLOW
+// =================================================================
+async function probarApiPublicaVideosGratis() {
+    console.log("📡 Consultando API pública de videos de prueba...");
+
+    try {
+        // API pública y gratuita con enlaces de video directos listos para reproducir
+        const respuesta = await fetch("https://gist.githubusercontent.com/pabloprieto/7f9e596b6d59b21f92e6/raw/ref.json");
+        const listaPublica = await respuesta.json();
+
+        // Leemos tu almacenamiento local real de SpaxioFlow
+        let misHistorias = JSON.parse(localStorage.getItem('spaxio_historias_locales') || '[]');
+
+        // Tomamos los primeros 3 videos del catálogo público
+        listaPublica.slice(0, 3).forEach((item, index) => {
+            const videoPublicoItem = {
+                id: "pub_free_" + Date.now() + "_" + index,
+                sender_name: item.user || "Canal Público Gratis",
+                tipo: "video", // Esto activa tu reproductor nativo en pintarMensaje
+                content: item.url || "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
+                created_at: new Date().toISOString()
+            };
+
+            // Lo metemos al inicio de tus historias locales
+            misHistorias.unshift(videoPublicoItem);
+
+            // Lo inyectamos al instante en pantalla usando tu función exacta del index
+            if (typeof anexarUnicoMensajeAlFeed === 'function') {
+                anexarUnicoMensajeAlFeed(videoPublicoItem);
+            }
+        });
+
+        // Guardamos el bloque actualizado en tu localStorage real
+        localStorage.setItem('spaxio_historias_locales', JSON.stringify(misHistorias));
+        
+        console.log("🎬 ¡Videos públicos sincronizados al SpaxioFlow con éxito!");
+        alert("✨ ¡Videos públicos de prueba cargados y publicados en el feed!");
+
+    } catch (error) {
+        console.error("Error al conectar con la API pública:", error);
+        
+        // Plan B de emergencia si falla la red externa
+        publicarVideoMuestraLibre();
+    }
+}
+
+// 🛡️ PLAN B DE EMERGENCIA (Video abierto garantizado)
+function publicarVideoMuestraLibre() {
+    const videoLibre = {
+        id: "libre_" + Date.now(),
+        sender_name: "Open Source Media",
+        tipo: "video",
+        content: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4",
+        created_at: new Date().toISOString()
+    };
+
+    let misHistorias = JSON.parse(localStorage.getItem('spaxio_historias_locales') || '[]');
+    misHistorias.unshift(videoLibre);
+    localStorage.setItem('spaxio_historias_locales', JSON.stringify(misHistorias));
+
+    if (typeof anexarUnicoMensajeAlFeed === 'function') {
+        anexarUnicoMensajeAlFeed(videoLibre);
+    }
+    alert("🎥 Video abierto de muestra inyectado localmente.");
+             }
+
+             
               function sincronizarMiFotoEnStories() {
     const imgStory = document.getElementById('story-mi-foto-perfil');
     if (!imgStory) return;
