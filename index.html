@@ -5,7 +5,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="ChatSpace">
 
-<link rel="apple-touch-icon" href="assets/imagen-logos-nuevos.png?v=10">
+<link rel="apple-touch-icon" href="assets/logo.png">
  <link rel="manifest" href="/manifest.json">    
  <meta charset="UTF-8">
  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, interactive-widget=overlays-content">
@@ -133,7 +133,7 @@ body {
     /* Efecto para que parezca que la foto sigue debajo */
     background: rgba(0, 0, 0, 0.1); 
     backdrop-filter: blur(5px); /* Opcional: desenfoca un poco para legibilidad */
-    -webkit-backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(10px);
 }
       
  .input-wrapper {
@@ -148,17 +148,25 @@ body {
  }
      
 .barra-flotante-premium {
-    position: fixed;
-    bottom: 50px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 92%;
-    max-width: 450px;
+    position: fixed !important; /* Se queda anclado a la pantalla física, no al flujo del body */
+     
+ bottom: 0;
+    left: 0;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    gap: 2px;
+    z-index: 100;
+    /* IMPORTANTE: Para que puedas hacer clic en el input */
     
-    background: rgba(32, 44, 51, 0.8);
-    backdrop-filter: blur(15px);
-    -webkit-backdrop-filter: blur(15px);
+    /* Efecto para que parezca que la foto sigue debajo */
     
+   
+    background: #0b141a; 
+  backdrop-filter: blur(5px); /* Opcional: desenfoca un poco para legibilidad */
+    -webkit-backdrop-filter: blur(10px);
+}
     /* Cambiamos a FLEX para los botones */
     display: flex;
     justify-content: space-around; /* Reparte los botones con espacio igual */
@@ -1460,15 +1468,32 @@ window.addEventListener('DOMContentLoaded', () => {
     </div>
 </div>
 
+<!-- Contenedor deslizable del feed (SpaxioFlow Dinámico) -->
+<div id="contenedor-spaxioflow-stories" style="display: flex; gap: 5px; overflow-x: auto; padding-bottom: 5px; scrollbar-width: none; align-items: center;">
     
-    <!-- Contenedor deslizable del feed (SpaxioFlow Dinámico) -->
-<div id="contenedor-spaxioflow-stories" style="display: flex; gap: 10px; overflow-x: auto; padding-bottom: 5px; scrollbar-width: none;">
-    
-    <!-- Tarjeta de ejemplo inicial (Cargando) -->
-    <div style="min-width: 110px; background: #151828; border: 1px solid #323657; border-radius: 50px; padding: 20px; text-align: center; flex-shrink: 0; color: #63688a; font-size: 11px;">
-        Cargando Flow...
-    </div>
+    <!-- 1. TU TARJETA DE PERFIL (QUEDA FIJA Y NO SE BORRA NUNCA) -->
+    <div style="min-width: 100px; height: 200px; border: 1px solid #ffd700; border-radius: 16px; padding: 1px; text-align: center; flex-shrink: 10; display: flex; flex-direction: column; align-items: center; justify-content: space-between; overflow: hidden;">
+        
+        <!-- Contenedor de la imagen ensanchado al 100% de la tarjeta de los lados -->
+        <div style="width: 100%; height: 115px; border-top-left-radius: 18px; border-top-right-radius: 12px; overflow: hidden; margin-top: -6px; margin-left: -6px; margin-right: -6px; width: calc(100% + 18px); position: relative;">
+            
+           <img id="story-mi-foto-perfil" src="" style="width: 100%; height: 100%; object-fit: cover; object-position: center top; display: block;">
 
+          
+        
+            <!-- Botón flotante (+) posicionado ENCIMA de la imagen -->
+            <label for="input-story-spaxio" style="position: absolute; bottom: -1px; right: 45px; background: #ffd700; color: #000; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 14px; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.8); z-index: 10;">
+                +
+                <input type="file" id="input-story-spaxio" accept="image/*,video/*" style="display: none;" onchange="subirYAbrirSpaxioFlow(this)">
+            </label>
+        </div>
+
+        <span style="font-size: 10px; color: #fff; font-weight: bold; margin-bottom: 2px;">Subir Publicacion</span>
+    
+</div>
+
+
+    <!-- Las tarjetas de la comunidad se inyectarán dinámicamente aquí al lado -->
 
         
    
@@ -1510,7 +1535,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
   
                 <!-- Tarjeta Visual --->
-                <div class="tarjeta-space" style="margin-bottom: 15px; text-align: left; padding: 15px; background: #151828; border-radius: 12px; width: 85%;">
+                <div class="tarjeta-space" style="margin-bottom: 5px; text-align: left; padding: 10px; background: #151828; border-radius: 12px; width: 85%;">
                     <div style="display: flex; justify-content: space-between; align-items: center;">
                         <span style="font-size: 12px; color: #63688a; text-transform: uppercase;">My Cards Prepagada
                         </span> 
@@ -1518,41 +1543,22 @@ window.addEventListener('DOMContentLoaded', () => {
                     </div>
 
                   
-                    <div class="balance-txt" id="balanceVisual" style="font-size: 22px; font-weight: bold; color: #fff; margin: 10px 0;">Pts. 000</div>
-                   <div class="btn-nav" onclick="document.getElementById('seccion-spaxiocard-integrada').scrollIntoView({ behavior: 'smooth' }); inicializarSpaxiocard();">
-    <span>💳</span><span>Saldo</span>
+                    <div class="balance-txt" id="balanceVisual" 
+                   <div class="btn-nav" onclick="document.getElementById('seccion-spaxiocard-integrada'); inicializarSpaxiocard();">
+    <span>Creditos</span>
+                     
                    </div>
-                    <div style="color: #63688a; font-size: 12px; margin-bottom: 15px;" id="nombreTitular">ID: Cargando...</div>
-                  <div style="font-family: monospace; letter-spacing: 3px; font-size: 13px; text-align: right; color: #a5a9c7;">**** **** **** 7890</div>
-                </div
-                    
-     
-
-
-                  
-  
-                 
+                    <button onclick="abrirSubModalIntegrado('submodal-miqr')" style="background: #ffd700; color: #000; border: none; border-radius: 6px; padding: 6px 12px; font-weight: 900; font-size: 14px; margin: 10px auto; cursor: pointer;">QR</button>
+                    </div>
+                   
+                               
      <!-- ============================================================== -->
 <!-- 4. SUBMODALES INTEGRADOS DENTRO DEL MODAL QR -->
 <!-- ============================================================== -->
 
 <!-- 1. Submodal Cargar (Oculto por defecto) -->
 <div id="submodal-cargar" style="display: none; background: #1a1c29; border: 1px solid #323657; border-radius: 12px; padding: 20px; margin-top: 15px; text-align: left;">
-    <h3 style="margin-top: 0; color: #00ffcc; font-size: 16px;">📥 Sumar Puntos</h3>
-    <p style="color: #63688a; font-size: 12px; margin-bottom: 15px;">Canjes de puntos directo a tu tarjeta spaxio</p>
     
-    <select id="bancoOrigen" style="width: 100%; padding: 8px; margin-bottom: 10px; background: #12131c; color: #fff; border: 1px solid #323657; border-radius: 8px;">
-        <option value="0102">Banco de Venezuela (BDV)</option>
-        <option value="0105">Banco Mercantil</option>
-        <option value="0134">Banesco</option>
-    </select>
-
-    <button class="btn-space" style="background-color: #ffd700; color: #000; width:100%; margin-bottom:10px;" onclick="sumarPuntosYConfirmacion()">🧪 Sumar Puntos (Test)</button>
-    <input type="number" id="montoCargar" placeholder="Monto en Bolívares (VES)" style="width: 100%; padding: 8px; margin-bottom: 10px; background: #12131c; color: #fff; border: 1px solid #323657; border-radius: 8px;">
-    <input type="text" id="tokenOTP" placeholder="Código de Pago Móvil (Clave/OTP)" style="width: 100%; padding: 8px; margin-bottom: 15px; background: #12131c; color: #fff; border: 1px solid #323657; border-radius: 8px;">
-    
-    <button class="btn-space" onclick="procesarCargaBanco()" style="width: 100%; padding: 10px; margin-bottom: 8px; cursor: pointer;">Confirmar Carga</button>
-    <button class="btn-space btn-danger" onclick="cerrarSubModalIntegrado('submodal-cargar')" style="width: 100%; padding: 10px; cursor: pointer;">Cerrar</button>
 </div>
 
 <!-- 2. Submodal Pagar / Canjear (Oculto por defecto) -->
@@ -1568,7 +1574,7 @@ window.addEventListener('DOMContentLoaded', () => {
     
     <div id="contenedor-qr-spaxiocard" style="background: white; padding: 10px; border-radius: 8px; display: inline-block; margin-bottom: 12px;"></div>
 
-  <button class="btn-space" onclick="abrirSubModalIntegrado('submodal-cargar')" style="width: 60%; max-width: 300px; padding: 10px; cursor: pointer;">📥 Sumar desde Banco</button>
+  
 
     <div style="margin-bottom: 20px;">
         <span id="spaxiocard-id-display" style="font-size: 12px; color: #ffd700; font-family: monospace; font-weight: bold;"></span>
@@ -1578,8 +1584,11 @@ window.addEventListener('DOMContentLoaded', () => {
     
     <input type="text" id="idReceptor" placeholder="ID o Cédula del Destinatario" style="width: 100%; padding: 8px; margin-bottom: 10px; background: #12131c; color: #fff; border: 1px solid #323657; border-radius: 8px;">
     
+    <button type="button" class="btn-space" onclick="document.getElementById('inputQRGaleria').click()" style="background: #323657; color: #fff; font-weight: bold; width: 100%; margin-bottom: 10px; padding: 10px; cursor: pointer; border: none; border-radius: 6px;">📁 Buscar QR en Galería</button>
+    <input type="file" id="inputQRGaleria" accept="image/*" style="display: none;" onchange="procesarQRGaleria(this)">
+  
     <!-- Tus botones principales de activación -->
-<button type="button" class="btn-space" onclick="iniciarLectorQR()" style="background: #ffd700; color: #000; font-weight: bold; width: 100%; margin-bottom: 8px; padding: 10px; cursor: pointer; border: none; border-radius: 6px;">📷 Escanear con Cámara</button>
+
 
 <!-- Input oculto para la galería -->
 <input type="file" id="inputQRGaleria" accept="image/*" style="display: none;" onchange="procesarQRGaleria(this)">
@@ -1597,17 +1606,18 @@ window.addEventListener('DOMContentLoaded', () => {
 
     <input type="number" id="montoEnviar" placeholder="Monto a Enviar (VES)" style="width: 100%; padding: 8px; margin-bottom: 15px; background: #12131c; color: #fff; border: 1px solid #323657; border-radius: 8px;">
     
-    <button class="btn-space" onclick="procesarEnvioInterno()" style="width: 100%; padding: 10px; margin-bottom: 8px; cursor: pointer;">Recibir Puntos</button>
-    
+  
+    <button class="btn-space" style="background-color: #ffd700; color: #000; width:100%; margin-bottom:10px;" onclick="procesarEnvioInterno()">🧪 Sumar Puntos (Test)</button>
     <button class="btn-space btn-danger" onclick="cerrarSubModalIntegrado('submodal-miqr')" style="width: 100%; padding: 10px; cursor: pointer;">Cerrar</button>
 </div>
-<!-- ============================================================== -->
-<!-- Contenedor alineado al centro para que los botones no se estiren -->
+<!-- ============================================================== -->            
+  
+                 
+         
+
 <div style="display: flex; flex-direction: column; align-items: center; width: 100%; gap: 10px; margin-bottom: 15px;">
 
     <!-- Botones limpios, más compactos y centrados -->
-    
-    <button onclick="abrirSubModalIntegrado('submodal-miqr')" style="background: #ffd700; color: #000; border: none; border-radius: 6px; padding: 6px 12px; font-weight: 900; font-size: 14px; margin: 10px auto; cursor: pointer;">QR</button>
     
     
     
@@ -1940,10 +1950,7 @@ window.addEventListener('DOMContentLoaded', () => {
         <div id="mensajes-live" style="display: flex; flex-direction: column; gap: 5px;"></div>
     </div>
 </div>
-<!-- Botón flotante para instalar la PWA (Oculto por defecto) -->
-<button id="btn-instalar-pwa" style="display: none; background: linear-gradient(135deg, #FFD700 0%, #B8860B 100%); color: #000; border: none; padding: 12px 20px; border-radius: 25px; font-weight: bold; font-size: 14px; cursor: pointer; box-shadow: 0 4px 15px rgba(255, 215, 0, 0.4); margin: 10px auto;">
-    📲 Instalar App Space
-</button>
+
 
             <script>
 
@@ -1953,54 +1960,120 @@ window.addEventListener('DOMContentLoaded', () => {
     return false;
 };
 
-              function renderizarSpaxioFlowStories(posts) {
-    const contenedor = document.getElementById('contenedor-spaxioflow-stories');
-    if (!contenedor) return;
-    
-    // Limpiamos el contenedor ("Cargando...")
-    contenedor.innerHTML = ''; 
+              function sincronizarMiFotoEnStories() {
+    const imgStory = document.getElementById('story-mi-foto-perfil');
+    if (!imgStory) return;
 
-    if (!posts || posts.length === 0) {
-        contenedor.innerHTML = '<div style="color: #63688a; font-size: 12px; padding: 10px; text-align: center;">No hay publicaciones aún...</div>';
-        return;
+    // 1. Intentamos recuperar la foto guardada previamente en el almacenamiento
+    const fotoGuardada = localStorage.getItem('spaxio_mi_foto_oficial');
+    const headerFoto = document.getElementById('perfil-foto-grande') || document.getElementById('foto-perfil-header');
+
+    if (fotoGuardada) {
+        // Si ya hay una guardada, la usamos de inmediato al arrancar
+        imgStory.src = fotoGuardada;
+    } else if (headerFoto && headerFoto.src && headerFoto.src.startsWith('http')) {
+        // Si no está guardada pero el header ya la tiene, la usamos y la guardamos
+        imgStory.src = headerFoto.src;
+        localStorage.setItem('spaxio_mi_foto_oficial', headerFoto.src);
+    }
+}
+
+// Ejecútala al cargar la página o justo después de que cargue tu perfil
+window.addEventListener('DOMContentLoaded', () => {
+    // 1. Leemos las historias comprimidas del localStorage al abrir la app
+    const historiasLocales = JSON.parse(localStorage.getItem('spaxio_historias_locales') || '[]');
+    
+    // 2. Si existen historias y la función de pintado está lista, las renderizamos de una vez
+    if (typeof renderizarSpaxioFlowStories === 'function' && historiasLocales.length > 0) {
+        renderizarSpaxioFlowStories(historiasLocales);
     }
 
-    posts.forEach(post => {
-        // Creamos la tarjeta dinámicamente con JavaScript real
-        const tarjeta = document.createElement('div');
-        tarjeta.style.cssText = "min-width: 110px; height: 130px; background: #151828; border: 1px solid #323657; border-radius: 12px; padding: 6px; text-align: center; flex-shrink: 0; cursor: pointer; display: flex; flex-direction: column; justify-content: space-between; overflow: hidden;";
+    // 3. Tu función de sincronización de perfil existente
+    setTimeout(sincronizarMiFotoEnStories, 500);
+});
+async function subirYAbrirSpaxioFlow(input) {
+    if (!input.files || !input.files[0]) return;
+    
+    const archivo = input.files[0];
+    alert("🚀 Subiendo archivo a SpaxioFlow...");
 
-        // Verificamos si el post tiene una imagen o URL de media subida
-        let contenidoVisual = '';
-        const urlImagen = post.imagen_url || post.media_url || post.foto;
+    // 1. Apuntamos temporalmente el target al ID de SpaxioFlow para que la app sepa a dónde enviarlo
+    const inputTarget = document.querySelector('#target-id');
+    if (inputTarget) inputTarget.value = "26fmetp4Q4WJ";
 
-        if (urlImagen) {
-            // Si hay imagen, la colocamos como fondo de la miniatura de la tarjeta
-            contenidoVisual = `<div style="width: 100%; height: 75px; background-image: url('${urlImagen}'); background-size: cover; background-position: center; border-radius: 8px;"></div>`;
-        } else {
-            // Si no tiene imagen, ponemos un icono por defecto
-            contenidoVisual = `<div style="font-size: 24px; margin: auto; display: flex; align-items: center; justify-content: center; height: 75px;">🎬</div>`;
-        }
+    // 2. Usamos tu función existente para preparar y enviar el archivo multimedia
+    let tipo = archivo.type.includes('video') ? 'video' : 'foto';
+    await prepararEnvioMedia(input, tipo);
 
-        // Estructura interna de la tarjeta
-        tarjeta.innerHTML = `
-            ${contenidoVisual}
-            <div style="font-size: 10px; color: #fff; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100px; margin: 2px auto;">${post.usuario_nombre || post.nombre || 'Usuario'}</div>
-        `;
+    // ==========================================
+    // >>> AQUÍ AGREGAS ESTO PARA GUARDAR EN EL CARRUSEL <<<
+    // ==========================================
+    const lector = new FileReader();
+    lector.onload = function(e) {
+        const img = new Image();
+        img.src = e.target.result;
+        img.onload = function() {
+            // Creamos un canvas para comprimir la imagen
+            const canvas = document.createElement('canvas');
+            const MAX_WIDTH = 600; // Ancho máximo seguro para historias
+            const scaleSize = MAX_WIDTH / img.width;
+            canvas.width = MAX_WIDTH;
+            canvas.height = img.height * scaleSize;
 
-        // Acción al hacer clic en la tarjeta (puedes adaptarla a tu función de abrir post)
-        tarjeta.onclick = function() {
-            if (typeof abrirDetallePost === 'function') {
-                abrirDetallePost(post.id);
-            } else {
-                console.log("Clic en post de:", post.id);
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+            // Convertimos a JPEG comprimido (calidad 70%) para quecupe muy poco espacio
+            const urlImagenComprimida = canvas.toDataURL('image/jpeg', 0.7);
+
+            const nuevaHistoriaLocal = {
+                id: "historia_local_" + Date.now(),
+                sender_name: "Pedro Peres",
+                content: urlImagenComprimida,
+                tipo: tipo,
+                created_at: new Date().toISOString()
+            };
+
+            let misHistorias = JSON.parse(localStorage.getItem('spaxio_historias_locales') || '[]');
+            
+            // Limitamos el historial a máximo 10 historias para no saturar nunca el localStorage
+            if (misHistorias.length >= 10) {
+                misHistorias = misHistorias.slice(0, 9);
+            }
+
+            misHistorias.unshift(nuevaHistoriaLocal);
+            
+            try {
+                localStorage.setItem('spaxio_historias_locales', JSON.stringify(misHistorias));
+            } catch (err) {
+                console.error("Error al guardar por espacio:", err);
+                alert("El almacenamiento local está lleno. Borra algunas historias antiguas.");
+                return;
+            }
+
+            if (typeof renderizarSpaxioFlowStories === 'function') {
+                renderizarSpaxioFlowStories(misHistorias);
             }
         };
+    };
+    lector.readAsDataURL(archivo);
+    
+    // ==========================================
 
-        // Añadimos la tarjeta terminada al contenedor deslizable
-        contenedor.appendChild(tarjeta);
-    });
-             }
+    // Refrescamos el carrusel de inmediato y luego abrimos la conversación
+        if (typeof renderizarSpaxioFlowStories === 'function') {
+            renderizarSpaxioFlowStories(misHistorias);
+        }
+
+        setTimeout(() => {
+            cargarConversacionCon("26fmetp4Q4WJ", "Spaxio Flow", "");
+            // Forzamos un segundo refresco aquí por si el chat limpia el DOM al abrirse
+            if (typeof renderizarSpaxioFlowStories === 'function') {
+                renderizarSpaxioFlowStories(misHistorias);
+            }
+        }, 1000);
+              }
+
             function toggleMenuHamburguesa() {
     const menu = document.getElementById('seccion-menu-hamburguesa');
     if (menu) {
@@ -2595,86 +2668,125 @@ async function procesarCargaBanco() {
     cerrarTodosLosModalesSpace();
 }
 
-async function procesarEnvioInterno() {
+      
+    async function procesarEnvioInterno() {
     const receptorInput = document.getElementById('idReceptor');
     const montoInput = document.getElementById('montoEnviar');
 
-    const receptor = receptorInput ? receptorInput.value.trim() : '';
+    const receptorID = receptorInput ? receptorInput.value.trim() : '';
     const monto = montoInput ? parseFloat(montoInput.value) : 0;
-    
-    // Obtenemos tu propio ID actual desde el almacenamiento local
     const miID = localStorage.getItem('mi_dropis_id') || localStorage.getItem('spaxiocard_id') || "SPAXIO-USER";
 
-    // Validaciones básicas
-    if (!receptor || !monto || isNaN(monto) || monto <= 0) {
-        alert("⚠️ Por favor ingresa un ID de destinatario válido y un monto mayor a cero.");
+    if (!receptorID || !monto || isNaN(monto) || monto <= 0) {
+        alert("⚠️ Ingresa un ID válido y un monto mayor a cero.");
         return;
     }
 
-    if (receptor === miID) {
-        alert("❌ No puedes hacerte un traspaso de puntos a ti mismo.");
+    if (receptorID === miID) {
+        alert("❌ No puedes enviarte puntos a ti mismo.");
         return;
     }
 
     if (monto > usuarioSesionSpaxio.saldo) {
-        alert("❌ Saldo insuficiente en tu tarjeta para realizar este envío.");
+        alert("❌ Saldo insuficiente en tu tarjeta.");
         return;
     }
 
-    // Código único de operación para trazabilidad
     const codigoOperacion = "TRX-" + Math.floor(100000 + Math.random() * 900000);
 
-    // 1. Descontar el saldo al emisor (usuario actual)
+    // 1. Descontar tu saldo local de inmediato
     usuarioSesionSpaxio.saldo -= monto;
-
-    // Actualizar el saldo visualmente en la interfaz
     const elBalance = document.getElementById('balanceVisual');
     if (elBalance) {
         elBalance.innerText = "Bs. " + usuarioSesionSpaxio.saldo.toLocaleString('es-VE', { minimumFractionDigits: 2 });
     }
 
-    // 2. Registrar la transacción localmente o preparar el payload para Supabase/Backend
-    const datosTraspaso = {
-        id_transaccion: codigoOperacion,
+    // 2. Crear la transacción para enviarla a Firebase
+    const nuevaTransaccion = {
+        id_operacion: codigoOperacion,
         emisor: miID,
-        receptor: receptor,
+        receptor: receptorID,
         monto: monto,
+        timestamp: Date.now(),
         fecha: new Date().toISOString()
     };
 
-    console.log("🚀 Traspaso procesado con éxito:", datosTraspaso);
+    // 3. Subir la transacción a Firebase Realtime Database
+    if (typeof firebase !== 'undefined' && firebase.database) {
+        try {
+            const db = firebase.database();
+            
+            // Push de la transacción al historial global de pagos
+            await db.ref('spaxiocard_transacciones').push(nuevaTransaccion);
 
-    // 3. Crear notificación visual en el chat local del usuario
-    const textoAviso = `💸 ¡Traspaso exitoso! Código: ${codigoOperacion}. Enviaste Bs. ${monto.toFixed(2)} al ID: ${receptor}.`;
-    const msgIdTest = "msg_trx_" + Date.now();
+            // Actualizar el saldo del receptor en Firebase para que le sume de una vez
+            const receptorRef = db.ref('usuarios_saldo/' + receptorID);
+            receptorRef.transaction((saldoActual) => {
+                return (saldoActual || 0) + monto;
+            });
 
-    if (typeof guardarLocal === "function") {
-        await guardarLocal('mensajes', {
-            id: msgIdTest,
-            contactoId: miID,
-            texto: textoAviso,
-            clase: 'msg-izquierda',
-            status: 'leido',
-            tipo: 'texto',
-            ts: Date.now(),
-            hora: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })
-        });
+            // Actualizar tu propio saldo en Firebase
+            db.ref('usuarios_saldo/' + miID).set(usuarioSesionSpaxio.saldo);
+
+            console.log("🔥 Transacción enviada con éxito a Firebase:", nuevaTransaccion);
+        } catch (err) {
+            console.error("Error al enviar transferencia a Firebase:", err);
+        }
+    } else {
+        console.warn("⚠️ Firebase no está cargado. Se procesó solo en modo offline local.");
     }
 
-    if (typeof pintarMensaje === "function") {
-        pintarMensaje(textoAviso, 'msg-izquierda', null, 'leido', msgIdTest, 'texto');
-    }
-
-    // Limpiar campos y cerrar modales
+    // Limpiar inputs y cerrar modales
     receptorInput.value = '';
     montoInput.value = '';
     cerrarTodosLosModalesSpace();
 
-    alert(`✅ ¡Traspaso de Bs. ${monto.toFixed(2)} completado hacia el ID: ${receptor}!`);
-}
-
-        
+    alert(`✅ ¡Traspaso enviado con éxito a ${receptorID}!`);
+    }
+    function escucharTransferenciasEnTiempoReal() {
+    const miID = localStorage.getItem('mi_dropis_id') || localStorage.getItem('spaxiocard_id');
     
+    if (!miID || typeof firebase === 'undefined' || !firebase.database) {
+        console.warn("⚠️ No se inició el listener de pagos: ID o Firebase ausente.");
+        return;
+    }
+
+    const db = firebase.database();
+
+    // 1. Escuchar cambios de saldo en tiempo real para MI usuario
+    db.ref('usuarios_saldo/' + miID).on('value', (snapshot) => {
+        const nuevoSaldoFirebase = snapshot.val();
+        if (nuevoSaldoFirebase !== null && nuevoSaldoFirebase !== undefined) {
+            // Actualizamos el objeto local
+            usuarioSesionSpaxio.saldo = parseFloat(nuevoSaldoFirebase);
+
+            // Actualizamos la pantalla de la tarjeta
+            const elBalance = document.getElementById('balanceVisual');
+            if (elBalance) {
+                elBalance.innerText = "Bs. " + usuarioSesionSpaxio.saldo.toLocaleString('es-VE', { minimumFractionDigits: 2 });
+            }
+        }
+    });
+
+    // 2. Escuchar si nos entra una transacción nueva en el feed de transacciones
+    db.ref('spaxiocard_transacciones')
+      .orderByChild('receptor')
+      .equalTo(miID)
+      .limitToLast(1)
+      .on('child_added', (snapshot) => {
+          const trx = snapshot.val();
+          
+          // Si la transacción es reciente (menos de 10 segundos) se muestra la notificación
+          if (trx && (Date.now() - trx.timestamp) < 10000) {
+              const textoAviso = `🎉 ¡Puntos recibidos! El ID: ${trx.emisor} te ha transferido Bs. ${parseFloat(trx.monto).toFixed(2)}. Código: ${trx.id_operacion}`;
+              
+              if (typeof pintarMensaje === "function") {
+                  pintarMensaje(textoAviso, 'msg-izquierda', null, 'leido', "trx_" + Date.now(), 'texto');
+              }
+              alert(`✨ ¡Acabas de recibir Bs. ${parseFloat(trx.monto).toFixed(2)} del ID ${trx.emisor}!`);
+          }
+      });
+              }
 
 
         // Si usas un sistema de pestañas (switchView), recuerda llamar a inicializarSpaxioCard() cuando el usuario abra esta sección.
@@ -3258,9 +3370,30 @@ if (targetID === "26fmetp4Q4WJ") {
         user_id: miUserId,
         created_at: new Date().toISOString()
     };
+  /*COMENTADO TEMPORAL PARA PRUEBAS
+fetch('/api/spaxioflow-event', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(mensajeSeguro)
+})
+.then(res => res.json())
+.then(respuestaServidor => {
+    console.log("📡 Servidor confirmó:", respuestaServidor);
+})
+.catch(err => console.error("❌ Error:", err));
+*/
+
+// MUESTRAS EL MENSAJE EN PANTALLA EN LOCAL DIRECTAMENTE
+anexarUnicoMensajeAlFeed({
+    id: Date.now(),
+    sender_name: miNombre,
+    content: msg,
+    tipo: tipoValidado,
+    created_at: new Date().toISOString()
+});
 
     // 2. Mandas a Vercel
-    fetch('/api/spaxioflow-event', {
+    /*fetch('/api/spaxioflow-event', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(mensajeSeguro)
@@ -3271,7 +3404,7 @@ if (targetID === "26fmetp4Q4WJ") {
         
         
     })
-    .catch(err => console.error("❌ Error:", err));
+    .catch(err => console.error("❌ Error:", err));*/
 
 } else if (targetID !== "uo4kb3tGHH7J") {
     // 🛡️ REGLA DE ORO: Si es un contacto normal, sigue usando la cola satelital tradicional
@@ -3438,7 +3571,7 @@ const cuerpoPeticion = {
         
 
      // --- BLOQUE: ENVIAR MENSAJE (NOTIFICAR) ---
-/*if ('serviceWorker' in navigator && Notification.permission === "granted") {
+if ('serviceWorker' in navigator && Notification.permission === "granted") {
     navigator.serviceWorker.ready.then(registration => {
         registration.showNotification("SpaceChat: " + emisorID, {
             body: textoReal,
@@ -3451,7 +3584,7 @@ const cuerpoPeticion = {
     }).catch(err => console.log("Notificación bloqueada o fallida"));
 } else {
     console.log("Notificaciones no permitidas por el usuario.");
-     }*/
+     }
 async function obtenerToken(registration) {
     try {
         const miVapidKey = 'BIrsA9YbBXfIuo4PTMrKRtuktRsK2RbK0XevupuofGGOUDy9w5VZ9yaXbZXsenXppmFsR62-2B7jBOG0Z8RdxvU';
@@ -3644,35 +3777,79 @@ async function cargarConversacionCon(idDestino, nombreDestino, fotoDestino) {
               
               console.log("📡 Cargando historial global de SpaxioFlow desde Vercel...");
     
-    const res = await fetch('/api/get-spaxioflow-feed');
-if (!res.ok) throw new Error("Fallo al obtener el feed desde el backend");
+               // 1. Definimos los datos de prueba (Mock) ya que eliminamos el fetch
+// 1. Leemos las historias reales que se guardaron en tu teléfono
+const postsGuardadosLocales = JSON.parse(localStorage.getItem('spaxio_historias_locales') || '[]');
 
-// 1. Recibimos el JSON en 'data'
-const data = await res.json();
+// Si no hay nada guardado aún, usamos los de prueba para que no quede vacío
+const posts = postsGuardadosLocales.length > 0 ? postsGuardadosLocales : [
+    { id: 't1', sender_name: 'Pedro Peres', content: 'https://picsum.photos/300/200?random=1', tipo: 'imagen', created_at: new Date().toISOString() },
+    { id: 't2', sender_name: 'Marley', content: 'https://picsum.photos/300/200?random=2', tipo: 'imagen', created_at: new Date().toISOString() },
+    { id: 't3', sender_name: 'Sami', content: 'Probando texto en SpaxioFlow', tipo: 'texto', created_at: new Date().toISOString() }
+];
 
-// 2. Extraemos el array de forma segura a 'posts'
-const posts = Array.isArray(data) ? data : (data.posts || []);
-// --- LÍNEAS EXACTAS PARA EL CARRUSEL DE STORIES ---
+// 3. Renderizamos las Stories manteniendo tu tarjeta fija intacta a la izquierda
 const contenedorStories = document.getElementById('contenedor-spaxioflow-stories');
 if (contenedorStories && posts.length > 0) {
-    contenedorStories.innerHTML = ''; // Limpiamos el "Cargando Flow..."
+    // Guardamos temporalmente el HTML de tu tarjeta fija para no perderla
+    const tarjetaFijaHTML = contenedorStories.firstElementChild ? contenedorStories.firstElementChild.outerHTML : '';
     
-    // Limitamos a los últimos 8 posts para que aparezcan uno al lado del otro
-    posts.slice(0, 8).forEach(post => {
-        const urlImg = post.content || post.tipo || post.foto || '';
+    // Vaciamos el contenedor y ponemos la tuya de primera
+    contenedorStories.innerHTML = tarjetaFijaHTML;
+    
+    // Recorremos los posts para agregarlos al lado (a la derecha)
+    posts.slice(0, 50).forEach(post => {
+        const urlImg = post.content || post.imagen_url || post.media_url || post.foto || '';
         const nombreUsr = post.sender_name || post.remitente || 'Usuario';
         
-     
-        contenedorStories.innerHTML += `
-            <div style="min-width: 110px; height: 130px; background: #151828; border: 1px solid #323657; border-radius: 12px; padding: 6px; text-align: center; flex-shrink: 0; cursor: pointer; display: flex; flex-direction: column; justify-content: space-between; overflow: hidden;">
-                <div style="width: 100%; height: 75px; background-image: url('${urlImg}'); background-size: cover; background-position: center; border-radius: 8px; background-color: #000; display: flex; align-items: center; justify-content: center;">
-                    ${!urlImg ? '<span style="font-size: 20px;">🎬</span>' : ''}
-                </div>
-                <div style="font-size: 10px; color: #fff; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100px; margin: 2px auto;">${nombreUsr}</div>
+        const esImagenValida = urlImg.startsWith('http') || urlImg.startsWith('data:image');
+        
+        // Definimos si es imagen o texto para el contenido
+const contenidoMiniatura = esImagenValida 
+    ? `
+        <!-- Contenedor con la foto de fondo que ocupa toda la tarjeta -->
+        <div style="position: relative; width: 100%; height: 100%; background-image: url('${urlImg}'); background-size: cover; background-position: center; border-radius: 12px; display: flex; flex-direction: column; justify-content: flex-end; overflow: hidden;">
+            
+            <!-- Capa oscura semitransparente abajo para que las letras floten y resalten -->
+            <div style="position: absolute; bottom: 0; left: 0; width: 100%; padding: 1px 1px; text-align: center;">
+                <span style="font-size: 10px; color: #ffd700; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block;">${nombreUsr}</span>
             </div>
-        `;
+        </div>
+      `
+    : `
+        <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; padding: 5px; text-align: center;">
+            <span style="font-size: 11px; color: #fff;">${urlImg}</span>
+        </div>
+      `;
+
+// Y la tarjeta completa la envuelves así para que la imagen ocupe todo el espacio libre:
+contenedorStories.innerHTML += `
+    <div style="min-width: 170px; height: 200px; border-radius: 12px; padding: 1px; flex-shrink: 0; cursor: pointer; overflow: hidden; position: relative;">
+        ${contenidoMiniatura}
+    </div>
+`;
+
+        
     });
-             }
+}
+
+// 4. Guardado local de prueba limpio
+const idUnicoLocal = "feed_local_" + Date.now();
+const nuevoPostLocal = {
+    id: idUnicoLocal,
+    contactoId: "26fmetp4Q4WJ",
+    clase: 'msg-izquierda',
+    status: 'leido',
+    tipo: 'imagen', // Corregido de variable suelta a string
+  
+    ts: Date.now(),
+    hora: typeof miNombre !== 'undefined' ? miNombre : 'Pedro'
+};
+
+// Guardamos usando tu estructura local
+await guardarLocal('mensajes', nuevoPostLocal);
+
+// 5. Pintar los mensajes/posts en pantalla de forma ordenada
 if (posts && Array.isArray(posts)) {
     const postsInvertidos = [...posts].reverse();
      
@@ -3684,8 +3861,12 @@ if (posts && Array.isArray(posts)) {
             pintarMensaje(post.content, "", nombreRemitente, 'leido', idContenido, post.tipo); 
         }
     });
-             }
-            
+}
+
+// 6. Refresco final de stories si ya tienes los datos cargados
+if (typeof postsGuardadosLocales !== 'undefined') {
+    renderizarSpaxioFlowStories(postsGuardadosLocales);
+}
 
     iniciarRealtimeSpaxioFlow("26fmetp4Q4WJ");
 
@@ -3884,14 +4065,22 @@ window.onload = async () => {
         document.body.style.backgroundImage = `url('${configTema.urlFondo}')`;
         document.body.style.backgroundSize = "cover";
     }
+if (id) {
+    const miPerfil = await obtenerLocal('perfiles', id);
+    if (miPerfil && miPerfil.foto) {
+        const headerFoto = document.getElementById('foto-perfil-header');
+        if (headerFoto) headerFoto.src = miPerfil.foto;
 
-    if (id) {
-        // Recuperar foto local
-        const miPerfil = await obtenerLocal('perfiles', id);
-        if (miPerfil && miPerfil.foto) {
-            const headerFoto = document.getElementById('foto-perfil-header');
-            if (headerFoto) headerFoto.src = miPerfil.foto;
-        }
+        // 🔥 Guarda la foto globalmente en el navegador al instante
+        localStorage.setItem('spaxio_mi_foto_oficial', miPerfil.foto);
+        
+        // Y actualiza la story si ya existe en pantalla
+        const imgStory = document.getElementById('story-mi-foto-perfil');
+        if (imgStory) imgStory.src = miPerfil.foto;
+    }
+
+              
+              
 
         // Si hay internet intentamos sincronizar Firebase de fondo, si no, la app abre local sin bloquearse
         if (navigator.onLine) {
@@ -4798,7 +4987,11 @@ async function guardarCambiosPerfil() {
         // 4. Actualizar Interfaz
         const headerFoto = document.getElementById('foto-perfil-header');
         if (headerFoto && fotoParaGuardar) headerFoto.src = fotoParaGuardar;
-
+// Justo al final de tu función de guardar el perfil (cuando ya guardaste con éxito):
+const imgStory = document.getElementById('story-mi-foto-perfil');
+if (imgStory) {
+    imgStory.src = fotoParaGuardar; // O el elemento que actualiza el header
+              }
         alternarVistaPerfil();
     } catch(e) {
         console.error("Error al guardar:", e);
@@ -6932,155 +7125,6 @@ if (typeof window !== "undefined" && window.speechSynthesis) {
     .then(() => console.log("Service Worker registrado con éxito"))
     .catch((err) => console.log("Error al registrar Service Worker", err));
              }
-     let eventoInstalacionDiferido = null;
-
-// 1. Capturar el evento automático de Chrome cuando detecta que la PWA está lista
-window.addEventListener('beforeinstallprompt', (e) => {
-    // Previene que Chrome intente mostrar su propio cartel/banner inferior
-    e.preventDefault();
-    
-    // Guarda el evento para usarlo cuando el usuario presione tu botón
-    eventoInstalacionDiferido = e;
-    
-    // Muestra tu botón personalizado
-    const btnInstalar = document.getElementById('btn-instalar-pwa');
-    if (btnInstalar) {
-        btnInstalar.style.display = 'block';
-    }
-    console.log("📲 Evento de instalación listo y capturado.");
-});
-
-// 2. Escuchar el clic en tu botón de instalación
-document.getElementById('btn-instalar-pwa')?.addEventListener('click', async () => {
-    if (!eventoInstalacionDiferido) {
-        alert("La aplicación ya está instalada o el navegador no soporta la instalación automática.");
-        return;
-    }
-    
-    // Dispara la ventana nativa de instalación de Android/Chrome
-    eventoInstalacionDiferido.prompt();
-    
-    // Espera la decisión del usuario
-    const { outcome } = await eventoInstalacionDiferido.userChoice;
-    console.log(`Respuesta del usuario a la instalación: ${outcome}`);
-    
-    // Limpia la variable y oculta el botón
-    eventoInstalacionDiferido = null;
-    document.getElementById('btn-instalar-pwa').style.display = 'none';
-});
-
-// 3. Detectar si la app ya fue instalada previamente
-window.addEventListener('appinstalled', () => {
-    console.log('🎉 ¡SpaceChat fue instalada con éxito!');
-    const btnInstalar = document.getElementById('btn-instalar-pwa');
-    if (btnInstalar) btnInstalar.style.display = 'none';
-});
-  // Variable global para capturar el aviso del sistema
-let promptInstalacionNativa = null;
-
-window.addEventListener('beforeinstallprompt', (e) => {
-    // AQUÍ ESTÁ EL TRUCO: 
-    // NO usamos e.preventDefault() para que Chrome muestre 
-    // su propio mensaje/banner nativo de instalación automáticamente.
-    promptInstalacionNativa = e;
-    
-    console.log("🚀 El navegador ha activado el aviso nativo de instalación.");
-});
-
-// (Opcional) Si en algún momento el usuario interactúa con algo y quieres forzar 
-// que se abra ese aviso nativo guardado:
-window.dispararInstalacion = async () => {
-    if (promptInstalacionNativa) {
-        promptInstalacionNativa.prompt();
-        const resultado = await promptInstalacionNativa.userChoice;
-        console.log("Respuesta del usuario:", resultado.outcome);
-        promptInstalacionNativa = null;
-    }
-};
-        let deferredPrompt = null;
-
-window.addEventListener('beforeinstallprompt', (e) => {
-    // Evitamos el comportamiento por defecto de Chrome
-    e.preventDefault();
-    deferredPrompt = e;
-
-    // Verificamos que no exista ya el banner en pantalla para no duplicarlo
-    if (!document.getElementById('spaxio-install-toast')) {
-        // Creamos dinámicamente el contenedor flotante con tu estética Black & Gold
-        const toast = document.createElement('div');
-        toast.id = 'spaxio-install-toast';
-        toast.style.cssText = `
-            position: fixed;
-            bottom: 80px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 90%;
-            max-width: 380px;
-            background: rgba(11, 20, 26, 0.95);
-            backdrop-filter: blur(15px);
-            -webkit-backdrop-filter: blur(15px);
-            border: 2px solid #ffd700;
-            color: #fff;
-            padding: 14px 18px;
-            border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.9);
-            z-index: 999999;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            font-family: sans-serif;
-            animation: slideUpToast 0.4s ease;
-        `;
-
-        toast.innerHTML = `
-            <div style="display: flex; align-items: center; gap: 10px;">
-                <span style="font-size: 22px;">🪐</span>
-                <div>
-                    <div style="font-weight: bold; color: #ffd700; font-size: 14px;">Instalar SpaceChat</div>
-                    <div style="font-size: 11px; color: #8696a0;">Acceso directo rápido y seguro</div>
-                </div>
-            </div>
-            <div style="display: flex; gap: 8px;">
-                <button id="btn-aceptar-pwa" style="
-                    background: #ffd700;
-                    color: #000;
-                    border: none;
-                    padding: 8px 14px;
-                    border-radius: 12px;
-                    font-weight: bold;
-                    font-size: 12px;
-                    cursor: pointer;
-                ">Instalar</button>
-                <button id="btn-cerrar-pwa" style="
-                    background: transparent;
-                    color: #8696a0;
-                    border: none;
-                    font-size: 16px;
-                    cursor: pointer;
-                    padding: 4px;
-                ">✕</button>
-            </div>
-        `;
-
-        document.body.appendChild(toast);
-
-        // Acción al hacer clic en el botón "Instalar" del banner flotante
-        document.getElementById('btn-aceptar-pwa').addEventListener('click', async () => {
-            if (deferredPrompt) {
-                deferredPrompt.prompt();
-                const { outcome } = await deferredPrompt.userChoice;
-                console.log(`Respuesta de instalación: ${outcome}`);
-                deferredPrompt = null;
-            }
-            toast.remove();
-        });
-
-        // Acción al cerrar el banner con la "X"
-        document.getElementById('btn-cerrar-pwa').addEventListener('click', () => {
-            toast.remove();
-        });
-    }
-});
      
   
 </script>
