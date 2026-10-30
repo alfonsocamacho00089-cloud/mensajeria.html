@@ -12,11 +12,12 @@ def generar_feed_videos():
             headers={'User-Agent': 'Mozilla/5.0'}
         )
         with urllib.request.urlopen(req) as response:
-            data = json.loads(response.read().decode())
+            respuesta_texto = response.read().decode('utf-8')
+            data = json.loads(respuesta_texto)
             
+        print(f"📦 Se encontraron {len(data)} elementos en la API.")
         videos_limpios = []
         
-        # Tomamos los primeros 5 videos y los dejamos relucientes para tu PWA
         for i, item in enumerate(data[:5]):
             video_limpio = {
                 "id": f"py_vid_{int(datetime.now().timestamp())}_{i}",
@@ -27,14 +28,14 @@ def generar_feed_videos():
             }
             videos_limpios.append(video_limpio)
             
-        # Guardamos el JSON final limpiecito
+        # Escribimos el JSON con los datos listos
         with open("videos_feed.json", "w", encoding="utf-8") as f:
             json.dump(videos_limpios, f, ensure_ascii=False, indent=4)
             
-        print("✅ ¡Archivo videos_feed.json generado con éxito por Python!")
+        print("✅ ¡Archivo videos_feed.json actualizado con éxito!")
         
     except Exception as e:
-        print(f"❌ Error al procesar los videos: {e}")
+        print(f"❌ Error crítico procesando los videos: {e}")
 
 if __name__ == "__main__":
     generar_feed_videos()
