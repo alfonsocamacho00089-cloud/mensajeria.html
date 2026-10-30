@@ -1607,7 +1607,7 @@ window.addEventListener('DOMContentLoaded', () => {
     <input type="number" id="montoEnviar" placeholder="Monto a Enviar (VES)" style="width: 100%; padding: 8px; margin-bottom: 15px; background: #12131c; color: #fff; border: 1px solid #323657; border-radius: 8px;">
     
   
-    <button class="btn-space" style="background-color: #ffd700; color: #000; width:100%; margin-bottom:10px;" onclick="enviarTransferenciaPorChat(receptorID, monto) ">🧪 Sumar Puntos (Test)</button>
+    <button class="btn-space" style="background-color: #ffd700; color: #000; width:100%; margin-bottom:10px;" onclick="procesarEnvioInterno() ">🧪 Sumar Puntos (Test)</button>
     <button class="btn-space btn-danger" onclick="cerrarSubModalIntegrado('submodal-miqr')" style="width: 100%; padding: 10px; cursor: pointer;">Cerrar</button>
 </div>
 <!-- ============================================================== -->            
@@ -2668,29 +2668,59 @@ async function procesarCargaBanco() {
     cerrarTodosLosModalesSpace();
 }
 
-      async function enviarTransferenciaPorChat(receptorID, monto) {
+      async function procesarEnvioInterno() {
+    const receptorInput = document.getElementById('idReceptor');
+    const montoInput = document.getElementById('montoEnviar');
+
+    const receptorID = receptorInput ? receptorInput.value.trim() : '';
+    const monto = montoInput ? parseFloat(montoInput.value) : 0;
     const miID = localStorage.getItem('mi_dropis_id') || "SPAXIO-USER";
-    const codigoOperacion = "TRX-" + Math.floor(100000 + Math.random() * 900000);
 
-    // 1. Estructuramos el mensaje de transferencia
-    const mensajeTransaccion = {
-        id: "msg_trx_" + Date.now(),
-        emisor: miID,
-        receptor: receptorID,
-        texto: `💸 Comprobante de Traspaso: Bs. ${monto.toFixed(2)} (Ref: ${codigoOperacion})`,
-        tipo: 'spaxiocard_pago', // Tipo especial para que la app lo reconozca
-        monto: monto,
-        ts: Date.now()
-    };
-
-    // 2. Se envía por tu canal normal de Firebase del chat
-    // (Aquí usas tu misma función que ya sube los mensajes al chat de Firebase)
-    if (typeof enviarMensajeFirebase === "function") {
-        await enviarMensajeFirebase(mensajeTransaccion);
+    if (!receptorID || !monto || isNaN(monto) || monto <= 0) {
+        alert("⚠️ Ingresa un ID válido y un monto mayor a cero.");
+        return;
     }
 
-    // 3. Del lado del receptor, cuando su chat detecte un mensaje tipo 'spaxiocard_pago' 
-    // donde él sea el receptor, su función de lectura sumará el saldo a su `usuarioSesionSpaxio.saldo` de inmediato.
+    if (receptorID === miID) {
+        alert("❌ No puedes enviarte puntos a ti mismo.");
+        return;
+    }
+
+    if (monto > usuarioSesionSpaxio.saldo) {
+        alert("❌ Saldo insuficiente en tu tarjeta.");
+        return;
+    }
+
+    const codigoOperacion = "TRX-" + Math.floor(100000 + Math.random() * 900000);
+
+    // 1. Descontar tu saldo local
+    usuarioSesionSpaxio.saldo -= monto;
+    const elBalance = document.getElementById('balanceVisual');
+    if (elBalance) {
+        elBalance.innerText = "Bs. " + usuarioSesionSpaxio.saldo.toLocaleString('es-VE', { minimumFractionDigits: 2 });
+    }
+
+    // 2. Preparar el mensaje que viaja por el chat (Antena Satelital)
+    // Seteamos temporalmente el input oculto de destino para que el satélite lo mande al receptor correcto
+    const inputTarget = document.querySelector('#target-id');
+    const targetAnterior = inputTarget ? inputTarget.value : '';
+    if (inputTarget) inputTarget.value = receptorID;
+
+    // Formato clave para que el receptor sepa que es dinero: SPA_PAGO|monto|codigo
+    const mensajePago = `💸 ¡Comprobante de Traspaso! Recibiste Bs. ${monto.toFixed(2)} (Ref: ${codigoOperacion}) |SPA_PAGO|${monto}|${codigoOperacion}`;
+
+    // Disparamos tu mismo chat satelital existente
+    await enviarMensajeSatelital(mensajePago, 'texto');
+
+    // Restaurar el target anterior si lo había
+    if (inputTarget) inputTarget.value = targetAnterior;
+
+    // Limpiar inputs y cerrar modales
+    receptorInput.value = '';
+    montoInput.value = '';
+    cerrarTodosLosModalesSpace();
+
+    alert(`✅ ¡Traspaso de Bs. ${monto.toFixed(2)} enviado con éxito!`);
              }
     
 
