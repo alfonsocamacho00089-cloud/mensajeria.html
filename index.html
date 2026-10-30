@@ -1997,88 +1997,10 @@ window.addEventListener('DOMContentLoaded', () => {
 };
 
 
-             async function sincronizarVideosFeedAutomatico() {
-    const apiKey = 'TU_YOUTUBE_API_KEY'; // Tu clave de YouTube Data API
-    const query = 'crypto trends 2026';
-    const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=5&q=${encodeURIComponent(query)}&type=video&key=${apiKey}`;
-
-    try {
-        const response = await fetch(url);
-        const data = await response.json();
-
-        // Recuperamos el historial local actual de SpaxioFlow
-        let misHistorias = JSON.parse(localStorage.getItem('spaxio_historias_locales') || '[]');
-
-        for (const item of data.items) {
-            const videoUrl = `https://www.youtube.com/watch?v=${item.id.videoId}`;
-            
-            const nuevoPostLocal = {
-                id: "yt_" + Date.now() + "_" + Math.random().toString(36.substring(2, 7)),
-                sender_name: item.snippet.channelTitle,
-                tipo: "video",
-                content: videoUrl,
-                created_at: new Date().toISOString()
-            };
-
-            // Lo agregamos al inicio de las historias locales
-            misHistorias.unshift(nuevoPostLocal);
-
-            console.log("🎬 Video sincronizado directo al feed local:", item.snippet.title);
-            
-            // Lo pintamos al instante en pantalla si estás en el feed
-            if (typeof anexarUnicoMensajeAlFeed === 'function') {
-                anexarUnicoMensajeAlFeed(nuevoPostLocal);
-            }
-        }
-
-        // Guardamos todo el bloque actualizado en el almacenamiento del teléfono
-        localStorage.setItem('spaxio_historias_locales', JSON.stringify(misHistorias));
-
-    } catch (error) {
-        console.error("Error al sincronizar videos externos:", error);
-    }
-}
+             
 
 async function sincronizarProductosDropiAutomatico() {
-    const dropiApiUrl = 'https://api.dropi.co/v1/products'; // Endpoint de la API de Dropi
-    const tokenPrivado = 'TU_TOKEN_DE_ACCESO_DROPI';
 
-    try {
-        const response = await fetch(dropiApiUrl, {
-            method: 'GET',
-            headers: {
-                'Authorization': `Bearer ${tokenPrivado}`,
-                'Content-Type': 'application/json'
-            }
-        });
-
-        const resultado = await response.json();
-        const productos = resultado.data || [];
-
-        // Guardamos el catálogo completo directo en el navegador
-        let productosLocales = [];
-        
-        for (const prod of productos) {
-            const productoFormateado = {
-                nombre_producto: prod.name,
-                precio_sugerido: prod.suggested_price,
-                stock: prod.stock,
-                imagen_url: prod.image,
-                proveedor: 'Dropi',
-                updated_at: new Date().toISOString()
-            };
-
-            productosLocales.push(productoFormateado);
-            console.log("🛍️ Producto de Dropi guardado localmente:", productoFormateado.nombre_producto);
-        }
-
-        // Guardamos en localStorage para que tu tienda lo lea al instante
-        localStorage.setItem('productos_dropi_local', JSON.stringify(productosLocales));
-
-    } catch (error) {
-        console.error("Error de conexión con la API de Dropi:", error);
-    }
-             }
               function sincronizarMiFotoEnStories() {
     const imgStory = document.getElementById('story-mi-foto-perfil');
     if (!imgStory) return;
