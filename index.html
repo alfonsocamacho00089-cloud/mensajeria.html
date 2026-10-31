@@ -3197,31 +3197,48 @@ try {
             const textoReal = decodeURIComponent(escape(atob(decoded.chatText)));
             const miID = data.from; 
 
-  // 🎫 DETECTOR DE VALIDACIÓN DE PASAJES (Descuenta créditos de transporte)
-            if (textoReal.includes('|SPA_PASAJE|')) {
-                const partesPasaje = textoReal.split('|SPA_PASAJE|')[1].split('|');
-                const viajesADescontar = parseInt(partesPasaje[0]) || 1;
-                
-                let pasajesDisponibles = parseInt(localStorage.getItem('spaxio_pasajes_disponibles')) || 60;
-                pasajesDisponibles -= viajesADescontar;
-                if (pasajesDisponibles < 0) pasajesDisponibles = 0;
-                
-                localStorage.setItem('spaxio_pasajes_disponibles', pasajesDisponibles);
-                console.log(`🎫 Pasaje cobrado con éxito. Te quedan ${pasajesDisponibles} viajes.`);
-            }
+  // Dentro de activarAntena(), justo después de decodificar el textoReal:
 
-            // 📦 DETECTOR DE CANJES EN COMERCIOS (Descuenta puntos/créditos en la app del cliente)
-            if (textoReal.includes('|SPA_CANJE|')) {
-                const partesCanje = textoReal.split('|SPA_CANJE|')[1].split('|');
-                const creditosADebitar = parseInt(partesCanje[0]) || 0;
-                
-                let creditosDisponibles = parseInt(localStorage.getItem('spaxio_pasajes_disponibles')) || 0;
-                creditosDisponibles -= creditosADebitar;
-                if (creditosDisponibles < 0) creditosDisponibles = 0;
-                
-                localStorage.setItem('spaxio_pasajes_disponibles', creditosDisponibles);
-                console.log(`📦 Canje procesado: -${creditosADebitar} créditos. Te quedan ${creditosDisponibles} disponibles.`);
-            }
+// 📦 1. INTERCEPTOR AUTOMÁTICO DE CANJE (Para el cliente que recibe el débito)
+if (textoReal.includes('|SPA_CANJE|')) {
+    try {
+        const partesCanje = textoReal.split('|SPA_CANJE|')[1].split('|');
+        const creditosADebitar = parseInt(partesCanje[0]) || 0;
+        
+        // Restamos de los créditos o saldo local del cliente
+        let saldoActual = parseFloat(localStorage.getItem('spaxio_saldo_actual')) || 2500.00;
+        saldoActual -= creditosADebitar;
+        if (saldoActual < 0) saldoActual = 0;
+        
+        localStorage.setItem('spaxio_saldo_actual', saldoActual);
+        
+        // Actualizamos el visor visual de la tarjeta de inmediato si está abierto
+        const elBalance = document.getElementById('balanceVisual');
+        if (elBalance) {
+            elBalance.innerText = "Bs. " + saldoActual.toLocaleString('es-VE', {minimumFractionDigits: 2});
+        }
+        console.log(`✅ Débito aplicado por canje: -${creditosADebitar}. Nuevo saldo: ${saldoActual}`);
+    } catch (err) {
+        console.error("Error procesando débito automático:", err);
+    }
+}
+
+// 🎫 2. INTERCEPTOR AUTOMÁTICO DE PASAJES (Para el pasajero)
+if (textoReal.includes('|SPA_PASAJE|')) {
+    try {
+        const partesPasaje = textoReal.split('|SPA_PASAJE|')[1].split('|');
+        const viajesADescontar = parseInt(partesPasaje[0]) || 1;
+        
+        let pasajesDisponibles = parseInt(localStorage.getItem('spaxio_pasajes_disponibles')) || 60;
+        pasajesDisponibles -= viajesADescontar;
+        if (pasajesDisponibles < 0) pasajesDisponibles = 0;
+        
+        localStorage.setItem('spaxio_pasajes_disponibles', pasajesDisponibles);
+        console.log(`🎫 Pasaje descontado con éxito. Te quedan ${pasajesDisponibles} viajes.`);
+    } catch (err) {
+        console.error("Error procesando pasaje automático:", err);
+    }
+ }
             
     
             // 🚗 BLOQUE NUEVO: Auto-registro de emergencia para desconocidos o taxistas
