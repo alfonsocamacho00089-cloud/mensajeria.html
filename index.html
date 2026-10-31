@@ -166,6 +166,7 @@ body {
     
     /* Efecto para que parezca que la foto sigue debajo */
     background: rgba(0, 0, 0, 0.1); 
+  
     backdrop-filter: blur(5px); /* Opcional: desenfoca un poco para legibilidad */
     -webkit-backdrop-filter: blur(5px);
 }
@@ -177,7 +178,7 @@ body {
     background: rgba(32, 44, 51, 0.9); /* Fondo gris */
     border-radius: 25px;
     padding: 5px 10px;
-    border: 1px solid rgba(255, 215, 0, 0.3); /* Borde dorado sutil */
+    border: 1px; 
     box-shadow: 0 10px 30px rgba(0,0,0,0.5);
  }
      
@@ -190,18 +191,18 @@ body {
     display: flex;
     align-items: center;
     padding: 10px;
-    gap: 2px;
+    gap: 0px;
     z-index: 100;
     /* IMPORTANTE: Para que puedas hacer clic en el input */
     
     /* Efecto para que parezca que la foto sigue debajo */
     
    
-    
-    background: rgba(17, 24, 39, 0.9);
+    background: #181d24 !important; /* Color gris idéntico al body */
+    /*background: rgba(17, 24, 39, 1);*/
     border: 1px solid rgba(255, 215, 0, 0.0); /* Sube un poco el brillo del borde dorado */ 
   backdrop-filter: blur(5px); /* Opcional: desenfoca un poco para legibilidad */
-    -webkit-backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(5px);
 
     /* Cambiamos a FLEX para los botones */
     display: flex;
@@ -209,8 +210,8 @@ body {
     align-items: center;
     
     padding: 5px 0px;
-    border-radius: 25px;
-    border: 1px solid rgba(255, 215, 0, 0.3);
+    border-radius: 0px;
+    border: 1px;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
     z-index: 30001;
 }
@@ -422,8 +423,7 @@ button#btn-enviar:active {
         /* MODALES */
         /* 1. EL CONTENEDOR (Ocupa toda la pantalla) */
 /* 1. EL FONDO NEGRO DETRÁS DEL MODAL */
-/* EL MODAL: Usa 'dvh' para que ignore el teclado y no se encoja */
-.modal {
+/* EL MODAL: Usa 'dvh' para que ignore el teclado y no se encoja */.modal {
     display: none; 
     position: fixed !important; 
     top: 0 !important; 
@@ -431,40 +431,26 @@ button#btn-enviar:active {
     width: 100vw !important; 
     height: 100vh !important;
     min-height: 100dvh !important;
-    bottom: 0 !important;
     z-index: 30000 !important; 
-    overflow-y: auto !important;
-    transition: all 0.5s ease;
-    
+    overflow-y: auto !important; /* <--- Vital para que toda la pantalla tenga scroll */
+    -webkit-overflow-scrolling: touch;
 }
 
-
-     
-/* 2. EL CONTENIDO (Pantalla Completa con Fondo) */
-
-    
-    .modal-content { 
+.modal-content { 
     background-color: #222b35;
-    
     background-size: cover;
     background-position: center;
     background-attachment: fixed;
-    
     width: 100%; 
-    
+    min-height: 100dvh; /* <--- Permite que crezca más allá de la pantalla */
     display: flex;
-    
-    flex-direction: column; /* Esto permite que el header esté arriba y el botón abajo */
+    flex-direction: column;
     color: white; 
-    animation: fadeIn 0.4s ease; 
-    
-    height: 100dvh; /* Usa el alto dinámico para móviles */
-margin: 0;
-    
-    /* Agrega estas dos líneas: */
-    overflow: hidden;
-    justify-content: space-between;
-}
+    overflow-y: auto !important; /* <--- Permite el movimiento interno */
+    padding-bottom: 80px; /* <--- Espacio extra al final para que el último botón no quede pegado al borde */
+       }
+       
+
 /* 3. LAS FILAS DE CONTACTOS (Estilo WhatsApp) */
 .fila-contacto {
     display: flex;
@@ -932,7 +918,7 @@ margin: 0;
         .btn-danger:hover { background-color: #a82e2e; }
 
         .overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 999; backdrop-filter: blur(4px); }
-        .modal-space { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background-color: #12131c; border: 1px solid #323657; border-radius: 16px; padding: 30px; z-index: 1000; width: 340px; box-shadow: 0 10px 30px rgba(0,0,0,0.7); }
+        .modal-space { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background-color: #12131c; border: 1px solid #323657; border-radius: 16px; padding: 30px; z-index: 1000; width: 340px; box-shadow: none; }
         
         .modal-space input, .modal-space select { width: 93%; padding: 12px; margin-bottom: 15px; background-color: #1a1c29; border: 1px solid #323657; border-radius: 8px; color: #fff; font-size: 14px; }
         .modal-space input:focus, .modal-space select:focus { border-color: #5b61e2; outline: none; }
@@ -959,7 +945,7 @@ margin: 0;
     transition: right 0.4s cubic-bezier(0.25, 1, 0.5, 1);
     display: flex !important;
     flex-direction: column;
-    box-shadow: -10px 0 30px rgba(0,0,0,0.9);
+    box-shadow: none;
     overflow-y: auto;
     box-sizing: border-box;
 }
@@ -987,7 +973,7 @@ margin: 0;
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+    box-shadow: none;
       }
       /* --- PANEL LATERAL PARA LA CALCULADORA (IGUAL QUE CONTACTOS) --- */
 
@@ -1043,7 +1029,7 @@ margin: 0;
     transition: right 0.4s cubic-bezier(0.25, 1, 0.5, 1);
     display: flex !important;
     flex-direction: column;
-    box-shadow: -10px 0 30px rgba(0,0,0,0.9);
+    box-shadow: none;
     overflow-y: auto;
     box-sizing: border-box;
 }
@@ -1069,7 +1055,9 @@ margin: 0;
     transition: left 0.4s cubic-bezier(0.25, 1, 0.5, 1); /* Transición fluida */
     display: flex !important;
     flex-direction: column;
-    box-shadow: 10px 0 30px rgba(0,0,0,0.9);
+    box-shadow: none;
+      
+      
     overflow-y: auto;
     box-sizing: border-box;
 }
@@ -1097,6 +1085,7 @@ margin: 0;
     background: rgba(255, 215, 0, 0.15);
     color: #ffd700;
                        }
+       
     </style>
 
 </head>
@@ -1362,21 +1351,22 @@ window.addEventListener('DOMContentLoaded', () => {
     <div class="modal-content" style="display: flex; flex-direction: column; height: 100dvh; position: relative; background-image: linear-gradient(rgba(11, 20, 26, 0.3), rgba(11, 20, 26, 0.3)), url('./assets/logo.webp'); background-size: cover; background-position: center; background-attachment: fixed;">      
    
      <div id="nombre-dueño-header-lista" style="background: rgba(32, 44, 51, 0.3); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(15px); color: #ffffff; padding: 1px; font-weight: 350; text-transform: uppercase; text-align: left; border-bottom: opx solid #333; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 1001;">
-       <button onclick="toggleMenuHamburguesa()" style="background: transparent; border: none; color: #efece0; font-size: 24px; cursor: pointer; padding: 5px;">
+       <button onclick="toggleMenuHamburguesa()" style="background: transparent; border: none; color: #efece0; font-size: 24px; cursor: pointer; padding: 5px; margin-left: 8px;">
     ☰
        </button>
+       
             <span style="display: inline-flex; align-items: center; gap: 8px; color: #efece0; text-transform: none !important; font-weight: bold;">YsaPay</span>
 
 <div class="btn-nav" 
      id="btn-nav-harvis" 
      data-contacto='{"id_sistema":"uo4kb3tGHH7J","nombre":"H.A.R.V.I.S.","apellido":"1.0","estado":"activo"}'
      onclick="cargarConversacionCon(JSON.parse(this.dataset.contacto).id_sistema)">
-        <span style="text-shadow: 0 0 6px;">🧑‍💻H.A.R.V.I.S.</span><span style="color: #ffd700;"></span>
+        <span style="text-shadow: 0 0 10px;"></span>🛸<span style="color: #ffd700;"></span>
 </div>
              
-                
-                <div onclick="togglePanelTaxiLateral()" title="Entrar al SpaxioVerso" style="cursor: pointer; color: #ffd700; font-size: 20px; padding: 0 5px; text-shadow: 0 0 8px #ffd700;">🚖</div></div>
-                
+          <div onclick="togglePanelTaxiLateral()" title="Entrar al SpaxioVerso" style="cursor: pointer; color: #ffd700; font-size: 20px; padding: 0 8px; margin-right: 8px; text-shadow: 0 0 8px #ffd700;">🚕</div>      
+                </div>
+      <div           
      
          
      
@@ -1597,16 +1587,16 @@ window.addEventListener('DOMContentLoaded', () => {
     
 </div>
 
-<!-- 2. Submodal Pagar / Canjear (Oculto por defecto) -->
+<!-- 2. Submodal Canjear (Oculto por defecto) -->
 <div id="submodal-pagar" style="display: none; background: #1a1c29; border: 1px solid #323657; border-radius: 12px; padding: 20px; margin-top: 15px; text-align: left;">
     <h3 style="margin-top: 0; color: #5b61e2; font-size: 16px;">🪙 Traspaso Inmediato</h3>
    
 </div>
 
 <!-- 3. Submodal Mi QR (Oculto por defecto) -->
-<div id="submodal-miqr" style="display: none; background: #1a1c29; border: 1px solid #323657; border-radius: 12px; padding: 20px; margin-top: 15px; text-align: center;">
-    <h3 style="margin-top: 0; color: #fff; font-size: 16px;"> Tu QR de Canje</h3>
-    <p style="color: #63688a; font-size: 12px; margin-bottom: 15px;">Muestra este QR para pasar los puntos.</p>
+<div id="submodal-miqr" style="display: none; background: #1a1c29; border: 1px solid #323657; border-radius: 12px; padding: 15px; margin-top: 10px; text-align: center;">
+  <h3 style="margin-top: 0; color: #fff; font-size: 16px;"> Tu QR de Canje</h3>
+    
     
     <div id="contenedor-qr-spaxiocard" style="background: white; padding: 10px; border-radius: 8px; display: inline-block; margin-bottom: 12px;"></div>
 
@@ -1615,10 +1605,9 @@ window.addEventListener('DOMContentLoaded', () => {
     <div style="margin-bottom: 20px;">
         <span id="spaxiocard-id-display" style="font-size: 12px; color: #ffd700; font-family: monospace; font-weight: bold;"></span>
     </div>
-   <p style="color
-: #63688a; font-size: 12px; margin-bottom: 15px;">Introduce el ID del usuario o escanea para recibir los puntos</p>
+   
     
-    <input type="text" id="idReceptor" placeholder="ID o Cédula del Destinatario" style="width: 100%; padding: 8px; margin-bottom: 10px; background: #12131c; color: #fff; border: 1px solid #323657; border-radius: 8px;">
+    <input type="text" id="idReceptor" placeholder="ID o esnanea el Qr del Destinatario" style="width: 100%; padding: 8px; margin-bottom: 10px; background: #12131c; color: #fff; border: 1px solid #323657; border-radius: 8px;">
     
     <button type="button" class="btn-space" onclick="document.getElementById('inputQRGaleria').click()" style="background: #323657; color: #fff; font-weight: bold; width: 100%; margin-bottom: 10px; padding: 10px; cursor: pointer; border: none; border-radius: 6px;">📁 Buscar QR en Galería</button>
     <input type="file" id="inputQRGaleria" accept="image/*" style="display: none;" onchange="procesarQRGaleria(this)">
@@ -1640,11 +1629,16 @@ window.addEventListener('DOMContentLoaded', () => {
     <button type="button" onclick="detenerLectorQR()" style="background: #ff4d4d; color: #fff; border: none; width: 100%; padding: 8px; cursor: pointer; font-weight: bold;">Cerrar Cámara</button>
 </div>
 
-    <input type="number" id="montoEnviar" placeholder="Monto a Enviar (VES)" style="width: 100%; padding: 8px; margin-bottom: 15px; background: #12131c; color: #fff; border: 1px solid #323657; border-radius: 8px;">
+    <input type="number" id="montoEnviar" placeholder="Monto a Enviar" style="width: 100%; padding: 8px; margin-bottom: 15px; background: #12131c; color: #fff; border: 1px solid #323657; border-radius: 8px;">
     
   
-    <button class="btn-space" style="background-color: #ffd700; color: #000; width:100%; margin-bottom:10px;" onclick="procesarEnvioInterno() ">🧪 Sumar Puntos (Test)</button>
-    <button class="btn-space btn-danger" onclick="cerrarSubModalIntegrado('submodal-miqr')" style="width: 100%; padding: 10px; cursor: pointer;">Cerrar</button>
+    <button class="btn-space" style="background-color: #ffd700; color: #000; width:100%; padding: 6px; margin-top: 8px; font-size: 12px; cursor: pointer;" onclick="procesarEnvioInterno() ">🧪 Sumar Puntos (Test)</button>
+    
+  <button class="btn-space btn-danger" onclick="cerrarSubModalIntegrado('submodal-miqr')" style="width: 100%; padding: 6px; margin-top: 8px; font-size: 12px; cursor: pointer;">Cerrar</button>
+  
+  
+  
+  
 </div>
 <!-- ============================================================== -->            
   
@@ -1697,7 +1691,40 @@ window.addEventListener('DOMContentLoaded', () => {
         </div>
     </div>
 </div>      
-<!-- ============================================================== -->
+<div style="width: 100%; margin-top: 20px; text-align: left; padding: 0 5px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+      <!-- Contenedor deslizable de productos/comercios -->
+    <div style="display: flex; gap: 10px; overflow-x: auto; padding-bottom: 5px; scrollbar-width: none;">
+        
+        <!-- Tarjeta de Comercio 1 -->
+        <div style="min-width: 110px; background: #151828; border: 1px solid #323657; border-radius: 10px; padding: 8px; text-align: center; flex-shrink: 0; cursor: pointer;">
+            <div style="font-size: 22px; margin-bottom: 4px;">🍔</div>
+            <div style="font-size: 11px; color: #fff; font-weight: bold;">Space Burger</div>
+            <div style="font-size: 10px; color: #00ffcc; margin-top: 2px;">-10% Puntos</div>
+        </div>
+
+        <!-- Tarjeta de Comercio 2 -->
+        <div style="min-width: 110px; background: #151828; border: 1px solid #323657; border-radius: 10px; padding: 8px; text-align: center; flex-shrink: 0; cursor: pointer;">
+            <div style="font-size: 22px; margin-bottom: 4px;">☕</div>
+            <div style="font-size: 11px; color: #fff; font-weight: bold;">Café Galaxia</div>
+            <div style="font-size: 10px; color: #ffd700; margin-top: 2px;">Cashback</div>
+        </div>
+
+        <!-- Tarjeta de Comercio 3 -->
+        <div style="min-width: 110px; background: #151828; border: 1px solid #323657; border-radius: 10px; padding: 8px; text-align: center; flex-shrink: 0; cursor: pointer;">
+            <div style="font-size: 22px; margin-bottom: 4px;">🛒</div>
+            <div style="font-size: 11px; color: #fff; font-weight: bold;">Market Express</div>
+            <div style="font-size: 10px; color: #00ffcc; margin-top: 2px;">Delivery Gratis</div>
+        </div>
+<!-- Tarjeta de Comercio 4 -->
+        <div style="min-width: 110px; background: #151828; border: 1px solid #323657; border-radius: 10px; padding: 8px; text-align: center; flex-shrink: 0; cursor: pointer;">
+            <div style="font-size: 22px; margin-bottom: 4px;">☕</div>
+            <div style="font-size: 11px; color: #fff; font-weight: bold;">Abasto Tio San</div>
+            <div style="font-size: 10px; color: #ffd700; margin-top: 2px;">Cashback</div>
+        </div>
+    </div>
+</div>      
+  <!-- ============================================================== -->
      
         <!-- ==================== PANEL LATERAL DE CONTACTOS ==================== -->
 <div id="seccion-panel-contactos-lateral">
@@ -1996,48 +2023,6 @@ window.addEventListener('DOMContentLoaded', () => {
     return false;
 };
 
-
-             async function sincronizarVideosDesdeGitHub() {
-    // La URL raw de tu archivo JSON generado automáticamente en GitHub
-    const urlJsonGitHub = "https://raw.githubusercontent.com/TU_USUARIO/TU_REPO/main/videos_feed.json";
-
-    try {
-        const response = await fetch(urlJsonGitHub);
-        const videosNuevos = await response.json();
-
-        let misHistorias = JSON.parse(localStorage.getItem('spaxio_historias_locales') || '[]');
-
-        // Recorremos los videos limpios que preparó Python
-        videosNuevos.forEach(video => {
-            // Verificamos que no esté duplicado en la memoria local
-            const existe = misHistorias.some(h => h.id === video.id);
-            if (!existe) {
-                misHistorias.unshift(video);
-
-                // Lo pintamos al instante en tu SpaxioFlow
-                if (typeof anexarUnicoMensajeAlFeed === 'function') {
-                    anexarUnicoMensajeAlFeed(video);
-                }
-            }
-        });
-
-        // Actualizamos la memoria del teléfono
-        localStorage.setItem('spaxio_historias_locales', JSON.stringify(misHistorias));
-        console.log("🎬 SpaxioFlow actualizado automáticamente desde el JSON de GitHub.");
-
-    } catch (error) {
-        console.error("Error al sincronizar el feed automatizado:", error);
-    }
-}
-
-// Puedes ejecutar esto automáticamente cada vez que cargue tu app
-window.addEventListener('DOMContentLoaded', () => {
-    sincronizarVideosDesdeGitHub();
-});
-
-             
-
-             
               function sincronizarMiFotoEnStories() {
     const imgStory = document.getElementById('story-mi-foto-perfil');
     if (!imgStory) return;
@@ -2642,8 +2627,8 @@ function generarMiQRSpaxioCard() {
     try {
         new QRCode(contenedorQR, {
             text: miID,
-            width: 150,
-            height: 150,
+            width: 120,
+            height: 120,
             colorDark: "#000000",
             colorLight: "#ffffff",
             correctLevel: QRCode.CorrectLevel.H
@@ -2704,7 +2689,8 @@ async function procesarCargaBanco() {
     cerrarTodosLosModalesSpace();
 }
 
-      async function procesarEnvioInterno() {
+      
+    async function procesarEnvioInterno() {
     const receptorInput = document.getElementById('idReceptor');
     const montoInput = document.getElementById('montoEnviar');
 
@@ -2722,6 +2708,9 @@ async function procesarCargaBanco() {
         return;
     }
 
+    // Asegurarnos de tener el saldo fresco
+    usuarioSesionSpaxio.saldo = parseFloat(localStorage.getItem('spaxio_saldo_actual')) || usuarioSesionSpaxio.saldo;
+
     if (monto > usuarioSesionSpaxio.saldo) {
         alert("❌ Saldo insuficiente en tu tarjeta.");
         return;
@@ -2729,36 +2718,84 @@ async function procesarCargaBanco() {
 
     const codigoOperacion = "TRX-" + Math.floor(100000 + Math.random() * 900000);
 
-    // 1. Descontar tu saldo local
+    // 1. Descontar tu saldo local (Envío P2P)
     usuarioSesionSpaxio.saldo -= monto;
+    localStorage.setItem('spaxio_saldo_actual', usuarioSesionSpaxio.saldo);
+
     const elBalance = document.getElementById('balanceVisual');
     if (elBalance) {
         elBalance.innerText = "Bs. " + usuarioSesionSpaxio.saldo.toLocaleString('es-VE', { minimumFractionDigits: 2 });
     }
 
-    // 2. Preparar el mensaje que viaja por el chat (Antena Satelital)
-    // Seteamos temporalmente el input oculto de destino para que el satélite lo mande al receptor correcto
+    // 2. Preparar el mensaje que viaja por el chat satelital
     const inputTarget = document.querySelector('#target-id');
     const targetAnterior = inputTarget ? inputTarget.value : '';
     if (inputTarget) inputTarget.value = receptorID;
 
-    // Formato clave para que el receptor sepa que es dinero: SPA_PAGO|monto|codigo
+    // Formato |SPA_PAGO| para que al receptor le sume el dinero automáticamente
     const mensajePago = `💸 ¡Comprobante de Traspaso! Recibiste Bs. ${monto.toFixed(2)} (Ref: ${codigoOperacion}) |SPA_PAGO|${monto}|${codigoOperacion}`;
 
-    // Disparamos tu mismo chat satelital existente
     await enviarMensajeSatelital(mensajePago, 'texto');
 
-    // Restaurar el target anterior si lo había
     if (inputTarget) inputTarget.value = targetAnterior;
 
-    // Limpiar inputs y cerrar modales
     receptorInput.value = '';
     montoInput.value = '';
-    cerrarTodosLosModalesSpace();
+    cerrarSubModalIntegrado('submodal-miqr');
 
     alert(`✅ ¡Traspaso de Bs. ${monto.toFixed(2)} enviado con éxito!`);
-             }
-    
+                                                             }
+
+              async function procesarCobroComercial() {
+    const receptorInput = document.getElementById('idReceptor');
+    const montoInput = document.getElementById('montoEnviar');
+
+    const clienteID = receptorInput ? receptorInput.value.trim() : '';
+    const monto = montoInput ? parseFloat(montoInput.value) : 0;
+    const miID = localStorage.getItem('mi_dropis_id') || "SPAXIO-USER";
+
+    if (!clienteID || !monto || isNaN(monto) || monto <= 0) {
+        alert("⚠️ Ingresa el ID del cliente y el monto a cobrar.");
+        return;
+    }
+
+    if (clienteID === miID) {
+        alert("❌ No puedes cobrarte a ti mismo.");
+        return;
+    }
+
+    const confirmar = confirm(`🔍 ¿Confirmar cobro por POS?\n\n💵 Monto: Bs. ${monto.toFixed(2)}\n👤 Cliente ID: ${clienteID}`);
+    if (!confirmar) return;
+
+    const codigoOperacion = "COB-" + Math.floor(100000 + Math.random() * 900000);
+
+    // 1. Tú (comercio) recibes los fondos en tu cuenta
+    usuarioSesionSpaxio.saldo = parseFloat(localStorage.getItem('spaxio_saldo_actual')) || usuarioSesionSpaxio.saldo;
+    usuarioSesionSpaxio.saldo += monto;
+    localStorage.setItem('spaxio_saldo_actual', usuarioSesionSpaxio.saldo);
+
+    const elBalance = document.getElementById('balanceVisual');
+    if (elBalance) {
+        elBalance.innerText = "Bs. " + usuarioSesionSpaxio.saldo.toLocaleString('es-VE', { minimumFractionDigits: 2 });
+    }
+
+    // 2. Enviar aviso al cliente con |SPA_COBRO| para que su app le reste el dinero automáticamente
+    const inputTarget = document.querySelector('#target-id');
+    const targetAnterior = inputTarget ? inputTarget.value : '';
+    if (inputTarget) inputTarget.value = clienteID;
+
+    const mensajeCobro = `🧾 ¡Cobro Exitoso en Comercio! Se procesó un cargo de Bs. ${monto.toFixed(2)} (Ref: ${codigoOperacion}) |SPA_COBRO|${monto}|${codigoOperacion}`;
+
+    await enviarMensajeSatelital(mensajeCobro, 'texto');
+
+    if (inputTarget) inputTarget.value = targetAnterior;
+
+    receptorInput.value = '';
+    montoInput.value = '';
+    cerrarSubModalIntegrado('submodal-miqr');
+
+    alert(`✅ ¡Cobro de Bs. ${monto.toFixed(2)} procesado con éxito! Fondos acreditados a tu cuenta.`);
+              }
 
 
         // Si usas un sistema de pestañas (switchView), recuerda llamar a inicializarSpaxioCard() cuando el usuario abra esta sección.
@@ -3150,17 +3187,34 @@ try {
             const textoReal = decodeURIComponent(escape(atob(decoded.chatText)));
             const miID = data.from; 
             
-            // 🪙 DETECTOR MAESTRO DE PAGOS (Fuera de cualquier filtro para que lea el texto al instante)
-            if (textoReal.includes('|SPA_PAGO|')) {
-                const montoRecibido = parseFloat(textoReal.split('|SPA_PAGO|')[1]) || 0;
-                usuarioSesionSpaxio.saldo += montoRecibido;
+            // 🪙 DETECTOR MAESTRO DE TRANSACCIONES FINANCIERAS
+            if (textoReal.includes('|SPA_PAGO|') || textoReal.includes('|SPA_COBRO|')) {
+                let esCobro = textoReal.includes('|SPA_COBRO|');
+                let etiqueta = esCobro ? '|SPA_COBRO|' : '|SPA_PAGO|';
+                
+                const montoTransaccion = parseFloat(textoReal.split(etiqueta)[1]) || 0;
+                
+                // Sincronizamos saldo actual desde localStorage
+                usuarioSesionSpaxio.saldo = parseFloat(localStorage.getItem('spaxio_saldo_actual')) || usuarioSesionSpaxio.saldo;
+
+                if (esCobro) {
+                    // Si un comercio/usuario te cobró, se te DEBITA de tu saldo
+                    usuarioSesionSpaxio.saldo -= montoTransaccion;
+                    if (usuarioSesionSpaxio.saldo < 0) usuarioSesionSpaxio.saldo = 0; // Blindaje
+                } else {
+                    // Si te hicieron un traspaso, se te SUMA a tu saldo
+                    usuarioSesionSpaxio.saldo += montoTransaccion;
+                }
+
+                // Guardamos en memoria local
                 localStorage.setItem('spaxio_saldo_actual', usuarioSesionSpaxio.saldo);
                 
+                // Refrescamos el balance visual en la pantalla al instante
                 const elBalance = document.getElementById('balanceVisual');
                 if (elBalance) {
                     elBalance.innerText = "Bs. " + usuarioSesionSpaxio.saldo.toLocaleString('es-VE', { minimumFractionDigits: 2 });
                 }
-            }
+          }
             
             // 🚗 BLOQUE NUEVO: Auto-registro de emergencia para desconocidos o taxistas
             let agendaActual = JSON.parse(localStorage.getItem('mis_contactos')) || [];
@@ -7112,6 +7166,6 @@ if (typeof window !== "undefined" && window.speechSynthesis) {
 </script>
 
 </body>
-</html>
+    </html>
  
      
