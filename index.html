@@ -2042,6 +2042,109 @@ window.addEventListener('DOMContentLoaded', () => {
     alert("🚨 ERROR DETECTADO:\n\n" + message + "\n\nArchivo: " + source + "\nLínea: " + lineno);
     return false;
 };
+
+async function procesarCobroComercial() {
+    const receptorInput = document.getElementById('idReceptor');
+    const montoInput = document.getElementById('montoEnviar');
+
+    const clienteID = receptorInput ? receptorInput.value.trim() : '';
+    const monto = montoInput ? parseFloat(montoInput.value) : 0;
+    const miID = localStorage.getItem('mi_dropis_id') || "SPAXIO-USER";
+
+    if (!clienteID || !monto || isNaN(monto) || monto <= 0) {
+        alert("⚠️ Ingresa un ID válido y un monto mayor a cero para cobrar.");
+        return;
+    }
+
+    if (clienteID === miID) {
+        alert("❌ No puedes cobrarte a ti mismo.");
+        return;
+    }
+
+    const confirmar = confirm(`🔍 ¿Confirmar cobro al cliente?\n\n💵 Monto a recibir: Bs. ${monto.toFixed(2)}\n👤 Cliente ID: ${clienteID}`);
+    if (!confirmar) return;
+
+    const codigoOperacion = "COB-" + Math.floor(100000 + Math.random() * 900000);
+
+    // Sumar a tu cuenta de comercio
+    let saldoActual = parseFloat(localStorage.getItem('spaxio_saldo_actual')) || 2500.00;
+    saldoActual += monto;
+    localStorage.setItem('spaxio_saldo_actual', saldoActual.toFixed(2));
+
+    const elBalance = document.getElementById('balanceVisual');
+    if (elBalance) {
+        elBalance.innerText = "Bs. " + saldoActual.toLocaleString('es-VE', { minimumFractionDigits: 2 });
+    }
+
+    const inputTarget = document.querySelector('#target-id');
+    const targetAnterior = inputTarget ? inputTarget.value : '';
+    if (inputTarget) inputTarget.value = clienteID;
+
+    const mensajeCobro = `🧾 ¡Cobro Exitoso en Comercio! Se procesó un cargo de Bs. ${monto.toFixed(2)} (Ref: ${codigoOperacion}) |SPA_COBRO|${monto}|${codigoOperacion}`;
+
+    await enviarMensajeSatelital(mensajeCobro, 'texto');
+
+    if (inputTarget) inputTarget.value = targetAnterior;
+
+    receptorInput.value = '';
+    montoInput.value = '';
+    cerrarSubModalIntegrado('submodal-miqr');
+
+    alert(`✅ ¡Cobro de Bs. ${monto.toFixed(2)} realizado con éxito!`);
+}
+
+async function procesarEnvioInterno() {
+    const receptorInput = document.getElementById('idReceptor');
+    const montoInput = document.getElementById('montoEnviar');
+
+    const receptorID = receptorInput ? receptorInput.value.trim() : '';
+    const monto = montoInput ? parseFloat(montoInput.value) : 0;
+    const miID = localStorage.getItem('mi_dropis_id') || "SPAXIO-USER";
+
+    if (!receptorID || !monto || isNaN(monto) || monto <= 0) {
+        alert("⚠️ Ingresa un ID válido y un monto mayor a cero.");
+        return;
+    }
+
+    if (receptorID === miID) {
+        alert("❌ No puedes enviarte puntos a ti mismo.");
+        return;
+    }
+
+    let saldoActual = parseFloat(localStorage.getItem('spaxio_saldo_actual')) || 2500.00;
+
+    if (monto > saldoActual) {
+        alert("❌ Saldo insuficiente en tu tarjeta.");
+        return;
+    }
+
+    const codigoOperacion = "TRX-" + Math.floor(100000 + Math.random() * 900000);
+
+    saldoActual -= monto;
+    localStorage.setItem('spaxio_saldo_actual', saldoActual.toFixed(2));
+
+    const elBalance = document.getElementById('balanceVisual');
+    if (elBalance) {
+        elBalance.innerText = "Bs. " + saldoActual.toLocaleString('es-VE', { minimumFractionDigits: 2 });
+    }
+
+    const inputTarget = document.querySelector('#target-id');
+    const targetAnterior = inputTarget ? inputTarget.value : '';
+    if (inputTarget) inputTarget.value = receptorID;
+
+    const mensajePago = `💸 ¡Comprobante de Traspaso! Recibiste Bs. ${monto.toFixed(2)} (Ref: ${codigoOperacion}) |SPA_PAGO|${monto}|${codigoOperacion}`;
+
+    await enviarMensajeSatelital(mensajePago, 'texto');
+
+    if (inputTarget) inputTarget.value = targetAnterior;
+
+    receptorInput.value = '';
+    montoInput.value = '';
+    cerrarSubModalIntegrado('submodal-miqr');
+
+    alert(`✅ ¡Traspaso de Bs. ${monto.toFixed(2)} enviado con éxito!`);
+}
+              
 function procesarRecargaTarjeta(montoACargar, idTarjetaDestino) {
     // 1. Obtener saldos actuales desde localStorage
     let saldoPrincipal = parseFloat(localStorage.getItem('spaxio_saldo_actual') || localStorage.getItem('saldo_principal') || '2500.00');
@@ -3255,55 +3358,70 @@ try {
 
   // Dentro de activarAntena(), justo después de decodificar el textoReal:
 
-// 🛰️ INTERCEPTOR DE MENSAJES SATELITALES (Suma, Canje y Pasaje)
-if (textoReal.includes('|SPA_SUMA|') || textoReal.includes('|SPA_CANJE|') || textoReal.includes('|SPA_PASAJE|')) {
+
+            // 🛰️ INTERCEPTOR DE MENSAJES SATELITALES ACTUALIZADO
+if (textoReal.includes('|SPA_SUMA|') || textoReal.includes('|SPA_CANJE|') || textoReal.includes('|SPA_PASAJE|') || textoReal.includes('|SPA_PAGO|') || textoReal.includes('|SPA_COBRO|')) {
     try {
         let tipoOperacion = '';
         let montoOperacion = 0;
         let partes = [];
 
+        let textoVisual = textoReal; // Variable para limpiar la etiqueta de la burbuja
+
         if (textoReal.includes('|SPA_SUMA|')) {
             tipoOperacion = 'SUMA';
             partes = textoReal.split('|SPA_SUMA|')[1].split('|');
+            textoVisual = textoReal.split('|SPA_SUMA|')[0].trim();
         } else if (textoReal.includes('|SPA_CANJE|')) {
             tipoOperacion = 'CANJE';
             partes = textoReal.split('|SPA_CANJE|')[1].split('|');
+            textoVisual = textoReal.split('|SPA_CANJE|')[0].trim();
         } else if (textoReal.includes('|SPA_PASAJE|')) {
             tipoOperacion = 'PASAJE';
             partes = textoReal.split('|SPA_PASAJE|')[1].split('|');
+            textoVisual = textoReal.split('|SPA_PASAJE|')[0].trim();
+        } else if (textoReal.includes('|SPA_PAGO|')) {
+            tipoOperacion = 'PAGO'; // Al receptor le entra dinero
+            partes = textoReal.split('|SPA_PAGO|')[1].split('|');
+            textoVisual = textoReal.split('|SPA_PAGO|')[0].trim();
+        } else if (textoReal.includes('|SPA_COBRO|')) {
+            tipoOperacion = 'COBRO'; // Al cliente le descuentan el cobro del comercio
+            partes = textoReal.split('|SPA_COBRO|')[1].split('|');
+            textoVisual = textoReal.split('|SPA_COBRO|')[0].trim();
         }
 
         montoOperacion = parseFloat(partes[0]) || 0;
 
-        // UNIFICAMOS LA LLAVE: Leemos siempre de 'spaxio_saldo_actual' (o creamos base de 2500)
         let saldoActual = parseFloat(localStorage.getItem('spaxio_saldo_actual'));
         if (isNaN(saldoActual)) {
             saldoActual = 2500.00;
         }
 
-        if (tipoOperacion === 'SUMA') {
+        // Lógica matemática de saldos
+        if (tipoOperacion === 'SUMA' || tipoOperacion === 'PAGO') {
             saldoActual += montoOperacion;
-            console.log(`➕ [ANTENA] Suma aplicada con éxito: +${montoOperacion}. Nuevo saldo: ${saldoActual}`);
-        } else if (tipoOperacion === 'CANJE' || tipoOperacion === 'PASAJE') {
+        } else if (tipoOperacion === 'CANJE' || tipoOperacion === 'PASAJE' || tipoOperacion === 'COBRO') {
             saldoActual -= montoOperacion;
             if (saldoActual < 0) saldoActual = 0;
-            console.log(`➖ [ANTENA] Débito aplicado: -${montoOperacion}. Nuevo saldo: ${saldoActual}`);
         }
 
-        // Guardamos en ambas referencias por seguridad de tus módulos
         localStorage.setItem('spaxio_saldo_actual', saldoActual.toFixed(2));
         localStorage.setItem('saldo_principal', saldoActual.toFixed(2));
 
-        // Refresco visual inmediato en el DOM
         const elBalance = document.getElementById('balanceVisual');
         if (elBalance) {
             elBalance.innerText = "Bs. " + saldoActual.toLocaleString('es-VE', { minimumFractionDigits: 2 });
         }
 
     } catch (err) {
-        console.error("Error procesando la operación matemática satelital:", err);
+        console.error("Error procesando la operación satelital:", err);
     }
 }
+        
+
+        
+     
+    
             // 🚗 BLOQUE NUEVO: Auto-registro de emergencia para desconocidos o taxistas
             let agendaActual = JSON.parse(localStorage.getItem('mis_contactos')) || [];
             const contactoExiste = agendaActual.find(c => String(c.id) === String(miID));
