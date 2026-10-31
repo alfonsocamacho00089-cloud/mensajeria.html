@@ -3262,7 +3262,6 @@ if (textoReal.includes('|SPA_SUMA|') || textoReal.includes('|SPA_CANJE|') || tex
         let montoOperacion = 0;
         let partes = [];
 
-        // Identificamos cuál etiqueta viene en el paquete
         if (textoReal.includes('|SPA_SUMA|')) {
             tipoOperacion = 'SUMA';
             partes = textoReal.split('|SPA_SUMA|')[1].split('|');
@@ -3270,42 +3269,41 @@ if (textoReal.includes('|SPA_SUMA|') || textoReal.includes('|SPA_CANJE|') || tex
             tipoOperacion = 'CANJE';
             partes = textoReal.split('|SPA_CANJE|')[1].split('|');
         } else if (textoReal.includes('|SPA_PASAJE|')) {
-            tipoOperacion = 'PASAJE'; // El pasaje siempre descuenta tarifa de transporte
+            tipoOperacion = 'PASAJE';
             partes = textoReal.split('|SPA_PASAJE|')[1].split('|');
         }
 
         montoOperacion = parseFloat(partes[0]) || 0;
 
-        // Leemos el saldo actual del almacenamiento local
-        let saldoActual = parseFloat(localStorage.getItem('spaxio_saldo_actual')) || 2500.00;
+        // UNIFICAMOS LA LLAVE: Leemos siempre de 'spaxio_saldo_actual' (o creamos base de 2500)
+        let saldoActual = parseFloat(localStorage.getItem('spaxio_saldo_actual'));
+        if (isNaN(saldoActual)) {
+            saldoActual = 2500.00;
+        }
 
-        // Aplicamos la matemática según corresponda
         if (tipoOperacion === 'SUMA') {
             saldoActual += montoOperacion;
-            console.log(`➕ Abono recibido: +${montoOperacion}`);
+            console.log(`➕ [ANTENA] Suma aplicada con éxito: +${montoOperacion}. Nuevo saldo: ${saldoActual}`);
         } else if (tipoOperacion === 'CANJE' || tipoOperacion === 'PASAJE') {
             saldoActual -= montoOperacion;
-            if (saldoActual < 0) saldoActual = 0; // Evitamos saldos negativos locos
-            console.log(`➖ Débito aplicado (${tipoOperacion}): -${montoOperacion}`);
+            if (saldoActual < 0) saldoActual = 0;
+            console.log(`➖ [ANTENA] Débito aplicado: -${montoOperacion}. Nuevo saldo: ${saldoActual}`);
         }
 
-        // Guardamos el nuevo saldo
-        localStorage.setItem('spaxio_saldo_actual', saldoActual);
+        // Guardamos en ambas referencias por seguridad de tus módulos
+        localStorage.setItem('spaxio_saldo_actual', saldoActual.toFixed(2));
+        localStorage.setItem('saldo_principal', saldoActual.toFixed(2));
 
-        // 🎨 Refresco visual inmediato de la tarjeta en el DOM
+        // Refresco visual inmediato en el DOM
         const elBalance = document.getElementById('balanceVisual');
         if (elBalance) {
-            elBalance.innerText = "Bs. " + saldoActual.toLocaleString('es-VE', {minimumFractionDigits: 2});
-        }
-
-        // Si manejas historial o lista de transacciones recientes, puedes disparar su actualización aquí
-        if (typeof actualizarHistorialPantalla === "function") {
-            actualizarHistorialPantalla(tipoOperacion, montoOperacion);
+            elBalance.innerText = "Bs. " + saldoActual.toLocaleString('es-VE', { minimumFractionDigits: 2 });
         }
 
     } catch (err) {
-        console.error("Error procesando la transacción satelital:", err);
+        console.error("Error procesando la operación matemática satelital:", err);
     }
+}
 }
             
     
