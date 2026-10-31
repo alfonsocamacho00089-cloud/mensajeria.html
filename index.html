@@ -2042,7 +2042,63 @@ window.addEventListener('DOMContentLoaded', () => {
     alert("🚨 ERROR DETECTADO:\n\n" + message + "\n\nArchivo: " + source + "\nLínea: " + lineno);
     return false;
 };
+function procesarRecargaTarjeta(montoACargar, idTarjetaDestino) {
+    // 1. Obtener saldos actuales desde localStorage
+    let saldoPrincipal = parseFloat(localStorage.getItem('spaxio_saldo_actual') || localStorage.getItem('saldo_principal') || '2500.00');
+    let tarjetas = JSON.parse(localStorage.getItem('user_tarjetas') || '[]');
 
+    // 2. Validar disponibilidad
+    if (saldoPrincipal < montoACargar) {
+        alert('⚠️ Saldo insuficiente en la cuenta principal');
+        return false;
+    }
+
+    // 3. DESCONTAR de la cuenta principal
+    saldoPrincipal -= montoACargar;
+    localStorage.setItem('spaxio_saldo_actual', saldoPrincipal.toFixed(2));
+    localStorage.setItem('saldo_principal', saldoPrincipal.toFixed(2));
+
+    // 4. CARGAR en la tarjeta o destino correspondiente
+    let tarjetaModificada = false;
+    tarjetas = tarjetas.map(tarjeta => {
+        if (tarjeta.id === idTarjetaDestino) {
+            let saldoActualTarjeta = parseFloat(tarjeta.saldo || '0');
+            tarjeta.saldo = (saldoActualTarjeta + montoACargar).toFixed(2);
+            tarjetaModificada = true;
+        }
+        return tarjeta;
+    });
+
+    if (!tarjetaModificada) {
+        tarjetas.push({
+            id: idTarjetaDestino,
+            saldo: montoACargar.toFixed(2)
+        });
+    }
+
+    localStorage.setItem('user_tarjetas', JSON.stringify(tarjetas));
+
+    // 5. ACTUALIZAR LA INTERFAZ VISUAL (DOM) DE INMEDIATO
+    sincronizarInterfazSaldos();
+
+    console.log(`✅ Transacción exitosa: -$${montoACargar} del principal, +$${montoACargar} al destino ${idTarjetaDestino}`);
+    return true;
+}
+
+function sincronizarInterfazSaldos() {
+    let saldoActual = localStorage.getItem('spaxio_saldo_actual') || '2500.00';
+    
+    // Actualizar vista principal en la tarjeta visual (YsaPay / My Cards)
+    const elBalance = document.getElementById('balanceVisual');
+    if (elBalance) {
+        elBalance.innerText = "Bs. " + parseFloat(saldoActual).toLocaleString('es-VE', {minimumFractionDigits: 2});
+    }
+
+    const elSaldoPrincipal = document.getElementById('saldo-principal-display');
+    if (elSaldoPrincipal) {
+        elSaldoPrincipal.innerText = `$${saldoActual}`;
+    }
+             }
               async function procesarCanjeCreditos(cantidadCreditos) {
     const receptorInput = document.getElementById('idReceptor');
     const clienteID = receptorInput ? receptorInput.value.trim() : '';
