@@ -3304,9 +3304,6 @@ if (textoReal.includes('|SPA_SUMA|') || textoReal.includes('|SPA_CANJE|') || tex
         console.error("Error procesando la operación matemática satelital:", err);
     }
 }
-}
-            
-    
             // 🚗 BLOQUE NUEVO: Auto-registro de emergencia para desconocidos o taxistas
             let agendaActual = JSON.parse(localStorage.getItem('mis_contactos')) || [];
             const contactoExiste = agendaActual.find(c => String(c.id) === String(miID));
