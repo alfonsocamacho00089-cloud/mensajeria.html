@@ -1435,7 +1435,9 @@ window.addEventListener('DOMContentLoaded', () => {
 </div>
 <!-- ==================== PANEL LATERAL DE TAXI / CONDUCTOR ==================== -->
 <div id="seccion-panel-taxi-lateral">
-    
+    <button onclick="procesarValidacionPasaje()" style="width: 100%; padding: 15px; background: #ffd700; color: #000; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; font-size: 15px; margin-top: 10px; box-shadow: 0 4px 15px rgba(255,215,0,0.3);">
+    🎟️ Validar 1 Pasaje (1-Tap Express)
+    </button>
     <!-- Cabecera del Panel con tu flechita exacta -->
     <div style="background: rgba(32, 44, 51, 0.5); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(15px); color: #ffffff; padding: 15px; font-weight: 900; text-transform: uppercase; text-align: left; border-bottom: 1px solid #333; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 10;">
         <div style="display: flex; align-items: center; gap: 12px;">
@@ -1628,11 +1630,29 @@ window.addEventListener('DOMContentLoaded', () => {
     <!-- Botón inferior para cerrar la cámara -->
     <button type="button" onclick="detenerLectorQR()" style="background: #ff4d4d; color: #fff; border: none; width: 100%; padding: 8px; cursor: pointer; font-weight: bold;">Cerrar Cámara</button>
 </div>
+<div class="panel-canjes-comercio" style="background: #111; padding: 15px; border-radius: 12px; border: 1px solid #ffd700; margin-top: 10px;">
+    <p style="color: #ffd700; font-weight: bold; margin-bottom: 10px;">📦 Selecciona la cantidad de Créditos a Canjear:</p>
+    
+    <!-- Escala unitaria del 1 al 5 -->
+    <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; margin-bottom: 10px;">
+        <button onclick="procesarCanjeCreditos(1)" style="padding: 10px; background: #222; color: #fff; border: 1px solid #444; border-radius: 8px; font-weight: bold; cursor: pointer;">1</button>
+        <button onclick="procesarCanjeCreditos(2)" style="padding: 10px; background: #222; color: #fff; border: 1px solid #444; border-radius: 8px; font-weight: bold; cursor: pointer;">2</button>
+        <button onclick="procesarCanjeCreditos(3)" style="padding: 10px; background: #222; color: #fff; border: 1px solid #444; border-radius: 8px; font-weight: bold; cursor: pointer;">3</button>
+        <button onclick="procesarCanjeCreditos(4)" style="padding: 10px; background: #222; color: #fff; border: 1px solid #444; border-radius: 8px; font-weight: bold; cursor: pointer;">4</button>
+        <button onclick="procesarCanjeCreditos(5)" style="padding: 10px; background: #ffd700; color: #000; border: none; border-radius: 8px; font-weight: bold; cursor: pointer;">5 (Mín)</button>
+    </div>
 
+    <!-- Combos y Multiplicadores -->
+    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;">
+        <button onclick="procesarCanjeCreditos(10)" style="padding: 10px; background: #222; color: #ffd700; border: 1px solid #ffd700; border-radius: 8px; font-weight: bold; cursor: pointer;">1 x 10</button>
+        <button onclick="procesarCanjeCreditos(20)" style="padding: 10px; background: #222; color: #ffd700; border: 1px solid #ffd700; border-radius: 8px; font-weight: bold; cursor: pointer;">2 x 10 (20)</button>
+        <button onclick="procesarCanjeCreditos(30)" style="padding: 10px; background: #222; color: #ffd700; border: 1px solid #ffd700; border-radius: 8px; font-weight: bold; cursor: pointer;">3 x 10 (30)</button>
+    </div>
+</div>
     <input type="number" id="montoEnviar" placeholder="Monto a Enviar" style="width: 100%; padding: 8px; margin-bottom: 15px; background: #12131c; color: #fff; border: 1px solid #323657; border-radius: 8px;">
     
   
-    <button class="btn-space" style="background-color: #ffd700; color: #000; width:100%; padding: 6px; margin-top: 8px; font-size: 12px; cursor: pointer;" onclick="procesarEnvioInterno() ">🧪 Sumar Puntos (Test)</button>
+    <button class="btn-space" style="background-color: #ffd700; color: #000; width:100%; padding: 6px; margin-top: 8px; font-size: 12px; cursor: pointer;" onclick="procesarCobroComercial() ">🧪 Sumar Puntos (Test)</button>
     
   <button class="btn-space btn-danger" onclick="cerrarSubModalIntegrado('submodal-miqr')" style="width: 100%; padding: 6px; margin-top: 8px; font-size: 12px; cursor: pointer;">Cerrar</button>
   
@@ -2023,6 +2043,101 @@ window.addEventListener('DOMContentLoaded', () => {
     return false;
 };
 
+              async function procesarCanjeCreditos(cantidadCreditos) {
+    const receptorInput = document.getElementById('idReceptor');
+    const clienteID = receptorInput ? receptorInput.value.trim() : '';
+    const miID = localStorage.getItem('mi_dropis_id') || "SPAXIO-USER";
+
+    if (!clienteID) {
+        alert("⚠️ Por favor, escanea o ingresa primero el ID del cliente.");
+        return;
+    }
+
+    if (clienteID === miID) {
+        alert("❌ No puedes hacerte un canje a ti mismo.");
+        return;
+    }
+
+    const confirmar = confirm(`📦 ¿Confirmar canje por créditos/puntos?\n\n🎟️ Créditos: ${cantidadCreditos}\n👤 Cliente ID: ${clienteID}`);
+    if (!confirmar) return;
+
+    const referenciaCanje = "CNJ-" + Math.floor(100000 + Math.random() * 900000);
+
+    // 1. Sumamos los créditos en tu cuenta local de comercio
+    let misCreditosComercio = parseInt(localStorage.getItem('spaxio_creditos_comercio')) || 0;
+    misCreditosComercio += cantidadCreditos;
+    localStorage.setItem('spaxio_creditos_comercio', misCreditosComercio);
+
+    // Actualizamos el balance visual de tu comercio si tienes el elemento
+    const elBalanceCreditos = document.getElementById('balanceCreditosVisual');
+    if (elBalanceCreditos) {
+        elBalanceCreditos.innerText = misCreditosComercio + " Créditos";
+    }
+
+    // 2. Apuntamos temporalmente al cliente para enviarle la orden satelital
+    const inputTarget = document.querySelector('#target-id');
+    const targetAnterior = inputTarget ? inputTarget.value : '';
+    if (inputTarget) inputTarget.value = clienteID;
+
+    // Mensaje satelital con etiqueta |SPA_CANJE| para que el teléfono del cliente reste sus créditos automáticamente
+    const mensajeSatelitalCanje = `📦 ¡Canje Exitoso en Comercio! Se han debitado ${cantidadCreditos} créditos/puntos (Ref: ${referenciaCanje}) |SPA_CANJE|${cantidadCreditos}|${referenciaCanje}`;
+
+    if (typeof enviarMensajeSatelital === "function") {
+        await enviarMensajeSatelital(mensajeSatelitalCanje, 'texto');
+    }
+
+    // Restauramos el target anterior
+    if (inputTarget) inputTarget.value = targetAnterior;
+
+    // Limpieza
+    if (receptorInput) receptorInput.value = '';
+    if (typeof cerrarSubModalIntegrado === "function") {
+        cerrarSubModalIntegrado('submodal-miqr');
+    }
+
+    alert(`✅ ¡Canje de ${cantidadCreditos} créditos procesado con éxito! Puntos acreditados a tu cuenta.`);
+              }
+ 
+
+              
+              async function procesarValidacionPasaje() {
+    const pasajeroID = document.getElementById('idReceptor') ? document.getElementById('idReceptor').value.trim() : '';
+    
+    if (!pasajeroID) {
+        alert("⚠️ Escanea o ingresa el ID del pasajero para validar su pasaje.");
+        return;
+    }
+
+    const referenciaPasaje = "PAS-" + Math.floor(100000 + Math.random() * 900000);
+    const cantidadPasajes = 1; // 1 viaje por validación
+
+    // 1. Mensaje satelital que se enviará al pasajero
+    const mensajePasaje = `🎫 ¡Pasaje Validado! Se ha descontado ${cantidadPasajes} viaje (Ref: ${referenciaPasaje}) |SPA_PASAJE|${cantidadPasajes}|${referenciaPasaje}`;
+
+    // 2. Apuntamos temporalmente el target al pasajero escaneado
+    const inputTarget = document.querySelector('#target-id');
+    const targetAnterior = inputTarget ? inputTarget.value : '';
+    if (inputTarget) inputTarget.value = pasajeroID;
+
+    // 3. Enviamos la orden mediante tu antena satelital existente
+    if (typeof enviarMensajeSatelital === "function") {
+        await enviarMensajeSatelital(mensajePasaje, 'texto');
+    }
+
+    // Restauramos el target anterior
+    if (inputTarget) inputTarget.value = targetAnterior;
+
+    // Sumar +1 al conteo diario del chofer en su dispositivo
+    let pasajesCobradosHoy = parseInt(localStorage.getItem('spaxio_contador_chofer_hoy') || '0') + 1;
+    localStorage.setItem('spaxio_contador_chofer_hoy', pasajesCobradosHoy);
+
+    alert(`✅ ¡Pasaje validado con éxito!\nTotal cobrados hoy por ti: ${pasajesCobradosHoy} viajes.`);
+    
+    // Limpiar input de escaneo si lo deseas
+    if (document.getElementById('idReceptor')) {
+        document.getElementById('idReceptor').value = '';
+    }
+              }
               function sincronizarMiFotoEnStories() {
     const imgStory = document.getElementById('story-mi-foto-perfil');
     if (!imgStory) return;
@@ -2690,112 +2805,7 @@ async function procesarCargaBanco() {
 }
 
       
-    async function procesarEnvioInterno() {
-    const receptorInput = document.getElementById('idReceptor');
-    const montoInput = document.getElementById('montoEnviar');
-
-    const receptorID = receptorInput ? receptorInput.value.trim() : '';
-    const monto = montoInput ? parseFloat(montoInput.value) : 0;
-    const miID = localStorage.getItem('mi_dropis_id') || "SPAXIO-USER";
-
-    if (!receptorID || !monto || isNaN(monto) || monto <= 0) {
-        alert("⚠️ Ingresa un ID válido y un monto mayor a cero.");
-        return;
-    }
-
-    if (receptorID === miID) {
-        alert("❌ No puedes enviarte puntos a ti mismo.");
-        return;
-    }
-
-    // Asegurarnos de tener el saldo fresco
-    usuarioSesionSpaxio.saldo = parseFloat(localStorage.getItem('spaxio_saldo_actual')) || usuarioSesionSpaxio.saldo;
-
-    if (monto > usuarioSesionSpaxio.saldo) {
-        alert("❌ Saldo insuficiente en tu tarjeta.");
-        return;
-    }
-
-    const codigoOperacion = "TRX-" + Math.floor(100000 + Math.random() * 900000);
-
-    // 1. Descontar tu saldo local (Envío P2P)
-    usuarioSesionSpaxio.saldo -= monto;
-    localStorage.setItem('spaxio_saldo_actual', usuarioSesionSpaxio.saldo);
-
-    const elBalance = document.getElementById('balanceVisual');
-    if (elBalance) {
-        elBalance.innerText = "Bs. " + usuarioSesionSpaxio.saldo.toLocaleString('es-VE', { minimumFractionDigits: 2 });
-    }
-
-    // 2. Preparar el mensaje que viaja por el chat satelital
-    const inputTarget = document.querySelector('#target-id');
-    const targetAnterior = inputTarget ? inputTarget.value : '';
-    if (inputTarget) inputTarget.value = receptorID;
-
-    // Formato |SPA_PAGO| para que al receptor le sume el dinero automáticamente
-    const mensajePago = `💸 ¡Comprobante de Traspaso! Recibiste Bs. ${monto.toFixed(2)} (Ref: ${codigoOperacion}) |SPA_PAGO|${monto}|${codigoOperacion}`;
-
-    await enviarMensajeSatelital(mensajePago, 'texto');
-
-    if (inputTarget) inputTarget.value = targetAnterior;
-
-    receptorInput.value = '';
-    montoInput.value = '';
-    cerrarSubModalIntegrado('submodal-miqr');
-
-    alert(`✅ ¡Traspaso de Bs. ${monto.toFixed(2)} enviado con éxito!`);
-                                                             }
-
-              async function procesarCobroComercial() {
-    const receptorInput = document.getElementById('idReceptor');
-    const montoInput = document.getElementById('montoEnviar');
-
-    const clienteID = receptorInput ? receptorInput.value.trim() : '';
-    const monto = montoInput ? parseFloat(montoInput.value) : 0;
-    const miID = localStorage.getItem('mi_dropis_id') || "SPAXIO-USER";
-
-    if (!clienteID || !monto || isNaN(monto) || monto <= 0) {
-        alert("⚠️ Ingresa el ID del cliente y el monto a cobrar.");
-        return;
-    }
-
-    if (clienteID === miID) {
-        alert("❌ No puedes cobrarte a ti mismo.");
-        return;
-    }
-
-    const confirmar = confirm(`🔍 ¿Confirmar cobro por POS?\n\n💵 Monto: Bs. ${monto.toFixed(2)}\n👤 Cliente ID: ${clienteID}`);
-    if (!confirmar) return;
-
-    const codigoOperacion = "COB-" + Math.floor(100000 + Math.random() * 900000);
-
-    // 1. Tú (comercio) recibes los fondos en tu cuenta
-    usuarioSesionSpaxio.saldo = parseFloat(localStorage.getItem('spaxio_saldo_actual')) || usuarioSesionSpaxio.saldo;
-    usuarioSesionSpaxio.saldo += monto;
-    localStorage.setItem('spaxio_saldo_actual', usuarioSesionSpaxio.saldo);
-
-    const elBalance = document.getElementById('balanceVisual');
-    if (elBalance) {
-        elBalance.innerText = "Bs. " + usuarioSesionSpaxio.saldo.toLocaleString('es-VE', { minimumFractionDigits: 2 });
-    }
-
-    // 2. Enviar aviso al cliente con |SPA_COBRO| para que su app le reste el dinero automáticamente
-    const inputTarget = document.querySelector('#target-id');
-    const targetAnterior = inputTarget ? inputTarget.value : '';
-    if (inputTarget) inputTarget.value = clienteID;
-
-    const mensajeCobro = `🧾 ¡Cobro Exitoso en Comercio! Se procesó un cargo de Bs. ${monto.toFixed(2)} (Ref: ${codigoOperacion}) |SPA_COBRO|${monto}|${codigoOperacion}`;
-
-    await enviarMensajeSatelital(mensajeCobro, 'texto');
-
-    if (inputTarget) inputTarget.value = targetAnterior;
-
-    receptorInput.value = '';
-    montoInput.value = '';
-    cerrarSubModalIntegrado('submodal-miqr');
-
-    alert(`✅ ¡Cobro de Bs. ${monto.toFixed(2)} procesado con éxito! Fondos acreditados a tu cuenta.`);
-              }
+    
 
 
         // Si usas un sistema de pestañas (switchView), recuerda llamar a inicializarSpaxioCard() cuando el usuario abra esta sección.
@@ -3186,36 +3196,34 @@ try {
             const chatAbiertoActualmente = document.querySelector('#target-id').value;
             const textoReal = decodeURIComponent(escape(atob(decoded.chatText)));
             const miID = data.from; 
-            
-            // 🪙 DETECTOR MAESTRO DE TRANSACCIONES FINANCIERAS
-            if (textoReal.includes('|SPA_PAGO|') || textoReal.includes('|SPA_COBRO|')) {
-                let esCobro = textoReal.includes('|SPA_COBRO|');
-                let etiqueta = esCobro ? '|SPA_COBRO|' : '|SPA_PAGO|';
-                
-                const montoTransaccion = parseFloat(textoReal.split(etiqueta)[1]) || 0;
-                
-                // Sincronizamos saldo actual desde localStorage
-                usuarioSesionSpaxio.saldo = parseFloat(localStorage.getItem('spaxio_saldo_actual')) || usuarioSesionSpaxio.saldo;
 
-                if (esCobro) {
-                    // Si un comercio/usuario te cobró, se te DEBITA de tu saldo
-                    usuarioSesionSpaxio.saldo -= montoTransaccion;
-                    if (usuarioSesionSpaxio.saldo < 0) usuarioSesionSpaxio.saldo = 0; // Blindaje
-                } else {
-                    // Si te hicieron un traspaso, se te SUMA a tu saldo
-                    usuarioSesionSpaxio.saldo += montoTransaccion;
-                }
-
-                // Guardamos en memoria local
-                localStorage.setItem('spaxio_saldo_actual', usuarioSesionSpaxio.saldo);
+  // 🎫 DETECTOR DE VALIDACIÓN DE PASAJES (Descuenta créditos de transporte)
+            if (textoReal.includes('|SPA_PASAJE|')) {
+                const partesPasaje = textoReal.split('|SPA_PASAJE|')[1].split('|');
+                const viajesADescontar = parseInt(partesPasaje[0]) || 1;
                 
-                // Refrescamos el balance visual en la pantalla al instante
-                const elBalance = document.getElementById('balanceVisual');
-                if (elBalance) {
-                    elBalance.innerText = "Bs. " + usuarioSesionSpaxio.saldo.toLocaleString('es-VE', { minimumFractionDigits: 2 });
-                }
-          }
+                let pasajesDisponibles = parseInt(localStorage.getItem('spaxio_pasajes_disponibles')) || 60;
+                pasajesDisponibles -= viajesADescontar;
+                if (pasajesDisponibles < 0) pasajesDisponibles = 0;
+                
+                localStorage.setItem('spaxio_pasajes_disponibles', pasajesDisponibles);
+                console.log(`🎫 Pasaje cobrado con éxito. Te quedan ${pasajesDisponibles} viajes.`);
+            }
+
+            // 📦 DETECTOR DE CANJES EN COMERCIOS (Descuenta puntos/créditos en la app del cliente)
+            if (textoReal.includes('|SPA_CANJE|')) {
+                const partesCanje = textoReal.split('|SPA_CANJE|')[1].split('|');
+                const creditosADebitar = parseInt(partesCanje[0]) || 0;
+                
+                let creditosDisponibles = parseInt(localStorage.getItem('spaxio_pasajes_disponibles')) || 0;
+                creditosDisponibles -= creditosADebitar;
+                if (creditosDisponibles < 0) creditosDisponibles = 0;
+                
+                localStorage.setItem('spaxio_pasajes_disponibles', creditosDisponibles);
+                console.log(`📦 Canje procesado: -${creditosADebitar} créditos. Te quedan ${creditosDisponibles} disponibles.`);
+            }
             
+    
             // 🚗 BLOQUE NUEVO: Auto-registro de emergencia para desconocidos o taxistas
             let agendaActual = JSON.parse(localStorage.getItem('mis_contactos')) || [];
             const contactoExiste = agendaActual.find(c => String(c.id) === String(miID));
