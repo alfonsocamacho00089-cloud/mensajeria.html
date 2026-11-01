@@ -2054,15 +2054,15 @@ window.addEventListener('DOMContentLoaded', () => {
     alert("🚨 ERROR DETECTADO:\n\n" + message + "\n\nArchivo: " + source + "\nLínea: " + lineno);
     return false;
 };
-
-async function procesarCobroComercial() {
+async function procesarCobroComercial(cantidadMonto = null) {
     const receptorInput = document.getElementById('idReceptor');
     const montoInput = document.getElementById('montoEnviar');
 
     const clienteID = receptorInput ? receptorInput.value.trim() : '';
-    const monto = montoInput ? parseFloat(montoInput.value) : 0;
+    const monto = cantidadMonto !== null ? parseFloat(cantidadMonto) : (montoInput ? parseFloat(montoInput.value) : 0);
     const miID = localStorage.getItem('mi_dropis_id') || "SPAXIO-USER";
 
+    
     if (!clienteID || !monto || isNaN(monto) || monto <= 0) {
         alert("⚠️ Ingresa un ID válido y un monto mayor a cero para cobrar.");
         return;
