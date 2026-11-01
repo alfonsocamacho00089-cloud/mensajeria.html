@@ -3275,7 +3275,7 @@ async function recuperarCuentaConID() {
      async function ejecutarRegistroCompleto() {
     const nombre = document.getElementById('reg-nombre').value.trim();
     const apellido = document.getElementById('reg-apellido').value.trim();
-    
+    const rolElegido = localStorage.getItem('spaxio_rol') || 'passenger';
     if (!nombre || !apellido) return alert("Completa los datos");
 
     // 1. GENERACIÓN DEL ID EXACTO (12 caracteres)
@@ -3288,14 +3288,15 @@ async function recuperarCuentaConID() {
         dropis_id: idUnico, 
         nombre: nombre, 
         apellido: apellido, 
+        rol: rolElegido, // 👈 Guardamos el rol localmente
         fecha: Date.now() 
     };
 
     try {
         localStorage.setItem('mi_dropis_id', idUnico);
         await guardarLocal('usuario', datosUsuario);
-        await guardarLocal('perfiles', { id: idUnico, nombre, apellido, foto: null });
-
+        
+        await guardarLocal('perfiles', { id: idUnico, nombre, apellido, foto: null, rol: rolElegido });
         // 3. ACTUALIZAR INTERFAZ (Sin que el error de display detenga el proceso)
         document.getElementById('modal-registro').style.display = 'none';
         const elDisplay = document.getElementById('mi-id-display');
@@ -3320,6 +3321,7 @@ async function recuperarCuentaConID() {
             id_sistema: idUnico,
             nombre: nombre,
             apellido: apellido,
+            rol: rolElegido, // 👈 Guardamos el rol localmente
             fcm_token: token || "sin_token",
             estado: "activo",
             version: "LITE_SUB12_FINAL",
