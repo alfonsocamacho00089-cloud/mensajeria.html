@@ -1303,31 +1303,28 @@ button#btn-enviar:active {
 
 <script>
 
- // Ejemplo de cómo integrarlo en tu función de selección de rol existente:
 function seleccionarRol(rolElegido) {
-    const miID = localStorage.getItem('mi_dropis_id') || "SPAXIO-USER";
-
-    // 1. Guardar localmente
-    localStorage.setItem('spaxio_user_rol', rolElegido);
-    localStorage.setItem('spaxio_rol', rolElegido); // Unificamos la clave que lee el DOMContentLoaded
-
-      
+ const miID = localStorage.getItem('mi_dropis_id') || "SPAXIO-USER";
  
-    // 3. Evaluar comportamiento según el rol elegido (Corregido de 'rol' a 'rolElegido')
-    if (rolElegido === 'driver') {
-        localStorage.setItem('es_taxista', 'true');
-        alert("🚖 Modo Conductor configurado. Tu panel de transmisión ha sido habilitado.");
-    } else {
-        localStorage.setItem('es_taxista', 'false');
-        alert(`✅ ¡Rol "${rolElegido}" guardado con éxito!`);
-    }
+    // 1. Guardar localmente
+    localStorage.setItem('spaxio_rol', rolElegido);
+    localStorage.setItem('spaxio_user_rol', rolElegido);
 
-    // Ocultar modal de selección
+    // 2. Ocultar el modal de selección
     const modal = document.getElementById('modal-seleccion-rol');
     if (modal) modal.style.display = 'none';
 
-    // Aplicar cambios en la interfaz de inmediato
+    // 3. Aplicar de inmediato el bloqueo de QR/ID y las reglas del rol elegido
+    aplicarBloqueoQRIDRoles(); // <-- Aquí se aplica en caliente al momento de elegir
     aplicarReglasDeRolEnInterfaz();
+
+    if (rolElegido === 'driver') {
+        alert("🚖 Modo Conductor configurado. Tu panel ha sido ajustado.");
+    } else if (rolElegido === 'merchant') {
+        alert("🏬 Modo Comerciante configurado.");
+    } else {
+        alert(`✅ ¡Rol "${rolElegido}" guardado con éxito!`);
+    }
  }
 function aplicarBloqueoQRIDRoles() {
     const rolActual = localStorage.getItem('spaxio_rol') || localStorage.getItem('spaxio_user_rol');
