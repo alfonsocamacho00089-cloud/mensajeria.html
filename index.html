@@ -1408,10 +1408,7 @@ function abrirAfiliacionComercial() {
 window.addEventListener('DOMContentLoaded', () => {
     
     const modal = document.getElementById('modal-seleccion-rol');
-const rolGuardado = localStorage.getItem('spaxio_rol') || 'passenger';
-    
-    // Aplicar el bloqueo de seguridad para comercios y drivers
-    
+const rolGuardado = localStorage.getItem('spaxio_rol');
  
     if (!rolGuardado) {
         // Si el usuario es nuevo y no tiene rol, mostramos la pantalla de elección
