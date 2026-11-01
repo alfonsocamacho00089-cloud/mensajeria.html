@@ -1422,8 +1422,8 @@ const rolGuardado = localStorage.getItem('spaxio_rol') || 'passenger';
     } else {
         // Si ya eligió antes, aplicamos sus reglas de diseño silenciosamente
         if (modal) modal.style.display = 'none';
-       
-     aplicarBloqueoRolesComercialYDriver();
+       aplicarBloqueoQRIDRoles();
+     
  aplicarReglasDeRolEnInterfaz();
      
     }
