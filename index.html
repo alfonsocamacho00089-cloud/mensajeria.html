@@ -1277,17 +1277,17 @@ button#btn-enviar:active {
 
       <!-- Botón Usuario / Pasajero -->
         <button onclick="seleccionarRol('passenger')" style="width: 100%; padding: 14px; background: rgba(255,215,0,0.1); color: #ffd700; border: 1px solid #ffd700; border-radius: 12px; font-weight: bold; font-size: 15px; cursor: pointer; margin-bottom: 20px;">
-            🏬Soy comerciante
+            🏬 Soy comerciante
         </button>
 
         <!-- Botón Conductor (Driver) -->
         <button onclick="seleccionarRol('driver')" style="width: 100%; padding: 14px; background: linear-gradient(135deg, #FFD700 0%, #B8860B 100%); color: #000; border: none; border-radius: 12px; font-weight: bold; font-size: 15px; cursor: pointer; margin-bottom: 12px; box-shadow: 0 4px 15px rgba(255,215,0,0.3);">
-            🚖 Soy Conductor (Driver)
+            🚖 Soy Driver (Taxi/Deliveys)
         </button>
 
 <!-- Botón Usuario / Pasajero -->
         <button onclick="seleccionarRol('passenger')" style="width: 100%; padding: 14px; background: rgba(255,215,0,0.1); color: #ffd700; border: 1px solid #ffd700; border-radius: 12px; font-weight: bold; font-size: 15px; cursor: pointer; margin-bottom: 20px;">
-            👨‍💼 Soy Usuario / Pasajero
+            👨‍💼 Soy Vendedor/@
         </button>
 
       
@@ -1447,9 +1447,7 @@ window.addEventListener('DOMContentLoaded', () => {
 </div>
 <!-- ==================== PANEL LATERAL DE TAXI / CONDUCTOR ==================== -->
 <div id="seccion-panel-taxi-lateral">
-    <button onclick="procesarValidacionPasaje()" style="width: 100%; padding: 15px; background: #ffd700; color: #000; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; font-size: 15px; margin-top: 10px; box-shadow: 0 4px 15px rgba(255,215,0,0.3);">
-    🎟️ Validar 1 Pasaje (1-Tap Express)
-    </button>
+
     <!-- Cabecera del Panel con tu flechita exacta -->
     <div style="background: rgba(32, 44, 51, 0.5); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(15px); color: #ffffff; padding: 15px; font-weight: 900; text-transform: uppercase; text-align: left; border-bottom: 1px solid #333; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 10;">
         <div style="display: flex; align-items: center; gap: 12px;">
@@ -1465,16 +1463,16 @@ window.addEventListener('DOMContentLoaded', () => {
         
         <!-- Switch de Modo Taxista -->
         <div style="background: rgba(11, 20, 26, 0.95); padding: 15px; border-radius: 12px; border: 1px solid #FFD700; color: #fff; text-align: center; margin-bottom: 20px;">
-            <h3 style="color: #FFD700; margin-bottom: 10px; font-size: 16px;">📡 Transmisión GPS</h3>
+            <h3 style="color: #FFD700; margin-bottom: 10px; font-size: 16px;">📡</h3>
             <label style="display: flex; align-items: center; justify-content: center; gap: 12px; cursor: pointer;">
-                <span style="font-size: 14px; font-weight: bold;">Activar Modo Taxista</span>
+                <span style="font-size: 14px; font-weight: bold;">Driver Disponible</span>
                 <input type="checkbox" id="switchTaxista" onchange="manejarModoTaxista(this)" style="width: 22px; height: 22px; accent-color: #FFD700; cursor: pointer;">
             </label>
         </div>
 
         <!-- Radar de Taxis Cercanos -->
         <div style="background: rgba(11, 20, 26, 0.95); border: 2px solid #ffd700; border-radius: 15px; padding: 15px; text-align: center;">
-            <h3 style="color: #ffd700; margin-top: 0; font-size: 16px;">🚕 Radar de Taxis</h3>
+            <h3 style="color: #ffd700; margin-top: 0; font-size: 16px;">🚕 TaxiDriver</h3>
             
             <iframe id="mapa-radar" 
                 width="100%" 
@@ -1485,7 +1483,7 @@ window.addEventListener('DOMContentLoaded', () => {
             </iframe>
             
             <button onclick="actualizarRadarTaxis()" style="margin-top: 12px; padding: 10px 15px; background: #ffd700; color: #000; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%;">
-                🔄 Actualizar Taxis Cercanos
+                🔄 Pide tu TaxiDriver 
             </button>
         </div>
 
