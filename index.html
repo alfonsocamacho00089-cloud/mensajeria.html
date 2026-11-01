@@ -1271,25 +1271,24 @@ button#btn-enviar:active {
         
 
         <!-- Botón Usuario / Pasajero -->
-        <button onclick="seleccionarRol('passenger')" style="width: 100%; padding: 14px; background: rgba(255,215,0,0.1); color: #ffd700; border: 1px solid #ffd700; border-radius: 12px; font-weight: bold; font-size: 15px; cursor: pointer; margin-bottom: 20px;">
-            👤 Soy Usuario / Pasajero
-        </button>
+<button onclick="seleccionarRol('passenger')" style="...">
+    👤 Soy Usuario / Pasajero
+</button>
 
-      <!-- Botón Usuario / Pasajero -->
-        <button onclick="seleccionarRol('passenger')" style="width: 100%; padding: 14px; background: rgba(255,215,0,0.1); color: #ffd700; border: 1px solid #ffd700; border-radius: 12px; font-weight: bold; font-size: 15px; cursor: pointer; margin-bottom: 20px;">
-            🏬 Soy comerciante
-        </button>
+<!-- Botón Comerciante -->
+<button onclick="seleccionarRol('merchant')" style="...">
+    🏬 Soy Comerciante
+</button>
 
-        <!-- Botón Conductor (Driver) -->
-        <button onclick="seleccionarRol('driver')" style="width: 100%; padding: 14px; background: linear-gradient(135deg, #FFD700 0%, #B8860B 100%); color: #000; border: none; border-radius: 12px; font-weight: bold; font-size: 15px; cursor: pointer; margin-bottom: 12px; box-shadow: 0 4px 15px rgba(255,215,0,0.3);">
-            🚖 Soy Driver (Taxi/Deliveys)
-        </button>
+<!-- Botón Conductor (Driver) -->
+<button onclick="seleccionarRol('driver')" style="...">
+    🚖 Soy Driver (Taxi/Deliverys)
+</button>
 
-<!-- Botón Usuario / Pasajero -->
-        <button onclick="seleccionarRol('passenger')" style="width: 100%; padding: 14px; background: rgba(255,215,0,0.1); color: #ffd700; border: 1px solid #ffd700; border-radius: 12px; font-weight: bold; font-size: 15px; cursor: pointer; margin-bottom: 20px;">
-            👨‍💼 Soy Vendedor/@
-        </button>
-
+<!-- Botón Vendedor/a -->
+<button onclick="seleccionarRol('vendor')" style="...">
+    👨‍💼 Soy Vendedor/@
+</button>
       
         <!-- Sección de Afiliaciones (Comercio / Tarjeta MÍA) -->
         <div style="border-top: 1px solid rgba(255,215,0,0.2); padding-top: 15px; display: flex; flex-direction: column; gap: 8px;">
@@ -1308,22 +1307,23 @@ button#btn-enviar:active {
 function seleccionarRol(rolElegido) {
     const miID = localStorage.getItem('mi_dropis_id') || "SPAXIO-USER";
 
-    // 1. Guardar localmente si lo necesitas rápido en el cliente
+    // 1. Guardar localmente
     localStorage.setItem('spaxio_user_rol', rolElegido);
+    localStorage.setItem('spaxio_rol', rolElegido); // Unificamos la clave que lee el DOMContentLoaded
 
-    // 2. ¡Aquí integras la función para sincronizarlo con Firebase!
-    guardarRolEnFirebase(miID, rolElegido);
+    // 2. Sincronizar con Firebase (Asegúrate de tener creada la función guardarRolEnFirebase)
+    if (typeof guardarRolEnFirebase === "function") {
+        guardarRolEnFirebase(miID, rolElegido);
+    }
  
-    
-// 1. Función al hacer clic en un rol
-
-    if (rol === 'driver') {
+    // 3. Evaluar comportamiento según el rol elegido (Corregido de 'rol' a 'rolElegido')
+    if (rolElegido === 'driver') {
         localStorage.setItem('es_taxista', 'true');
-      alert("🚖 Modo Conductor configurado. Tu panel de transmisión ha sido habilitado.");
+        alert("🚖 Modo Conductor configurado. Tu panel de transmisión ha sido habilitado.");
     } else {
         localStorage.setItem('es_taxista', 'false');
-      alert(`✅ ¡Rol "${rolElegido}" guardado con éxito!`);
- }
+        alert(`✅ ¡Rol "${rolElegido}" guardado con éxito!`);
+    }
 
     // Ocultar modal de selección
     const modal = document.getElementById('modal-seleccion-rol');
@@ -1331,7 +1331,7 @@ function seleccionarRol(rolElegido) {
 
     // Aplicar cambios en la interfaz de inmediato
     aplicarReglasDeRolEnInterfaz();
-}
+ }
 
 // 2. Ocultar o mostrar elementos según el rol guardado
 function aplicarReglasDeRolEnInterfaz() {
@@ -1357,14 +1357,21 @@ function abrirAfiliacionComercial() {
 window.addEventListener('DOMContentLoaded', () => {
     const rolGuardado = localStorage.getItem('spaxio_rol');
     const modal = document.getElementById('modal-seleccion-rol');
-
+const rolGuardado = localStorage.getItem('spaxio_rol') || 'passenger';
+    
+    // Aplicar el bloqueo de seguridad para comercios y drivers
+    
+ 
     if (!rolGuardado) {
         // Si el usuario es nuevo y no tiene rol, mostramos la pantalla de elección
         if (modal) modal.style.display = 'flex';
     } else {
         // Si ya eligió antes, aplicamos sus reglas de diseño silenciosamente
         if (modal) modal.style.display = 'none';
-        aplicarReglasDeRolEnInterfaz();
+       
+     aplicarBloqueoRolesComercialYDriver();
+ aplicarReglasDeRolEnInterfaz();
+     
     }
 });
 </script>
