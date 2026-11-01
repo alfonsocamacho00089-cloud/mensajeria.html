@@ -1303,17 +1303,27 @@ button#btn-enviar:active {
 </div>
 
 <script>
-// 1. Función al hacer clic en un rol
-function seleccionarRol(rol) {
-    localStorage.setItem('spaxio_rol', rol);
+
+ // Ejemplo de cómo integrarlo en tu función de selección de rol existente:
+function seleccionarRol(rolElegido) {
+    const miID = localStorage.getItem('mi_dropis_id') || "SPAXIO-USER";
+
+    // 1. Guardar localmente si lo necesitas rápido en el cliente
+    localStorage.setItem('spaxio_user_rol', rolElegido);
+
+    // 2. ¡Aquí integras la función para sincronizarlo con Firebase!
+    guardarRolEnFirebase(miID, rolElegido);
+ 
     
+// 1. Función al hacer clic en un rol
+
     if (rol === 'driver') {
         localStorage.setItem('es_taxista', 'true');
       alert("🚖 Modo Conductor configurado. Tu panel de transmisión ha sido habilitado.");
     } else {
         localStorage.setItem('es_taxista', 'false');
-      alert("👤 Modo Usuario configurado. Bienvenido al radar de movilidad.");
-    }
+      alert(`✅ ¡Rol "${rolElegido}" guardado con éxito!`);
+ }
 
     // Ocultar modal de selección
     const modal = document.getElementById('modal-seleccion-rol');
