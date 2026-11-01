@@ -1332,7 +1332,64 @@ function seleccionarRol(rolElegido) {
     // Aplicar cambios en la interfaz de inmediato
     aplicarReglasDeRolEnInterfaz();
  }
+function aplicarBloqueoQRIDRoles() {
+    const rolActual = localStorage.getItem('spaxio_rol') || localStorage.getItem('spaxio_user_rol');
+    
+    // Elementos del DOM a bloquear u ocultar
+    const contenedorQR = document.getElementById('seccion-qr-usuario'); // Contenedor general de tu QR
+    const contenedorID = document.getElementById('seccion-id-usuario'); // Contenedor de tu ID de Spaxio
+    const elementoIDTexto = document.getElementById('mi-id-span');       // El texto donde se muestra el ID
+    const inputReceptor = document.getElementById('idReceptor');        // Inputs de transferencia
 
+    if (rolActual === 'merchant' || rolActual === 'driver') {
+        
+        // 1. Bloquear y ocultar el QR
+        if (contenedorQR) {
+            contenedorQR.style.display = 'none'; // Ocultarlo por completo para evitar tentaciones o confusiones
+        }
+
+        // 2. Bloquear o enmascarar el ID de usuario
+        if (contenedorID) {
+            contenedorID.style.opacity = '0.3';
+            contenedorID.style.pointerEvents = 'none';
+        }
+
+        if (elementoIDTexto) {
+            elementoIDTexto.innerText = "🔒 [ID Desactivado - Modo B2C Pendiente]";
+        }
+
+        if (inputReceptor) {
+            inputReceptor.disabled = true;
+            inputReceptor.placeholder = "Cobros por ID desactivados temporalmente";
+        }
+
+        // 3. Crear una alerta visual flotante o banner en el perfil de estos roles si no existe
+        const perfilContenedor = document.getElementById('perfil-usuario-container') || document.body;
+        if (!document.getElementById('aviso-bloqueo-b2c')) {
+            const banner = document.createElement('div');
+            banner.id = 'aviso-bloqueo-b2c';
+            banner.innerHTML = `
+                <div style="background: rgba(20, 20, 20, 0.95); border: 1px solid #FFD700; color: #FFD700; padding: 12px; margin: 10px; border-radius: 10px; text-align: center; font-size: 13px; z-index: 9999;">
+                    🛡️ <b>Modo Operativo Restringido</b><br>
+                    Tu QR e ID de cobro están deshabilitados temporalmente. Se activarán con la llegada de la pasarela P2P/B2C con dinero real.
+                </div>
+            `;
+            perfilContenedor.prepend(banner);
+        }
+
+        console.warn(`🛡️ [Spaxio Security]: QR e ID bloqueados para el rol comercial/driver: ${rolActual}`);
+        
+    } else {
+        // Si es usuario normal / pasajero, se muestra todo de forma nativa
+        if (contenedorQR) contenedorQR.style.display = 'block';
+        if (contenedorID) {
+            contenedorID.style.opacity = '1';
+            contenedorID.style.pointerEvents = 'auto';
+        }
+        const bannerExistente = document.getElementById('aviso-bloqueo-b2c');
+        if (bannerExistente) bannerExistente.remove();
+    }
+ }
 // 2. Ocultar o mostrar elementos según el rol guardado
 function aplicarReglasDeRolEnInterfaz() {
     const esTaxista = localStorage.getItem('es_taxista') === 'true';
