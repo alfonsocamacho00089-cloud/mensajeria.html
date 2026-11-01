@@ -1311,10 +1311,7 @@ function seleccionarRol(rolElegido) {
     localStorage.setItem('spaxio_user_rol', rolElegido);
     localStorage.setItem('spaxio_rol', rolElegido); // Unificamos la clave que lee el DOMContentLoaded
 
-    // 2. Sincronizar con Firebase (Asegúrate de tener creada la función guardarRolEnFirebase)
-    if (typeof guardarRolEnFirebase === "function") {
-        guardarRolEnFirebase(miID, rolElegido);
-    }
+      
  
     // 3. Evaluar comportamiento según el rol elegido (Corregido de 'rol' a 'rolElegido')
     if (rolElegido === 'driver') {
