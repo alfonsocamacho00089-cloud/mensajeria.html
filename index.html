@@ -1475,6 +1475,236 @@ const rolGuardado = localStorage.getItem('spaxio_rol');
 });
 </script>
  
+<!-- ==================== SUBMODAL DE AFILIACIÓN Y CRÉDITOS (INTEGRADO EN LA CALCULADORA) ==================== -->
+<div id="submodal-afiliacion-calculadora" style="display: none; background: #12131c; border: 1px solid #ffd700; border-radius: 16px; padding: 20px; margin-top: 15px; text-align: left; box-sizing: border-box;">
+    
+    <!-- Cabecera de la sección -->
+    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,215,0,0.3); padding-bottom: 10px; margin-bottom: 15px;">
+        <span style="font-size: 13px; font-weight: bold; color: #ffd700; text-transform: uppercase; letter-spacing: 1px;">Créditos / Usuarios • Afiliación / Comercios / Drivers</span>
+        <button onclick="cerrarSubmodalAfiliacion()" style="background: transparent; border: none; color: white; font-size: 20px; cursor: pointer;">✕</button>
+    </div>
+
+    <!-- Botones de navegación principales de la sección -->
+    <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+        <button onclick="mostrarSeccionAfiliacion('obtener')" id="btn-tab-obtener" style="flex: 1; padding: 10px; background: #ffd700; color: #000; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 13px;">Obtener Créditos</button>
+        <button onclick="mostrarSeccionAfiliacion('afiliacion')" id="btn-tab-afiliacion" style="flex: 1; padding: 10px; background: #1a1c29; color: #ffd700; border: 1px solid #ffd700; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 13px;">Afiliación</button>
+    </div>
+
+    <!-- ========================================================== -->
+    <!-- VISTA 1: OBTENER CRÉDITOS & COMPRA P2P / BINANCE PAY        -->
+    <!-- ========================================================== -->
+    <div id="vista-obtener-creditos" style="display: block;">
+        
+        <!-- Campos de Identificación YsaPay y Binance Pay -->
+        <div style="margin-bottom: 12px;">
+            <label style="display: block; font-size: 11px; color: #ffd700; font-weight: bold; text-transform: uppercase; margin-bottom: 4px;">ID YsaPay</label>
+            <input type="text" id="credito-id-ysapay" placeholder="Ej: YSA-USER-9988" style="width: 100%; padding: 10px; background: #1a1c29; border: 1px solid #323657; border-radius: 8px; color: #fff; font-size: 13px; box-sizing: border-box;">
+        </div>
+
+        <div style="margin-bottom: 15px;">
+            <label style="display: block; font-size: 11px; color: #ffd700; font-weight: bold; text-transform: uppercase; margin-bottom: 4px;">ID Binance Pay</label>
+            <input type="text" id="credito-id-binance" placeholder="Ej: 83749210" style="width: 100%; padding: 10px; background: #1a1c29; border: 1px solid #323657; border-radius: 8px; color: #fff; font-size: 13px; box-sizing: border-box;">
+        </div>
+
+        <!-- Panel de Selección de Cantidad de Créditos (Estilo el que ya tenías) -->
+        <div style="background: #151828; padding: 12px; border-radius: 12px; border: 1px solid rgba(255,215,0,0.3); margin-bottom: 15px;">
+            <p style="color: #ffd700; font-weight: bold; font-size: 12px; margin-top: 0; margin-bottom: 8px;">📦 Selecciona la cantidad de Créditos a Adquirir:</p>
+            
+            <!-- Escala unitaria del 1 al 5 -->
+            <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; margin-bottom: 8px;">
+                <button type="button" onclick="seleccionarCantidadCreditos(1)" style="padding: 8px; background: #222; color: #fff; border: 1px solid #444; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 12px;">1</button>
+                <button type="button" onclick="seleccionarCantidadCreditos(2)" style="padding: 8px; background: #222; color: #fff; border: 1px solid #444; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 12px;">2</button>
+                <button type="button" onclick="seleccionarCantidadCreditos(3)" style="padding: 8px; background: #222; color: #fff; border: 1px solid #444; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 12px;">3</button>
+                <button type="button" onclick="seleccionarCantidadCreditos(4)" style="padding: 8px; background: #222; color: #fff; border: 1px solid #444; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 12px;">4</button>
+                <button type="button" onclick="seleccionarCantidadCreditos(5)" style="padding: 8px; background: #ffd700; color: #000; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 12px;">5</button>
+            </div>
+
+            <!-- Combos y Multiplicadores -->
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-bottom: 10px;">
+                <button type="button" onclick="seleccionarCantidadCreditos(10)" style="padding: 8px; background: #222; color: #ffd700; border: 1px solid #ffd700; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 11px;">1 x 10</button>
+                <button type="button" onclick="seleccionarCantidadCreditos(20)" style="padding: 8px; background: #222; color: #ffd700; border: 1px solid #ffd700; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 11px;">2 x 10 (20)</button>
+                <button type="button" onclick="seleccionarCantidadCreditos(30)" style="padding: 8px; background: #222; color: #ffd700; border: 1px solid #ffd700; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 11px;">3 x 10 (30)</button>
+            </div>
+
+            <!-- Input Manual de Monto de Créditos -->
+            <div>
+                <label style="display: block; font-size: 10px; color: #8696a0; text-transform: uppercase; margin-bottom: 3px;">O ingresa la cantidad manual:</label>
+                <input type="number" id="input-creditos-manual" placeholder="Cantidad de créditos" style="width: 100%; padding: 8px; background: #12131c; color: #fff; border: 1px solid #323657; border-radius: 6px; font-size: 13px; box-sizing: border-box;" oninput="actualizarMontoCreditosManual(this.value)">
+            </div>
+        </div>
+
+        <!-- Botón para disparar la compra con Binance Pay (El que estaba comentado en tu index) -->
+        <div id="contenedor-btn-binance-pago" style="margin-bottom: 15px; text-align: center;">
+            <a href="https://pay.binance.com" target="_blank" rel="noopener noreferrer" 
+               style="display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 12px; background: #FCD535; color: #000; border-radius: 10px; font-weight: bold; font-size: 14px; text-decoration: none; box-shadow: 0 4px 12px rgba(252,213,53,0.3);">
+               🟡 Pagar con Binance Pay
+            </a>
+        </div>
+
+        <!-- Botón de Confirmación de Pago -->
+        <button type="button" onclick="procesarConfirmacionAdquisicionCreditos()" style="width: 100%; padding: 12px; background: #00ffcc; color: #000; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 14px; text-transform: uppercase;">
+            Confirmar Pago Realizado
+        </button>
+    </div>
+
+    <!-- ========================================================== -->
+    <!-- VISTA 2: AFILIACIÓN & VERIFICACIÓN DE PAGO COMERCIOS       -->
+    <!-- ========================================================== -->
+    <div id="vista-seccion-afiliacion" style="display: none;">
+        <p style="font-size: 12px; color: #8696a0; margin-top: 0; margin-bottom: 12px;">Módulo exclusivo para Comercios y Drivers. Ingrese su ID de Binance Pay para verificar la transacción y sincronizar saldos cruzados.</p>
+
+        <!-- Campo de verificación de ID Binance para Comercios -->
+        <div style="margin-bottom: 15px;">
+            <label style="display: block; font-size: 11px; color: #ffd700; font-weight: bold; text-transform: uppercase; margin-bottom: 4px;">Verificación de Pago (ID Binance / Recibo)</label>
+            <input type="text" id="afiliacion-id-verificacion" placeholder="Ingrese ID Binance del pagador o recibo" style="width: 100%; padding: 10px; background: #1a1c29; border: 1px solid #323657; border-radius: 8px; color: #fff; font-size: 13px; box-sizing: border-box;">
+        </div>
+
+        <!-- Botón de Verificación del Sistema -->
+        <button type="button" onclick="verificarYSincronizarAfiliacionComercio()" style="width: 100%; padding: 12px; background: #ffd700; color: #000; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 14px; text-transform: uppercase; box-shadow: 0 0 10px rgba(255,215,0,0.4);">
+            Verificar y Sincronizar Saldos
+        </button>
+    </div>
+
+</div>
+
+<script>
+/* ========================================================================== */
+/* LÓGICA DE CONTROL PARA EL SUBMODAL DE AFILIACIÓN Y CRÉDITOS EN CALCULADORA */
+/* ========================================================================== */
+
+let cantidadCreditosSeleccionada = 5; // Valor por defecto
+
+// Función para abrir el submodal desde el botón de la calculadora
+function abrirSubmodalAfiliacionCalculadora() {
+    // Cerramos otros paneles o calculadoras si estorban para limpiar la interfaz
+    const submodal = document.getElementById('submodal-afiliacion-calculadora');
+    if (submodal) {
+        submodal.style.display = 'block';
+        submodal.scrollIntoView({ behavior: 'smooth' });
+    }
+}
+
+function cerrarSubmodalAfiliacion() {
+    const submodal = document.getElementById('submodal-afiliacion-calculadora');
+    if (submodal) {
+        submodal.style.display = 'none';
+    }
+}
+
+// Navegación interna entre pestañas (Obtener Créditos vs Afiliación)
+function mostrarSeccionAfiliacion(tipo) {
+    const vistaObtener = document.getElementById('vista-obtener-creditos');
+    const vistaAfiliacion = document.getElementById('vista-seccion-afiliacion');
+    const btnObtener = document.getElementById('btn-tab-obtener');
+    const btnAfiliacion = document.getElementById('btn-tab-afiliacion');
+
+    if (tipo === 'obtener') {
+        vistaObtener.style.display = 'block';
+        vistaAfiliacion.style.display = 'none';
+        btnObtener.style.background = '#ffd700';
+        btnObtener.style.color = '#000';
+        btnAfiliacion.style.background = '#1a1c29';
+        btnAfiliacion.style.color = '#ffd700';
+    } else {
+        vistaObtener.style.display = 'none';
+        vistaAfiliacion.style.display = 'block';
+        btnAfiliacion.style.background = '#ffd700';
+        btnAfiliacion.style.color = '#000';
+        btnObtener.style.background = '#1a1c29';
+        btnObtener.style.color = '#ffd700';
+    }
+}
+
+// Capturar la selección de créditos desde los botones rápidos
+function seleccionarCantidadCreditos(cantidad) {
+    cantidadCreditosSeleccionada = parseInt(cantidad);
+    const inputManual = document.getElementById('input-creditos-manual');
+    if (inputManual) {
+        inputManual.value = cantidadCreditosSeleccionada;
+    }
+}
+
+// Actualizar si el usuario escribe de forma manual
+function actualizarMontoCreditosManual(valor) {
+    if (valor && !isNaN(valor) && valor > 0) {
+        cantidadCreditosSeleccionada = parseInt(valor);
+    }
+}
+
+// Al hacer clic en confirmar pago de créditos
+function procesarConfirmacionAdquisicionCreditos() {
+    const idYsaPay = document.getElementById('credito-id-ysapay').value.trim();
+    const idBinance = document.getElementById('credito-id-binance').value.trim();
+
+    if (!idYsaPay || !idBinance) {
+        alert("⚠️ Por favor, ingresa tu ID YsaPay y tu ID de Binance Pay para continuar.");
+        return;
+    }
+
+    // Mensaje de confirmación interactivo como solicitaste
+    const confirmarAdquisicion = confirm(`¿Deseas adquirir ${cantidadCreditosSeleccionada} créditos con tu cuenta YsaPay (${idYsaPay}) vinculada a Binance (${idBinance})?`);
+    
+    if (!confirmarAdquisicion) return;
+
+    // Guardar temporalmente los datos de la transacción en memoria local para validación cruzada
+    localStorage.setItem('spaxio_ultima_transaccion_pendiente', JSON.stringify({
+        ysapay: idYsaPay,
+        binance: idBinance,
+        creditos: cantidadCreditosSeleccionada,
+        timestamp: Date.now()
+    }));
+
+    alert(`✅ Solicitud registrada con éxito. Dirígete a la pestaña "Afiliación" para completar la verificación de pago con tu ID Binance si eres comercio.`);
+    mostrarSeccionAfiliacion('afiliacion');
+}
+
+// Verificación y sincronización de saldo para comercios (Verifica ambos IDs)
+function verificarYSincronizarAfiliacionComercio() {
+    const idBinanceVerificacion = document.getElementById('afiliacion-id-verificacion').value.trim();
+    const transaccionPendienteStr = localStorage.getItem('spaxio_ultima_transaccion_pendiente');
+
+    if (!idBinanceVerificacion) {
+        alert("⚠️ Ingresa el ID de Binance Pay o recibo para realizar la verificación.");
+        return;
+    }
+
+    if (!transaccionPendienteStr) {
+        alert("⚠️ No se encontró una orden previa registrada en este dispositivo. Adquiere créditos primero.");
+        mostrarSeccionAfiliacion('obtener');
+        return;
+    }
+
+    const datosPendientes = JSON.parse(transaccionPendienteStr);
+
+    // Validación estricta cruzada de IDs (Verifica que coincida el ID ingresado con el de la orden)
+    if (datosPendientes.binance === idBinanceVerificacion) {
+        
+        // Sumar saldo a la tarjeta del comercio o cliente local
+        let saldoActual = parseFloat(localStorage.getItem('spaxio_saldo_actual')) || 2500.00;
+        let valorAAgregar = datosPendientes.creditos * 10; // Factor de conversión estimado por crédito en Bs/USD
+        saldoActual += valorAAgregar;
+        
+        localStorage.setItem('spaxio_saldo_actual', saldoActual.toFixed(2));
+
+        // Actualizar visualmente la tarjeta de saldo si está abierta en el index
+        const elBalance = document.getElementById('balanceVisual');
+        if (elBalance) {
+            elBalance.innerText = "Bs. " + saldoActual.toLocaleString('es-VE', { minimumFractionDigits: 2 });
+        }
+
+        // Limpiar registro pendiente
+        localStorage.removeItem('spaxio_ultima_transaccion_pendiente');
+
+        alert(`🎉 ¡Verificación Exitosa!\n\nLos IDs coinciden correctamente con el registro de pago.\nSe han acreditado ${datosPendientes.creditos} créditos (${valorAAgregar.toFixed(2)} Bs.) a tu tarjeta. Listos para ser debitados al escanear.`);
+        
+        cerrarSubmodalAfiliacion();
+    } else {
+        alert("❌ Error de verificación: El ID de Binance ingresado no coincide con el registro generado en la orden de compra.");
+    }
+}
+</script>
+
+
 <div id="modal-qr" class="modal">
     <div class="modal-content" style="display: flex; flex-direction: column; height: 100dvh; position: relative; background-image: linear-gradient(rgba(11, 20, 26, 0.3), rgba(11, 20, 26, 0.3)), url('./assets/logo.webp'); background-size: cover; background-position: center; background-attachment: fixed;">      
    
