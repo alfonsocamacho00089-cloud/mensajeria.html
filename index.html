@@ -3627,7 +3627,7 @@ async function recuperarCuentaConID() {
     const apellido = document.getElementById('reg-apellido').value.trim();
     const identificacion = document.getElementById('reg-identificacion').value.trim();
     const rolElegido = localStorage.getItem('spaxio_rol') || 'passenger';
-    if (!nombre || !apellido || !identificacion) return alert("Completa los datos");
+    if (!nombre || !apellido) return alert("Completa los datos");
 
     // 1. GENERACIÓN DEL ID EXACTO (12 caracteres)
     const hash = Math.random().toString(36).substring(2, 7).toUpperCase(); 
