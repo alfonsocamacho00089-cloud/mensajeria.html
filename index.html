@@ -3476,7 +3476,7 @@ async function recuperarCuentaConID() {
         localStorage.setItem('mi_dropis_id', idUnico);
         await guardarLocal('usuario', datosUsuario);
         
-        await guardarLocal('perfiles', { id: idUnico, nombre, apellido, identigicacion, foto: null, rol: rolElegido });
+        await guardarLocal('perfiles', { id: idUnico, nombre, apellido, identificacion, foto: null, rol: rolElegido });
         // 3. ACTUALIZAR INTERFAZ (Sin que el error de display detenga el proceso)
         document.getElementById('modal-registro').style.display = 'none';
         const elDisplay = document.getElementById('mi-id-display');
