@@ -8,7 +8,7 @@ import time
 # ==============================================================================
 
 # URL de tu endpoint backend en Vercel (ajusta la URL según tu dominio real)
-URL_API_VERCEL = "https://tu-app-spaxio.vercel.app/api/spaxioflow-event" 
+URL_API_VERCEL = "https://dropis-chat.vercel.app/api/spaxioflow-event" 
 TOKEN_BOT = "8317000492:AAHBidIMBFqAdH4t4GufKzeTfiF7TmJuhts"
 MI_CHAT_ID = "8320121552"
 # Token de tu Bot de Telegram
