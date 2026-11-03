@@ -7,13 +7,12 @@ import time
 # 1. CONFIGURACIÓN DE PRUEBA E INYECCIÓN DIRECTA
 # ==============================================================================
 
-# URL de tu endpoint backend en Vercel (ajusta la URL según tu dominio real)
+# URL de tu endpoint backend en Vercel
 URL_API_VERCEL = "https://dropis-chat.vercel.app/api/spaxioflow-event" 
-TOKEN_BOT = "8317000492:AAHBidIMBFqAdH4t4GufKzeTfiF7TmJuhts"
-MI_CHAT_ID = "8320121552"
-# Token de tu Bot de Telegram
-TELEGRAM_BOT_TOKEN = os.environ.get("8317000492:AAHBidIMBFqAdH4t4GufKzeTfiF7TmJuhts", "8320121552)
 
+# Credenciales de Telegram (lee el secreto de GitHub o usa tu token como respaldo)
+TELEGRAM_BOT_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN", "8317000492:AAHBidIMBFqAdH4t4GufKzeTfiF7TmJuhts")
+MI_CHAT_ID = "8320121552"
 # ==============================================================================
 # 2. CONFIGURACIÓN DE SUPABASE (LISTA PARA DESCOMENTAR LUEGO)
 # ==============================================================================
