@@ -18,16 +18,9 @@
 <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-storage-compat.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script> 
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-<script src="https://cdn.jsdelivr.net/gh/mrdoob/three.js@r128/examples/js/loaders/GLTFLoader.js"></script>
-
-<script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
-<script src="https://cdn.jsdelivr.net/npm/@mediapipe/holistic/holistic.js" crossorigin="anonymous"></script>
 
 <script src="https://cdn.jsdelivr.net/npm/protobufjs@7.2.4/dist/protobuf.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/livekit-client/dist/livekit-client.umd.min.js"></script>
 
- <script src="https://cdn.jsdelivr.net/npm/kalidokit@1.1.5/dist/kalidokit.umd.js"></script>
 
  <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
 
@@ -1410,7 +1403,7 @@ const rolGuardado = localStorage.getItem('spaxio_rol');
     } else {
         // Si ya eligió antes, aplicamos sus reglas de diseño silenciosamente
         if (modal) modal.style.display = 'none';
-       aplicarBloqueoQRIDRoles();
+       
      
  aplicarReglasDeRolEnInterfaz();
      
@@ -1518,7 +1511,7 @@ const rolGuardado = localStorage.getItem('spaxio_rol');
             <button onclick="togglePanelTaxiLateral()" style="background: transparent; border: none; color: white; font-size: 20px; cursor: pointer; padding: 0;">
                 <span style="display: inline-block; transform: scaleX(-1);">➔</span>
             </button>
-            <span style="color: #ffd700; font-size: 15px;">🚖 Panel de Conductor</span>
+            <span style="color: #ffd700; font-size: 15px;">🚖  zona driver</span>
         </div>
     </div>
 
@@ -1526,17 +1519,17 @@ const rolGuardado = localStorage.getItem('spaxio_rol');
     <div style="padding: 15px; flex-grow: 1; overflow-y: auto;">
         
         <!-- Switch de Modo Taxista -->
-        <div style="background: rgba(11, 20, 26, 0.95); padding: 15px; border-radius: 12px; border: 1px solid #FFD700; color: #fff; text-align: center; margin-bottom: 20px;">
-            <h3 style="color: #FFD700; margin-bottom: 10px; font-size: 16px;">📡</h3>
+        <div style="background: rgba(11, 20, 26, 0.95); padding: 15px; border-radius: 12px; border: 1px solid #FFD700; color: #fff; text-align: center; margin-bottom: 50px;">
+            <h3 style="color: #FFD700; margin-bottom: 10px; font-size: 16px;"></h3>
+          
             <label style="display: flex; align-items: center; justify-content: center; gap: 12px; cursor: pointer;">
-                <span style="font-size: 14px; font-weight: bold;">Driver Disponible</span>
-                <input type="checkbox" id="switchTaxista" onchange="manejarModoTaxista(this)" style="width: 22px; height: 22px; accent-color: #FFD700; cursor: pointer;">
+                <h3 style="color: #ffd700; margin-top: 0; font-size: 16px;">🚕 TaxiDriver</h3>
             </label>
         </div>
 
         <!-- Radar de Taxis Cercanos -->
         <div style="background: rgba(11, 20, 26, 0.95); border: 2px solid #ffd700; border-radius: 15px; padding: 15px; text-align: center;">
-            <h3 style="color: #ffd700; margin-top: 0; font-size: 16px;">🚕 TaxiDriver</h3>
+            
             
             <iframe id="mapa-radar" 
                 width="100%" 
@@ -1547,7 +1540,7 @@ const rolGuardado = localStorage.getItem('spaxio_rol');
             </iframe>
             
             <button onclick="actualizarRadarTaxis()" style="margin-top: 12px; padding: 10px 15px; background: #ffd700; color: #000; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%;">
-                🔄 Pide tu TaxiDriver 
+                🚖 Pide tu Driver Disponible
             </button>
         </div>
 
@@ -1665,13 +1658,13 @@ const rolGuardado = localStorage.getItem('spaxio_rol');
 
 <!-- 2. Submodal Canjear (Oculto por defecto) -->
 <div id="submodal-pagar" style="display: none; background: #1a1c29; border: 1px solid #323657; border-radius: 12px; padding: 20px; margin-top: 15px; text-align: left;">
-    <h3 style="margin-top: 0; color: #5b61e2; font-size: 16px;">🪙 Traspaso Inmediato</h3>
+    <h3 style="margin-top: 0; color: #5b61e2; font-size: 16px;"></h3>
    
 </div>
 
 <!-- 3. Submodal Mi QR (Oculto por defecto) -->
 <div id="submodal-miqr" style="display: none; background: #1a1c29; border: 1px solid #323657; border-radius: 12px; padding: 15px; margin-top: 10px; text-align: center;">
-  <h3 style="margin-top: 0; color: #fff; font-size: 16px;"> Tu QR de Canje</h3>
+  <h3 style="margin-top: 0; color: #fff; font-size: 16px;"> Mi QR </h3>
     
     
     <div id="contenedor-qr-spaxiocard" style="background: white; padding: 10px; border-radius: 8px; display: inline-block; margin-bottom: 12px;"></div>
@@ -1683,52 +1676,15 @@ const rolGuardado = localStorage.getItem('spaxio_rol');
     </div>
    
     
-    <input type="text" id="idReceptor" placeholder="ID o esnanea el Qr del Destinatario" style="width: 100%; padding: 8px; margin-bottom: 10px; background: #12131c; color: #fff; border: 1px solid #323657; border-radius: 8px;">
     
-    <button type="button" class="btn-space" onclick="document.getElementById('inputQRGaleria').click()" style="background: #323657; color: #fff; font-weight: bold; width: 100%; margin-bottom: 10px; padding: 10px; cursor: pointer; border: none; border-radius: 6px;">📁 Buscar QR en Galería</button>
-    <input type="file" id="inputQRGaleria" accept="image/*" style="display: none;" onchange="procesarQRGaleria(this)">
+    
+
+
+
   
-    <!-- Tus botones principales de activación -->
 
-
-<!-- Input oculto para la galería -->
-<input type="file" id="inputQRGaleria" accept="image/*" style="display: none;" onchange="procesarQRGaleria(this)">
-
-<!-- Contenedor del escáner con la cámara y el botón de galería integrado adentro -->
-<div id="lector-qr-container" style="display: none; width: 100%; margin-bottom: 10px; border-radius: 8px; overflow: hidden; background: #000; border: 1px solid #ffd700; position: relative;">
     
-    <!-- Vista previa de la cámara -->
-    <video id="preview-camara" style="width: 100%; height: 220px; object-fit: cover; display: block;"></video>
-    
-
-    <!-- Botón inferior para cerrar la cámara -->
-    <button type="button" onclick="detenerLectorQR()" style="background: #ff4d4d; color: #fff; border: none; width: 100%; padding: 8px; cursor: pointer; font-weight: bold;">Cerrar Cámara</button>
-</div>
-<div class="panel-canjes-comercio" style="background: #111; padding: 15px; border-radius: 12px; border: 1px solid #ffd700; margin-top: 10px;">
-    <p style="color: #ffd700; font-weight: bold; margin-bottom: 10px;">📦 Selecciona la cantidad de Créditos a Canjear:</p>
-    
-    <!-- Escala unitaria del 1 al 5 -->
-    <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; margin-bottom: 10px;">
-        <button onclick="procesarCobroComercial(1)" style="padding: 10px; background: #222; color: #fff; border: 1px solid #444; border-radius: 8px; font-weight: bold; cursor: pointer;">1</button>
-        <button onclick="procesarCobroComercial(2)" style="padding: 10px; background: #222; color: #fff; border: 1px solid #444; border-radius: 8px; font-weight: bold; cursor: pointer;">2</button>
-        <button onclick="procesarCobroComercial(3)" style="padding: 10px; background: #222; color: #fff; border: 1px solid #444; border-radius: 8px; font-weight: bold; cursor: pointer;">3</button>
-        <button onclick="procesarCobroComercial(4)" style="padding: 10px; background: #222; color: #fff; border: 1px solid #444; border-radius: 8px; font-weight: bold; cursor: pointer;">4</button>
-        <button onclick="procesarCobroComercial(5)" style="padding: 10px; background: #ffd700; color: #000; border: none; border-radius: 8px; font-weight: bold; cursor: pointer;">5 (Mín)</button>
-    </div>
-
-    <!-- Combos y Multiplicadores -->
-    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;">
-        <button onclick="procesarCobroComercial(10)" style="padding: 10px; background: #222; color: #ffd700; border: 1px solid #ffd700; border-radius: 8px; font-weight: bold; cursor: pointer;">1 x 10</button>
-        <button onclick="procesarCobroComercial(20)" style="padding: 10px; background: #222; color: #ffd700; border: 1px solid #ffd700; border-radius: 8px; font-weight: bold; cursor: pointer;">2 x 10 (20)</button>
-        <button onclick="procesarCobroComercial(30)" style="padding: 10px; background: #222; color: #ffd700; border: 1px solid #ffd700; border-radius: 8px; font-weight: bold; cursor: pointer;">3 x 10 (30)</button>
-    </div>
-</div>
-    <input type="number" id="montoEnviar" placeholder="Monto a Enviar" style="width: 100%; padding: 8px; margin-bottom: 15px; background: #12131c; color: #fff; border: 1px solid #323657; border-radius: 8px;">
-    
-  
-    <button class="btn-space" style="background-color: #ffd700; color: #000; width:100%; padding: 6px; margin-top: 8px; font-size: 12px; cursor: pointer;" onclick="procesarCobroComercial() ">🧪 Sumar Puntos (Test)</button>
-    
-  <button class="btn-space btn-danger" onclick="cerrarSubModalIntegrado('submodal-miqr')" style="width: 100%; padding: 6px; margin-top: 8px; font-size: 12px; cursor: pointer;">Cerrar</button>
+  <button class="btn-space btn-danger" onclick="cerrarSubModalIntegrado('submodal-miqr')" style="width: 100%; padding: 10px; margin-top: 25px; font-size: 12px; cursor: pointer;">Cerrar</button>
   
   
   
@@ -1739,7 +1695,7 @@ const rolGuardado = localStorage.getItem('spaxio_rol');
                  
          
 
-<div style="display: flex; flex-direction: column; align-items: center; width: 100%; gap: 10px; margin-bottom: 15px;">
+<div style="display: flex; flex-direction: column; align-items: center; width: 100%; gap: 10px; margin-bottom: 10px;">
 
     <!-- Botones limpios, más compactos y centrados -->
     
@@ -1750,7 +1706,7 @@ const rolGuardado = localStorage.getItem('spaxio_rol');
        <!-- ==================== SECCIÓN: SPAXIOSHOPPING ==================== -->
 <div style="width: 100%; margin-top: 20px; text-align: left; padding: 0 5px;">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-        <span style="font-size: 13px; font-weight: bold; color: #ffd700; text-transform: uppercase; letter-spacing: 1px;">🛍️ SpaxioShopping</span>
+        <span style="font-size: 13px; font-weight: bold; color: #ffd700; text-transform: uppercase; letter-spacing: 1px;">🛍️ SpaceShopping</span>
         <span style="font-size: 10px; color: #8696a0;">Comercios Afiliados</span>
     </div>
 
@@ -1785,7 +1741,8 @@ const rolGuardado = localStorage.getItem('spaxio_rol');
         </div>
     </div>
 </div>      
-<div style="width: 100%; margin-top: 20px; text-align: left; padding: 0 5px;">
+
+  <div style="width: 100%; margin-top: 20px; text-align: left; padding: 0 5px;">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
       <!-- Contenedor deslizable de productos/comercios -->
     <div style="display: flex; gap: 10px; overflow-x: auto; padding-bottom: 5px; scrollbar-width: none;">
@@ -1816,8 +1773,122 @@ const rolGuardado = localStorage.getItem('spaxio_rol');
             <div style="font-size: 11px; color: #fff; font-weight: bold;">Abasto Tio San</div>
             <div style="font-size: 10px; color: #ffd700; margin-top: 2px;">Cashback</div>
         </div>
+      
+
     </div>
-</div>      
+</div>     
+    <div style="width: 100%; margin-top: 20px; text-align: left; padding: 0 5px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+      <!-- Contenedor deslizable de productos/comercios -->
+    <div style="display: flex; gap: 10px; overflow-x: auto; padding-bottom: 5px; scrollbar-width: none;">
+        
+        <!-- Tarjeta de Comercio 1 -->
+        <div style="min-width: 110px; background: #151828; border: 1px solid #323657; border-radius: 10px; padding: 8px; text-align: center; flex-shrink: 0; cursor: pointer;">
+            <div style="font-size: 22px; margin-bottom: 4px;">🍔</div>
+            <div style="font-size: 11px; color: #fff; font-weight: bold;">Space Burger</div>
+            <div style="font-size: 10px; color: #00ffcc; margin-top: 2px;">-10% Puntos</div>
+        </div>
+
+        <!-- Tarjeta de Comercio 2 -->
+        <div style="min-width: 110px; background: #151828; border: 1px solid #323657; border-radius: 10px; padding: 8px; text-align: center; flex-shrink: 0; cursor: pointer;">
+            <div style="font-size: 22px; margin-bottom: 4px;">☕</div>
+            <div style="font-size: 11px; color: #fff; font-weight: bold;">Café Galaxia</div>
+            <div style="font-size: 10px; color: #ffd700; margin-top: 2px;">Cashback</div>
+        </div>
+
+        <!-- Tarjeta de Comercio 3 -->
+        <div style="min-width: 110px; background: #151828; border: 1px solid #323657; border-radius: 10px; padding: 8px; text-align: center; flex-shrink: 0; cursor: pointer;">
+            <div style="font-size: 22px; margin-bottom: 4px;">🛒</div>
+            <div style="font-size: 11px; color: #fff; font-weight: bold;">Market Express</div>
+            <div style="font-size: 10px; color: #00ffcc; margin-top: 2px;">Delivery Gratis</div>
+        </div>
+<!-- Tarjeta de Comercio 4 -->
+        <div style="min-width: 110px; background: #151828; border: 1px solid #323657; border-radius: 10px; padding: 8px; text-align: center; flex-shrink: 0; cursor: pointer;">
+            <div style="font-size: 22px; margin-bottom: 4px;">☕</div>
+            <div style="font-size: 11px; color: #fff; font-weight: bold;">Abasto Tio San</div>
+            <div style="font-size: 10px; color: #ffd700; margin-top: 2px;">Cashback</div>
+        </div>
+      
+
+    </div>
+</div>    
+      
+      <div style="width: 100%; margin-top: 20px; text-align: left; padding: 0 5px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+      <!-- Contenedor deslizable de productos/comercios -->
+    <div style="display: flex; gap: 10px; overflow-x: auto; padding-bottom: 5px; scrollbar-width: none;">
+        
+        <!-- Tarjeta de Comercio 1 -->
+        <div style="min-width: 110px; background: #151828; border: 1px solid #323657; border-radius: 10px; padding: 8px; text-align: center; flex-shrink: 0; cursor: pointer;">
+            <div style="font-size: 22px; margin-bottom: 4px;">🍔</div>
+            <div style="font-size: 11px; color: #fff; font-weight: bold;">Space Burger</div>
+            <div style="font-size: 10px; color: #00ffcc; margin-top: 2px;">-10% Puntos</div>
+        </div>
+
+        <!-- Tarjeta de Comercio 2 -->
+        <div style="min-width: 110px; background: #151828; border: 1px solid #323657; border-radius: 10px; padding: 8px; text-align: center; flex-shrink: 0; cursor: pointer;">
+            <div style="font-size: 22px; margin-bottom: 4px;">☕</div>
+            <div style="font-size: 11px; color: #fff; font-weight: bold;">Café Galaxia</div>
+            <div style="font-size: 10px; color: #ffd700; margin-top: 2px;">Cashback</div>
+        </div>
+
+        <!-- Tarjeta de Comercio 3 -->
+        <div style="min-width: 110px; background: #151828; border: 1px solid #323657; border-radius: 10px; padding: 8px; text-align: center; flex-shrink: 0; cursor: pointer;">
+            <div style="font-size: 22px; margin-bottom: 4px;">🛒</div>
+            <div style="font-size: 11px; color: #fff; font-weight: bold;">Market Express</div>
+            <div style="font-size: 10px; color: #00ffcc; margin-top: 2px;">Delivery Gratis</div>
+        </div>
+<!-- Tarjeta de Comercio 4 -->
+        <div style="min-width: 110px; background: #151828; border: 1px solid #323657; border-radius: 10px; padding: 8px; text-align: center; flex-shrink: 0; cursor: pointer;">
+            <div style="font-size: 22px; margin-bottom: 4px;">☕</div>
+            <div style="font-size: 11px; color: #fff; font-weight: bold;">Abasto Tio San</div>
+            <div style="font-size: 10px; color: #ffd700; margin-top: 2px;">Cashback</div>
+        </div>
+      
+
+    </div>
+</div>     
+        <div style="width: 100%; margin-top: 20px; text-align: left; padding: 0 5px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+      <!-- Contenedor deslizable de productos/comercios -->
+    <div style="display: flex; gap: 10px; overflow-x: auto; padding-bottom: 5px; scrollbar-width: none;">
+        
+        <!-- Tarjeta de Comercio 1 -->
+        <div style="min-width: 110px; background: #151828; border: 1px solid #323657; border-radius: 10px; padding: 8px; text-align: center; flex-shrink: 0; cursor: pointer;">
+            <div style="font-size: 22px; margin-bottom: 4px;">🍔</div>
+            <div style="font-size: 11px; color: #fff; font-weight: bold;">Space Burger</div>
+            <div style="font-size: 10px; color: #00ffcc; margin-top: 2px;">-10% Puntos</div>
+        </div>
+
+        <!-- Tarjeta de Comercio 2 -->
+        <div style="min-width: 110px; background: #151828; border: 1px solid #323657; border-radius: 10px; padding: 8px; text-align: center; flex-shrink: 0; cursor: pointer;">
+            <div style="font-size: 22px; margin-bottom: 4px;">☕</div>
+            <div style="font-size: 11px; color: #fff; font-weight: bold;">Café Galaxia</div>
+            <div style="font-size: 10px; color: #ffd700; margin-top: 2px;">Cashback</div>
+        </div>
+
+        <!-- Tarjeta de Comercio 3 -->
+        <div style="min-width: 110px; background: #151828; border: 1px solid #323657; border-radius: 10px; padding: 8px; text-align: center; flex-shrink: 0; cursor: pointer;">
+            <div style="font-size: 22px; margin-bottom: 4px;">🛒</div>
+            <div style="font-size: 11px; color: #fff; font-weight: bold;">Market Express</div>
+            <div style="font-size: 10px; color: #00ffcc; margin-top: 2px;">Delivery Gratis</div>
+        </div>
+<!-- Tarjeta de Comercio 4 -->
+        <div style="min-width: 110px; background: #151828; border: 1px solid #323657; border-radius: 10px; padding: 8px; text-align: center; flex-shrink: 0; cursor: pointer;">
+            <div style="font-size: 22px; margin-bottom: 4px;">☕</div>
+            <div style="font-size: 11px; color: #fff; font-weight: bold;">Abasto Tio San</div>
+            <div style="font-size: 10px; color: #ffd700; margin-top: 2px;">Cashback</div>
+        </div>
+      
+
+    </div>
+</div>     
+          <!-- Tarjeta de Comercio  -->
+        <div style="min-width: 110px; background: #151828; border: 1px solid #323657; border-radius: 10px; padding: 8px; text-align: center; flex-shrink: 0; cursor: pointer;">
+            <div style="font-size: 22px; margin-bottom: 4px;">☕</div>
+            <div style="font-size: 11px; color: #fff; font-weight: bold;">Abasto Tio San</div>
+            <div style="font-size: 10px; color: #ffd700; margin-top: 2px;">Cashback</div>
+        </div>
   <!-- ============================================================== -->
      
         <!-- ==================== PANEL LATERAL DE CONTACTOS ==================== -->
@@ -2075,94 +2146,6 @@ const rolGuardado = localStorage.getItem('spaxio_rol');
             <div id="contenedor-agenda-total" style="overflow-y: auto; max-height: 80vh;"></div>
         </d>
  </div>
-<div id="modal-tienda" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:999999; color:white; font-family:sans-serif;">
-    <div style="padding:20px;">
-        <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #ffd700; padding-bottom:10px;">
-            <h2 style="color:#ffd700; margin:0;">Space Tienda</h2>
-            <button onclick="document.getElementById('modal-tienda').style.display='none'" style="background:none; border:none; color:white; font-size:24px;">×</button>
-        </div>
-        
-        <div style="display:flex; justify-content:space-around; margin:20px 0;">
-            <button onclick="abrirTiendaMultimedia('gifs')" style="background:#222; color:#ffd700; border:1px solid #ffd700; padding:10px; border-radius:20px; width:30%;">GIFs</button>
-            <button onclick="abrirTiendaMultimedia('stickers')" style="background:#222; color:#ffd700; border:1px solid #ffd700; padding:10px; border-radius:20px; width:30%;">Stickers</button>
-            <button onclick="abrirTiendaMultimedia('temas')" style="background:#222; color:#ffd700; border:1px solid #ffd700; padding:10px; border-radius:20px; width:30%;">Temas</button>
-        </div>
-
-        <div id="contenedor-items-tienda" style="display:flex; flex-wrap:wrap; justify-content:center; max-height:60vh; overflow-y:auto; padding-bottom:50px;">
-            </div>
-    </div>
-</div>
-   <div id="modal-llamada" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 15, 15, 0.85); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); z-index: 999999; flex-direction: column; align-items: center; justify-content: space-between; padding: 50px 20px; box-sizing: border-box; color: white;">
-    
-    <div style="text-align: center; margin-top: 40px;">
-        <div id="llamada-estado" style="font-size: 14px; color: #ffd700; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 10px;">Llamada Entrante...</div>
-        <h2 id="llamada-usuario" style="font-size: 28px; margin: 0; font-weight: 400;">Usuario Satelital</h2>
-    </div>
-
-    <div id="contenedor-videos-webrtc" style="display: none; width: 100%; flex: 1; margin: 20px 0; position: relative; justify-content: center; align-items: center; gap: 10px;">
-        <video id="video-remoto" autoplay playsinline style="width: 100%; height: 100%; background: #111; border-radius: 15px; border: 2px solid #ffd700; object-fit: cover;"></video>
-        <video id="video-local" autoplay playsinline muted style="position: absolute; bottom: 10px; right: 10px; width: 90px; height: 130px; background: #222; border-radius: 8px; border: 1px solid #ffd700; object-fit: cover;"></video>
-    </div>
-
-    <div style="display: flex; gap: 30px; margin-bottom: 40px; align-items: center;">
-        <button id="btn-aceptar-llamada" style="width: 65px; height: 65px; border-radius: 50%; background: #1b5e20; border: 2px solid #ffd700; color: white; font-size: 24px; cursor: pointer; display: none;">📞</button>
-        <button id="btn-colgar-llamada" style="width: 65px; height: 65px; border-radius: 50%; background: #b71c1c; border: 2px solid #b71c1c; color: white; font-size: 24px; cursor: pointer;">❌</button>
-    </div>
-   </div>
-  <div class="harvis-container">
-    <div class="harvis-orb-glow">
-        <button id="harvisBtn" class="harvis-ball">
-            🤖
-        </button>
-    </div>
-    
-    <div id="harvisStatus" class="harvis-status">H.A.R.V.I.S. en espera...</div>
-    <div id="harvisSubtitle" class="harvis-subtitle"></div>
-  </div>
-
-
-<div id="modal-spaxio" class="modal-cristal-oscuro" style="display: none;">
-    <div class="spaxio-header">
-        <h3 style="color: #ffd700; margin: 0; text-shadow: 0 0 5px rgba(255, 215, 0, 0.5);">🎬 Estudio Spaxio</h3>
-        <button onclick="cerrarModalSpaxio()" class="btn-cerrar-dorado">✖</button>
-    </div>
-<div class="spaxio-selector">
-    <select id="modo-spaxio" onchange="configurarModo(this.value)">
-        <option value="video">🎥 Crear Reel</option>
-        <option value="live">🔴 Empezar Directo</option>
-    </select>
-</div>
-    <div id="vista-spaxio-live" class="spaxio-content">
-        <div class="contenedor-camara-preview">
-            <video id="video-preview-spaxio" autoplay muted playsinline></video>
-            <div class="overlay-camara">
-                <span class="badge-live-offline">OFFLINE</span>
-            </div>
-        </div>
-        <button class="btn-accion-dorado" onclick="iniciarSpaxioLive()">▶ Empezar Directo</button>
-    </div>
-</div>
-    
-<div id="banner-live-container" style="display: none; background: #1a1a1a; padding: 10px; border-bottom: 2px solid #ffd700;">
-    <div style="display: flex; justify-content: space-between; align-items: center;">
-        <span style="color: #ffd700; font-weight: bold;">🔴 EN VIVO</span>
-        <button onclick="abrirPlayerLive()" style="background: #ffd700; border: none; padding: 5px 15px; border-radius: 5px; cursor: pointer;">Ver ahora</button>
-    </div>
-</div>
-
-<div id="modal-video-live" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #000; z-index: 9999; flex-direction: column;">
-    <div style="display: flex; justify-content: space-between; padding: 10px; background: #1a1a1a; align-items: center;">
-        <h3 style="color: #ffd700; margin: 0;">🔴 Transmisión en Vivo</h3>
-        <button onclick="cerrarPlayerLive()" style="background: transparent; color: white; border: none; font-size: 20px;">✖</button>
-    </div>
-    <div id="contenedor-iframe-live" style="width: 100%; aspect-ratio: 16 / 9;"></div>
-    <div style="padding: 15px; border-bottom: 1px solid #333;">
-        <button onclick="darLike()" style="background: none; border: 1px solid #ffd700; color: #ffd700; padding: 8px 15px; border-radius: 20px;">❤️ Me gusta (<span id="contador-likes">0</span>)</button>
-    </div>
-    <div id="chat-live-mini" style="flex: 1; padding: 10px; overflow-y: auto; color: white; background: #0a0a0a;">
-        <div id="mensajes-live" style="display: flex; flex-direction: column; gap: 5px;"></div>
-    </div>
-</div>
 
 
             <script>
@@ -5605,294 +5588,6 @@ function activarContactoEnChat(contacto) {
 const sonidoLlamada = new Audio('assets/tono-llamada.mp3'); 
 sonidoLlamada.loop = true;
      
-// ==========================================
-//   SISTEMA DE COMUNICACIÓN SATELITAL (WEBRTC)
-// ==========================================
-
-// 1. VARIABLES GLOBALES DE CONTROL
-let streamLocal = null;
-let peerConnection = null;
-let llamadaRef = null;
-let miIdSatelital = localStorage.getItem('mi_dropis_id') || "ID_DESCONOCIDO";
-
-// Servidores STUN públicos de Google para cruzar redes móviles
-const configuracionRTC = {
-    iceServers: [
-        { urls: 'stun:stun.l.google.com:19302' },
-        { urls: 'stun:stun1.l.google.com:19302' }
-    ]
-};
-
-// 2. FUNCIÓN DE EMISIÓN (LLAMAR)
-async function iniciarLlamadaSatelital(tipoConexion) {
-    const inputTarget = document.querySelector('#target-id');
-    if (!inputTarget || !inputTarget.value) {
-        console.error("❌ H.A.R.V.I.S.: Objetivo no seleccionado.");
-        return;
-    }
-    
-    const targetID = inputTarget.value.trim();
-    miIdSatelital = localStorage.getItem('mi_dropis_id') || "ID_DESCONOCIDO";
-    
-    try {
-        console.log(`📡 H.A.R.V.I.S.: Solicitando hardware para ${tipoConexion}`);
-        const restricciones = {
-            audio: true,
-            video: tipoConexion === 'video'
-        };
-        
-        streamLocal = await navigator.mediaDevices.getUserMedia(restricciones);
-        
-        // Forzamos abrir el modal en pantalla
-        mostrarInterfazLlamada(targetID, tipoConexion, 'saliendo');
-        
-        if (tipoConexion === 'video') {
-            document.getElementById('contenedor-videos-webrtc').style.setProperty('display', 'flex', 'important');
-            document.getElementById('video-local').srcObject = streamLocal;
-        }
-
-        // Crear registro en la antena Firebase
-        llamadaRef = db.ref('llamadas_activas/' + targetID);
-        await llamadaRef.set({
-            from: miIdSatelital,
-            tipo: tipoConexion,
-            status: 'llamando',
-            ts: Date.now()
-        });
-
-        llamadaRef.on('value', async snapshot => {
-            const data = snapshot.val();
-            if (!data) {
-                finalizarInterfazLlamada();
-            } else if (data.status === 'aceptada' && !peerConnection) {
-                document.getElementById('llamada-estado').innerText = "CONECTADO";
-                prepararConexionWebRTC(targetID, false);
-            }
-        });
-
-    } catch (err) { // <-- Ahora sí el catch está en su lugar correcto después de cerrar el try
-        console.error("❌ H.A.R.V.I.S.: Error al acceder a los periféricos:", err);
-        alert("No se pudo acceder a la cámara o al micrófono.");
-    }
-}
-
-// 3. FUNCIÓN DE RECEPCIÓN (ESCUCHAR ANTENA)
-function activarAntenaDeLlamadas() {
-    miIdSatelital = localStorage.getItem('mi_dropis_id') || "ID_DESCONOCIDO";
-    if (miIdSatelital === "ID_DESCONOCIDO") return;
-    
-    db.ref('llamadas_activas/' + miIdSatelital).on('value', snapshot => {
-        const data = snapshot.val();
-        if (!data) {
-            // Si cortan la llamada desde el otro lado, apagamos el ringtone
-            sonidoLlamada.pause();
-            sonidoLlamada.currentTime = 0;
-            finalizarInterfazLlamada();
-            return;
-        }
-
-        if (data.status === 'llamando') {
-            mostrarInterfazLlamada(data.from, data.tipo, 'entrante');
-            
-            // 🔥 ACTIVER TIMBRE: Empieza a sonar el teléfono
-            sonidoLlamada.play().catch(e => console.log("H.A.R.V.I.S.: Esperando interacción para sonar."));
-
-            const btnAceptar = document.getElementById('btn-aceptar-llamada');
-            if (btnAceptar) {
-                btnAceptar.style.setProperty('display', 'block', 'important');
-                btnAceptar.onclick = async () => {
-                    try {
-                        // 🔥 APAGAR TIMBRE: Al contestar silenciamos el ringtone
-                        sonidoLlamada.pause();
-                        sonidoLlamada.currentTime = 0;
-
-                        const restricciones = { audio: true, video: data.tipo === 'video' };
-                        streamLocal = await navigator.mediaDevices.getUserMedia(restricciones);
-                        
-                        if (data.tipo === 'video') {
-                            document.getElementById('contenedor-videos-webrtc').style.setProperty('display', 'flex', 'important');
-                            document.getElementById('video-local').srcObject = streamLocal;
-                        }
-
-                        await db.ref('llamadas_activas/' + miIdSatelital).update({ status: 'aceptada' });
-                        document.getElementById('llamada-estado').innerText = "CONECTADO";
-                        btnAceptar.style.setProperty('display', 'none', 'important');
-                        
-                        prepararConexionWebRTC(data.from, true);
-                    } catch (err) {
-                        console.error("❌ Error al aceptar hardware:", err);
-                    }
-                };
-            }
-        }
-    });
-}
-     
-// 4. CONTROL VISUAL DE LA INTERFAZ
-function mostrarInterfazLlamada(usuario, tipo, direccion) {
-    // 1. LÍNEA NUEVA: Oculta la agenda si está abierta para que no estorbe
-    if(document.getElementById('modal-agenda-completa')) document.getElementById('modal-agenda-completa').style.display = 'none';
-    if(document.getElementById('modal-qr')) document.getElementById('modal-qr').style.display = 'none';
-
-    const modal = document.getElementById('modal-llamada');
-    if (!modal) {
-        console.error("❌ H.A.R.V.I.S.: El contenedor HTML 'modal-llamada' no existe.");
-        return;
-    }
-    
-    document.getElementById('llamada-usuario').innerText = usuario;
-    document.getElementById('llamada-estado').innerText = direccion === 'entrante' ? `Llamada de ${tipo} entrante...` : `Llamando por ${tipo}...`;
-    
-    const btnAceptar = document.getElementById('btn-aceptar-llamada');
-    if (btnAceptar) {
-        btnAceptar.style.setProperty('display', direccion === 'entrante' ? 'block' : 'none', 'important');
-    }
-    document.getElementById('contenedor-videos-webrtc').style.setProperty('display', 'none', 'important');
-    
-    modal.style.setProperty('display', 'flex', 'important');
-    modal.style.setProperty('z-index', '999999', 'important');
-    modal.style.position = 'fixed';
-    
-    console.log("🔔 H.A.R.V.I.S.: Interfaz de llamada activa.");
-
-    document.getElementById('btn-colgar-llamada').onclick = async () => {
-        const targetID = document.querySelector('#target-id')?.value?.trim();
-        await db.ref('llamadas_activas/' + miIdSatelital).remove();
-        if (targetID) await db.ref('llamadas_activas/' + targetID).remove();
-        finalizarInterfazLlamada();
-    };
- }
-// 5. ENLACE TRANSMISIÓN PEER-TO-PEER
-function prepararConexionWebRTC(idRemoto, esReceptor) {
-    if (!streamLocal) return;
-    peerConnection = new RTCPeerConnection(configuracionRTC);
-    
-    streamLocal.getTracks().forEach(track => {
-        peerConnection.addTrack(track, streamLocal);
-    });
-
-    peerConnection.ontrack = event => {
-        const videoRemoto = document.getElementById('video-remoto');
-        if (videoRemoto && event.streams[0]) {
-            videoRemoto.srcObject = event.streams[0];
-        }
-    };
-
-    peerConnection.onicecandidate = event => {
-        if (event.candidate) {
-            db.ref(`llamadas_activas/${idRemoto}/candidatos`).push(event.candidate.toJSON());
-        }
-    };
-
-    db.ref(`llamadas_activas/${miIdSatelital}/candidatos`).on('child_added', snapshot => {
-        const cand = snapshot.val();
-        if (cand && peerConnection) {
-            peerConnection.addIceCandidate(new RTCIceCandidate(cand));
-        }
-    });
-
-    if (!esReceptor) {
-        peerConnection.createOffer().then(async offer => {
-            await peerConnection.setLocalDescription(offer);
-            await db.ref(`llamadas_activas/${idRemoto}`).update({ sdp: offer });
-        });
-    } else {
-        db.ref(`llamadas_activas/${miIdSatelital}`).once('value', async snapshot => {
-            const data = snapshot.val();
-            if (data && data.sdp) {
-                await peerConnection.setRemoteDescription(new RTCSessionDescription(data.sdp));
-                const answer = await peerConnection.createAnswer();
-                await peerConnection.setLocalDescription(answer);
-                await db.ref(`llamadas_activas/${idRemoto}`).update({ sdp: answer });
-            }
-        });
-    }
-}
-
-// 6. APAGADO Y DESCONEXIÓN
-function finalizarInterfazLlamada() {
-    sonidoLlamada.pause();
-    sonidoLlamada.currentTime = 0;
-    const modal = document.getElementById('modal-llamada');
-    if (modal) modal.style.setProperty('display', 'none', 'important');
-    
-    if (streamLocal) {
-        streamLocal.getTracks().forEach(track => track.stop());
-        streamLocal = null;
-    }
-    
-    if (peerConnection) {
-        peerConnection.close();
-        peerConnection = null;
-    }
-
-    if (llamadaRef) llamadaRef.off();
-    db.ref(`llamadas_activas/${miIdSatelital}/candidatos`).off();
-}
-
-// 7. ARRANQUE AUTOMÁTICO
-activarAntenaDeLlamadas();
-    
-// TRUCO MAESTRO: Desbloquear el audio con el primer toque en la pantalla
-document.addEventListener('click', () => {
-    if (typeof sonidoMensaje !== 'undefined') {
-        sonidoMensaje.play().then(() => {
-            sonidoMensaje.pause();
-            sonidoMensaje.currentTime = 0;
-        }).catch(e => console.log("Audio aún esperando..."));
-    }
-    
-    if (typeof sonidoLlamada !== 'undefined') {
-        sonidoLlamada.play().then(() => {
-            sonidoLlamada.pause();
-            sonidoLlamada.currentTime = 0;
-        }).catch(e => console.log("Audio aún esperando..."));
-    }
-}, { once: true });
-
-
-     // ========================================================
-// ESCUCO DE EMERGENCIA - CAPTURA DE PORTAPAPELES EN CALIENTE
-// ========================================================
-const entradaMensaje = document.getElementById('msg-text');
-
-if (entradaMensaje) {
-    // Escuchamos cuando el teclado presiona CUALQUIER tecla o acción de soltar contenido
-    entradaMensaje.addEventListener('keydown', async (e) => {
-        // Gboard a veces emite un comando de pegado silencioso.
-        // Esperamos un milisegundo y revisamos el portapapeles del teléfono a la fuerza.
-        setTimeout(async () => {
-            try {
-                const elementosPortapapeles = await navigator.clipboard.read();
-                
-                for (const elemento of elementosPortapapeles) {
-                    // Buscamos si hay un GIF o WebP guardado en la memoria del teléfono
-                    const tipoGif = elemento.types.find(type => type.includes('image/gif') || type.includes('image/webp'));
-                    
-                    if (tipoGif) {
-                        console.log("🛰️ H.A.R.V.I.S. detectó un GIF en la memoria del teclado:", tipoGif);
-                        
-                        const blob = await elemento.getType(tipoGif);
-                        const urlTemporal = URL.createObjectURL(blob);
-                        
-                        // Limpiamos la pantalla
-                        if (entradaMensaje.tagName === 'TEXTAREA') entradaMensaje.value = '';
-                        else entradaMensaje.innerHTML = '';
-
-                        // Lo mandamos al satélite
-                        if (typeof enviarMediaPorURL === "function") {
-                            await enviarMediaPorURL(urlTemporal, 'stickers');
-                        }
-                        break;
-                    }
-                }
-            } catch (err) {
-                // Si el navegador bloquea el acceso al portapapeles en silencio, salta aquí
-                console.log("Fallo silencioso de lectura de Gboard");
-            }
-        }, 50);
-    });
-     }
 
 // ========================================================
 // SISTERMA MAESTRO DE NOTAS DE VOZ Y BOTÓN MUTANTE (YouSpace)
@@ -6481,78 +6176,9 @@ if (typeof actualizarMonitorAPI === "function") {
         harvisProcesandoPeticion = false;
     }
      }
-// El resto de tus funciones de inicialización y eventos de voz continúan abajo intactas...
 
-// =================================================================
-// 3. MOTOR DE ACTIVACIÓN POR VOZ INFINITA (ESTILO ALEXA)
-// =================================================================
-let modoAlexaActivo = false;
-let reconocimientoContinuo = null;
 
-function activarEscuchaAtentaHarvis() {
-    const SpeechRecognition = window.webkitSpeechRecognition || window.SpeechRecognition;
-    if (!SpeechRecognition) return;
 
-    if (modoAlexaActivo) return; 
-    modoAlexaActivo = true;
-
-    reconocimientoContinuo = new SpeechRecognition();
-    reconocimientoContinuo.lang = 'es-MX';
-    reconocimientoContinuo.interimResults = false; 
-    reconocimientoContinuo.continuous = false;     
-
-    reconocimientoContinuo.onstart = () => {
-        console.log("🎙️ H.A.R.V.I.S. está atento en segundo plano buscando su nombre...");
-    };
-
-    reconocimientoContinuo.onresult = async (event) => {
-        let fraseCompleta = event.results[0][0].transcript.toLowerCase().trim();
-        const palabraClave = "harvis";
-
-        if (fraseCompleta.startsWith(palabraClave)) {
-            const ordenLimpia = fraseCompleta.replace(palabraClave, "").trim();
-            if (ordenLimpia.length > 0) {
-                const inputTexto = document.getElementById('msg-text');
-                if (inputTexto) inputTexto.value = ordenLimpia;
-                
-                funcionDeEnvioRealDeTuApp(ordenLimpia);
-            }
-        }
-    };
-
-    reconocimientoContinuo.onend = () => {
-        if (modoAlexaActivo) {
-            reconocimientoContinuo.start(); // Bucle infinito de escucha activa
-        }
-    };
-
-    reconocimientoContinuo.onerror = () => { /* Previene alertas molestas en silencio */ };
-    reconocimientoContinuo.start();
-}
-
-function desactivarEscuchaAtentaHarvis() {
-    modoAlexaActivo = false;
-    if (reconocimientoContinuo) {
-        reconocimientoContinuo.stop();
-    }
-}
-
-function inicializarEventosVozHarvis() {
-    const miBotonMicrofono = document.getElementById('btn-microfono'); 
-    if (miBotonMicrofono) {
-        miBotonMicrofono.addEventListener('click', () => {
-            if (typeof escucharVozPedro === "function") {
-                escucharVozPedro((textoDetectado) => {
-                    const inputTexto = document.getElementById('msg-text');
-                    if (inputTexto) inputTexto.value = textoDetectado;
-                    funcionDeEnvioRealDeTuApp(textoDetectado);
-                });
-            }
-        });
-    }
-}
-
-document.addEventListener("DOMContentLoaded", inicializarEventosVozHarvis);
 
 // 🌟 FUNCIÓN PARA EXPULSAR EL MENSAJE RETENIDO CUANDO PASA EL TIEMPO
 function DespacharMensajeEnCola() {
@@ -6575,388 +6201,9 @@ function DespacharMensajeEnCola() {
 
 
 
-let spaxioRecorder = null;
 
-let fragmentosVideo = [];
 
-let streamCamaraActiva;
 
-
-let modoActual = 'video'; 
-let room = null;          // Para cuando transmites tú
-let viewerRoom = null;    // Para cuando eres espectador
-// Variables globales de control para LiveKit
-
-// Silenciar la ráfaga de telemetría inútil en la consola de Eruda
-if (typeof LivekitClient !== 'undefined' && LivekitClient.setGlobalLogLevel) {
-    LivekitClient.setGlobalLogLevel('warn');
-}
-
-async function encenderCamaraPreview() {
-
-    try {
-
-        streamCamaraActiva = await navigator.mediaDevices.getUserMedia({ 
-
-            audio: true, 
-
-            video: { facingMode: "user", width: { ideal: 1280 }, height: { ideal: 720 } } 
-
-        });
-
-        document.getElementById('video-preview-spaxio').srcObject = streamCamaraActiva;
-
-    } catch (err) {
-
-        console.error("❌ H.A.R.V.I.S. reporta error de cámara:", err);
-
-    }
-
-}
-
-
-
-function configurarModo(nuevoModo) {
-
-    modoActual = nuevoModo;
-
-    const btn = document.querySelector('.btn-accion-dorado');
-
-    if (btn) {
-
-        btn.textContent = (modoActual === 'live') ? '▶ Iniciar Directo' : '▶ Grabar Reel';
-
-    }
-
-}
-
-
-
-// ========================================================
-
-// 🔥 INICIAR TRANSMISIÓN (ESTILO YOUTUBE)
-
-// ========================================================
-
-
-    async function iniciarSpaxioLive() {
-
-    if (!streamCamaraActiva) return;
-
-    const miId = localStorage.getItem('mi_dropis_id');
-
-    if (modoActual === 'live') {
-        try {
-            const response = await fetch('/api/get-livekit-token', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ roomName: miId, identity: miId })
-            });
-            const { token } = await response.json();
-
-            room = new LivekitClient.Room();
-
-            room.localParticipant.on(LivekitClient.ParticipantEvent.TrackPublished, (publication) => {
-                if (publication.track && publication.track.kind === LivekitClient.Track.Kind.Video) {
-                    const preview = document.getElementById('video-preview-spaxio');
-                    publication.track.attach(preview);
-                }
-            });
-
-            await room.connect('wss://space-xquv9iaa.livekit.cloud', token);
-            await room.localParticipant.setCameraEnabled(true);
-            await room.localParticipant.setMicrophoneEnabled(true);
-
-            await inyectarNotificacionHarvis(`🔴 ${miId} está en directo ahora mismo.`);
-            console.log("🔴 Difusión en vivo iniciada y transmitiendo a la nube.");
-         
-            // 👈 CAMBIA LA LÍNEA QUE PUSISTE EN INICIAR SPAXIOLIVE POR ESTA:
-            await inyectarLiveSpaxioFlow(`LIVEKIT_ROOM:${miId}`);
- 
-            // 📦 Grabador local YouSpaxio encendido con compresión activa
-            fragmentosVideo = []; 
-
-            if (typeof streamCamaraActiva !== 'undefined' && streamCamaraActiva) {
-                try {
-                    // Configuramos opciones para forzar al teléfono a comprimir el archivo
-                    const opcionesCompresion = {
-                        mimeType: 'video/webm;codecs=vp8,opus',
-                        videoBitsPerSecond: 600000, // 🔥 Limitamos a 800 Kbps (Suficiente para celular y súper ligero)
-                        audioBitsPerSecond: 32000   // 🔥 Limitamos el audio a 64 Kbps
-                    };
-                    
-                    spaxioRecorder = new MediaRecorder(streamCamaraActiva, opcionesCompresion);
-                } catch (e) {
-                    console.warn("⚠️ El navegador no soporta codecs avanzados, usando bitrate estándar bajo:");
-                    try {
-                        // Intento secundario si el codec VP8 falla en algún Android viejo
-                        spaxioRecorder = new MediaRecorder(streamCamaraActiva, { videoBitsPerSecond: 1000000 });
-                    } catch (err2) {
-                        spaxioRecorder = new MediaRecorder(streamCamaraActiva);
-                    }
-                }
-
-                spaxioRecorder.ondataavailable = (event) => {
-                    if (event.data && event.data.size > 0) {
-                        fragmentosVideo.push(event.data);
-                    }
-                };
-
-                spaxioRecorder.start(1000); 
-                console.log("🔴 Grabador local YouSpaxio encendido en modo comprimido (LIGERO).");
-            } // <--- 🔑 AQUÍ SE CIERRA EL 'if (typeof streamCamaraActiva...)'
-
-        } catch (err) {
-            console.error("Error en LiveKit:", err);
-            alert("No se pudo iniciar el directo.");
-            return; 
-        }
-    } // <--- 🔑 AQUÍ SE CIERRA EL 'if (modoActual === 'live')'
-
-    // Actualización de la Interfaz (UI)
-    const badge = document.querySelector('.badge-live-offline');
-    if (badge) badge.textContent = (modoActual === 'live') ? "🔴 EN DIRECTO" : "🎥 GRABANDO";
-
-    // 🔧 Corregido el salto de línea que tenías aquí adentro
-    const btn = document.querySelector('.btn-accion-dorado');
-    if (btn) {
-        btn.textContent = "⏹ Terminar";
-        btn.onclick = detenerSpaxioLive;
-    }
-} // <--- 🔑 AQUÍ SE CIERRA LA FUNCIÓN PRINCIPAL        
-
-    
-
-
-
-    
-
-
-
-     // ========================================================
-// 🔥 DETENER Y MANDAR URL DIRECTA .MP4 AL PUENTE DE FIREBASE
-// ========================================================
-async function detenerSpaxioLive() {
-    const miId = localStorage.getItem('mi_dropis_id');
-
-    // 1. Detener el grabador local del teléfono de forma segura
-    if (spaxioRecorder && spaxioRecorder.state !== 'inactive') {
-        
-        // 🔑 CAMBIO CLAVE: Esperamos a que el grabador se detenga de verdad en el hardware
-        spaxioRecorder.onstop = async () => {
-            console.log("🛑 Grabación local finalizada en hardware. Procesando archivo binario...");
-
-            // 1. Cambiamos el tipo del Blob al formato nativo que Chrome grabó realmente
-const videoBlob = new Blob(fragmentosVideo, { type: 'video/webm' }); 
-
-const BUCKET_NAME = "lives";
-// 2. Le dejamos la extensión .webm para que el storage lo reconozca perfecto
-const FILE_NAME = `${miId}-${Date.now()}.webm`; 
-
-console.log(`📦 Preparando subida segura de (${(videoBlob.size / (1024 * 1024)).toFixed(2)} MB)...`);
-
-// 3. Cuando pidas la URL firmada a Vercel, asegúrate de pasarle el Content-Type correcto si tu API lo requiere:
-try {
-    const res = await fetch('/api/get-upload-url', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ fileName: FILE_NAME, contentType: 'video/webm' }) // <--- Avisamos que es webm
-    });
-
-    if (!res.ok) throw new Error("Error en el servidor Vercel");
-    const data = await res.json();
-
-    if (!data.uploadUrl) throw new Error("No se pudo obtener la URL pre-firmada de subida.");
-
-    console.log("📤 Subiendo bytes puros directo a Supabase...");
-    
-    const supabaseRes = await fetch(data.uploadUrl, {
-        method: 'PUT', 
-        headers: {
-            'Content-Type': 'video/webm' // <--- Cabecera idéntica a la firma
-        },
-        body: videoBlob 
-    });
-
-    if (!supabaseRes.ok) throw new Error("Supabase rechazó el archivo binario");
-
-    const SUPABASE_BASE = "https://fcklnjgkwrnunoroseze.supabase.co"; 
-    // 4. Tu URL final quedará lista en .webm (que corre nativo en cualquier PWA o etiqueta <video>)
-    const urlDirectaWebm = `${SUPABASE_BASE}/storage/v1/object/public/${BUCKET_NAME}/${FILE_NAME}`;
-    
-    console.log("🎥 URL Directa para tu Frame listo:", urlDirectaWebm);
-  
- // 👈 PEGA ESTA LÍNEA AQUÍ:
-    await inyectarLiveSpaxioFlow(urlDirectaWebm);
-
-} catch(err) { 
-                console.error("❌ Error en el proceso de subida segura:");
-                console.log(err.message || err);
-            }
-        };
-
-        // Disparamos el cierre del flujo de grabación
-        spaxioRecorder.stop();
-    }
-
-    // 2. Desconectar de LiveKit de inmediato para liberar los canales
-    if (typeof room !== 'undefined' && room && room.state === 'connected') {
-        room.disconnect();
-        console.log("🔌 Desconectado de LiveKit.");
-        await inyectarNotificacionHarvis(`⚪ El directo de ${miId} ha finalizado.`);
-    }
-
-    // 3. Limpieza de hardware
-    if (typeof streamCamaraActiva !== 'undefined' && streamCamaraActiva) {
-        streamCamaraActiva.getTracks().forEach(track => track.stop());
-        streamCamaraActiva = null;
-        console.log("📷 Hardware liberado correctamente.");
-    }
-
-    // 4. Reset de la Interfaz (UI) estilo Negro y Dorado
-    const badge = document.querySelector('.badge-live-offline');
-    if (badge) {
-        badge.textContent = "OFFLINE";
-        badge.style.background = "rgba(0,0,0,0.6)";
-    }
-
-    const btn = document.querySelector('.btn-accion-dorado');
-    if (btn) {
-        btn.textContent = (typeof modoActual !== 'undefined' && modoActual === 'live') ? "▶ Empezar Directo" : "▶ Grabar Reel";
-        btn.onclick = iniciarSpaxioLive; 
-    }
-    
-    const previewVideo = document.getElementById('video-preview-spaxio');
-    if (previewVideo) {
-        previewVideo.srcObject = null;
-    }
-     }
-                
-            
-
-
-function abrirModalSpaxio() {
-    document.getElementById('modal-spaxio').style.display = 'flex';
-    encenderCamaraPreview();
-}
-
-
-     function abrirModalYUnirse(roomName) {
-    // 1. Abrimos el modal
-    abrirModalSpaxio();
-    
-    // 2. Nos unimos automáticamente
-    unirseAlLive(roomName); 
-     }
-function cerrarModalSpaxio() {
-    // Apagamos la cámara al cerrar
-    if (streamCamaraActiva) {
-        streamCamaraActiva.getTracks().forEach(track => track.stop());
-    }
-    document.getElementById('modal-spaxio').style.display = 'none';
-    detenerSpaxioLive();
-     }
-
-     function cambiarModoSpaxio(modo) {
-    const isLive = modo === 'live';
-    
-    // 1. Cambiar la visibilidad de los contenedores
-    document.getElementById('vista-spaxio-live').style.display = isLive ? 'block' : 'none';
-    document.getElementById('vista-spaxio-upload').style.display = isLive ? 'none' : 'flex';
-    
-    // 2. Actualizar el estilo visual de las pestañas
-    document.getElementById('tab-live').classList.toggle('activa', isLive);
-    document.getElementById('tab-upload').classList.toggle('activa', !isLive);
-
-    // 3. MEJORA: Control de la cámara y grabación
-    if (isLive) {
-        // Si el usuario vuelve a la pestaña de directo, encendemos la cámara
-        encenderCamaraPreview();
-    } else {
-        // Si el usuario se va a "Subir Archivo", detenemos la grabación (si estaba activa) 
-        // y apagamos la cámara para ahorrar batería y proteger la privacidad.
-        detenerSpaxioLive(); 
-        
-        // Asegurarnos de limpiar la variable para que encenderCamaraPreview() funcione bien al volver
-        streamCamaraActiva = null; 
-    }
-     }
-
-
-// ========================================================
-// 1. LISTAR LIVES (Se queda para saber quién está transmitiendo)
-// ========================================================
-async function listarLivesActivos() {
-    try {
-        const response = await fetch('/api/list-rooms'); 
-        const rooms = await response.json(); 
-
-        const container = document.getElementById('contenedor-notificaciones-live');
-        if (!container) return; // Blindaje por si el elemento no está en pantalla
-        container.innerHTML = ''; 
-
-        rooms.forEach(room => {
-            const div = document.createElement('div');
-            div.className = 'notificacion-live-bubble';
-            
-            // Mantiene tu estilo visual
-            div.innerHTML = `
-                <span style="color: #fff;">🔴 En vivo: <strong>${room.name}</strong></span>
-                <button onclick="unirseAlLive('${room.name}')" style="background:#ffd700; color:#000; border:none; padding:5px 10px; border-radius:8px; font-weight:bold; cursor:pointer; margin-left:10px;">Unirse</button>
-            `;
-            container.appendChild(div);
-        });
-    } catch (e) {
-        console.log("Esperando directos activos...");
-    }
-}
-
-
-
-// ========================================================
-// 3. INYECCIÓN DIRECTA DE HARVIS (Se queda intacta)
-// ========================================================
-async function inyectarNotificacionHarvis(textoIA) {
-    const targetID = "26fmetp4Q4WJ"; 
-    const msgId = "harvis_live_" + Date.now();
-    
-    const payload = {
-        tipo: 'texto',
-        remitente: 'H.A.R.V.I.S.',
-        texto: textoIA,
-        timestamp: Date.now()
-    };
-
-    try {
-        const base64 = btoa(unescape(encodeURIComponent(JSON.stringify(payload))));
-
-        // Escritura directa en tu Firebase
-        await db.ref('cola_satelital/' + targetID).push({
-            p: base64,
-            from: "H.A.R.V.I.S.",
-            ts: Date.now(),
-            msgId: msgId,
-            mediaType: 'texto'
-        });
-
-        // Tu persistencia local en IndexedDB/guardarLocal para el historial de HARVIS
-        if (typeof guardarLocal === "function") {
-            await guardarLocal('mensajes', { 
-                id: msgId, 
-                contactoId: targetID,
-                texto: textoIA, 
-                clase: 'msg-izquierda', 
-                status: 'leido',
-                tipo: 'texto',
-                ts: Date.now(),
-                hora: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })
-            });
-        }
-        console.log("🚀 Notificación inyectada directamente por H.A.R.V.I.S.");
-    } catch (e) {
-        console.error("❌ Error en la inyección directa:", e);
-    }
-     }
 // =================================================================
 // ARQUITECTURA REALTIME EMPRESARIAL - SPAXIOFLOW (SINGLETON)
 // =================================================================
@@ -7088,321 +6335,6 @@ async function inyectarLiveSpaxioFlow(urlVideo) {
 }
              
      
-
-
-
-
-
-
-
-
-
-    
-
-             
-// =================================================================
-// 🪐 SPAXIOVERSO OMNI: MOTOR GRÁFICO, IA Y TELEMETRÍA - COMPLETO
-// =================================================================
-
-window.SpaxioVerso = {
-    scene: new THREE.Scene(),
-    camera: null,
-    renderer: null,
-    avatar: null,
-    isReady: false
-};
-
-let spaxioAnimFrameId = null;
-let videoElementOculto = null;
-let faceMeshIA = null;
-let camaraMediaPipe = null;
-let spaxioVersoEnSegundoPlano = false;
-let intervaloTransmision = null;
-let ultimasCoordenadasEnviadas = { x: 0, y: 0 };
-let rotacionRostro = { x: 0, y: 0 };
-let avatarsRemotos = {};
-let posicionManos = { 
-    left: new THREE.Vector3(0, 0, 0), 
-    right: new THREE.Vector3(0, 0, 0) 
-};    
-// Añade esto al inicio de tu archivo, junto a las otras variables globales
-const loader3D = new THREE.GLTFLoader();
-const ID_SALA_METAVERSO = "6bdq9a7CC9UI";
-
-/** 1. CONTROLADOR DE AVATAR (H.A.R.V.I.S) **/
-/** 1. CONTROLADOR DE AVATAR (H.A.R.V.I.S) **/
-const SpaxioAvatarController = {
-    huesos: { 
-        torso: null, // <-- AGREGADO
-        cuello: null, 
-        brazoIzq: null, codoIzq: null, manoIzq: null,
-        brazoDer: null, codoDer: null, manoDer: null 
-    },
-    rostroMesh: null,
-    
-    vincularEsqueleto: function(gltfScene) {
-        // Vinculamos las caderas (el eje central del cuerpo)
-        this.huesos.torso = gltfScene.getObjectByName('mixamorigHips');
-        
-        this.huesos.cuello = gltfScene.getObjectByName('mixamorigNeck') || gltfScene.getObjectByName('mixamorigHead');
-        
-        this.huesos.brazoIzq = gltfScene.getObjectByName('mixamorigLeftArm');
-        this.huesos.codoIzq = gltfScene.getObjectByName('mixamorigLeftForeArm');
-        this.huesos.manoIzq = gltfScene.getObjectByName('mixamorigLeftHand');
-        
-        this.huesos.brazoDer = gltfScene.getObjectByName('mixamorigRightArm');
-        this.huesos.codoDer = gltfScene.getObjectByName('mixamorigRightForeArm');
-        this.huesos.manoDer = gltfScene.getObjectByName('mixamorigRightHand');
-
-        gltfScene.traverse((child) => {
-            if (child.isMesh && child.morphTargetDictionary) this.rostroMesh = child;
-        });
-        console.log("🧬 H.A.R.V.I.S: Esqueleto, Torso y Brazos vinculados.");
-    }
-};
-
-/** 2. INICIALIZACIÓN **/
-async function abrirSpaxioVersoDesdeContacto() {
-    if (spaxioVersoEnSegundoPlano) { maximizarSpaxioVerso(); return; }
-    
-    let contenedor3D = document.getElementById('contenedor-spaxioverso');
-    if (!contenedor3D) {
-        contenedor3D = document.createElement('div');
-        contenedor3D.id = 'contenedor-spaxioverso';
-        contenedor3D.style.cssText = `position: fixed; top: 0; left: 0; width: 100dvw; height: 100dvh; background: #0b141a; z-index: 2000; display: flex; flex-direction: column;`;
-        contenedor3D.innerHTML = `
-            <div style="padding: 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333;">
-                <button onclick="minimizarSpaxioVerso()">←</button>
-                <span>🪐 SPAXIOVERSO OMNI</span>
-                <button onclick="cerrarSpaxioVerso()">[ Salir ]</button>
-            </div>
-            <div id="canvas-render-3d" style="flex-grow: 1;"></div>
-            <video id="video-captura-omni" style="display: none;" playsinline></video>
-        `;
-        document.body.appendChild(contenedor3D);
-    }
-    videoElementOculto = document.getElementById('video-captura-omni');
-    inicializarEntorno3D();
-    setTimeout(() => encenderRastreadorFacialOMNI(), 400);
-}
-
-/** 2. INICIALIZACIÓN OPTIMIZADA **/
-function inicializarEntorno3D() {
-    const contenedor = document.getElementById('canvas-render-3d');
-    if (!contenedor) return;
-
-    // 1. Configuración básica
-    window.SpaxioVerso.scene = new THREE.Scene();
-    window.SpaxioVerso.scene.background = new THREE.Color(0x000000);
-    window.SpaxioVerso.camera = new THREE.PerspectiveCamera(45, contenedor.clientWidth / contenedor.clientHeight, 0.1, 1000);
-    window.SpaxioVerso.camera.position.set(0, 1.5, 2);
-    
-    window.SpaxioVerso.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-    window.SpaxioVerso.renderer.setSize(contenedor.clientWidth, contenedor.clientHeight);
-    contenedor.appendChild(window.SpaxioVerso.renderer.domElement);
-
-    // 2. Luces
-    window.SpaxioVerso.scene.add(new THREE.AmbientLight(0xffffff, 1));
-
-    
-    // 3. CARGA DIRECTA (Sin variables raras)
-    // Asegúrate de que esto esté fuera de cualquier función
-const loader3D = new THREE.GLTFLoader(); 
-
-// Dentro de tu función inicializarEntorno3D:
-loader3D.load('/assets/avatar_local.glb', (gltf) => {
-    window.SpaxioVerso.avatar = gltf.scene;
-
-    // --- CÓDIGO FIJO: Ajuste de escala y posición ---
-    window.SpaxioVerso.avatar.position.set(0, 0, 0);
-    window.SpaxioVerso.avatar.scale.set(1, 1, 1);
-
-    const factorDeEscala = 0.05; 
-    window.SpaxioVerso.avatar.traverse((child) => {
-        if (child.isMesh) {
-            child.scale.set(factorDeEscala, factorDeEscala, factorDeEscala);
-        }
-    });
-
-    // Ajuste de cámara (fijo)
-    window.SpaxioVerso.camera.position.set(0, 1.5, 5); 
-    window.SpaxioVerso.camera.lookAt(0, 1.5, 0);
-    // ------------------------------------------------
-
-    window.SpaxioVerso.scene.add(window.SpaxioVerso.avatar);
-    
-    // Vinculamos el esqueleto para que responda a tus movimientos
-    SpaxioAvatarController.vincularEsqueleto(window.SpaxioVerso.avatar);
-    
-    window.SpaxioVerso.isReady = true;
-    console.log("Avatar cargado y configurado permanentemente");
-}, undefined, (err) => {
-    console.error("Error al cargar:", err);
-});
-
- animarSpaxioVerso();
-
-}
-/** 4. BUCLE DE ANIMACIÓN CON AJUSTE DE REDIMENSIONADO **/
-
-
-
-// 2. En el bucle de animación, verifica la pose
-
-     function animarSpaxioVerso() {
-    spaxioAnimFrameId = requestAnimationFrame(animarSpaxioVerso);
-
-    // 1. Mover Cuello con suavizado (Lerp)
-    if (window.SpaxioVerso.avatar && SpaxioAvatarController.huesos.cuello) {
-        const rotY = rotacionRostro.y || 0;
-        SpaxioAvatarController.huesos.cuello.rotation.y = THREE.MathUtils.lerp(
-            SpaxioAvatarController.huesos.cuello.rotation.y, 
-            rotY, 
-            0.1
-        );
-        SpaxioAvatarController.huesos.cuello.rotation.x = 0;
-        SpaxioAvatarController.huesos.cuello.rotation.z = 0;
-    }
-
-    // 2. Mover Manos con tu lógica directa de telemetría de pantalla
-    if (SpaxioAvatarController.huesos.manoIzq && SpaxioAvatarController.huesos.manoDer) {
-        SpaxioAvatarController.huesos.manoIzq.rotation.set(posicionManos.left.x, posicionManos.left.y, 0);
-        SpaxioAvatarController.huesos.manoDer.rotation.set(posicionManos.right.x, posicionManos.right.y, 0);
-    }
-
-    // 3. Renderizar la escena permanentemente
-    if (window.SpaxioVerso.renderer && window.SpaxioVerso.scene && window.SpaxioVerso.camera) {
-        window.SpaxioVerso.renderer.render(window.SpaxioVerso.scene, window.SpaxioVerso.camera);
-    }
- }
-    
-    
-    
-        
-    
-
-// CORRECCIÓN: Unimos la línea rota y aseguramos que el ID exista
-window.addEventListener('resize', () => {
-    if (!window.SpaxioVerso || !window.SpaxioVerso.renderer) return;
-    
-    const contenedor = document.getElementById('canvas-render-3d');
-    if (!contenedor) return;
-
-    const w = contenedor.clientWidth;
-    const h = contenedor.clientHeight;
-    
-    window.SpaxioVerso.camera.aspect = w / h;
-    window.SpaxioVerso.camera.updateProjectionMatrix();
-    window.SpaxioVerso.renderer.setSize(w, h);
-});
-
-/** 3. IA Y RASTREO **/
-
-function encenderRastreadorFacialOMNI() {
-    // Usamos una ruta más directa para evitar errores de red
-    const CDN_URL = "https://cdn.jsdelivr.net/npm/@mediapipe/holistic@0.5.1675471628/";
-
-    holisticIA = new Holistic({
-        locateFile: (file) => {
-            return `${CDN_URL}${file}`;
-        }
-    });
-
-    holisticIA.setOptions({
-        modelComplexity: 1,
-        smoothLandmarks: true,
-        refineFaceLandmarks: true,
-        enableHandLandmarks: true
-    });
-
-    holisticIA.onResults((results) => {
-        // --- Rastreo del Rostro ---
-        if (results.faceLandmarks) {
-            const nariz = results.faceLandmarks[4];
-            rotacionRostro.y = (nariz.x - 0.5) * -2.5;
-            rotacionRostro.x = (nariz.y - 0.4) * 2.5;
-        }
-
-        // --- Rastreo Manual Directo ---
-        if (results.leftHandLandmarks) {
-            posicionManos.left.set(
-                (results.leftHandLandmarks[0].x - 0.5) * 5,
-                -(results.leftHandLandmarks[0].y - 0.5) * 5,
-                0
-            );
-        }
-        
-        if (results.rightHandLandmarks) {
-            posicionManos.right.set(
-                (results.rightHandLandmarks[0].x - 0.5) * 5,
-                -(results.rightHandLandmarks[0].y - 0.5) * 5,
-                0
-            );
-        }
-    });
-
-    camaraMediaPipe = new Camera(videoElementOculto, {
-        onFrame: async () => await holisticIA.send({ image: videoElementOculto }),
-        width: 480, 
-        height: 360
-    });
-    
-    // Agregamos un pequeño delay para asegurar que los scripts cargaron
-    setTimeout(() => {
-        camaraMediaPipe.start();
-    }, 1000);
- }
-
-    
-    
-
-    
-
-    
-
-
-function cerrarSpaxioVerso() {
-    document.getElementById('contenedor-spaxioverso').style.display = 'none';
-    if (camaraMediaPipe) camaraMediaPipe.stop();
-    cancelAnimationFrame(spaxioAnimFrameId);
-}
-
-
-
-    
-function detenerTransmisionOmniRealtime() {
-    if (intervaloTransmision) {
-        clearInterval(intervaloTransmision);
-        intervaloTransmision = null;
-        console.log("🛑 H.A.R.V.I.S: Emisión de telemetría facial apagada.");
-    }
-}
-/**
- * 5. INTERRUPTORES DE CICLO DE VIDA (Minimizar / Cerrar)
- */
-function minimizarSpaxioVerso() {
-    const contenedor3D = document.getElementById('contenedor-spaxioverso');
-    if (contenedor3D) {
-        contenedor3D.style.zIndex = "-1000";
-        contenedor3D.style.opacity = "0";
-        contenedor3D.style.pointerEvents = "none";
-        spaxioVersoEnSegundoPlano = true;
-        console.log("📥 SpaxioVerso en segundo plano.");
-    }
-}
-
-function maximizarSpaxioVerso() {
-    const contenedor3D = document.getElementById('contenedor-spaxioverso');
-    if (contenedor3D) {
-        contenedor3D.style.zIndex = "2000";
-        contenedor3D.style.opacity = "1";
-        contenedor3D.style.pointerEvents = "auto";
-        spaxioVersoEnSegundoPlano = false;
-        console.log("📤 SpaxioVerso al frente.");
-    }
-}
-
-
 
 
      
