@@ -9,9 +9,10 @@ import time
 
 # URL de tu endpoint backend en Vercel (ajusta la URL según tu dominio real)
 URL_API_VERCEL = "https://tu-app-spaxio.vercel.app/api/spaxioflow-event" 
-
+TOKEN_BOT = "8317000492:AAHBidIMBFqAdH4t4GufKzeTfiF7TmJuhts"
+MI_CHAT_ID = "8320121552"
 # Token de tu Bot de Telegram
-TELEGRAM_BOT_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN", "TU_TOKEN_TELEGRAM_AQUI")
+TELEGRAM_BOT_TOKEN = os.environ.get("8317000492:AAHBidIMBFqAdH4t4GufKzeTfiF7TmJuhts", "8320121552)
 
 # ==============================================================================
 # 2. CONFIGURACIÓN DE SUPABASE (LISTA PARA DESCOMENTAR LUEGO)
