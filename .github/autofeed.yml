@@ -1,1 +1,31 @@
+name: SpaxioFlow Auto Bot
 
+on:
+  schedule:
+    # Se ejecuta cada 4 horas automáticamente
+    - cron: '0 */4 * * *'
+  workflow_dispatch: # Permite ejecutarlo manualmente desde GitHub cuando quieras
+
+jobs:
+  run-bot:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout del repositorio
+        uses: actions/checkout@v3
+
+      - name: Configurar Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Instalar dependencias
+        run: |
+          pip install requests supabase
+
+      - name: Ejecutar script del Bot
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+        run: |
+          python bot_cron.py
