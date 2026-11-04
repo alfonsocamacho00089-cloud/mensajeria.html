@@ -1,4 +1,4 @@
-const CACHE_NAME = 'spacechat-v11';
+const CACHE_NAME = 'spacechat-v12';
 const urlsToCache = [
   './index.html',
   './assets/logo.webp',
