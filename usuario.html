@@ -2127,7 +2127,7 @@ const rolGuardado = localStorage.getItem('spaxio_rol');
     return false;
 };
 
-             async function cambiarARol(tipoRol) {
+             async function cambiarARol(rolElegido, tipoRol) {
     // 1. Identificador único de la cuenta principal del usuario (ej: su correo o teléfono)
     const usuarioPrincipal = localStorage.getItem('usuario_correo') || 'default_user';
     
