@@ -2,7 +2,7 @@ const CACHE_NAME = 'spacechat-v11';
 const urlsToCache = [
   './index.html',
   './assets/logo.webp',
-  './assets/imagen-logos-nuevos.png'
+  './assets/imagen-logos-nuevos.png?v=12",
 ];
 
 self.addEventListener('install', (event) => {
