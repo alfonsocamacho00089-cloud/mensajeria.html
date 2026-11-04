@@ -1416,16 +1416,30 @@ const rolGuardado = localStorage.getItem('spaxio_rol');
     <button onclick="guardarCambiosPerfil()" style="width: 50%; padding: 10px; background: #ffd700; border: none; border-radius: 10px; font-weight: bold; color: #000; cursor: pointer; font-size: 16px; margin: 20px auto 10px auto; display: block; text-transform: uppercase; box-shadow: 0 0 5px #ffd700;">
         GUARDAR 
     </button>
+<div style="display: flex; gap: 10px; justify-content: center; width: 80%; margin: 15px auto 0 auto;">
+       
+!-- Botón Usuario / Pasajero -->
+    <button class="btn-rol" onclick="seleccionarRol('passenger')">
+        👤 Soy Usuario 
+    </button>
 
+    <!-- Botón Comerciante -->
+    <button class="btn-rol" onclick="seleccionarRol('merchant')">
+        🏬 Soy Comerciante
+    </button>
 
-    <!-- Botones para cambiar automáticamente a modo Comercio o Driver -->
-    <div style="display: flex; gap: 10px; justify-content: center; width: 80%; margin: 15px auto 0 auto;">
-        <button onclick="cambiarARol('merchant')" style="flex: 1; padding: 10px; background: rgba(255,215,0,0.1); color: #ffd700; border: 1px solid #ffd700; border-radius: 8px; font-weight: bold; font-size: 13px; cursor: pointer;">
+    <!-- Botón Conductor (Driver) -->
+    <button class="btn-rol btn-driver" onclick="seleccionarRol('driver')">
+        🚖 Soy Driver 
+    </button>
+      
+    <!-- Botones para cambiar automáticamente a modo Comercio o Driver 
+     <button onclick="cambiarARol('merchant')" style="flex: 1; padding: 10px; background: rgba(255,215,0,0.1); color: #ffd700; border: 1px solid #ffd700; border-radius: 8px; font-weight: bold; font-size: 13px; cursor: pointer;">
             👤 Cambiar a Perfil Comercio
         </button>
         <button onclick="cambiarARol('driver')" style="flex: 1; padding: 10px; background: rgba(255,215,0,0.1); color: #ffd700; border: 1px solid #ffd700; border-radius: 8px; font-weight: bold; font-size: 13px; cursor: pointer;">
             👤 Cambiar a Perfil Driver
-        </button>
+        </button>--->
     </div>
 
       </div>
@@ -2126,8 +2140,22 @@ const rolGuardado = localStorage.getItem('spaxio_rol');
     alert("🚨 ERROR DETECTADO:\n\n" + message + "\n\nArchivo: " + source + "\nLínea: " + lineno);
     return false;
 };
+function seleccionarRol(rolElegido) {
+            // Guardamos el rol en el almacenamiento del navegador
+            localStorage.setItem('spaxio_rol', rolElegido);
 
-             async function cambiarARol(rolElegido, tipoRol) {
+            // Redirección a los subdominios de Vercel (Reemplaza estas URLs con las tuyas cuando las despliegues)
+            if (rolElegido === 'passenger') {
+                window.location.href = "./usuario.html";
+            } 
+            else if (rolElegido === 'driver') {
+                window.location.href = "./drivtaxi.html";
+            } 
+            else if (rolElegido === 'merchant') {
+                window.location.href = "./comercios.html";
+            }
+             }
+            /* async function cambiarARol(rolElegido, tipoRol) {
     // 1. Identificador único de la cuenta principal del usuario (ej: su correo o teléfono)
     const usuarioPrincipal = localStorage.getItem('usuario_correo') || 'default_user';
     
@@ -2165,7 +2193,7 @@ const rolGuardado = localStorage.getItem('spaxio_rol');
 
     // 4. Redirigimos al archivo HTML correspondiente
     window.location.href = archivoDestino;
-             }
+             }*/
              
 async function procesarCobroComercial(cantidadMonto = null) {
     const receptorInput = document.getElementById('idReceptor');
