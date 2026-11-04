@@ -1393,7 +1393,7 @@ const rolGuardado = localStorage.getItem('spaxio_rol');
      
          
      
-     <div id="seccion-mi-perfil" style="display: none; padding: 15px; background: #1e222b; border-bottom: 1px solid #1e222b;">
+<div id="seccion-mi-perfil" style="display: none; padding: 15px; background: #1e222b; border-bottom: 1px solid #1e222b;">
     <!-- Modifica el estilo del div que envuelve los inputs y el botón -->
     <div style="display: flex; flex-direction: column; align-items: center; width: 100%; text-align: center;">
    
@@ -1416,6 +1416,7 @@ const rolGuardado = localStorage.getItem('spaxio_rol');
     <button onclick="guardarCambiosPerfil()" style="width: 50%; padding: 10px; background: #ffd700; border: none; border-radius: 10px; font-weight: bold; color: #000; cursor: pointer; font-size: 16px; margin: 20px auto 10px auto; display: block; text-transform: uppercase; box-shadow: 0 0 5px #ffd700;">
         GUARDAR 
     </button>
+
 
     <!-- Botones para cambiar automáticamente a modo Comercio o Driver -->
     <div style="display: flex; gap: 10px; justify-content: center; width: 80%; margin: 15px auto 0 auto;">
@@ -2125,6 +2126,47 @@ const rolGuardado = localStorage.getItem('spaxio_rol');
     alert("🚨 ERROR DETECTADO:\n\n" + message + "\n\nArchivo: " + source + "\nLínea: " + lineno);
     return false;
 };
+
+             async function cambiarARol(tipoRol) {
+    // 1. Identificador único de la cuenta principal del usuario (ej: su correo o teléfono)
+    const usuarioPrincipal = localStorage.getItem('usuario_correo') || 'default_user';
+    
+    // 2. Definimos los nombres de las llaves según el rol
+    let idKey = `${tipoRol}_id`;
+    let qrKey = `${tipoRol}_qr`;
+    let archivoDestino = '';
+
+    if (tipoRol === 'driver') archivoDestino = './driver.html';
+    if (tipoRol === 'merchant') archivoDestino = './comercio.html';
+    if (tipoRol === 'passenger') archivoDestino = './usuario.html';
+
+    // 3. Verificamos si ya tiene un ID creado para este rol
+    let rolIdActual = localStorage.getItem(idKey);
+
+    if (!rolIdActual) {
+        // --- ¡ES LA PRIMERA VEZ! LO CREAMOS AUTOMÁTICAMENTE ---
+        // Generamos un ID único basado en el rol y números aleatorios/tiempo
+        const prefijo = tipoRol === 'driver' ? 'DRV' : (tipoRol === 'merchant' ? 'COM' : 'USR');
+        rolIdActual = `${prefijo}-${Math.floor(10000 + Math.random() * 90000)}` ;
+        
+        // Generamos un QR que contenga este ID único
+        const qrGeneradoUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${rolIdActual}`;
+
+        // Guardamos localmente (y aquí mismo puedes hacer tu inserción automática a Firebase/Supabase)
+        localStorage.setItem(idKey, rolIdActual);
+        localStorage.setItem(qrKey, qrGeneradoUrl);
+        localStorage.setItem('spaxio_rol', tipoRol);
+
+        console.log(`Nuevo perfil de ${tipoRol} creado automáticamente con ID: ${rolIdActual}`);
+    } else {
+        // Si ya existía, solo actualizamos el rol activo
+        localStorage.setItem('spaxio_rol', tipoRol);
+    }
+
+    // 4. Redirigimos al archivo HTML correspondiente
+    window.location.href = archivoDestino;
+             }
+             
 async function procesarCobroComercial(cantidadMonto = null) {
     const receptorInput = document.getElementById('idReceptor');
     const montoInput = document.getElementById('montoEnviar');
