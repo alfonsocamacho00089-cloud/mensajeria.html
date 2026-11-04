@@ -1,10 +1,7 @@
 {
-  "name": "YsaPay",
-  "short_name": "YsaPay",
-  "start_url": "./index.html",
-  "display": "standalone",
-  "background_color": "#0b141a",
-  "theme_color": "#ffd700",
+  "short_name": "SpaceChat",
+  "name": "SpaceChat",
+  "description": "Mensajería",
   "icons": [
     {
       "src": "assets/imagen-logos-nuevos.png",
@@ -12,9 +9,16 @@
       "type": "image/png"
     },
     {
-      "src": "assets/imagen-logos-nuevos.png",
+      "src": "assets/imagen-logos-nuevos.png?v=2",
+      "type": "image/png",
       "sizes": "512x512",
-      "type": "image/png"
+      "purpose": "any maskable"
     }
-  ]
+  ],
+  "start_url": "./index.html",
+  "display": "standalone",
+  "scope": "/",
+  "background_color": "#000000",
+  "theme_color": "#000000"
 }
+
