@@ -1372,6 +1372,62 @@ function seleccionarRol(rolElegido) {
   <Elicitation label="Sincronizar con Firebase" query="¿Cómo sincronizo estos múltiples IDs de roles en la base de datos de Firebase?"/>
   <Elicitation label="Ajustar interfaz del menú" query="¿Cómo muestro el ID activo actual directamente en el menú de perfil?"/>
 </ElicitationsGroup>*/
+
+ // Variable global temporal para saber qué tipo de cuenta se está abriendo en el modal
+let rolObjetivoRegistro = 'passenger'; 
+
+function abrirModalRegistroParaRol(rol) {
+    rolObjetivoRegistro = rol; // 'passenger', 'driver' o 'merchant'
+    
+    // Ocultamos otros modales o menús que puedan estorbar
+    const panelLateral = document.getElementById('seccion-menu-hamburguesa');
+    if (panelLateral) panelLateral.classList.remove('abierto');
+    
+    const modalPerfil = document.getElementById('seccion-mi-perfil');
+    if (modalPerfil) modalPerfil.style.display = 'none';
+
+    // Abrimos el modal de registro
+    const modalRegistro = document.getElementById('modal-registro');
+    if (modalRegistro) {
+        modalRegistro.style.display = 'flex';
+        
+        // Opcional: Cambiar el título del modal dinámicamente según el rol
+        const tituloModal = modalRegistro.querySelector('h3');
+        if (tituloModal) {
+            if (rol === 'driver') tituloModal.textContent = "Registro - Cuenta Driver 🚖";
+            else if (rol === 'merchant') tituloModal.textContent = "Registro - Cuenta Comercio 🏬";
+            else tituloModal.textContent = "Registro - Cuenta Usuario 👤";
+        }
+    }
+}
+/*```[cite: 1]
+
+---
+
+### Paso 2: Actualizar los botones de tu perfil y menú
+Asegúrate de que los botones en tu sección de perfil (`#seccion-mi-perfil`) y en tu menú hamburguesa llamen a esta nueva función pasando el rol correspondiente:
+
+```html
+<!-- En tu sección de perfil o menú, cambia el onclick para usar la nueva función -->*/
+
+ 
+/*```[cite: 1]
+
+---
+
+### Paso 3: Modificar `ejecutarRegistroCompleto` para soportar múltiples perfiles
+Para evitar que se sobrescriba la cuenta anterior y permitir que el usuario tenga varios perfiles guardados en su dispositivo, ajusta la función de guardado para que asigne un ID único independiente según el rol seleccionado (`spaxio_id_passenger`, `spaxio_id_driver`, etc.)[cite: 1]:
+
+```javascript*/
+
+/*```[cite: 1]
+
+---
+
+<ElicitationsGroup message="¿Quieres que añadamos un selector rápido para alternar entre las cuentas ya creadas o prefieres que se maneje desde el menú?">
+  <Elicitation label="Selector rápido de cuentas" query="¿Cómo puedo hacer un selector rápido en el perfil para cambiar entre mis cuentas creadas?"/>
+  <Elicitation label="Todo listo" query="¡Perfecto, la lógica de registro múltiple está lista!"/>
+</ElicitationsGroup>*/
 </script>
  
 <div id="modal-qr" class="modal">
@@ -1423,19 +1479,17 @@ function seleccionarRol(rolElegido) {
 <div style="display: flex; gap: 10px; justify-content: center; width: 80%; margin: 15px auto 0 auto;">
        
 !-- Botón Usuario / Pasajero -->
-    <button class="btn-rol" onclick="seleccionarRol('passenger')">
-        👤 Soy Usuario 
-    </button>
+    <button class="btn-rol" onclick="abrirModalRegistroParaRol('passenger')">
+    👤 Soy Usuario 
+</button>
 
-    <!-- Botón Comerciante -->
-    <button class="btn-rol" onclick="seleccionarRol('merchant')">
-        🏬 Soy Comerciante
-    </button>
+<button class="btn-rol" onclick="abrirModalRegistroParaRol('merchant')">
+    🏬 Soy Comerciante
+</button>
 
-    <!-- Botón Conductor (Driver) -->
-    <button class="btn-rol btn-driver" onclick="seleccionarRol('driver')">
-        🚖 Soy Driver 
-    </button>
+<button class="btn-rol btn-driver" onclick="abrirModalRegistroParaRol('driver')">
+    🚖 Soy Driver 
+</button>
       
     <!-- Botones para cambiar automáticamente a modo Comercio o Driver 
      <button onclick="cambiarARol('merchant')" style="flex: 1; padding: 10px; background: rgba(255,215,0,0.1); color: #ffd700; border: 1px solid #ffd700; border-radius: 8px; font-weight: bold; font-size: 13px; cursor: pointer;">
