@@ -1386,19 +1386,20 @@ function seleccionarRol(rolElegido) {
     <!-- Botones para cambiar automáticamente a modo Comercio o Driver -->
     <div style="display: flex; gap: 10px; justify-content: center; width: 80%; margin: 15px auto 0 auto;">
         
-    <button class="btn-rol" onclick="abrirModalRegistroParaRol('passenger')">
-    👤 Soy Usuario 
-</button>
+<!-- Botón Usuario / Pasajero -->
+    <button class="btn-rol" onclick="seleccionarRol('passenger')">
+        👤 Soy Usuario 
+    </button>
 
-<!-- Botón para Driver -->
-<button class="btn-rol btn-driver" onclick="document.getElementById('modal-registro').style.display = 'flex';">
-    🚖 Soy Driver 
-</button>
+    <!-- Botón Comerciante -->
+    <button class="btn-rol" onclick="seleccionarRol('merchant')">
+        🏬 Soy Comerciante
+    </button>
 
-<!-- Botón para Comercio -->
-<button class="btn-rol" onclick="document.getElementById('modal-registro').style.display = 'flex';">
-    🏬 Soy Comerciante
-</button>
+    <!-- Botón Conductor (Driver) -->
+    <button class="btn-rol btn-driver" onclick="seleccionarRol('driver')">
+        🚖 Soy Driver 
+    </button>
     
     </div>
 
@@ -1424,7 +1425,7 @@ function seleccionarRol(rolElegido) {
             <span></span> <span>Afiliacion</span>
 
     </div>
-      
+          
         <div class="menu-item-link" onclick="toggleMenuHamburguesa(); abrirAgendaCompleta();">
             <span>👥</span> <span>Mi Agenda</span>
         </div>
@@ -1444,7 +1445,17 @@ function seleccionarRol(rolElegido) {
         <div class="menu-item-link" onclick="toggleMenuHamburguesa(); lanzarInstalacion();">
             <span>📱</span> <span>Instalar Aplicación (PWA)</span>
         </div>
+<div style="display: flex; gap: 10px; justify-content: center; width: 80%; margin: 15px auto 0 auto;">
+        
+ <!-- Botón para Driver -->
+<button class="btn-rol btn-driver" onclick="document.getElementById('modal-registro').style.display = 'flex';">
+    🚖 Soy Driver 
+</button>
 
+<!-- Botón para Comercio -->
+<button class="btn-rol" onclick="document.getElementById('modal-registro').style.display = 'flex';">
+    🏬 Soy Comerciante
+</button></div>
     </div>
 </div>
 <!-- ==================== PANEL LATERAL DE TAXI / CONDUCTOR ==================== -->
