@@ -1309,101 +1309,31 @@ button#btn-enviar:active {
 
 <script>
 
-
 function seleccionarRol(rolElegido) {
-    // Definimos las llaves específicas según el rol
-    let idKey = `spaxio_id_${rolElegido}`; // Ej: spaxio_id_driver, spaxio_id_passenger
-    let perfilKey = `spaxio_perfil_${rolElegido}`;
-
-    // 1. Verificamos si ya existe un ID creado para este rol en este dispositivo
-    let idRolActual = localStorage.getItem(idKey);
-
-    if (!idRolActual) {
-        // --- ¡ES LA PRIMERA VEZ QUE USA ESTE ROL! GENERAMOS UN ID NUEVO ---
-        const prefijo = rolElegido === 'driver' ? 'DRV' : (rolElegido === 'merchant' ? 'COM' : 'USR');
-        const hashAleatorio = Math.random().toString(36).substring(2, 9).toUpperCase();
-        idRolActual = `${prefijo}-${hashAleatorio}`;
-
-        // Guardamos el ID exclusivo para este rol
-        localStorage.setItem(idKey, idRolActual);
-        
-        // Opcional: Guardamos un registro básico en el almacenamiento local para este perfil
-        const datosNuevoRol = {
-            id: idRolActual,
-            rol: rolElegido,
-            fechaCreacion: Date.now()
-        };
-        localStorage.setItem(perfilKey, JSON.stringify(datosNuevoRol));
-        
-        console.log(`✨ Nuevo ID exclusivo creado para el rol [${rolElegido}]: ${idRolActual}`);
-    } else {
-        console.log(`🔄 Cambiando al rol [${rolElegido}] con ID existente: ${idRolActual}`);
-    }
-
-    // 2. ESTABLECEMOS EL ID ACTIVO EN LA SESIÓN GENERAL DE LA APP
-    // Aquí es donde la app sabe qué ID usar en el header, chat y antenas en este momento exacto
-    localStorage.setItem('mi_dropis_id', idRolActual);
+ const miID = localStorage.getItem('mi_dropis_id') || "SPAXIO-USER";
+ 
+    // 1. Guardar localmente
     localStorage.setItem('spaxio_rol', rolElegido);
+    localStorage.setItem('spaxio_user_rol', rolElegido);
 
-    // 3. Ocultar el modal de selección si estaba abierto
+    // 2. Ocultar el modal de selección
     const modal = document.getElementById('modal-seleccion-rol');
     if (modal) modal.style.display = 'none';
 
-    // 4. Recargar o actualizar la interfaz para que tome el nuevo ID de inmediato
-    if (typeof aplicarBloqueoQRIDRoles === "function") aplicarBloqueoQRIDRoles();
-    if (typeof aplicarReglasDeRolEnInterfaz === "function") aplicarReglasDeRolEnInterfaz();
+    // 3. Aplicar de inmediato el bloqueo de QR/ID y las reglas del rol elegido
+    aplicarBloqueoQRIDRoles(); // <-- Aquí se aplica en caliente al momento de elegir
+    aplicarReglasDeRolEnInterfaz();
 
-    alert(`✅ ¡Cambiado a perfil "${rolElegido}"!\nTu ID activo actual es: ${idRolActual}`);
-    
-    // Recargamos la interfaz o el span del ID si lo tienes visible
-    const elDisplay = document.getElementById('mi-id-display');
-    if (elDisplay) elDisplay.textContent = "Tu ID: " + idRolActual;
-    
-    // Opcional: recargar la ventana para asegurar que las conexiones de Firebase/IndexedDBlean el nuevo ID activo
-    location.reload();
-}
-
- 
-/*```[cite: 1]
-
----
-
-### ¿Cómo funciona esta solución para lo que necesitas?
-
-1. **Separación por sufijos:** Al usar `spaxio_id_driver` y `spaxio_id_passenger`, el navegador almacena de manera independiente el código de cada perfil.
-2. **Persistencia de cuentas múltiples:** Cuando seleccionas *Driver* por primera vez, la app le asigna un ID único (ej. `DRV-9F48X2`). Si luego cambias a *Usuario*, la app busca `spaxio_id_passenger`. Si ya existía, carga el del usuario; si no, le crea uno nuevo (`USR-3B71W9`).
-3. **ID Activo:** `mi_dropis_id` pasa a ser el **ID activo en el momento**. Cada vez que cambias de perfil, actualizamos `mi_dropis_id` con el valor correspondiente al rol seleccionado, logrando que el botón abra la cuenta correcta y escanee con su identidad respectiva.
-
-<ElicitationsGroup message="Si necesitas ajustar algún detalle adicional de esta lógica o adaptarla al registro en Firebase:">
-  <Elicitation label="Sincronizar con Firebase" query="¿Cómo sincronizo estos múltiples IDs de roles en la base de datos de Firebase?"/>
-  <Elicitation label="Ajustar interfaz del menú" query="¿Cómo muestro el ID activo actual directamente en el menú de perfil?"/>
-</ElicitationsGroup>*/
-let rolObjetivoRegistro = 'passenger'; 
-
-function abrirModalRegistroParaRol(rol) {
-    rolObjetivoRegistro = rol; // 'passenger', 'driver' o 'merchant'
-    
-    // Ocultamos otros modales o menús que puedan estorbar
-    const panelLateral = document.getElementById('seccion-menu-hamburguesa');
-    if (panelLateral) panelLateral.classList.remove('abierto');
-    
-    const modalPerfil = document.getElementById('seccion-mi-perfil');
-    if (modalPerfil) modalPerfil.style.display = 'none';
-
-    // Abrimos el modal de registro
-    const modalRegistro = document.getElementById('modal-registro');
-    if (modalRegistro) {
-        modalRegistro.style.display = 'flex';
-        
-        // Opcional: Cambiar el título del modal dinámicamente según el rol
-        const tituloModal = modalRegistro.querySelector('h3');
-        if (tituloModal) {
-            if (rol === 'driver') tituloModal.textContent = "Registro - Cuenta Driver 🚖";
-            else if (rol === 'merchant') tituloModal.textContent = "Registro - Cuenta Comercio 🏬";
-            else tituloModal.textContent = "Registro - Cuenta Usuario 👤";
-        }
+    if (rolElegido === 'driver') {
+        alert("🚖 Modo Conductor configurado. Tu panel ha sido ajustado.");
+    } else if (rolElegido === 'merchant') {
+        alert("🏬 Modo Comerciante configurado.");
+    } else {
+        alert(`✅ ¡Rol "${rolElegido}" guardado con éxito!`);
     }
- }
+}
+ 
+
 </script>
  
 <div id="modal-qr" class="modal">
@@ -1460,12 +1390,14 @@ function abrirModalRegistroParaRol(rol) {
     👤 Soy Usuario 
 </button>
 
-<button class="btn-rol" onclick="abrirModalRegistroParaRol('merchant')">
-    🏬 Soy Comerciante
+<!-- Botón para Driver -->
+<button class="btn-rol btn-driver" onclick="document.getElementById('modal-registro').style.display = 'flex';">
+    🚖 Soy Driver 
 </button>
 
-<button class="btn-rol btn-driver" onclick="abrirModalRegistroParaRol('driver')">
-    🚖 Soy Driver 
+<!-- Botón para Comercio -->
+<button class="btn-rol" onclick="document.getElementById('modal-registro').style.display = 'flex';">
+    🏬 Soy Comerciante
 </button>
     
     </div>
