@@ -1378,7 +1378,32 @@ function seleccionarRol(rolElegido) {
   <Elicitation label="Sincronizar con Firebase" query="¿Cómo sincronizo estos múltiples IDs de roles en la base de datos de Firebase?"/>
   <Elicitation label="Ajustar interfaz del menú" query="¿Cómo muestro el ID activo actual directamente en el menú de perfil?"/>
 </ElicitationsGroup>*/
+let rolObjetivoRegistro = 'passenger'; 
 
+function abrirModalRegistroParaRol(rol) {
+    rolObjetivoRegistro = rol; // 'passenger', 'driver' o 'merchant'
+    
+    // Ocultamos otros modales o menús que puedan estorbar
+    const panelLateral = document.getElementById('seccion-menu-hamburguesa');
+    if (panelLateral) panelLateral.classList.remove('abierto');
+    
+    const modalPerfil = document.getElementById('seccion-mi-perfil');
+    if (modalPerfil) modalPerfil.style.display = 'none';
+
+    // Abrimos el modal de registro
+    const modalRegistro = document.getElementById('modal-registro');
+    if (modalRegistro) {
+        modalRegistro.style.display = 'flex';
+        
+        // Opcional: Cambiar el título del modal dinámicamente según el rol
+        const tituloModal = modalRegistro.querySelector('h3');
+        if (tituloModal) {
+            if (rol === 'driver') tituloModal.textContent = "Registro - Cuenta Driver 🚖";
+            else if (rol === 'merchant') tituloModal.textContent = "Registro - Cuenta Comercio 🏬";
+            else tituloModal.textContent = "Registro - Cuenta Usuario 👤";
+        }
+    }
+ }
 </script>
  
 <div id="modal-qr" class="modal">
@@ -1430,20 +1455,18 @@ function seleccionarRol(rolElegido) {
 
     <!-- Botones para cambiar automáticamente a modo Comercio o Driver -->
     <div style="display: flex; gap: 10px; justify-content: center; width: 80%; margin: 15px auto 0 auto;">
-        !-- Botón Usuario / Pasajero -->
-    <button class="btn-rol" onclick="seleccionarRol('passenger')">
-        👤 Soy Usuario 
-    </button>
+        
+    <button class="btn-rol" onclick="abrirModalRegistroParaRol('passenger')">
+    👤 Soy Usuario 
+</button>
 
-    <!-- Botón Comerciante -->
-    <button class="btn-rol" onclick="seleccionarRol('merchant')">
-        🏬 Soy Comerciante
-    </button>
+<button class="btn-rol" onclick="abrirModalRegistroParaRol('merchant')">
+    🏬 Soy Comerciante
+</button>
 
-    <!-- Botón Conductor (Driver) -->
-    <button class="btn-rol btn-driver" onclick="seleccionarRol('driver')">
-        🚖 Soy Driver 
-    </button>
+<button class="btn-rol btn-driver" onclick="abrirModalRegistroParaRol('driver')">
+    🚖 Soy Driver 
+</button>
     
     </div>
 
