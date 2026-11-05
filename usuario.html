@@ -7,38 +7,56 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="ChatSpace">
 
-<link rel="apple-touch-icon" href="assets/imagen-logos-nuevos.png">
- <link rel="manifest" href="manifest.json">    
- 
+<link rel="apple-touch-icon" href="assets/imagen-nuevas-logos.png">
+ <link rel="manifest" href="/manifest.json">    
  <meta charset="UTF-8">
  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, interactive-widget=overlays-content">
         <title>SpaceChat</title> </head>
-  <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
+  <!-- 1. Primero cargan las librerías externas base -->
+<script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-messaging-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-storage-compat.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script> 
-
-
 <script src="https://cdn.jsdelivr.net/npm/protobufjs@7.2.4/dist/protobuf.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-
- <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
-
- 
-
- <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<!-- 2. Tu inicialización global de Supabase y Eruda (si la usas) -->
 <script>
-  // Inicialización global explícita en window
   const SUPABASE_URL = "https://fcklnjgkwrnunoroseze.supabase.co";
   const SUPABASE_ANON_KEY = "sb_publishable_5hnn7yZwjtyk5ZLTrnO-2Q_8MJ6DPLR"; 
-  
   window.supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-  var supabaseClient = window.supabaseClient; // Respaldo global
+  var supabaseClient = window.supabaseClient;
 </script>
- 
- <script src="https://cdn.jsdelivr.net/npm/eruda"></script>
+<script src="https://cdn.jsdelivr.net/npm/eruda"></script>
 <script>eruda.init();</script>
+
+<!-- 3. TUS NUEVOS ARCHIVOS MODULARIZADOS -->
+<script src="js/taxi.js"></script>
+<script src="js/spaxioflow.js"></script><!-- 1. Primero cargan las librerías externas base -->
+<script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-messaging-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-storage-compat.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script> 
+<script src="https://cdn.jsdelivr.net/npm/protobufjs@7.2.4/dist/protobuf.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<!-- 2. Tu inicialización global de Supabase y Eruda (si la usas) -->
+<script>
+  const SUPABASE_URL = "https://fcklnjgkwrnunoroseze.supabase.co";
+  const SUPABASE_ANON_KEY = "sb_publishable_5hnn7yZwjtyk5ZLTrnO-2Q_8MJ6DPLR"; 
+  window.supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  var supabaseClient = window.supabaseClient;
+</script>
+<script src="https://cdn.jsdelivr.net/npm/eruda"></script>
+<script>eruda.init();</script>
+
+<!-- 3. TUS NUEVOS ARCHIVOS MODULARIZADOS -->
+<script src="js/taxi.js"></script>
+<script src="js/spaxioflow.js"></script>
      <style>
    
     * {
@@ -1258,7 +1276,7 @@ button#btn-enviar:active {
   
           <div class="modal-cover" style="position: relative; width: 100vw; height: 100vh; padding: 50px 30px 50px 30px; box-sizing: border-box; background: #1e222b; border-radius: 0px; text-align: center; border: 0px solid #333; box-shadow: 0 0 20px rgba(0,0,0,0.5);">   
 
-<img src="assets/imagen-nuevo-logo.png" alt="SpaceChat Logo" 
+<img src="assets/imagen-nuevas-logos.png" alt="SpaceChat Logo" 
      style="width: 80px; height: auto; display: block; margin: 0 auto 15px; position: relative; left: 2px; filter: drop-shadow(0px 4px 8px rgba(255, 215, 0, 0.3));">           
            
            <h3 style="color: #ffd700; margin-bottom: 20px;">Registro</h3>
@@ -1300,9 +1318,346 @@ button#btn-enviar:active {
     </div>
 </div>
  
+ <div id="modal-registro-rol" class="modal" style="display: none; align-items: center; justify-content: center; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #1e222b; z-index: 60000;">
+  
+          <div class="modal-cover" style="position: relative; width: 100vw; height: 100vh; padding: 50px 30px 50px 30px; box-sizing: border-box; background: #1e222b; border-radius: 0px; text-align: center; border: 0px solid #333; box-shadow: 0 0 20px rgba(0,0,0,0.5);">   
+
+<img src="assets/imagen-nuevas-logos.png" alt="SpaceChat Logo" 
+     style="width: 80px; height: auto; display: block; margin: 0 auto 15px; position: relative; left: 2px; filter: drop-shadow(0px 4px 8px rgba(255, 215, 0, 0.3));">           
+           
+           <h3 style="color: #ffd700; margin-bottom: 20px;">Registro</h3>
+        
+     
+     
+        <input type="text" id="reg-nombre" placeholder="Nombre" 
+            onfocus="this.style.boxShadow='0 0 5px #ffd700'; this.style.borderColor='#ffd700';" 
+            onblur="this.style.boxShadow='none'; this.style.borderColor='#999';"
+             style="width: 100%; padding: 18px; margin-bottom: 15px; background: #2a2f3a; color: white; border: 1px solid #999; border-radius: 8px; box-sizing: border-box; outline: none;">
+        
+        <input type="text" id="reg-apellido" placeholder="Apellido" 
+            onfocus="this.style.boxShadow='0 0 5px #ffd700'; this.style.borderColor='#ffd700';" 
+            onblur="this.style.boxShadow='none'; this.style.borderColor='#999';"
+             style="width: 100%; padding: 18px; margin-bottom: 15px; background: #2a2f3a; color: white; border: 1px solid #999; border-radius: 8px; box-sizing: border-box; outline: none;">
+
+<input type
+="text" id="reg-identificacion" placeholder="Cedula o Rif" 
+            onfocus="this.style.boxShadow='0 0 5px #ffd700'; this.style.borderColor='#ffd700';" 
+            onblur="this.style.boxShadow='none'; this.style.borderColor='#999';"
+             style="width: 100%; padding: 18px; margin-bottom: 15px; background: #2a2f3a; color: white; border: 1px solid #999; border-radius: 8px; box-sizing: border-box; outline: none;">
+            
+   <button onclick="ejecutarRegistroCompletoRol()" 
+            style="width: 100%; padding: 15px; background: #ffd700; border: none; border-radius: 25px; font-weight: bold; color: #000; cursor: pointer; font-size: 16px; margin-bottom: 20px; text-transform: uppercase; box-shadow: 0 0 5px #ffd700;">
+            CREAR MI CUENTA 
+        </button></div></div>
+<!-- ============================================================== -->
+<!-- PANTALLA / MODAL DE SELECCIÓN DE ROL (POST-REGISTRO) -->
+<!-- ============================================================== -->
+<div id="modal-seleccion-rol" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100dvh; background: rgba(11, 20, 26, 0.95); background-image: linear-gradient(rgba(11, 20, 26, 0.9), rgba(11, 20, 26, 0.9)), url('./assets/logo.webp'); background-size: cover; background-position: center; z-index: 99999; display: none; flex-direction: column; align-items: center; justify-content: center; padding: 20px; box-sizing: border-box; text-align: center;">
+    
+    <div style="background: rgba(32, 44, 51, 0.85); border: 2px solid #ffd700; border-radius: 20px; padding: 30px; max-width: 380px; width: 100%; box-shadow: 0 10px 30px rgba(0,0,0,0.8);">
+        
+        <h2 style="color: #ffd700; margin-top: 0; font-size: 22px; text-transform: uppercase; letter-spacing: 1px;">YsaPay</h2>
+        <p style="color: #8696a0; font-size: 13px; margin-bottom: 25px;">Elige tu perfil principal para configurar tu espacio:</p>
+        
+
+        <!-- Botón Usuario / Pasajero -->
+<button onclick="seleccionarRol('passenger')" style="width: 100%; padding: 14px; background: rgba(255,215,0,0.1); color: #ffd700; border: 1px solid #ffd700; border-radius: 12px; font-weight: bold; font-size: 15px; cursor: pointer; margin-bottom: 20px;">
+    👤 Soy Usuario / Pasajero / Vendedor
+</button>
+
+<!-- Botón Comerciante -->
+<button onclick="seleccionarRol('merchant')" style="width: 100%; padding: 14px; background: rgba(255,215,0,0.1); color: #ffd700; border: 1px solid #ffd700; border-radius: 12px; font-weight: bold; font-size: 15px; cursor: pointer; margin-bottom: 20px;">
+    🏬 Soy Comerciante
+</button>
+
+<!-- Botón Conductor (Driver) -->
+<button onclick="seleccionarRol('driver')" style="width: 100%; padding: 14px; background: linear-gradient(135deg, #FFD700 0%, #B8860B 100%); color: #000; border: none; border-radius: 12px; font-weight: bold; font-size: 15px; cursor: pointer; margin-bottom: 12px; box-shadow: 0 4px 15px rgba(255,215,0,0.3);">
+    🚖 Soy Driver (Taxi/Deliverys)
+</button>
+
+      
+        
+
+    <!-- Sección de Afiliaciones (Comercio / Driver / Tarjeta MÍA) 
+        <div style="border-top: 1px solid rgba(255,215,0,0.2); padding-top: 15px; display: flex; flex-direction: column; gap: 8px;">
+            <span style="font-size: 11px; color: #8696a0; text-transform: uppercase;">¿Tienes un negocio?</span>
+            <button onclick="abrirAfiliacionComercial()" style="background: transparent; border: 1px dashed #00ffcc; color: #00ffcc; padding: 10px; border-radius: 10px; font-size: 12px; cursor: pointer; font-weight: bold;">
+                🏬 Afiliar mi Comercio (Merchant)
+            </button>
+          <a href="bnc://app.binance.com/payment/main" class="btn-check-binance">
+
+            <i class="fas fa-search-dollar"></i> Pagos / Creditos
+
+          </a>--->
+        </div>
+
+    </div>
 
 
 <script>
+
+  async function ejecutarRegistroCompletoRol() {
+    const nombre = document.getElementById('reg-nombre').value.trim();
+    const apellido = document.getElementById('reg-apellido').value.trim();
+    const identificacion = document.getElementById('reg-identificacion').value.trim();
+    const rolElegido = localStorage.getItem('spaxio_rol') || 'passenger';
+    if (!nombre || !apellido || !identificacion) {
+        alert("Completa los datos");
+        return;
+    }
+
+    const hash = Math.random().toString(36).substring(2, 7).toUpperCase(); 
+    const idUnico = Math.random().toString(36).substring(2, 9) + hash; 
+
+    const datosUsuario = { 
+        id: 'perfil_propietario', 
+        dropis_id: idUnico, 
+        nombre: nombre, 
+        apellido: apellido,
+        identificacion: identificacion,
+        rol: rolElegido, 
+        fecha: Date.now() 
+    };
+
+    try {
+        localStorage.setItem('mi_dropis_id', idUnico);
+        await guardarLocal('usuario', datosUsuario);
+        await guardarLocal('perfiles', { id: idUnico, nombre, apellido, identificacion, foto: null, rol: rolElegido });
+        
+        document.getElementById('modal-registro').style.display = 'none';
+        const elDisplay = document.getElementById('mi-id-display');
+        if (elDisplay) {
+            elDisplay.textContent = "Tu ID: " + idUnico;
+        }
+
+        // Obtener token de forma segura sin congelarse
+        let token = "sin_token";
+        try {
+            if ('serviceWorker' in navigator) {
+                const reg = await navigator.serviceWorker.getRegistration();
+                if (reg) {
+                    token = await messaging.getToken({ 
+                        vapidKey: 'BIrsA9YbBXfIuo4PTMrKRtuktRsK2RbK0XevupuofGGOUDy9w5VZ9yaXbZXsenXppmFsR62-2B7jBOG0Z8RdxvU',
+                        serviceWorkerRegistration: reg 
+                    }) || "sin_token";
+                }
+            }
+        } catch (e) {
+            console.log("Error obteniendo token, se usará 'sin_token'");
+        }
+
+        await db.ref('usuarios/' + idUnico).set({
+            id_sistema: idUnico,
+            nombre: nombre,
+            apellido: apellido,
+            identificacion: identificacion,
+            rol: rolElegido, 
+            fcm_token: token,
+            estado: "activo",
+            version: "LITE_SUB12_FINAL",
+            timestamp: firebase.database.ServerValue.TIMESTAMP
+        });
+
+        console.log("✅ Sincronizado en Firebase: " + idUnico);
+        alert("¡Registro Exitoso!");
+        location.reload();
+
+    } catch (error) { 
+        console.error("⚠️ Error en el proceso:", error);
+        alert("Error al registrar. Revisa tu conexión.");
+    }
+}
+
+async function ejecutarRegistroCompleto() {
+    const nombre = document.getElementById('reg-nombre').value.trim();
+    const apellido = document.getElementById('reg-apellido').value.trim();
+    const identificacion = document.getElementById('reg-identificacion').value.trim();
+    const rolElegido = localStorage.getItem('spaxio_rol') || 'passenger';
+    if (!nombre || !apellido || !identificacion) {
+        alert("Completa los datos");
+        return;
+    }
+
+    const hash = Math.random().toString(36).substring(2, 7).toUpperCase(); 
+    const idUnico = Math.random().toString(36).substring(2, 9) + hash; 
+
+    const datosUsuario = { 
+        id: 'perfil_propietario', 
+        dropis_id: idUnico, 
+        nombre: nombre, 
+        apellido: apellido,
+        identificacion: identificacion,
+        rol: rolElegido, 
+        fecha: Date.now() 
+    };
+
+    try {
+        localStorage.setItem('mi_dropis_id', idUnico);
+        await guardarLocal('usuario', datosUsuario);
+        await guardarLocal('perfiles', { id: idUnico, nombre, apellido, identificacion, foto: null, rol: rolElegido });
+        
+        document.getElementById('modal-registro').style.display = 'none';
+        const elDisplay = document.getElementById('mi-id-display');
+        if (elDisplay) {
+            elDisplay.textContent = "Tu ID: " + idUnico;
+        }
+
+        // Obtener token de forma segura sin congelarse
+        let token = "sin_token";
+        try {
+            if ('serviceWorker' in navigator) {
+                const reg = await navigator.serviceWorker.getRegistration();
+                if (reg) {
+                    token = await messaging.getToken({ 
+                        vapidKey: 'BIrsA9YbBXfIuo4PTMrKRtuktRsK2RbK0XevupuofGGOUDy9w5VZ9yaXbZXsenXppmFsR62-2B7jBOG0Z8RdxvU',
+                        serviceWorkerRegistration: reg 
+                    }) || "sin_token";
+                }
+            }
+        } catch (e) {
+            console.log("Error obteniendo token, se usará 'sin_token'");
+        }
+
+        await db.ref('usuarios/' + idUnico).set({
+            id_sistema: idUnico,
+            nombre: nombre,
+            apellido: apellido,
+            identificacion: identificacion,
+            rol: rolElegido, 
+            fcm_token: token,
+            estado: "activo",
+            version: "LITE_SUB12_FINAL",
+            timestamp: firebase.database.ServerValue.TIMESTAMP
+        });
+
+        console.log("✅ Sincronizado en Firebase: " + idUnico);
+        alert("¡Registro Exitoso!");
+        location.reload();
+
+    } catch (error) { 
+        console.error("⚠️ Error en el proceso:", error);
+        alert("Error al registrar. Revisa tu conexión.");
+    }
+  }     
+// Variable global temporal para saber qué tipo de cuenta se está abriendo en el modal
+let rolObjetivoRegistro = 'passenger'; 
+
+function abrirModalRegistroRol(rol) {
+    rolObjetivoRegistro = rol; // 'passenger', 'driver' o 'merchant'
+    
+    // Ocultamos otros modales o menús que puedan estorbar
+    const panelLateral = document.getElementById('seccion-menu-hamburguesa');
+    if (panelLateral) panelLateral.classList.remove('abierto');
+    
+    const modalPerfil = document.getElementById('seccion-mi-perfil');
+    if (modalPerfil) modalPerfil.style.display = 'none';
+
+    // Abrimos el modal de registro
+    const modalRegistro = document.getElementById('modal-registro');
+    if (modalRegistro) {
+        modalRegistro.style.display = 'flex';
+        
+        // Opcional: Cambiar el título del modal dinámicamente según el rol
+        const tituloModal = modalRegistro.querySelector('h3');
+        if (tituloModal) {
+            if (rol === 'driver') tituloModal.textContent = "Registro - Cuenta Driver 🚖";
+            else if (rol === 'merchant') tituloModal.textContent = "Registro - Cuenta Comercio 🏬";
+            else tituloModal.textContent = "Registro - Cuenta Usuario 👤";
+        }
+    }
+}
+/*```[cite: 1]
+
+---
+
+### Paso 2: Actualizar los botones de tu perfil y menú
+Asegúrate de que los botones en tu sección de perfil (`#seccion-mi-perfil`) y en tu menú hamburguesa llamen a esta nueva función pasando el rol correspondiente:
+
+```html
+<!-- En tu sección de perfil o menú, cambia el onclick para usar la nueva función -->*/
+
+/*```[cite: 1]
+
+---
+
+### Paso 3: Modificar `ejecutarRegistroCompleto` para soportar múltiples perfiles
+Para evitar que se sobrescriba la cuenta anterior y permitir que el usuario tenga varios perfiles guardados en su dispositivo, ajusta la función de guardado para que asigne un ID único independiente según el rol seleccionado (`spaxio_id_passenger`, `spaxio_id_driver`, etc.)[cite: 1]:
+
+```javascri*/
+async function ejecutarRegistroCompleto() {
+    const nombre = document.getElementById('reg-nombre').value.trim();
+    const apellido = document.getElementById('reg-apellido').value.trim();
+    const identificacion = document.getElementById('reg-identificacion').value.trim();
+    
+    // Usamos el rol que definimos al abrir el modal
+    const rolElegido = window.rolObjetivoRegistro || 'passenger'; 
+
+    if (!nombre || !apellido || !identificacion) {
+        alert("⚠️ Por favor completa todos los datos.");
+        return;
+    }
+
+    // 1. Generación de un ID único con prefijo según el rol
+    const prefijo = rolElegido === 'driver' ? 'DRV' : (rolElegido === 'merchant' ? 'COM' : 'USR');
+    const hashUnico = Math.random().toString(36).substring(2, 9).toUpperCase(); 
+    const idUnico = `${prefijo}-${hashUnico}`;
+
+    // 2. Definir llaves independientes para no sobrescribir cuentas previas
+    const idKeyRol = `spaxio_id_${rolElegido}`;
+    
+    const datosUsuario = { 
+        id: 'perfil_' + rolElegido, 
+        dropis_id: idUnico, 
+        nombre: nombre, 
+        apellido: apellido,
+        identificacion: identificacion,
+        rol: rolElegido,
+        fecha: Date.now() 
+    };
+
+    try {
+        // Guardamos el ID específico de este rol
+        localStorage.setItem(idKeyRol, idUnico);
+        
+        // Opcional: Si deseas que este sea el ID activo actual al terminar el registro:
+        localStorage.setItem('mi_dropis_id', idUnico);
+        localStorage.setItem('spaxio_rol', rolElegido);
+
+        await guardarLocal('usuario', datosUsuario);
+        await guardarLocal('perfiles', { id: idUnico, nombre, apellido, identificacion, foto: null, rol: rolElegido });
+
+        // Ocultar modal de registro
+        document.getElementById('modal-registro').style.display = 'none';
+
+        // Sincronización con Firebase (opcional si usas tu base de datos en nube)
+        if (window.db) {
+            await db.ref('usuarios/' + idUnico).set({
+                id_sistema: idUnico,
+                nombre: nombre,
+                apellido: apellido,
+                identificacion: identificacion,
+                rol: rolElegido,
+                timestamp: firebase.database.ServerValue.TIMESTAMP
+            });
+        }
+
+        alert(`✅ ¡Cuenta de ${rolElegido.toUpperCase()} creada con éxito!\nTu nuevo ID es: ${idUnico}`);
+        location.reload();
+
+    } catch (error) { 
+        console.error("⚠️ Error en el registro:", error);
+        alert("Hubo un error al guardar los datos localmente.");
+    }
+}
+/*```[cite: 1]
+
+---
+
+<ElicitationsGroup message="¿Quieres que añadamos un selector rápido para alternar entre las cuentas ya creadas o prefieres que se maneje desde el menú?">
+  <Elicitation label="Selector rápido de cuentas" query="¿Cómo puedo hacer un selector rápido en el perfil para cambiar entre mis cuentas creadas?"/>
+  <Elicitation label="Todo listo" query="¡Perfecto, la lógica de registro múltiple está lista!"/>
+</ElicitationsGroup>*/
+
 function seleccionarRol(rolElegido) {
  const miID = localStorage.getItem('mi_dropis_id') || "SPAXIO-USER";
  
@@ -1314,10 +1669,7 @@ function seleccionarRol(rolElegido) {
     const modal = document.getElementById('modal-seleccion-rol');
     if (modal) modal.style.display = 'none';
 
-    // 3. Aplicar de inmediato el bloqueo de QR/ID y las reglas del rol elegido
-    aplicarBloqueoQRIDRoles(); // <-- Aquí se aplica en caliente al momento de elegir
-    aplicarReglasDeRolEnInterfaz();
-
+    
     if (rolElegido === 'driver') {
         alert("🚖 Modo Conductor configurado. Tu panel ha sido ajustado.");
     } else if (rolElegido === 'merchant') {
@@ -1326,11 +1678,45 @@ function seleccionarRol(rolElegido) {
         alert(`✅ ¡Rol "${rolElegido}" guardado con éxito!`);
     }
  }
+
+// 2. Ocultar o mostrar elementos según el rol guardado
+function aplicarReglasDeRolEnInterfaz() {
+    const esTaxista = localStorage.getItem('es_taxista') === 'true';
+    const bloqueConductor = document.getElementById('bloque-modo-taxista'); // El switch de arriba en tu panel lateral
+
+    if (bloqueConductor) {
+        if (esTaxista) {
+            bloqueConductor.style.display = 'block'; // Lo ve el taxista
+        } else {
+            bloqueConductor.style.display = 'none';  // Se oculta para el pasajero normal
+        }
+    }
+}
+
+// 3. Simulador de Afiliación Comercial
+function abrirAfiliacionComercial() {
+    alert("💳 Módulo de Afiliación Comercial: Aquí podrás registrar tu tienda para recibir pagos por Spaxio Gifscards / Tarjeta MÍA.");
+    // Aquí puedes disparar luego el modal o submodal de comercios que ya tienes integrados
+}
+
+// 4. Verificación automática al cargar la PWA
+window.addEventListener('DOMContentLoaded', () => {
+    
+    const modal = document.getElementById('modal-seleccion-rol');
+const rolGuardado = localStorage.getItem('spaxio_rol');
  
-
-
-
-
+    if (!rolGuardado) {
+        // Si el usuario es nuevo y no tiene rol, mostramos la pantalla de elección
+        if (modal) modal.style.display = 'flex';
+    } else {
+        // Si ya eligió antes, aplicamos sus reglas de diseño silenciosamente
+        if (modal) modal.style.display = 'none';
+       
+     
+ 
+     
+    }
+});
 </script>
  
 <div id="modal-qr" class="modal">
@@ -1356,33 +1742,30 @@ function seleccionarRol(rolElegido) {
      
          
      
-<div id="seccion-mi-perfil" style="display: none; padding: 15px; background: #1e222b; border-bottom: 1px solid #1e222b;">
-    <!-- Modifica el estilo del div que envuelve los inputs y el botón -->
-    <div style="display: flex; flex-direction: column; align-items: center; width: 100%; text-align: center;">
+     <div id="seccion-mi-perfil" style="display: none; padding: 15px; background: #1e222b; border-bottom: 1px solid #1e222b;">
+            <!-- Modifica el estilo del div que envuelve los inputs y el botón -->
+<div style="display: flex; flex-direction: column; align-items: center; width: 100%; text-align: center;">
    
-        <div onclick="document.getElementById('input-mi-foto').click()" style="width: 100px; height: 100px; border-radius: 50%; border: 1px solid #ffd700; overflow: hidden; background: #222; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0;">
-            <img id="mi-foto-previa" src="" style="width: 100%; height: 100%; object-fit: cover; display: block;">
-            <span id="mi-placeholder-foto" style="font-size: 20px;">📷</span>
-        </div>
-        <input type="file" id="input-mi-foto" accept="image/*" style="display: none;" onchange="previsualizarMiFoto(this)">
-        <button onclick="gestionarQR()" style="background: #ffd700; color: #000; border: none; border-radius: 8px; padding: 8px 12px; font-weight: 900; font-size: 14px; margin: 20px auto; display: block; cursor: pointer;">QR</button>
-    </div>
-    
-    <input type="text" id="mi-nuevo-nombre" placeholder="Editar mi nombre..." onfocus="this.style.boxShadow='0 0 5px #ffd700'; this.style.borderColor='#ffd700';" 
-    onblur="this.style.boxShadow='none'; this.style.borderColor='#999';"
-     style="width: 80%; padding: 12px; background: #2a2f3a; color: white; border: 1px solid #999; margin: 0 auto 15px auto; display: block; border-radius: 8px; box-sizing: border-box; outline: none;">
-                                               
-    <input type="text" id="mi-nuevo-estado" placeholder="Estado (Ej: Disponible)" onfocus="this.style.boxShadow='0 0 5px #ffd700'; this.style.borderColor='#ffd700';" 
-    onblur="this.style.boxShadow='none'; this.style.borderColor='#999';"
-     style="width: 80%; padding: 12px; background: #2a2f3a; color: white; border: 1px solid #999; margin: 0 auto 15px auto; display: block; border-radius: 8px; box-sizing: border-box; outline: none;">
-
-    <button onclick="guardarCambiosPerfil()" style="width: 50%; padding: 10px; background: #ffd700; border: none; border-radius: 10px; font-weight: bold; color: #000; cursor: pointer; font-size: 16px; margin: 20px auto 10px auto; display: block; text-transform: uppercase; box-shadow: 0 0 5px #ffd700;">
-        GUARDAR 
-    </button>
-<div style="display: flex; gap: 10px; justify-content: center; width: 80%; margin: 15px auto 0 auto;">
-       
-<!-- Botón Usuario / Pasajero -->
-    <button class="btn-rol" onclick="seleccionarRol('passenger')">
+             <div onclick="document.getElementById('input-mi-foto').click()" style="width: 100px; height: 100px; border-radius: 50%; border: 1px solid #ffd700; overflow: hidden; background: #222; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0;">
+              <img id="mi-foto-previa" src="" style="width: 100%; height: 100%; object-fit: cover; display: block;">
+              <span id="mi-placeholder-foto" style="font-size: 20px;">📷</span>
+                </div>
+                <input type="file" id="input-mi-foto" accept="image/*" style="display: none;" onchange="previsualizarMiFoto(this)">
+                <button onclick="gestionarQR()" style="background: #ffd700; color: #000; border: none; border-radius: 8px; padding: 8px 12px; font-weight: 900; font-size: 14px; margin: 20px auto; display: block; cursor: pointer;">QR</button>
+            </div>
+            <input type="text" id="mi-nuevo-nombre" placeholder="Editar mi nombre..." onfocus="this.style.boxShadow='0 0 5px #ffd700'; this.style.borderColor='#ffd700';" 
+            onblur="this.style.boxShadow='none'; this.style.borderColor='#999';"
+             style="width: 80%; padding: 12px; background: #2a2f3a; color: white; border: 1px solid #999; margin: 0 auto 15px auto; display: block; border-radius: 8px; box-sizing: border-box; outline: none;">
+                                                       
+            <input type="text" id="mi-nuevo-estado" placeholder="Estado (Ej: Disponible)" onfocus="this.style.boxShadow='0 0 5px #ffd700'; this.style.borderColor='#ffd700';" 
+            onblur="this.style.boxShadow='none'; this.style.borderColor='#999';"
+             style="width: 80%; padding: 12px; background: #2a2f3a; color: white; border: 1px solid #999; margin: 0 auto 15px auto; display: block; border-radius: 8px; box-sizing: border-box; outline: none;">
+        
+            <button onclick="guardarCambiosPerfil()" style="width: 50%; padding: 10px; background: #ffd700; border: none; border-radius: 10px; font-weight: bold; color: #000; cursor: pointer; font-size: 16px; margin: 20px auto; display: block; text-transform: uppercase; box-shadow: 0 0 5px #ffd700;">
+      GUARDAR 
+     </button>
+    <!-- Botón Usuario / Pasajero -->
+    <button class="btn-rol" onclick="abrirModalRegistroRol('passenger')">
         👤 Soy Usuario 
     </button>
 
@@ -1392,20 +1775,10 @@ function seleccionarRol(rolElegido) {
     </button>
 
     <!-- Botón Conductor (Driver) -->
-    <button class="btn-rol btn-driver" onclick="seleccionarRol('driver')">
+    <button class="btn-rol btn-driver" onclick="abrirModalRegistroRol('driver')">
         🚖 Soy Driver 
     </button>
-      
-    <!-- Botones para cambiar automáticamente a modo Comercio o Driver 
-     <button onclick="cambiarARol('merchant')" style="flex: 1; padding: 10px; background: rgba(255,215,0,0.1); color: #ffd700; border: 1px solid #ffd700; border-radius: 8px; font-weight: bold; font-size: 13px; cursor: pointer;">
-            👤 Cambiar a Perfil Comercio
-        </button>
-        <button onclick="cambiarARol('driver')" style="flex: 1; padding: 10px; background: rgba(255,215,0,0.1); color: #ffd700; border: 1px solid #ffd700; border-radius: 8px; font-weight: bold; font-size: 13px; cursor: pointer;">
-            👤 Cambiar a Perfil Driver
-        </button>--->
     </div>
-
-      </div>
      <!-- ==================== MENÚ HAMBURGUESA LATERAL ==================== -->
 <div id="seccion-menu-hamburguesa">
     
@@ -1446,20 +1819,21 @@ function seleccionarRol(rolElegido) {
 
         <div class="menu-item-link" onclick="toggleMenuHamburguesa(); lanzarInstalacion();">
             <span>📱</span> <span>Instalar Aplicación (PWA)</span>
-        </div>
+        </div></div>
     <div style="display: flex; gap: 10px; justify-content: center; width: 80%; margin: 15px auto 0 auto;">
         
  <!-- Botón para Driver -->
-<button class="btn-rol btn-driver" onclick="document.getElementById('modal-registro').style.display = 'flex';">
+<button class="btn-rol btn-driver" onclick="document.getElementById('modal-registro-rol').style.display = 'flex';">
     🚖 Soy Driver 
 </button>
 
 <!-- Botón para Comercio -->
-<button class="btn-rol" onclick="document.getElementById('modal-registro').style.display = 'flex';">
+<button class="btn-rol" onclick="document.getElementById('modal-registro-rol').style.display = 'flex';">
     🏬 Soy Comerciante
-</button></div>
+</button>
     </div>
 </div>
+
 <!-- ==================== PANEL LATERAL DE TAXI / CONDUCTOR ==================== -->
 <div id="seccion-panel-taxi-lateral">
 
@@ -1469,7 +1843,7 @@ function seleccionarRol(rolElegido) {
             <button onclick="togglePanelTaxiLateral()" style="background: transparent; border: none; color: white; font-size: 20px; cursor: pointer; padding: 0;">
                 <span style="display: inline-block; transform: scaleX(-1);">➔</span>
             </button>
-            <span style="color: #ffd700; font-size: 15px;">🚖  zona driver</span>
+            <span style="color: #ffd700; font-size: 15px;">🚖 zona driver</span>
         </div>
     </div>
 
@@ -1477,18 +1851,14 @@ function seleccionarRol(rolElegido) {
     <div style="padding: 15px; flex-grow: 1; overflow-y: auto;">
         
         <!-- Switch de Modo Taxista -->
-        <div style="background: rgba(11, 20, 26, 0.95); padding: 15px; border-radius: 12px; border: 1px solid #FFD700; color: #fff; text-align: center; margin-bottom: 50px;">
-            <h3 style="color: #FFD700; margin-bottom: 10px; font-size: 16px;"></h3>
-          
+        <div style="background: rgba(11, 20, 26, 0.95); padding: 15px; border-radius: 12px; border: 1px solid #FFD700; color: #fff; text-align: center; margin-bottom: 20px;">
             <label style="display: flex; align-items: center; justify-content: center; gap: 12px; cursor: pointer;">
-                <h3 style="color: #ffd700; margin-top: 0; font-size: 16px;">🚕 TaxiDriver</h3>
+                <h3 style="color: #ffd700; margin: 0; font-size: 16px;">🚕 TaxiDriver</h3>
             </label>
         </div>
 
-        <!-- Radar de Taxis Cercanos -->
+        <!-- Radar / Mapa GPS de Taxis Cercanos -->
         <div style="background: rgba(11, 20, 26, 0.95); border: 2px solid #ffd700; border-radius: 15px; padding: 15px; text-align: center;">
-            
-            
             <iframe id="mapa-radar" 
                 width="100%" 
                 height="220" 
@@ -1502,8 +1872,60 @@ function seleccionarRol(rolElegido) {
             </button>
         </div>
 
+        <!-- ==================== NUEVO: CARRUSEL HORIZONTAL DE COMERCIOS (GPS) ==================== -->
+        <div style="margin-top: 25px; text-align: left;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; padding: 0 2px;">
+                <span style="font-size: 13px; font-weight: bold; color: #ffd700; text-transform: uppercase; letter-spacing: 1px;">📍 Lugares & Negocios Cercanos</span>
+                <span style="font-size: 10px; color: #8696a0;">Toca para trazar ruta</span>
+            </div>
+
+            <!-- Contenedor Deslizable de Izquierda a Derecha -->
+            <div id="carrusel-negocios-gps" style="display: flex; gap: 12px; overflow-x: auto; padding-bottom: 10px; scrollbar-width: none; -webkit-overflow-scrolling: touch;">
+                
+                <!-- Negocio 1 -->
+                <div class="tarjeta-negocio-gps" onclick="trazarRutaHaciaNegocio(10.3428692, -67.0362434, 'Space Burger')" style="min-width: 140px; max-width: 140px; background: #151828; border: 1px solid #ffd700; border-radius: 12px; overflow: hidden; flex-shrink: 0; cursor: pointer; transition: transform 0.2s;">
+                    <img src="https://share.google/9aKTQOnE7WQrg3NGu" alt="Space Burger" style="width: 100%; height: 85px; object-fit: cover;">
+                    <div style="padding: 8px; text-align: center;">
+                        <div style="font-size: 12px; color: #fff; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Space Burger</div>
+                        <div style="font-size: 10px; color: #ffd700; margin-top: 2px;">🍔 Toca para ir</div>
+                    </div>
+                </div>
+
+                <!-- Negocio 2 -->
+                <div class="tarjeta-negocio-gps" onclick="trazarRutaHaciaNegocio(10.481, -66.898, 'Café Galaxia')" style="min-width: 140px; max-width: 140px; background: #151828; border: 1px solid #ffd700; border-radius: 12px; overflow: hidden; flex-shrink: 0; cursor: pointer; transition: transform 0.2s;">
+                    <img src="https://picsum.photos/200/120?random=11" alt="Café Galaxia" style="width: 100%; height: 85px; object-fit: cover;">
+                    <div style="padding: 8px; text-align: center;">
+                        <div style="font-size: 12px; color: #fff; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Café Galaxia</div>
+                        <div style="font-size: 10px; color: #ffd700; margin-top: 2px;">☕ Toca para ir</div>
+                    </div>
+                </div>
+
+                <!-- Negocio 3 -->
+                <div class="tarjeta-negocio-gps" onclick="trazarRutaHaciaNegocio(10.3428692, -67.0362434, 'Market Express')" style="min-width: 140px; max-width: 140px; background: #151828; border: 1px solid #ffd700; border-radius: 12px; overflow: hidden; flex-shrink: 0; cursor: pointer; transition: transform 0.2s;">
+                    <img src="https://picsum.photos/200/120?random=12" alt="Market Express" style="width: 100%; height: 85px; object-fit: cover;">
+                    <div style="padding: 8px; text-align: center;">
+                        <div style="font-size: 12px; color: #fff; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Market Express</div>
+                        <div style="font-size: 10px; color: #ffd700; margin-top: 2px;">🛒 Toca para ir</div>
+                    </div>
+                </div>
+
+                <!-- Negocio 4 -->
+                <div class="tarjeta-negocio-gps" onclick="trazarRutaHaciaNegocio(10.490, -66.890, 'Abasto Tio San')" style="min-width: 140px; max-width: 140px; background: #151828; border: 1px solid #ffd700; border-radius: 12px; overflow: hidden; flex-shrink: 0; cursor: pointer; transition: transform 0.2s;">
+                    <img src="https://picsum.photos/200/120?random=13" alt="Abasto Tio San" style="width: 100%; height: 85px; object-fit: cover;">
+                    <div style="padding: 8px; text-align: center;">
+                        <div style="font-size: 12px; color: #fff; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Abasto Tio San</div>
+                        <div style="font-size: 10px; color: #ffd700; margin-top: 2px;">🏬 Toca para ir</div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+        <!-- ==================== FIN CARRUSEL ==================== -->
+
     </div>
 </div>
+        
+
  
 <!-- 3. 🪐 SECCIÓN INTEGRADA: SPAXIOGIFSCARD (Debajo de los contactos) -->  <!-- ============================================================== --->
             <div id="seccion-spaxiocard-integrada" style="display: flex; flex-direction: column; width: 100%; padding: 5px;"> 
@@ -2113,61 +2535,27 @@ function seleccionarRol(rolElegido) {
     alert("🚨 ERROR DETECTADO:\n\n" + message + "\n\nArchivo: " + source + "\nLínea: " + lineno);
     return false;
 };
-function seleccionarRol(rolElegido) {
-            // Guardamos el rol en el almacenamiento del navegador
-            localStorage.setItem('spaxio_rol', rolElegido);
 
-            // Redirección a los subdominios de Vercel (Reemplaza estas URLs con las tuyas cuando las despliegues)
-            if (rolElegido === 'passenger') {
-                window.location.href = "./usuario.html";
-            } 
-            else if (rolElegido === 'driver') {
-                window.location.href = "./drivtaxi.html";
-            } 
-            else if (rolElegido === 'merchant') {
-                window.location.href = "./comercios.html";
-            }
-             }
-            /* async function cambiarARol(rolElegido, tipoRol) {
-    // 1. Identificador único de la cuenta principal del usuario (ej: su correo o teléfono)
-    const usuarioPrincipal = localStorage.getItem('usuario_correo') || 'default_user';
-    
-    // 2. Definimos los nombres de las llaves según el rol
-    let idKey = `${tipoRol}_id`;
-    let qrKey = `${tipoRol}_qr`;
-    let archivoDestino = '';
+     
+              
+              
+              // Función para enfocar el mapa GPS en el negocio seleccionado y dar la opción de pedir taxi
 
-    if (tipoRol === 'driver') archivoDestino = './driver.html';
-    if (tipoRol === 'merchant') archivoDestino = './comercio.html';
-    if (tipoRol === 'passenger') archivoDestino = './usuario.html';
-
-    // 3. Verificamos si ya tiene un ID creado para este rol
-    let rolIdActual = localStorage.getItem(idKey);
-
-    if (!rolIdActual) {
-        // --- ¡ES LA PRIMERA VEZ! LO CREAMOS AUTOMÁTICAMENTE ---
-        // Generamos un ID único basado en el rol y números aleatorios/tiempo
-        const prefijo = tipoRol === 'driver' ? 'DRV' : (tipoRol === 'merchant' ? 'COM' : 'USR');
-        rolIdActual = `${prefijo}-${Math.floor(10000 + Math.random() * 90000)}` ;
-        
-        // Generamos un QR que contenga este ID único
-        const qrGeneradoUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${rolIdActual}`;
-
-        // Guardamos localmente (y aquí mismo puedes hacer tu inserción automática a Firebase/Supabase)
-        localStorage.setItem(idKey, rolIdActual);
-        localStorage.setItem(qrKey, qrGeneradoUrl);
-        localStorage.setItem('spaxio_rol', tipoRol);
-
-        console.log(`Nuevo perfil de ${tipoRol} creado automáticamente con ID: ${rolIdActual}`);
-    } else {
-        // Si ya existía, solo actualizamos el rol activo
-        localStorage.setItem('spaxio_rol', tipoRol);
+              function trazarRutaHaciaNegocio(lat, lng, nombreNegocio) {
+    // 1. Actualiza el mapa miniatura en tu panel lateral de taxi (el iframe)
+    const iframeMapa = document.getElementById('mapa-radar');
+    if (iframeMapa) {
+        iframeMapa.src = `https://maps.google.com/maps?q=${lat},${lng}&z=16&output=embed`;
     }
 
-    // 4. Redirigimos al archivo HTML correspondiente
-    window.location.href = archivoDestino;
-             }*/
-             
+    // 2. Abre automáticamente Google Maps con las indicaciones de navegación (GPS)
+    const urlNavegacion = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}&travelmode=driving`;
+    
+    // Abre el mapa exteriormente (en la app de Google Maps o pestaña nueva del navegador)
+    window.open(urlNavegacion, '_blank');
+              }
+
+              
 async function procesarCobroComercial(cantidadMonto = null) {
     const receptorInput = document.getElementById('idReceptor');
     const montoInput = document.getElementById('montoEnviar');
