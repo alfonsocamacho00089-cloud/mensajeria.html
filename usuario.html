@@ -3697,7 +3697,18 @@ if (textoReal.includes('|SPA_SUMA|') || textoReal.includes('|SPA_CANJE|') || tex
     }
 }
         
+const rolActual = localStorage.getItem('spaxio_rol') || 'passenger';
 
+if (rolActual === 'merchant') {
+    localStorage.setItem('mi_dropis_id_comercio', idUnico);
+} else if (rolActual === 'driver') {
+    localStorage.setItem('mi_dropis_id_driver', idUnico);
+} else {
+    localStorage.setItem('mi_dropis_id_usuario', idUnico);
+}
+
+// Y siempre seteamos el ID general activo para la sesión actual
+localStorage.setItem('mi_dropis_id', idUnico);
         
      
     
