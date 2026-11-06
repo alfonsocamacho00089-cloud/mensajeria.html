@@ -1525,10 +1525,7 @@ function seleccionarRol(rolElegido) {
             <button onclick="guardarCambiosPerfil()" style="width: 50%; padding: 10px; background: #ffd700; border: none; border-radius: 10px; font-weight: bold; color: #000; cursor: pointer; font-size: 16px; margin: 20px auto; display: block; text-transform: uppercase; box-shadow: 0 0 5px #ffd700;">
       GUARDAR 
      </button>
-    <!-- Botón Usuario / Pasajero -->
-    <button class="btn-rol" onclick="seleccionarRol('passenger')">
-        👤 Soy Usuario 
-    </button>
+    
 
     <!-- Botón Comerciante -->
     <button class="btn-rol" onclick="abrirPerfilComercioLocal('merchant')">
@@ -1581,12 +1578,19 @@ function seleccionarRol(rolElegido) {
         <div class="menu-item-link" onclick="toggleMenuHamburguesa(); lanzarInstalacion();">
             <span>📱</span> <span>Instalar Aplicación (PWA)</span>
         </div>
-     <div class="btn-nav" onclick="irADriver();">
-        <span>🚕</span><span>Driver</span>
+
+<div class="menu-item-link" onclick="toggleMenuHamburguesa(); seleccionarRol();">
+            <span>👤</span> <span>Perfil Usuario</span>
+</div>
+
+<div class="menu-item-link" onclick="toggleMenuHamburguesa(); seleccionarRol();">
+            <span>🚕</span> <span>Perfil Driver</span>
+</div>
+     <div class="menu-item-link" onclick="toggleMenuHamburguesa(); seleccionarRol();">
+            <span>🏬</span> <span>Perfil  Comercio</span>
      </div>
-      <div class="btn-nav" onclick="irAComercio();">
-        <span>🏬</span><span>Comercio</span>
-      </div>
+     
+     
      
     
     
