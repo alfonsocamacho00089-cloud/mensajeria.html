@@ -167,48 +167,54 @@
     <p style="color: #8696a0; font-size: 13px; margin-bottom: 25px;">Elige tu perfil principal para configurar tu espacio:</p>
     
     <!-- Botón Usuario / Pasajero -->
-    <button class="btn-rol" onclick="abrirPerfilUsuarioLocal('passenger')">
+    <button class="btn-rol" onclick="abrirPerfilConVerificacion('passenger')">
         👤 Soy Usuario 
     </button>
 
     <!-- Botón Comerciante -->
-    <button class="btn-rol" onclick="abrirPerfilComercioLocal('merchant')">
+    <button class="btn-rol" onclick="abrirPerfilConVerificacion('merchant')">
         🏬 Soy Comerciante
     </button>
 
     <!-- Botón Conductor (Driver) -->
-    <button class="btn-rol btn-driver" onclick="abrirPerfilDriverLocal('driver')">
+    <button class="btn-rol btn-driver" onclick="abrirPerfilConVerificacion('driver')">
         🚖 Soy Driver 
     </button>
 </div>
 
     <script>
-       // Al hacer clic en el botón de Comercio:
-function abrirPerfilUsuarioLocal() {
-    // 1. Limpiamos temporalmente el ID activo para forzar un registro nuevo
-    localStorage.removeItem('mi_dropis_id');
-    localStorage.setItem('spaxio_rol', 'usuario');
-    
-    // 2. Abrimos tu archivo local limpio dentro de la misma app (sin pestañas de Google)
-    window.location.href = "./usuario.html";
-}
-        // Al hacer clic en el botón de Comercio:
-function abrirPerfilComercioLocal() {
-    // 1. Limpiamos temporalmente el ID activo para forzar un registro nuevo
-    localStorage.removeItem('mi_dropis_id');
-    localStorage.setItem('spaxio_rol', 'merchant');
-    
-    // 2. Abrimos tu archivo local limpio dentro de la misma app (sin pestañas de Google)
-    window.location.href = "./comercios.html";
+       // Función inteligente que revisa si el rol elegido es el que ya tiene datos
+async function abrirPerfilConVerificacion(rolDeseado, urlDestino) {
+    // 1. Consultamos si hay un perfil guardado y cuál fue su último rol
+    const perfilGuardado = await obtenerLocal('usuario', 'perfil_propietario');
+    const rolGuardado = localStorage.getItem('spaxio_rol');
+
+    // 2. Si el ID existe Y es el mismo rol que eligió, entra directo
+    if (perfilGuardado && perfilGuardado.dropis_id && rolGuardado === rolDeseado) {
+        localStorage.setItem('mi_dropis_id', perfilGuardado.dropis_id);
+        window.location.href = urlDestino;
+    } else {
+        // 3. Si eligió un rol diferente o no hay registro, limpia el ID para crear el nuevo perfil
+        localStorage.removeItem('mi_dropis_id');
+        localStorage.setItem('spaxio_rol', rolDeseado);
+        window.location.href = urlDestino;
+    }
 }
 
-// Al hacer clic en el botón de Driver:
-function abrirPerfilDriverLocal() {
-    localStorage.removeItem('mi_dropis_id');
-    localStorage.setItem('spaxio_rol', 'driver');
-    
-    window.location.href = "./drivtaxi.html";
+// Botones adaptados para usar la verificación
+async function abrirPerfilUsuarioLocal() {
+    await abrirPerfilConVerificacion('usuario', './usuario.html');
 }
+
+async function abrirPerfilComercioLocal() {
+    await abrirPerfilConVerificacion('merchant', './comercios.html');
+}
+
+async function abrirPerfilDriverLocal() {
+    await abrirPerfilConVerificacion('driver', './drivtaxi.html');
+}
+
+
         
         
 if ('serviceWorker' in navigator) {
