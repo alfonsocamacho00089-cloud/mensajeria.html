@@ -1396,10 +1396,69 @@ button#btn-enviar:active {
 
 <script>
 
+// Ir al perfil de Usuario
+function irAUsuario() {
+    // Verificamos si ya existe un ID guardado como pasajero/usuario
+    const idUsuario = localStorage.getItem('mi_dropis_id_usuario');
+    
+    if (idUsuario) {
+        // Si ya tiene cuenta, cargamos su panel/chat directamente de forma local
+        localStorage.setItem('mi_dropis_id', idUsuario);
+        window.location.href = "./usuario.html"; // o tu archivo principal de chat
+    } else {
+        // Si no tiene cuenta aún, guardamos el rol y abrimos el modal de registro limpio
+        localStorage.setItem('spaxio_rol', 'passenger');
+        // Aquí abres tu modal de registro local
+        document.getElementById('modal-registro').style.display = 'flex';
+    }
+}
+
+// Ir al perfil de Comercio
+function irAComercio() {
+    const idComercio = localStorage.getItem('mi_dropis_id_comercio');
+    
+    if (idComercio) {
+        // Si ya está registrado como comercio, entra directo sin pedir datos
+        localStorage.setItem('mi_dropis_id', idComercio);
+        window.location.href = "./comercios.html";
+    } else {
+        // Si es nuevo en comercio, configuramos el rol y abrimos el registro
+        localStorage.setItem('spaxio_rol', 'merchant');
+        document.getElementById('modal-registro').style.display = 'flex';
+    }
+}
+
+// Ir al perfil de Driver
+function irADriver() {
+    const idDriver = localStorage.getItem('mi_dropis_id_driver');
+    
+    if (idDriver) {
+        localStorage.setItem('mi_dropis_id', idDriver);
+        window.location.href = "./drivtaxi.html";
+    } else {
+        localStorage.setItem('spaxio_rol', 'driver');
+        document.getElementById('modal-registro').style.display = 'flex';
+    }
+ }
 
 
+// Al hacer clic en el botón de Comercio:
+function abrirPerfilComercioLocal() {
+    // 1. Limpiamos temporalmente el ID activo para forzar un registro nuevo
+    localStorage.removeItem('mi_dropis_id');
+    localStorage.setItem('spaxio_rol', 'merchant');
+    
+    // 2. Abrimos tu archivo local limpio dentro de la misma app (sin pestañas de Google)
+    window.location.href = "./comercios.html";
+}
 
-
+// Al hacer clic en el botón de Driver:
+function abrirPerfilDriverLocal() {
+    localStorage.removeItem('mi_dropis_id');
+    localStorage.setItem('spaxio_rol', 'driver');
+    
+    window.location.href = "./drivtaxi.html";
+ }
 
 
 function seleccionarRol(rolElegido) {
@@ -1472,12 +1531,12 @@ function seleccionarRol(rolElegido) {
     </button>
 
     <!-- Botón Comerciante -->
-    <button class="btn-rol" onclick="seleccionarRol('merchant')">
+    <button class="btn-rol" onclick="abrirPerfilComercioLocal('merchant')">
         🏬 Soy Comerciante
     </button>
 
     <!-- Botón Conductor (Driver) -->
-    <button class="btn-rol btn-driver" onclick="seleccionarRol('driver')">
+    <button class="btn-rol btn-driver" onclick="abrirPerfilDriverLocal('driver')">
         🚖 Soy Driver 
     </button>
     </div>
@@ -1521,7 +1580,17 @@ function seleccionarRol(rolElegido) {
 
         <div class="menu-item-link" onclick="toggleMenuHamburguesa(); lanzarInstalacion();">
             <span>📱</span> <span>Instalar Aplicación (PWA)</span>
-        </div></div></div>
+        </div>
+     <div class="btn-nav" onclick="irADriver();">
+        <span>🚕</span><span>Driver</span>
+     </div>
+      <div class="btn-nav" onclick="irAComercio();">
+        <span>🏬</span><span>Comercio</span>
+      </div>
+     
+    
+    
+    </div></div>
 
 
 <!-- ==================== PANEL LATERAL DE TAXI / CONDUCTOR ==================== -->
