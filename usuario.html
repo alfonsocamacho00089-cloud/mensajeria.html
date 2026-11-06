@@ -1396,153 +1396,11 @@ button#btn-enviar:active {
 
 <script>
 
-  async function ejecutarRegistroCompleto() {
-    const nombre = document.getElementById('reg-nombre').value.trim();
-    const apellido = document.getElementById('reg-apellido').value.trim();
-    const identificacion = document.getElementById('reg-identificacion').value.trim();
-    const rolElegido = localStorage.getItem('spaxio_rol') || 'passenger';
-    if (!nombre || !apellido || !identificacion) {
-        alert("Completa los datos");
-        return;
-    }
 
-    const hash = Math.random().toString(36).substring(2, 7).toUpperCase(); 
-    const idUnico = Math.random().toString(36).substring(2, 9) + hash; 
 
-    const datosUsuario = { 
-        id: 'perfil_propietario', 
-        dropis_id: idUnico, 
-        nombre: nombre, 
-        apellido: apellido,
-        identificacion: identificacion,
-        rol: rolElegido, 
-        fecha: Date.now() 
-    };
 
-    try {
-        localStorage.setItem('mi_dropis_id', idUnico);
-        await guardarLocal('usuario', datosUsuario);
-        await guardarLocal('perfiles', { id: idUnico, nombre, apellido, identificacion, foto: null, rol: rolElegido });
-        
-        document.getElementById('modal-registro').style.display = 'none';
-        const elDisplay = document.getElementById('mi-id-display');
-        if (elDisplay) {
-            elDisplay.textContent = "Tu ID: " + idUnico;
-        }
 
-        // Obtener token de forma segura sin congelarse
-        let token = "sin_token";
-        try {
-            if ('serviceWorker' in navigator) {
-                const reg = await navigator.serviceWorker.getRegistration();
-                if (reg) {
-                    token = await messaging.getToken({ 
-                        vapidKey: 'BIrsA9YbBXfIuo4PTMrKRtuktRsK2RbK0XevupuofGGOUDy9w5VZ9yaXbZXsenXppmFsR62-2B7jBOG0Z8RdxvU',
-                        serviceWorkerRegistration: reg 
-                    }) || "sin_token";
-                }
-            }
-        } catch (e) {
-            console.log("Error obteniendo token, se usará 'sin_token'");
-        }
-
-        await db.ref('usuarios/' + idUnico).set({
-            id_sistema: idUnico,
-            nombre: nombre,
-            apellido: apellido,
-            identificacion: identificacion,
-            rol: rolElegido, 
-            fcm_token: token,
-            estado: "activo",
-            version: "LITE_SUB12_FINAL",
-            timestamp: firebase.database.ServerValue.TIMESTAMP
-        });
-
-        console.log("✅ Sincronizado en Firebase: " + idUnico);
-        alert("¡Registro Exitoso!");
-        location.reload();
-
-    } catch (error) { 
-        console.error("⚠️ Error en el proceso:", error);
-        alert("Error al registrar. Revisa tu conexión.");
-    }
-}
-
-async function ejecutarRegistroCompleto() {
-    const nombre = document.getElementById('reg-nombre').value.trim();
-    const apellido = document.getElementById('reg-apellido').value.trim();
-    const identificacion = document.getElementById('reg-identificacion').value.trim();
-    const rolElegido = localStorage.getItem('spaxio_rol') || 'passenger';
-    if (!nombre || !apellido || !identificacion) {
-        alert("Completa los datos");
-        return;
-    }
-
-    const hash = Math.random().toString(36).substring(2, 7).toUpperCase(); 
-    const idUnico = Math.random().toString(36).substring(2, 9) + hash; 
-
-    const datosUsuario = { 
-        id: 'perfil_propietario', 
-        dropis_id: idUnico, 
-        nombre: nombre, 
-        apellido: apellido,
-        identificacion: identificacion,
-        rol: rolElegido, 
-        fecha: Date.now() 
-    };
-
-    try {
-        localStorage.setItem('mi_dropis_id', idUnico);
-        await guardarLocal('usuario', datosUsuario);
-        await guardarLocal('perfiles', { id: idUnico, nombre, apellido, identificacion, foto: null, rol: rolElegido });
-        
-        document.getElementById('modal-registro').style.display = 'none';
-        const elDisplay = document.getElementById('mi-id-display');
-        if (elDisplay) {
-            elDisplay.textContent = "Tu ID: " + idUnico;
-        }
-
-        // Obtener token de forma segura sin congelarse
-        let token = "sin_token";
-        try {
-            if ('serviceWorker' in navigator) {
-                const reg = await navigator.serviceWorker.getRegistration();
-                if (reg) {
-                    token = await messaging.getToken({ 
-                        vapidKey: 'BIrsA9YbBXfIuo4PTMrKRtuktRsK2RbK0XevupuofGGOUDy9w5VZ9yaXbZXsenXppmFsR62-2B7jBOG0Z8RdxvU',
-                        serviceWorkerRegistration: reg 
-                    }) || "sin_token";
-                }
-            }
-        } catch (e) {
-            console.log("Error obteniendo token, se usará 'sin_token'");
-        }
-
-        await db.ref('usuarios/' + idUnico).set({
-            id_sistema: idUnico,
-            nombre: nombre,
-            apellido: apellido,
-            identificacion: identificacion,
-            rol: rolElegido, 
-            fcm_token: token,
-            estado: "activo",
-            version: "LITE_SUB12_FINAL",
-            timestamp: firebase.database.ServerValue.TIMESTAMP
-        });
-
-        console.log("✅ Sincronizado en Firebase: " + idUnico);
-        alert("¡Registro Exitoso!");
-        location.reload();
-
-    } catch (error) { 
-        console.error("⚠️ Error en el proceso:", error);
-        alert("Error al registrar. Revisa tu conexión.");
-    }
-  }     
-// Variable global temporal para saber qué tipo de cuenta se está abriendo en el modal
-let rolElegidoObjetivoRegistro = 'passenger'; 
-
-function abrirModalRegistroRol(rolElegido) {
+function abrirModalRegistro(rolElegido) {
     rolElegidoObjetivoRegistro = rolElegido; // 'passenger', 'driver' o 'merchant'
     
     // Ocultamos otros modales o menús que puedan estorbar
@@ -1553,12 +1411,12 @@ function abrirModalRegistroRol(rolElegido) {
     if (modalPerfil) modalPerfil.style.display = 'none';
 
     // Abrimos el modal de registro
-    const modalRegistroRol = document.getElementById('modal-registro-rol');
-    if (modalRegistroRol) {
-        modalRegistroRol.style.display = 'flex';
+    const modalRegistro = document.getElementById('modal-registro-rol');
+    if (modalRegistro) {
+        modalRegistro.style.display = 'flex';
         
         // Opcional: Cambiar el título del modal dinámicamente según el rol
-        const tituloModal = modalRegistroRol.querySelector('h3');
+        const tituloModal = modalRegistro.querySelector('h3');
         if (tituloModal) {
             if (rolElegido === 'driver') tituloModal.textContent = "Registro - Cuenta Driver 🚖";
             else if (rolElegido === 'merchant') tituloModal.textContent = "Registro - Cuenta Comercio 🏬";
@@ -1584,71 +1442,8 @@ En tu sección de perfil o menú, cambia el onclick para usar la nueva función 
 Para evitar que se sobrescriba la cuenta anterior y permitir que el usuario tenga varios perfiles guardados en su dispositivo, ajusta la función de guardado para que asigne un ID único independiente según el rol seleccionado (`spaxio_id_passenger`, `spaxio_id_driver`, etc.)[cite: 1]:
 
 ```javascri*/
-async function ejecutarRegistroCompletoRol() {
-    const nombre = document.getElementById('reg-nombre').value.trim();
-    const apellido = document.getElementById('reg-apellido').value.trim();
-    const identificacion = document.getElementById('reg-identificacion').value.trim();
-    
-    // Usamos el rol que definimos al abrir el modal
-    const rolElegido = window.rolObjetivoRegistro || 'passenger'; 
 
-    if (!nombre || !apellido || !identificacion) {
-        alert("⚠️ Por favor completa todos los datos.");
-        return;
-    }
 
-    // 1. Generación de un ID único con prefijo según el rol
-    const prefijo = rolElegido === 'driver' ? 'DRV' : (rolElegido === 'merchant' ? 'COM' : 'USR');
-    const hashUnico = Math.random().toString(36).substring(2, 9).toUpperCase(); 
-    const idUnico = `${prefijo}-${hashUnico}`;
-
-    // 2. Definir llaves independientes para no sobrescribir cuentas previas
-    const idKeyRol = `spaxio_id_${rolElegido}`;
-    
-    const datosUsuario = { 
-        id: 'perfil_' + rolElegido, 
-        dropis_id: idUnico, 
-        nombre: nombre, 
-        apellido: apellido,
-        identificacion: identificacion,
-        rol: rolElegido,
-        fecha: Date.now() 
-    };
-
-    try {
-        // Guardamos el ID específico de este rol
-        localStorage.setItem(idKeyRol, idUnico);
-        
-        // Opcional: Si deseas que este sea el ID activo actual al terminar el registro:
-        localStorage.setItem('mi_dropis_id', idUnico);
-        localStorage.setItem('spaxio_rol', rolElegido);
-
-        await guardarLocal('usuario', datosUsuario);
-        await guardarLocal('perfiles', { id: idUnico, nombre, apellido, identificacion, foto: null, rol: rolElegido });
-
-        // Ocultar modal de registro
-        document.getElementById('modal-registro').style.display = 'none';
-
-        // Sincronización con Firebase (opcional si usas tu base de datos en nube)
-        if (window.db) {
-            await db.ref('usuarios/' + idUnico).set({
-                id_sistema: idUnico,
-                nombre: nombre,
-                apellido: apellido,
-                identificacion: identificacion,
-                rol: rolElegido,
-                timestamp: firebase.database.ServerValue.TIMESTAMP
-            });
-        }
-
-        alert(`✅ ¡Cuenta de ${rolElegido.toUpperCase()} creada con éxito!\nTu nuevo ID es: ${idUnico}`);
-        location.reload();
-
-    } catch (error) { 
-        console.error("⚠️ Error en el registro:", error);
-        alert("Hubo un error al guardar los datos localmente.");
-    }
-}
 /*```[cite: 1]
 
 ---
