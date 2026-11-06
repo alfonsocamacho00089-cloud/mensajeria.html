@@ -1453,10 +1453,7 @@ function seleccionarRol(rolElegido) {
         🏬 Soy Comerciante
     </button>
 
-    <!-- Botón Conductor (Driver) -->
-    <button class="btn-rol btn-driver" onclick="seleccionarRol('driver')">
-        🚖 Soy Driver 
-    </button>
+    
     
     </div>
 
@@ -1503,11 +1500,15 @@ function seleccionarRol(rolElegido) {
             <span>📱</span> <span>Instalar Aplicación (PWA)</span>
         </div>
 
-     <div class="btn-nav" onclick="irAUsuario();">
-        <span>👤</span><span>Perfil Usuario</span>
-     </div>
-     <div class="btn-nav" onclick="irAComercio();">
-        <span>🏬</span><span>Perfil Comercio</span>
+     <div class="menu-item-link" onclick="toggleMenuHamburguesa(); seleccionarRol();">
+            <span>👤</span> <span>Perfil Usuario</span>
+</div>
+
+<div class="menu-item-link" onclick="toggleMenuHamburguesa(); seleccionarRol();">
+            <span>🚕</span> <span>Perfil Driver</span>
+</div>
+     <div class="menu-item-link" onclick="toggleMenuHamburguesa(); seleccionarRol();">
+            <span>🏬</span> <span>Perfil  Comercio</span>
      </div>
      
      
