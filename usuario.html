@@ -1657,66 +1657,23 @@ async function ejecutarRegistroCompletoRol() {
   <Elicitation label="Selector rápido de cuentas" query="¿Cómo puedo hacer un selector rápido en el perfil para cambiar entre mis cuentas creadas?"/>
   <Elicitation label="Todo listo" query="¡Perfecto, la lógica de registro múltiple está lista!"/>
 </ElicitationsGroup>*/
-
 function seleccionarRol(rolElegido) {
- const miID = localStorage.getItem('mi_dropis_id') || "SPAXIO-USER";
- 
-    // 1. Guardar localmente
-    localStorage.setItem('spaxio_rol', rolElegido);
-    localStorage.setItem('spaxio_user_rol', rolElegido);
+            // Guardamos el rol en el almacenamiento del navegador
+            localStorage.setItem('spaxio_rol', rolElegido);
 
-    // 2. Ocultar el modal de selección
-    const modal = document.getElementById('modal-seleccion-rol');
-    if (modal) modal.style.display = 'none';
-
-    
-    if (rolElegido === 'driver') {
-        alert("🚖 Modo Conductor configurado. Tu panel ha sido ajustado.");
-    } else if (rolElegido === 'merchant') {
-        alert("🏬 Modo Comerciante configurado.");
-    } else {
-        alert(`✅ ¡Rol "${rolElegido}" guardado con éxito!`);
-    }
+            // Redirección a los subdominios de Vercel (Reemplaza estas URLs con las tuyas cuando las despliegues)
+            if (rolElegido === 'passenger') {
+                window.location.href = "https://usuariosapps.vercel.app";
+            } 
+            else if (rolElegido === 'driver') {
+                window.location.href = "https://dritax.vercel.app";
+            } 
+            else if (rolElegido === 'merchant') {
+                window.location.href = "https://ysapay-comercios.vercel.app";
+            }
  }
 
-// 2. Ocultar o mostrar elementos según el rol guardado
-function aplicarReglasDeRolEnInterfaz() {
-    const esTaxista = localStorage.getItem('es_taxista') === 'true';
-    const bloqueConductor = document.getElementById('bloque-modo-taxista'); // El switch de arriba en tu panel lateral
 
-    if (bloqueConductor) {
-        if (esTaxista) {
-            bloqueConductor.style.display = 'block'; // Lo ve el taxista
-        } else {
-            bloqueConductor.style.display = 'none';  // Se oculta para el pasajero normal
-        }
-    }
-}
-
-// 3. Simulador de Afiliación Comercial
-function abrirAfiliacionComercial() {
-    alert("💳 Módulo de Afiliación Comercial: Aquí podrás registrar tu tienda para recibir pagos por Spaxio Gifscards / Tarjeta MÍA.");
-    // Aquí puedes disparar luego el modal o submodal de comercios que ya tienes integrados
-}
-
-// 4. Verificación automática al cargar la PWA
-window.addEventListener('DOMContentLoaded', () => {
-    
-    const modal = document.getElementById('modal-seleccion-rol');
-const rolGuardado = localStorage.getItem('spaxio_rol');
- 
-    if (!rolGuardado) {
-        // Si el usuario es nuevo y no tiene rol, mostramos la pantalla de elección
-        if (modal) modal.style.display = 'flex';
-    } else {
-        // Si ya eligió antes, aplicamos sus reglas de diseño silenciosamente
-        if (modal) modal.style.display = 'none';
-       
-     
- 
-     
-    }
-});
 </script>
  
 <div id="modal-qr" class="modal">
