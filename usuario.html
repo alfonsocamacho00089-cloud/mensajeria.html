@@ -1408,13 +1408,13 @@ function seleccionarRol(rolElegido) {
 
             // Redirección a los subdominios de Vercel (Reemplaza estas URLs con las tuyas cuando las despliegues)
             if (rolElegido === 'passenger') {
-                window.location.href = "https://usuariosapps.vercel.app";
+                window.location.href = "https:./usuario.html";
             } 
             else if (rolElegido === 'driver') {
-                window.location.href = "https://dritax.vercel.app";
+                window.location.href = "https:./driver.html";
             } 
             else if (rolElegido === 'merchant') {
-                window.location.href = "https://ysapay-comercios.vercel.app";
+                window.location.href = "https:./comercios.html";
             }
  }
 
@@ -1522,19 +1522,7 @@ function seleccionarRol(rolElegido) {
         <div class="menu-item-link" onclick="toggleMenuHamburguesa(); lanzarInstalacion();">
             <span>📱</span> <span>Instalar Aplicación (PWA)</span>
         </div></div>
-    <div style="display: flex; gap: 10px; justify-content: center; width: 80%; margin: 15px auto 0 auto;">
-        
- <!-- Botón para Driver -->
-<button class="btn-rol btn-driver" onclick="document.getElementById('modal-registro').style.display = 'flex';">
-    🚖 Soy Driver 
-</button>
 
-<!-- Botón para Comercio -->
-<button class="btn-rol" onclick="document.getElementById('modal-registro').style.display = 'flex';">
-    🏬 Soy Comerciante
-</button>
-    </div>
-</div>
 
 <!-- ==================== PANEL LATERAL DE TAXI / CONDUCTOR ==================== -->
 <div id="seccion-panel-taxi-lateral">
