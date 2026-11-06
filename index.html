@@ -167,66 +167,61 @@
     <p style="color: #8696a0; font-size: 13px; margin-bottom: 25px;">Elige tu perfil principal para configurar tu espacio:</p>
     
     <!-- Botón Usuario / Pasajero -->
-    <button class="btn-rol" onclick="abrirPerfilUsuarioLocal()('passenger')">
+    <button class="btn-rol" onclick="abrirPerfilUsuarioLocal()">
         👤 Soy Usuario 
     </button>
 
     <!-- Botón Comerciante -->
-    <button class="btn-rol" onclick="abrirPerfilComercioLocal('merchant')">
+    <button class="btn-rol" onclick="abrirPerfilComercioLocal()">
         🏬 Soy Comerciante
     </button>
 
     <!-- Botón Conductor (Driver) -->
-    <button class="btn-rol btn-driver" onclick="abrirPerfilDriverLocal('driver')">
+    <button class="btn-rol btn-driver" onclick="abrirPerfilDriverLocal()">
         🚖 Soy Driver 
     </button>
 </div>
 
+
     <script>
-       
-// Al hacer clic en el botón de Usuario:
-async function abrirPerfilUsuarioLocal() {
-    const perfil = await obtenerLocal('usuario', 'perfil_propietario');
-    const rolGuardado = localStorage.getItem('spaxio_rol');
+// Función de navegación segura con protección ante fallos de IndexedDB
+async function navegarConVerificacion(rolDeseado, urlDestino) {
+    try {
+        // Intentamos leer IndexedDB con un límite de tiempo por seguridad
+        const perfil = await Promise.race([
+            obtenerLocal('usuario', 'perfil_propietario'),
+            new Promise((_, reject) => setTimeout(() => reject(timeout), 400))
+        ]);
 
-    if (perfil && perfil.dropis_id && rolGuardado === 'usuario') {
-        localStorage.setItem('mi_dropis_id', perfil.dropis_id);
-    } else {
+        const rolGuardado = localStorage.getItem('spaxio_rol');
+
+        if (perfil && perfil.dropis_id && rolGuardado === rolDeseado) {
+            localStorage.setItem('mi_dropis_id', perfil.dropis_id);
+        } else {
+            localStorage.removeItem('mi_dropis_id');
+        }
+    } catch (e) {
+        // Si IndexedDB falla, no bloqueamos la app: limpiamos por precaución o dejamos continuar
+        console.warn("IndexedDB no respondió a tiempo, procediendo de forma segura.");
         localStorage.removeItem('mi_dropis_id');
     }
-    
-    localStorage.setItem('spaxio_rol', 'usuario');
-    window.location.href = "./usuario.html";
+
+    // Siempre ejecutamos el cambio de página garantizado
+    localStorage.setItem('spaxio_rol', rolDeseado);
+    window.location.href = urlDestino;
 }
 
-// Al hacer clic en el botón de Comercio:
-async function abrirPerfilComercioLocal() {
-    const perfil = await obtenerLocal('usuario', 'perfil_propietario');
-    const rolGuardado = localStorage.getItem('spaxio_rol');
-
-    if (perfil && perfil.dropis_id && rolGuardado === 'merchant') {
-        localStorage.setItem('mi_dropis_id', perfil.dropis_id);
-    } else {
-        localStorage.removeItem('mi_dropis_id');
-    }
-    
-    localStorage.setItem('spaxio_rol', 'merchant');
-    window.location.href = "./comercios.html";
+// Funciones limpias conectadas al selector seguro
+function abrirPerfilUsuarioLocal() {
+    navegarConVerificacion('usuario', './usuario.html');
 }
 
-// Al hacer clic en el botón de Driver:
-async function abrirPerfilDriverLocal() {
-    const perfil = await obtenerLocal('usuario', 'perfil_propietario');
-    const rolGuardado = localStorage.getItem('spaxio_rol');
+function abrirPerfilComercioLocal() {
+    navegarConVerificacion('merchant', './comercios.html');
+}
 
-    if (perfil && perfil.dropis_id && rolGuardado === 'driver') {
-        localStorage.setItem('mi_dropis_id', perfil.dropis_id);
-    } else {
-        localStorage.removeItem('mi_dropis_id');
-    }
-    
-    localStorage.setItem('spaxio_rol', 'driver');
-    window.location.href = "./drivtaxi.html";
+function abrirPerfilDriverLocal() {
+    navegarConVerificacion('driver', './drivtaxi.html');
 }
         
 if ('serviceWorker' in navigator) {
@@ -234,6 +229,7 @@ if ('serviceWorker' in navigator) {
     .then(() => console.log("Service Worker registrado con éxito"))
     .catch((err) => console.log("Error al registrar Service Worker", err));
 }
+    
     
      
         
