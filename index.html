@@ -183,52 +183,75 @@
 </div>
 
 
-    <script>
-// Función de navegación segura con protección ante fallos de IndexedDB
-async function abrirPerfilLocal(rolDeseado, urlDestino) {
+    
+<script>
+// Función para restaurar la cuenta desde Firebase si cambiaste de teléfono o borraste datos
+async function recuperarCuentaConID(RolElegido) {
+    const idParaRecuperar = prompt("Escribe tu ID Dropis:");
+    if (!idParaRecuperar) return;
+
     try {
-        // Intentamos leer IndexedDB con un límite de tiempo por seguridad
-        const perfil = await Promise.race([
-            obtenerLocal('usuario', 'perfil_propietario'),
-            new Promise((_, reject) => setTimeout(() => reject(timeout), 400))
-        ]);
-
-        const rolGuardado = localStorage.getItem('spaxio_rol');
-
-        if (perfil && perfil.dropis_id && rolGuardado === rolDeseado) {
-            localStorage.setItem('mi_dropis_id', perfil.dropis_id);
+        const snapshot = await firebase.database().ref('usuarios/' + idParaRecuperar).once('value');
+        if (snapshot.exists()) {
+            const datos = snapshot.val();
+            // Restablecemos el ID en el teléfono
+            localStorage.setItem('mi_dropis_id', idParaRecuperar);
+            alert(`✅ Bienvenido ${datos.nombre}.`);
+            location.reload(); 
         } else {
-            localStorage.removeItem('mi_dropis_id');
+            alert("❌ ID no encontrado en el satélite.");
         }
     } catch (e) {
-        // Si IndexedDB falla, no bloqueamos la app: limpiamos por precaución o dejamos continuar
-        console.warn("IndexedDB no respondió a tiempo, procediendo de forma segura.");
+        alert("Error de conexión satelital.");
+    }
+}
+
+// BOTÓN USUARIOS
+function abrirPerfilUsuarioLocal() {
+    const idExistente = localStorage.getItem('mi_dropis_id');
+    const rolGuardado = localStorage.getItem('spaxio_rol');
+
+    // Si ya hay un ID guardado Y el último rol era usuario, NO borramos el ID
+    if (!idExistente || rolGuardado !== 'usuario') {
         localStorage.removeItem('mi_dropis_id');
     }
-
-    // Siempre ejecutamos el cambio de página garantizado
-    localStorage.setItem('spaxio_rol', rolDeseado);
-    window.location.href = urlDestino;
+    
+    localStorage.setItem('spaxio_rol', 'usuario');
+    window.location.href = "./usuario.html";
 }
 
-// Funciones limpias conectadas al selector seguro
-function abrirPerfilUsuarioLocal() {
-    navegarConVerificacion('usuario', './usuario.html');
-}
-
+// BOTÓN COMERCIOS
 function abrirPerfilComercioLocal() {
-    navegarConVerificacion('merchant', './comercios.html');
+    const idExistente = localStorage.getItem('mi_dropis_id');
+    const rolGuardado = localStorage.getItem('spaxio_rol');
+
+    if (!idExistente || rolGuardado !== 'merchant') {
+        localStorage.removeItem('mi_dropis_id');
+    }
+    
+    localStorage.setItem('spaxio_rol', 'merchant');
+    window.location.href = "./comercios.html";
 }
 
+// BOTÓN DRIVER
 function abrirPerfilDriverLocal() {
-    navegarConVerificacion('driver', './drivtaxi.html');
+    const idExistente = localStorage.getItem('mi_dropis_id');
+    const rolGuardado = localStorage.getItem('spaxio_rol');
+
+    if (!idExistente || rolGuardado !== 'driver') {
+        localStorage.removeItem('mi_dropis_id');
+    }
+    
+    localStorage.setItem('spaxio_rol', 'driver');
+    window.location.href = "./drivtaxi.html";
 }
-        
+
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('./sw.js')
     .then(() => console.log("Service Worker registrado con éxito"))
     .catch((err) => console.log("Error al registrar Service Worker", err));
 }
+    
     
     
      
