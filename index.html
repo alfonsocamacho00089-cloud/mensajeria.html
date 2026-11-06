@@ -185,26 +185,41 @@
 
     
 <script>
-// Función para restaurar la cuenta desde Firebase si cambiaste de teléfono o borraste datos
-async function recuperarCuentaConID(RolElegido) {
+   async function recuperarCuentaConID(rolElegido, urlDestino) {
     const idParaRecuperar = prompt("Escribe tu ID Dropis:");
     if (!idParaRecuperar) return;
 
     try {
         const snapshot = await firebase.database().ref('usuarios/' + idParaRecuperar).once('value');
+
         if (snapshot.exists()) {
             const datos = snapshot.val();
-            // Restablecemos el ID en el teléfono
+
+            // 1. Restaurar en el teléfono
             localStorage.setItem('mi_dropis_id', idParaRecuperar);
+            localStorage.setItem('spaxio_rol', rolElegido);
+
+            await guardarLocal('usuario', {
+                id: 'perfil_propietario',
+                dropis_id: idParaRecuperar,
+                nombre: datos.nombre,
+                apellido: datos.apellido,
+                identificacion: datos.identificacion,
+                fcm_token: datos.fcm_token || ''
+            });
+
             alert(`✅ Bienvenido ${datos.nombre}.`);
-            location.reload(); 
+            
+            // 2. LÍNEA AGREGADA: Abrir de una vez la pantalla del perfil elegido
+            window.location.href = urlDestino;
+
         } else {
             alert("❌ ID no encontrado en el satélite.");
         }
     } catch (e) {
         alert("Error de conexión satelital.");
     }
-}
+    }
 
 // BOTÓN USUARIOS
 function abrirPerfilUsuarioLocal() {
