@@ -1540,10 +1540,10 @@ async function ejecutarRegistroCompleto() {
     }
   }     
 // Variable global temporal para saber qué tipo de cuenta se está abriendo en el modal
-let rolObjetivoRegistro = 'passenger'; 
+let rolElegidoObjetivoRegistro = 'passenger'; 
 
 function abrirModalRegistroRol(rolElegido) {
-    rolObjetivoRegistro = rolElegido; // 'passenger', 'driver' o 'merchant'
+    rolElegidoObjetivoRegistro = rolElegido; // 'passenger', 'driver' o 'merchant'
     
     // Ocultamos otros modales o menús que puedan estorbar
     const panelLateral = document.getElementById('seccion-menu-hamburguesa');
