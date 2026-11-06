@@ -3522,6 +3522,7 @@ async function recuperarCuentaConID() {
             const datos = snapshot.val();
             // Restaurar en el teléfono
             localStorage.setItem('mi_dropis_id', idParaRecuperar);
+         localStorage.setItem('id_' + datos.rol, idParaRecuperar);
             await guardarLocal('usuario', { 
                 id: 'perfil_propietario', 
                 dropis_id: idParaRecuperar,
@@ -3531,7 +3532,11 @@ async function recuperarCuentaConID() {
               fcm_token: datos.fcm_token || '' 
             });
             alert(`✅Bienvenido ${datos.nombre}.`);
-            location.reload(); 
+            
+
+
+// POR ESTO:
+window.location.href = (datos.rol === 'merchant' ? './comercios.html' : datos.rol === 'driver' ? './drivtaxi.html' : './usuario.html');
         } else {
             alert("❌ ID no encontrado en el satélite.");
         }
@@ -3564,6 +3569,7 @@ async function recuperarCuentaConID() {
 
     try {
         localStorage.setItem('mi_dropis_id', idUnico);
+     localStorage.setItem('id_' + rolElegido, idUnico);
         await guardarLocal('usuario', datosUsuario);
         
         await guardarLocal('perfiles', { id: idUnico, nombre, apellido, identificacion, foto: null, rol: rolElegido });
@@ -3603,7 +3609,10 @@ async function recuperarCuentaConID() {
         
         // Un pequeño aviso y recarga para confirmar que terminó
         alert("¡Registro Exitoso!");
-        location.reload();
+        
+
+// POR ESTO:
+window.location.href = (datos.rol === 'merchant' ? './comercios.html' : datos.rol === 'driver' ? './drivtaxi.html' : './usuario.html');
 
     } catch (error) { 
         console.error("⚠️ Error en el proceso:", error);
