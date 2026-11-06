@@ -1310,27 +1310,19 @@ button#btn-enviar:active {
 <script>
 
 function seleccionarRol(rolElegido) {
- const miID = localStorage.getItem('mi_dropis_id') || "SPAXIO-USER";
- 
-    // 1. Guardar localmente
-    localStorage.setItem('spaxio_rol', rolElegido);
-    localStorage.setItem('spaxio_user_rol', rolElegido);
+            // Guardamos el rol en el almacenamiento del navegador
+            localStorage.setItem('spaxio_rol', rolElegido);
 
-    // 2. Ocultar el modal de selección
-    const modal = document.getElementById('modal-seleccion-rol');
-    if (modal) modal.style.display = 'none';
-
-    // 3. Aplicar de inmediato el bloqueo de QR/ID y las reglas del rol elegido
-    aplicarBloqueoQRIDRoles(); // <-- Aquí se aplica en caliente al momento de elegir
-    aplicarReglasDeRolEnInterfaz();
-
-    if (rolElegido === 'driver') {
-        alert("🚖 Modo Conductor configurado. Tu panel ha sido ajustado.");
-    } else if (rolElegido === 'merchant') {
-        alert("🏬 Modo Comerciante configurado.");
-    } else {
-        alert(`✅ ¡Rol "${rolElegido}" guardado con éxito!`);
-    }
+            // Redirección a los subdominios de Vercel (Reemplaza estas URLs con las tuyas cuando las despliegues)
+            if (rolElegido === 'passenger') {
+                window.location.href = "https://usuariosapps.vercel.app";
+            } 
+            else if (rolElegido === 'driver') {
+                window.location.href = "https://dritax.vercel.app";
+            } 
+            else if (rolElegido === 'merchant') {
+                window.location.href = "https://ysapay-comercios.vercel.app";
+            }
 }
  
 
