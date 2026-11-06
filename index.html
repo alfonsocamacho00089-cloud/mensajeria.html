@@ -167,22 +167,48 @@
     <p style="color: #8696a0; font-size: 13px; margin-bottom: 25px;">Elige tu perfil principal para configurar tu espacio:</p>
     
     <!-- Botón Usuario / Pasajero -->
-    <button class="btn-rol" onclick="seleccionarRol('passenger')">
+    <button class="btn-rol" onclick="abrirPerfilUsuarioLocal('passenger')">
         👤 Soy Usuario 
     </button>
 
     <!-- Botón Comerciante -->
-    <button class="btn-rol" onclick="seleccionarRol('merchant')">
+    <button class="btn-rol" onclick="abrirPerfilComercioLocal('merchant')">
         🏬 Soy Comerciante
     </button>
 
     <!-- Botón Conductor (Driver) -->
-    <button class="btn-rol btn-driver" onclick="seleccionarRol('driver')">
+    <button class="btn-rol btn-driver" onclick="abrirPerfilDriverLocal('driver')">
         🚖 Soy Driver 
     </button>
 </div>
 
     <script>
+       // Al hacer clic en el botón de Comercio:
+function abrirPerfilUsuarioLocal() {
+    // 1. Limpiamos temporalmente el ID activo para forzar un registro nuevo
+    localStorage.removeItem('mi_dropis_id');
+    localStorage.setItem('spaxio_rol', 'usuario');
+    
+    // 2. Abrimos tu archivo local limpio dentro de la misma app (sin pestañas de Google)
+    window.location.href = "./comercios.html";
+}
+        // Al hacer clic en el botón de Comercio:
+function abrirPerfilComercioLocal() {
+    // 1. Limpiamos temporalmente el ID activo para forzar un registro nuevo
+    localStorage.removeItem('mi_dropis_id');
+    localStorage.setItem('spaxio_rol', 'merchant');
+    
+    // 2. Abrimos tu archivo local limpio dentro de la misma app (sin pestañas de Google)
+    window.location.href = "./comercios.html";
+}
+
+// Al hacer clic en el botón de Driver:
+function abrirPerfilDriverLocal() {
+    localStorage.removeItem('mi_dropis_id');
+    localStorage.setItem('spaxio_rol', 'driver');
+    
+    window.location.href = "./drivtaxi.html";
+}
         function seleccionarRol(rolElegido) {
             // Guardamos el rol en el almacenamiento del navegador
             localStorage.setItem('spaxio_rol', rolElegido);
