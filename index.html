@@ -209,21 +209,7 @@ function abrirPerfilDriverLocal() {
     
     window.location.href = "./drivtaxi.html";
 }
-        function seleccionarRol(rolElegido) {
-            // Guardamos el rol en el almacenamiento del navegador
-            localStorage.setItem('spaxio_rol', rolElegido);
-
-            // Redirección a los subdominios de Vercel (Reemplaza estas URLs con las tuyas cuando las despliegues)
-            if (rolElegido === 'passenger') {
-                window.location.href = "./usuario.html";
-            } 
-            else if (rolElegido === 'driver') {
-                window.location.href = "./drivtaxi.html";
-            } 
-            else if (rolElegido === 'merchant') {
-                window.location.href = "./comercios.html";
-            }
-        }
+        
         
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('./sw.js')
