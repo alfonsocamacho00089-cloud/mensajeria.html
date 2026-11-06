@@ -1560,8 +1560,8 @@ function abrirModalRegistroRol(rolElegido) {
         // Opcional: Cambiar el título del modal dinámicamente según el rol
         const tituloModal = modalRegistroRol.querySelector('h3');
         if (tituloModal) {
-            if (rol === 'driver') tituloModal.textContent = "Registro - Cuenta Driver 🚖";
-            else if (rol === 'merchant') tituloModal.textContent = "Registro - Cuenta Comercio 🏬";
+            if (rolElegido === 'driver') tituloModal.textContent = "Registro - Cuenta Driver 🚖";
+            else if (rolElegido === 'merchant') tituloModal.textContent = "Registro - Cuenta Comercio 🏬";
             else tituloModal.textContent = "Registro - Cuenta Usuario 👤";
         }
     }
