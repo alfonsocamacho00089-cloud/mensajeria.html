@@ -185,7 +185,7 @@
 
     <script>
 // Función de navegación segura con protección ante fallos de IndexedDB
-async function navegarConVerificacion(rolDeseado, urlDestino) {
+async function abrirPerfilLocal(rolDeseado, urlDestino) {
     try {
         // Intentamos leer IndexedDB con un límite de tiempo por seguridad
         const perfil = await Promise.race([
