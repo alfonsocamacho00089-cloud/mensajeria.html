@@ -12,51 +12,32 @@
  <meta charset="UTF-8">
  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, interactive-widget=overlays-content">
         <title>SpaceChat</title> </head>
-  <!-- 1. Primero cargan las librerías externas base -->
-<script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-messaging-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-storage-compat.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script> 
-<script src="https://cdn.jsdelivr.net/npm/protobufjs@7.2.4/dist/protobuf.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-<!-- 2. Tu inicialización global de Supabase y Eruda (si la usas) -->
+
+<script src="https://cdn.jsdelivr.net/npm/protobufjs@7.2.4/dist/protobuf.min.js"></script>
+
+
+ <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
+
+ 
+
+ <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
+  // Inicialización global explícita en window
   const SUPABASE_URL = "https://fcklnjgkwrnunoroseze.supabase.co";
   const SUPABASE_ANON_KEY = "sb_publishable_5hnn7yZwjtyk5ZLTrnO-2Q_8MJ6DPLR"; 
+  
   window.supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-  var supabaseClient = window.supabaseClient;
+  var supabaseClient = window.supabaseClient; // Respaldo global
 </script>
-<script src="https://cdn.jsdelivr.net/npm/eruda"></script>
+ 
+ <script src="https://cdn.jsdelivr.net/npm/eruda"></script>
 <script>eruda.init();</script>
-
-<!-- 3. TUS NUEVOS ARCHIVOS MODULARIZADOS -->
-<script src="js/taxi.js"></script>
-<script src="js/spaxioflow.js"></script><!-- 1. Primero cargan las librerías externas base -->
-<script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-messaging-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-storage-compat.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script> 
-<script src="https://cdn.jsdelivr.net/npm/protobufjs@7.2.4/dist/protobuf.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-<!-- 2. Tu inicialización global de Supabase y Eruda (si la usas) -->
-<script>
-  const SUPABASE_URL = "https://fcklnjgkwrnunoroseze.supabase.co";
-  const SUPABASE_ANON_KEY = "sb_publishable_5hnn7yZwjtyk5ZLTrnO-2Q_8MJ6DPLR"; 
-  window.supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-  var supabaseClient = window.supabaseClient;
-</script>
-<script src="https://cdn.jsdelivr.net/npm/eruda"></script>
-<script>eruda.init();</script>
-
-<!-- 3. TUS NUEVOS ARCHIVOS MODULARIZADOS -->
-<script src="js/taxi.js"></script>
-<script src="js/spaxioflow.js"></script>
      <style>
    
     * {
@@ -104,11 +85,12 @@ body {
 /* 2. Cuando el teléfono activa modo oscuro, cambia las variables */
 @media (prefers-color-scheme: dark) {
     :root {
-        --bg-principal: #181d24; /* El gris oscuro de tu captura */
-        --bg-tarjeta: #202732;
+        --bg-principal: #203062; /* El gris oscuro de tu captura */
+        --bg-tarjeta: #203062;
         --texto-color: #ffffff;
     }
 }
+
 
 
     
@@ -450,7 +432,7 @@ button#btn-enviar:active {
 }
 
 .modal-content { 
-    background-color: #222b35;
+    background: #202732 !important;
     background-size: cover;
     background-position: center;
     background-attachment: fixed;
@@ -940,8 +922,31 @@ button#btn-enviar:active {
         .qr-container img { max-width: 100%; }
 
 
-/* --- PANEL LATERAL EXCLUSIVO PARA CONTACTOS Y CALCULADORA --- */
-#seccion-panel-contactos-lateral, 
+/* --- PANEL LATERAL/* --- PANEL
+ LATERAL EXCLUSIVO PARA CONTACTOS Y CALCULADORA --- */
+#seccion-panel-contactos-lateral {
+  position: fixed !important;
+    top: 0 !important;
+    right: -100% !important; /* Oculto completamente a la derecha por defecto */
+    width: 100vw !important; /* Ocupa todo el ancho en móviles para que no quede flotando a medias */
+    max-width: 400px !important;
+    height: 100dvh !important;
+    background: #202732 !important;
+    background-image: linear-gradient(rgba(11, 20, 26, 0.95), rgba(11, 20, 26, 0.95)), url('./assets/logo.webp');
+    background-size: cover;
+    background-position: center;
+    border-left: 1px;
+    z-index: 60000 !important; /* Por encima de todo, incluyendo la barra inferior */
+    transition: right 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+    display: flex !important;
+    flex-direction: column;
+    box-shadow: none;
+    overflow-y: auto;
+    box-sizing: border-box;
+  }
+#seccion-panel-contactos-lateral.abierto {
+    right: 0 !important; /* Se desliza perfectamente hacia la pantalla ocupando su espacio */
+  }
 #seccion-calculadora-integrada {
     position: fixed !important;
     top: 0 !important;
@@ -949,11 +954,11 @@ button#btn-enviar:active {
     width: 100vw !important; /* Ocupa todo el ancho en móviles para que no quede flotando a medias */
     max-width: 400px !important;
     height: 100dvh !important;
-    background: #0b141a !important;
+    background: #161b22 !important;
     background-image: linear-gradient(rgba(11, 20, 26, 0.95), rgba(11, 20, 26, 0.95)), url('./assets/logo.webp');
     background-size: cover;
     background-position: center;
-    border-left: 2px solid #ffd700;
+    border-left: 1px;
     z-index: 60000 !important; /* Por encima de todo, incluyendo la barra inferior */
     transition: right 0.4s cubic-bezier(0.25, 1, 0.5, 1);
     display: flex !important;
@@ -963,7 +968,7 @@ button#btn-enviar:active {
     box-sizing: border-box;
 }
 
-#seccion-panel-contactos-lateral.abierto,
+
 #seccion-calculadora-integrada.abierto {
     right: 0 !important; /* Se desliza perfectamente hacia la pantalla ocupando su espacio */
       }
@@ -972,7 +977,7 @@ button#btn-enviar:active {
     position: fixed;
     right: 20px;
     bottom: 110px; /* Arriba de tu barra de navegación */
-    background: rgba(255, 215, 0, 0.25);
+    background:#171e24;
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
     border: 1px solid rgba(255, 215, 0, 0.4);
@@ -1033,11 +1038,9 @@ button#btn-enviar:active {
     width: 100vw !important; 
     max-width: 400px !important;
     height: 100dvh !important;
-    background: #0b141a !important;
-    background-image: linear-gradient(rgba(11, 20, 26, 0.95), rgba(11, 20, 26, 0.95)), url('./assets/logo.webp');
-    background-size: cover;
-    background-position: center;
-    border-left: 2px solid #ffd700;
+    background: #202e38 !important;
+    
+    
     z-index: 60000 !important; 
     transition: right 0.4s cubic-bezier(0.25, 1, 0.5, 1);
     display: flex !important;
@@ -1057,13 +1060,10 @@ button#btn-enviar:active {
     top: 0 !important;
     left: -100% !important; /* Oculto completamente a la izquierda por defecto */
     width: 100vw !important;
-    max-width: 320px !important; /* Ancho máximo del menú */
+    max-width: 400px !important; /* Ancho máximo del menú */
     height: 100dvh !important;
-    background: #0b141a !important;
-    background-image: linear-gradient(rgba(11, 20, 26, 0.95), rgba(11, 20, 26, 0.95)), url('./assets/logo.webp');
-    background-size: cover;
-    background-position: center;
-    border-right: 2px solid #ffd700; /* Borde dorado al lado derecho */
+    background: #202732 !important;
+    
     z-index: 60000 !important; /* Por encima de todo */
     transition: left 0.4s cubic-bezier(0.25, 1, 0.5, 1); /* Transición fluida */
     display: flex !important;
@@ -1089,7 +1089,7 @@ button#btn-enviar:active {
     text-decoration: none;
     font-size: 15px;
     font-weight: bold;
-    border-bottom: 1px solid rgba(255, 215, 0, 0.1);
+    border-bottom: 0px;
     transition: background 0.3s ease;
     cursor: pointer;
 }
@@ -1318,37 +1318,7 @@ button#btn-enviar:active {
     </div>
 </div>
  
- <div id="modal-registro-rol" class="modal" style="display: none; align-items: center; justify-content: center; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #1e222b; z-index: 60000;">
-  
-          <div class="modal-cover" style="position: relative; width: 100vw; height: 100vh; padding: 50px 30px 50px 30px; box-sizing: border-box; background: #1e222b; border-radius: 0px; text-align: center; border: 0px solid #333; box-shadow: 0 0 20px rgba(0,0,0,0.5);">   
 
-<img src="assets/imagen-nuevas-logos.png" alt="SpaceChat Logo" 
-     style="width: 80px; height: auto; display: block; margin: 0 auto 15px; position: relative; left: 2px; filter: drop-shadow(0px 4px 8px rgba(255, 215, 0, 0.3));">           
-           
-           <h3 style="color: #ffd700; margin-bottom: 20px;">Registro</h3>
-        
-     
-     
-        <input type="text" id="reg-nombre" placeholder="Nombre" 
-            onfocus="this.style.boxShadow='0 0 5px #ffd700'; this.style.borderColor='#ffd700';" 
-            onblur="this.style.boxShadow='none'; this.style.borderColor='#999';"
-             style="width: 100%; padding: 18px; margin-bottom: 15px; background: #2a2f3a; color: white; border: 1px solid #999; border-radius: 8px; box-sizing: border-box; outline: none;">
-        
-        <input type="text" id="reg-apellido" placeholder="Apellido" 
-            onfocus="this.style.boxShadow='0 0 5px #ffd700'; this.style.borderColor='#ffd700';" 
-            onblur="this.style.boxShadow='none'; this.style.borderColor='#999';"
-             style="width: 100%; padding: 18px; margin-bottom: 15px; background: #2a2f3a; color: white; border: 1px solid #999; border-radius: 8px; box-sizing: border-box; outline: none;">
-
-<input type
-="text" id="reg-identificacion" placeholder="Cedula o Rif" 
-            onfocus="this.style.boxShadow='0 0 5px #ffd700'; this.style.borderColor='#ffd700';" 
-            onblur="this.style.boxShadow='none'; this.style.borderColor='#999';"
-             style="width: 100%; padding: 18px; margin-bottom: 15px; background: #2a2f3a; color: white; border: 1px solid #999; border-radius: 8px; box-sizing: border-box; outline: none;">
-            
-   <button onclick="ejecutarRegistroCompletoRol()" 
-            style="width: 100%; padding: 15px; background: #ffd700; border: none; border-radius: 25px; font-weight: bold; color: #000; cursor: pointer; font-size: 16px; margin-bottom: 20px; text-transform: uppercase; box-shadow: 0 0 5px #ffd700;">
-            CREAR MI CUENTA 
-        </button></div></div>
 <!-- ============================================================== -->
 <!-- PANTALLA / MODAL DE SELECCIÓN DE ROL (POST-REGISTRO) -->
 <!-- ============================================================== -->
@@ -1396,88 +1366,68 @@ button#btn-enviar:active {
 
 <script>
 
-// Ir al perfil de Usuario
-function irAUsuario() {
-    // Verificamos si ya existe un ID guardado como pasajero/usuario
-    const idUsuario = localStorage.getItem('mi_dropis_id_usuario');
-    
-    if (idUsuario) {
-        // Si ya tiene cuenta, cargamos su panel/chat directamente de forma local
-        localStorage.setItem('mi_dropis_id', idUsuario);
-        window.location.href = "./usuario.html"; // o tu archivo principal de chat
-    } else {
-        // Si no tiene cuenta aún, guardamos el rol y abrimos el modal de registro limpio
-        localStorage.setItem('spaxio_rol', 'passenger');
-        // Aquí abres tu modal de registro local
-        document.getElementById('modal-registro').style.display = 'flex';
-    }
-}
-
-// Ir al perfil de Comercio
-function irAComercio() {
-    const idComercio = localStorage.getItem('mi_dropis_id_comercio');
-    
-    if (idComercio) {
-        // Si ya está registrado como comercio, entra directo sin pedir datos
-        localStorage.setItem('mi_dropis_id', idComercio);
-        window.location.href = "./comercios.html";
-    } else {
-        // Si es nuevo en comercio, configuramos el rol y abrimos el registro
-        localStorage.setItem('spaxio_rol', 'merchant');
-        document.getElementById('modal-registro').style.display = 'flex';
-    }
-}
-
-// Ir al perfil de Driver
-function irADriver() {
-    const idDriver = localStorage.getItem('mi_dropis_id_driver');
-    
-    if (idDriver) {
-        localStorage.setItem('mi_dropis_id', idDriver);
-        window.location.href = "./drivtaxi.html";
-    } else {
-        localStorage.setItem('spaxio_rol', 'driver');
-        document.getElementById('modal-registro').style.display = 'flex';
-    }
- }
-
-
-// Al hacer clic en el botón de Comercio:
-function abrirPerfilComercioLocal() {
-    // 1. Limpiamos temporalmente el ID activo para forzar un registro nuevo
-    localStorage.removeItem('mi_dropis_id');
-    localStorage.setItem('spaxio_rol', 'merchant');
-    
-    // 2. Abrimos tu archivo local limpio dentro de la misma app (sin pestañas de Google)
-    window.location.href = "./comercios.html";
-}
-
-// Al hacer clic en el botón de Driver:
-function abrirPerfilDriverLocal() {
-    localStorage.removeItem('mi_dropis_id');
-    localStorage.setItem('spaxio_rol', 'driver');
-    
-    window.location.href = "./drivtaxi.html";
- }
-
-
 function seleccionarRol(rolElegido) {
-            // Guardamos el rol en el almacenamiento del navegador
-            localStorage.setItem('spaxio_rol', rolElegido);
+ const miID = localStorage.getItem('mi_dropis_id') || "SPAXIO-USER";
+ 
+    // 1. Guardar localmente
+    localStorage.setItem('spaxio_rol', rolElegido);
+    localStorage.setItem('spaxio_user_rol', rolElegido);
 
-            // Redirección a los subdominios de Vercel (Reemplaza estas URLs con las tuyas cuando las despliegues)
-            if (rolElegido === 'passenger') {
-                window.location.href = "./usuario.html";
-            } 
-            else if (rolElegido === 'driver') {
-                window.location.href = "./drivtaxi.html";
-            } 
-            else if (rolElegido === 'merchant') {
-                window.location.href = "./comercios.html";
-            }
+    // 2. Ocultar el modal de selección
+    const modal = document.getElementById('modal-seleccion-rol');
+    if (modal) modal.style.display = 'none';
+
+    // 3. Aplicar de inmediato el bloqueo de QR/ID y las reglas del rol elegido
+    aplicarBloqueoQRIDRoles(); // <-- Aquí se aplica en caliente al momento de elegir
+    aplicarReglasDeRolEnInterfaz();
+
+    if (rolElegido === 'driver') {
+        alert("🚖 Modo Conductor configurado. Tu panel ha sido ajustado.");
+    } else if (rolElegido === 'merchant') {
+        alert("🏬 Modo Comerciante configurado.");
+    } else {
+        alert(`✅ ¡Rol "${rolElegido}" guardado con éxito!`);
+    }
  }
 
+// 2. Ocultar o mostrar elementos según el rol guardado
+function aplicarReglasDeRolEnInterfaz() {
+    const esTaxista = localStorage.getItem('es_taxista') === 'true';
+    const bloqueConductor = document.getElementById('bloque-modo-taxista'); // El switch de arriba en tu panel lateral
 
+    if (bloqueConductor) {
+        if (esTaxista) {
+            bloqueConductor.style.display = 'block'; // Lo ve el taxista
+        } else {
+            bloqueConductor.style.display = 'none';  // Se oculta para el pasajero normal
+        }
+    }
+}
+
+// 3. Simulador de Afiliación Comercial
+function abrirAfiliacionComercial() {
+    alert("💳 Módulo de Afiliación Comercial: Aquí podrás registrar tu tienda para recibir pagos por Spaxio Gifscards / Tarjeta MÍA.");
+    // Aquí puedes disparar luego el modal o submodal de comercios que ya tienes integrados
+}
+
+// 4. Verificación automática al cargar la PWA
+window.addEventListener('DOMContentLoaded', () => {
+    
+    const modal = document.getElementById('modal-seleccion-rol');
+const rolGuardado = localStorage.getItem('spaxio_rol');
+ 
+    if (!rolGuardado) {
+        // Si el usuario es nuevo y no tiene rol, mostramos la pantalla de elección
+        if (modal) modal.style.display = 'flex';
+    } else {
+        // Si ya eligió antes, aplicamos sus reglas de diseño silenciosamente
+        if (modal) modal.style.display = 'none';
+       
+     
+ aplicarReglasDeRolEnInterfaz();
+     
+    }
+});
 </script>
  
 <div id="modal-qr" class="modal">
@@ -1499,7 +1449,7 @@ function seleccionarRol(rolElegido) {
              
           <div onclick="togglePanelTaxiLateral()" title="Entrar al SpaxioVerso" style="cursor: pointer; color: #ffd700; font-size: 20px; padding: 0 8px; margin-right: 8px; text-shadow: 0 0 8px #ffd700;">🚕</div>      
                 </div>
-      <div           
+                
      
          
      
@@ -1526,16 +1476,6 @@ function seleccionarRol(rolElegido) {
       GUARDAR 
      </button>
     
-
-    <!-- Botón Comerciante -->
-    <button class="btn-rol" onclick="abrirPerfilComercioLocal('merchant')">
-        🏬 Soy Comerciante
-    </button>
-
-    <!-- Botón Conductor (Driver) -->
-    <button class="btn-rol btn-driver" onclick="abrirPerfilDriverLocal('driver')">
-        🚖 Soy Driver 
-    </button>
     </div>
      <!-- ==================== MENÚ HAMBURGUESA LATERAL ==================== -->
 <div id="seccion-menu-hamburguesa">
@@ -1579,24 +1519,8 @@ function seleccionarRol(rolElegido) {
             <span>📱</span> <span>Instalar Aplicación (PWA)</span>
         </div>
 
-<div class="menu-item-link" onclick="toggleMenuHamburguesa(); seleccionarRol();">
-            <span>👤</span> <span>Perfil Usuario</span>
+    </div>
 </div>
-
-<div class="menu-item-link" onclick="toggleMenuHamburguesa(); seleccionarRol();">
-            <span>🚕</span> <span>Perfil Driver</span>
-</div>
-     <div class="menu-item-link" onclick="toggleMenuHamburguesa(); seleccionarRol();">
-            <span>🏬</span> <span>Perfil  Comercio</span>
-     </div>
-     
-     
-     
-    
-    
-    </div></div>
-
-
 <!-- ==================== PANEL LATERAL DE TAXI / CONDUCTOR ==================== -->
 <div id="seccion-panel-taxi-lateral">
 
@@ -1606,7 +1530,7 @@ function seleccionarRol(rolElegido) {
             <button onclick="togglePanelTaxiLateral()" style="background: transparent; border: none; color: white; font-size: 20px; cursor: pointer; padding: 0;">
                 <span style="display: inline-block; transform: scaleX(-1);">➔</span>
             </button>
-            <span style="color: #ffd700; font-size: 15px;">🚖 zona driver</span>
+            <span style="color: #ffd700; font-size: 15px;">🚖  zona driver</span>
         </div>
     </div>
 
@@ -1614,14 +1538,18 @@ function seleccionarRol(rolElegido) {
     <div style="padding: 15px; flex-grow: 1; overflow-y: auto;">
         
         <!-- Switch de Modo Taxista -->
-        <div style="background: rgba(11, 20, 26, 0.95); padding: 15px; border-radius: 12px; border: 1px solid #FFD700; color: #fff; text-align: center; margin-bottom: 20px;">
-            <label style="display: flex; align-items: center; justify-content: center; gap: 12px; cursor: pointer;">
-                <h3 style="color: #ffd700; margin: 0; font-size: 16px;">🚕 TaxiDriver</h3>
-            </label>
-        </div>
+      <div style=" padding: 15px; border-radius: 12px; border: 0px solid #FFD700; color: #fff; text-align: center; margin-bottom: 5px;">
+            <h3 style="color: #FFD700; margin-bottom: 10px; font-size: 16px;"></h3>
+          
+            <div style="display: flex; align-items: center; justify-content: center; gap: 12px; cursor: pointer;">
+                
+        </div></div>
 
-        <!-- Radar / Mapa GPS de Taxis Cercanos -->
-        <div style="background: rgba(11, 20, 26, 0.95); border: 2px solid #ffd700; border-radius: 15px; padding: 15px; text-align: center;">
+        <!-- Radar
+ de Taxis Cercanos -->
+        <div style="background: rgba(32, 63, 84, 0.9490196078431372); border: 1px solid #ffd700; border-radius: 15px; padding: 15px; text-align: center;">
+            <h3 style="color: #ffd700; margin-top: 0; font-size: 16px;">🚕 TaxiDriver / 🚌 Autobuses / 🏍️ Deliverys</h3>
+            
             <iframe id="mapa-radar" 
                 width="100%" 
                 height="220" 
@@ -1630,12 +1558,16 @@ function seleccionarRol(rolElegido) {
                 src="https://maps.google.com/maps?q=10.48,-66.9&z=14&output=embed">
             </iframe>
             
+        
+      
+    
+            
             <button onclick="actualizarRadarTaxis()" style="margin-top: 12px; padding: 10px 15px; background: #ffd700; color: #000; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%;">
                 🚖 Pide tu Driver Disponible
             </button>
         </div>
-
-        <!-- ==================== NUEVO: CARRUSEL HORIZONTAL DE COMERCIOS (GPS) ==================== -->
+<!-- =============
+======= NUEVO: CARRUSEL HORIZONTAL DE COMERCIOS (GPS) ==================== -->
         <div style="margin-top: 25px; text-align: left;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; padding: 0 2px;">
                 <span style="font-size: 13px; font-weight: bold; color: #ffd700; text-transform: uppercase; letter-spacing: 1px;">📍 Lugares & Negocios Cercanos</span>
@@ -1646,7 +1578,7 @@ function seleccionarRol(rolElegido) {
             <div id="carrusel-negocios-gps" style="display: flex; gap: 12px; overflow-x: auto; padding-bottom: 10px; scrollbar-width: none; -webkit-overflow-scrolling: touch;">
                 
                 <!-- Negocio 1 -->
-                <div class="tarjeta-negocio-gps" onclick="trazarRutaHaciaNegocio(10.3428692, -67.0362434, 'Space Burger')" style="min-width: 140px; max-width: 140px; background: #151828; border: 1px solid #ffd700; border-radius: 12px; overflow: hidden; flex-shrink: 0; cursor: pointer; transition: transform 0.2s;">
+                <div class="tarjeta-negocio-gps" onclick="trazarRutaHaciaNegocio(10.3428692, -67.0362434, 'Space Burger')" style="min-width: 140px; max-width: 140px; background: #1b1b2813; border: 1px solid #ffd700; border-radius: 12px; overflow: hidden; flex-shrink: 0; cursor: pointer; transition: transform 0.2s;">
                     <img src="https://share.google/9aKTQOnE7WQrg3NGu" alt="Space Burger" style="width: 100%; height: 85px; object-fit: cover;">
                     <div style="padding: 8px; text-align: center;">
                         <div style="font-size: 12px; color: #fff; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Space Burger</div>
@@ -1655,7 +1587,7 @@ function seleccionarRol(rolElegido) {
                 </div>
 
                 <!-- Negocio 2 -->
-                <div class="tarjeta-negocio-gps" onclick="trazarRutaHaciaNegocio(10.481, -66.898, 'Café Galaxia')" style="min-width: 140px; max-width: 140px; background: #151828; border: 1px solid #ffd700; border-radius: 12px; overflow: hidden; flex-shrink: 0; cursor: pointer; transition: transform 0.2s;">
+                <div class="tarjeta-negocio-gps" onclick="trazarRutaHaciaNegocio(10.481, -66.898, 'Café Galaxia')" style="min-width: 140px; max-width: 140px; background: #1b1b2813; border: 1px solid #ffd700; border-radius: 12px; overflow: hidden; flex-shrink: 0; cursor: pointer; transition: transform 0.2s;">
                     <img src="https://picsum.photos/200/120?random=11" alt="Café Galaxia" style="width: 100%; height: 85px; object-fit: cover;">
                     <div style="padding: 8px; text-align: center;">
                         <div style="font-size: 12px; color: #fff; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Café Galaxia</div>
@@ -1664,7 +1596,7 @@ function seleccionarRol(rolElegido) {
                 </div>
 
                 <!-- Negocio 3 -->
-                <div class="tarjeta-negocio-gps" onclick="trazarRutaHaciaNegocio(10.3428692, -67.0362434, 'Market Express')" style="min-width: 140px; max-width: 140px; background: #151828; border: 1px solid #ffd700; border-radius: 12px; overflow: hidden; flex-shrink: 0; cursor: pointer; transition: transform 0.2s;">
+                <div class="tarjeta-negocio-gps" onclick="trazarRutaHaciaNegocio(10.3428692, -67.0362434, 'Market Express')" style="min-width: 140px; max-width: 140px; background: #1b1b2813; border: 1px solid #ffd700; border-radius: 12px; overflow: hidden; flex-shrink: 0; cursor: pointer; transition: transform 0.2s;">
                     <img src="https://picsum.photos/200/120?random=12" alt="Market Express" style="width: 100%; height: 85px; object-fit: cover;">
                     <div style="padding: 8px; text-align: center;">
                         <div style="font-size: 12px; color: #fff; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Market Express</div>
@@ -1673,7 +1605,7 @@ function seleccionarRol(rolElegido) {
                 </div>
 
                 <!-- Negocio 4 -->
-                <div class="tarjeta-negocio-gps" onclick="trazarRutaHaciaNegocio(10.490, -66.890, 'Abasto Tio San')" style="min-width: 140px; max-width: 140px; background: #151828; border: 1px solid #ffd700; border-radius: 12px; overflow: hidden; flex-shrink: 0; cursor: pointer; transition: transform 0.2s;">
+                <div class="tarjeta-negocio-gps" onclick="trazarRutaHaciaNegocio(10.490, -66.890, 'Abasto Tio San')" style="min-width: 140px; max-width: 140px; background: #1b1b2813; border: 1px solid #ffd700; border-radius: 12px; overflow: hidden; flex-shrink: 0; cursor: pointer; transition: transform 0.2s;">
                     <img src="https://picsum.photos/200/120?random=13" alt="Abasto Tio San" style="width: 100%; height: 85px; object-fit: cover;">
                     <div style="padding: 8px; text-align: center;">
                         <div style="font-size: 12px; color: #fff; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Abasto Tio San</div>
@@ -1683,34 +1615,41 @@ function seleccionarRol(rolElegido) {
 
             </div>
         </div>
-        <!-- ==================== FIN CARRUSEL ==================== -->
-
     </div>
+  
+  <div class="barra-flotante-premium">
+
+  <div class="btn-nav" onclick="togglePanelTaxiLateral();">
+        <span>🛖</span><span>Inicio</span></div>
+ <div class="btn-nav" onclick="togglePanelContactosLateral();">
+        <span>💬</span><span>Chat</span></div>
+
+<div class="btn-nav" onclick="abrirAgendaCompleta();">
+        <span>👥</span><span>Contactos</span>
+</div>
+  <div class="btn-nav" 
+     id="btn-nav-flow" 
+     data-contacto='{"id_sistema":"26fmetp4Q4WJ","nombre":"Spaxio","apellido":"Flow","estado":"activo"}'
+     onclick="cargarConversacionCon(JSON.parse(this.dataset.contacto).id_sistema)">🪙<span></span><span>P2P</span>
+        
+  </div>
+<div class="btn-nav" onclick="abrirCalculadora();">
+        <span>💹</span><span>Cr / Tasas</span>
+</div>
+</div>
 </div>
         
-
  
 <!-- 3. 🪐 SECCIÓN INTEGRADA: SPAXIOGIFSCARD (Debajo de los contactos) -->  <!-- ============================================================== --->
             <div id="seccion-spaxiocard-integrada" style="display: flex; flex-direction: column; width: 100%; padding: 5px;"> 
 
               
-             <div style="width: 100%;">
-
-    
-    <div class="btn-nav" 
-     id="btn-nav-flow" 
-     data-contacto='{"id_sistema":"26fmetp4Q4WJ","nombre":"Spaxio","apellido":"Flow","estado":"activo"}'
-     onclick="cargarConversacionCon(JSON.parse(this.dataset.contacto).id_sistema)"><span style="display: flex; width: 100%; justify-content: space-between; align-items: center; margin-bottom: 10px; padding: 0 5px;font-size: 13px; font-weight: bold; color: #ffd700; text-transform: uppercase; letter-spacing: 1px;">🎬YouSpace
-        <span></span>
-        
-    </div>
-</div>
-
+             
 <!-- Contenedor deslizable del feed (SpaxioFlow Dinámico) -->
 <div id="contenedor-spaxioflow-stories" style="display: flex; gap: 5px; overflow-x: auto; padding-bottom: 5px; scrollbar-width: none; align-items: center;">
     
     <!-- 1. TU TARJETA DE PERFIL (QUEDA FIJA Y NO SE BORRA NUNCA) -->
-    <div style="min-width: 100px; height: 200px; border: 1px solid #ffd700; border-radius: 16px; padding: 1px; text-align: center; flex-shrink: 10; display: flex; flex-direction: column; align-items: center; justify-content: space-between; overflow: hidden;">
+    <div style="min-width: 100px; height: 200px; border: 1px solid rgba(255, 215, 0, 0.15); border-radius: 16px; padding: 1px; text-align: center; flex-shrink: 10; display: flex; flex-direction: column; align-items: center; justify-content: space-between; overflow: hidden;">
         
         <!-- Contenedor de la imagen ensanchado al 100% de la tarjeta de los lados -->
         <div style="width: 100%; height: 115px; border-top-left-radius: 18px; border-top-right-radius: 12px; overflow: hidden; margin-top: -6px; margin-left: -6px; margin-right: -6px; width: calc(100% + 18px); position: relative;">
@@ -1806,7 +1745,7 @@ function seleccionarRol(rolElegido) {
 </div>
 
 <!-- 3. Submodal Mi QR (Oculto por defecto) -->
-<div id="submodal-miqr" style="display: none; background: #1a1c29; border: 1px solid #323657; border-radius: 12px; padding: 15px; margin-top: 10px; text-align: center;">
+<div id="submodal-miqr" style="display: none; background: #1b1b2813; border-radius: 12px; padding: 15px; margin-top: 10px; text-align: center;">
   <h3 style="margin-top: 0; color: #fff; font-size: 16px;"> Mi QR </h3>
     
     
@@ -1827,7 +1766,7 @@ function seleccionarRol(rolElegido) {
   
 
     
-  <button class="btn-space btn-danger" onclick="cerrarSubModalIntegrado('submodal-miqr')" style="width: 100%; padding: 10px; margin-top: 25px; font-size: 12px; cursor: pointer;">Cerrar</button>
+  <button class="btn-space btn-danger" onclick="cerrarSubModalIntegrado('submodal-miqr')" style="width: 60%; padding: 10px; margin-top: 25px; font-size: 12px; cursor: pointer;">Cerrar</button>
   
   
   
@@ -1857,30 +1796,39 @@ function seleccionarRol(rolElegido) {
     <div style="display: flex; gap: 10px; overflow-x: auto; padding-bottom: 5px; scrollbar-width: none;">
         
         <!-- Tarjeta de Comercio 1 -->
-        <div style="min-width: 110px; background: #151828; border: 1px solid #323657; border-radius: 10px; padding: 8px; text-align: center; flex-shrink: 0; cursor: pointer;">
-            <div style="font-size: 22px; margin-bottom: 4px;">🍔</div>
-            <div style="font-size: 11px; color: #fff; font-weight: bold;">Space Burger</div>
+        <div style="min-width: 140px; max-width: 140px; background: #1b1b2813; border: 1px solid rgba(255, 215, 0, 0.15); border-radius: 12px; overflow: hidden; flex-shrink: 0; cursor: pointer; transition: transform 0.2s;">
+                    <img src="https://picsum.photos/200/120?random=11" alt="Café Galaxia" style="width: 100%; height: 85px; object-fit: cover;">
+                    <div style="padding: 8px; text-align: center;">   <div style="font-size: 22px; margin-bottom: 4px;">☕</div>
+                        <div style="font-size: 12px; color: #fff; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Café Galaxia</div>
+            
             <div style="font-size: 10px; color: #00ffcc; margin-top: 2px;">-10% Puntos</div>
-        </div>
+        </div></div>
 
         <!-- Tarjeta de Comercio 2 -->
-        <div style="min-width: 110px; background: #151828; border: 1px solid #323657; border-radius: 10px; padding: 8px; text-align: center; flex-shrink: 0; cursor: pointer;">
-            <div style="font-size: 22px; margin-bottom: 4px;">☕</div>
-            <div style="font-size: 11px; color: #fff; font-weight: bold;">Café Galaxia</div>
-            <div style="font-size: 10px; color: #ffd700; margin-top: 2px;">Cashback</div>
-        </div>
+        <div style="min-width: 140px; max-width: 140px; background: #1b1b2813; border: 1px solid rgba(255, 215, 0, 0.15); border-radius: 12px; overflow: hidden; flex-shrink: 0; cursor: pointer; transition: transform 0.2s;">
+                    <img src="https://picsum.photos/200/120?random=12" alt="Café Galaxia" style="width: 100%; height: 85px; object-fit: cover;">
+                    <div style="padding: 8px; text-align: center;">   <div style="font-size: 22px; margin-bottom: 4px;">🍔</div>
+                        <div style="font-size: 12px; color: #fff; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Space Burger</div>
+            
+            <div style="font-size: 10px; color: #00ffcc; margin-top: 2px;">-10% Puntos</div>
+        </div></div>
 
         <!-- Tarjeta de Comercio 3 -->
-        <div style="min-width: 110px; background: #151828; border: 1px solid #323657; border-radius: 10px; padding: 8px; text-align: center; flex-shrink: 0; cursor: pointer;">
-            <div style="font-size: 22px; margin-bottom: 4px;">🛒</div>
-            <div style="font-size: 11px; color: #fff; font-weight: bold;">Market Express</div>
-            <div style="font-size: 10px; color: #00ffcc; margin-top: 2px;">Delivery Gratis</div>
-        </div>
+        <div style="min-width: 140px; max-width: 140px; background: #1b1b2813; border: 1px solid rgba(255, 215, 0, 0.15); border-radius: 12px; overflow: hidden; flex-shrink: 0; cursor: pointer; transition: transform 0.2s;">
+                    <img src="https://picsum.photos/200/120?random=13" alt="Café Galaxia" style="width: 100%; height: 85px; object-fit: cover;">
+                    <div style="padding: 8px; text-align: center;">   <div style="font-size: 22px; margin-bottom: 4px;">🛒</div>
+                        <div style="font-size: 12px; color: #fff; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Market Express</div>
+            
+            <div style="font-size: 10px; color: #00ffcc; margin-top: 2px;">-10% Puntos</div>
+        </div></div>
 <!-- Tarjeta de Comercio 4 -->
-        <div style="min-width: 110px; background: #151828; border: 1px solid #323657; border-radius: 10px; padding: 8px; text-align: center; flex-shrink: 0; cursor: pointer;">
-            <div style="font-size: 22px; margin-bottom: 4px;">☕</div>
-            <div style="font-size: 11px; color: #fff; font-weight: bold;">Abasto Tio San</div>
-            <div style="font-size: 10px; color: #ffd700; margin-top: 2px;">Cashback</div>
+        <div style="min-width: 140px; max-width: 140px; background: #1b1b2813; border: 1px solid rgba(255, 215, 0, 0.15); border-radius: 12px; overflow: hidden; flex-shrink: 0; cursor: pointer; transition: transform 0.2s;">
+                    <img src="https://picsum.photos/200/120?random=11" alt="Café Galaxia" style="width: 100%; height: 85px; object-fit: cover;">
+                    <div style="padding: 8px; text-align: center;">   <div style="font-size: 22px; margin-bottom: 4px;">🍔</div>
+                        <div style="font-size: 12px; color: #fff; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Space Burger</div>
+            
+            <div style="font-size: 10px; color: #00ffcc; margin-top: 2px;">-10% Puntos</div>
+        </div></div>
         </div>
     </div>
 </div>      
@@ -1891,27 +1839,27 @@ function seleccionarRol(rolElegido) {
     <div style="display: flex; gap: 10px; overflow-x: auto; padding-bottom: 5px; scrollbar-width: none;">
         
         <!-- Tarjeta de Comercio 1 -->
-        <div style="min-width: 110px; background: #151828; border: 1px solid #323657; border-radius: 10px; padding: 8px; text-align: center; flex-shrink: 0; cursor: pointer;">
+        <div style="min-width: 110px; background: #1b1b2813; border: 1px solid #323657; border-radius: 10px; padding: 8px; text-align: center; flex-shrink: 0; cursor: pointer;">
             <div style="font-size: 22px; margin-bottom: 4px;">🍔</div>
             <div style="font-size: 11px; color: #fff; font-weight: bold;">Space Burger</div>
             <div style="font-size: 10px; color: #00ffcc; margin-top: 2px;">-10% Puntos</div>
         </div>
 
         <!-- Tarjeta de Comercio 2 -->
-        <div style="min-width: 110px; background: #151828; border: 1px solid #323657; border-radius: 10px; padding: 8px; text-align: center; flex-shrink: 0; cursor: pointer;">
+        <div style="min-width: 110px; background: #1b1b2813; border: 1px solid #323657; border-radius: 10px; padding: 8px; text-align: center; flex-shrink: 0; cursor: pointer;">
             <div style="font-size: 22px; margin-bottom: 4px;">☕</div>
             <div style="font-size: 11px; color: #fff; font-weight: bold;">Café Galaxia</div>
             <div style="font-size: 10px; color: #ffd700; margin-top: 2px;">Cashback</div>
         </div>
 
         <!-- Tarjeta de Comercio 3 -->
-        <div style="min-width: 110px; background: #151828; border: 1px solid #323657; border-radius: 10px; padding: 8px; text-align: center; flex-shrink: 0; cursor: pointer;">
+        <div style="min-width: 110px; background: #1b1b2813; border: 1px solid #323657; border-radius: 10px; padding: 8px; text-align: center; flex-shrink: 0; cursor: pointer;">
             <div style="font-size: 22px; margin-bottom: 4px;">🛒</div>
             <div style="font-size: 11px; color: #fff; font-weight: bold;">Market Express</div>
             <div style="font-size: 10px; color: #00ffcc; margin-top: 2px;">Delivery Gratis</div>
         </div>
 <!-- Tarjeta de Comercio 4 -->
-        <div style="min-width: 110px; background: #151828; border: 1px solid #323657; border-radius: 10px; padding: 8px; text-align: center; flex-shrink: 0; cursor: pointer;">
+        <div style="min-width: 110px; background: #1b1b2813; border: 1px solid #323657; border-radius: 10px; padding: 8px; text-align: center; flex-shrink: 0; cursor: pointer;">
             <div style="font-size: 22px; margin-bottom: 4px;">☕</div>
             <div style="font-size: 11px; color: #fff; font-weight: bold;">Abasto Tio San</div>
             <div style="font-size: 10px; color: #ffd700; margin-top: 2px;">Cashback</div>
@@ -1926,27 +1874,27 @@ function seleccionarRol(rolElegido) {
     <div style="display: flex; gap: 10px; overflow-x: auto; padding-bottom: 5px; scrollbar-width: none;">
         
         <!-- Tarjeta de Comercio 1 -->
-        <div style="min-width: 110px; background: #151828; border: 1px solid #323657; border-radius: 10px; padding: 8px; text-align: center; flex-shrink: 0; cursor: pointer;">
+        <div style="min-width: 110px; background: #1b1b2813; border: 1px solid #323657; border-radius: 10px; padding: 8px; text-align: center; flex-shrink: 0; cursor: pointer;">
             <div style="font-size: 22px; margin-bottom: 4px;">🍔</div>
             <div style="font-size: 11px; color: #fff; font-weight: bold;">Space Burger</div>
             <div style="font-size: 10px; color: #00ffcc; margin-top: 2px;">-10% Puntos</div>
         </div>
 
         <!-- Tarjeta de Comercio 2 -->
-        <div style="min-width: 110px; background: #151828; border: 1px solid #323657; border-radius: 10px; padding: 8px; text-align: center; flex-shrink: 0; cursor: pointer;">
+        <div style="min-width: 110px; background: #1b1b2813; border: 1px solid #323657; border-radius: 10px; padding: 8px; text-align: center; flex-shrink: 0; cursor: pointer;">
             <div style="font-size: 22px; margin-bottom: 4px;">☕</div>
             <div style="font-size: 11px; color: #fff; font-weight: bold;">Café Galaxia</div>
             <div style="font-size: 10px; color: #ffd700; margin-top: 2px;">Cashback</div>
         </div>
 
         <!-- Tarjeta de Comercio 3 -->
-        <div style="min-width: 110px; background: #151828; border: 1px solid #323657; border-radius: 10px; padding: 8px; text-align: center; flex-shrink: 0; cursor: pointer;">
+        <div style="min-width: 110px; background: #1b1b2813; border: 1px solid #323657; border-radius: 10px; padding: 8px; text-align: center; flex-shrink: 0; cursor: pointer;">
             <div style="font-size: 22px; margin-bottom: 4px;">🛒</div>
             <div style="font-size: 11px; color: #fff; font-weight: bold;">Market Express</div>
             <div style="font-size: 10px; color: #00ffcc; margin-top: 2px;">Delivery Gratis</div>
         </div>
 <!-- Tarjeta de Comercio 4 -->
-        <div style="min-width: 110px; background: #151828; border: 1px solid #323657; border-radius: 10px; padding: 8px; text-align: center; flex-shrink: 0; cursor: pointer;">
+        <div style="min-width: 110px; background: #1b1b2813; border: 1px solid #323657; border-radius: 10px; padding: 8px; text-align: center; flex-shrink: 0; cursor: pointer;">
             <div style="font-size: 22px; margin-bottom: 4px;">☕</div>
             <div style="font-size: 11px; color: #fff; font-weight: bold;">Abasto Tio San</div>
             <div style="font-size: 10px; color: #ffd700; margin-top: 2px;">Cashback</div>
@@ -1962,27 +1910,27 @@ function seleccionarRol(rolElegido) {
     <div style="display: flex; gap: 10px; overflow-x: auto; padding-bottom: 5px; scrollbar-width: none;">
         
         <!-- Tarjeta de Comercio 1 -->
-        <div style="min-width: 110px; background: #151828; border: 1px solid #323657; border-radius: 10px; padding: 8px; text-align: center; flex-shrink: 0; cursor: pointer;">
+        <div style="min-width: 110px; background: #1b1b2813; border: 1px solid #323657; border-radius: 10px; padding: 8px; text-align: center; flex-shrink: 0; cursor: pointer;">
             <div style="font-size: 22px; margin-bottom: 4px;">🍔</div>
             <div style="font-size: 11px; color: #fff; font-weight: bold;">Space Burger</div>
             <div style="font-size: 10px; color: #00ffcc; margin-top: 2px;">-10% Puntos</div>
         </div>
 
         <!-- Tarjeta de Comercio 2 -->
-        <div style="min-width: 110px; background: #151828; border: 1px solid #323657; border-radius: 10px; padding: 8px; text-align: center; flex-shrink: 0; cursor: pointer;">
+        <div style="min-width: 110px; background: #1b1b2813; border: 1px solid #323657; border-radius: 10px; padding: 8px; text-align: center; flex-shrink: 0; cursor: pointer;">
             <div style="font-size: 22px; margin-bottom: 4px;">☕</div>
             <div style="font-size: 11px; color: #fff; font-weight: bold;">Café Galaxia</div>
             <div style="font-size: 10px; color: #ffd700; margin-top: 2px;">Cashback</div>
         </div>
 
         <!-- Tarjeta de Comercio 3 -->
-        <div style="min-width: 110px; background: #151828; border: 1px solid #323657; border-radius: 10px; padding: 8px; text-align: center; flex-shrink: 0; cursor: pointer;">
+        <div style="min-width: 110px; background: #1b1b2813; border: 1px solid #323657; border-radius: 10px; padding: 8px; text-align: center; flex-shrink: 0; cursor: pointer;">
             <div style="font-size: 22px; margin-bottom: 4px;">🛒</div>
             <div style="font-size: 11px; color: #fff; font-weight: bold;">Market Express</div>
             <div style="font-size: 10px; color: #00ffcc; margin-top: 2px;">Delivery Gratis</div>
         </div>
 <!-- Tarjeta de Comercio 4 -->
-        <div style="min-width: 110px; background: #151828; border: 1px solid #323657; border-radius: 10px; padding: 8px; text-align: center; flex-shrink: 0; cursor: pointer;">
+        <div style="min-width: 110px; background: #1b1b2813; border: 1px solid #323657; border-radius: 10px; padding: 8px; text-align: center; flex-shrink: 0; cursor: pointer;">
             <div style="font-size: 22px; margin-bottom: 4px;">☕</div>
             <div style="font-size: 11px; color: #fff; font-weight: bold;">Abasto Tio San</div>
             <div style="font-size: 10px; color: #ffd700; margin-top: 2px;">Cashback</div>
@@ -1991,47 +1939,12 @@ function seleccionarRol(rolElegido) {
 
     </div>
 </div>     
-        <div style="width: 100%; margin-top: 20px; text-align: left; padding: 0 5px;">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-      <!-- Contenedor deslizable de productos/comercios -->
-    <div style="display: flex; gap: 10px; overflow-x: auto; padding-bottom: 5px; scrollbar-width: none;">
         
-        <!-- Tarjeta de Comercio 1 -->
-        <div style="min-width: 110px; background: #151828; border: 1px solid #323657; border-radius: 10px; padding: 8px; text-align: center; flex-shrink: 0; cursor: pointer;">
-            <div style="font-size: 22px; margin-bottom: 4px;">🍔</div>
-            <div style="font-size: 11px; color: #fff; font-weight: bold;">Space Burger</div>
-            <div style="font-size: 10px; color: #00ffcc; margin-top: 2px;">-10% Puntos</div>
-        </div>
-
-        <!-- Tarjeta de Comercio 2 -->
-        <div style="min-width: 110px; background: #151828; border: 1px solid #323657; border-radius: 10px; padding: 8px; text-align: center; flex-shrink: 0; cursor: pointer;">
-            <div style="font-size: 22px; margin-bottom: 4px;">☕</div>
-            <div style="font-size: 11px; color: #fff; font-weight: bold;">Café Galaxia</div>
-            <div style="font-size: 10px; color: #ffd700; margin-top: 2px;">Cashback</div>
-        </div>
-
-        <!-- Tarjeta de Comercio 3 -->
-        <div style="min-width: 110px; background: #151828; border: 1px solid #323657; border-radius: 10px; padding: 8px; text-align: center; flex-shrink: 0; cursor: pointer;">
-            <div style="font-size: 22px; margin-bottom: 4px;">🛒</div>
-            <div style="font-size: 11px; color: #fff; font-weight: bold;">Market Express</div>
-            <div style="font-size: 10px; color: #00ffcc; margin-top: 2px;">Delivery Gratis</div>
-        </div>
-<!-- Tarjeta de Comercio 4 -->
-        <div style="min-width: 110px; background: #151828; border: 1px solid #323657; border-radius: 10px; padding: 8px; text-align: center; flex-shrink: 0; cursor: pointer;">
-            <div style="font-size: 22px; margin-bottom: 4px;">☕</div>
-            <div style="font-size: 11px; color: #fff; font-weight: bold;">Abasto Tio San</div>
-            <div style="font-size: 10px; color: #ffd700; margin-top: 2px;">Cashback</div>
-        </div>
       
 
     </div>
 </div>     
-          <!-- Tarjeta de Comercio  -->
-        <div style="min-width: 110px; background: #151828; border: 1px solid #323657; border-radius: 10px; padding: 8px; text-align: center; flex-shrink: 0; cursor: pointer;">
-            <div style="font-size: 22px; margin-bottom: 4px;">☕</div>
-            <div style="font-size: 11px; color: #fff; font-weight: bold;">Abasto Tio San</div>
-            <div style="font-size: 10px; color: #ffd700; margin-top: 2px;">Cashback</div>
-        </div>
+        
   <!-- ============================================================== -->
      
         <!-- ==================== PANEL LATERAL DE CONTACTOS ==================== -->
@@ -2072,6 +1985,27 @@ function seleccionarRol(rolElegido) {
     <div style="flex-grow: 1; overflow-y: auto; padding: 15px; -webkit-overflow-scrolling: touch;">
         <div id="lista-contactos"></div>
     </div>
+  <div class="barra-flotante-premium">
+
+  <div class="btn-nav" onclick="togglePanelTaxiLateral();">
+        <span>🛖</span><span>Inicio</span></div>
+ <div class="btn-nav" onclick="togglePanelContactosLateral();">
+        <span>💬</span><span>Chat</span></div>
+
+<div class="btn-nav" onclick="abrirAgendaCompleta();">
+        <span>👥</span><span>Contactos</span>
+</div>
+  <div class="btn-nav" 
+     id="btn-nav-flow" 
+     data-contacto='{"id_sistema":"26fmetp4Q4WJ","nombre":"Spaxio","apellido":"Flow","estado":"activo"}'
+     onclick="cargarConversacionCon(JSON.parse(this.dataset.contacto).id_sistema)">🪙<span></span><span>P2P</span>
+        
+  </div>
+<div class="btn-nav" onclick="abrirCalculadora();">
+        <span>💹</span><span>Cr / Tasas</span>
+</div>
+</div>
+</div>
 </div>
 
 
@@ -2080,19 +2014,7 @@ function seleccionarRol(rolElegido) {
 
         
 
-<div class="barra-flotante-premium">
 
- 
-
- <div class="btn-nav" onclick="togglePanelContactosLateral();">
-        <span>💬</span><span>Chat</span></div>
-<div class="btn-nav" onclick="abrirAgendaCompleta();">
-        <span>👥</span><span>Contactos</span>
-</div>
-<div class="btn-nav" onclick="abrirCalculadora();">
-        <span>🪙</span><span>Creditos / Tasas</span>
-</div>
- </div>
      
  <div id="modal-nuevocontacto" class="modal" style="display: none; align-items: center; justify-content: center; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #1e222b; z-index: 30000;">
     
@@ -2247,7 +2169,27 @@ function seleccionarRol(rolElegido) {
               
               <button onclick="abrirAfiliacionComercial()" style="width: 100%; padding: 8px; background-color: #43fc35; color: #000; border: none; border-radius: 12px; font-weight: 900; font-size: 1em; cursor: pointer; margin-top: 10px; display: flex; align-items: center; justify-content: center; gap: 10px; text-decoration: none;;">Afiliacion / Creditos</button>
             </div>
-          
+          <div class="barra-flotante-premium">
+
+  <div class="btn-nav" onclick="togglePanelTaxiLateral();">
+        <span>🛖</span><span>Inicio</span></div>
+ <div class="btn-nav" onclick="togglePanelContactosLateral();">
+        <span>💬</span><span>Chat</span></div>
+
+<div class="btn-nav" onclick="abrirAgendaCompleta();">
+        <span>👥</span><span>Contactos</span>
+</div>
+  <div class="btn-nav" 
+     id="btn-nav-flow" 
+     data-contacto='{"id_sistema":"26fmetp4Q4WJ","nombre":"Spaxio","apellido":"Flow","estado":"activo"}'
+     onclick="cargarConversacionCon(JSON.parse(this.dataset.contacto).id_sistema)">🪙<span></span><span>P2P</span>
+        
+  </div>
+<div class="btn-nav" onclick="abrirCalculadora();">
+        <span>💹</span><span>Cr / Tasas</span>
+</div>
+</div>
+    </div>
         </div>
       
     </div>
@@ -2299,9 +2241,6 @@ function seleccionarRol(rolElegido) {
     return false;
 };
 
-     
-              
-              
               // Función para enfocar el mapa GPS en el negocio seleccionado y dar la opción de pedir taxi
 
               function trazarRutaHaciaNegocio(lat, lng, nombreNegocio) {
@@ -2317,8 +2256,6 @@ function seleccionarRol(rolElegido) {
     // Abre el mapa exteriormente (en la app de Google Maps o pestaña nueva del navegador)
     window.open(urlNavegacion, '_blank');
               }
-
-              
 async function procesarCobroComercial(cantidadMonto = null) {
     const receptorInput = document.getElementById('idReceptor');
     const montoInput = document.getElementById('montoEnviar');
@@ -3522,7 +3459,6 @@ async function recuperarCuentaConID() {
             const datos = snapshot.val();
             // Restaurar en el teléfono
             localStorage.setItem('mi_dropis_id', idParaRecuperar);
-         localStorage.setItem('id_' + datos.rol, idParaRecuperar);
             await guardarLocal('usuario', { 
                 id: 'perfil_propietario', 
                 dropis_id: idParaRecuperar,
@@ -3532,11 +3468,7 @@ async function recuperarCuentaConID() {
               fcm_token: datos.fcm_token || '' 
             });
             alert(`✅Bienvenido ${datos.nombre}.`);
-            
-
-
-// POR ESTO:
-window.location.href = (datos.rol === 'merchant' ? './comercios.html' : datos.rol === 'driver' ? './drivtaxi.html' : './usuario.html');
+            location.reload(); 
         } else {
             alert("❌ ID no encontrado en el satélite.");
         }
@@ -3569,7 +3501,6 @@ window.location.href = (datos.rol === 'merchant' ? './comercios.html' : datos.ro
 
     try {
         localStorage.setItem('mi_dropis_id', idUnico);
-     localStorage.setItem('id_' + rolElegido, idUnico);
         await guardarLocal('usuario', datosUsuario);
         
         await guardarLocal('perfiles', { id: idUnico, nombre, apellido, identificacion, foto: null, rol: rolElegido });
@@ -3609,10 +3540,7 @@ window.location.href = (datos.rol === 'merchant' ? './comercios.html' : datos.ro
         
         // Un pequeño aviso y recarga para confirmar que terminó
         alert("¡Registro Exitoso!");
-        
-
-// POR ESTO:
-window.location.href = (datos.rol === 'merchant' ? './comercios.html' : datos.rol === 'driver' ? './drivtaxi.html' : './usuario.html');
+        location.reload();
 
     } catch (error) { 
         console.error("⚠️ Error en el proceso:", error);
@@ -3710,18 +3638,7 @@ if (textoReal.includes('|SPA_SUMA|') || textoReal.includes('|SPA_CANJE|') || tex
     }
 }
         
-const rolActual = localStorage.getItem('spaxio_rol') || 'passenger';
 
-if (rolActual === 'merchant') {
-    localStorage.setItem('mi_dropis_id_comercio', idUnico);
-} else if (rolActual === 'driver') {
-    localStorage.setItem('mi_dropis_id_driver', idUnico);
-} else {
-    localStorage.setItem('mi_dropis_id_usuario', idUnico);
-}
-
-// Y siempre seteamos el ID general activo para la sesión actual
-localStorage.setItem('mi_dropis_id', idUnico);
         
      
     
@@ -4362,14 +4279,14 @@ const contenidoMiniatura = esImagenValida
         </div>
       `
     : `
-        <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; padding: 5px; text-align: center;">
+        <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; padding: 5px; bordetext-align: center;">
             <span style="font-size: 11px; color: #fff;">${urlImg}</span>
         </div>
       `;
 
 // Y la tarjeta completa la envuelves así para que la imagen ocupe todo el espacio libre:
 contenedorStories.innerHTML += `
-    <div style="min-width: 170px; height: 200px; border-radius: 12px; padding: 1px; flex-shrink: 0; cursor: pointer; overflow: hidden; position: relative;">
+    <div style="min-width: 170px; height: 200px; border-radius: 12px; borde: 1px; rgba(255, 215, 0, 0.15); padding: 1px; flex-shrink: 0; cursor: pointer; overflow: hidden; position: relative;">
         ${contenidoMiniatura}
     </div>
 `;
