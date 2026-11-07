@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="ChatSpace">
 
-<link rel="apple-touch-icon" href="assets/imagen-logos-nuevos.png">
+<link rel="apple-touch-icon" href="assets/imagen-nuevas-logos.png">
  <link rel="manifest" href="/manifest.json">    
  <meta charset="UTF-8">
  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, interactive-widget=overlays-content">
@@ -85,8 +85,8 @@ body {
 /* 2. Cuando el teléfono activa modo oscuro, cambia las variables */
 @media (prefers-color-scheme: dark) {
     :root {
-        --bg-principal: #181d24; /* El gris oscuro de tu captura */
-        --bg-tarjeta: #202732;
+        --bg-principal: #203062; /* El gris oscuro de tu captura */
+        --bg-tarjeta: #203062;
         --texto-color: #ffffff;
     }
 }
@@ -157,10 +157,9 @@ body {
     gap: 5px;
     z-index: 100;
     pointer-events: auto; /* IMPORTANTE: Para que puedas hacer clic en el input */
-    
+    border: 2px solid rgba(255, 215, 0, 0.0); 
     /* Efecto para que parezca que la foto sigue debajo */
-    background: rgba(0, 0, 0, 0.1); 
-  
+    
     backdrop-filter: blur(5px); /* Opcional: desenfoca un poco para legibilidad */
     -webkit-backdrop-filter: blur(5px);
 }
@@ -178,7 +177,7 @@ body {
      
 .barra-flotante-premium {
     position: fixed !important; /* Se queda anclado a la pantalla física, no al flujo del body */
-     
+     border-top: 1px solid #38404f  !important; 
  bottom: 0;
     left: 0;
     width: 100%;
@@ -191,13 +190,10 @@ body {
     
     /* Efecto para que parezca que la foto sigue debajo */
     
-   
-    background: #181d24 !important; /* Color gris idéntico al body */
-    /*background: rgba(17, 24, 39, 1);*/
-    border: 1px solid rgba(255, 215, 0, 0.0); /* Sube un poco el brillo del borde dorado */ 
-  backdrop-filter: blur(5px); /* Opcional: desenfoca un poco para legibilidad */
-    -webkit-backdrop-filter: blur(5px);
-
+    background: #202732 !important; /* Color gris idéntico al body */
+    
+    
+  
     /* Cambiamos a FLEX para los botones */
     display: flex;
     justify-content: space-around; /* Reparte los botones con espacio igual */
@@ -206,7 +202,7 @@ body {
     padding: 5px 0px;
     border-radius: 0px;
     border: 1px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    box-shadow: 0;
     z-index: 30001;
 }
 
@@ -431,7 +427,7 @@ button#btn-enviar:active {
 }
 
 .modal-content { 
-    background-color: #222b35;
+    background: #202732 !important;
     background-size: cover;
     background-position: center;
     background-attachment: fixed;
@@ -506,6 +502,7 @@ button#btn-enviar:active {
     font-size: 20px; 
     z-index: 10;          
     box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+  
     display: flex;
     align-items: center;
     justify-content: center;
@@ -922,7 +919,29 @@ button#btn-enviar:active {
 
 
 /* --- PANEL LATERAL EXCLUSIVO PARA CONTACTOS Y CALCULADORA --- */
-#seccion-panel-contactos-lateral, 
+#seccion-panel-contactos-lateral {
+  position: fixed !important;
+    top: 0 !important;
+    right: -100% !important; /* Oculto completamente a la derecha por defecto */
+    width: 100vw !important; /* Ocupa todo el ancho en móviles para que no quede flotando a medias */
+    max-width: 400px !important;
+    height: 100dvh !important;
+    background: #202732 !important;
+    background-image: linear-gradient(rgba(11, 20, 26, 0.95), rgba(11, 20, 26, 0.95)), url('./assets/logo.webp');
+    background-size: cover;
+    background-position: center;
+    border-left: 1px;
+    z-index: 60000 !important; /* Por encima de todo, incluyendo la barra inferior */
+    transition: right 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+    display: flex !important;
+    flex-direction: column;
+    box-shadow: none;
+    overflow-y: auto;
+    box-sizing: border-box;
+  }
+#seccion-panel-contactos-lateral.abierto {
+    right: 0 !important; /* Se desliza perfectamente hacia la pantalla ocupando su espacio */
+  }
 #seccion-calculadora-integrada {
     position: fixed !important;
     top: 0 !important;
@@ -930,11 +949,11 @@ button#btn-enviar:active {
     width: 100vw !important; /* Ocupa todo el ancho en móviles para que no quede flotando a medias */
     max-width: 400px !important;
     height: 100dvh !important;
-    background: #0b141a !important;
+    background: #161b22 !important;
     background-image: linear-gradient(rgba(11, 20, 26, 0.95), rgba(11, 20, 26, 0.95)), url('./assets/logo.webp');
     background-size: cover;
     background-position: center;
-    border-left: 2px solid #ffd700;
+    border-left: 1px;
     z-index: 60000 !important; /* Por encima de todo, incluyendo la barra inferior */
     transition: right 0.4s cubic-bezier(0.25, 1, 0.5, 1);
     display: flex !important;
@@ -944,7 +963,7 @@ button#btn-enviar:active {
     box-sizing: border-box;
 }
 
-#seccion-panel-contactos-lateral.abierto,
+
 #seccion-calculadora-integrada.abierto {
     right: 0 !important; /* Se desliza perfectamente hacia la pantalla ocupando su espacio */
       }
@@ -953,7 +972,7 @@ button#btn-enviar:active {
     position: fixed;
     right: 20px;
     bottom: 110px; /* Arriba de tu barra de navegación */
-    background: rgba(255, 215, 0, 0.25);
+    background:#171e24;
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
     border: 1px solid rgba(255, 215, 0, 0.4);
@@ -1014,11 +1033,9 @@ button#btn-enviar:active {
     width: 100vw !important; 
     max-width: 400px !important;
     height: 100dvh !important;
-    background: #0b141a !important;
-    background-image: linear-gradient(rgba(11, 20, 26, 0.95), rgba(11, 20, 26, 0.95)), url('./assets/logo.webp');
-    background-size: cover;
-    background-position: center;
-    border-left: 2px solid #ffd700;
+    background: #202e38 !important;
+    
+    
     z-index: 60000 !important; 
     transition: right 0.4s cubic-bezier(0.25, 1, 0.5, 1);
     display: flex !important;
@@ -1038,13 +1055,10 @@ button#btn-enviar:active {
     top: 0 !important;
     left: -100% !important; /* Oculto completamente a la izquierda por defecto */
     width: 100vw !important;
-    max-width: 320px !important; /* Ancho máximo del menú */
+    max-width: 400px !important; /* Ancho máximo del menú */
     height: 100dvh !important;
-    background: #0b141a !important;
-    background-image: linear-gradient(rgba(11, 20, 26, 0.95), rgba(11, 20, 26, 0.95)), url('./assets/logo.webp');
-    background-size: cover;
-    background-position: center;
-    border-right: 2px solid #ffd700; /* Borde dorado al lado derecho */
+    background: #202732 !important;
+    
     z-index: 60000 !important; /* Por encima de todo */
     transition: left 0.4s cubic-bezier(0.25, 1, 0.5, 1); /* Transición fluida */
     display: flex !important;
@@ -1070,7 +1084,7 @@ button#btn-enviar:active {
     text-decoration: none;
     font-size: 15px;
     font-weight: bold;
-    border-bottom: 1px solid rgba(255, 215, 0, 0.1);
+    border-bottom: 0px;
     transition: background 0.3s ease;
     cursor: pointer;
 }
@@ -1146,13 +1160,20 @@ button#btn-enviar:active {
             <h1 id="nombre-dueño-header">SpaceChat</h1>
         </div>
     </div>
+
+  
 <!-- En tu header, añade este botón antes de los de llamada---> 
 <div style="display: flex; align-items: center; gap: 15px; flex-shrink: 0;">
-    <!-- Botón para abrir el Estudio Spaxio (el modal que ya tienes) --->
-    <button onclick="enviarUbicacionGPS()" 
-            style="background: rgba(255, 215, 0, 0.1); border: 1px solid #ffd700; border-radius: 50%; width: 35px; height: 35px; cursor: pointer; color: #ffd700;">
-        🛰️
-    </button>
+    <!-- Botón para abrir el Estudio 
+  Spaxio (el modal que ya tienes) --->
+
+
+
+    <a href="bnc://app.binance.com/payment/main"><span>🪙</span></a>
+
+
+  
+    
 </div>
 
  
@@ -1173,12 +1194,11 @@ button#btn-enviar:active {
         </button>
     </div>
 </div>-->
-<button onclick="abrirCalculadora()" 
-                style="background: none; border: none; color: #ffd700; font-size: 22px; cursor: pointer; padding: 5px; transition: transform 0.2s;"
-                onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
-            🪙
-           Usdt 
-        </button>
+
+          
+
+           
+        
 </div>
 
  <div id="chat-box">
@@ -1200,7 +1220,12 @@ button#btn-enviar:active {
       
         <img id="perfil-foto-grande" src="" style="width: 150px; height: 150px; border: 1px solid #ffd700; margin-bottom: 15px; object-fit: cover;">
         
-        <h2 id="perfil-nombre" style="color: white; margin-bottom: 20px; font-size: 24px; font-weight: bold;">Arturo Martinez</h2>
+        <h2 id="perfil-nombre" style="color: white; margin-bottom: 20px; font-size: 24px; font-weight: bold;">Pedro perez</h2>
+      
+    
+            
+        
+      
        
         <button onclick="eliminarChatEspecifico(); event.stopPropagation();" 
                 style="width: 180px; padding: 10px; background: transparent; border: none; color: #8696a0; font-size: 14px; font-weight: 500; cursor: pointer;">
@@ -1211,7 +1236,14 @@ button#btn-enviar:active {
                 style="width: 180px; padding: 10px; background: transparent; border: none; color: #8696a0; font-size: 14px; font-weight: 500; cursor: pointer; margin-top: 5px;">
             Eliminar 
         </button>
+
+  <div class="btn-nav" onclick="enviarUbicacionGPS();">
+        <span>🛰️</span><span>Enviar mi Ubicación</span></div>
+      
     </div>
+
+  
+  
 </div>
  
  
@@ -1221,9 +1253,7 @@ button#btn-enviar:active {
 <div class="contenedor-flotante">
     <div class="input-wrapper">
         <!-- Busca este botón en tu HTML y cambia el onclick por este -->
-<button class="icon-btn" onclick="document.getElementById('modal-tienda').style.display='block'">
-    <span>😊</span>
-</button>
+
         
         <textarea 
     id="msg-text" 
@@ -1253,7 +1283,7 @@ button#btn-enviar:active {
 
 
  
- <div id="modal-registro" class="modal" style="display: none; align-items: center; justify-content: center; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #1e222b; z-index: 30000;">
+ <div id="modal-registro" class="modal" style="display: none; align-items: center; justify-content: center; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: 203062; z-index: 30000;">
   
           <div class="modal-cover" style="position: relative; width: 100vw; height: 100vh; padding: 50px 30px 50px 30px; box-sizing: border-box; background: #1e222b; border-radius: 0px; text-align: center; border: 0px solid #333; box-shadow: 0 0 20px rgba(0,0,0,0.5);">   
 
@@ -1300,96 +1330,73 @@ button#btn-enviar:active {
 </div>
  
 
+<!-- ============================================================== -->
+<!-- PANTALLA / MODAL DE SELECCIÓN DE ROL (POST-REGISTRO) -->
+<!-- ============================================================== -->
+<div id="modal-seleccion-rol" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100dvh; background: rgba(11, 20, 26, 0.95); background-image: linear-gradient(rgba(11, 20, 26, 0.9), rgba(11, 20, 26, 0.9)), url('./assets/logo.webp'); background-size: cover; background-position: center; z-index: 99999; display: none; flex-direction: column; align-items: center; justify-content: center; padding: 20px; box-sizing: border-box; text-align: center;">
+    
+    <div style="background: rgba(32, 44, 51, 0.85); border: 2px solid #ffd700; border-radius: 20px; padding: 30px; max-width: 380px; width: 100%; box-shadow: 0 10px 30px rgba(0,0,0,0.8);">
+        
+        <h2 style="color: #ffd700; margin-top: 0; font-size: 22px; text-transform: uppercase; letter-spacing: 1px;">YsaPay</h2>
+        <p style="color: #8696a0; font-size: 13px; margin-bottom: 25px;">Elige tu perfil principal para configurar tu espacio:</p>
+        
+
+        <!-- Botón Usuario / Pasajero -->
+<button onclick="seleccionarRol('passenger')" style="width: 100%; padding: 14px; background: rgba(255,215,0,0.1); color: #ffd700; border: 1px solid #ffd700; border-radius: 12px; font-weight: bold; font-size: 15px; cursor: pointer; margin-bottom: 20px;">
+    👤 Soy Usuario / Pasajero / Vendedor
+</button>
+
+<!-- Botón Comerciante -->
+<button onclick="seleccionarRol('merchant')" style="width: 100%; padding: 14px; background: rgba(255,215,0,0.1); color: #ffd700; border: 1px solid #ffd700; border-radius: 12px; font-weight: bold; font-size: 15px; cursor: pointer; margin-bottom: 20px;">
+    🏬 Soy Comerciante
+</button>
+
+<!-- Botón Conductor (Driver) -->
+<button onclick="seleccionarRol('driver')" style="width: 100%; padding: 14px; background: linear-gradient(135deg, #FFD700 0%, #B8860B 100%); color: #000; border: none; border-radius: 12px; font-weight: bold; font-size: 15px; cursor: pointer; margin-bottom: 12px; box-shadow: 0 4px 15px rgba(255,215,0,0.3);">
+    🚖 Soy Driver (Taxi/Deliverys)
+</button>
 
       
         
 
-  
+    <!-- Sección de Afiliaciones (Comercio / Driver / Tarjeta MÍA) 
+        <div style="border-top: 1px solid rgba(255,215,0,0.2); padding-top: 15px; display: flex; flex-direction: column; gap: 8px;">
+            <span style="font-size: 11px; color: #8696a0; text-transform: uppercase;">¿Tienes un negocio?</span>
+            <button onclick="abrirAfiliacionComercial()" style="background: transparent; border: 1px dashed #00ffcc; color: #00ffcc; padding: 10px; border-radius: 10px; font-size: 12px; cursor: pointer; font-weight: bold;">
+                🏬 Afiliar mi Comercio (Merchant)
+            </button>
+          <a href="bnc://app.binance.com/payment/main" class="btn-check-binance">
+
+            <i class="fas fa-search-dollar"></i> Pagos / Creditos
+
+          </a>--->
+        </div>
+
+    </div>
 
 
 <script>
 
- // Ir al perfil de Usuario
-function irAUsuario() {
-    // Verificamos si ya existe un ID guardado como pasajero/usuario
-    const idUsuario = localStorage.getItem('mi_dropis_id_usuario');
-    
-    if (idUsuario) {
-        // Si ya tiene cuenta, cargamos su panel/chat directamente de forma local
-        localStorage.setItem('mi_dropis_id', idUsuario);
-        window.location.href = "./usuario.html"; // o tu archivo principal de chat
-    } else {
-        // Si no tiene cuenta aún, guardamos el rol y abrimos el modal de registro limpio
-        localStorage.setItem('spaxio_rol', 'passenger');
-        // Aquí abres tu modal de registro local
-        document.getElementById('modal-registro').style.display = 'flex';
-    }
-}
-
-// Ir al perfil de Comercio
-function irAComercio() {
-    const idComercio = localStorage.getItem('mi_dropis_id_comercio');
-    
-    if (idComercio) {
-        // Si ya está registrado como comercio, entra directo sin pedir datos
-        localStorage.setItem('mi_dropis_id', idComercio);
-        window.location.href = "./comercios.html";
-    } else {
-        // Si es nuevo en comercio, configuramos el rol y abrimos el registro
-        localStorage.setItem('spaxio_rol', 'merchant');
-        document.getElementById('modal-registro').style.display = 'flex';
-    }
-}
-
-// Ir al perfil de Driver
-function irADriver() {
-    const idDriver = localStorage.getItem('mi_dropis_id_driver');
-    
-    if (idDriver) {
-        localStorage.setItem('mi_dropis_id', idDriver);
-        window.location.href = "./drivtaxi.html";
-    } else {
-        localStorage.setItem('spaxio_rol', 'driver');
-        document.getElementById('modal-registro').style.display = 'flex';
-    }
-}
-
-
- // Al hacer clic en el botón de Comercio:
-function abrirPerfilComercioLocal() {
-    // 1. Limpiamos temporalmente el ID activo para forzar un registro nuevo
-    localStorage.removeItem('mi_dropis_id');
-    localStorage.setItem('spaxio_rol', 'merchant');
-    
-    // 2. Abrimos tu archivo local limpio dentro de la misma app (sin pestañas de Google)
-    window.location.href = "./comercios.html";
-}
-
-// Al hacer clic en el botón de Driver:
-function abrirPerfilUsuarioLocal() {
-    localStorage.removeItem('mi_dropis_id');
-    localStorage.setItem('spaxio_rol', 'usuario');
-    
-    window.location.href = "./usuario.html";
-     }
-
- 
 function seleccionarRol(rolElegido) {
-            // Guardamos el rol en el almacenamiento del navegador
-            localStorage.setItem('spaxio_rol', rolElegido);
-
-            // Redirección a los subdominios de Vercel (Reemplaza estas URLs con las tuyas cuando las despliegues)
-            if (rolElegido === 'passenger') {
-                window.location.href = "./usuariosapps.htlm";
-            } 
-            else if (rolElegido === 'driver') {
-                window.location.href = "./dritax.htlm";
-            } 
-            else if (rolElegido === 'merchant') {
-                window.location.href = "./comercios.htlm";
-            }
-}
+ const miID = localStorage.getItem('mi_dropis_id') || "SPAXIO-USER";
  
+    // 1. Guardar localmente
+    localStorage.setItem('spaxio_rol', rolElegido);
+    localStorage.setItem('spaxio_user_rol', rolElegido);
+
+    // 2. Ocultar el modal de selección
+    const modal = document.getElementById('modal-seleccion-rol');
+    if (modal) modal.style.display = 'none';
+
+    
+    if (rolElegido === 'driver') {
+        alert("🚖 Modo Conductor configurado. Tu panel ha sido ajustado.");
+    } else if (rolElegido === 'merchant') {
+        alert("🏬 Modo Comerciante configurado.");
+    } else {
+        alert(`✅ ¡Rol "${rolElegido}" guardado con éxito!`);
+    }
+ }
 
 </script>
  
@@ -1412,74 +1419,129 @@ function seleccionarRol(rolElegido) {
              
           <div onclick="togglePanelTaxiLateral()" title="Entrar al SpaxioVerso" style="cursor: pointer; color: #ffd700; font-size: 20px; padding: 0 8px; margin-right: 8px; text-shadow: 0 0 8px #ffd700;">🚕</div>      
                 </div>
-                
+             
      
          
      
-     <div id="seccion-mi-perfil" style="display: none; padding: 15px; background: #1e222b; border-bottom: 1px solid #1e222b;">
-    <!-- Modifica el estilo del div que envuelve los inputs y el botón -->
-    <div style="display: flex; flex-direction: column; align-items: center; width: 100%; text-align: center;">
+     <div id="seccion-mi-perfil" style="display: none; padding: 15px; background: rgba(25, 43, 56, 0.9490196078431372); border-bottom: 1px solid #1e222b;">
+            <!-- Modifica el estilo del div que envuelve los inputs y el botón -->
+<div style="display: flex; flex-direction: column; align-items: center; width: 100%; text-align: center;">
    
-        <div onclick="document.getElementById('input-mi-foto').click()" style="width: 100px; height: 100px; border-radius: 50%; border: 1px solid #ffd700; overflow: hidden; background: #222; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0;">
-            <img id="mi-foto-previa" src="" style="width: 100%; height: 100%; object-fit: cover; display: block;">
-            <span id="mi-placeholder-foto" style="font-size: 20px;">📷</span>
-        </div>
-        <input type="file" id="input-mi-foto" accept="image/*" style="display: none;" onchange="previsualizarMiFoto(this)">
-        <button onclick="gestionarQR()" style="background: #ffd700; color: #000; border: none; border-radius: 8px; padding: 8px 12px; font-weight: 900; font-size: 14px; margin: 20px auto; display: block; cursor: pointer;">QR</button>
-    </div>
+             <div onclick="document.getElementById('input-mi-foto').click()" style="width: 150px; height: 150px; border-radius: 50%; border: 1px solid #ffd700; overflow: hidden; background: #222; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0;">
+              <img id="mi-foto-previa" src="" style="width: 100%; height: 100%; object-fit: cover; display: block;">
+              <span id="mi-placeholder-foto" style="font-size: 20px;">📷</span>
+                </div>
+                <input type="file" id="input-mi-foto" accept="image/*" style="display: none;" onchange="previsualizarMiFoto(this)">
+
+                  
+                <!-- Tarjeta
+
+ Visual --->
+                <div class="tarjeta-space" style="margin-bottom: 20px; text-align: left; padding: 10px; background: rgba(32, 63, 84, 0.9490196078431372);  border-radius: 12px; border: 2px solid #323657;width: 80%;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <span style="font-size: 12px; color: #6a7095; text-transform: uppercase;">My Cards Prepagada
+                        </span> 
+                      <span style="color: #ffd700;">YSA</span>
+                    </div>
+
+                  
+                    <div class="balance-txt" id="balanceVisual" 
+                   <div class="btn-nav" onclick="document.getElementById('seccion-spaxiocard-integrada'); inicializarSpaxiocard();">
+    <span>Cr. 0.00</span>
+                     
+                   </div>
+                      </div>
+                   
+                             <button onclick="abrirSubModalIntegrado('submodal-miqr')" style="background: #ffd700; color: #000; border: none; border-radius: 6px; padding: 6px 12px; font-weight: 900; font-size: 12px; margin: 15px auto; cursor: pointer;">QR</button>    
+     <!-- ============================================================== -->
+<!-- 4. SUBMODALES INTEGRADOS DENTRO DEL MODAL QR -->
+<!-- ============================================================== -->
+
+<!-- 1. Submodal Cargar (Oculto por defecto) -->
+<div id="submodal-cargar" style="display: none; background: #1a1c29; border: 1px solid #323657; border-radius: 12px; padding: 20px; margin-top: 15px; text-align: left;">
     
-    <input type="text" id="mi-nuevo-nombre" placeholder="Editar mi nombre..." onfocus="this.style.boxShadow='0 0 5px #ffd700'; this.style.borderColor='#ffd700';" 
-    onblur="this.style.boxShadow='none'; this.style.borderColor='#999';"
-     style="width: 80%; padding: 12px; background: #2a2f3a; color: white; border: 1px solid #999; margin: 0 auto 15px auto; display: block; border-radius: 8px; box-sizing: border-box; outline: none;">
-                                               
-    <input type="text" id="mi-nuevo-estado" placeholder="Estado (Ej: Disponible)" onfocus="this.style.boxShadow='0 0 5px #ffd700'; this.style.borderColor='#ffd700';" 
-    onblur="this.style.boxShadow='none'; this.style.borderColor='#999';"
-     style="width: 80%; padding: 12px; background: #2a2f3a; color: white; border: 1px solid #999; margin: 0 auto 15px auto; display: block; border-radius: 8px; box-sizing: border-box; outline: none;">
-
-    <button onclick="guardarCambiosPerfil()" style="width: 50%; padding: 10px; background: #ffd700; border: none; border-radius: 10px; font-weight: bold; color: #000; cursor: pointer; font-size: 16px; margin: 20px auto 10px auto; display: block; text-transform: uppercase; box-shadow: 0 0 5px #ffd700;">
-        GUARDAR 
-    </button>
-
-    <!-- Botones para cambiar automáticamente a modo Comercio o Driver -->
-    <div style="display: flex; gap: 10px; justify-content: center; width: 80%; margin: 15px auto 0 auto;">
-        
-<!-- Botón Usuario / Pasajero -->
-    <button class="btn-rol" onclick="abrirPerfilUsuarioLocal('passenger')">
-        👤 Soy Usuario 
-    </button>
-
-    <!-- Botón Comerciante -->
-    <button class="btn-rol" onclick="abrirPerfilComercioLocal('merchant')">
-        🏬 Soy Comerciante
-    </button>
-
-    
-    
-    </div>
-
 </div>
+
+<!-- 2. Submodal Canjear (Oculto por defecto) -->
+<div id="submodal-pagar" style="display: none; background: #1a1c29; border: 1px solid #323657; border-radius: 12px; padding: 20px; margin-top: 15px; text-align: left;">
+    <h3 style="margin-top: 0; color: #5b61e2; font-size: 16px;">🪙 Traspaso Inmediato</h3>
+   
+</div>
+
+<!-- 3. Submodal Mi QR (Oculto por defecto) -->
+<div id="submodal-miqr" style="display: none; background: #00000000; border-radius: 12px; padding: 10px; margin-top: 5px; text-align: center;">
+  <h3 style="margin-top: 0; color: #fff; font-size: 16px;"> Tu QR </h3>
+    
+    
+    <div id="contenedor-qr-spaxiocard" style="background: white; padding: 10px; border-radius: 8px; display: inline-block; margin-bottom: 12px;"></div>
+
+  
+
+    <div style="margin-bottom: 20px;">
+        <span id="spaxiocard-id-display" style="font-size: 12px; color: #ffd700; font-family: monospace; font-weight: bold;"></span>
+    </div>
+   
+    
+    
+    
+    
+
+  
+    
+  <button class="btn-space btn-danger" onclick="cerrarSubModalIntegrado('submodal-miqr')" style="width: 50%; padding: 6px; margin-top: 8px; font-size: 12px; cursor: pointer;">Cerrar</button>
+  
+  
+  
+  
+</div>
+<!-- ============================================================== -->            
+  
+            </div>
+            <input type="text" id="mi-nuevo-nombre" placeholder="Editar mi nombre..." onfocus="this.style.boxShadow='0 0 5px #ffd700'; this.style.borderColor='#ffd700';" 
+            onblur="this.style.boxShadow='none'; this.style.borderColor='#999';"
+             style="width: 80%; padding: 12px; background: #2a2f3a; color: white; border: 1px solid #999; margin: 0 auto 15px auto; display: block; border-radius: 8px; box-sizing: border-box; outline: none;">
+                                                       
+            <input type="text" id="mi-nuevo-estado" placeholder="Estado (Ej: Disponible)" onfocus="this.style.boxShadow='0 0 5px #ffd700'; this.style.borderColor='#ffd700';" 
+            onblur="this.style.boxShadow='none'; this.style.borderColor='#999';"
+             style="width: 80%; padding: 12px; background: #2a2f3a; color: white; border: 1px solid #999; margin: 0 auto 15px auto; display: block; border-radius: 8px; box-sizing: border-box; outline: none;">
+
+
+       
+            <button onclick="guardarCambiosPerfil()" style="width: 50%; padding: 10px; background: #ffd700; border: none; border-radius: 10px; font-weight: bold; color: #000; cursor: pointer; font-size: 16px; margin: 20px auto; display: block; text-transform: uppercase; box-shadow: 0 0 5px #ffd700;">
+      GUARDAR 
+     </button>
+         
+                 
+         
+
+
+    
+    
+    </div>
      <!-- ==================== MENÚ HAMBURGUESA LATERAL ==================== -->
 <div id="seccion-menu-hamburguesa">
     
     <!-- Cabecera del Menú -->
-    <div style="background: rgba(32, 44, 51, 0.5); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(15px); color: #ffffff; padding: 15px; font-weight: 900; text-transform: uppercase; text-align: left; border-bottom: 1px solid #333; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 10;">
+    <div style="background: rgba(25, 43, 56, 0.9490196078431372); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(15px); color: #ffffff; padding: 15px; font-weight: 900; text-transform: uppercase; text-align: left; border-bottom: 1px solid #333; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 10;">
         <div style="display: flex; align-items: center; gap: 12px;">
             <!-- Botón para cerrar con la flecha -->
-            <button onclick="toggleMenuHamburguesa()" style="background: transparent; border: none; color: white; font-size: 20px; cursor: pointer; padding: 0;">
-                <span>➔</span>
+            <button onclick="toggleMenuHamburguesa()" style="background: transparent; border: none; color: white; font-size: 20px; cursor: pointer; padding: 0; display: inline-block; transform: scaleX(-1);">➔<span></span>
+        
+                
             </button>
+          
             <span style="color: #ffd700; font-size: 15px;">Menú Principal</span>
         </div>
     </div>
 
     <!-- Opciones del Menú (Contenido con scroll) -->
-    <div style="padding: 10px 0; flex-grow: 1; overflow-y: auto;">
+    <div style="padding: 10px 0; flex-grow: 1; overflow-y: auto; background: rgba(25, 43, 56, 0.9490196078431372);">
 
       <div class="menu-item-link" onclick="toggleMenuHamburguesa(); abrirAfiliacionComercial();">
             <span></span> <span>Afiliacion</span>
 
     </div>
-          
+      
         <div class="menu-item-link" onclick="toggleMenuHamburguesa(); abrirAgendaCompleta();">
             <span>👥</span> <span>Mi Agenda</span>
         </div>
@@ -1500,28 +1562,16 @@ function seleccionarRol(rolElegido) {
             <span>📱</span> <span>Instalar Aplicación (PWA)</span>
         </div>
 
-     <div class="menu-item-link" onclick="toggleMenuHamburguesa(); seleccionarRol();">
-            <span>👤</span> <span>Perfil Usuario</span>
-</div>
-
-<div class="menu-item-link" onclick="toggleMenuHamburguesa(); seleccionarRol();">
-            <span>🚕</span> <span>Perfil Driver</span>
-</div>
-     <div class="menu-item-link" onclick="toggleMenuHamburguesa(); seleccionarRol();">
-            <span>🏬</span> <span>Perfil  Comercio</span>
-     </div>
-     
-     
     </div>
 </div>
 <!-- ==================== PANEL LATERAL DE TAXI / CONDUCTOR ==================== -->
 <div id="seccion-panel-taxi-lateral">
 
-    <!-- Cabecera del Panel con tu flechita exacta -->
     <div style="background: rgba(32, 44, 51, 0.5); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(15px); color: #ffffff; padding: 15px; font-weight: 900; text-transform: uppercase; text-align: left; border-bottom: 1px solid #333; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 10;">
+    <!-- Cabecera del Panel con tu flechita exacta -->
         <div style="display: flex; align-items: center; gap: 12px;">
             <button onclick="togglePanelTaxiLateral()" style="background: transparent; border: none; color: white; font-size: 20px; cursor: pointer; padding: 0;">
-                <span style="display: inline-block; transform: scaleX(-1);">➔</span>
+                <span style="display: inline-block; transform: scaleX(-1);"></span>
             </button>
             <span style="color: #ffd700; font-size: 15px;">🚖 zona Driver / pasajes</span>
         </div>
@@ -1530,42 +1580,24 @@ function seleccionarRol(rolElegido) {
     <!-- Contenido interno con scroll independiente -->
     <div style="padding: 10px; flex-grow: 1; overflow-y: auto;">
         
-        <!-- Switch de Modo Taxista -->
-        <div style="background: rgba(11, 20, 26, 0.95); padding: 15px; border-radius: 12px; border: 1px solid #FFD700; color: #fff; text-align: center; margin-bottom: 10px;">
-            
-            <label style="display: flex; align-items: center; justify-content: center; gap: 12px; cursor: pointer;">
-                <span style="font-size: 14px; font-weight: bold;">Activar TaxiDriver Disponible</span>
-                <input type="checkbox" id="switchTaxista" onchange="manejarModoTaxista(this)" style="width: 22px; height: 22px; accent-color: #FFD700; cursor: pointer;">Desactivar
-            </label>
-        </div>
+        
 
-        <!-- Radar de Taxis Cercanos -->
-        <div style="background: rgba(11, 20, 26, 0.95); border: 2px solid #ffd700; border-radius: 15px; padding: 15px; text-align: center;">
-            <h3 style="color: #ffd700; margin-top: 0; font-size: 16px;">🚕 TaxiDriver / 🚌 atobubuses / 🏍️ Deliverys</h3>
-            
-            <iframe id="mapa-radar" 
-                width="100%" 
-                height="220" 
-                style="border:0; border-radius: 10px;" 
-                loading="lazy" 
-                src="https://maps.google.com/maps?q=10.48,-66.9&z=14&output=embed">
-            </iframe>
-            
-        </div>
+        
 
-<div class="panel-canjes-comercio" style="background: #111; padding: 15px; border-radius: 12px; border: 1px solid #ffd700; margin-top: 10px;">
-    <p style="color: #ffd700; font-weight: bold; margin-bottom: 10px;">📦 Selecciona la cantidad de Créditos:</p>
+<div class="panel-canjes-comercio" style="background: #203241; padding: 15px; border-radius: 12px; border: 1px solid #ffd700; margin-top: 10px;">
+     <h3 style="color: #ffd700; margin-top: 0; font-size: 16px;">📦 Selecciona la cantidad de Créditos:</h3>
+            
     
     <!-- Escala unitaria del 1 al 5 -->
     <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 5px; margin-bottom: 10px;">
-        <button onclick="procesarCobroComercial(25)" style="padding: 10px; background: #222; color: #fff; border: 1px solid #444; border-radius: 8px; font-weight: bold; cursor: pointer;">Urbano(25) Enviar</button>
-        <button onclick="procesarCobroComercial(100)" style="padding: 10px; background: #222; color: #fff; border: 1px solid #444; border-radius: 8px; font-weight: bold; cursor: pointer;">Sub-Urbano(100)</button>
-        <button onclick="procesarCobroComercial(150)" style="padding: 10px; background: #222; color: #fff; border: 1px solid #444; border-radius: 8px; font-weight: bold; cursor: pointer;">150</button>
-        <button onclick="procesarCobroComercial(200)" style="padding: 10px; background: #222; color: #fff; border: 1px solid #444; border-radius: 8px; font-weight: bold; cursor: pointer;">200</button>
-      <button onclick="procesarCobroComercial(300)" style="padding: 10px; background: #222; color: #fff; border: 1px solid #444; border-radius: 8px; font-weight: bold; cursor: pointer;">300</button>
+        <button onclick="procesarCobroComercial(25)" style="padding: 10px; background: #20395c; color: #fff; border: 1px solid #444; border-radius: 8px; font-weight: bold; cursor: pointer;">25 Enviar</button>
+        <button onclick="procesarCobroComercial(100)" style="padding: 10px; background: #20395c; color: #fff; border: 1px solid #444; border-radius: 8px; font-weight: bold; cursor: pointer;">100</button>
+        <button onclick="procesarCobroComercial(150)" style="padding: 10px; background: #20395c; color: #fff; border: 1px solid #444; border-radius: 8px; font-weight: bold; cursor: pointer;">150</button>
+        <button onclick="procesarCobroComercial(200)" style="padding: 10px; background: #20395c; color: #fff; border: 1px solid #444; border-radius: 8px; font-weight: bold; cursor: pointer;">200</button>
+      <button onclick="procesarCobroComercial(300)" style="padding: 10px; background: #20395c; color: #fff; border: 1px solid #444; border-radius: 8px; font-weight: bold; cursor: pointer;">300</button>
         
     </div>
-<button type="button" class="btn-space" onclick="document.getElementById('inputQRGaleria').click()" style="background: #323657; color: #fff; font-weight: bold; width: 100%; margin-bottom: 10px; padding: 10px; cursor: pointer; border: none; border-radius: 6px;">📁 Buscar QR en Galería</button>
+<button type="button" class="btn-space" onclick="document.getElementById('inputQRGaleria').click()" style="background: #20395c; color: #fff; font-weight: bold; width: 100%; margin-bottom: 10px; padding: 10px; cursor: pointer; border: 1px solid #444; border-radius: 6px;">📁 Buscar QR en Galería</button>
 
     <!-- Tus botones principales de activación -->
 
@@ -1586,14 +1618,56 @@ function seleccionarRol(rolElegido) {
   
     <!-- Combos y Multiplicadores -->
     <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;">
-        <input type="number" id="montoEnviar" placeholder="Monto Manual" style="width: 100%; padding: 8px; margin-bottom: 5px; background: #12131c; color: #fff; border: 1px solid #323657; border-radius: 8px;">
-    <input type="text" id="idReceptor" placeholder="ID Manual" style="width: 100%; padding: 8px; margin-bottom: 5px; background: #12131c; color: #fff; border: 1px solid #323657; border-radius: 8px;">
+        <input type="number" id="montoEnviar" placeholder="Monto Manual" style="width: 100%; padding: 8px; margin-bottom: 5px; background: #20395c; color: #fff; border: 1px solid #444; border-radius: 8px;">
+    <input type="text" id="idReceptor" placeholder="Ingresar   ID" style="width: 100%; padding: 8px; margin-bottom: 5px; background: #20395c; color: #fff; border: 1px solid #444; border-radius: 8px;">
    
     <button class="btn-space" style="background-color: #ffd700; color: #000; width:100%; padding: 10px; font-size: 12px; margin-bottom: 5px; margin-top: 5px; border-radius: 8px; cursor: pointer;" onclick="procesarCobroComercial() ">Enviar</button>
     </div>
 </div>
+<!-- Switch de Modo Taxista -->
+        <div style=" padding: 15px; border-radius: 12px; border: 0px solid #FFD700; color: #fff; text-align: center; margin-bottom: 5px;">
+            
+            <label style="display: flex; align-items: center; justify-content: center; gap: 12px; cursor: pointer;">
+                <span style="font-size: 14px; font-weight: bold;"> TaxiDriver Disponible</span>Activar
+                <input type="checkbox" id="switchTaxista" onchange="manejarModoTaxista(this)" style="width: 22px; height: 22px; accent-color: #FFD700; cursor: pointer;">Desactivar
+            </label>
+        </div>
+<!-- Radar
+ de Taxis Cercanos -->
+        <div style="background: rgba(32, 63, 84, 0.9490196078431372); border: 1px solid #ffd700; border-radius: 15px; padding: 15px; text-align: center;">
+            <h3 style="color: #ffd700; margin-top: 0; font-size: 16px;">🚕 TaxiDriver / 🚌 Autobuses / 🏍️ Deliverys</h3>
+            
+            <iframe id="mapa-radar" 
+                width="100%" 
+                height="220" 
+                style="border:0; border-radius: 10px;" 
+                loading="lazy" 
+                src="https://maps.google.com/maps?q=10.48,-66.9&z=14&output=embed">
+            </iframe>
+            
+        </div>
+      
     </div>
+<div class="barra-flotante-premium">
 
+  <div class="btn-nav" onclick="togglePanelTaxiLateral();">
+        <span>🛖</span><span>Inicio</span></div>
+ <div class="btn-nav" onclick="togglePanelContactosLateral();">
+        <span>💬</span><span>Chat</span></div>
+
+<div class="btn-nav" onclick="abrirAgendaCompleta();">
+        <span>👥</span><span>Contactos</span>
+</div>
+  <div class="btn-nav" 
+     id="btn-nav-flow" 
+     data-contacto='{"id_sistema":"26fmetp4Q4WJ","nombre":"Spaxio","apellido":"Flow","estado":"activo"}'
+     onclick="cargarConversacionCon(JSON.parse(this.dataset.contacto).id_sistema)">🪙<span></span><span>P2P</span>
+        
+  </div>
+<div class="btn-nav" onclick="abrirCalculadora();">
+        <span>💹</span><span>Cr / Tasas</span>
+</div>
+</div>
 </div>
 
       
@@ -1604,26 +1678,19 @@ function seleccionarRol(rolElegido) {
             <div id="seccion-spaxiocard-integrada" style="display: flex; flex-direction: column; width: 100%; padding: 5px;"> 
 
               
-             <div style="width: 100%;">
+            
+              
 
-    
-    <div class="btn-nav" 
-     id="btn-nav-flow" 
-     data-contacto='{"id_sistema":"26fmetp4Q4WJ","nombre":"Spaxio","apellido":"Flow","estado":"activo"}'
-     onclick="cargarConversacionCon(JSON.parse(this.dataset.contacto).id_sistema)"><span style="display: flex; width: 100%; justify-content: space-between; align-items: center; margin-bottom: 10px; padding: 0 5px;font-size: 13px; font-weight: bold; color: #ffd700; text-transform: uppercase; letter-spacing: 1px;">🎬YouSpace
-        <span></span>
-        
-    </div>
-</div>
+  
 
 <!-- Contenedor deslizable del feed (SpaxioFlow Dinámico) -->
-<div id="contenedor-spaxioflow-stories" style="display: flex; gap: 5px; overflow-x: auto; padding-bottom: 5px; scrollbar-width: none; align-items: center;">
+<div id="contenedor-spaxioflow-stories" style="display: flex; gap: 5px; overflow-x: auto; padding-bottom: 5px; scrollbar-width: 100; align-items: center;">
     
     <!-- 1. TU TARJETA DE PERFIL (QUEDA FIJA Y NO SE BORRA NUNCA) -->
-    <div style="min-width: 100px; height: 200px; border: 1px solid #ffd700; border-radius: 16px; padding: 1px; text-align: center; flex-shrink: 10; display: flex; flex-direction: column; align-items: center; justify-content: space-between; overflow: hidden;">
+    <div style="min-width: 100px; height: 200px; border: 1px solid #e1d27d; border-radius: 16px; padding: 1px; text-align: center; flex-shrink: 10; display: flex; flex-direction: column; align-items: center; justify-content: space-between; overflow: hidden;">
         
         <!-- Contenedor de la imagen ensanchado al 100% de la tarjeta de los lados -->
-        <div style="width: 100%; height: 115px; border-top-left-radius: 18px; border-top-right-radius: 12px; overflow: hidden; margin-top: -6px; margin-left: -6px; margin-right: -6px; width: calc(100% + 18px); position: relative;">
+        <div style="width: 100%; height: 100px; border-top-left-radius: 18px; border-top-right-radius: 12px; overflow: hidden; margin-top: -6px; margin-left: -6px; margin-right: -6px; width: calc(100% + 18px); position: relative;">
             
            <img id="story-mi-foto-perfil" src="" style="width: 100%; height: 100%; object-fit: cover; object-position: center top; display: block;">
 
@@ -1634,11 +1701,12 @@ function seleccionarRol(rolElegido) {
                 +
                 <input type="file" id="input-story-spaxio" accept="image/*,video/*" style="display: none;" onchange="subirYAbrirSpaxioFlow(this)">
             </label>
+          
         </div>
 
-        <span style="font-size: 10px; color: #fff; font-weight: bold; margin-bottom: 2px;">Subir Publicacion</span>
-    
-</div>
+        <span style="font-size: 10px; color: #fff; font-weight: bold; margin-bottom: 2px;">Subir Publicacion<span></span>
+      
+          </span>
 
 
     <!-- Las tarjetas de la comunidad se inyectarán dinámicamente aquí al lado -->
@@ -1676,161 +1744,59 @@ function seleccionarRol(rolElegido) {
               <img id="26fmetp4Q4WJ" src="" style="width: 50%; height: 50%; object-fit: cover; display: block;"--->
               
           
+  
+    </div>   
+
+
+</div>    
+
+  <!-- Contenedor
+ deslizable de productos/comercios -->
+    <div id="contenedor-spaxioflow-stories" style="display: flex; gap: 5px; overflow-x: auto; padding-bottom: 5px; scrollbar-width: 100; align-items: center; touch-action: pan-y; /* Permite scroll solo de arriba a abajo */
+    -webkit-overflow-scrolling: touch; overscroll-behavior-y: contain;
+    ">
+        
+        <!-- Tarjeta de Comercio 1 -->
+        <div style="min-width: 110px; background: #151828; border: 1px solid #323657; border-radius: 10px; padding: 8px; text-align: center; flex-shrink: 0; cursor: pointer;">
+            <div style="font-size: 22px; margin-bottom: 4px;">🍔</div>
+            <div style="font-size: 11px; color: #fff; font-weight: bold;">Space Burger</div>
+            <div style="font-size: 10px; color: #00ffcc; margin-top: 2px;">-10% Puntos</div>
         </div>
-    </div>       
 
-              
+        <!-- Tarjeta de Comercio 2 -->
+        <div style="min-width: 110px; background: #151828; border: 1px solid #323657; border-radius: 10px; padding: 8px; text-align: center; flex-shrink: 0; cursor: pointer;">
+            <div style="font-size: 22px; margin-bottom: 4px;">☕</div>
+            <div style="font-size: 11px; color: #fff; font-weight: bold;">Café Galaxia</div>
+            <div style="font-size: 10px; color: #ffd700; margin-top: 2px;">Cashback</div>
+        </div>
 
-  
-                <!-- Tarjeta Visual --->
-                <div class="tarjeta-space" style="margin-bottom: 5px; text-align: left; padding: 10px; background: #151828; border-radius: 12px; width: 85%;">
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <span style="font-size: 12px; color: #63688a; text-transform: uppercase;">My Cards Prepagada
-                        </span> 
-                      <span style="color: #ffd700;">YSA</span>
-                    </div>
-
-                  
-                    <div class="balance-txt" id="balanceVisual" 
-                   <div class="btn-nav" onclick="document.getElementById('seccion-spaxiocard-integrada'); inicializarSpaxiocard();">
-    <span>Cr. 0.00</span>
-                     
-                   </div>
-                    <button onclick="abrirSubModalIntegrado('submodal-miqr')" style="background: #ffd700; color: #000; border: none; border-radius: 6px; padding: 6px 12px; font-weight: 900; font-size: 14px; margin: 10px auto; cursor: pointer;">QR</button>
-                    </div>
-                   
-                               
-     <!-- ============================================================== -->
-<!-- 4. SUBMODALES INTEGRADOS DENTRO DEL MODAL QR -->
-<!-- ============================================================== -->
-
-<!-- 1. Submodal Cargar (Oculto por defecto) -->
-<div id="submodal-cargar" style="display: none; background: #1a1c29; border: 1px solid #323657; border-radius: 12px; padding: 20px; margin-top: 15px; text-align: left;">
-    
-</div>
-
-<!-- 2. Submodal Canjear (Oculto por defecto) -->
-<div id="submodal-pagar" style="display: none; background: #1a1c29; border: 1px solid #323657; border-radius: 12px; padding: 20px; margin-top: 15px; text-align: left;">
-    <h3 style="margin-top: 0; color: #5b61e2; font-size: 16px;">🪙 Traspaso Inmediato</h3>
-   
-</div>
-
-<!-- 3. Submodal Mi QR (Oculto por defecto) -->
-<div id="submodal-miqr" style="display: none; background: #1a1c29; border: 1px solid #323657; border-radius: 12px; padding: 15px; margin-top: 10px; text-align: center;">
-  <h3 style="margin-top: 0; color: #fff; font-size: 16px;"> Tu QR de Canje</h3>
-    
-    
-    <div id="contenedor-qr-spaxiocard" style="background: white; padding: 10px; border-radius: 8px; display: inline-block; margin-bottom: 12px;"></div>
-
-  
-
-    <div style="margin-bottom: 20px;">
-        <span id="spaxiocard-id-display" style="font-size: 12px; color: #ffd700; font-family: monospace; font-weight: bold;"></span>
+        <!-- Tarjeta de Comercio 3 -->
+        <div style="min-width: 110px; background: #151828; border: 1px solid #323657; border-radius: 10px; padding: 8px; text-align: center; flex-shrink: 0; cursor: pointer;">
+            <div style="font-size: 22px; margin-bottom: 4px;">🛒</div>
+            <div style="font-size: 11px; color: #fff; font-weight: bold;">Market Express</div>
+            <div style="font-size: 10px; color: #00ffcc; margin-top: 2px;">Delivery Gratis</div>
+        </div>
+<!-- Tarjeta de Comercio 4 -->
+        <div style="min-width: 110px; background: #151828; border: 1px solid #323657; border-radius: 10px; padding: 8px; text-align: center; flex-shrink: 0; cursor: pointer;">
+            <div style="font-size: 22px; margin-bottom: 4px;">☕</div>
+            <div style="font-size: 11px; color: #fff; font-weight: bold;">Abasto Tio San</div>
+            <div style="font-size: 10px; color: #ffd700; margin-top: 2px;">Cashback</div>
+        </div>
     </div>
-   
-    
-    
-    
-    
-
-  
-    
-  <button class="btn-space btn-danger" onclick="cerrarSubModalIntegrado('submodal-miqr')" style="width: 100%; padding: 6px; margin-top: 8px; font-size: 12px; cursor: pointer;">Cerrar</button>
-  
-  
-  
-  
+</div>      
 </div>
 <!-- ============================================================== -->            
   
                  
          
 
-<div style="display: flex; flex-direction: column; align-items: center; width: 100%; gap: 10px; margin-bottom: 15px;">
 
-    <!-- Botones limpios, más compactos y centrados -->
-    
-    
-    
-
-
-       <!-- ==================== SECCIÓN: SPAXIOSHOPPING ==================== -->
-<div style="width: 100%; margin-top: 20px; text-align: left; padding: 0 5px;">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-        <span style="font-size: 13px; font-weight: bold; color: #ffd700; text-transform: uppercase; letter-spacing: 1px;">🛍️ SpaxioShopping</span>
-        <span style="font-size: 10px; color: #8696a0;">Comercios Afiliados</span>
-    </div>
-
-    <!-- Contenedor deslizable de productos/comercios -->
-    <div style="display: flex; gap: 10px; overflow-x: auto; padding-bottom: 5px; scrollbar-width: none;">
-        
-        <!-- Tarjeta de Comercio 1 -->
-        <div style="min-width: 110px; background: #151828; border: 1px solid #323657; border-radius: 10px; padding: 8px; text-align: center; flex-shrink: 0; cursor: pointer;">
-            <div style="font-size: 22px; margin-bottom: 4px;">🍔</div>
-            <div style="font-size: 11px; color: #fff; font-weight: bold;">Space Burger</div>
-            <div style="font-size: 10px; color: #00ffcc; margin-top: 2px;">-10% Puntos</div>
-        </div>
-
-        <!-- Tarjeta de Comercio 2 -->
-        <div style="min-width: 110px; background: #151828; border: 1px solid #323657; border-radius: 10px; padding: 8px; text-align: center; flex-shrink: 0; cursor: pointer;">
-            <div style="font-size: 22px; margin-bottom: 4px;">☕</div>
-            <div style="font-size: 11px; color: #fff; font-weight: bold;">Café Galaxia</div>
-            <div style="font-size: 10px; color: #ffd700; margin-top: 2px;">Cashback</div>
-        </div>
-
-        <!-- Tarjeta de Comercio 3 -->
-        <div style="min-width: 110px; background: #151828; border: 1px solid #323657; border-radius: 10px; padding: 8px; text-align: center; flex-shrink: 0; cursor: pointer;">
-            <div style="font-size: 22px; margin-bottom: 4px;">🛒</div>
-            <div style="font-size: 11px; color: #fff; font-weight: bold;">Market Express</div>
-            <div style="font-size: 10px; color: #00ffcc; margin-top: 2px;">Delivery Gratis</div>
-        </div>
-<!-- Tarjeta de Comercio 4 -->
-        <div style="min-width: 110px; background: #151828; border: 1px solid #323657; border-radius: 10px; padding: 8px; text-align: center; flex-shrink: 0; cursor: pointer;">
-            <div style="font-size: 22px; margin-bottom: 4px;">☕</div>
-            <div style="font-size: 11px; color: #fff; font-weight: bold;">Abasto Tio San</div>
-            <div style="font-size: 10px; color: #ffd700; margin-top: 2px;">Cashback</div>
-        </div>
-    </div>
-</div>      
-<div style="width: 100%; margin-top: 20px; text-align: left; padding: 0 5px;">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-      <!-- Contenedor deslizable de productos/comercios -->
-    <div style="display: flex; gap: 10px; overflow-x: auto; padding-bottom: 5px; scrollbar-width: none;">
-        
-        <!-- Tarjeta de Comercio 1 -->
-        <div style="min-width: 110px; background: #151828; border: 1px solid #323657; border-radius: 10px; padding: 8px; text-align: center; flex-shrink: 0; cursor: pointer;">
-            <div style="font-size: 22px; margin-bottom: 4px;">🍔</div>
-            <div style="font-size: 11px; color: #fff; font-weight: bold;">Space Burger</div>
-            <div style="font-size: 10px; color: #00ffcc; margin-top: 2px;">-10% Puntos</div>
-        </div>
-
-        <!-- Tarjeta de Comercio 2 -->
-        <div style="min-width: 110px; background: #151828; border: 1px solid #323657; border-radius: 10px; padding: 8px; text-align: center; flex-shrink: 0; cursor: pointer;">
-            <div style="font-size: 22px; margin-bottom: 4px;">☕</div>
-            <div style="font-size: 11px; color: #fff; font-weight: bold;">Café Galaxia</div>
-            <div style="font-size: 10px; color: #ffd700; margin-top: 2px;">Cashback</div>
-        </div>
-
-        <!-- Tarjeta de Comercio 3 -->
-        <div style="min-width: 110px; background: #151828; border: 1px solid #323657; border-radius: 10px; padding: 8px; text-align: center; flex-shrink: 0; cursor: pointer;">
-            <div style="font-size: 22px; margin-bottom: 4px;">🛒</div>
-            <div style="font-size: 11px; color: #fff; font-weight: bold;">Market Express</div>
-            <div style="font-size: 10px; color: #00ffcc; margin-top: 2px;">Delivery Gratis</div>
-        </div>
-<!-- Tarjeta de Comercio 4 -->
-        <div style="min-width: 110px; background: #151828; border: 1px solid #323657; border-radius: 10px; padding: 8px; text-align: center; flex-shrink: 0; cursor: pointer;">
-            <div style="font-size: 22px; margin-bottom: 4px;">☕</div>
-            <div style="font-size: 11px; color: #fff; font-weight: bold;">Abasto Tio San</div>
-            <div style="font-size: 10px; color: #ffd700; margin-top: 2px;">Cashback</div>
-        </div>
-    </div>
-</div>      
   <!-- ============================================================== -->
      
         <!-- ==================== PANEL LATERAL DE CONTACTOS ==================== -->
 <div id="seccion-panel-contactos-lateral">
     <!-- Cabecera del Panel de Contactos con tu Flechita exacta -->
-    <div style="background: rgba(32, 44, 51, 0.5); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(15px); color: #ffffff; padding: 15px; font-weight: 900; text-transform: uppercase; text-align: left; border-bottom: 1px solid #333; display: flex; justify-content: space-between; align-items: center;">
+    <div style="background: #202732 !important; backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(15px); color: #ffffff; padding: 15px; font-weight: 900; text-transform: uppercase; text-align: left; border-bottom: 1px solid #333; display: flex; justify-content: space-between; align-items: center;">
         <div style="display: flex; align-items: center; gap: 12px;">
             <!-- Tu flechita reutilizada para cerrar/deslizar -->
             <button onclick="togglePanelContactosLateral()" style="background: transparent; border: none; color: white; font-size: 20px; cursor: pointer; padding: 0;">
@@ -1865,6 +1831,7 @@ function seleccionarRol(rolElegido) {
     <div style="flex-grow: 1; overflow-y: auto; padding: 15px; -webkit-overflow-scrolling: touch;">
         <div id="lista-contactos"></div>
     </div>
+
 </div>
 
 
@@ -1873,21 +1840,9 @@ function seleccionarRol(rolElegido) {
 
         
 
-<div class="barra-flotante-premium">
 
- 
-
- <div class="btn-nav" onclick="togglePanelContactosLateral();">
-        <span>💬</span><span>Chat</span></div>
-<div class="btn-nav" onclick="abrirAgendaCompleta();">
-        <span>👥</span><span>Contactos</span>
-</div>
-<div class="btn-nav" onclick="abrirCalculadora();">
-        <span>🪙</span><span>Creditos / Tasas</span>
-</div>
- </div>
      
- <div id="modal-nuevocontacto" class="modal" style="display: none; align-items: center; justify-content: center; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #1e222b; z-index: 30000;">
+ <div id="modal-nuevocontacto" class="modal" style="display: none; align-items: center; justify-content: center; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #202732 !important; z-index: 30000;">
     
           <div class="modal-cover" style="position: relative; width: 100vw; height: 100vh; padding: 50px 30px 50px 30px; box-sizing: border-box; background: #1e222b; border-radius: 0px; text-align: center; border: 0px solid #333; box-shadow: 0 0 20px rgba(0,0,0,0.5);">                                                
         
@@ -1934,13 +1889,13 @@ function seleccionarRol(rolElegido) {
 <div id="seccion-calculadora-integrada">
     
     <!-- Cabecera del Panel con tu Flechita exacta -->
-    <div style="background: rgba(32, 44, 51, 0.5); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(15px); color: #ffffff; padding: 15px; font-weight: 900; text-transform: uppercase; text-align: left; border-bottom: 1px solid #333; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 10;">
+    <div style="background: #202732 !important; backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(15px); color: #ffffff; padding: 15px; font-weight: 900; text-transform: uppercase; text-align: left; border-bottom: 0px solid #333; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 10;">
         <div style="display: flex; align-items: center; gap: 12px;">
             <!-- Tu flechita reutilizada para cerrar/deslizar -->
             <button onclick="cerrarCalculadora()" style="background: transparent; border: none; color: white; font-size: 20px; cursor: pointer; padding: 0;">
                 <span style="display: inline-block; transform: scaleX(-1);">➔</span>
             </button>
-            <span style="color: #ffd700; font-size: 15px;">Tasas / Calculadora / Creditos</span>
+            <span style="color: #ffd700; font-size: 15px;">Tasas / Calculadora </span>
         </div>
     </div>
 
@@ -2035,11 +1990,13 @@ function seleccionarRol(rolElegido) {
 
             </div>
 
-          
+        
                
               
-              <button onclick="abrirAfiliacionComercial()" style="width: 100%; padding: 8px; background-color: #43fc35; color: #000; border: none; border-radius: 12px; font-weight: 900; font-size: 1em; cursor: pointer; margin-top: 10px; display: flex; align-items: center; justify-content: center; gap: 10px; text-decoration: none;;">Afiliacion / Creditos</button>
+          
             </div>
+      
+      </div>
           
         </div>
       
@@ -2048,40 +2005,49 @@ function seleccionarRol(rolElegido) {
 
 
 
-</div>
+
              
 
-      <div id="modal-agenda-completa" class="modal" style="display:none; background: #000; z-index: 30000;">
+      <div id="modal-agenda-completa" class="modal" style="display:none; background: #202732 !important; z-index: 30000;">
     <div class="modal-content" style="display: flex; flex-direction: column; width: 100vw; height: 100dvh; position: fixed; top: 0; left: 0; background: #0b141a; overflow-y: auto;">   
 
-      <button onclick="abrirmodalnuevocontactoDesdemodalagendacompleta()" 
-            style="position: fixed; right: 20px; bottom: 100px; 
-                   background: rgba(255, 215, 0, 0.25); 
+      
+
+<div style="background: rgba(0, 0, 0, 0); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(15px); color: #ffffff; padding: 15px; font-weight: 900; text-transform: uppercase; text-align: left; border-bottom: 1px solid #333; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 10;">
+    <div style="display: flex; align-items: center; gap: 12px;">
+        <!-- Botón para cerrar la agenda -->
+        <button onclick="document.getElementById('modal-agenda-completa').style.display='none'" style="background: transparent; border: none; color: white; font-size: 20px; cursor: pointer; padding: 0; display: flex; align-items: center;">
+            <span style="display: inline-block; transform: scaleX(-1);">➔</span>
+        </button>
+      
+        <span style="color: #ffd700; font-size: 15px;">Contactos</span>
+    </div>
+
+
+
+<button onclick="abrirmodalnuevocontactoDesdemodalagendacompleta()" 
+            style="background: rgba(255, 215, 0, 0.15); 
                    backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); 
                    border: 1px solid rgba(255, 215, 0, 0.4); 
-                   border-radius: 50%; width: 55px; height: 55px; 
-                   color: #ffd700; cursor: pointer; z-index: 100; 
-                   font-size: 25px; display: flex; 
-                   align-items: center; margin-top: 50; right: 0; justify-content: center;">
-            + 
-        </button>
+                   border-radius: 20px; padding: 6px 12px; 
+                   color: #ffd700; cursor: pointer; 
+                   font-size: 13px; font-weight: bold; 
+                   display: flex; align-items: center; gap: 6px;">
+        <span style="font-size: 18px; line-height: 1;">+</span> Nuevo contacto
+    </button>
+</div>
 
-        <div style="padding: 20px; flex-shrink: 0;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                <h2 style="color: #ffd700; margin: 0;">👥 Mi Agenda</h2>
-                <button onclick="document.getElementById('modal-agenda-completa').style.display='none'" 
-                        style="background: transparent; border: none; color: white; font-size: 24px; cursor: pointer;">✕</button>
-            </div>
-        </div>
+        
+          
+          
+          
         <div id="contenedor-agenda-total" style="flex: 1; overflow-y: auto; padding: 0 15px 100px 15px;"></div>
     </div>
-      </div>
+    </div>
 
 
 
-            <div id="contenedor-agenda-total" style="overflow-y: auto; max-height: 80vh;"></div>
-        </d>
- </div>
+            
 
 
             <script>
@@ -2091,23 +2057,6 @@ function seleccionarRol(rolElegido) {
     alert("🚨 ERROR DETECTADO:\n\n" + message + "\n\nArchivo: " + source + "\nLínea: " + lineno);
     return false;
 };
-
-             function seleccionarRol(rolElegido) {
-            // Guardamos el rol en el almacenamiento del navegador
-            localStorage.setItem('spaxio_rol', rolElegido);
-
-            // Redirección a los subdominios de Vercel (Reemplaza estas URLs con las tuyas cuando las despliegues)
-            if (rolElegido === 'passenger') {
-                window.location.href = "./usuario.html";
-            } 
-            else if (rolElegido === 'driver') {
-                window.location.href = "./drivtaxi.html";
-            } 
-            else if (rolElegido === 'merchant') {
-                window.location.href = "./comercios.html";
-            }
-             }
-             
 async function procesarCobroComercial(cantidadMonto = null) {
     const receptorInput = document.getElementById('idReceptor');
     const montoInput = document.getElementById('montoEnviar');
@@ -3490,18 +3439,7 @@ if (textoReal.includes('|SPA_SUMA|') || textoReal.includes('|SPA_CANJE|') || tex
     }
 }
         
-const rolActual = localStorage.getItem('spaxio_rol') || 'passenger';
 
-if (rolActual === 'merchant') {
-    localStorage.setItem('mi_dropis_id_comercio', idUnico);
-} else if (rolActual === 'driver') {
-    localStorage.setItem('mi_dropis_id_driver', idUnico);
-} else {
-    localStorage.setItem('mi_dropis_id_usuario', idUnico);
-}
-
-// Y siempre seteamos el ID general activo para la sesión actual
-localStorage.setItem('mi_dropis_id', idUnico);
         
      
     
@@ -4419,7 +4357,12 @@ if (id) {
         } else {
             console.log("📡 Modo Offline detectado: Abriendo con base de datos local (IndexedDB).");
         }
+  
+  togglePanelTaxiLateral();
 
+
+
+              
         manejarBotonIdentidad();
      
     } else {
