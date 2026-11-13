@@ -2057,7 +2057,8 @@ const rolGuardado = localStorage.getItem('spaxio_rol');
     </div>
  </div>
      
-
+<!-- Contenedor donde se cargará p2p.html de forma interna -->
+<div id="contenedor-p2p" style="display: none; width: 100%; height: 100%;"></div>
          
          <!-- ==================== PANEL LATERAL CALCULADORA ==================== -->
 <div id="seccion-calculadora-integrada">
@@ -2176,8 +2177,8 @@ const rolGuardado = localStorage.getItem('spaxio_rol');
  <div class="btn-nav" onclick="togglePanelContactosLateral();">
         <span>💬</span><span>Chat</span></div>
 
-<div class="btn-nav" onclick="abrirAgendaCompleta();">
-        <span>👥</span><span>Contactos</span>
+<div class="btn-nav" onclick="abrirP2PInterno()">
+    <span>💱</span><span>P2P</span>
 </div>
   <div class="btn-nav" 
      id="btn-nav-flow" 
@@ -2240,7 +2241,38 @@ const rolGuardado = localStorage.getItem('spaxio_rol');
     alert("🚨 ERROR DETECTADO:\n\n" + message + "\n\nArchivo: " + source + "\nLínea: " + lineno);
     return false;
 };
+async function abrirP2PInterno() {
+    // 1. Limpiamos todo lo que esté abierto en la pantalla
+    if (typeof cerrarTodosLosModalesSpace === "function") cerrarTodosLosModalesSpace();
+    if (typeof cerrarTodosLosTogge === "function") cerrarTodosLosTogge();
 
+    const contenedor = document.getElementById('contenedor-p2p');
+    
+    // Si ya está cargado, solo lo mostramos
+    if (contenedor.innerHTML.trim() !== "") {
+        contenedor.style.display = 'block';
+        return;
+    }
+
+    try {
+        // 2. Cargamos p2p.html de forma interna sin salir de la PWA
+        let respuesta = await fetch('./p2p.html');
+        if (!respuesta.ok) throw new Error("No se pudo cargar el archivo");
+        
+        let htmlContenido = await respuesta.text();
+        
+        // 3. Inyectamos el HTML dentro de nuestra app
+        contenedor.innerHTML = htmlContenido;
+        contenedor.style.display = 'block';
+
+        // 4. (Opcional) Si p2p.html necesita ejecutar algún script interno, puedes dispararlo aquí
+        console.log("✅ p2p.html cargado internamente con éxito");
+
+    } catch (error) {
+        console.error("Error al cargar P2P:", error);
+        alert("No se pudo abrir la sección P2P.");
+    }
+             }
               // Función para enfocar el mapa GPS en el negocio seleccionado y dar la opción de pedir taxi
 
               function trazarRutaHaciaNegocio(lat, lng, nombreNegocio) {
