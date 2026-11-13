@@ -2193,9 +2193,10 @@ const rolGuardado = localStorage.getItem('spaxio_rol');
         <span>🛖</span><span>Inicio</span></div>
  <div class="btn-nav" onclick="togglePanelContactosLateral();">
         <span>💬</span><span>Chat</span></div>
-<div class="btn-nav" onclick="abrirP2PPanel()">
-    <span>💱</span><span>P2P</span>
-</div>
+<a href="p2p.html" class="btn-nav">
+    <span>💱</span>
+    <span>P2P</span>
+</a>
 
   <div class="btn-nav" 
      id="btn-nav-flow" 
@@ -2271,6 +2272,38 @@ const rolGuardado = localStorage.getItem('spaxio_rol');
     alert("🚨 ERROR DETECTADO:\n\n" + message + "\n\nArchivo: " + source + "\nLínea: " + lineno);
     return false;
 };
+
+
+             function abrirP2PWeb() {
+    window.location.href = 'p2p.html'; // O window.open('p2p.html', '_blank'); si quieres que abra en pestaña/ventana nueva
+             }
+
+             function abrirP2PComoWeb() {
+    // Ocultas las demás secciones principales
+    document.getElementById('seccion-chat').style.display = 'none';
+    document.getElementById('seccion-flow').style.display = 'none';
+
+    // Muestras la sección P2P ocupando toda la pantalla
+    const panelP2P = document.getElementById('seccion-p2p-lateral');
+    if (panelP2P) {
+        panelP2P.style.position = 'fixed';
+        panelP2P.style.top = '0';
+        panelP2P.style.left = '0';
+        panelP2P.style.width = '100vw';
+        panelP2P.style.height = '100vh';
+        panelP2P.style.zIndex = '999999';
+        panelP2P.style.right = '0'; // Se despliega por completo
+    }
+}
+
+function cerrarP2PComoWeb() {
+    // Regresas a la vista normal y ocultas el P2P
+    const panelP2P = document.getElementById('seccion-p2p-lateral');
+    if (panelP2P) {
+        panelP2P.style.right = '-100%'; // Lo vuelves a esconder
+    }
+    document.getElementById('seccion-chat').style.display = 'block'; // O tu vista por defecto
+             }
 function abrirP2PPanel() {
     const panel = document.getElementById('seccion-p2p-lateral');
     if (panel) {
