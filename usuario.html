@@ -2173,9 +2173,11 @@ const rolGuardado = localStorage.getItem('spaxio_rol');
         <span>🛖</span><span>Inicio</span></div>
  <div class="btn-nav" onclick="togglePanelContactosLateral();">
         <span>💬</span><span>Chat</span></div>
-<div class="btn-nav" onclick="abrirP2PPanel();">
-        <span>🪙</span><span>P2P</span>
-</div>
+<button onclick="abrirP2PPanel()" 
+        style="background: none; border: none; color: #ffd700; font-size: 22px; cursor: pointer; padding: 5px; transition: transform 0.2s;"
+        onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'" title="Panel P2P">
+    💱
+</button>
 
   <div class="btn-nav" 
      id="btn-nav-flow" 
