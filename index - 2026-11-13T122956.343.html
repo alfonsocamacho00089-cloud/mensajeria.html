@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 
 <html lang="es">
 
@@ -11,12 +11,10 @@
     <title>DropisApp - Real Market Elite</title>
 
     <link rel="manifest" href="manifest.json">
-    
+
     <meta name="theme-color" content="#556b2f">
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
- 
-      <link rel="stylesheet" href="./css/style.css">
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
@@ -128,29 +126,7 @@
 
         .calc-section.active { display: block; }
 
-        #shopping { 
-
-    background-color: #000; 
-
-    min-height: 100vh; 
-
-    padding-top: 10px;
-
-}
-
-#lista-productos div {
-
-    transition: transform 0.2s;
-
-    box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-
-}
-
-#lista-productos div:active {
-
-    transform: scale(0.95); /* Efecto de pulsación al tocarlo */
-
-}
+        
 
         /* BOTÓN REVISAR PAGO */
 
@@ -183,41 +159,10 @@
   display: inline-block;
   animation: girar 1s linear infinite;
 }
-
-      
-                     
     </style>
 
- <script src="https://cdn.jsdelivr.net/npm/eruda"></script>
-<script>eruda.init();</script>   
-
 </head>
-<script>
-    // 1. Esta función quita el error de "Not Defined"
-    function enviarMensajeSatelital() {
-        const id = document.getElementById('target-id').value;
-        const msg = document.getElementById('msg-text').value;
-        
-        if(msg === "") {
-            alert("Escribe algo para enviar");
-            return;
-        }
-        
-        console.log("Mensaje enviado a: " + id);
-        document.getElementById('msg-text').value = ""; // Limpia el cuadro
-    }
 
-    // 2. Esta función permite que el botón de la pestaña Chat funcione
-    function openTab(tabName) {
-        const sections = document.querySelectorAll('.calc-section');
-        sections.forEach(s => s.classList.remove('active'));
-        
-        const target = document.getElementById(tabName);
-        if(target) {
-            target.classList.add('active');
-        }
-    }
-</script>
 <body>
 <div id="modalBancos" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:9999; align-items:flex-end; justify-content:center;">
     <div style="background:white; width:100%; max-width:500px; height:85vh; border-top-left-radius:25px; border-top-right-radius:25px; display:flex; flex-direction:column; animation: subir 0.3s ease-out;">
@@ -289,97 +234,148 @@
             console.error(e);
         }
     }
+</script>
 
- </script>
- 
-<div class="header-bar">
-    <span class="brand-title">DropisApp</span>
-    <div class="header-icons-right">
-        <div class="icon-btn" onclick="abrirModalQR()" title="Mi Identidad">
-            <i class="fas fa-qrcode"></i>
-        </div>
-        <a href="#" class="icon-btn" onclick="openTab('shopping')"><i class="fas fa-house"></i></a>
-       <div class="icon-btn" onclick="alert ('proximanete')"><i class="fas"></i></div>
-    </div>
-</div>
 
-<nav class="nav-tabs-top">
-  <div class="tab-link active" onclick="openTab('comercio')">Comercio</div>
-  <div class="tab-link" onclick="openTab('cliente')">Cliente</div>
-  <div class="tab-link" onclick="openTab('exchange')">USDT P2P</div>
-  <div class="tab-link" onclick="openTab('chat')">DropisChat</div> 
-</nav>
-
-            
-
-          
-        <div id="main-content"></div>
-
-<div class="top-wrapper" id="top-wrapper">
-    <div class="top-box">
-        <div class="tasa-usdt">
-            <div class="fixed-title">tasa USDT</div>
-            <input type="number" id="adjInput" value="4.21" step="0.01" style="display:none;">
-            <div class="input-wrapper-main"><span class="bs-inside">Bs</span><input type="text" id="p2pRate" readonly></div>
-        </div> 
     
 
-    <div class="bottom-row">
+<div class="header-bar">
+    <span class="brand-title"></span>
+  <div style="font-size: 0.8em; opacity: 0.8;">USDT Referecial de Binance P2P</div>
+    <div class="header-icons-right">
+      
+        <div class="header-icons-right">
+
+      
+
+        <div class="icon-btn" onclick="alert ('proximanete')"><i class="fas"></i></div>
+
+    </div>
+
+    </div>
+</div>
+    
+  
+
+
+<nav class="nav-tabs-top">
+
+  <div class="tab-link active" onclick="openTab('comercio')">Comercio</div>
+
+  <div class="tab-link" onclick="openTab('cliente')">Cliente</div>
+
+  <div class="tab-link" onclick="openTab('exchange')">USDT P2P</div>
+
+  <div class="tab-link" onclick="openTab('exchange2')">YsaPay P2P</div> </nav>
+
+
+
+<div class="main-content">
+
+  
+
+
+  <div class="top-wrapper">
+
+    <div class="top-box">
+
+      <div class=tasa-usdt
+       </div>
+      
+          <div class="fixed-title" </div>tasa USDT </div>
+          
+        <input type="number" id="adjInput" value="4.21" step="0.01" style="display:none;">
+
+        <div class="input-wrapper-main"><span class="bs-inside">Bs</span><input type="text" id="p2pRate" readonly></div>
+
+    </div> 
+
+    
+
+      <div class="bottom-row">
+
         <div class="card-wrapper selected" id="cardBCV" onclick="selectTasa('bcv')">
+
           <div class="fixed-title">tasa BCV</div>
+
           <div class="field-top do-flip" id="flipBCV">
+
             <div class="face face-front"><div class="input-wrapper"><span class="bs-inside">Bs</span><input type="number" id="bcvRate" readonly></div></div>
+
             <div class="face face-back"><div class="input-wrapper"><span class="bs-inside">Bs</span><input type="number" id="bcvRateBack" readonly></div></div>
-          </div> 
-        </div> 
+
+         </div> 
+
+         </div> 
 
         <div class="card-wrapper" id="cardEuro" onclick="selectTasa('euro')">
           <div class="fixed-title">Tasa EURO</div>
           <div class="field-top do-flip" id="flipEuro">
             <div class="face face-front"><div class="input-wrapper"><span class="bs-inside">Bs</span><input type="number" id="euroRate" readonly></div></div>
             <div class="face face-back"><div class="input-wrapper"><span class="bs-inside">Bs</span><input type="number" id="euroRateBack" readonly></div></div>
+            
+
           </div>
-        </div>
-    </div>
 
-    <div class="date-row" onclick="cargarTasas()" style="cursor:pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; margin-top: 10px; margin-bottom: 10px;">
+        </div>
+
+      </div>
+
+     <div class="date-row" onclick="cargarTasas()" style="cursor:pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; margin-top: 10px; margin-bottom: 10px;">
+
+
         <div class="card-container" style="height: 25px; width: 150px; margin: 0 auto 5px auto; perspective: 1000px;">
-            <div style="position: relative; height: 35px; width: 100%; display: flex; justify-content: center; margin-bottom: 10px;">
-                <div id="divFechaNext" style="position: absolute; background: #1a1a1a; padding: 3.5px 15px; border-radius: 8px; border: 1px solid #333; box-shadow: 0 0px 0px rgba(0,0,0,0.5); display: block;">
-                    <span id="dateDisplay" style="color: #ffd700; font-size: 1.1em; font-weight: bold;">--/--/----</span>
-                </div>
-                <div id="divFechaHoy" style="position: absolute; background: #6b8e23; padding: 3px 15px; border-radius: 9px; border: 1px solid #777; box-shadow: 0 0px 0px rgba(0,0,0,0.6); display: none;">
-                    <span id="dateNextDisplay" style="color: #ffd700; font-size: 1.1em; font-weight: bold;">--/--/----</span>
-                </div>
-            </div>
-        </div>
-        <div style="color: #ffd700; display: flex; align-items: center; gap: 6px; font-size: 0.75em; font-weight: bold; text-transform: uppercase;">
-          <span id="iconoActualizar" style="font-size: 1.2em; display: inline-block;">♻️</span>
-          <span id="timeDisplay"></span>
-        </div>
+    <div style="position: relative; height: 35px; width: 100%; display: flex; justify-content: center; margin-bottom: 10px;">
+    
+    <div id="divFechaNext" style="position: absolute; background: #1a1a1a; padding: 3.5px 15px; border-radius: 8px; border: 1px solid #333; box-shadow: 0 0px 0px rgba(0,0,0,0.5); display: block;">
+        <span id="dateDisplay" style="color: #ffd700; font-size: 1.1em; font-weight: bold;">--/--/----</span>
     </div>
 
-    <div id="timeP2PDisplay" style="color: #ffd700; font-size: 0.75em; font-weight: bold; text-align: center">
-        ÚLTIMA ACTUALIZACIÓN P2P: Cargando...
+    <div id="divFechaHoy" style="position: absolute; background: #6b8e23; padding: 3px 15px; border-radius: 9px; border: 1px solid #777; box-shadow: 0 0px 0px rgba(0,0,0,0.6); display: none;">
+        <span id="dateNextDisplay" style="color: #ffd700; font-size: 1.1em; font-weight: bold;">--/--/----</span>
     </div>
 
-    <div id="switchArea">
+        <div class="back" style="position: absolute; width: 100%; height: 100%; backface-visibility: hidden; display: flex; align-items: center; justify-content: center; background: transparent; border: none; transform: rotateX(180deg);">
+            <span id="dateNextDisplay" style="color: #ffd700; font-size: 1.1em; font-weight: bold;">--/--/----</span>
+
+        </div>
+    </div>
+</div>
+  <div style="color: #ffd700; display: flex; align-items: center; gap: 6px; font-size: 0.75em; font-weight: bold; text-transform: uppercase;">
+        <span id="iconoActualizar" style="font-size: 1.2em; display: inline-block;">♻️</span>
+        <span id="timeDisplay"></span>
+    </div>
+</div>
+      <div id="timeP2PDisplay" style="color: #ffd700; font-size: 0.75em; font-weight: bold; text-align: center">
+    ÚLTIMA ACTUALIZACIÓN P2P: Cargando...
+</div>
+      
+
+      <div id="switchArea">
+
         <span>mañana</span>
-        <label class="switch"><input type="checkbox" id="nextDaySwitch" onchange="toggleFlip()" checked><span class="slider"></span></label>
-        <span>hoy</span>
-    </div>
-</div>
 
-</div>
+        <label class="switch"><input type="checkbox" id="nextDaySwitch" onchange="toggleFlip()" checked><span class="slider"></span></label>
+
+        <span>hoy</span>
+
+      </div>
+
+    </div>
+
+  </div>
+
 
 
   <div class="container">
+
+    
 
     <div id="comercio" class="calc-section active">
 
         <div class="field"><label>Precio Producto (USD)</label><input type="number" id="priceUSD" placeholder="0.00" inputmode="decimal"></div>
 
-        <div class="field"><label id="labelVES">Bolívares + IGTF</label><input type="text" id="totalVES" readonly></div>
+        <div class="field"><label id="labelVES">Bolívares</label><input type="text" id="totalVES" readonly></div>
 
         <div class="field"><label>Total USDT</label><input type="text" id="totalUSDT" readonly style="background-color:#1e3a1e;"></div>
 
@@ -415,19 +411,40 @@
 
         <div class="field"><label>Pagar al cliente (Bs)</label><input type="text" id="resBuy" readonly></div>
 
-        <div class="field"><label>Venta (Tasa: <span id="labSell">--</span>)</label><input type="number" id="uSell" placeholder="Monto USDT" inputmode="decimal"></div>
+      <div class="field">
+    <label>Venta (Tasa: <span id="labSell">--</span>)</label>
+    <input type="number" id="uSell" placeholder="Monto USDT" inputmode="decimal" oninput="actualizar()">
+</div>
 
-        <div class="field"><label>Recibir del cliente (Bs)</label><input type="text" id="resSell" readonly></div>
+<div class="field">
+    <label>Recibir del cliente (Bs)</label>
+    <input type="text" id="resSell" readonly>
+</div>
 
     </div>
 
+<div id="exchange2" class="calc-section">
+    
+    <div class="field">
+        <label>Tu Envias S.L</label>
+        <input type="text" id="resBuy2" readonly>
+    </div>
 
+<div class="field">
+        <label>Tu Recibes S.I (Tasa: <span id="labBuy2">--</span>)</label>
+        <input type="number" id="uBuy2" placeholder="Monto USDT" inputmode="decimal" oninput="actualizar()">
+</div>
+
+
+  
+</div>
+
+    
 
     <div id="cierre" class="calc-section">
 
         <div class="field"><label>Ventas Totales (USDT)</label><input type="number" id="vCierre" placeholder="0.00" inputmode="decimal"></div>
 
-        <div class="field"><label>Bolívares Netos (Menos 3%)</label><input type="text" id="rCierre" readonly style="background-color:#1e3a1e;"></div>
 
     </div>
 
@@ -449,40 +466,10 @@
 
     </div>
 
-         </div>
- 
-<div id="chat" class="calc-section" style="margin-bottom: 80px;">
-    <div id="chat-box" style="min-height: 300px; padding: 10px;">
-        <p style="color: #888; text-align: center;">Conectando a DropisChat...</p>
-    </div>
-</div>
+  </div>
 
-<div style="display: flex; gap: 8px; background: #1a1a1a; padding: 10px; border-radius: 15px; position: sticky; bottom: 10px; margin: 0 10px; z-index: 999;">
-    <input type="text" id="target-id" placeholder="ID" style="width: 60px; background: #000; color: #ffd700; border: 1px solid #333; border-radius: 8px; text-align: center;">
-    
-    <input type="text" id="msg-text" placeholder="Escribe un mensaje..." style="flex-grow: 1; background: #000; color: white; border: 1px solid #333; border-radius: 8px; padding: 10px;">
-    
-     <button onclick="enviarMensajeSatelital()" style="background: #ffd700; color: black; border: none; border-radius: 5px; padding: 0 15px;">
-            <i class="fas fa-paper-plane"></i>
-        </button>
-    </div>
-</div>
-
-   <div id="shopping" class="calc-section">
-
-        <div id="lista-productos" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding: 10px;">
-
-            <p style="color: #888; text-align: center; grid-column: 1 / -1;">Cargando catálogo de Dropi...</p>
-
-        </div>
-
-    </div>
-
-</div>
- 
-
-
-
+  
+          
 
 <nav class="nav-tabs-bottom">
 
@@ -514,7 +501,6 @@
 
 
 
-
 <div class="footer-bar">
 
     <div onclick="alert('Tasas Plataformas próximamente')">
@@ -530,13 +516,13 @@
 
     <div>Real Market Elite © 2025</div>
 
-    <div style="font-size: 0.8em; opacity: 0.8;">Todos los precios incluyen IGTF</div>
+    
 
 </div>
 
     <div class="icon-btn" onclick="abrirTasas()"><i class="fas fa-building-columns"></i></div>
 
-</div>
+
 
 <script>
   
@@ -566,12 +552,9 @@ async function selectTasa(tipo) {
     document.getElementById('cardBCV').classList.toggle('selected', tipo === 'bcv');
     document.getElementById('cardEuro').classList.toggle('selected', tipo === 'euro');
     
-    actualizar();
-    // El await es el que hace la magia de esperar a Shopify
-    contenedor.innerHTML = "<p style='color:white; text-align:center;'>Cargando vitrina...</p>";
-    await cargarShopping(); 
+    // <--- Esto es lo que hacía que recalculara automáticamente al tocar la tarjeta
+    actualizar(); 
 }
-
 
 async function cargarTasas() {
     const icono = document.getElementById("iconoActualizar");
@@ -584,59 +567,72 @@ async function cargarTasas() {
     const urlP = "https://raw.githubusercontent.com/alfonsocamacho00089-cloud/BcvEuroapp.py/main/Bcveuro_proxima.json" + antiCache;
     const urlP2P = "https://raw.githubusercontent.com/alfonsocamacho00089-cloud/P2papp.py/main/p2p.json" + antiCache;
 
-    // --- BLOQUE 1: BCV Y EURO ---
+    
+            
+// --- BLOQUE// --- BLOQUE 1: BCV Y EURO (RESPETANDO TU LÓGICA: PROX = HOY / VIGENTE = ATRÁS) ---
     try {
-        const resVigente = await fetch(urlV);
-        const resProxima = await fetch(urlP);
+
+      const resVigente = await fetch(urlV); // _vigente.json (Para ti es ATRÁS / tMan)
+        const resProxima = await fetch(urlP); // _proxima.json (Para ti es HOY / tApi)
+        
         const dataV = await resVigente.json();
         const dataP = await resProxima.json();
+        
 
-        if (dataV && dataV.length > 0 && dataP && dataP.length > 0) {
-            tApi.bcv = parseFloat(dataP[0].precio_dolar) || 0;
-            tApi.euro = parseFloat(dataP[0].precio_euro) || 0;
-            tMan.bcv = parseFloat(dataV[0].precio_dolar) || 0;
-            tMan.euro = parseFloat(dataV[0].precio_euro) || 0;
-
-            const nuevoBCV = tApi.bcv;
-            const anteriorBCV = parseFloat(localStorage.getItem("res_bcv_hoy")) || 0;
-
-            if (nuevoBCV !== anteriorBCV && nuevoBCV > 0) {
-                const ahoraStr = new Date().toLocaleTimeString('es-VE', {
-                    hour: '2-digit', minute: '2-digit', hour12: true
-                });
-                localStorage.setItem("horaBCV", ahoraStr);
-                if(document.getElementById("timeDisplay")) {
-                    document.getElementById("timeDisplay").textContent = `ÚLTIMA ACTUALIZACIÓN BCV: ${ahoraStr}`;
-                }
-            }
+        if (dataV && dataV.length  > 0 && dataP && dataP.length > 0) {
+            // tApi = La tasa fresca que viene de PROXIMA (La de hoy)
+            tApi.bcv = parseFloat(parseFloat(dataP[0].precio_dolar).toFixed(2)) || 0;
+            tApi.euro = parseFloat(parseFloat(dataP[0].precio_euro).toFixed(2)) || 0;
             
-            // Guardar en caché
-            if (tMan.bcv > 0) localStorage.setItem("res_bcv", tMan.bcv);
-            if (tMan.euro > 0) localStorage.setItem("res_euro", tMan.euro);
-            if (tApi.bcv > 0) localStorage.setItem("res_bcv_hoy", tApi.bcv);
-            if (tApi.euro > 0) localStorage.setItem("res_euro_hoy", tApi.euro);
-        } else {
-            throw new Error("Datos incompletos");
+            // tMan = La tasa de atrás que viene de VIGENTE (La de mañana)
+            tMan.bcv = parseFloat(parseFloat(dataV[0].precio_dolar).toFixed(2)) || 0;
+            tMan.euro = parseFloat(parseFloat(dataV[0].precio_euro).toFixed(2)) || 0;
+
+            const ahoraStr = new Date().toLocaleTimeString('es-VE', {
+                hour: '2-digit', minute: '2-digit', hour12: true
+            });
+
+            // Guardar en caché limpio sin cruzar cables
+            if (tMan.bcv > 0) localStorage.setItem("res_bcv_hoy", tMan.bcv.toFixed(2));
+            if (tMan.euro > 0) localStorage.setItem("res_euro_hoy", tMan.euro.toFixed(2));
+            if (tApi.bcv > 0) localStorage.setItem("res_bcv", tApi.bcv.toFixed(2));
+            if (tApi.euro > 0) localStorage.setItem("res_euro", tApi.euro.toFixed(2));
+
+            
+
+// Muestra siempre la hora del último cambio guardado
+const horaMostrar = localStorage.getItem("horaBCV") || ahoraStr;
+if (document.getElementById("timeDisplay")) {
+    document.getElementById("timeDisplay").textContent = `ÚLTIMA ACTUALIZACIÓN BCV: ${horaMostrar}`;
+
+
+            }
         }
+
     } catch (error) {
         console.warn("Fallo BCV, usando LocalStorage");
-        tMan.bcv = parseFloat(localStorage.getItem("res_bcv")) || 0;
-        tMan.euro = parseFloat(localStorage.getItem("res_euro")) || 0;
-        tApi.bcv = parseFloat(localStorage.getItem("res_bcv_hoy")) || 0;
-        tApi.euro = parseFloat(localStorage.getItem("res_euro_hoy")) || 0;
+        // Recuperación sin pisar variables cuando falla la red
+        tMan.bcv = parseFloat(parseFloat(localStorage.getItem("res_bcv_hoy") || 0).toFixed(2));
+        tMan.euro = parseFloat(parseFloat(localStorage.getItem("res_euro_hoy") || 0).toFixed(2));
+        tApi.bcv = parseFloat(parseFloat(localStorage.getItem("res_bcv") || 0).toFixed(2));
+        tApi.euro = parseFloat(parseFloat(localStorage.getItem("res_euro") || 0).toFixed(2));
     }
-
-    // --- BLOQUE 2: P2P (BINANCE/DOLARAPI) ---
+  
+// --- BLOQUE 2: P2P (BINANCE) ---
     try {
-        const resB = await fetch(urlP2P);const dataB = await resB.json();
-// 1. Cambiamos dataB.binance por dataB.binance_p2p
-if (dataB && dataB.binance_p2p) {
-    // 2. Usamos Math.max para obtener el precio más alto de ventas_sell
-    const nuevoP2P = Math.max(...Object.values(dataB.binance_p2p.ventas_sell)) || 0;
-        
-            const anteriorP2P = parseFloat(localStorage.getItem("res_p2p_hoy")) || 0;
+        const resB = await fetch(urlP2P);
+        const dataB = await resB.json();
 
-            if (nuevoP2P !== anteriorP2P) {
+        if (dataB && dataB.binance_p2p) {
+            const p2pBuyRate = Math.max(...Object.values(dataB.binance_p2p.compras_buy)) || 0;
+            const p2pSellRate = Math.max(...Object.values(dataB.binance_p2p.ventas_sell)) || 0;
+
+            tApi.p2p = p2pBuyRate;
+            tApi.p2pBuy = p2pBuyRate;
+            tApi.p2pSell = p2pSellRate;
+
+            const anteriorP2P = parseFloat(localStorage.getItem("res_p2p_hoy")) || 0;
+            if (p2pBuyRate !== anteriorP2P && p2pBuyRate > 0) {
                 const horaP2P = new Date().toLocaleTimeString('es-VE', {
                     hour: '2-digit', minute: '2-digit', hour12: true
                 });
@@ -645,25 +641,21 @@ if (dataB && dataB.binance_p2p) {
                     document.getElementById("timeP2PDisplay").textContent = "ACTUALIZADO P2P: " + horaP2P;
                 }
             }
-            tApi.p2p = nuevoP2P;
-            localStorage.setItem("res_p2p_hoy", nuevoP2P);
+
+            localStorage.setItem("res_p2p_hoy", p2pBuyRate);
+            localStorage.setItem("res_p2p_buy", p2pBuyRate);
+            localStorage.setItem("res_p2p_sell", p2pSellRate);
         } else {
             throw new Error("GitHub P2P Vacío");
         }
     } catch (error) {
-        console.warn("Fallo GitHub P2P, intentando DolarApi...");
-        try {
-            const resRespaldo = await fetch("https://ve.dolarapi.com/v1/dolares/paralelo");
-            const dataR = await resRespaldo.json();
-            tApi.p2p = parseFloat(dataR.promedio) || 0;
-            localStorage.setItem("res_p2p_hoy", tApi.p2p);
-        } catch (errorApi) {
-            console.error("Fallo total P2P");
-            tApi.p2p = parseFloat(localStorage.getItem("res_p2p_hoy")) || 0;
-        }
-    }
+        console.warn("Fallo GitHub P2P, usando respaldo...");
+        tApi.p2p = parseFloat(parseFloat(localStorage.getItem("res_p2p_hoy") || 0).toFixed(2));
+        tApi.p2pBuy = parseFloat(parseFloat(localStorage.getItem("res_p2p_buy") || 0).toFixed(2));
+        tApi.p2pSell = parseFloat(parseFloat(localStorage.getItem("res_p2p_sell") || 0).toFixed(2));
+          }
 
-    // --- FINALIZACIÓN Y UI ---
+// --- FINALIZACIÓN Y UI ---
     try {
         if(document.getElementById('bcvRate')) document.getElementById('bcvRate').value = tApi.bcv.toFixed(2);
         if(document.getElementById('p2pRate')) document.getElementById('p2pRate').value = tApi.p2p.toFixed(2);
@@ -671,8 +663,7 @@ if (dataB && dataB.binance_p2p) {
         if(document.getElementById('bcvRateBack')) document.getElementById('bcvRateBack').value = tMan.bcv.toFixed(2);
         if(document.getElementById('euroRateBack')) document.getElementById('euroRateBack').value = tMan.euro.toFixed(2);
 
-        actualizar();
-        if (typeof cargarShopping === 'function') cargarShopping();
+        
     } catch (e) {
         console.error("Error UI:", e);
     } finally {
@@ -680,7 +671,39 @@ if (dataB && dataB.binance_p2p) {
             if (icono) icono.classList.remove("girando");
         }, 600);
     }
-} // <--- CIERRE CORRECTO DE CARGARTASAS<--- Aquí cierra la función cargarTasas
+} 
+  async function cargarTasasBCV() {
+    // El antiCache evita que el navegador guarde la versión vieja en memoria
+    const antiCache = '?t=' + new Date().getTime();
+    
+    // Apuntamos a tus archivos con los nombres nuevos
+    const urlVigenteN = "https://raw.githubusercontent.com/alfonsocamacho00089-cloud/BcvEuroapp.py/main/Bcveuro_VigenteN.json" + antiCache;
+    const urlProximaN = "https://raw.githubusercontent.com/alfonsocamacho00089-cloud/BcvEuroapp.py/main/Bcveuro_ProximaN.json" + antiCache;
+
+    try {
+        // 1. Llamamos a la tasa vigente
+        const resV = await fetch(urlVigenteN);
+        const dataV = await resV.json();
+        const tasaVigente = dataV[0]; // Extrae el objeto dentro del array []
+
+        // 2. Llamamos a la tasa próxima
+        const resP = await fetch(urlProximaN);
+        const dataP = await resP.json();
+        const tasaProxima = dataP[0]; // Extrae el objeto dentro del array []
+
+        // 3. Las usas en tu app (por ejemplo, para pintar en pantalla o en tu switch)
+        console.log("Vigente:", tasaVigente.precio_dolar);
+        console.log("Próxima:", tasaProxima.precio_dolar);
+
+        // Aquí aplicas tus valores a los elementos HTML de tu PWA:
+        // document.getElementById('labelDolar').innerText = tasaVigente.precio_dolar;
+
+    } catch (error) {
+        console.error("Error al cargar las tasas:", error);
+    }
+  }
+  
+  // <--- CIERRE CORRECTO DE CARGARTASAS<--- Aquí cierra la función cargarTasas
 function actualizar() {
     const d = new Date();
     const dia = d.getDay(); 
@@ -707,32 +730,63 @@ const p2pReal = tApi.p2p || parseFloat(localStorage.getItem("res_p2p_hoy"));
         tBase = isMañana ? tMan.bcv : tApi.bcv;
         // Si las variables están en 0 (API caída), usa el respaldo guardado
         if (tBase === 0) {
-            tBase = isMañana ? parseFloat(localStorage.getItem("res_bcv_prox")) : parseFloat(localStorage.getItem("res_bcv_hoy"));
+            tBase = isMañana ? parseFloat(localStorage.getItem("res_bcv_hoy")) : parseFloat(localStorage.getItem("res_bcv_hoy"));
         }
     } else {
         tBase = isMañana ? tMan.euro : tApi.euro;
         if (tBase === 0) {
-            tBase = isMañana ? parseFloat(localStorage.getItem("res_euro_prox")) : parseFloat(localStorage.getItem("res_euro_hoy"));
+            tBase = isMañana ? parseFloat(localStorage.getItem("res_euro_hoy")) : parseFloat(localStorage.getItem("res_euro_hoy"));
         }
     }
+
+
+    
 if (!tBase || isNaN(tBase)) tBase = 0;
-    // --- MOTOR DE CÁLCULO (IGTF 3%) ---
+// --- MOTOR DE CÁLCULO LIMPIO (SIN IGTF) ---
     const procesar = (monto) => {
-        const baseBS = monto * tBase;
-        const igtfBS = baseBS * 0.03;
-        const totalBS = baseBS + igtfBS;
+        const totalBS = monto * tBase;
+        const baseBS = totalBS; // Se mantiene como referencia para las etiquetas de la interfaz
         const totalUSDT = (p2pReal > 0) ? (totalBS / p2pReal) : 0;
-        return { baseBS, igtfBS, totalBS, totalUSDT };
+        
+        return { baseBS, totalBS, totalUSDT };
     };
+       
 // --- ACTUALIZACIÓN DE PANTALLAS (COMERCIO Y CLIENTE) ---
     const resCom = procesar(pUSD);
-    document.getElementById("labelVES").textContent = `${nombreTasa} ${format(resCom.baseBS)} + IGTF ${format(resCom.igtfBS)}`;
+    document.getElementById("labelVES").textContent = `${nombreTasa} ${format(resCom.baseBS)}`;
     document.getElementById("totalVES").value = format(resCom.totalBS) + " Bs";
     document.getElementById("totalUSDT").value = resCom.totalUSDT.toFixed(2);
     const resCli = procesar(pCli);
-    document.getElementById("labelCli").textContent = `${nombreTasa} ${format(resCli.baseBS)} + IGTF ${format(resCli.igtfBS)}`;
+    document.getElementById("labelCli").textContent = `${nombreTasa} ${format(resCli.baseBS)}`;
     document.getElementById("bsCliBCV").value = format(resCli.totalBS) + " Bs";
     document.getElementById("usdtCliFinal").value = resCli.totalUSDT.toFixed(2);
+// ---p2p YsaPay (Pestaña 2) ---
+    const p2pRateEl = document.getElementById("p2pRate");
+    if (p2pRateEl) p2pRateEl.value = p2pReal.toFixed(2);
+
+    // Calculas la tasa efectiva unitaria con tu margen y la inyectas
+    const tasaEfectiva = p2pReal * 1.2; 
+    const labBuy2El = document.getElementById("labBuy2");
+    if (labBuy2El) {
+        labBuy2El.textContent = tasaEfectiva.toFixed(2);
+    }
+  
+    const inputUBuy2 = document.getElementById("uBuy2");
+    if (inputUBuy2) {
+        const uBuyVal2 = parseFloat(inputUBuy2.value) || 0;
+        
+        // Calculas el total bruto y le restas el equivalente a los 7.5 USDT en bolívares (7.5 * p2pReal)
+        const totalBruto2 = uBuyVal2 > 0 ? (uBuyVal2 * p2pReal * 1.2) : 0;
+        const descuentoBs2 = 7.5 * p2pReal;
+        const totalBs2 = totalBruto2 > 0 ? Math.max(0, totalBruto2 - descuentoBs2) : 0;
+        
+        const resBuy2El = document.getElementById("resBuy2");
+        if (resBuy2El) {
+            resBuy2El.value = format(totalBs2) + " Bs";
+        }
+    }
+    
+  
     // --- ACTUALIZACIÓN DE INTERFAZ EXCHANGE ---
     document.getElementById("p2pRate").value = p2pReal.toFixed(2);
     document.getElementById("labBuy").textContent = p2pReal.toFixed(2);
@@ -740,8 +794,23 @@ if (!tBase || isNaN(tBase)) tBase = 0;
     
     const uBuyVal = parseFloat(document.getElementById("uBuy").value) || 0;
     document.getElementById("resBuy").value = format(uBuyVal * p2pReal) + " Bs";
-    const uSellVal = parseFloat(document.getElementById("uSell").value) || 0;
-   document.getElementById("resSell").value = format(uSellVal * p2pReal) + " Bs";
+  
+    // 1. Capturas la tasa de venta de tu objeto tApi (o del localStorage si falló)
+const p2pSell = tApi.p2pSell || parseFloat(localStorage.getItem("res_p2p_sell")) || 0;
+
+// 2. Actualizas la etiqueta solo en la sección P2P (el labSell que tienes en esa pestaña)
+const labSellEl = document.getElementById("labSell");
+if (labSellEl) labSellEl.textContent = p2pSell.toFixed(2);
+
+// 3. Ejecutas la multiplicación exclusiva para el campo de venta dentro de la pestaña P2P
+const uSellVal = parseFloat(document.getElementById("uSell").value) || 0;
+const resSellEl = document.getElementById("resSell");
+if (resSellEl) {
+    resSellEl.value = format(uSellVal * p2pSell) + " Bs";
+}
+
+  
+
     // Actualiza los valores de "atrás" de las tarjetas (Flip)
    if (document.getElementById("bcvRateBack")){
     document.getElementById("bcvRateBack").value = tMan.bcv.toFixed(2);
@@ -795,12 +864,12 @@ function updateDate() {
     }
 
     // Formateo de strings
-    const fProxima = `${fechaDestino.getDate().toString().padStart(2, '0')}/${(fechaDestino.getMonth() + 1).toString().padStart(2, '0')}/${fechaDestino.getFullYear()}`;
-    const fHoy = `${d.getDate().toString().padStart(2, '0')}/${(d.getMonth() + 1).toString().padStart(2, '0')}/${d.getFullYear()}`;
+    const fHoy = `${fechaDestino.getDate().toString().padStart(2, '0')}/${(fechaDestino.getMonth() + 1).toString().padStart(2, '0')}/${fechaDestino.getFullYear()}`;
+    const fProxima = `${d.getDate().toString().padStart(2, '0')}/${(d.getMonth() + 1).toString().padStart(2, '0')}/${d.getFullYear()}`;
     
     // --- ASIGNACIÓN A PANTALLA CON PROTECCIÓN ---
     const elHoy = document.getElementById("dateDisplay");
-    const elProx = document.getElementById("dateNextDisplay"); // <--- REVISA ESTE ID EN TU HTML
+    const elProx = document.getElementById("dateNextDisplay"); 
 
     if (elHoy) elHoy.textContent = fHoy;
     if (elProx) elProx.textContent = fProxima;
@@ -814,6 +883,8 @@ function updateDate() {
     }
 }
 
+
+  
 function abrirBinance() {
     // Intenta abrir la app
     window.location.href = "bnc://app.binance.com/payment/main";
@@ -828,84 +899,6 @@ function abrirBinance() {
 }
 // 1. Nueva función para buscar datos reales
 
-            async function cargarShopping() {
-    const contenedor = document.getElementById('lista-productos');
-    if (!contenedor) return;
-
-    // Usamos tus variables de tasa (BCV, P2P, etc.)
-    const tasaActual = (tasaSeleccionada === 'bcv') ? tApi.bcv : (tasaSeleccionada === 'euro' ? tApi.euro : tApi.p2p);
-    const p2pReal = tasaActual || 40.00;
-
-    // Mensaje de carga con tu estilo
-    contenedor.innerHTML = "<p style='color: #888; text-align: center; grid-column: 1 / -1;'>Conectando con la bodega...</p>";
-
-    try {
-    try {
-        const API_KEY = "test_sk_xkBnAua0mgljpF5X4KH4SmcZH8s01q5VfKGz2WBaWppBmVrOIN66";
-        const url = 'https://cors-anywhere.herokuapp.com/https://app.dropanas.com/v1/products';
-        
-        console.log("Intentando conectar a:", url);
-
-        const response = await fetch(url, {
-            method: 'GET',
-            headers: {
-                'Authorization': `Bearer ${API_KEY}`,
-                'X-Requested-With': 'XMLHttpRequest'
-            }
-        });
-
-        console.log("Estatus de la respuesta:", response.status);
-
-        if (!response.ok) {
-            const errorTexto = await response.text();
-            console.error("Error detallado de la API:", errorTexto);
-            throw new Error(`Error HTTP: ${response.status}`);
-        }
-
-        const productos = await response.json();
-        console.log("Productos recibidos:", productos);
-
-        if (productos.length === 0) {
-            contenedor.innerHTML = "<p style='color: orange; text-align: center; grid-column: 1/-1;'>La bodega está vacía (0 productos)</p>";
-            return;
-        }
-
-        contenedor.innerHTML = ""; 
-        // ... aquí sigue tu productos.forEach ...
-        
-    } catch (error) {
-        console.error("CAUSA REAL DEL ERROR:", error);
-        contenedor.innerHTML = `<p style="color: #ff4444; text-align: center; grid-column: 1 / -1;">Error: ${error.message}</p>`;
- }
-
-        if (!response.ok) throw new Error("Error de conexión");
-
-        const productos = await response.json();
-        contenedor.innerHTML = ""; 
-
-        productos.forEach(prod => {
-            const precioUSD = parseFloat(prod.price || 0);
-            const precioBS = (precioUSD * p2pReal).toLocaleString("es-VE", {minimumFractionDigits: 2});
-            const imagen = prod.main_image || "https://via.placeholder.com/300";
-
-            // Aquí usamos el grid de 2 columnas que ya tienes en tu HTML
-            contenedor.innerHTML += `
-                <div style="background: #222; border-radius: 18px; padding: 10px; text-align: center; border: 1px solid #333;">
-                    <img src="${imagen}" style="width: 100%; border-radius: 12px; margin-bottom: 8px; height: 120px; object-fit: cover;">
-                    <h4 style="font-size: 0.7em; color: #eee; margin-bottom: 5px; height: 30px; overflow: hidden;">${prod.name}</h4>
-                    <p style="color: #ffd700; font-weight: bold; font-size: 0.85em;">Bs. ${precioBS}</p>
-                    <p style="color: #888; font-size: 0.65em; margin-bottom: 8px;">($${precioUSD.toFixed(2)})</p>
-                    <button onclick="registrarVenta('${prod.id}', '${prod.name}', ${precioUSD})" 
-                            style="width: 100%; background: #6b8e23; color: white; border: none; padding: 6px; border-radius: 8px; font-size: 0.65em; font-weight: bold;">
-                        VENDER
-                    </button>
-                </div>`;
-        });
-    } catch (error) {
-        contenedor.innerHTML = `<p style="color: #ff4444; text-align: center; grid-column: 1 / -1;">Error al cargar productos</p>`;
-    }
-            }
- 
 function generarNota() {
     document.getElementById("nFinal").textContent = (document.getElementById("nInput").value || "0.00") + " USDT";
     document.getElementById("modalTicket").style.display = "flex";
@@ -945,17 +938,7 @@ if (euroAtras) tMan.euro = parseFloat(euroAtras);
 if (tMan.bcv > 0) document.getElementById('bcvRateBack').value = tMan.bcv.toFixed(2);
 if (tMan.euro > 0) document.getElementById('euroRateBack').value = tMan.euro.toFixed(2);
 // ... debajo de donde cargas las tasas del cache ...
-    const hBcvGuardada = localStorage.getItem("horaBCV");
-    const hP2pGuardada = localStorage.getItem("horaP2P");
-// 845:
-if (hBcvGuardada) {
-    document.getElementById("timeDisplay").textContent = `ÚLTIMA ACTUALIZACIÓN: ${hBcvGuardada}`;
-}
-
-// 846:
-if (hP2pGuardada && document.getElementById("timeP2PDisplay")) {
-    document.getElementById("timeP2PDisplay").textContent = `P2P: ${hP2pGuardada}`;
-}
+    
     
 
     // 4. Activar cálculos y visibilidad de inmediato
@@ -964,206 +947,11 @@ if (hP2pGuardada && document.getElementById("timeP2PDisplay")) {
     // 5. Solo ahora buscamos los datos nuevos en GitHub (en segundo plano)
     cargarTasas();
 })();
-
 document.querySelectorAll('input').forEach(i => i.addEventListener('input', actualizar));
 
- </script>
-<script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-messaging-compat.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-<script src="protobuf.min.js"></script>
 
-<script>
-const firebaseConfig = {
-    apiKey: "AIzaSyCaUyhX2iBMl4A5xeKeu_4SeE6HClp4V1s",
-    authDomain: "real-market-elite-2025.firebaseapp.com",
-    projectId: "real-market-elite-2025",
-    databaseURL: "https://real-market-elite-2025-default-rtdb.firebaseio.com",
-    storageBucket: "real-market-elite-2025.appspot.com",
-    messagingSenderId: "226489002778",
-    appId: "1:226489002778:web:6722d21a9e78b33b5b1aa3"
-};
 
-// Inicializar Firebase
-firebase.initializeApp(firebaseConfig);
-const db = firebase.database();
-const messaging = firebase.messaging();
-const miVapidKey = 'BIrsA9YbBXfIuo4PTMrKRtuktRsK2RbK0XevupuofGGOUDy9w5VZ9yaXbZXsenXppmFsR62-2B7jBOG0Z8RdxvU';
-
-// --- SISTEMA DE NOTIFICACIONES (RECUPERADO) ---
-if ('Notification' in window) {
-    Notification.requestPermission().then((permission) => {
-        if (permission === 'granted') {
-            console.log('✅ Notificaciones activadas');
-            
-            // Esperamos a que el SW esté listo para pedir el Token
-            navigator.serviceWorker.ready.then((registration) => {
-                messaging.getToken({ 
-                    vapidKey: miVapidKey,
-                    serviceWorkerRegistration: registration 
-                })
-                .then((token) => {
-                    if (token) {
-                        console.log("🎫 TU TOKEN DROPIS:", token);
-                        localStorage.setItem('fcm_token', token);
-                    }
-                })
-                .catch(err => console.error("❌ Error Token:", err));
-            });
-        }
-    });
-}
-
-// Manejar mensaje en primer plano (Foreground)
-messaging.onMessage((payload) => {
-    console.log('☁️ Push recibido:', payload);
-    alert("Notificación: " + (payload.notification?.body || "Nuevo mensaje"));
-});
-
-// --- ANTENA Y SERVICE WORKER ---
-if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('./firebase-messaging-sw.js?v=6')
-        .then(reg => console.log("🚀 Antena y SW Operativos:", reg.scope))
-        .catch(err => console.error("❌ Error registrando SW:", err));
-
-    // Escuchar mensajes que el SW envía a la pantalla
-    navigator.serviceWorker.addEventListener('message', event => {
-        if (event.data.type === 'NUEVO_MENSAJE_SATELITAL' || event.data.type === 'RESPUESTA_NUBE') {
-            renderizarMensajeEnPantalla(event.data.texto, event.data.nombre || '🛰️ Satélite');
-        }
-    });
-}
-
-function renderizarMensajeEnPantalla(texto, remitente) {
-    const box = document.getElementById('chat-box');
-    if (box) {
-        const div = document.createElement('div');
-        div.className = 'msg-burbuja msg-izquierda';
-        div.style.cssText = "background:#005c4b; color:white; align-self:flex-start; padding:12px; border-radius:15px; margin:8px; border-left: 5px solid #25d366;";
-        div.innerHTML = `<small style="color:#25d366;">${remitente}</small><br>${texto}`;
-        box.appendChild(div);
-        box.scrollTop = box.scrollHeight;
-    }
-}
 </script>
 
-<script src="js/registro.js"></script>
-<script src="js/qr-generator.js"></script>
-<script>
-    async function manejarBotonIdentidad() {
-    const idGuardado = localStorage.getItem('mi_dropis_id');
-
-    if (idGuardado) {
-        // --- AQUÍ ESTÁ EL BLOQUEO ---
-        // Ya no pide nada a Firebase, solo muestra lo que ya tienes en el TLF
-        console.log("Acceso directo: ID ya existente.");
-        mostrarMiQR(idGuardado); 
-        alert("Esta es tu identidad guardada.");
-    } else {
-        // Si el TLF está vacío, entonces sí abre el registro
-        document.getElementById('modal-registro').style.display = 'flex';
-    }
-    }
-
-    function cerrarModalQR() {
-        const modal = document.getElementById('modal-qr');
-        if (modal) modal.style.display = 'none';
-        
-        // Sugerencia: Limpia el QR al cerrar para que no se vea el anterior al abrir
-        const contenedor = document.getElementById('contenedor-qr');
-        if (contenedor) contenedor.innerHTML = '<p style="color: #666;">Generando tu código...</p>';
-    }
-
-<div id="modal-qr" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 9999; justify-content: center; align-items: center; flex-direction: column;">
-    <div style="background: #fff; padding: 20px; border-radius: 20px; width: 85%; max-width: 350px; text-align: center; position: relative;">
-        
-        <button onclick="cerrarModalQR()" style="position: absolute; top: 10px; right: 10px; background: none; border: none; font-size: 20px; cursor: pointer;">&times;</button>
-        
-        <h3 style="color: #333; margin-bottom: 15px;">Mi Identidad Dropis</h3>
-        
-        <div id="contenedor-qr">
-            <p style="color: #666;">Generando tu código...</p>
-        </div>
-
-        <button onclick="cerrarModalQR()" style="margin-top: 20px; width: 100%; padding: 10px; background: #6b8e23; color: white; border: none; border-radius: 10px; font-weight: bold;">CERRAR</button>
-    </div>
-</div>
-
-    // 1. Permisos de Notificación
-if ('Notification' in window) {
-    if (Notification.permission !== 'granted') {
-        Notification.requestPermission();
-    }
-}
-
-// 2. Escuchar al Service Worker (El "Oído")
-navigator.serviceWorker.addEventListener('message', event => {
-    if (event.data.type === 'NUEVO_MENSAJE_SATELITAL') {
-        const box = document.getElementById('chat-box');
-        if (box) {
-            const div = document.createElement('div');
-            div.className = 'msg-burbuja msg-izquierda';
-            div.style.cssText = "background:#005c4b; color:white; align-self:flex-start; padding:12px; border-radius:15px; margin:8px; border-left: 5px solid #25d366;";
-            div.innerHTML = `<small style="color:#25d366;">🛰️ MENSAJE REAL</small><br>${event.data.texto}`;
-            box.appendChild(div);
-            box.scrollTop = box.scrollHeight;
-        }
-    }
-});
-
-// 3. El Registro Único (La "Antena")
-// ==========================================
-// REGISTRO ÚNICO DE ANTENA (SERVICE WORKER)
-// ==========================================
-if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-        // Registramos SOLO el archivo de Firebase con v7 para limpiar caché
-        navigator.serviceWorker.register('./firebase-messaging-sw.js?v=7', { scope: '/' })
-            .then(reg => {
-                console.log("🚀 DropisApp: Antena V7 Operativa en", reg.scope);
-            })
-            .catch(err => console.error("❌ Error registrando Antena:", err));
-    });
-
-    // Escuchador para pintar mensajes en el chat sin recargar
-    navigator.serviceWorker.addEventListener('message', event => {
-        if (event.data.type === 'NUEVO_MENSAJE_SATELITAL' || event.data.type === 'RESPUESTA_NUBE') {
-            renderizarMensajeEnPantalla(event.data.texto, event.data.nombre || '🛰️ Satélite');
-        }
-    });
-}
- // ESCUCHADOR DE PUSH (Desde la Nube)
-self.addEventListener('push', function(event) {
-    const data = event.data ? event.data.json() : {};
-    
-    // Aquí es donde la nube te da el nombre y el texto
-    const nombreEnNube = data.nombre || "Usuario Nube";
-    const textoEnNube = data.mensaje || "Hola desde el más allá";
-
-    // USAMOS TU FUNCIÓN (La reversa)
-    // En lugar de enviar texto solo, enviamos un objeto con el nombre
-    self.clients.matchAll().then(clients => {
-        clients.forEach(client => {
-            client.postMessage({
-                type: 'RESPUESTA_NUBE',
-                nombre: nombreEnNube,
-                texto: textoEnNube
-            });
-        });
-    });
-});
-
-    // Esto asegura que el botón encuentre la función aunque esté en otro archivo
-    function enviarMensajeSatelital() {
-        if (typeof window.enviarMensajeUI === 'function') {
-            window.enviarMensajeUI();
-        } else {
-            console.error("La función aún no carga en app.js");
-        }
-    }
- 
-
-    </script>
 </body>
 </html>
