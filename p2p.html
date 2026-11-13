@@ -593,10 +593,10 @@ async function cargarTasas() {
             });
 
             // Guardar en caché limpio sin cruzar cables
-            if (tMan.bcv > 0) localStorage.setItem("res_bcv_hoy", tMan.bcv.toFixed(2));
-            if (tMan.euro > 0) localStorage.setItem("res_euro_hoy", tMan.euro.toFixed(2));
-            if (tApi.bcv > 0) localStorage.setItem("res_bcv", tApi.bcv.toFixed(2));
-            if (tApi.euro > 0) localStorage.setItem("res_euro", tApi.euro.toFixed(2));
+            if (tMan.bcv > 0) localStorage.setItem("res_bcv_", tMan.bcv.toFixed(2));
+            if (tMan.euro > 0) localStorage.setItem("res_euro_", tMan.euro.toFixed(2));
+            if (tApi.bcv > 0) localStorage.setItem("res_bcv_hoy", tApi.bcv.toFixed(2));
+            if (tApi.euro > 0) localStorage.setItem("res_euro_hoy", tApi.euro.toFixed(2));
 
             
 
@@ -672,36 +672,7 @@ if (document.getElementById("timeDisplay")) {
         }, 600);
     }
 } 
-  async function cargarTasasBCV() {
-    // El antiCache evita que el navegador guarde la versión vieja en memoria
-    const antiCache = '?t=' + new Date().getTime();
-    
-    // Apuntamos a tus archivos con los nombres nuevos
-    const urlVigenteN = "https://raw.githubusercontent.com/alfonsocamacho00089-cloud/BcvEuroapp.py/main/Bcveuro_VigenteN.json" + antiCache;
-    const urlProximaN = "https://raw.githubusercontent.com/alfonsocamacho00089-cloud/BcvEuroapp.py/main/Bcveuro_ProximaN.json" + antiCache;
-
-    try {
-        // 1. Llamamos a la tasa vigente
-        const resV = await fetch(urlVigenteN);
-        const dataV = await resV.json();
-        const tasaVigente = dataV[0]; // Extrae el objeto dentro del array []
-
-        // 2. Llamamos a la tasa próxima
-        const resP = await fetch(urlProximaN);
-        const dataP = await resP.json();
-        const tasaProxima = dataP[0]; // Extrae el objeto dentro del array []
-
-        // 3. Las usas en tu app (por ejemplo, para pintar en pantalla o en tu switch)
-        console.log("Vigente:", tasaVigente.precio_dolar);
-        console.log("Próxima:", tasaProxima.precio_dolar);
-
-        // Aquí aplicas tus valores a los elementos HTML de tu PWA:
-        // document.getElementById('labelDolar').innerText = tasaVigente.precio_dolar;
-
-    } catch (error) {
-        console.error("Error al cargar las tasas:", error);
-    }
-  }
+  
   
   // <--- CIERRE CORRECTO DE CARGARTASAS<--- Aquí cierra la función cargarTasas
 function actualizar() {
@@ -730,12 +701,12 @@ const p2pReal = tApi.p2p || parseFloat(localStorage.getItem("res_p2p_hoy"));
         tBase = isMañana ? tMan.bcv : tApi.bcv;
         // Si las variables están en 0 (API caída), usa el respaldo guardado
         if (tBase === 0) {
-            tBase = isMañana ? parseFloat(localStorage.getItem("res_bcv_hoy")) : parseFloat(localStorage.getItem("res_bcv_hoy"));
+            tBase = isMañana ? parseFloat(localStorage.getItem("res_bcv_prox")) : parseFloat(localStorage.getItem("res_bcv_hoy"));
         }
     } else {
         tBase = isMañana ? tMan.euro : tApi.euro;
         if (tBase === 0) {
-            tBase = isMañana ? parseFloat(localStorage.getItem("res_euro_hoy")) : parseFloat(localStorage.getItem("res_euro_hoy"));
+            tBase = isMañana ? parseFloat(localStorage.getItem("res_euro_prox")) : parseFloat(localStorage.getItem("res_euro_hoy"));
         }
     }
 
@@ -863,9 +834,9 @@ function updateDate() {
         fechaDestino.setDate(d.getDate() + 1); 
     }
 
-    // Formateo de strings
-    const fHoy = `${fechaDestino.getDate().toString().padStart(2, '0')}/${(fechaDestino.getMonth() + 1).toString().padStart(2, '0')}/${fechaDestino.getFullYear()}`;
-    const fProxima = `${d.getDate().toString().padStart(2, '0')}/${(d.getMonth() + 1).toString().padStart(2, '0')}/${d.getFullYear()}`;
+// Formateo de strings
+    const fProxima = `${fechaDestino.getDate().toString().padStart(2, '0')}/${(fechaDestino.getMonth() + 1).toString().padStart(2, '0')}/${fechaDestino.getFullYear()}`;
+    const fHoy = `${d.getDate().toString().padStart(2, '0')}/${(d.getMonth() + 1).toString().padStart(2, '0')}/${d.getFullYear()}`;
     
     // --- ASIGNACIÓN A PANTALLA CON PROTECCIÓN ---
     const elHoy = document.getElementById("dateDisplay");
@@ -873,6 +844,7 @@ function updateDate() {
 
     if (elHoy) elHoy.textContent = fHoy;
     if (elProx) elProx.textContent = fProxima;
+  
 
     // --- ACTUALIZACIÓN DE HORA BCV
     const hFija = localStorage.getItem("horaBCV");
