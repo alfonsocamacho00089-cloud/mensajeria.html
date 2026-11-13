@@ -1139,6 +1139,26 @@ button#btn-enviar:active {
         .btn-check-binance { width: 100%; padding: 8px; background-color: #FCD535; color: #000; border: none; border-radius: 12px; font-weight: 900; font-size: 1em; cursor: pointer; margin-top: 10px; display: flex; align-items: center; justify-content: center; gap: 10px; text-decoration: none; }
 
        */
+
+      /* ==================== ESTILOS DEL PANEL P2P ==================== */
+#seccion-p2p-lateral {
+    position: fixed !important;
+    top: 0 !important;
+    right: -100% !important; /* Oculto completamente a la derecha por defecto */
+    width: 100vw !important;
+    max-width: 400px !important;
+    height: 100dvh !important;
+    background: #161b22 !important;
+    z-index: 60000 !important;
+    transition: right 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+    display: flex !important;
+    flex-direction: column;
+    box-sizing: border-box;
+}
+
+#seccion-p2p-lateral.abierto {
+    right: 0 !important; /* Se desliza perfectamente hacia la pantalla */
+      }
        
      </style>
 
