@@ -2057,10 +2057,7 @@ const rolGuardado = localStorage.getItem('spaxio_rol');
     </div>
  </div>
      
-<!-- Contenedor donde se cargará p2p.html de forma interna -->
-<div id="contenedor-p2p" style="display: none; width: 100%; height: 100%;"></div>
-         
-         <!-- ==================== PANEL LATERAL CALCULADORA ==================== -->
+<!-- ==================== PANEL LATERAL CALCULADORA ==================== -->
 <div id="seccion-calculadora-integrada">
     
     <!-- Cabecera del Panel con tu Flechita exacta -->
@@ -2233,7 +2230,8 @@ const rolGuardado = localStorage.getItem('spaxio_rol');
         </d>
  </div>
 
-
+<!-- Contenedor donde vivirá la pestaña P2P -->
+<div id="contenedor-p2p" style="display: none; width: 100%; height: 100%;"></div>
             <script>
 
      
@@ -2242,31 +2240,47 @@ const rolGuardado = localStorage.getItem('spaxio_rol');
     return false;
 };
 async function abrirP2PInterno() {
-    // 1. Limpiamos todo lo que esté abierto en la pantalla
+    // 1. Cerramos todo lo demás usando tus funciones de limpieza
     if (typeof cerrarTodosLosModalesSpace === "function") cerrarTodosLosModalesSpace();
     if (typeof cerrarTodosLosTogge === "function") cerrarTodosLosTogge();
 
     const contenedor = document.getElementById('contenedor-p2p');
     
-    // Si ya está cargado, solo lo mostramos
+    // Si ya está cargado previamente, solo lo mostramos
     if (contenedor.innerHTML.trim() !== "") {
         contenedor.style.display = 'block';
         return;
     }
 
     try {
-        // 2. Cargamos p2p.html de forma interna sin salir de la PWA
+        // 2. Descargamos el archivo p2p.html
         let respuesta = await fetch('./p2p.html');
-        if (!respuesta.ok) throw new Error("No se pudo cargar el archivo");
+        if (!respuesta.ok) throw new Error("No se pudo cargar p2p.html");
         
-        let htmlContenido = await respuesta.text();
+        let htmlTexto = await respuesta.text();
         
-        // 3. Inyectamos el HTML dentro de nuestra app
-        contenedor.innerHTML = htmlContenido;
+        // 3. Inyectamos el HTML en el contenedor de tu app
+        contenedor.innerHTML = htmlTexto;
         contenedor.style.display = 'block';
 
-        // 4. (Opcional) Si p2p.html necesita ejecutar algún script interno, puedes dispararlo aquí
-        console.log("✅ p2p.html cargado internamente con éxito");
+        // 4. EL TRUCO: Buscamos todos los <script> que traía el archivo y los volvemos a crear para que el navegador los ejecute
+        const scripts = contenedor.querySelectorAll('script');
+        scripts.forEach(scriptAntiguo => {
+            const scriptNuevo = document.createElement('script');
+            
+            // Copiamos los atributos (como src si el js está en un archivo externo)
+            Array.from(scriptAntiguo.attributes).forEach(attr => {
+                scriptNuevo.setAttribute(attr.name, attr.value);
+            });
+            
+            // Copiamos el código de adentro si es código en línea
+            scriptNuevo.appendChild(document.createTextNode(scriptAntiguo.innerHTML));
+            
+            // Reemplazamos el script viejo por el nuevo para forzar la ejecución
+            scriptAntiguo.parentNode.replaceChild(scriptNuevo, scriptAntiguo);
+        });
+
+        console.log("✅ p2p.html cargado con CSS y JavaScript funcionando al 100%");
 
     } catch (error) {
         console.error("Error al cargar P2P:", error);
