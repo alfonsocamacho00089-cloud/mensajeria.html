@@ -1644,9 +1644,9 @@ const rolGuardado = localStorage.getItem('spaxio_rol');
  <div class="btn-nav" onclick="togglePanelContactosLateral();">
         <span>💬</span><span>Chat</span></div>
 
-<div class="btn-nav" onclick="abrirAgendaCompleta();">
-        <span>👥</span><span>Contactos</span>
-</div>
+<div class="btn-nav" onclick="abrirP2PPanel()">
+    <span>💱</span><span>P2P</span>
+ </div>
   <div class="btn-nav" 
      id="btn-nav-flow" 
      data-contacto='{"id_sistema":"26fmetp4Q4WJ","nombre":"Spaxio","apellido":"Flow","estado":"activo"}'
@@ -2012,8 +2012,8 @@ const rolGuardado = localStorage.getItem('spaxio_rol');
  <div class="btn-nav" onclick="togglePanelContactosLateral();">
         <span>💬</span><span>Chat</span></div>
 
-<div class="btn-nav" onclick="abrirAgendaCompleta();">
-        <span>👥</span><span>Contactos</span>
+<div class="btn-nav" onclick="abrirP2PPanel()">
+    <span>💱</span><span>P2P</span>
 </div>
   <div class="btn-nav" 
      id="btn-nav-flow" 
@@ -2193,11 +2193,9 @@ const rolGuardado = localStorage.getItem('spaxio_rol');
         <span>🛖</span><span>Inicio</span></div>
  <div class="btn-nav" onclick="togglePanelContactosLateral();">
         <span>💬</span><span>Chat</span></div>
-<button onclick="abrirP2PPanel()" 
-        style="background: none; border: none; color: #ffd700; font-size: 22px; cursor: pointer; padding: 5px; transition: transform 0.2s;"
-        onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'" title="Panel P2P">
-    💱
-</button>
+<div class="btn-nav" onclick="abrirP2PPanel()">
+    <span>💱</span><span>P2P</span>
+</div>
 
   <div class="btn-nav" 
      id="btn-nav-flow" 
@@ -2277,7 +2275,6 @@ function abrirP2PPanel() {
     const panel = document.getElementById('seccion-p2p-lateral');
     if (panel) {
         panel.classList.add('abierto');
-        // Si ya tienes una función global para cerrar otros modales, la puedes invocar aquí:
         if (typeof cerrarTodosLosModalesSpace === "function") {
             cerrarTodosLosModalesSpace();
         }
@@ -2289,7 +2286,7 @@ function cerrarP2PPanel() {
     if (panel) {
         panel.classList.remove('abierto');
     }
-             }
+}
 
               // Función para enfocar el mapa GPS en el negocio seleccionado y dar la opción de pedir taxi
 
