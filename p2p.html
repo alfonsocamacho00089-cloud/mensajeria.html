@@ -401,6 +401,7 @@
 
         <a href="bnc://app.binance.com/payment/main" class="btn-pay-binance"><strong>🟡 PAGAR CON BINANCE APP</strong></a>
 
+
     </div>
 
 
@@ -409,7 +410,7 @@
 
         <div class="field"><label>Compra (Tasa: <span id="labBuy">--</span>)</label><input type="number" id="uBuy" placeholder="Monto USDT" inputmode="decimal"></div>
 
-        <div class="field"><label>Pagar al cliente (Bs)</label><input type="text" id="resBuy" readonly></div>
+        <div class="field"><label>El Cliente Paga (Bs)</label><input type="text" id="resBuy" readonly></div>
 
       <div class="field">
     <label>Venta (Tasa: <span id="labSell">--</span>)</label>
@@ -417,7 +418,7 @@
 </div>
 
 <div class="field">
-    <label>Recibir del cliente (Bs)</label>
+    <label>El Cliente Recibe (Bs)</label>
     <input type="text" id="resSell" readonly>
 </div>
 
@@ -425,16 +426,24 @@
 
 <div id="exchange2" class="calc-section">
     
-    <div class="field">
-        <label>Tu Envias S.L</label>
-        <input type="text" id="resBuy2" readonly>
-    </div>
-
+<!-- Arriba: Aquí escribes los USDT (ej: 100) -->
 <div class="field">
-        <label>Tu Recibes S.I (Tasa: <span id="labBuy2">--</span>)</label>
-        <input type="number" id="uBuy2" placeholder="Monto USDT" inputmode="decimal" oninput="actualizar()">
+    <label>Lo que Recibes S.I<span id="labBuy2"></span></label>
+    <input type="number" id="uBuy2" placeholder="Monto" inputmode="decimal" oninput="actualizar()">
 </div>
 
+<!-- Abajo: Aquí se muestra el resultado con el 10% aplicado (ej: 110.00) -->
+<div class="field">
+    <label>Lo que Envias S.C</label>
+    <input type="text" id="resBuy2" readonly>
+  
+</div>
+
+<!-- VISTA DEL CLIENTE: Botón para buscar remeseros activos -->
+<button onclick="buscarRemeserosDisponibles()" style="margin-top: 12px; padding: 12px 16px; background: #FFD700; color: #000; border: none; border-radius: 10px; font-size: 14px; font-weight: bold; cursor: pointer; width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 2px 6px rgba(255, 215, 0, 0.25); font-family: sans-serif;">
+    <span></span>
+    <span>intercanbio P2P</span>
+</button>
 
   
 </div>
@@ -452,7 +461,9 @@
 
     <div id="grafica" class="calc-section">
 
-        <canvas id="miGrafica" height="200"></canvas>
+        
+
+
 
     </div>
 
@@ -588,34 +599,23 @@ async function cargarTasas() {
             tMan.bcv = parseFloat(parseFloat(dataV[0].precio_dolar).toFixed(2)) || 0;
             tMan.euro = parseFloat(parseFloat(dataV[0].precio_euro).toFixed(2)) || 0;
 
-            const ahoraStr = new Date().toLocaleTimeString('es-VE', {
-                hour: '2-digit', minute: '2-digit', hour12: true
-            });
-
+            
             // Guardar en caché limpio sin cruzar cables
             if (tMan.bcv > 0) localStorage.setItem("res_bcv_", tMan.bcv.toFixed(2));
             if (tMan.euro > 0) localStorage.setItem("res_euro_", tMan.euro.toFixed(2));
             if (tApi.bcv > 0) localStorage.setItem("res_bcv_hoy", tApi.bcv.toFixed(2));
             if (tApi.euro > 0) localStorage.setItem("res_euro_hoy", tApi.euro.toFixed(2));
 
-            
+        }    
 
-// Muestra siempre la hora del último cambio guardado
-const horaMostrar = localStorage.getItem("horaBCV") || ahoraStr;
-if (document.getElementById("timeDisplay")) {
-    document.getElementById("timeDisplay").textContent = `ÚLTIMA ACTUALIZACIÓN BCV: ${horaMostrar}`;
-
-
-            }
-        }
 
     } catch (error) {
         console.warn("Fallo BCV, usando LocalStorage");
         // Recuperación sin pisar variables cuando falla la red
-        tMan.bcv = parseFloat(parseFloat(localStorage.getItem("res_bcv_hoy") || 0).toFixed(2));
-        tMan.euro = parseFloat(parseFloat(localStorage.getItem("res_euro_hoy") || 0).toFixed(2));
-        tApi.bcv = parseFloat(parseFloat(localStorage.getItem("res_bcv") || 0).toFixed(2));
-        tApi.euro = parseFloat(parseFloat(localStorage.getItem("res_euro") || 0).toFixed(2));
+        tMan.bcv = parseFloat(parseFloat(localStorage.getItem("res_bcv") || 0).toFixed(2));
+        tMan.euro = parseFloat(parseFloat(localStorage.getItem("res_euro") || 0).toFixed(2));
+        tApi.bcv = parseFloat(parseFloat(localStorage.getItem("res_bcv_hoy") || 0).toFixed(2));
+        tApi.euro = parseFloat(parseFloat(localStorage.getItem("res_euro_hoy") || 0).toFixed(2));
     }
   
 // --- BLOQUE 2: P2P (BINANCE) ---
@@ -624,13 +624,15 @@ if (document.getElementById("timeDisplay")) {
         const dataB = await resB.json();
 
         if (dataB && dataB.binance_p2p) {
-            const p2pBuyRate = Math.max(...Object.values(dataB.binance_p2p.compras_buy)) || 0;
-            const p2pSellRate = Math.max(...Object.values(dataB.binance_p2p.ventas_sell)) || 0;
+            // Cambiar Math.max por la lectura directa de la propiedad .promedio
 
+          const p2pSellRate = dataB.binance_p2p.ventas_sell.promedio || 0;
+          const p2pBuyRate = dataB.binance_p2p.compras_buy.promedio || 0;
+           
             tApi.p2p = p2pBuyRate;
             tApi.p2pBuy = p2pBuyRate;
             tApi.p2pSell = p2pSellRate;
-
+          
             const anteriorP2P = parseFloat(localStorage.getItem("res_p2p_hoy")) || 0;
             if (p2pBuyRate !== anteriorP2P && p2pBuyRate > 0) {
                 const horaP2P = new Date().toLocaleTimeString('es-VE', {
@@ -658,7 +660,7 @@ if (document.getElementById("timeDisplay")) {
 // --- FINALIZACIÓN Y UI ---
     try {
         if(document.getElementById('bcvRate')) document.getElementById('bcvRate').value = tApi.bcv.toFixed(2);
-        if(document.getElementById('p2pRate')) document.getElementById('p2pRate').value = tApi.p2p.toFixed(2);
+        if(document.getElementById('p2pRate')) document.getElementById('p2pRate').value = tApi.p2pSell.toFixed(2);
         if(document.getElementById('euroRate')) document.getElementById('euroRate').value = tApi.euro.toFixed(2);
         if(document.getElementById('bcvRateBack')) document.getElementById('bcvRateBack').value = tMan.bcv.toFixed(2);
         if(document.getElementById('euroRateBack')) document.getElementById('euroRateBack').value = tMan.euro.toFixed(2);
@@ -693,6 +695,7 @@ function actualizar() {
     
     // Si tApi.p2p es 0 (falló la API), busca en la memoria (localStorage)
 const p2pReal = tApi.p2p || parseFloat(localStorage.getItem("res_p2p_hoy"));
+  
     // --- SELECCIÓN DINÁMICA DE TASA ---
     let tBase = 0;
     let nombreTasa = (tasaSeleccionada === 'bcv') ? "BCV" : "EURO";
@@ -716,11 +719,13 @@ if (!tBase || isNaN(tBase)) tBase = 0;
 // --- MOTOR DE CÁLCULO LIMPIO (SIN IGTF) ---
     const procesar = (monto) => {
         const totalBS = monto * tBase;
-        const baseBS = totalBS; // Se mantiene como referencia para las etiquetas de la interfaz
-        const totalUSDT = (p2pReal > 0) ? (totalBS / p2pReal) : 0;
+        const baseBS = totalBS; 
+        const tasaVenta = tApi.p2pSell || parseFloat(localStorage.getItem("res_p2p_sell")) || p2pReal;
+        const totalUSDT = (tasaVenta > 0) ? (totalBS / tasaVenta) : 0;
         
         return { baseBS, totalBS, totalUSDT };
     };
+  
        
 // --- ACTUALIZACIÓN DE PANTALLAS (COMERCIO Y CLIENTE) ---
     const resCom = procesar(pUSD);
@@ -732,44 +737,31 @@ if (!tBase || isNaN(tBase)) tBase = 0;
     document.getElementById("bsCliBCV").value = format(resCli.totalBS) + " Bs";
     document.getElementById("usdtCliFinal").value = resCli.totalUSDT.toFixed(2);
 // ---p2p YsaPay (Pestaña 2) ---
+    const p2pSell = tApi.p2pSell || parseFloat(localStorage.getItem("res_p2p_sell")) || 0;
     const p2pRateEl = document.getElementById("p2pRate");
-    if (p2pRateEl) p2pRateEl.value = p2pReal.toFixed(2);
+    if (p2pRateEl) p2pRateEl.value = p2pSell.toFixed(2); // <--- La tarjeta amarilla toma Sell
 
-    // Calculas la tasa efectiva unitaria con tu margen y la inyectas
-    const tasaEfectiva = p2pReal * 1.2; 
-    const labBuy2El = document.getElementById("labBuy2");
-    if (labBuy2El) {
-        labBuy2El.textContent = tasaEfectiva.toFixed(2);
+    const inputUBuy2 = document.getElementById("uBuy2");
+    const uBuyVal2 = inputUBuy2 ? parseFloat(inputUBuy2.value) || 0 : 0;
+    
+    // 2. Calculamos el valor con el 10% arriba (100 * 1.10 = 110)
+    const totalUsdt = uBuyVal2 * 1.10;
+    
+    // 3. Mostramos el resultado abajo en el campo readonly
+    const resBuy2El = document.getElementById("resBuy2");
+    if (resBuy2El) {
+        resBuy2El.value = totalUsdt.toFixed(2) + ""; // O ponle " Bs" si requieres bolívares
     }
   
-    const inputUBuy2 = document.getElementById("uBuy2");
-    if (inputUBuy2) {
-        const uBuyVal2 = parseFloat(inputUBuy2.value) || 0;
-        
-        // Calculas el total bruto y le restas el equivalente a los 7.5 USDT en bolívares (7.5 * p2pReal)
-        const totalBruto2 = uBuyVal2 > 0 ? (uBuyVal2 * p2pReal * 1.2) : 0;
-        const descuentoBs2 = 7.5 * p2pReal;
-        const totalBs2 = totalBruto2 > 0 ? Math.max(0, totalBruto2 - descuentoBs2) : 0;
-        
-        const resBuy2El = document.getElementById("resBuy2");
-        if (resBuy2El) {
-            resBuy2El.value = format(totalBs2) + " Bs";
-        }
-    }
-    
   
     // --- ACTUALIZACIÓN DE INTERFAZ EXCHANGE ---
-    document.getElementById("p2pRate").value = p2pReal.toFixed(2);
     document.getElementById("labBuy").textContent = p2pReal.toFixed(2);
     document.getElementById("labSell").textContent = p2pReal.toFixed(2);
     
     const uBuyVal = parseFloat(document.getElementById("uBuy").value) || 0;
     document.getElementById("resBuy").value = format(uBuyVal * p2pReal) + " Bs";
   
-    // 1. Capturas la tasa de venta de tu objeto tApi (o del localStorage si falló)
-const p2pSell = tApi.p2pSell || parseFloat(localStorage.getItem("res_p2p_sell")) || 0;
-
-// 2. Actualizas la etiqueta solo en la sección P2P (el labSell que tienes en esa pestaña)
+    // 2. Actualizas la etiqueta solo en la sección P2P (el labSell que tienes en esa pestaña)
 const labSellEl = document.getElementById("labSell");
 if (labSellEl) labSellEl.textContent = p2pSell.toFixed(2);
 
@@ -781,6 +773,15 @@ if (resSellEl) {
 }
 
   
+
+    // Actualiza los valores de "atrás" de las tarjetas (Flip)
+   if (document.getElementById("bcvRateBack")){
+    document.getElementById("bcvRateBack").value = tMan.bcv.toFixed(2);
+   }
+  if (document.getElementById("euroRateBack")){
+    document.getElementById("euroRateBack").value = tMan.euro.toFixed(2);
+}
+
 
     // Actualiza los valores de "atrás" de las tarjetas (Flip)
    if (document.getElementById("bcvRateBack")){
@@ -846,15 +847,7 @@ function updateDate() {
     if (elProx) elProx.textContent = fProxima;
   
 
-    // --- ACTUALIZACIÓN DE HORA BCV
-    const hFija = localStorage.getItem("horaBCV");
-    const displayElement = document.getElementById("timeDisplay");
-
-    if (displayElement) {
-        displayElement.textContent = hFija ? `ÚLTIMA ACTUALIZACIÓN BCV: ${hFija}` : `ÚLTIMA ACTUALIZACIÓN BCV: No disponible`;
-    }
 }
-
 
   
 function abrirBinance() {
@@ -890,25 +883,33 @@ function renderGrafica() {
         options: { plugins: { legend: { display: false } }, scales: { y: { display: false }, x: { grid: { display: false } } } }
     });
 }
+
+  
 (function inicializarCalculadora() {
+  // 1. Recuperar las 3 tasas del bolsillo (LocalStorage)
+    
   // 1. Recuperar las 3 tasas del bolsillo (LocalStorage)
     const bcvCache = localStorage.getItem("res_bcv_hoy");
     const euroCache = localStorage.getItem("res_euro_hoy");
     const p2pCache = localStorage.getItem("res_p2p_hoy");
-const bcvAtras = localStorage.getItem("res_bcv"); 
-const euroAtras = localStorage.getItem("res_euro");
+    const p2pSellCache = localStorage.getItem("res_p2p_sell"); // <-- Caché exclusivo de Sell
+    const bcvAtras = localStorage.getItem("res_bcv"); 
+    const euroAtras = localStorage.getItem("res_euro");
+
     // 2. Si existen, las cargamos en la memoria de la calculadora (tApi)
     if (bcvCache) tApi.bcv = parseFloat(bcvCache);
     if (euroCache) tApi.euro = parseFloat(euroCache);
     if (p2pCache) tApi.p2p = parseFloat(p2pCache);
-  if (bcvAtras) tMan.bcv = parseFloat(bcvAtras);
-if (euroAtras) tMan.euro = parseFloat(euroAtras);
+    if (p2pSellCache) tApi.p2pSell = parseFloat(p2pSellCache); // <-- Carga Sell en memoria
+    if (bcvAtras) tMan.bcv = parseFloat(bcvAtras);
+    if (euroAtras) tMan.euro = parseFloat(euroAtras);
+
     // 3. Llenar los campos visuales de una vez
     if (tApi.bcv > 0) document.getElementById('bcvRate').value = tApi.bcv.toFixed(2);
     if (tApi.euro > 0) document.getElementById('euroRate').value = tApi.euro.toFixed(2);
-    if (tApi.p2p > 0) document.getElementById('p2pRate').value = tApi.p2p.toFixed(2);
-if (tMan.bcv > 0) document.getElementById('bcvRateBack').value = tMan.bcv.toFixed(2);
-if (tMan.euro > 0) document.getElementById('euroRateBack').value = tMan.euro.toFixed(2);
+    if (tApi.p2pSell > 0) document.getElementById('p2pRate').value = tApi.p2pSell.toFixed(2); // <-- La tarjeta amarilla arranca con Sell
+    if (tMan.bcv > 0) document.getElementById('bcvRateBack').value = tMan.bcv.toFixed(2);
+    if (tMan.euro > 0) document.getElementById('euroRateBack').value = tMan.euro.toFixed(2);
 // ... debajo de donde cargas las tasas del cache ...
     
     
