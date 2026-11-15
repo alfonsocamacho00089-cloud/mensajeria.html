@@ -2766,63 +2766,7 @@ function toggleComentarios(postId) {
         localStorage.setItem(`comentarios_${postId}`, contador.innerText);
     }
               }
-async function subirYAbrirSpaxioFlow(input) {
-    if (!input.files || !input.files[0]) return;
-    
-    const archivo = input.files[0];
 
-    // 1. 🔥 VENTANA FLOTANTE PARA EL TEXTO TIPO NOTICIA
-    const textoNoticia = prompt("Escribe una noticia corta o titular para la publicación (opcional):", "") || "";
-
-    alert("🚀 Subiendo historia a SpaxioFlow...");
-
-    const inputTarget = document.querySelector('#target-id');
-    if (inputTarget) inputTarget.value = "26fmetp4Q4WJ";
-
-    let tipo = archivo.type.includes('video') ? 'video' : 'foto';
-
-    const lector = new FileReader();
-    lector.onload = function(e) {
-        const img = new Image();
-        img.src = e.target.result;
-        img.onload = function() {
-            const canvas = document.createElement('canvas');
-            const MAX_WIDTH = 600;
-            const scaleSize = MAX_WIDTH / img.width;
-            canvas.width = MAX_WIDTH;
-            canvas.height = img.height * scaleSize;
-
-            const ctx = canvas.getContext('2d');
-            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-
-            const urlImagenComprimida = canvas.toDataURL('image/jpeg', 0.8);
-
-            const nuevaHistoriaLocal = {
-                id: "historia_local_" + Date.now(),
-                sender_name: localStorage.getItem('mi_nombre') || "Pedro Peres",
-                content: urlImagenComprimida,
-                tipo: tipo,
-                descripcion: textoNoticia,
-                created_at: new Date().toISOString()
-            };
-
-            let misHistorias = JSON.parse(localStorage.getItem('spaxio_historias_locales') || '[]');
-            if (misHistorias.length >= 15) misHistorias = misHistorias.slice(0, 14);
-            misHistorias.unshift(nuevaHistoriaLocal);
-            
-            try {
-                localStorage.setItem('spaxio_historias_locales', JSON.stringify(misHistorias));
-            } catch (err) {
-                console.error("Almacenamiento lleno:", err);
-            }
-
-            if (typeof renderizarSpaxioFlowStories === 'function') {
-                renderizarSpaxioFlowStories(misHistorias);
-            }
-        };
-    };
-    lector.readAsDataURL(archivo);
-              }
 
 function enviarComentarioInstagram(postId) {
     const input = document.getElementById(`input-comentario-${postId}`);
