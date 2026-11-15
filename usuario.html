@@ -1644,9 +1644,9 @@ const rolGuardado = localStorage.getItem('spaxio_rol');
  <div class="btn-nav" onclick="togglePanelContactosLateral();">
         <span>💬</span><span>Chat</span></div>
 
-<div class="btn-nav" onclick="abrirP2PPanel()">
-    <span>💱</span><span>P2P</span>
- </div>
+<div class="btn-nav" onclick="abrirAgendaCompleta();">
+        <span>👥</span><span>Contactos</span>
+</div>
   <div class="btn-nav" 
      id="btn-nav-flow" 
      data-contacto='{"id_sistema":"26fmetp4Q4WJ","nombre":"Spaxio","apellido":"Flow","estado":"activo"}'
@@ -1658,51 +1658,7 @@ const rolGuardado = localStorage.getItem('spaxio_rol');
 </div>
 </div>
 </div>
-        <!-- PANEL DEL REMESERO: Switch de Encendido/Apagado -->
-<div style="padding: 14px 16px; border-radius: 12px; color: #fff; margin-bottom: 10px; background: rgba(32, 44, 51, 0.75); border: 1px solid #3a4a54; box-sizing: border-box; font-family: sans-serif;">
-    <label style="display: flex; align-items: center; justify-content: space-between; cursor: pointer; width: 100%; user-select: none;">
-        <div style="display: flex; flex-direction: column; text-align: left;">
-            <span style="font-size: 14px; font-weight: bold; color: #fff;">💸 Remesero Disponible</span>
-            <span id="estadoRemeseroTexto" style="font-size: 12px; color: #aaa; margin-top: 2px;">Desactivado</span>
-        </div>
-
-        <!-- Interruptor visual -->
-        <div style="position: relative; width: 48px; height: 26px; flex-shrink: 0;">
-            <input type="checkbox" id="switchRemesero" onchange="actualizarSwitchRemesero(this)" style="opacity: 0; width: 0; height: 0;">
-            <span id="sliderRemesero" style="position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #444; transition: .3s; border-radius: 26px;">
-                <span id="knobRemesero" style="position: absolute; height: 20px; width: 20px; left: 3px; bottom: 3px; background-color: white; transition: .3s; border-radius: 50%;"></span>
-            </span>
-        </div>
-    </label>
-</div>
-
-<script>
-function actualizarSwitchRemesero(checkbox) {
-    const slider = document.getElementById('sliderRemesero');
-    const knob = document.getElementById('knobRemesero');
-    const texto = document.getElementById('estadoRemeseroTexto');
-
-    if (checkbox.checked) {
-        slider.style.backgroundColor = '#00E676';
-        knob.style.transform = 'translateX(22px)';
-        knob.style.backgroundColor = '#111';
-        texto.textContent = 'Activado (En línea)';
-        texto.style.color = '#00E676';
-    } else {
-        slider.style.backgroundColor = '#444';
-        knob.style.transform = 'translateX(0px)';
-        knob.style.backgroundColor = '#fff';
-        texto.textContent = 'Desactivado';
-        texto.style.color = '#aaa';
-    }
-
-    // Tu función para actualizar el estado en la base de datos
-    if (typeof manejarModoRemesero === 'function') {
-        manejarModoRemesero(checkbox);
-    }
-}
-</script>
-     
+        
  
 <!-- 3. 🪐 SECCIÓN INTEGRADA: SPAXIOGIFSCARD (Debajo de los contactos) -->  <!-- ============================================================== --->
             <div id="seccion-spaxiocard-integrada" style="display: flex; flex-direction: column; width: 100%; padding: 5px;"> 
@@ -2056,8 +2012,8 @@ function actualizarSwitchRemesero(checkbox) {
  <div class="btn-nav" onclick="togglePanelContactosLateral();">
         <span>💬</span><span>Chat</span></div>
 
-<div class="btn-nav" onclick="abrirP2PPanel()">
-    <span>💱</span><span>P2P</span>
+<div class="btn-nav" onclick="abrirAgendaCompleta();">
+        <span>👥</span><span>Contactos</span>
 </div>
   <div class="btn-nav" 
      id="btn-nav-flow" 
@@ -2237,10 +2193,11 @@ function actualizarSwitchRemesero(checkbox) {
         <span>🛖</span><span>Inicio</span></div>
  <div class="btn-nav" onclick="togglePanelContactosLateral();">
         <span>💬</span><span>Chat</span></div>
-<a href="p2p.html" class="btn-nav">
-    <span>💱</span>
-    <span>P2P</span>
-</a>
+<button onclick="abrirP2PPanel()" 
+        style="background: none; border: none; color: #ffd700; font-size: 22px; cursor: pointer; padding: 5px; transition: transform 0.2s;"
+        onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'" title="Panel P2P">
+    💱
+</button>
 
   <div class="btn-nav" 
      id="btn-nav-flow" 
@@ -2316,42 +2273,11 @@ function actualizarSwitchRemesero(checkbox) {
     alert("🚨 ERROR DETECTADO:\n\n" + message + "\n\nArchivo: " + source + "\nLínea: " + lineno);
     return false;
 };
-
-
-             function abrirP2PWeb() {
-    window.location.href = 'p2p.html'; // O window.open('p2p.html', '_blank'); si quieres que abra en pestaña/ventana nueva
-             }
-
-             function abrirP2PComoWeb() {
-    // Ocultas las demás secciones principales
-    document.getElementById('seccion-chat').style.display = 'none';
-    document.getElementById('seccion-flow').style.display = 'none';
-
-    // Muestras la sección P2P ocupando toda la pantalla
-    const panelP2P = document.getElementById('seccion-p2p-lateral');
-    if (panelP2P) {
-        panelP2P.style.position = 'fixed';
-        panelP2P.style.top = '0';
-        panelP2P.style.left = '0';
-        panelP2P.style.width = '100vw';
-        panelP2P.style.height = '100vh';
-        panelP2P.style.zIndex = '999999';
-        panelP2P.style.right = '0'; // Se despliega por completo
-    }
-}
-
-function cerrarP2PComoWeb() {
-    // Regresas a la vista normal y ocultas el P2P
-    const panelP2P = document.getElementById('seccion-p2p-lateral');
-    if (panelP2P) {
-        panelP2P.style.right = '-100%'; // Lo vuelves a esconder
-    }
-    document.getElementById('seccion-chat').style.display = 'block'; // O tu vista por defecto
-             }
 function abrirP2PPanel() {
     const panel = document.getElementById('seccion-p2p-lateral');
     if (panel) {
         panel.classList.add('abierto');
+        // Si ya tienes una función global para cerrar otros modales, la puedes invocar aquí:
         if (typeof cerrarTodosLosModalesSpace === "function") {
             cerrarTodosLosModalesSpace();
         }
@@ -2363,7 +2289,7 @@ function cerrarP2PPanel() {
     if (panel) {
         panel.classList.remove('abierto');
     }
-}
+             }
 
               // Función para enfocar el mapa GPS en el negocio seleccionado y dar la opción de pedir taxi
 
@@ -3956,7 +3882,7 @@ if (targetID === "26fmetp4Q4WJ") {
         user_id: miUserId,
         created_at: new Date().toISOString()
     };
-  /*COMENTADO TEMPORAL PARA PRUEBAS
+  
 fetch('/api/spaxioflow-event', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -3967,7 +3893,7 @@ fetch('/api/spaxioflow-event', {
     console.log("📡 Servidor confirmó:", respuestaServidor);
 })
 .catch(err => console.error("❌ Error:", err));
-*/
+
 
 // MUESTRAS EL MENSAJE EN PANTALLA EN LOCAL DIRECTAMENTE
 anexarUnicoMensajeAlFeed({
@@ -3978,19 +3904,7 @@ anexarUnicoMensajeAlFeed({
     created_at: new Date().toISOString()
 });
 
-    // 2. Mandas a Vercel
-    /*fetch('/api/spaxioflow-event', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(mensajeSeguro)
-    })
-    .then(res => res.json())
-    .then(respuestaServidor => {
-        console.log("📡 Servidor confirmó:", respuestaServidor);
-        
-        
-    })
-    .catch(err => console.error("❌ Error:", err));*/
+    
 
 } else if (targetID !== "uo4kb3tGHH7J") {
     // 🛡️ REGLA DE ORO: Si es un contacto normal, sigue usando la cola satelital tradicional
@@ -4357,114 +4271,121 @@ async function cargarConversacionCon(idDestino, nombreDestino, fotoDestino) {
 
 
 
-// 🔥 INTERCEPCIÓN MAESTRA     
-             if (idDestino === "26fmetp4Q4WJ") {
-   
-              
-              console.log("📡 Cargando historial global de SpaxioFlow desde Vercel...");
-    
-               // 1. Definimos los datos de prueba (Mock) ya que eliminamos el fetch
-// 1. Leemos las historias reales que se guardaron en tu teléfono
-const postsGuardadosLocales = JSON.parse(localStorage.getItem('spaxio_historias_locales') || '[]');
+// 🔥 INTERCEPCIÓN MAESTRA PARA INSTANEW
+if (idDestino === "26fmetp4Q4WJ") {
+    console.log("📡 Cargando feed Instanew (Nube y Local)...");
 
-// Si no hay nada guardado aún, usamos los de prueba para que no quede vacío
-const posts = postsGuardadosLocales.length > 0 ? postsGuardadosLocales : [
-    { id: 't1', sender_name: 'Pedro Peres', content: 'https://picsum.photos/300/200?random=1', tipo: 'imagen', created_at: new Date().toISOString() },
-    { id: 't2', sender_name: 'Marley', content: 'https://picsum.photos/300/200?random=2', tipo: 'imagen', created_at: new Date().toISOString() },
-    { id: 't3', sender_name: 'Sami', content: 'Probando texto en SpaxioFlow', tipo: 'texto', created_at: new Date().toISOString() }
-];
+    let postsParaMostrar = [];
 
-// 3. Renderizamos las Stories manteniendo tu tarjeta fija intacta a la izquierda
-const contenedorStories = document.getElementById('contenedor-spaxioflow-stories');
-if (contenedorStories && posts.length > 0) {
-    // Guardamos temporalmente el HTML de tu tarjeta fija para no perderla
-    const tarjetaFijaHTML = contenedorStories.firstElementChild ? contenedorStories.firstElementChild.outerHTML : '';
-    
-    // Vaciamos el contenedor y ponemos la tuya de primera
-    contenedorStories.innerHTML = tarjetaFijaHTML;
-    
-    // Recorremos los posts para agregarlos al lado (a la derecha)
-    posts.slice(0, 50).forEach(post => {
-        const urlImg = post.content || post.imagen_url || post.media_url || post.foto || '';
-        const nombreUsr = post.sender_name || post.remitente || 'Usuario';
-        
-        const esImagenValida = urlImg.startsWith('http') || urlImg.startsWith('data:image');
-        
-        // Definimos si es imagen o texto para el contenido
-const contenidoMiniatura = esImagenValida 
-    ? `
-        <!-- Contenedor con la foto de fondo que ocupa toda la tarjeta -->
-        <div style="position: relative; width: 100%; height: 100%; background-image: url('${urlImg}'); background-size: cover; background-position: center; border-radius: 12px; display: flex; flex-direction: column; justify-content: flex-end; overflow: hidden;">
-            
-            <!-- Capa oscura semitransparente abajo para que las letras floten y resalten -->
-            <div style="position: absolute; bottom: 0; left: 0; width: 100%; padding: 1px 1px; text-align: center;">
-                <span style="font-size: 10px; color: #ffd700; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block;">${nombreUsr}</span>
-            </div>
-        </div>
-      `
-    : `
-        <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; padding: 5px; bordetext-align: center;">
-            <span style="font-size: 11px; color: #fff;">${urlImg}</span>
-        </div>
-      `;
-
-// Y la tarjeta completa la envuelves así para que la imagen ocupe todo el espacio libre:
-contenedorStories.innerHTML += `
-    <div style="min-width: 170px; height: 200px; border-radius: 12px; borde: 1px; rgba(255, 215, 0, 0.15); padding: 1px; flex-shrink: 0; cursor: pointer; overflow: hidden; position: relative;">
-        ${contenidoMiniatura}
-    </div>
-`;
-
-        
-    });
-}
-
-// 4. Guardado local de prueba limpio
-const idUnicoLocal = "feed_local_" + Date.now();
-const nuevoPostLocal = {
-    id: idUnicoLocal,
-    contactoId: "26fmetp4Q4WJ",
-    clase: 'msg-izquierda',
-    status: 'leido',
-    tipo: 'imagen', // Corregido de variable suelta a string
-  
-    ts: Date.now(),
-    hora: typeof miNombre !== 'undefined' ? miNombre : 'Pedro'
-};
-
-// Guardamos usando tu estructura local
-await guardarLocal('mensajes', nuevoPostLocal);
-
-// 5. Pintar los mensajes/posts en pantalla de forma ordenada
-if (posts && Array.isArray(posts)) {
-    const postsInvertidos = [...posts].reverse();
-     
-    postsInvertidos.forEach(post => {
-        const idContenido = "feed_" + post.id;
-        const nombreRemitente = post.sender_name || 'H.A.R.V.I.S.';
-        
-        if (!document.getElementById(idContenido)) {
-            pintarMensaje(post.content, "", nombreRemitente, 'leido', idContenido, post.tipo); 
+    try {
+        // 1. Intentamos traer el feed global desde tu API de Vercel (Supabase -> tabla instanew)
+        const res = await fetch('/api/get-instanew-feed');
+        if (res.ok) {
+            const data = await res.json();
+            const postsRemotos = Array.isArray(data) ? data : (data.posts || []);
+            if (postsRemotos.length > 0) {
+                postsParaMostrar = [...postsRemotos].reverse();
+            }
         }
-    });
-}
+    } catch (e) {
+        console.warn("⚠️ Sin conexión a la nube para Instanew, usando respaldo local...", e);
+    }
 
-// 6. Refresco final de stories si ya tienes los datos cargados
-if (typeof postsGuardadosLocales !== 'undefined') {
-    renderizarSpaxioFlowStories(postsGuardadosLocales);
-}
+    // 2. Si la nube no devolvió nada, usamos tus historias locales de respaldo
+    const postsGuardadosLocales = JSON.parse(localStorage.getItem('spaxio_historias_locales') || '[]');
+    
+    if (postsParaMostrar.length === 0) {
+        postsParaMostrar = postsGuardadosLocales.length > 0 ? postsGuardadosLocales : [
+            { id: 't1', sender_name: 'Pedro Peres', content: 'https://picsum.photos/300/200?random=1', tipo: 'imagen', created_at: new Date().toISOString() },
+            { id: 't2', sender_name: 'Marley', content: 'https://picsum.photos/300/200?random=2', tipo: 'imagen', created_at: new Date().toISOString() },
+            { id: 't3', sender_name: 'Sami', content: 'Probando texto en Instanew', tipo: 'texto', created_at: new Date().toISOString() }
+        ];
+    }
 
-    iniciarRealtimeSpaxioFlow("26fmetp4Q4WJ");
+    // 3. Renderizamos las Stories manteniendo tu tarjeta fija intacta a la izquierda
+    const contenedorStories = document.getElementById('contenedor-spaxioflow-stories');
+    if (contenedorStories && postsParaMostrar.length > 0) {
+        const tarjetaFijaHTML = contenedorStories.firstElementChild ? contenedorStories.firstElementChild.outerHTML : '';
+        contenedorStories.innerHTML = tarjetaFijaHTML;
 
-    // 🎯 Forzamos el scroll arriba con un micro-respiro para ganarle al renderizado
+        postsParaMostrar.forEach(post => {
+            const urlImg = post.content || post.imagen_url || post.media_url || post.foto || '';
+            const nombreUsr = post.sender_name || post.remitente || 'Pedro Peres';
+            const usuarioIdAutor = post.sender_id || post.usuarioId || post.usuario_id || '26fmetp4Q4WJ';
+            
+            const esImagenValida = urlImg.startsWith('http') || urlImg.startsWith('data:image');
+            
+            const contenidoMiniatura = esImagenValida 
+                ? `
+                    <div style="position: relative; width: 100%; height: 100%; background-image: url('${urlImg}'); background-size: cover; background-position: center; border-radius: 12px; display: flex; flex-direction: column; justify-content: flex-end; overflow: hidden;">
+                        <div style="position: absolute; bottom: 0; left: 0; width: 100%; padding: 1px 1px; text-align: center; background: rgba(0,0,0,0.5);">
+                            <span style="font-size: 10px; color: #ffd700; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block;">${nombreUsr}</span>
+                        </div>
+                    </div>
+                  `
+                : `
+                    <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; padding: 5px; text-align: center;">
+                        <span style="font-size: 11px; color: #fff;">${urlImg}</span>
+                    </div>
+                  `;
+
+            contenedorStories.innerHTML += `
+                <div onclick="cargarConversacionCon('${usuarioIdAutor}', '${nombreUsr}')" style="min-width: 170px; height: 200px; border-radius: 12px; padding: 1px; flex-shrink: 0; cursor: pointer; overflow: hidden; position: relative;">
+                    ${contenidoMiniatura}
+                </div>
+            `;
+        });
+    }
+
+    // 4. Guardado local de respaldo limpio
+    const idUnicoLocal = "feed_local_" + Date.now();
+    const nuevoPostLocal = {
+        id: idUnicoLocal,
+        contactoId: "26fmetp4Q4WJ",
+        clase: 'msg-izquierda',
+        status: 'leido',
+        tipo: 'imagen',
+        ts: Date.now(),
+        hora: typeof miNombre !== 'undefined' ? miNombre : 'Pedro'
+    };
+
+    await guardarLocal('mensajes', nuevoPostLocal);
+
+    // 5. Pintar los mensajes/posts en pantalla de forma ordenada abajo
+    if (postsParaMostrar && Array.isArray(postsParaMostrar)) {
+        const postsInvertidos = [...postsParaMostrar].reverse();
+         
+        postsInvertidos.forEach(post => {
+            const idContenido = "feed_" + post.id;
+            const nombreRemitente = post.sender_name || post.remitente || 'H.A.R.V.I.S.';
+            const urlContenido = post.content || post.imagen_url || post.media_url || post.foto || '';
+            
+            if (!document.getElementById(idContenido)) {
+                pintarMensaje(urlContenido, "", nombreRemitente, 'leido', idContenido, post.tipo || 'imagen'); 
+            }
+        });
+    }
+
+    // 6. Refresco final de stories
+    if (typeof postsGuardadosLocales !== 'undefined' && postsGuardadosLocales.length > 0) {
+        if (typeof renderizarSpaxioFlowStories === 'function') {
+            renderizarSpaxioFlowStories(postsGuardadosLocales);
+        }
+    }
+
+    // 7. Arrancamos el Realtime independiente para la tabla instanew
+    if (typeof iniciarRealtimeInstanew === 'function') {
+        iniciarRealtimeInstanew("26fmetp4Q4WJ");
+    }
+
+    // 🎯 Forzamos el scroll arriba con un micro-respiro
     setTimeout(() => {
         const box = document.getElementById('chat-box');
         if (box) {
             box.scrollTop = 0; 
         }
-    }, 50); // 50 milisegundos de respiro
-
- }
+    }, 50);
+              }
               
               else {
     // 🔒 LÓGICA OPTIMIZADA: Últimos 50 mensajes para chats privados
@@ -6432,6 +6353,9 @@ function DespacharMensajeEnCola() {
 // =================================================================
 // ARQUITECTURA REALTIME EMPRESARIAL - SPAXIOFLOW (SINGLETON)
 // =================================================================
+// =================================================================
+// 1. CANAL REALTIME PARA SPAXIOFLOW (Tabla: spaxioflow_feed)
+// =================================================================
 window.spaxioRealtimeChannel = null;
 
 function iniciarRealtimeSpaxioFlow(conversacionId) {
@@ -6440,18 +6364,14 @@ function iniciarRealtimeSpaxioFlow(conversacionId) {
         return;
     }
 
-    // 1. Limpieza síncrona y desinscripción del canal activo previo (Prevent Memory Leak)
     if (window.spaxioRealtimeChannel) {
         window.supabaseClient.removeChannel(window.spaxioRealtimeChannel);
         window.spaxioRealtimeChannel = null;
     }
 
-    // 2. Creación de canal aislado por ID de sesión/conversación
     const channelName = `spaxioflow_live_${conversacionId}_${Date.now()}`;
-    
     window.spaxioRealtimeChannel = window.supabaseClient.channel(channelName);
 
-    // 3. Suscripción con manejo estricto de eventos de ciclo de vida
     window.spaxioRealtimeChannel
     .on(
         'postgres_changes',
@@ -6461,36 +6381,78 @@ function iniciarRealtimeSpaxioFlow(conversacionId) {
             table: 'spaxioflow_feed',
             filter: `chat_id=eq.${conversacionId}`
         },
-
-(payload) => {
+        (payload) => {
             const nuevoMensaje = payload.new;
             const miUserId = localStorage.getItem('mi_dropis_id') || "anonimo";
 
-            // 🛑 IMPRIME ESTO EN CONSOLA PARA VER QUÉ ESTÁ PASANDO
-            console.log("🔍 Comparando IDs en Realtime -> Mensaje sender_id:", nuevoMensaje.sender_id, "| Mi ID:", miUserId);
+            console.log("🔍 Comparando IDs en SpaxioFlow -> Mensaje sender_id:", nuevoMensaje.sender_id, "| Mi ID:", miUserId);
 
-            // Blindaje estricto (comparamos strings limpios)
-           
-if (String(nuevoMensaje.sender_id).trim() === String(miUserId).trim()) {
-    }
+            if (String(nuevoMensaje.sender_id).trim() === String(miUserId).trim()) {
+                // Tuyo
+            }
 
-            // Si es de otro usuario, lo dibuja en el feed de inmediato
             anexarUnicoMensajeAlFeed(nuevoMensaje);
-            // Si pasa este filtro, ahora sí se pinta (solo para mensajes del vecino)
-            
-
-     
-        
         }
     )
-   
-        .subscribe((status, err) => {
-            if (status === 'SUBSCRIBED') {
-                console.log(`[SpaxioFlow Enterprise] Canal ${channelName} suscrito correctamente.`);
-            } else if (status === 'CHANNEL_ERROR' || err) {
-                console.error(`[SpaxioFlow Enterprise] Fallo de conexión en Realtime:`, err);
+    .subscribe((status, err) => {
+        if (status === 'SUBSCRIBED') {
+            console.log(`[SpaxioFlow Enterprise] Canal ${channelName} suscrito a spaxioflow_feed.`);
+        } else if (status === 'CHANNEL_ERROR' || err) {
+            console.error(`[SpaxioFlow Enterprise] Error en canal SpaxioFlow:`, err);
+        }
+    });
+}
+
+
+// =================================================================
+// 2. CANAL REALTIME PARA INSTANEW (Tabla: instanew)
+// =================================================================
+window.instanewRealtimeChannel = null;
+
+function iniciarRealtimeInstanew(conversacionId) {
+    if (!window.supabaseClient) {
+        console.error("[Instanew Enterprise] Error crítico: Cliente Supabase no inicializado.");
+        return;
+    }
+
+    if (window.instanewRealtimeChannel) {
+        window.supabaseClient.removeChannel(window.instanewRealtimeChannel);
+        window.instanewRealtimeChannel = null;
+    }
+
+    const channelName = `instanew_live_${conversacionId}_${Date.now()}`;
+    window.instanewRealtimeChannel = window.supabaseClient.channel(channelName);
+
+    window.instanewRealtimeChannel
+    .on(
+        'postgres_changes',
+        {
+            event: 'INSERT',
+            schema: 'public',
+            table: 'instanew',
+            filter: `chat_id=eq.${conversacionId}`
+        },
+        (payload) => {
+            const nuevoMensaje = payload.new;
+            const miUserId = localStorage.getItem('mi_dropis_id') || "anonimo";
+
+            console.log("🔍 Comparando IDs en Instanew -> Mensaje sender_id:", nuevoMensaje.sender_id, "| Mi ID:", miUserId);
+
+            if (String(nuevoMensaje.sender_id).trim() === String(miUserId).trim()) {
+                // Tuyo
             }
-        });
+
+            // Aquí llamas a la función que pinta las historias y tarjetas de Instagram
+            anexarUnicoMensajeAlInstanew(nuevoMensaje);
+        }
+    )
+    .subscribe((status, err) => {
+        if (status === 'SUBSCRIBED') {
+            console.log(`[Instanew Enterprise] Canal ${channelName} suscrito a la tabla instanew.`);
+        } else if (status === 'CHANNEL_ERROR' || err) {
+            console.error(`[Instanew Enterprise] Error en canal Instanew:`, err);
+        }
+    });
 }
 
              
