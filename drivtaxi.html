@@ -2406,22 +2406,18 @@ function seleccionarRol(rolElegido) {
     if (!input.files || !input.files[0]) return;
     
     const archivo = input.files[0];
-
-    // 1. 🔥 VENTANA FLOTANTE PARA EL TEXTO TIPO NOTICIA
     const textoNoticia = prompt("Escribe una noticia corta o titular para la publicación (opcional):", "") || "";
 
-    alert("🚀 Subiendo historia a SpaxioFlow...");
-
-    const inputTarget = document.querySelector('#target-id');
-    if (inputTarget) inputTarget.value = "26fmetp4Q4WJ";
+    alert("🚀 Subiendo historia a la nube de SpaxioFlow...");
 
     let tipo = archivo.type.includes('video') ? 'video' : 'foto';
 
     const lector = new FileReader();
-    lector.onload = function(e) {
+    lector.onload = async function(e) {
         const img = new Image();
         img.src = e.target.result;
-        img.onload = function() {
+        img.onload = async function() {
+            // Optimización y compresión de imagen para la base de datos
             const canvas = document.createElement('canvas');
             const MAX_WIDTH = 600;
             const scaleSize = MAX_WIDTH / img.width;
@@ -2430,27 +2426,43 @@ function seleccionarRol(rolElegido) {
 
             const ctx = canvas.getContext('2d');
             ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-
             const urlImagenComprimida = canvas.toDataURL('image/jpeg', 0.8);
 
-            const nuevaHistoriaLocal = {
-                id: "historia_local_" + Date.now(),
-                sender_name: localStorage.getItem('mi_nombre') || "Pedro Peres",
+            const miNombre = localStorage.getItem('mi_nombre') || "Pedro Peres";
+            const miUserId = localStorage.getItem('mi_dropis_id') || "SPAXIO-USER";
+
+            // 1. Objeto listo para insertar en Supabase
+            const nuevoPostSupabase = {
+                chat_id: "26fmetp4Q4WJ", // ID del canal general de Spaxio Flow
+                sender_id: miUserId,
+                sender_name: miNombre,
                 content: urlImagenComprimida,
                 tipo: tipo,
                 descripcion: textoNoticia,
                 created_at: new Date().toISOString()
             };
 
-            let misHistorias = JSON.parse(localStorage.getItem('spaxio_historias_locales') || '[]');
-            if (misHistorias.length >= 15) misHistorias = misHistorias.slice(0, 14);
-            misHistorias.unshift(nuevaHistoriaLocal);
-            
             try {
-                localStorage.setItem('spaxio_historias_locales', JSON.stringify(misHistorias));
+                // 2. 🟢 PETICIÓN DIRECTA A SUPABASE (Tabla spaxioflow_feed)
+                const { data, error } = await window.supabaseClient
+                    .from('spaxioflow_feed')
+                    .insert([nuevoPostSupabase]);
+
+                if (error) {
+                    console.error("❌ Error al subir a Supabase:", error.message);
+                    alert("Hubo un error al subir a la nube: " + error.message);
+                } else {
+                    console.log("✅ ¡Subido con éxito a Supabase!", data);
+                    alert("¡Publicación compartida en la nube con éxito!");
+                }
             } catch (err) {
-                console.error("Almacenamiento lleno:", err);
+                console.error("❌ Excepción al conectar con Supabase:", err);
             }
+
+            // 3. Guardado de respaldo local opcional
+            let misHistorias = JSON.parse(localStorage.getItem('spaxio_historias_locales') || '[]');
+            misHistorias.unshift(nuevoPostSupabase);
+            localStorage.setItem('spaxio_historias_locales', JSON.stringify(misHistorias));
 
             if (typeof renderizarSpaxioFlowStories === 'function') {
                 renderizarSpaxioFlowStories(misHistorias);
@@ -2458,7 +2470,7 @@ function seleccionarRol(rolElegido) {
         };
     };
     lector.readAsDataURL(archivo);
-             }            
+             }
               
 async function procesarCobroComercial(cantidadMonto = null) {
     const receptorInput = document.getElementById('idReceptor');
