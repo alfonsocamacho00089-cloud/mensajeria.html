@@ -4806,45 +4806,50 @@ async function cargarConversacionCon(idDestino, nombreDestino, fotoDestino) {
 
 
 if (idDestino === "26fmetp4Q4WJ") {
-    console.log("📡 Cargando Instanew (Nube y Local)...");
+    console.log("📡 Cargando SpaxioFlow / Chat Feed...");
 
     let postsParaMostrar = [];
 
     try {
-        // 1. Intentamos traer el feed desde tu nueva ruta de Vercel para instanew
-        const res = await fetch('/api/get-instanew-feed');
+        // 1. Intentamos traer los datos directamente de tu tabla en Supabase (vía tu API)
+        const res = await fetch('/api/get-spaxioflow-feed'); // O tu ruta de API correspondiente
         if (res.ok) {
             const data = await res.json();
-            const postsRemotos = Array.isArray(data) ? data : (data.posts || []);
+            const postsRemotos = Array.isArray(data) ? data : (data.posts || data.data || []);
+            
             if (postsRemotos.length > 0) {
-                postsParaMostrar = [...postsRemotos].reverse();
+                postsParaMostrar = postsRemotos;
+                // 💡 ¡CLAVE AQUÍ! Guardamos en el localStorage apenas bajan de Supabase 
+                // para que nunca se queden en blanco si se recarga o se cierra la app.
+                localStorage.setItem('spaxio_historias_locales', JSON.stringify(postsParaMostrar));
             }
         }
     } catch (e) {
-        console.warn("⚠️ Sin conexión a la nube, usando respaldo local...", e);
+        console.warn("⚠️ Sin conexión a la nube, cargando desde el respaldo local...", e);
     }
 
-    // 2. Si la nube no devolvió nada, usamos tus historias locales de respaldo
+    // 2. Si la nube falló o no devolvió nada, usamos el respaldo local guardado
     if (postsParaMostrar.length === 0) {
         postsParaMostrar = JSON.parse(localStorage.getItem('spaxio_historias_locales') || '[]');
     }
 
-    // 3. Renderizamos las Stories horizontales de arriba
+    // 3. Renderizamos las historias / miniaturas horizontales de arriba
     const contenedorStories = document.getElementById('contenedor-spaxioflow-stories');
     if (contenedorStories) {
         const tarjetaFijaHTML = contenedorStories.firstElementChild ? contenedorStories.firstElementChild.outerHTML : '';
         contenedorStories.innerHTML = tarjetaFijaHTML;
 
         postsParaMostrar.forEach(post => {
+            // Aseguramos capturar la imagen sin importar cómo venga nombrada en el objeto
             const urlImg = post.content || post.imagen_url || post.media_url || post.foto || ''; 
             const nombreUsr = post.sender_name || post.remitente || 'Pedro Peres';
             const usuarioIdAutor = post.sender_id || post.usuarioId || post.usuario_id || '26fmetp4Q4WJ';
 
-            if (urlImg.startsWith('http') || urlImg.startsWith('data:image')) {
+            if (urlImg && (urlImg.startsWith('http') || urlImg.startsWith('data:image'))) {
                 contenedorStories.innerHTML += `
                     <div onclick="cargarConversacionCon('${usuarioIdAutor}', '${nombreUsr}')" style="min-width: 170px; height: 200px; border-radius: 12px; padding: 1px; flex-shrink: 0; cursor: pointer; overflow: hidden; position: relative;">
                         <div style="position: relative; width: 100%; height: 100%; background-image: url('${urlImg}'); background-size: cover; background-position: center; border-radius: 12px; display: flex; flex-direction: column; justify-content: flex-end; overflow: hidden;">
-                            <div style="position: absolute; bottom: 0; left: 0; width: 100%; padding: 1px; text-align: center; background: rgba(0,0,0,0.5);">
+                            <div style="position: absolute; bottom: 0; left: 0; width: 100%; padding: 2px; text-align: center; background: rgba(0,0,0,0.6);">
                                 <span style="font-size: 10px; color: #ffd700; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block;">${nombreUsr}</span>
                             </div>
                         </div>
@@ -4859,19 +4864,19 @@ if (idDestino === "26fmetp4Q4WJ") {
         renderizarSpaxioFlowStories(postsParaMostrar);
     }
 
-    // 5. Arrancamos el Realtime con la nueva función independiente para instanew
-    if (typeof iniciarRealtimeInstanew === 'function') {
-        iniciarRealtimeInstanew("26fmetp4Q4WJ");
+    // 5. Arrancamos el Realtime del chat feed
+    if (typeof iniciarRealtimeSpaxioFlow === 'function') {
+        iniciarRealtimeSpaxioFlow("26fmetp4Q4WJ");
     }
 
-    // 🎯 Forzamos el scroll arriba
+    // Forzamos el scroll arriba
     setTimeout(() => {
         const box = document.getElementById('chat-box');
-        if (box) {
-            box.scrollTop = 0; 
-        }
+        if (box) box.scrollTop = 0; 
     }, 50);
-}          
+             }
+
+          
               else {
     // 🔒 LÓGICA OPTIMIZADA: Últimos 50 mensajes para chats privados
     const todosLosMensajes = await obtenerTodo('mensajes');
