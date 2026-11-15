@@ -85,8 +85,8 @@ body {
 /* 2. Cuando el teléfono activa modo oscuro, cambia las variables */
 @media (prefers-color-scheme: dark) {
     :root {
-        --bg-principal: #203062; /* El gris oscuro de tu captura */
-        --bg-tarjeta: #203062;
+        --bg-principal: #38404f; /* El gris oscuro de tu captura */
+        --bg-tarjeta: #38404f;
         --texto-color: #ffffff;
     }
 }
@@ -1093,37 +1093,6 @@ button#btn-enviar:active {
     background: rgba(255, 215, 0, 0.15);
     color: #ffd700;
                        }
-       .bs-inside { position
-:absolute; left:6px; background:#000; color:#fff; font-size:10px; width:26px; height:26px; display:flex; align-items:center; justify-content:center; border-radius:50%; font-weight:bold; z-index:2; }
-
-        
-
-        .bottom-row { display:flex; justify-content:space-between; gap:15px; perspective: 1000px; }
-
-        
-
-        
-
-        
-
-        .field-top { width:100%; position: relative; height: 60px; transform-style: preserve-3d; transition: transform 0.6s; pointer-events: none; }
-
-        .do-flip { transform: rotateY(180deg); }
-
-        
-
-        
-
-        
-        .date-display { color: #ffd700; font-size: 0.8em; font-weight: bold; }
-
-        
-
-        #switchArea { display: none; align-items: center; justify-content: center; margin-top: 10px; gap: 10px; font-size: 0.75em; color: #ffd700; }
-
-        .switch { position: relative; display: inline-block; width: 34px; height: 18px; }
-
-        .switch input { opacity: 0; width: 0; height: 0; }
 
        
 
@@ -1134,6 +1103,35 @@ button#btn-enviar:active {
         .btn-check-binance { width: 100%; padding: 8px; background-color: #FCD535; color: #000; border: none; border-radius: 12px; font-weight: 900; font-size: 1em; cursor: pointer; margin-top: 10px; display: flex; align-items: center; justify-content: center; gap: 10px; text-decoration: none; }
 
        */
+       .tarjeta-insta-img {
+    width: 100%;
+    height: 350px;
+    object-fit: cover;
+    display: block;
+    background: #000;
+       }
+
+       .tarjeta-feed-insta {
+    width: 100% !important;
+    background: #202732 !important;
+    border: 1px solid rgba(255, 215, 0, 0.25) !important;
+    border-radius: 16px !important;
+    overflow: hidden !important;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.5) !important;
+    display: flex !important;
+    flex-direction: column !important;
+    margin-bottom: 15px !important;
+    min-height: 420px !important; /* 🔥 ESTO OBLIGA A LA TARJETA A TENER TAMAÑO Y EVITA EL APLASTAMIENTO */
+}
+
+.imagen-feed-insta {
+    width: 100% !important;
+    height: 320px !important; /* 🔥 ALTURA FIJA DE LA FOTO */
+    object-fit: cover !important;
+    display: block !important;
+    background: #00000000 !important; border: 1px solid rgba(255,215,0,0.1);
+       }
+
        
      </style>
 
@@ -1403,25 +1401,19 @@ function seleccionarRol(rolElegido) {
 <div id="modal-qr" class="modal">
     <div class="modal-content" style="display: flex; flex-direction: column; height: 100dvh; position: relative; background-image: linear-gradient(rgba(11, 20, 26, 0.3), rgba(11, 20, 26, 0.3)), url('./assets/logo.webp'); background-size: cover; background-position: center; background-attachment: fixed;">      
    
-     <div id="nombre-dueño-header-lista" style="background: rgba(32, 44, 51, 0.3); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(15px); color: #ffffff; padding: 1px; font-weight: 350; text-transform: uppercase; text-align: left; border-bottom: opx solid #333; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 1001;">
-       <button onclick="toggleMenuHamburguesa()" style="background: transparent; border: none; color: #efece0; font-size: 24px; cursor: pointer; padding: 5px; margin-left: 8px;">
-    ☰
-       </button>
-       
-            <span style="display: inline-flex; align-items: center; gap: 8px; color: #efece0; text-transform: none !important; font-weight: bold;">YsaPay</span>
+     <div id="nombre-dueño-header-lista" style="background:4 rgba(0, 0, 0, 0.0196078431372549); color: #ffffff; padding: 1px; font-weight: 350; text-transform: uppercase; text-align: left; border-bottom: opx solid #333; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 1001;">
 
-<div class="btn-nav" 
-     id="btn-nav-harvis" 
-     data-contacto='{"id_sistema":"uo4kb3tGHH7J","nombre":"H.A.R.V.I.S.","apellido":"1.0","estado":"activo"}'
-     onclick="cargarConversacionCon(JSON.parse(this.dataset.contacto).id_sistema)">
-        <span style="text-shadow: 0 0 10px;"></span>🛸<span style="color: #ffd700;"></span>
-</div>
-             
-          <div onclick="togglePanelTaxiLateral()" title="Entrar al SpaxioVerso" style="cursor: pointer; color: #ffd700; font-size: 20px; padding: 0 8px; margin-right: 8px; text-shadow: 0 0 8px #ffd700;">🚕</div>      
-                </div>
-             
-     
+       
          
+             
+     <button onclick="toggleMenuHamburguesa()" style="background: transparent; border: none; color: #efece0; font-size: 24px; cursor: pointer; padding: 5px; margin-left: 8px;">
+    ☰
+       YsaPay</button>
+       
+     </div>     
+             
+       
+             
      
      <div id="seccion-mi-perfil" style="display: none; padding: 15px; background: rgba(25, 43, 56, 0.9490196078431372); border-bottom: 1px solid #1e222b;">
             <!-- Modifica el estilo del div que envuelve los inputs y el botón -->
@@ -1564,13 +1556,18 @@ function seleccionarRol(rolElegido) {
 
     </div>
 </div>
-<!-- ==================== PANEL LATERAL DE TAXI / CONDUCTOR ==================== -->
-<div id="seccion-panel-taxi-lateral">
+<!-- ========<!-- ======== PANEL LATERAL DE TAXI / CONDUCTOR ==================== -->
+<div id="seccion-panel-taxi-lateral" style="display: flex; flex-direction: column; width: 100%; height: 100%; background: #16222c; box-sizing: border-box; overflow: hidden;">
 
-    <div style="background: rgba(32, 44, 51, 0.5); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(15px); color: #ffffff; padding: 15px; font-weight: 900; text-transform: uppercase; text-align: left; border-bottom: 1px solid #333; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 10;">
-    <!-- Cabecera del Panel con tu flechita exacta -->
+    <!-- Cabecera del Panel -->
+    <div style="background: rgba(32, 44, 51, 0.9); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(15px); color: #ffffff; padding: 15px; font-weight: 900; text-transform: uppercase; text-align: left; border-bottom: 1px solid #333; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 10; box-sizing: border-box;">
         <div style="display: flex; align-items: center; gap: 12px;">
-            <button onclick="togglePanelTaxiLateral()" style="background: transparent; border: none; color: white; font-size: 20px; cursor: pointer; padding: 0;">
+            
+        
+             
+          
+          
+          <button onclick="togglePanelTaxiLateral()" style="background: transparent; border: none; color: white; font-size: 20px; cursor: pointer; padding: 0;">
                 <span style="display: inline-block; transform: scaleX(-1);"></span>
             </button>
             <span style="color: #ffd700; font-size: 15px;">🚖 zona Driver / pasajes</span>
@@ -1578,64 +1575,51 @@ function seleccionarRol(rolElegido) {
     </div>
 
     <!-- Contenido interno con scroll independiente -->
-    <div style="padding: 10px; flex-grow: 1; overflow-y: auto;">
+    <div style="padding: 12px; flex-grow: 1; overflow-y: auto; box-sizing: border-box;">
         
-        
-
-        
-
-<div class="panel-canjes-comercio" style="background: #203241; padding: 15px; border-radius: 12px; border: 1px solid #ffd700; margin-top: 10px;">
-     <h3 style="color: #ffd700; margin-top: 0; font-size: 16px;">📦 Selecciona la cantidad de Créditos:</h3>
-            
+      <div class="panel-canjes-comercio" style="background: rgba(32, 44, 51, 0.5); padding: 15px; border: 1px solid #444; border-radius: 12px;  margin-bottom: 10px; box-sizing: border-box;">
+     <p style="color: #ffd700; font-weight: bold; text-align: center; margin-top: 0; margin-bottom: 10px;">📦 Primero el Escaner despues los Créditos:</p>
     
-    <!-- Escala unitaria del 1 al 5 -->
-    <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 5px; margin-bottom: 10px;">
-        <button onclick="procesarCobroComercial(25)" style="padding: 10px; background: #20395c; color: #fff; border: 1px solid #444; border-radius: 8px; font-weight: bold; cursor: pointer;">25 Enviar</button>
-        <button onclick="procesarCobroComercial(100)" style="padding: 10px; background: #20395c; color: #fff; border: 1px solid #444; border-radius: 8px; font-weight: bold; cursor: pointer;">100</button>
-        <button onclick="procesarCobroComercial(150)" style="padding: 10px; background: #20395c; color: #fff; border: 1px solid #444; border-radius: 8px; font-weight: bold; cursor: pointer;">150</button>
-        <button onclick="procesarCobroComercial(200)" style="padding: 10px; background: #20395c; color: #fff; border: 1px solid #444; border-radius: 8px; font-weight: bold; cursor: pointer;">200</button>
-      <button onclick="procesarCobroComercial(300)" style="padding: 10px; background: #20395c; color: #fff; border: 1px solid #444; border-radius: 8px; font-weight: bold; cursor: pointer;">300</button>
-        
+    <!-- Primer bloque de montos (1 al 5) -->
+    <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; margin-bottom: 10px;">
+        <button onclick="procesarCobroComercial(25)" style="height: 40px; background: #ffd700; color: #0f0c0c; border: 2px solid #222628; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 13px; box-sizing: border-box;">25</button>
+        <button onclick="procesarCobroComercial(50)" style="height: 40px; background: #20395c; color: #fff; border: 2px solid #444; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 13px; box-sizing: border-box;">50</button>
+        <button onclick="procesarCobroComercial(100)" style="height: 40px; background: #20395c; color: #fff; border: 2px solid #444; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 13px; box-sizing: border-box;">100</button>
+        <button onclick="procesarCobroComercial(150)" style="height: 40px; background: #20395c; color: #fff; border: 2px solid #444; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 13px; box-sizing: border-box;">150</button>
+        <button onclick="procesarCobroComercial(200)" style="height: 40px; background: #20395c; color: #fff; border: 2px solid #444; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 13px; box-sizing: border-box;">200</button>
     </div>
-<button type="button" class="btn-space" onclick="document.getElementById('inputQRGaleria').click()" style="background: #20395c; color: #fff; font-weight: bold; width: 100%; margin-bottom: 10px; padding: 10px; cursor: pointer; border: 1px solid #444; border-radius: 6px;">📁 Buscar QR en Galería</button>
 
-    <!-- Tus botones principales de activación -->
+    <!-- Botón Escanear QR -->
+    <button type="button" class="btn-space" onclick="iniciarLectorQR()" style="background: #ffd700; color: #000; font-weight: bold; width: 100%; height: 42px; margin-bottom: 10px; cursor: pointer; border: none; border-radius: 8px; box-sizing: border-box;">📷 Escanear QR</button>
 
+    <!-- Input oculto para la galería -->
+    <input type="file" id="inputQRGaleria" accept="image/*" style="display: none;" onchange="procesarQRGaleria(this)">
 
-<!-- Input oculto para la galería -->
-<input type="file" id="inputQRGaleria" accept="image/*" style="display: none;" onchange="procesarQRGaleria(this)">
-
-<!-- Contenedor del escáner con la cámara y el botón de galería integrado adentro -->
-<div id="lector-qr-container" style="display: none; width: 100%; margin-bottom: 10px; border-radius: 8px; overflow: hidden; background: #000; border: 1px solid #ffd700; position: relative;">
-    
-    <!-- Vista previa de la cámara -->
-    <video id="preview-camara" style="width: 100%; height: 220px; object-fit: cover; display: block;"></video>
-    
-
-    <!-- Botón inferior para cerrar la cámara -->
-    <button type="button" onclick="detenerLectorQR()" style="background: #ff4d4d; color: #fff; border: none; width: 100%; padding: 8px; cursor: pointer; font-weight: bold;">Cerrar Cámara</button>
-</div>
-  
-    <!-- Combos y Multiplicadores -->
-    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;">
-        <input type="number" id="montoEnviar" placeholder="Monto Manual" style="width: 100%; padding: 8px; margin-bottom: 5px; background: #20395c; color: #fff; border: 1px solid #444; border-radius: 8px;">
-    <input type="text" id="idReceptor" placeholder="Ingresar   ID" style="width: 100%; padding: 8px; margin-bottom: 5px; background: #20395c; color: #fff; border: 1px solid #444; border-radius: 8px;">
-   
-    <button class="btn-space" style="background-color: #ffd700; color: #000; width:100%; padding: 10px; font-size: 12px; margin-bottom: 5px; margin-top: 5px; border-radius: 8px; cursor: pointer;" onclick="procesarCobroComercial() ">Enviar</button>
+    <!-- Contenedor del escáner con la cámara -->
+    <div id="lector-qr-container" style="display: none; width: 100%; margin-bottom: 10px; border-radius: 8px; overflow: hidden; background: #000; border: 1px solid #ffd700; position: relative; box-sizing: border-box;">
+        <video id="preview-camara" style="width: 100%; height: 220px; object-fit: cover; display: block;"></video>
     </div>
-</div>
-<!-- Switch de Modo Taxista -->
-        <div style=" padding: 15px; border-radius: 12px; border: 0px solid #FFD700; color: #fff; text-align: center; margin-bottom: 5px;">
-            
-            <label style="display: flex; align-items: center; justify-content: center; gap: 12px; cursor: pointer;">
-                <span style="font-size: 14px; font-weight: bold;"> TaxiDriver Disponible</span>Activar
+
+    <!-- Fila de Inputs (ID y Monto uno al lado del otro con idénticas medidas) -->
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 0px; box-sizing: border-box;">
+        <input type="text" id="idReceptor" placeholder="Ingresar ID" style="height: 40px; padding: 0 10px; background: #20395c; color: #fff; border: 2px solid #444; border-radius: 8px; box-sizing: border-box; font-size: 13px; width: 100%;">
+        <input type="number" id="montoEnviar" placeholder="Monto a Enviar" style="height: 40px; padding: 0 10px; background: #20395c; color: #fff; border: 2px solid #444; border-radius: 8px; box-sizing: border-box; font-size: 13px; width: 100%;">
+    </div>
+<button class="btn-space" style="background-color: #ffd700; color: #000; width:100%; padding: 6px; margin-top: 8px; margin-bottom: 1px; font-size: 13px; cursor: pointer;" onclick="procesarCobroComercial() ">Descontar</button>
+      
+      </div>
+
+        <!-- Switch de Modo Taxista -->
+        <div style="padding: 14px; border-radius: 12px; color: #fff; text-align: center; margin-bottom: 10px; background: rgba(32, 44, 51, 0.5); border: 1px solid #444; box-sizing: border-box;">
+            <label style="display: flex; align-items: center; justify-content: space-between; cursor: pointer; width: 100%;">
+                <span style="font-size: 14px; font-weight: bold;">🚕 TaxiDriver Disponible</span>Activar
                 <input type="checkbox" id="switchTaxista" onchange="manejarModoTaxista(this)" style="width: 22px; height: 22px; accent-color: #FFD700; cursor: pointer;">Desactivar
             </label>
         </div>
-<!-- Radar
- de Taxis Cercanos -->
-        <div style="background: rgba(32, 63, 84, 0.9490196078431372); border: 1px solid #ffd700; border-radius: 15px; padding: 15px; text-align: center;">
-            <h3 style="color: #ffd700; margin-top: 0; font-size: 16px;">🚕 TaxiDriver / 🚌 Autobuses / 🏍️ Deliverys</h3>
+
+        <!-- Radar de Taxis Cercanos -->
+        <div style="background: rgba(32, 44, 51, 0.5); border-radius: 15px; padding: 12px; border: 1px solid #444;text-align: center; box-sizing: border-box; margin-bottom: 15px;">
+            <h3 style="color: #ffd700; margin-top: 0; margin-bottom: 10px; font-size: 15px;">🚕 TaxiDriver / 🚌 Autobuses / 🏍️ Deliverys</h3>
             
             <iframe id="mapa-radar" 
                 width="100%" 
@@ -1644,20 +1628,23 @@ function seleccionarRol(rolElegido) {
                 loading="lazy" 
                 src="https://maps.google.com/maps?q=10.48,-66.9&z=14&output=embed">
             </iframe>
-            
         </div>
       
     </div>
-<div class="barra-flotante-premium">
+  <div class="barra-flotante-premium">
 
   <div class="btn-nav" onclick="togglePanelTaxiLateral();">
         <span>🛖</span><span>Inicio</span></div>
+
+
+  <div class="btn-nav" onclick="togglePanelTaxiLateral();">
+        <span>🚖</span><span>Driver</span></div>
+  <div class="btn-nav" onclick="toggleP2PPanel();">
+        <span></span><span>P2P</span></div>
  <div class="btn-nav" onclick="togglePanelContactosLateral();">
         <span>💬</span><span>Chat</span></div>
 
-<div class="btn-nav" onclick="abrirAgendaCompleta();">
-        <span>👥</span><span>Contactos</span>
-</div>
+
   <div class="btn-nav" 
      id="btn-nav-flow" 
      data-contacto='{"id_sistema":"26fmetp4Q4WJ","nombre":"Spaxio","apellido":"Flow","estado":"activo"}'
@@ -1667,10 +1654,299 @@ function seleccionarRol(rolElegido) {
 <div class="btn-nav" onclick="abrirCalculadora();">
         <span>💹</span><span>Cr / Tasas</span>
 </div>
-</div>
+  </div>
 </div>
 
+
+      <!-- ================================================================= -->
+<!-- COMPONENTE: PANEL LATERAL P2P (Pégalo dentro de tu app principal) -->
+<!-- ================================================================= -->
+
+<style>
+    /* Estilos encapsulados del panel lateral para que no afecten el resto de tu app */
+    #p2pSidePanel {
+        position: fixed;
+        top: 0;
+        left: 100%;
+        width: 100%;
+        height: 100vh;
+        background-color: #000;
+        font-family: Arial, sans-serif;
+        color: white;
+        z-index: 9999;
+        display: flex;
+        flex-direction: column;
+        padding-bottom: 60px;
+        overflow-x: hidden;
+        overflow-y: auto;
+        transition: left 0.35s cubic-bezier(0.25, 0.8, 0.25, 1);
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    #p2pSidePanel.abierto {
+        left: 0;
+    }
+
+    /* Tus estilos originales adaptados al ámbito del panel */
+    #p2pSidePanel * { box-sizing: border-box; }
+    #p2pSidePanel .header-bar { height:40px; background-color:#556b2f; width:100%; display:flex; align-items:center; justify-content: space-between; padding: 0 15px; position:fixed; top:0; z-index:100; }
+    #p2pSidePanel .brand-title { color:white; font-size:20px; font-weight:bold; text-transform:uppercase; }
+    #p2pSidePanel .header-icons-right { display: flex; align-items: center; gap: 20px; }
+    #p2pSidePanel .icon-btn { color: white; font-size: 1.3em; cursor: pointer; text-decoration: none; display: flex; align-items: center; }
+
+    #p2pSidePanel .nav-tabs-top { display: flex; justify-content: space-around; background: #1a1a1a; margin-top: 40px; border-bottom: 2px solid #556b2f; }
+    #p2pSidePanel .nav-tabs-bottom { display: flex; justify-content: space-around; background: #1a1a1a; border-top: 1px solid #333; position: fixed; bottom: 40px; width: 100%; z-index: 99; }
+    #p2pSidePanel .tab-link { padding: 15px 10px; color: #888; cursor: pointer; font-size: 0.65em; font-weight: bold; text-transform: uppercase; flex: 1; text-align: center; }
+    #p2pSidePanel .tab-link.active { color: white; background: rgba(107, 142, 35, 0.2); border-bottom: 3px solid #6b8e23; }
+    
+    #p2pSidePanel .main-content { flex: 1; padding-top: 20px; padding-bottom: 100px; }
+    #p2pSidePanel .top-wrapper { display:flex; justify-content:center; width:100%; margin-bottom: 20px; }
+    #p2pSidePanel .top-box { background-color:rgba(255,255,255,0.1); width:90%; max-width:380px; padding:15px; border-radius:24px; }
+    #p2pSidePanel .tasa-usdt { text-align:center; margin-bottom:15px; display: flex; flex-direction: column; align-items: center; }
+    #p2pSidePanel .input-wrapper-main { width: 180px; position:relative; display:flex; align-items:center; margin: 0 auto; }
+    #p2pSidePanel .input-wrapper { position:relative; display:flex; align-items:center; }
+    #p2pSidePanel .input-wrapper input, #p2pSidePanel .input-wrapper-main input { width:100%; padding:10px 10px 10px 40px; border-radius:50px; border:none; background-color:#ffd700; font-weight:bold; font-size:1.1em; color:#000; outline:none; text-align:center; }
+    #p2pSidePanel .bs-inside { position:absolute; left:6px; background:#000; color:#fff; font-size:10px; width:26px; height:26px; display:flex; align-items:center; justify-content:center; border-radius:50%; font-weight:bold; z-index:2; }
+    
+    #p2pSidePanel .bottom-row { display:flex; justify-content:space-between; gap:15px; perspective: 1000px; }
+    #p2pSidePanel .card-wrapper { width: 48%; display: flex; flex-direction: column; background-color: rgba(255, 255, 255, 0.1); align-items: center; cursor: pointer; padding: 5px; border-radius: 15px; transition: 0.3s; }
+    #p2pSidePanel .card-wrapper.selected { background-color: rgba(107, 142, 35, 0.4); border: 1px solid #6b8e23; }
+    
+    #p2pSidePanel .fixed-title { color:#ffd700; font-size:0.7em; margin-bottom:5px; text-align: center; text-transform: uppercase; font-weight: bold; }
+    #p2pSidePanel .field-top { width:100%; position: relative; height: 60px; transform-style: preserve-3d; transition: transform 0.6s; pointer-events: none; }
+    #p2pSidePanel .do-flip { transform: rotateY(180deg); }
+    #p2pSidePanel .face { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; display: flex; align-items: center; }
+    #p2pSidePanel .face-front { transform: rotateY(0deg); }
+    #p2pSidePanel .face-front input { background-color: #6b8e23 !important; color: white !important; }
+    #p2pSidePanel .face-back { transform: rotateY(180deg); }
+    #p2pSidePanel .face-back input { background-color: #ffd700 !important; color: black !important; }
+    
+    #p2pSidePanel .date-row { display: flex; flex-direction: column; align-items: center; margin-top: 15px; }
+    #p2pSidePanel .date-display { color: #ffd700; font-size: 0.8em; font-weight: bold; }
+    
+    #p2pSidePanel #switchArea { display: none; align-items: center; justify-content: center; margin-top: 10px; gap: 10px; font-size: 0.75em; color: #ffd700; }
+    #p2pSidePanel .switch { position: relative; display: inline-block; width: 34px; height: 18px; }
+    #p2pSidePanel .switch input { opacity: 0; width: 0; height: 0; }
+    #p2pSidePanel .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #333; transition: .4s; border-radius: 20px; }
+    #p2pSidePanel .slider:before { position: absolute; content: ""; height: 12px; width: 12px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
+    #p2pSidePanel input:checked + .slider { background-color: #556b2f; }
+    #p2pSidePanel input:checked + .slider:before { transform: translateX(16px); }
+
+    #p2pSidePanel .container { max-width:380px; margin:0 auto; background-color:#1a1a1a; padding:25px; border-radius:24px; }
+    #p2pSidePanel .field { margin-bottom:18px; }
+    #p2pSidePanel .field label { display:block; margin-bottom:5px; font-size:0.75em; color:#bbb; font-weight: bold; }
+    #p2pSidePanel .field input { width:100%; padding:12px; border-radius:12px; border:none; text-align:center; font-size:1.1em; background-color:#fff; color:#000; outline:none; }
+    #p2pSidePanel .field input[readonly] { background-color:#3b5f5f; color:#eaffea; font-weight:bold; }
+    #p2pSidePanel .calc-section { display: none; }
+    #p2pSidePanel .calc-section.active { display: block; }
+    
+    #p2pSidePanel .btn-check-binance, #p2pSidePanel .btn-pay-binance { width: 100%; padding: 15px; background-color: #FCD535; color: #000; border: none; border-radius: 12px; font-weight: 900; font-size: 1em; cursor: pointer; margin-top: 10px; display: flex; align-items: center; justify-content: center; gap: 10px; text-decoration: none; }
+    
+    #p2pSidePanel .modal-ticket { display: none; position: fixed; z-index: 200; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); justify-content: center; align-items: center; }
+    #p2pSidePanel .ticket-box { background: white; color: black; padding: 25px; border-radius: 12px; text-align: center; width: 280px; border-top: 8px solid #6b8e23; }
+    #p2pSidePanel .btn-copy { background: #25d366; color: white; border: none; padding: 10px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+    
+    
+    #p2pSidePanel .tether-svg { width: 24px; height: 24px; fill: white; cursor: pointer; }
+
+    @keyframes girarP2P { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+    #p2pSidePanel .girando { display: inline-block; animation: girarP2P 1s linear infinite; }
+</style>
+
+<!-- CONTENEDOR PRINCIPAL DEL PANEL -->
+<div id="p2pSidePanel">
+
+    <!-- MODAL BANCOS INTERNO -->
+    <div id="modalBancos" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:9999; align-items:flex-end; justify-content:center;">
+        <div style="background:white; width:100%; max-width:500px; height:85vh; border-top-left-radius:25px; border-top-right-radius:25px; display:flex; flex-direction:column; animation: subir 0.3s ease-out;">
+            <div style="padding:20px; border-bottom:1px solid #eee; display:flex; justify-content:space-between; align-items:center;">
+              
+                <h3 style="margin:0; color:#008080;">Precio en Bancos</h3>
+                <span class="fas fa-times" onclick="cerrarTasas()" style="cursor:pointer; font-size:22px; color:#999;">x
+            </div>
+            <div style="padding:10px 20px;">
+                
+            </div>
+            <div id="listaContenedor" style="flex:1; overflow-y:auto; padding:15px; -webkit-overflow-scrolling: touch;">
+                <p style="text-align:center; color:#333;">Cargando tasas oficiales...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- HEADER BAR CON FLECHA DE CIERRE -->
+    <div class="header-bar">
+        <div style="display: flex; align-items: center; gap: 12px;">
+            
+            
+          <div onclick="alert('Tasas Plataformas próximamente')">
+            <svg class="tether-svg" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.49 9.32h-3.41v5.6h-2.16v-5.6H7.51v-1.9h8.98v1.9zM12 10.45l4.31-.01v-1.1H7.69v1.1l4.31.01zM18.15 8H5.85L5.5 7.15h13l-.35.85z"/></svg>
+        </div>
+       
+          
+        </div>
+        <div style="font-size: 0.8em; opacity: 0.8;">USDT Referencial Binance P2P
+        
+        </div>
       
+      <div class="icon-btn" onclick="abrirTasas()"><span class="fas fa-building-columns">🏦</div>
+
+      
+    </div>
+
+    <!-- TABS SUPERIORES -->
+    <nav class="nav-tabs-top">
+        <div class="tab-link active" onclick="openTab('comercio')">Comercio</div>
+        <div class="tab-link" onclick="openTab('cliente')">Cliente</div>
+        <div class="tab-link" onclick="openTab('exchange')">USDT P2P</div>
+        <div class="tab-link" onclick="openTab('exchange2')">YsaPay P2P</div>
+    </nav>
+
+    <!-- CONTENIDO CENTRAL -->
+    <div class="main-content">
+        <div class="top-wrapper">
+            <div class="top-box">
+                <div class="tasa-usdt"></div>
+                <div class="fixed-title">tasa USDT</div>
+                <input type="number" id="adjInput" value="4.21" step="0.01" style="display:none;">
+                <div class="input-wrapper-main">
+                    <span class="bs-inside">Bs</span>
+                    <input type="text" id="p2pRate" readonly>
+                </div>
+            </div>
+        </div>
+
+        <div class="top-wrapper">
+            <div class="top-box" spadding: 0; box-shadow: none;">
+                <div class="bottom-row">
+                    <div class="card-wrapper selected" id="cardBCV" onclick="selectTasa('bcv')">
+                        <div class="fixed-title">tasa BCV</div>
+                        <div class="field-top do-flip" id="flipBCV">
+                            <div class="face face-front"><div class="input-wrapper"><span class="bs-inside">Bs</span><input type="number" id="bcvRate" readonly></div></div>
+                            <div class="face face-back"><div class="input-wrapper"><span class="bs-inside">Bs</span><input type="number" id="bcvRateBack" readonly></div></div>
+                        </div>
+                    </div>
+
+                    <div class="card-wrapper" id="cardEuro" onclick="selectTasa('euro')">
+                        <div class="fixed-title">Tasa EURO</div>
+                        <div class="field-top do-flip" id="flipEuro">
+                            <div class="face face-front"><div class="input-wrapper"><span class="bs-inside">Bs</span><input type="number" id="euroRate" readonly></div></div>
+                            <div class="face face-back"><div class="input-wrapper"><span class="bs-inside">Bs</span><input type="number" id="euroRateBack" readonly></div></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="date-row" onclick="cargarTasas()" style="cursor:pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; margin-top: 10px; margin-bottom: 10px;">
+                    <div class="card-container" style="height: 25px; width: 150px; margin: 0 auto 5px auto; perspective: 1000px;">
+                        <div style="position: relative; height: 35px; width: 100%; display: flex; justify-content: center; margin-bottom: 10px;">
+                            <div id="divFechaNext" style="position: absolute; background: #1a1a1a; padding: 3.5px 15px; border-radius: 8px; border: 1px solid #333; display: block;">
+                                <span id="dateDisplay" style="color: #ffd700; font-size: 1.1em; font-weight: bold;">--/--/----</span>
+                            </div>
+                            <div id="divFechaHoy" style="position: absolute; background: #6b8e23; padding: 3px 15px; border-radius: 9px; border: 1px solid #777; display: none;">
+                                <span id="dateNextDisplay" style="color: #ffd700; font-size: 1.1em; font-weight: bold;">--/--/----</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="color: #ffd700; display: flex; align-items: center; gap: 6px; font-size: 0.75em; font-weight: bold; text-transform: uppercase;">
+                        <span id="iconoActualizar" style="font-size: 1.2em; display: inline-block;">♻️</span>
+                        <span id="timeDisplay"></span>
+                    </div>
+                </div>
+
+                <div id="timeP2PDisplay" style="color: #ffd700; font-size: 0.75em; font-weight: bold; text-align: center">
+                    ÚLTIMA ACTUALIZACIÓN P2P: Cargando...
+                </div>
+
+                <div id="switchArea">
+                    <span>mañana</span>
+                    <label class="switch"><input type="checkbox" id="nextDaySwitch" onchange="toggleFlip()" checked><span class="slider"></span></label>
+                    <span>hoy</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+            <div id="comercio" class="calc-section active">
+                <div class="field"><label>Precio Producto (USD)</label><input type="number" id="priceUSD" placeholder="0.00" inputmode="decimal"></div>
+                <div class="field"><label id="labelVES">Bolívares</label><input type="text" id="totalVES" readonly></div>
+                <div class="field"><label>Total USDT</label><input type="text" id="totalUSDT" readonly style="background-color:#1e3a1e;"></div>
+                <a href="bnc://app.binance.com/payment/main" class="btn-check-binance">
+                    <i class="fas fa-search-dollar"></i> REVISAR PAGO (BINANCE)
+                </a>
+            </div>
+
+            <div id="cliente" class="calc-section">
+                <div class="field"><label>Costo Producto (USD)</label><input type="number" id="priceCli" placeholder="0.00" inputmode="decimal"></div>
+                <div class="field"><label id="labelCli">Bolívares + IGTF</label><input type="text" id="bsCliBCV" readonly></div>
+                <div class="field"><label>Monto en USDT</label><input type="text" id="usdtCliFinal" readonly style="background-color:#1e3a1e;"></div>
+                <a href="bnc://app.binance.com/payment/main" class="btn-pay-binance"><strong>🟡 PAGAR CON BINANCE APP</strong></a>
+            </div>
+
+            <div id="exchange" class="calc-section">
+                <div class="field"><label>Compra (Tasa: <span id="labBuy">--</span>)</label><input type="number" id="uBuy" placeholder="Monto USDT" inputmode="decimal"></div>
+                <div class="field"><label>El Cliente Paga (Bs)</label><input type="text" id="resBuy" readonly></div>
+                <div class="field">
+                    <label>Venta (Tasa: <span id="labSell">--</span>)</label>
+                    <input type="number" id="uSell" placeholder="Monto USDT" inputmode="decimal" oninput="actualizar()">
+                </div>
+                <div class="field">
+                    <label>El Cliente Recibe (Bs)</label>
+                    <input type="text" id="resSell" readonly>
+                </div>
+            </div>
+
+            <div id="exchange2" class="calc-section">
+                <div class="field">
+                    <label>Lo que Recibes S.I<span id="labBuy2"></span></label>
+                    <input type="number" id="uBuy2" placeholder="Monto" inputmode="decimal" oninput="actualizar()">
+                </div>
+                <div class="field">
+                    <label>Lo que Envias S.C</label>
+                    <input type="text" id="resBuy2" readonly>
+                </div>
+            </div>
+
+            <div id="cierre" class="calc-section">
+                <div class="field"><label>Ventas Totales (USDT)</label><input type="number" id="vCierre" placeholder="0.00" inputmode="decimal"></div>
+            </div>
+
+            <div id="grafica" class="calc-section">
+                <canvas id="miGrafica" height="200"></canvas>
+            </div>
+
+            <div id="nota" class="calc-section">
+                <div class="field"><label>Confirmar Pago Recibido (USDT)</label><input type="number" id="nInput" placeholder="0.00" inputmode="decimal"></div>
+                <button onclick="generarNota()" style="width:100%; padding:15px; background:#6b8e23; color:white; border:none; border-radius:12px; font-weight:bold;">CONFIRMAR Y NOTIFICAR</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- TABS INFERIORES -->
+    <nav class="nav-tabs-bottom">
+        <div class="tab-link" onclick="openTab('cierre')">Cierre</div>
+        <div class="tab-link" onclick="openTab('grafica')">Gráfica</div>
+        <div class="tab-link" onclick="openTab('nota')">Nota</div>
+    </nav>
+
+    <!-- MODAL TICKET -->
+    <div id="modalTicket" class="modal-ticket">
+        <div class="ticket-box">
+            <h3 style="color:#556b2f;">PAGO CONFIRMADO</h3>
+            <h1 id="nFinal" style="margin:15px 0; font-size: 2.2em;">0.00 USDT</h1>
+            <button class="btn-copy" onclick="copiarWA()">ENVIAR WHATSAPP</button>
+            <button onclick="document.getElementById('modalTicket').style.display='none'" style="margin-top:10px; width:100%; padding:8px; background:#eee; border:none; border-radius:8px;">CERRAR</button>
+        </div>
+    </div>
+
+    
+</div>
+
+<!-- ÚNICA FUNCIÓN DE TOGGLE PARA ABRIR/CERRAR DESDE TU APP -->
+<script>
+    function toggleP2PPanel() {
+        const panel = document.getElementById('p2pSidePanel');
+        panel.classList.toggle('abierto');
+    }
+</script>
   
     
  
@@ -1748,47 +2024,87 @@ function seleccionarRol(rolElegido) {
     </div>   
 
 
-</div>    
+</div> 
 
-  <!-- Contenedor
- deslizable de productos/comercios -->
-    <div id="contenedor-spaxioflow-stories" style="display: flex; gap: 5px; overflow-x: auto; padding-bottom: 5px; scrollbar-width: 100; align-items: center; touch-action: pan-y; /* Permite scroll solo de arriba a abajo */
-    -webkit-overflow-scrolling: touch; overscroll-behavior-y: contain;
-    ">
+ 
+
+
+    <!-- Las tarjetas de la comunidad se inyectarán dinámicamente aquí al lado -->
+
         
-        <!-- Tarjeta de Comercio 1 -->
-        <div style="min-width: 110px; background: #151828; border: 1px solid #323657; border-radius: 10px; padding: 8px; text-align: center; flex-shrink: 0; cursor: pointer;">
-            <div style="font-size: 22px; margin-bottom: 4px;">🍔</div>
-            <div style="font-size: 11px; color: #fff; font-weight: bold;">Space Burger</div>
-            <div style="font-size: 10px; color: #00ffcc; margin-top: 2px;">-10% Puntos</div>
-        </div>
+   
+             
 
-        <!-- Tarjeta de Comercio 2 -->
-        <div style="min-width: 110px; background: #151828; border: 1px solid #323657; border-radius: 10px; padding: 8px; text-align: center; flex-shrink: 0; cursor: pointer;">
-            <div style="font-size: 22px; margin-bottom: 4px;">☕</div>
-            <div style="font-size: 11px; color: #fff; font-weight: bold;">Café Galaxia</div>
-            <div style="font-size: 10px; color: #ffd700; margin-top: 2px;">Cashback</div>
-        </div>
-
-        <!-- Tarjeta de Comercio 3 -->
-        <div style="min-width: 110px; background: #151828; border: 1px solid #323657; border-radius: 10px; padding: 8px; text-align: center; flex-shrink: 0; cursor: pointer;">
-            <div style="font-size: 22px; margin-bottom: 4px;">🛒</div>
-            <div style="font-size: 11px; color: #fff; font-weight: bold;">Market Express</div>
-            <div style="font-size: 10px; color: #00ffcc; margin-top: 2px;">Delivery Gratis</div>
-        </div>
-<!-- Tarjeta de Comercio 4 -->
-        <div style="min-width: 110px; background: #151828; border: 1px solid #323657; border-radius: 10px; padding: 8px; text-align: center; flex-shrink: 0; cursor: pointer;">
-            <div style="font-size: 22px; margin-bottom: 4px;">☕</div>
-            <div style="font-size: 11px; color: #fff; font-weight: bold;">Abasto Tio San</div>
-            <div style="font-size: 10px; color: #ffd700; margin-top: 2px;">Cashback</div>
-        </div>
+              <!-- Contenedor del feed
+<div style="width: 30%; margin-top: 0px; text-align: left; padding: 0 5px;">
+    
+      
+        <div class="btn-nav" 
+     id="btn-nav-flow" 
+     data-contacto='{"id_sistema":"26fmetp4Q4WJ","nombre":"Spaxio","apellido":"Flow","estado":"activo"}'
+     onclick="cargarConversacionCon(JSON.parse(this.dataset.contacto).id_sistema)"><span style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; padding: 0 5px;font-size: 13px; font-weight: bold; color: #ffd700; text-transform: uppercase; letter-spacing: 1px;">YouSpace
+        <span>🎬</span>
+        
     </div>
-</div>      
 </div>
-<!-- ============================================================== -->            
-  
-                 
-         
+  <!-- Contenedor deslizable del feed
+    <div style="display: flex; gap: 10px; overflow-x: auto; padding-bottom: 5px; scrollbar-width: none;">
+        
+        <!-- Tarjeta historias del feed-
+        <div style="background: #151828; border: 1px solid #323657; border-radius: 50px; padding: 0px; text-align: center; flex-shrink: 0; cursor: pointer;">
+            
+          <div onclick="document.getElementById('input-mi-foto').click()" style="width: 100px; border-radius: 50%; padding: 35px; border: 1px solid #ffd700; overflow: hidden; background: #222; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0;">
+              <img id="26fmetp4Q4WJ" src="" style="width: 50%; height: 50%; object-fit: cover; display: block;">
+              
+            </div>
+           
+<div style="background: #151828; border: 1px solid #323657; border-radius: 50px; padding: 0px; text-align: center; flex-shrink: 0; cursor: pointer;">
+            
+          <div onclick="document.getElementById('input-mi-foto').click()" style="width: 100px; border-radius: 50%; padding: 35px; border: 1px solid #ffd700; overflow: hidden; background: #222; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0;">
+              <img id="26fmetp4Q4WJ" src="" style="width: 50%; height: 50%; object-fit: cover; display: block;"--->
+              
+          
+<!-- Contenedor general del Mercado P2P --<div style="background: #202732; border: 1px solid rgba(255, 215, 0, 0.3); border-radius: 12px; padding: 10px; margin-bottom: 12px; display: flex; flex-direction: column; gap: 8px;">
+    
+    <!-- Cabecera de la Ficha -- <div style="display: flex; justify-content: space-between; align-items: center; font-size: 11px; color: #8696a0;">
+        <span>Comercio ID: #8921</span>
+        <span style="color: #ffd700; font-weight: bold;">● Activo</span>
+    </div>
+
+    <!-- Fichas de Saldos (SC, SL, SE) en línea compacta --
+    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; text-align: center;">
+        
+        <!-- Ficha SC (Saldo Cripto) --
+        <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,215,0,0.2); border-radius: 8px; padding: 6px 4px;">
+            <div style="font-size: 9px; color: #ffd700; font-weight: bold;">SC (Cripto)</div>
+            <div style="font-size: 11px; color: #fff; margin-top: 2px;">10 - 50</div>
+        </div>
+
+        <!-- Ficha SL (Saldo Local) --
+        <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,215,0,0.2); border-radius: 8px; padding: 6px 4px;">
+            <div style="font-size: 9px; color: #ffd700; font-weight: bold;">SL (Local)</div>
+            <div style="font-size: 10px; color: #fff; margin-top: 2px;">1.1k - 110k</div>
+        </div>
+
+        <!-- Ficha SE (Saldo Extranjero) --
+        <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,215,0,0.2); border-radius: 8px; padding: 6px 4px;">
+            <div style="font-size: 9px; color: #ffd700; font-weight: bold;">SE (Extranj.)</div>
+            <div style="font-size: 11px; color: #fff; margin-top: 2px;">60 - 75</div>
+        </div>
+
+    </div>
+
+    <!-- Botón de Acción Rápida --
+    <button style="background: #ffd700; color: #000; border: none; border-radius: 6px; padding: 6px; font-weight: bold; font-size: 11px; cursor: pointer; width: 100%; margin-top: 2px;">
+        Intercambiar / Ofertar
+    </button>
+</div>--->
+
+      <!-- CARRUSEL VERTICAL TIPO INSTAGRAM (SCROLL ARRIBA Y ABAJO) -->
+    <div id="carrusel-feed-instagram" style="display: flex; flex-direction: column; gap: 15px; width: 100%; margin-top: 15px; max-height: 7
+      1000vh; overflow-y: auto; padding-right: 2px; -webkit-overflow-scrolling: touch;">
+        <!-- Las tarjetas se inyectarán dinámicamente aquí -->
+    </div>   
 
 
   <!-- ============================================================== -->
@@ -1905,7 +2221,7 @@ function seleccionarRol(rolElegido) {
 
         <div class="calc-body" style="color: white;">
             <!-- 1. Primero las tarjetas de tasas (P2P, BCV, Euro) -->
-            <div class="top-wrapper">
+            <div  class="top-wrapper">
                 <div class="top-box">
                     <div class="fixed-title" style="text-align: center;">Tasa USDT P2P</div>
                     <div class="input-wrapper-main">
@@ -1930,45 +2246,11 @@ function seleccionarRol(rolElegido) {
                         </div>
 
                     
-                    </div>
-                </div>
-            </div>
+                    </div></div></div>
+                
+            
           
-          <div class="date-row" onclick="cargarTasas()" style="cursor:pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; margin-top: 10px; margin-bottom: 10px;">
-
-
-        <div class="card-container" style="height: 25px; width: 150px; margin: 0 auto 5px auto; perspective: 1000px;">
-    <div style="position: relative; height: 35px; width: 100%; display: flex; justify-content: center; margin-bottom: 10px;">
-    
-    <div id="divFechaNext" style="position: absolute; background: #1a1a1a; padding: 3.5px 15px; border-radius: 8px; border: 1px solid #333; box-shadow: 0 0px 0px rgba(0,0,0,0.5); display: block;">
-        <span id="dateDisplay" style="color: #ffd700; font-size: 1.1em; font-weight: bold;">--/--/----</span>
-    </div>
-
-    <div id="divFechaHoy" style="position: absolute; background: #6b8e2; padding: 3px 15px; border-radius: 9px; border: 1px solid #777; box-shadow: 0 0px 0px rgba(0,0,0,0.6); display: none;">
-        <span id="dateNextDisplay" style="color: #ffd70; font-size: 1.1em; font-weight: bold;">--/--/----</span>
-    </div>
-
-        <div class="back" style="position: absolute; width: 100%; height: 100%; backface-visibility: hidden; display: flex; align-items: center; justify-content: center; background: transparent; border: none; transform: rotateX(180deg);">
-            <span id="dateNextDisplay" style="color: #ffd700; font-size: 1.1em; font-weight: bold;">--/--/----</span>
-
-        </div>
-    </div>
-</div>
- 
-     
-      
-
-      <div id="switchArea">
-
-        <span>mañana</span>
-
-        <label class="switch"><input type="checkbox" id="nextDaySwitch" onchange="toggleFlip()" checked><span class="slider"></span></label>
-
-        <span>hoy</span>
-
-      </div>
-
-    </div>
+          
 
 
             <!-- 2. Después los campos de cálculo (Precio USD, Bolívares, USDT) -->
@@ -1989,19 +2271,25 @@ function seleccionarRol(rolElegido) {
 
 
             </div>
+                
+                <button onclick="abrirAfiliacionComercial()" style="width: 100%; padding: 8px; background-color: #43fc35; color: #000; border: none; border-radius: 12px; font-weight: 900; font-size: 1em; cursor: pointer; margin-top: 10px; display: flex; align-items: center; justify-content: center; gap: 10px; text-decoration: none;;">Afiliacion / Creditos</button>
+                
+                
+                </div>
+              
 
         
                
               
           
-            </div>
+            
       
-      </div>
+      
           
-        </div>
       
-    </div>
-</div>
+      
+    
+
 
 
 
@@ -2046,8 +2334,65 @@ function seleccionarRol(rolElegido) {
     </div>
 
 
+         
 
-            
+<style>
+    @keyframes subir { from { transform: translateY(100%); } to { transform: translateY(0); } }
+    .card-banco { display:flex; align-items:center; background:#fff; padding:15px; border-radius:15px; margin-bottom:12px; box-shadow:0 2px 5px rgba(0,0,0,0.05); border:1px solid #f0f0f0; }
+    .img-logo { width:50px; height:50px; margin-right:15px; object-fit:contain; }
+</style>
+
+<script>
+    const URL_JSON = "https://raw.githubusercontent.com/alfonsocamacho00089-cloud/captura_bcv.py/main/bancos.json";
+    
+    // Aquí pon los nombres de las imágenes exactos que subiste a GitHub
+    const BASE_URL_LOGOS = "https://raw.githubusercontent.com/alfonsocamacho00089-cloud/captura_bcv.py/main/";
+
+    function abrirTasas() {
+        document.getElementById('modalBancos').style.display = 'flex';
+        actualizarLista();
+    }
+
+    function cerrarTasas() {
+        document.getElementById('modalBancos').style.display = 'none';
+    }
+
+    async function actualizarLista() {
+        try {
+            const res = await fetch(URL_JSON);
+            const datos = await res.json();
+            const contenedor = document.getElementById('listaContenedor');
+            contenedor.innerHTML = '';
+
+            datos.forEach(b => {
+                let nombreLimpio = b.banco.replace(/\\u00e9/g, 'é').replace(/\\u00ed/g, 'í').replace(/\\u00f3/g, 'ó');
+                
+                // Intentamos armar el nombre del logo (ej: "Banesco" -> "banesco.png")
+                let nombreLogo = nombreLimpio.toLowerCase().split(' ')[0] + ".png"; 
+
+                contenedor.innerHTML += `
+                    <div class="card-banco">
+                        <img src="${BASE_URL_LOGOS}${nombreLogo}" onerror="this.src='https://cdn-icons-png.flaticon.com/512/2830/2830284.png'" class="img-logo">
+                        <div style="flex:1">
+                            <div style="font-size:12px; color:#888;">Banco</div>
+                            <div style="font-weight:bold; color:#333;">${nombreLimpio}</div>
+                        </div>
+                        <div style="text-align:right">
+                            <div style="font-size:12px; color:#888;">Precio</div>
+                            <div style="font-size:20px; font-weight:bold; color:#008080;">${parseFloat(b.precio).toFixed(2)}</div>
+                        </div>
+                    </div>
+                `;
+            });
+        } catch (e) {
+            console.error(e);
+        }
+    }
+</script>
+         
+
+
+   
 
 
             <script>
@@ -2057,6 +2402,8 @@ function seleccionarRol(rolElegido) {
     alert("🚨 ERROR DETECTADO:\n\n" + message + "\n\nArchivo: " + source + "\nLínea: " + lineno);
     return false;
 };
+              
+              
 async function procesarCobroComercial(cantidadMonto = null) {
     const receptorInput = document.getElementById('idReceptor');
     const montoInput = document.getElementById('montoEnviar');
@@ -2076,7 +2423,7 @@ async function procesarCobroComercial(cantidadMonto = null) {
         return;
     }
 
-    const confirmar = confirm(`🔍 ¿Confirmar cobro al cliente?\n\n💵 Monto a recibir: Bs. ${monto.toFixed(2)}\n👤 Cliente ID: ${clienteID}`);
+    const confirmar = confirm(`🔍 ¿Confirmar cobro al cliente?\n\n💵 Monto a recibir: Cr. ${monto.toFixed(2)}\n👤 Cliente ID: ${clienteID}`);
     if (!confirmar) return;
 
     const codigoOperacion = "COB-" + Math.floor(100000 + Math.random() * 900000);
@@ -2088,14 +2435,14 @@ async function procesarCobroComercial(cantidadMonto = null) {
 
     const elBalance = document.getElementById('balanceVisual');
     if (elBalance) {
-        elBalance.innerText = "Bs. " + saldoActual.toLocaleString('es-VE', { minimumFractionDigits: 2 });
+        elBalance.innerText = "Cr. " + saldoActual.toLocaleString('es-VE', { minimumFractionDigits: 2 });
     }
 
     const inputTarget = document.querySelector('#target-id');
     const targetAnterior = inputTarget ? inputTarget.value : '';
     if (inputTarget) inputTarget.value = clienteID;
 
-    const mensajeCobro = `🧾 ¡Cobro Exitoso en Comercio! Se procesó un cargo de Bs. ${monto.toFixed(2)} (Ref: ${codigoOperacion}) |SPA_COBRO|${monto}|${codigoOperacion}`;
+    const mensajeCobro = `🧾 ¡Gracias por usar YsaPay! Se procesó un cargo de Cr. ${monto.toFixed(2)} (Ref: ${codigoOperacion}) |SPA_COBRO|${monto}|${codigoOperacion}`;
 
     await enviarMensajeSatelital(mensajeCobro, 'texto');
 
@@ -2105,7 +2452,7 @@ async function procesarCobroComercial(cantidadMonto = null) {
     montoInput.value = '';
     cerrarSubModalIntegrado('submodal-miqr');
 
-    alert(`✅ ¡Cobro de Bs. ${monto.toFixed(2)} realizado con éxito!`);
+    alert(`✅ ¡Cobro de Cr. ${monto.toFixed(2)} realizado con éxito!`);
 }
 
 async function procesarEnvioInterno() {
@@ -2209,7 +2556,7 @@ function sincronizarInterfazSaldos() {
     // Actualizar vista principal en la tarjeta visual (YsaPay / My Cards)
     const elBalance = document.getElementById('balanceVisual');
     if (elBalance) {
-        elBalance.innerText = "Bs. " + parseFloat(saldoActual).toLocaleString('es-VE', {minimumFractionDigits: 2});
+        elBalance.innerText = "Cr. " + parseFloat(saldoActual).toLocaleString('es-VE', {minimumFractionDigits: 2});
     }
 
     const elSaldoPrincipal = document.getElementById('saldo-principal-display');
@@ -2312,6 +2659,8 @@ function sincronizarInterfazSaldos() {
         document.getElementById('idReceptor').value = '';
     }
               }
+
+  
               function sincronizarMiFotoEnStories() {
     const imgStory = document.getElementById('story-mi-foto-perfil');
     if (!imgStory) return;
@@ -2343,31 +2692,103 @@ window.addEventListener('DOMContentLoaded', () => {
     // 3. Tu función de sincronización de perfil existente
     setTimeout(sincronizarMiFotoEnStories, 500);
 });
+
+              function darLike(postId) {
+    const contador = document.getElementById(`contador-like-${postId}`);
+    const icono = document.getElementById(`icono-like-${postId}`);
+    
+    if (contador && icono) {
+        let actual = parseInt(contador.innerText) || 0;
+        if (icono.style.color === 'red') {
+            icono.style.color = '#fff';
+            contador.innerText = actual - 1;
+            localStorage.setItem(`dado_like_${postId}`, 'false');
+        } else {
+            icono.style.color = 'red';
+            contador.innerText = actual + 1;
+            localStorage.setItem(`dado_like_${postId}`, 'true');
+        }
+        localStorage.setItem(`like_${postId}`, contador.innerText);
+    }
+}
+
+function darPulgar(postId) {
+    const contador = document.getElementById(`contador-pulgar-${postId}`);
+    const icono = document.getElementById(`icono-pulgar-${postId}`);
+    
+    if (contador && icono) {
+        let actual = parseInt(contador.innerText) || 0;
+        if (icono.style.color === 'rgb(255, 215, 0)' || icono.style.color === '#ffd700') {
+            icono.style.color = '#fff';
+            contador.innerText = actual - 1;
+            localStorage.setItem(`dado_pulgar_${postId}`, 'false');
+        } else {
+            icono.style.color = '#ffd700';
+            contador.innerText = actual + 1;
+            localStorage.setItem(`dado_pulgar_${postId}`, 'true');
+        }
+        localStorage.setItem(`pulgar_${postId}`, contador.innerText);
+    }
+}
+
+function toggleComentarios(postId) {
+    const box = document.getElementById(`box-comentarios-${postId}`);
+    if (box) {
+        if (box.style.display === 'none' || box.style.display === '') {
+            box.style.display = 'flex';
+        } else {
+            box.style.display = 'none';
+        }
+    }
+              }
+              
+              function darComentario(postId) {
+    const contador = document.getElementById(`contador-comentarios-${postId}`);
+    const box = document.getElementById(`box-comentarios-${postId}`);
+    
+    if (contador) {
+        let actual = parseInt(contador.innerText) || 0;
+        
+        // Verificamos si ya abrió o interactuó con la caja de comentarios
+        let yaComento = localStorage.getItem(`dado_comentario_${postId}`) === 'true';
+        
+        if (yaComento) {
+            // Si ya habia sumado su comentario y quiere ajustarlo/quitarlo
+            contador.innerText = Math.max(0, actual - 1);
+            localStorage.setItem(`dado_comentario_${postId}`, 'false');
+        } else {
+            // Suma un nuevo comentario al contador
+            contador.innerText = actual + 1;
+            localStorage.setItem(`dado_comentario_${postId}`, 'true');
+        }
+        
+        // Guardamos el número limpio en el localStorage tal como el like
+        localStorage.setItem(`comentarios_${postId}`, contador.innerText);
+    }
+              }
 async function subirYAbrirSpaxioFlow(input) {
     if (!input.files || !input.files[0]) return;
     
     const archivo = input.files[0];
-    alert("🚀 Subiendo archivo a SpaxioFlow...");
 
-    // 1. Apuntamos temporalmente el target al ID de SpaxioFlow para que la app sepa a dónde enviarlo
+    // 1. 🔥 VENTANA FLOTANTE PARA EL TEXTO TIPO NOTICIA
+    const textoNoticia = prompt("Escribe una noticia corta o titular para la publicación (opcional):", "") || "";
+
+    alert("🚀 Subiendo historia a SpaxioFlow...");
+
     const inputTarget = document.querySelector('#target-id');
     if (inputTarget) inputTarget.value = "26fmetp4Q4WJ";
 
-    // 2. Usamos tu función existente para preparar y enviar el archivo multimedia
     let tipo = archivo.type.includes('video') ? 'video' : 'foto';
     await prepararEnvioMedia(input, tipo);
 
-    // ==========================================
-    // >>> AQUÍ AGREGAS ESTO PARA GUARDAR EN EL CARRUSEL <<<
-    // ==========================================
     const lector = new FileReader();
     lector.onload = function(e) {
         const img = new Image();
         img.src = e.target.result;
         img.onload = function() {
-            // Creamos un canvas para comprimir la imagen
             const canvas = document.createElement('canvas');
-            const MAX_WIDTH = 600; // Ancho máximo seguro para historias
+            const MAX_WIDTH = 600;
             const scaleSize = MAX_WIDTH / img.width;
             canvas.width = MAX_WIDTH;
             canvas.height = img.height * scaleSize;
@@ -2375,32 +2796,25 @@ async function subirYAbrirSpaxioFlow(input) {
             const ctx = canvas.getContext('2d');
             ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
 
-            // Convertimos a JPEG comprimido (calidad 70%) para quecupe muy poco espacio
-            const urlImagenComprimida = canvas.toDataURL('image/jpeg', 0.7);
+            const urlImagenComprimida = canvas.toDataURL('image/jpeg', 0.8);
 
             const nuevaHistoriaLocal = {
                 id: "historia_local_" + Date.now(),
-                sender_name: "Pedro Peres",
+                sender_name: localStorage.getItem('mi_nombre') || "Pedro Peres",
                 content: urlImagenComprimida,
                 tipo: tipo,
+                descripcion: textoNoticia, // 👈 AQUÍ SE GUARDA LO QUE ESCRIBISTE EN LA VENTANA
                 created_at: new Date().toISOString()
             };
 
             let misHistorias = JSON.parse(localStorage.getItem('spaxio_historias_locales') || '[]');
-            
-            // Limitamos el historial a máximo 10 historias para no saturar nunca el localStorage
-            if (misHistorias.length >= 10) {
-                misHistorias = misHistorias.slice(0, 9);
-            }
-
+            if (misHistorias.length >= 15) misHistorias = misHistorias.slice(0, 14);
             misHistorias.unshift(nuevaHistoriaLocal);
             
             try {
                 localStorage.setItem('spaxio_historias_locales', JSON.stringify(misHistorias));
             } catch (err) {
-                console.error("Error al guardar por espacio:", err);
-                alert("El almacenamiento local está lleno. Borra algunas historias antiguas.");
-                return;
+                console.error("Almacenamiento lleno:", err);
             }
 
             if (typeof renderizarSpaxioFlowStories === 'function') {
@@ -2409,22 +2823,139 @@ async function subirYAbrirSpaxioFlow(input) {
         };
     };
     lector.readAsDataURL(archivo);
-    
-    // ==========================================
+              }
 
-    // Refrescamos el carrusel de inmediato y luego abrimos la conversación
-        if (typeof renderizarSpaxioFlowStories === 'function') {
-            renderizarSpaxioFlowStories(misHistorias);
+      function renderizarSpaxioFlowStories(historias) {
+    const contenedorInstagram = document.getElementById('carrusel-feed-instagram');
+    if (!contenedorInstagram) return;
+
+    contenedorInstagram.innerHTML = ''; 
+
+    if (!historias || historias.length === 0) {
+        contenedorInstagram.innerHTML = `
+            <div style="text-align: center; padding: 25px; color: #8696a0; font-size: 12px; background: #202732; border-radius: 16px; border: 1px solid rgba(255,215,0,0.1);">
+                Sube una historia con el botón "+" de arriba para verla aquí en tarjetas tipo Instagram 🚀
+            </div>
+        `;
+        return;
+    }
+
+    historias.forEach((post, index) => {
+        const urlImg = post.content || post.imagen_url || post.media_url || post.foto || '';
+        const nombreUsr = post.sender_name || post.remitente || 'Pedro Peres';
+        const fechaHora = post.created_at ? new Date(post.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Hace un momento';
+        const postId = post.id || 'post_' + index;
+
+        const comentariosKey = 'comentarios_' + postId;
+        const comentariosGuardados = JSON.parse(localStorage.getItem(comentariosKey) || '[]');
+
+        const tarjetaInsta = document.createElement('div');
+        tarjetaInsta.className = 'tarjeta-feed-insta'; // Usamos la clase CSS blindada
+
+        let contenidoMedia = '';
+        if (urlImg && (urlImg.startsWith('data:image') || urlImg.startsWith('http'))) {
+            contenidoMedia = `<img src="${urlImg}" class="imagen-feed-insta" onerror="this.style.display='none'">`;
+        } else if (post.tipo === 'video' || (urlImg && (urlImg.includes('.mp4') || urlImg.includes('.webm')))) {
+            contenidoMedia = `<video src="${urlImg}" controls playsinline class="imagen-feed-insta"></video>`;
+        } else {
+            contenidoMedia = `<div style="padding: 20px; color: #fff; font-size: 13px; text-align: center; min-height: 150px;">${urlImg || 'Publicación'}</div>`;
         }
 
-        setTimeout(() => {
-            cargarConversacionCon("26fmetp4Q4WJ", "Spaxio Flow", "");
-            // Forzamos un segundo refresco aquí por si el chat limpia el DOM al abrirse
-            if (typeof renderizarSpaxioFlowStories === 'function') {
-                renderizarSpaxioFlowStories(misHistorias);
-            }
-        }, 1000);
-              }
+        let htmlComentarios = '';
+        comentariosGuardados.forEach(c => {
+            htmlComentarios += `<div style="font-size: 11px; color: #ccc; margin-top: 3px;"><b style="color: #ffd700;">${c.autor}:</b> ${c.texto}</div>`;
+        });
+
+        tarjetaInsta.innerHTML = `
+            <div style="display: flex; align-items: center; justify-content: space-between; padding: 10px 12px; background: #202732;">
+                <div onclick="cargarConversacionCon('${post.usuarioId}', '${nombreUsr}')" style="display: flex; align-items: center; gap: 10px; min-width: 0; cursor: pointer;">
+    <div style="width: 32px; height: 32px; min-width: 32px; border-radius: 50%; border: 1px solid #ffd700; background: #202732; overflow: hidden; display: flex; align-items: center; justify-content: center; font-weight: bold; color: #ffd700; font-size: 12px; flex-shrink: 0;">
+        ${nombreUsr.charAt(0).toUpperCase()}
+    </div>
+    <span style="font-size: 12px; font-weight: bold; color: #ffffff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${nombreUsr}</span>
+</div>
+<span style="font-size: 10px; color: #8696a0; flex-shrink: 0;">${fechaHora}</span>
+</div>
+<!-- 🔥 ESTO ES LO QUE TE FALTABA EN LA PLANTILLA PARA QUE PINTE EL TEXTO -->
+            ${post.descripcion || post.texto ? `
+                <div style="padding: 10px 12px 6px 12px; font-size: 14px; color: #ffffff; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; background: #202732; max-height: 100px;">
+                    ${post.descripcion || post.texto}
+                </div>
+            ` : ''}
+         <div style="width: 100%;">
+                ${contenidoMedia}
+            </div>
+
+
+
+<!-- Botones de Interacción con Contadores -->
+<div style="padding: 8px 12px; display: flex; gap: 20px; font-size: 18px; align-items: center; background: #202732;">
+    
+    <!-- Botón de Corazón / Me gusta -->
+    <div style="display: flex; align-items: center; gap: 6px; cursor: pointer;" onclick="darLike('${postId}')">
+        <span id="icono-like-${postId}" style="color: ${localStorage.getItem(`dado_like_${postId}`) === 'true' ? 'red' : '#fff'};">🤍</span>
+        <span id="contador-like-${postId}" style="font-size: 13px; color: #ffd700; font-weight: bold;">${localStorage.getItem(`like_${postId}`) || post.likes || 0}</span>
+    </div>
+
+    <!-- Botón de 👍 / Me gusta secundario -->
+    <div style="display: flex; align-items: center; gap: 6px; cursor: pointer;" onclick="darPulgar('${postId}')">
+        <span id="icono-pulgar-${postId}" style="color: ${localStorage.getItem(`dado_pulgar_${postId}`) === 'true' ? '#ffd700' : '#fff'};">👍</span>
+        
+        <span id="contador-pulgar-${postId}" style="font-size: 13px; color: #ffd700; font-weight: bold;">${localStorage.getItem(`pulgar_${postId}`) || post.pulgares || 0}</span>
+    </div>
+
+    
+    <!-- Botón de Comentarios -->
+<div style="display: flex; align-items: center; gap: 6px; cursor: pointer;" onclick="toggleComentarios('${postId}')">
+    <span style="color: #ffd700;">💬</span>
+    <span id="contador-comentarios-${postId}" style="font-size: 13px; color: #ffd700; font-weight: bold;">${comentariosGuardados.length}</span>
+</div>
+    
+    
+</div>
+
+<!-- Contenedor de Comentarios Oculto por Defecto (Se despliega al tocar el icono) -->
+<div id="box-comentarios-${postId}" style="display: none; padding: 0 12px 10px 12px; flex-direction: column; gap: 4px; background: #202732; border-bottom-left-radius: 12px; border-bottom-right-radius: 12px;">
+    
+    <div id="lista-comentarios-${postId}" style="display: flex; flex-direction: column; max-height: 100px; overflow-y: auto; margin-top: 4px;">
+        ${htmlComentarios}
+    </div>
+
+    <div style="display: flex; align-items: center; margin-top: 8px; border-top: 1px solid rgba(255,215,0,0.1); padding-top: 8px; gap: 8px;">
+        <input type="text" id="input-comentario-${postId}" placeholder="Agrega un comentario..." style="flex: 1; background: #151828; border: 1px solid #323657; border-radius: 20px; padding: 6px 12px; color: #fff; font-size: 11px; outline: none;">
+        <button onclick="enviarComentarioInstagram('${postId}')" style="background: #ffd700; color: #000; border: none; border-radius: 50%; width: 28px; height: 28px; font-weight: bold; font-size: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">➤</button>
+    </div>
+</div>
+
+
+
+        `;
+
+        contenedorInstagram.appendChild(tarjetaInsta);
+    });
+}
+
+function enviarComentarioInstagram(postId) {
+    const input = document.getElementById(`input-comentario-${postId}`);
+    if (!input || !input.value.trim()) return;
+
+    const textoComentario = input.value.trim();
+    const autorNombre = localStorage.getItem('mi_nombre') || "Pedro Peres";
+
+    const comentariosKey = 'comentarios_' + postId;
+    let comentariosGuardados = JSON.parse(localStorage.getItem(comentariosKey) || '[]');
+
+    comentariosGuardados.push({ autor: autorNombre, texto: textoComentario });
+    localStorage.setItem(comentariosKey, JSON.stringify(comentariosGuardados));
+
+    const listaComentariosDiv = document.getElementById(`lista-comentarios-${postId}`);
+    if (listaComentariosDiv) {
+        listaComentariosDiv.innerHTML += `<div style="font-size: 11px; color: #ccc; margin-top: 3px;"><b style="color: #ffd700;">${autorNombre}:</b> ${textoComentario}</div>`;
+        listaComentariosDiv.scrollTop = listaComentariosDiv.scrollHeight;
+    }
+
+    input.value = '';
+}
 
             function toggleMenuHamburguesa() {
     const menu = document.getElementById('seccion-menu-hamburguesa');
@@ -2968,6 +3499,7 @@ async function procesarCargaBanco() {
         return; 
     }
 
+    alert("Gracias ppr su compra  " + monto + " desde el banco tradicional hacia tu Tarjeta Space.");
     alert("API UBII: Jalando Bs. " + monto + " desde el banco tradicional hacia tu Tarjeta Space.");
     
     usuarioSesionSpaxio.saldo += monto;
@@ -2978,63 +3510,470 @@ async function procesarCargaBanco() {
     cerrarTodosLosModalesSpace();
 }
 
-      
+      let tApi = { bcv:
+ 0, euro: 0, p2p: 0 };
+
+let tMan = { bcv: 0, euro: 0, p2p: 0 };
+
+let tasaSeleccionada = 'bcv';
+
+let chart;
+
+
+// --- FUNCIONES DE NAVEGACIÓN Y TABS ----
+function openTab(id) {
+    document.querySelectorAll('.calc-section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.tab-link').forEach(l => l.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    
+    if (id === 'shopping') cargarShopping();
+
+    if (id === 'grafica') setTimeout(renderGrafica, 100);
+}
+async function selectTasa(tipo) {
+    tasaSeleccionada = tipo;
+    document.getElementById('cardBCV').classList.toggle('selected', tipo === 'bcv');
+    document.getElementById('cardEuro').classList.toggle('selected', tipo === 'euro');
+    
+    // <--- Esto es lo que hacía que recalculara automáticamente al tocar la tarjeta
+    actualizar(); 
+}
+
+async function cargarTasas() {
+    const icono = document.getElementById("iconoActualizar");
+    if (icono) icono.classList.add("girando");
+
+    updateDate();
+
+    const antiCache = "?t=" + new Date().getTime();
+    const urlV = "https://raw.githubusercontent.com/alfonsocamacho00089-cloud/BcvEuroapp.py/main/Bcveuro_vigente.json" + antiCache;
+    const urlP = "https://raw.githubusercontent.com/alfonsocamacho00089-cloud/BcvEuroapp.py/main/Bcveuro_proxima.json" + antiCache;
+    const urlP2P = "https://raw.githubusercontent.com/alfonsocamacho00089-cloud/P2papp.py/main/p2p.json" + antiCache;
+
+    
+            
+// --- BLOQUE// --- BLOQUE 1: BCV Y EURO (RESPETANDO TU LÓGICA: PROX = HOY / VIGENTE = ATRÁS) ---
+    try {
+
+      const resVigente = await fetch(urlV); // _vigente.json (Para ti es ATRÁS / tMan)
+        const resProxima = await fetch(urlP); // _proxima.json (Para ti es HOY / tApi)
+        
+        const dataV = await resVigente.json();
+        const dataP = await resProxima.json();
+        
+
+        if (dataV && dataV.length  > 0 && dataP && dataP.length > 0) {
+            // tApi = La tasa fresca que viene de PROXIMA (La de hoy)
+            tApi.bcv = parseFloat(parseFloat(dataP[0].precio_dolar).toFixed(2)) || 0;
+            tApi.euro = parseFloat(parseFloat(dataP[0].precio_euro).toFixed(2)) || 0;
+            
+            // tMan = La tasa de atrás que viene de VIGENTE (La de mañana)
+            tMan.bcv = parseFloat(parseFloat(dataV[0].precio_dolar).toFixed(2)) || 0;
+            tMan.euro = parseFloat(parseFloat(dataV[0].precio_euro).toFixed(2)) || 0;
+
+            
+            // Guardar en caché limpio sin cruzar cables
+            if (tMan.bcv > 0) localStorage.setItem("res_bcv_", tMan.bcv.toFixed(2));
+            if (tMan.euro > 0) localStorage.setItem("res_euro_", tMan.euro.toFixed(2));
+            if (tApi.bcv > 0) localStorage.setItem("res_bcv_hoy", tApi.bcv.toFixed(2));
+            if (tApi.euro > 0) localStorage.setItem("res_euro_hoy", tApi.euro.toFixed(2));
+
+        }    
+
+
+    } catch (error) {
+        console.warn("Fallo BCV, usando LocalStorage");
+        // Recuperación sin pisar variables cuando falla la red
+        tMan.bcv = parseFloat(parseFloat(localStorage.getItem("res_bcv") || 0).toFixed(2));
+        tMan.euro = parseFloat(parseFloat(localStorage.getItem("res_euro") || 0).toFixed(2));
+        tApi.bcv = parseFloat(parseFloat(localStorage.getItem("res_bcv_hoy") || 0).toFixed(2));
+        tApi.euro = parseFloat(parseFloat(localStorage.getItem("res_euro_hoy") || 0).toFixed(2));
+    }
+  
+// --- BLOQUE 2: P2P (BINANCE) ---
+    try {
+        const resB = await fetch(urlP2P);
+        const dataB = await resB.json();
+
+        if (dataB && dataB.binance_p2p) {
+            // Cambiar Math.max por la lectura directa de la propiedad .promedio
+
+          const p2pSellRate = dataB.binance_p2p.ventas_sell.promedio || 0;
+          const p2pBuyRate = dataB.binance_p2p.compras_buy.promedio || 0;
+           
+            tApi.p2p = p2pBuyRate;
+            tApi.p2pBuy = p2pBuyRate;
+            tApi.p2pSell = p2pSellRate;
+          
+            const anteriorP2P = parseFloat(localStorage.getItem("res_p2p_hoy")) || 0;
+            if (p2pBuyRate !== anteriorP2P && p2pBuyRate > 0) {
+                const horaP2P = new Date().toLocaleTimeString('es-VE', {
+                    hour: '2-digit', minute: '2-digit', hour12: true
+                });
+                localStorage.setItem("horaP2P", horaP2P);
+                if (document.getElementById("timeP2PDisplay")) {
+                    document.getElementById("timeP2PDisplay").textContent = "ACTUALIZADO P2P: " + horaP2P;
+                }
+            }
+
+            localStorage.setItem("res_p2p_hoy", p2pBuyRate);
+            localStorage.setItem("res_p2p_buy", p2pBuyRate);
+            localStorage.setItem("res_p2p_sell", p2pSellRate);
+        } else {
+            throw new Error("GitHub P2P Vacío");
+        }
+    } catch (error) {
+        console.warn("Fallo GitHub P2P, usando respaldo...");
+        tApi.p2p = parseFloat(parseFloat(localStorage.getItem("res_p2p_hoy") || 0).toFixed(2));
+        tApi.p2pBuy = parseFloat(parseFloat(localStorage.getItem("res_p2p_buy") || 0).toFixed(2));
+        tApi.p2pSell = parseFloat(parseFloat(localStorage.getItem("res_p2p_sell") || 0).toFixed(2));
+          }
+
+// --- FINALIZACIÓN Y UI ---
+    try {
+        if(document.getElementById('bcvRate')) document.getElementById('bcvRate').value = tApi.bcv.toFixed(2);
+        if(document.getElementById('p2pRate')) document.getElementById('p2pRate').value = tApi.p2pSell.toFixed(2);
+        if(document.getElementById('euroRate')) document.getElementById('euroRate').value = tApi.euro.toFixed(2);
+        if(document.getElementById('bcvRateBack')) document.getElementById('bcvRateBack').value = tMan.bcv.toFixed(2);
+        if(document.getElementById('euroRateBack')) document.getElementById('euroRateBack').value = tMan.euro.toFixed(2);
+
+        
+    } catch (e) {
+        console.error("Error UI:", e);
+    } finally {
+        setTimeout(() => {
+            if (icono) icono.classList.remove("girando");
+        }, 600);
+    }
+} 
+  
+  
+  // <--- CIERRE CORRECTO DE CARGARTASAS<--- Aquí cierra la función cargarTasas
+function actualizar() {
+    const d = new Date();
+    const dia = d.getDay(); 
+    const hora = d.getHours();
+    
+    // --- LÓGICA DE TIEMPO (FIJA) ---
+    // Detecta si es fin de semana (Viernes 4pm hasta Domingo 11:59pm)
+    const isFinDeSemana = (dia === 5 && hora >= 16) || dia === 6 || dia === 0;
+    
+    // Detecta qué tasa eligió el usuario en el Switch (Hoy o Mañana)
+    const isMañana = document.getElementById("nextDaySwitch").checked;
+
+    // --- CAPTURA DE DATOS (CON RESPALDO) ---
+    const pUSD = parseFloat(document.getElementById("priceUSD").value) || 0;
+    const pCli = parseFloat(document.getElementById("priceCli").value) || 0;
+    
+    // Si tApi.p2p es 0 (falló la API), busca en la memoria (localStorage)
+const p2pReal = tApi.p2p || parseFloat(localStorage.getItem("res_p2p_hoy"));
+  
+    // --- SELECCIÓN DINÁMICA DE TASA ---
+    let tBase = 0;
+    let nombreTasa = (tasaSeleccionada === 'bcv') ? "BCV" : "EURO";
+
+    if (tasaSeleccionada === 'bcv') {
+        tBase = isMañana ? tMan.bcv : tApi.bcv;
+        // Si las variables están en 0 (API caída), usa el respaldo guardado
+        if (tBase === 0) {
+            tBase = isMañana ? parseFloat(localStorage.getItem("res_bcv_prox")) : parseFloat(localStorage.getItem("res_bcv_hoy"));
+        }
+    } else {
+        tBase = isMañana ? tMan.euro : tApi.euro;
+        if (tBase === 0) {
+            tBase = isMañana ? parseFloat(localStorage.getItem("res_euro_prox")) : parseFloat(localStorage.getItem("res_euro_hoy"));
+        }
+    }
+
+
+    
+if (!tBase || isNaN(tBase)) tBase = 0;
+// --- MOTOR DE CÁLCULO LIMPIO (SIN IGTF) ---
+    const procesar = (monto) => {
+        const totalBS = monto * tBase;
+        const baseBS = totalBS; 
+        const tasaVenta = tApi.p2pSell || parseFloat(localStorage.getItem("res_p2p_sell")) || p2pReal;
+        const totalUSDT = (tasaVenta > 0) ? (totalBS / tasaVenta) : 0;
+        
+        return { baseBS, totalBS, totalUSDT };
+    };
+       
+// --- ACTUALIZACIÓN DE PANTALLAS (COMERCIO Y CLIENTE) ---
+    const resCom = procesar(pUSD);
+    document.getElementById("labelVES").textContent = `${nombreTasa} ${format(resCom.baseBS)}`;
+    document.getElementById("totalVES").value = format(resCom.totalBS) + " Bs";
+    document.getElementById("totalUSDT").value = resCom.totalUSDT.toFixed(2);
+    const resCli = procesar(pCli);
+    document.getElementById("labelCli").textContent = `${nombreTasa} ${format(resCli.baseBS)}`;
+    document.getElementById("bsCliBCV").value = format(resCli.totalBS) + " Bs";
+    document.getElementById("usdtCliFinal").value = resCli.totalUSDT.toFixed(2);
+// ---p2p YsaPay (Pestaña 2) ---
+    const p2pSell = tApi.p2pSell || parseFloat(localStorage.getItem("res_p2p_sell")) || 0;
+    const p2pRateEl = document.getElementById("p2pRate");
+    if (p2pRateEl) p2pRateEl.value = p2pSell.toFixed(2); // <--- La tarjeta amarilla toma Sell
+
+    const inputUBuy2 = document.getElementById("uBuy2");
+    const uBuyVal2 = inputUBuy2 ? parseFloat(inputUBuy2.value) || 0 : 0;
+    
+    // 2. Calculamos el valor con el 10% arriba (100 * 1.10 = 110)
+    const totalUsdt = uBuyVal2 * 1.10;
+    
+    // 3. Mostramos el resultado abajo en el campo readonly
+    const resBuy2El = document.getElementById("resBuy2");
+    if (resBuy2El) {
+        resBuy2El.value = totalUsdt.toFixed(2) + ""; // O ponle " Bs" si requieres bolívares
+    }
+  
+  
+    // --- ACTUALIZACIÓN DE INTERFAZ EXCHANGE ---
+    document.getElementById("labBuy").textContent = p2pReal.toFixed(2);
+    document.getElementById("labSell").textContent = p2pReal.toFixed(2);
+    
+    const uBuyVal = parseFloat(document.getElementById("uBuy").value) || 0;
+    document.getElementById("resBuy").value = format(uBuyVal * p2pReal) + " Bs";
+  
+    // 2. Actualizas la etiqueta solo en la sección P2P (el labSell que tienes en esa pestaña)
+const labSellEl = document.getElementById("labSell");
+if (labSellEl) labSellEl.textContent = p2pSell.toFixed(2);
+
+// 3. Ejecutas la multiplicación exclusiva para el campo de venta dentro de la pestaña P2P
+const uSellVal = parseFloat(document.getElementById("uSell").value) || 0;
+const resSellEl = document.getElementById("resSell");
+if (resSellEl) {
+    resSellEl.value = format(uSellVal * p2pSell) + " Bs";
+}
+
+  
+
+    // Actualiza los valores de "atrás" de las tarjetas (Flip)
+   if (document.getElementById("bcvRateBack")){
+    document.getElementById("bcvRateBack").value = tMan.bcv.toFixed(2);
+   }
+  if (document.getElementById("euroRateBack")){
+    document.getElementById("euroRateBack").value = tMan.euro.toFixed(2);
+}
+
+
+    // Actualiza los valores de "atrás" de las tarjetas (Flip)
+   if (document.getElementById("bcvRateBack")){
+    document.getElementById("bcvRateBack").value = tMan.bcv.toFixed(2);
+   }
+  if (document.getElementById("euroRateBack")){
+    document.getElementById("euroRateBack").value = tMan.euro.toFixed(2);
+}
+}
+function format(n) { 
+  return n.toLocaleString("es-VE", {minimumFractionDigits: 2, maximumFractionDigits: 2}); }
+
+function checkSwitchVisibility() {
+    const ahora = new Date();
+    const hora = ahora.getHours();
+    const dia = ahora.getDay();
+    const area = document.getElementById("switchArea");
+
+    if (area) {
+        // Visible si: Son las 4pm+ (L-V) O es Sábado (6) O es Domingo (0)
+        if (hora >= 16 || dia === 6 || dia === 0) {
+            area.style.display = "flex";
+        } else {
+            area.style.display = "none";
+        }
+    }
+}
+function toggleFlip() {
+    const isHoy = document.getElementById("nextDaySwitch").checked;
+    document.getElementById("flipBCV").className = isHoy ? "field-top do-flip" : "field-top";
+    document.getElementById("flipEuro").className = isHoy ? "field-top do-flip" : "field-top";
+    // Nueva línea para girar la fecha
+    document.getElementById("divFechaHoy").style.display = isHoy ? "none" : "block";
+document.getElementById("divFechaNext").style.display = isHoy ? "block" : "none";
+     // Refrescar cálculos y catálogo
+    actualizar();
+    if (typeof cargarShopping === 'function') cargarShopping();
+}
+function updateDate() {
+    const d = new Date();
+    const hora = d.getHours();
+    const diaSemana = d.getDay(); 
+    let fechaDestino = new Date(d);
+   
+    // LÓGICA DE FECHAS:
+    if ((diaSemana === 5 && hora >= 16) || diaSemana === 6 || diaSemana === 0) {
+        // Si es Viernes tarde (3 días), Sábado (2 días) o Domingo (1 día) para llegar al lunes
+        let diasParaLunes = (diaSemana === 5) ? 3 : (diaSemana === 6 ? 2 : 1);
+        fechaDestino.setDate(d.getDate() + diasParaLunes);
+    } else {
+        fechaDestino.setDate(d.getDate() + 1); 
+    }
+
+// Formateo de strings
+    const fProxima = `${fechaDestino.getDate().toString().padStart(2, '0')}/${(fechaDestino.getMonth() + 1).toString().padStart(2, '0')}/${fechaDestino.getFullYear()}`;
+    const fHoy = `${d.getDate().toString().padStart(2, '0')}/${(d.getMonth() + 1).toString().padStart(2, '0')}/${d.getFullYear()}`;
+    
+    // --- ASIGNACIÓN A PANTALLA CON PROTECCIÓN ---
+    const elHoy = document.getElementById("dateDisplay");
+    const elProx = document.getElementById("dateNextDisplay"); 
+
+    if (elHoy) elHoy.textContent = fHoy;
+    if (elProx) elProx.textContent = fProxima;
+  
+
+}
+
+  
+function abrirBinance() {
+    // Intenta abrir la app
+    window.location.href = "bnc://app.binance.com/payment/main";
+    
+    // Si en 2 segundos no se movió de la página, es que no tiene la app
+    setTimeout(function() {
+        if (!document.hidden) {
+            window.open("https://www.binance.com", "_blank");
+        
+        }
+    }, 2000);
+}
+// 1. Nueva función para buscar datos reales
+
+function generarNota() {
+    document.getElementById("nFinal").textContent = (document.getElementById("nInput").value || "0.00") + " USDT";
+    document.getElementById("modalTicket").style.display = "flex";
+}
+function copiarWA() {
+    const msg = `✅ *PAGO CONFIRMADO*\nMonto: *${document.getElementById("nFinal").textContent}*\nSistema: *Real Market*`;
+    navigator.clipboard.writeText(msg).then(() => { alert("Copiado!"); });
+}
+// --- GRÁFICA ---
+function renderGrafica() {
+    const ctx = document.getElementById('miGrafica').getContext('2d');
+    if(chart) chart.destroy();
+    const p = parseFloat(document.getElementById("p2pRate").value);
+    chart = new Chart(ctx, {
+        type: 'line',
+        data: { labels: ['9am', '12pm', '3pm', 'Ahora'], datasets: [{ data: [p*0.99, p*1.01, p*0.99, p], borderColor: '#ffd700', backgroundColor: 'rgba(255, 215, 0, 0.1)', fill: true }] },
+        options: { plugins: { legend: { display: false } }, scales: { y: { display: false }, x: { grid: { display: false } } } }
+    });
+}
+
+  
+(function inicializarCalculadora() {
+  // 1. Recuperar las 3 tasas del bolsillo (LocalStorage)
+    
+  // 1. Recuperar las 3 tasas del bolsillo (LocalStorage)
+    const bcvCache = localStorage.getItem("res_bcv_hoy");
+    const euroCache = localStorage.getItem("res_euro_hoy");
+    const p2pCache = localStorage.getItem("res_p2p_hoy");
+    const p2pSellCache = localStorage.getItem("res_p2p_sell"); // <-- Caché exclusivo de Sell
+    const bcvAtras = localStorage.getItem("res_bcv"); 
+    const euroAtras = localStorage.getItem("res_euro");
+
+    // 2. Si existen, las cargamos en la memoria de la calculadora (tApi)
+    if (bcvCache) tApi.bcv = parseFloat(bcvCache);
+    if (euroCache) tApi.euro = parseFloat(euroCache);
+    if (p2pCache) tApi.p2p = parseFloat(p2pCache);
+    if (p2pSellCache) tApi.p2pSell = parseFloat(p2pSellCache); // <-- Carga Sell en memoria
+    if (bcvAtras) tMan.bcv = parseFloat(bcvAtras);
+    if (euroAtras) tMan.euro = parseFloat(euroAtras);
+
+    // 3. Llenar los campos visuales de una vez
+    if (tApi.bcv > 0) document.getElementById('bcvRate').value = tApi.bcv.toFixed(2);
+    if (tApi.euro > 0) document.getElementById('euroRate').value = tApi.euro.toFixed(2);
+    if (tApi.p2pSell > 0) document.getElementById('p2pRate').value = tApi.p2pSell.toFixed(2); // <-- La tarjeta amarilla arranca con Sell
+    if (tMan.bcv > 0) document.getElementById('bcvRateBack').value = tMan.bcv.toFixed(2);
+    if (tMan.euro > 0) document.getElementById('euroRateBack').value = tMan.euro.toFixed(2);
+// ... debajo de donde cargas las tasas del cache ...
+    
+    
+
+    // 4. Activar cálculos y visibilidad de inmediato
+    checkSwitchVisibility();
+    actualizar();
+    // 5. Solo ahora buscamos los datos nuevos en GitHub (en segundo plano)
+    cargarTasas();
+})();
+document.querySelectorAll('input').forEach(i => i.addEventListener('input', actualizar));
     
 
 
-        // Si usas un sistema de pestañas (switchView), recuerda llamar a inicializarSpaxioCard() cuando el usuario abra esta sección.
-     // --- MOTOR DE TASAS (DROPISAPP INTEGRADOR) ---
-        let tApi = { bcv: 36.5, euro: 39.2, p2p: 41.5 };
-        let tasaSeleccionada = 'bcv';
+        
+     // --- MOTOR// Usamos window para evitar el error de "ya ha sido declarada" en tu archivo grande
+window.tMan = window.tMan || { bcv: 0, euro: 0 };
+window.tApi = window.tApi || { p2p: 0 };
+window.tasaSeleccionada = 'bcv'; // Por defecto
 
-        function selectTasa(tipo) {
-            tasaSeleccionada = tipo;
-            document.getElementById('cardBCV').classList.toggle('selected', tipo === 'bcv');
-            document.getElementById('cardEuro').classList.toggle('selected', tipo === 'euro');
-            calcularTasasPanel();
+function selectTasa(tipo) {
+    tasaSeleccionada = tipo;
+    const cardBCV = document.getElementById('cardBCV');
+    const cardEuro = document.getElementById('cardEuro');
+    if (cardBCV) cardBCV.classList.toggle('selected', tipo === 'bcv');
+    if (cardEuro) cardEuro.classList.toggle('selected', tipo === 'euro');
+    calcularTasasPanel();
+}
+
+async function cargarTasasDropdown() {
+    const antiCache = "?t=" + new Date().getTime();
+
+    // --- CARGAR BCV Y EURO ---
+    try {
+        const res = await fetch("https://raw.githubusercontent.com/alfonsocamacho00089-cloud/BcvEuroapp.py/main/Bcveuro_vigente.json" + antiCache);
+        const data = await res.json();
+        if (data && data.length > 0) {
+            window.tMan.bcv = parseFloat(parseFloat(data[0].precio_dolar).toFixed(2)) || 0;
+            window.tMan.euro = parseFloat(parseFloat(data[0].precio_euro).toFixed(2)) || 0;
+            localStorage.setItem("res_bcv_prox", window.tMan.bcv.toFixed(2));
+            localStorage.setItem("res_euro_prox", window.tMan.euro.toFixed(2));
         }
-
-        async function cargarTasasDropdown() {
-            try {
-                const res = await fetch("https://raw.githubusercontent.com/alfonsocamacho00089-cloud/BcvEuroapp.py/main/Bcveuro_vigente.json");
-                const data = await res.json();
-                if (data && data.length > 0) {
-                    tApi.bcv = parseFloat(data[0].precio_dolar) || 36.5;
-                    tApi.euro = parseFloat(data[0].precio_euro) || 39.2;
-                }
-            } catch (e) { console.log("Usando tasas predeterminadas BCV"); }
-
-            try {
-                const resP = await fetch("https://raw.githubusercontent.com/alfonsocamacho00089-cloud/P2papp.py/main/p2p.json");
-                const dataP = await resP.json();
-                if (dataP && dataP.binance_p2p) {
-                    tApi.p2p = Math.max(...Object.values(dataP.binance_p2p.ventas_sell)) || 41.5;
-                }
-            } catch (e) { console.log("Usando tasas P2P base"); }
-
-            document.getElementById('bcvRate').value = tApi.bcv.toFixed(2);
-            document.getElementById('euroRate').value = tApi.euro.toFixed(2);
-            document.getElementById('p2pRate').value = tApi.p2p.toFixed(2);
-            calcularTasasPanel();
+    } catch (e) { 
+        window.tMan.bcv = parseFloat(localStorage.getItem("res_bcv_prox")) || 0;
+        window.tMan.euro = parseFloat(localStorage.getItem("res_euro_prox")) || 0;
+    }
+  
+    // --- CARGAR P2P ---
+    try {
+        const resP = await fetch("https://raw.githubusercontent.com/alfonsocamacho00089-cloud/P2papp.py/main/p2p.json" + antiCache);
+        const dataP = await resP.json();
+        if (dataP && dataP.binance_p2p) {
+            window.tApi.p2p = Math.max(...Object.values(dataP.binance_p2p.compras_buy)) || 0;
+            localStorage.setItem("res_p2p_hoy", window.tApi.p2p);
         }
+    } catch (e) { 
+        window.tApi.p2p = parseFloat(localStorage.getItem("res_p2p_hoy")) || 0;
+    }
 
-        function calcularTasasPanel() {
-            const pUSD = parseFloat(document.getElementById('priceUSD').value) || 0;
-            const tBase = (tasaSeleccionada === 'bcv') ? tApi.bcv : tApi.euro;
-            const nombreTasa = (tasaSeleccionada === 'bcv') ? "BCV" : "EURO";
+    // --- PINTAR EN LOS INPUTS CON SEGURIDAD ---
+    if(document.getElementById('bcvRate')) document.getElementById('bcvRate').value = window.tMan.bcv.toFixed(2);
+    if(document.getElementById('euroRate')) document.getElementById('euroRate').value = window.tMan.euro.toFixed(2);
+    if(document.getElementById('p2pRate')) document.getElementById('p2pRate').value = window.tApi.p2p.toFixed(2);
+    
+    calcularTasasPanel();
+}
 
-            const baseBS = pUSD * tBase;
-            const igtfBS = baseBS * 0.03;
-            const totalBS = baseBS + igtfBS;
-            const totalUSDT = tApi.p2p > 0 ? (totalBS / tApi.p2p) : 0;
+function calcularTasasPanel() {
+    const inputPrice = document.getElementById('priceUSD');
+    if (!inputPrice) return; 
 
-            document.getElementById('labelVES').textContent = `${nombreTasa} ${baseBS.toLocaleString('es-VE', {minimumFractionDigits:2})} + IGTF`;
-            document.getElementById('totalVES').value = totalBS.toLocaleString('es-VE', {minimumFractionDigits:2}) + " Bs";
-            document.getElementById('totalUSDT').value = totalUSDT.toFixed(2);
-        }
+    const pUSD = parseFloat(inputPrice.value) || 0;
+    const tBase = (tasaSeleccionada === 'bcv') ? window.tMan.bcv : window.tMan.euro;
+    const nombreTasa = (tasaSeleccionada === 'bcv') ? "BCV" : "EURO";
 
-        document.getElementById('priceUSD').addEventListener('input', calcularTasasPanel);
-     
+    const baseBS = pUSD * tBase;
+    const igtfBS = baseBS * 0.00;
+    const totalBS = baseBS + igtfBS;
+    const totalUSDT = window.tApi.p2p > 0 ? (totalBS / window.tApi.p2p) : 0;
+
+    if(document.getElementById('labelVES')) document.getElementById('labelVES').textContent = `${nombreTasa} ${baseBS.toLocaleString('es-VE', {minimumFractionDigits:2})} + IGTF`;
+    if(document.getElementById('totalVES')) document.getElementById('totalVES').value = totalBS.toLocaleString('es-VE', {minimumFractionDigits:2}) + " Bs";
+    if(document.getElementById('totalUSDT')) document.getElementById('totalUSDT').value = totalUSDT.toFixed(2);
+}
+
+// Escuchar cambios en el input de precio de forma segura
+document.addEventListener('input', function(e) {
+    if (e.target && e.target.id === 'priceUSD') {
+        calcularTasasPanel();
+    }
+});
+
+
          function abrirCalculadora() {
     const modalCalc = document.getElementById('seccion-calculadora-integrada');
     if (modalCalc) {
@@ -3633,7 +4572,7 @@ if (targetID === "26fmetp4Q4WJ") {
         user_id: miUserId,
         created_at: new Date().toISOString()
     };
-  /*COMENTADO TEMPORAL PARA PRUEBAS
+  
 fetch('/api/spaxioflow-event', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -3644,7 +4583,7 @@ fetch('/api/spaxioflow-event', {
     console.log("📡 Servidor confirmó:", respuestaServidor);
 })
 .catch(err => console.error("❌ Error:", err));
-*/
+
 
 // MUESTRAS EL MENSAJE EN PANTALLA EN LOCAL DIRECTAMENTE
 anexarUnicoMensajeAlFeed({
@@ -3834,7 +4773,7 @@ const cuerpoPeticion = {
         
 
      // --- BLOQUE: ENVIAR MENSAJE (NOTIFICAR) ---
-/*if ('serviceWorker' in navigator && Notification.permission === "granted") {
+if ('serviceWorker' in navigator && Notification.permission === "granted") {
     navigator.serviceWorker.ready.then(registration => {
         registration.showNotification("SpaceChat: " + emisorID, {
             body: textoReal,
@@ -3847,7 +4786,7 @@ const cuerpoPeticion = {
     }).catch(err => console.log("Notificación bloqueada o fallida"));
 } else {
     console.log("Notificaciones no permitidas por el usuario.");
-     }*/
+     }
 async function obtenerToken(registration) {
     try {
         const miVapidKey = 'BIrsA9YbBXfIuo4PTMrKRtuktRsK2RbK0XevupuofGGOUDy9w5VZ9yaXbZXsenXppmFsR62-2B7jBOG0Z8RdxvU';
@@ -4033,116 +4972,73 @@ async function cargarConversacionCon(idDestino, nombreDestino, fotoDestino) {
         if (box) box.innerHTML = ""; 
 
 
+if (idDestino === "26fmetp4Q4WJ") {
+    console.log("📡 Cargando Instanew (Nube y Local)...");
 
-// 🔥 INTERCEPCIÓN MAESTRA     
-             if (idDestino === "26fmetp4Q4WJ") {
-   
-              
-              console.log("📡 Cargando historial global de SpaxioFlow desde Vercel...");
-    
-               // 1. Definimos los datos de prueba (Mock) ya que eliminamos el fetch
-// 1. Leemos las historias reales que se guardaron en tu teléfono
-const postsGuardadosLocales = JSON.parse(localStorage.getItem('spaxio_historias_locales') || '[]');
+    let postsParaMostrar = [];
 
-// Si no hay nada guardado aún, usamos los de prueba para que no quede vacío
-const posts = postsGuardadosLocales.length > 0 ? postsGuardadosLocales : [
-    { id: 't1', sender_name: 'Pedro Peres', content: 'https://picsum.photos/300/200?random=1', tipo: 'imagen', created_at: new Date().toISOString() },
-    { id: 't2', sender_name: 'Marley', content: 'https://picsum.photos/300/200?random=2', tipo: 'imagen', created_at: new Date().toISOString() },
-    { id: 't3', sender_name: 'Sami', content: 'Probando texto en SpaxioFlow', tipo: 'texto', created_at: new Date().toISOString() }
-];
-
-// 3. Renderizamos las Stories manteniendo tu tarjeta fija intacta a la izquierda
-const contenedorStories = document.getElementById('contenedor-spaxioflow-stories');
-if (contenedorStories && posts.length > 0) {
-    // Guardamos temporalmente el HTML de tu tarjeta fija para no perderla
-    const tarjetaFijaHTML = contenedorStories.firstElementChild ? contenedorStories.firstElementChild.outerHTML : '';
-    
-    // Vaciamos el contenedor y ponemos la tuya de primera
-    contenedorStories.innerHTML = tarjetaFijaHTML;
-    
-    // Recorremos los posts para agregarlos al lado (a la derecha)
-    posts.slice(0, 50).forEach(post => {
-        const urlImg = post.content || post.imagen_url || post.media_url || post.foto || '';
-        const nombreUsr = post.sender_name || post.remitente || 'Usuario';
-        
-        const esImagenValida = urlImg.startsWith('http') || urlImg.startsWith('data:image');
-        
-        // Definimos si es imagen o texto para el contenido
-const contenidoMiniatura = esImagenValida 
-    ? `
-        <!-- Contenedor con la foto de fondo que ocupa toda la tarjeta -->
-        <div style="position: relative; width: 100%; height: 100%; background-image: url('${urlImg}'); background-size: cover; background-position: center; border-radius: 12px; display: flex; flex-direction: column; justify-content: flex-end; overflow: hidden;">
-            
-            <!-- Capa oscura semitransparente abajo para que las letras floten y resalten -->
-            <div style="position: absolute; bottom: 0; left: 0; width: 100%; padding: 1px 1px; text-align: center;">
-                <span style="font-size: 10px; color: #ffd700; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block;">${nombreUsr}</span>
-            </div>
-        </div>
-      `
-    : `
-        <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; padding: 5px; text-align: center;">
-            <span style="font-size: 11px; color: #fff;">${urlImg}</span>
-        </div>
-      `;
-
-// Y la tarjeta completa la envuelves así para que la imagen ocupe todo el espacio libre:
-contenedorStories.innerHTML += `
-    <div style="min-width: 170px; height: 200px; border-radius: 12px; padding: 1px; flex-shrink: 0; cursor: pointer; overflow: hidden; position: relative;">
-        ${contenidoMiniatura}
-    </div>
-`;
-
-        
-    });
-}
-
-// 4. Guardado local de prueba limpio
-const idUnicoLocal = "feed_local_" + Date.now();
-const nuevoPostLocal = {
-    id: idUnicoLocal,
-    contactoId: "26fmetp4Q4WJ",
-    clase: 'msg-izquierda',
-    status: 'leido',
-    tipo: 'imagen', // Corregido de variable suelta a string
-  
-    ts: Date.now(),
-    hora: typeof miNombre !== 'undefined' ? miNombre : 'Pedro'
-};
-
-// Guardamos usando tu estructura local
-await guardarLocal('mensajes', nuevoPostLocal);
-
-// 5. Pintar los mensajes/posts en pantalla de forma ordenada
-if (posts && Array.isArray(posts)) {
-    const postsInvertidos = [...posts].reverse();
-     
-    postsInvertidos.forEach(post => {
-        const idContenido = "feed_" + post.id;
-        const nombreRemitente = post.sender_name || 'H.A.R.V.I.S.';
-        
-        if (!document.getElementById(idContenido)) {
-            pintarMensaje(post.content, "", nombreRemitente, 'leido', idContenido, post.tipo); 
+    try {
+        // 1. Intentamos traer el feed desde tu nueva ruta de Vercel para instanew
+        const res = await fetch('/api/get-instanew-feed');
+        if (res.ok) {
+            const data = await res.json();
+            const postsRemotos = Array.isArray(data) ? data : (data.posts || []);
+            if (postsRemotos.length > 0) {
+                postsParaMostrar = [...postsRemotos].reverse();
+            }
         }
-    });
-}
+    } catch (e) {
+        console.warn("⚠️ Sin conexión a la nube, usando respaldo local...", e);
+    }
 
-// 6. Refresco final de stories si ya tienes los datos cargados
-if (typeof postsGuardadosLocales !== 'undefined') {
-    renderizarSpaxioFlowStories(postsGuardadosLocales);
-}
+    // 2. Si la nube no devolvió nada, usamos tus historias locales de respaldo
+    if (postsParaMostrar.length === 0) {
+        postsParaMostrar = JSON.parse(localStorage.getItem('spaxio_historias_locales') || '[]');
+    }
 
-    iniciarRealtimeSpaxioFlow("26fmetp4Q4WJ");
+    // 3. Renderizamos las Stories horizontales de arriba
+    const contenedorStories = document.getElementById('contenedor-spaxioflow-stories');
+    if (contenedorStories) {
+        const tarjetaFijaHTML = contenedorStories.firstElementChild ? contenedorStories.firstElementChild.outerHTML : '';
+        contenedorStories.innerHTML = tarjetaFijaHTML;
 
-    // 🎯 Forzamos el scroll arriba con un micro-respiro para ganarle al renderizado
+        postsParaMostrar.forEach(post => {
+            const urlImg = post.content || post.imagen_url || post.media_url || post.foto || ''; 
+            const nombreUsr = post.sender_name || post.remitente || 'Pedro Peres';
+            const usuarioIdAutor = post.sender_id || post.usuarioId || post.usuario_id || '26fmetp4Q4WJ';
+
+            if (urlImg.startsWith('http') || urlImg.startsWith('data:image')) {
+                contenedorStories.innerHTML += `
+                    <div onclick="cargarConversacionCon('${usuarioIdAutor}', '${nombreUsr}')" style="min-width: 170px; height: 200px; border-radius: 12px; padding: 1px; flex-shrink: 0; cursor: pointer; overflow: hidden; position: relative;">
+                        <div style="position: relative; width: 100%; height: 100%; background-image: url('${urlImg}'); background-size: cover; background-position: center; border-radius: 12px; display: flex; flex-direction: column; justify-content: flex-end; overflow: hidden;">
+                            <div style="position: absolute; bottom: 0; left: 0; width: 100%; padding: 1px; text-align: center; background: rgba(0,0,0,0.5);">
+                                <span style="font-size: 10px; color: #ffd700; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block;">${nombreUsr}</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+        });
+    }
+
+    // 4. DISPARAMOS EL CARRUSEL VERTICAL TIPO INSTAGRAM DE ABAJO
+    if (typeof renderizarSpaxioFlowStories === 'function') {
+        renderizarSpaxioFlowStories(postsParaMostrar);
+    }
+
+    // 5. Arrancamos el Realtime con la nueva función independiente para instanew
+    if (typeof iniciarRealtimeInstanew === 'function') {
+        iniciarRealtimeInstanew("26fmetp4Q4WJ");
+    }
+
+    // 🎯 Forzamos el scroll arriba
     setTimeout(() => {
         const box = document.getElementById('chat-box');
         if (box) {
             box.scrollTop = 0; 
         }
-    }, 50); // 50 milisegundos de respiro
-
- }
-              
+    }, 50);
+}          
               else {
     // 🔒 LÓGICA OPTIMIZADA: Últimos 50 mensajes para chats privados
     const todosLosMensajes = await obtenerTodo('mensajes');
@@ -6114,6 +7010,9 @@ function DespacharMensajeEnCola() {
 // =================================================================
 // ARQUITECTURA REALTIME EMPRESARIAL - SPAXIOFLOW (SINGLETON)
 // =================================================================
+// =================================================================
+// 1. CANAL REALTIME PARA SPAXIOFLOW (Tabla: spaxioflow_feed)
+// =================================================================
 window.spaxioRealtimeChannel = null;
 
 function iniciarRealtimeSpaxioFlow(conversacionId) {
@@ -6122,18 +7021,14 @@ function iniciarRealtimeSpaxioFlow(conversacionId) {
         return;
     }
 
-    // 1. Limpieza síncrona y desinscripción del canal activo previo (Prevent Memory Leak)
     if (window.spaxioRealtimeChannel) {
         window.supabaseClient.removeChannel(window.spaxioRealtimeChannel);
         window.spaxioRealtimeChannel = null;
     }
 
-    // 2. Creación de canal aislado por ID de sesión/conversación
     const channelName = `spaxioflow_live_${conversacionId}_${Date.now()}`;
-    
     window.spaxioRealtimeChannel = window.supabaseClient.channel(channelName);
 
-    // 3. Suscripción con manejo estricto de eventos de ciclo de vida
     window.spaxioRealtimeChannel
     .on(
         'postgres_changes',
@@ -6143,37 +7038,79 @@ function iniciarRealtimeSpaxioFlow(conversacionId) {
             table: 'spaxioflow_feed',
             filter: `chat_id=eq.${conversacionId}`
         },
-
-(payload) => {
+        (payload) => {
             const nuevoMensaje = payload.new;
             const miUserId = localStorage.getItem('mi_dropis_id') || "anonimo";
 
-            // 🛑 IMPRIME ESTO EN CONSOLA PARA VER QUÉ ESTÁ PASANDO
-            console.log("🔍 Comparando IDs en Realtime -> Mensaje sender_id:", nuevoMensaje.sender_id, "| Mi ID:", miUserId);
+            console.log("🔍 Comparando IDs en SpaxioFlow -> Mensaje sender_id:", nuevoMensaje.sender_id, "| Mi ID:", miUserId);
 
-            // Blindaje estricto (comparamos strings limpios)
-           
-if (String(nuevoMensaje.sender_id).trim() === String(miUserId).trim()) {
-    }
+            if (String(nuevoMensaje.sender_id).trim() === String(miUserId).trim()) {
+                // Tuyo
+            }
 
-            // Si es de otro usuario, lo dibuja en el feed de inmediato
             anexarUnicoMensajeAlFeed(nuevoMensaje);
-            // Si pasa este filtro, ahora sí se pinta (solo para mensajes del vecino)
-            
-
-     
-        
         }
     )
-   
-        .subscribe((status, err) => {
-            if (status === 'SUBSCRIBED') {
-                console.log(`[SpaxioFlow Enterprise] Canal ${channelName} suscrito correctamente.`);
-            } else if (status === 'CHANNEL_ERROR' || err) {
-                console.error(`[SpaxioFlow Enterprise] Fallo de conexión en Realtime:`, err);
-            }
-        });
+    .subscribe((status, err) => {
+        if (status === 'SUBSCRIBED') {
+            console.log(`[SpaxioFlow Enterprise] Canal ${channelName} suscrito a spaxioflow_feed.`);
+        } else if (status === 'CHANNEL_ERROR' || err) {
+            console.error(`[SpaxioFlow Enterprise] Error en canal SpaxioFlow:`, err);
+        }
+    });
 }
+
+
+// =================================================================
+// 2. CANAL REALTIME PARA INSTANEW (Tabla: instanew)
+// =================================================================
+window.instanewRealtimeChannel = null;
+
+function iniciarRealtimeInstanew(conversacionId) {
+    if (!window.supabaseClient) {
+        console.error("[Instanew Enterprise] Error crítico: Cliente Supabase no inicializado.");
+        return;
+    }
+
+    if (window.instanewRealtimeChannel) {
+        window.supabaseClient.removeChannel(window.instanewRealtimeChannel);
+        window.instanewRealtimeChannel = null;
+    }
+
+    const channelName = `instanew_live_${conversacionId}_${Date.now()}`;
+    window.instanewRealtimeChannel = window.supabaseClient.channel(channelName);
+
+    window.instanewRealtimeChannel
+    .on(
+        'postgres_changes',
+        {
+            event: 'INSERT',
+            schema: 'public',
+            table: 'instanew',
+            filter: `chat_id=eq.${conversacionId}`
+        },
+        (payload) => {
+            const nuevoMensaje = payload.new;
+            const miUserId = localStorage.getItem('mi_dropis_id') || "anonimo";
+
+            console.log("🔍 Comparando IDs en Instanew -> Mensaje sender_id:", nuevoMensaje.sender_id, "| Mi ID:", miUserId);
+
+            if (String(nuevoMensaje.sender_id).trim() === String(miUserId).trim()) {
+                // Tuyo
+            }
+
+            // Aquí llamas a la función que pinta las historias y tarjetas de Instagram
+            anexarUnicoMensajeAlInstanew(nuevoMensaje);
+        }
+    )
+    .subscribe((status, err) => {
+        if (status === 'SUBSCRIBED') {
+            console.log(`[Instanew Enterprise] Canal ${channelName} suscrito a la tabla instanew.`);
+        } else if (status === 'CHANNEL_ERROR' || err) {
+            console.error(`[Instanew Enterprise] Error en canal Instanew:`, err);
+        }
+    });
+              }
 
              
 // 2. Función quirúrgica para pintar solo el mensaje nuevo (Cero lag, cero parpadeo)
