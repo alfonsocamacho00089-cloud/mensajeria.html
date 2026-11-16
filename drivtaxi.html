@@ -2402,7 +2402,50 @@ function seleccionarRol(rolElegido) {
     alert("🚨 ERROR DETECTADO:\n\n" + message + "\n\nArchivo: " + source + "\nLínea: " + lineno);
     return false;
 };
+// =================================================================
+// 2. FUNCIÓN PARA PINTAR SOLO LAS MINIATURAS (Desde spaxioflow_feed)
+// =================================================================
+function renderizarMiniaturasSpaxioFlow(postsSpaxio) {
+    const contenedorStories = document.getElementById('contenedor-spaxioflow-stories');
+    if (!contenedorStories) return;
 
+    const tarjetaFijaHTML = contenedorStories.firstElementChild ? contenedorStories.firstElementChild.outerHTML : '';
+    contenedorStories.innerHTML = tarjetaFijaHTML;
+
+    postsSpaxio.forEach(post => {
+        const urlImg = post.content || post.imagen_url || post.media_url || post.foto || ''; 
+        const nombreUsr = post.sender_name || post.remitente || 'Pedro Peres';
+        const usuarioIdAutor = post.sender_id || post.usuarioId || post.usuario_id || '26fmetp4Q4WJ';
+
+        if (urlImg.startsWith('http') || urlImg.startsWith('data:image')) {
+            contenedorStories.innerHTML += `
+                <div onclick="cargarConversacionCon('${usuarioIdAutor}', '${nombreUsr}')" style="min-width: 170px; height: 200px; border-radius: 12px; padding: 1px; flex-shrink: 0; cursor: pointer; overflow: hidden; position: relative;">
+                    <div style="position: relative; width: 100%; height: 100%; background-image: url('${urlImg}'); background-size: cover; background-position: center; border-radius: 12px; display: flex; flex-direction: column; justify-content: flex-end; overflow: hidden;">
+                        <div style="position: absolute; bottom: 0; left: 0; width: 100%; padding: 1px; text-align: center; background: rgba(0,0,0,0.5);">
+                            <span style="font-size: 10px; color: #ffd700; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block;">${nombreUsr}</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+    });
+}
+
+// =================================================================
+// 3. BOTÓN "+" -> SUBE EXCLUSIVAMENTE A LA TABLA 'instanew'
+// =================================================================
+async function subirAInstanewBotonMas(input) {
+    if (!input.files || !input.files[0]) return;
+    
+    const archivo = input.files[0];
+    const textoNoticia = prompt("Escribe una noticia corta o titular para la publicación (opcional):", "") || "";
+
+    alert("🚀 Publicando en Instanew...");
+
+    let tipo = archivo.type.includes('video') ? 'video' : 'foto';
+
+    await enviarMediaExclusivoInstanew(input, tipo, textoNoticia);
+             }
 function renderizarSpaxioFlowStories(historias) {
     const contenedorInstagram = document.getElementById('carrusel-feed-instagram');
     if (!contenedorInstagram) return;
@@ -2513,82 +2556,8 @@ function renderizarSpaxioFlowStories(historias) {
     });
              }
              
-   async function subirYAbrirSpaxioFlow(input) {
-    if (!input.files || !input.files[0]) return;
-    
-    const archivo = input.files[0];
+   
 
-    // 1. 📝 Ventana flotante para la noticia o titular de la historia grande
-    const textoNoticia = prompt("Escribe una noticia corta o titular para la publicación (opcional):", "") || "";
-
-    alert("🚀 Subiendo historia grande a Instanew...");
-
-    let tipo = archivo.type.includes('video') ? 'video' : 'foto';
-
-    const lector = new FileReader();
-    lector.onload = function(e) {
-        const img = new Image();
-        img.src = e.target.result;
-        img.onload = async function() {
-            // Compresión en canvas para optimizar peso
-            const canvas = document.createElement('canvas');
-            const MAX_WIDTH = 800;
-            const scaleSize = MAX_WIDTH / img.width;
-            canvas.width = MAX_WIDTH;
-            canvas.height = img.height * scaleSize;
-
-            const ctx = canvas.getContext('2d');
-            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-
-            const urlImagenComprimida = canvas.toDataURL('image/jpeg', 0.82);
-            const nombreUsuario = localStorage.getItem('mi_nombre') || "Pedro Peres";
-            const miIdUsuario = localStorage.getItem('mi_dropis_id') || "anonimo";
-
-            // Objeto listo para la nueva tabla instanew
-            const nuevaHistoriaCloud = {
-                sender_name: nombreUsuario,
-                sender_id: miIdUsuario,
-                content: urlImagenComprimida,
-                tipo: tipo,
-                descripcion: textoNoticia,
-                chat_id: "26fmetp4Q4WJ"
-            };
-
-            try {
-                // 2. 🌐 Envío directo a tu backend de Vercel enfocado en instanew
-                const response = await fetch('/api/subir-instanew', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(nuevaHistoriaCloud)
-                });
-
-                if (!response.ok) throw new Error("Error al guardar en el servidor");
-
-                const resultado = await response.json();
-                console.log("✅ Historia guardada en la tabla instanew con éxito:", resultado);
-
-                alert("✨ ¡Publicación enviada a Instanew correctamente!");
-
-            } catch (error) {
-                console.error("❌ Falló la subida a la nube, respaldando localmente:", error);
-                
-                // PLAN B: Respaldo local si no hay red en ese momento
-                let misHistorias = JSON.parse(localStorage.getItem('spaxio_historias_locales') || '[]');
-                misHistorias.unshift({
-                    id: "historia_local_" + Date.now(),
-                    ...nuevaHistoriaCloud,
-                    created_at: new Date().toISOString()
-                });
-                localStorage.setItem('spaxio_historias_locales', JSON.stringify(misHistorias));
-                
-                if (typeof renderizarSpaxioFlowStories === 'function') {
-                    renderizarSpaxioFlowStories(misHistorias);
-                }
-            }
-        };
-    };
-    lector.readAsDataURL(archivo);
-             }
               
 async function procesarCobroComercial(cantidadMonto = null) {
     const receptorInput = document.getElementById('idReceptor');
@@ -4991,67 +4960,56 @@ async function cargarConversacionCon(idDestino, nombreDestino, fotoDestino) {
         if (box) box.innerHTML = ""; 
 
 
+// =================================================================
+// 1. CARGA SEPARADA AL ABRIR EL MÓDULO (idDestino === "26fmetp4Q4WJ")
+// =================================================================
 if (idDestino === "26fmetp4Q4WJ") {
-   
-              
-              console.log("📡 Cargando historial global de SpaxioFlow desde Vercel...");
-    
-    const res = await fetch('/api/get-spaxioflow-feed');
-if (!res.ok) throw new Error("Fallo al obtener el feed desde el backend");
+    console.log("📡 Cargando flujos separados: Instanew (Tarjetas Grandes) y SpaxioFlow (Miniaturas/Chat)...");
 
-// 1. Recibimos el JSON en 'data'
-const data = await res.json();
-
-// 2. Extraemos el array de forma segura a 'posts'
-const posts = Array.isArray(data) ? data : (data.posts || []);
-// --- LÍNEAS EXACTAS PARA EL CARRUSEL DE STORIES ---
-const contenedorStories = document.getElementById('contenedor-spaxioflow-stories');
-if (contenedorStories && posts.length > 0) {
-    contenedorStories.innerHTML = ''; // Limpiamos el "Cargando Flow..."
-    
-    // Limitamos a los últimos 8 posts para que aparezcan uno al lado del otro
-    posts.slice(0, 8).forEach(post => {
-        const urlImg = post.imagen_url || post.media_url || post.foto || '';
-        const nombreUsr = post.sender_name || post.remitente || 'Usuario';
-        const idContenido = "feed_" + post.id;
-        const nombreRemitente = post.sender_name || 'H.A.R.V.I.S.';
-
-     
-        contenedorStories.innerHTML += `
-            <div style="min-width: 110px; height: 130px; background: #151828; border: 1px solid #323657; border-radius: 12px; padding: 6px; text-align: center; flex-shrink: 0; cursor: pointer; display: flex; flex-direction: column; justify-content: space-between; overflow: hidden;">
-                <div style="width: 100%; height: 75px; background-image: url('${urlImg}'); background-size: cover; background-position: center; border-radius: 8px; background-color: #000; display: flex; align-items: center; justify-content: center;">
-                    ${!urlImg ? '<span style="font-size: 20px;">🎬</span>' : ''}
-                </div>
-                <div style="font-size: 10px; color: #fff; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100px; margin: 2px auto;">${nombreUsr}</div>
-            </div>
-        `;
-    });
-             }
-if (posts && Array.isArray(posts)) {
-    const postsInvertidos = [...posts].reverse();
-     
-    postsInvertidos.forEach(post => {
-        const idContenido = "feed_" + post.id;
-        const nombreRemitente = post.sender_name || 'H.A.R.V.I.S.';
-        
-        if (!document.getElementById(idContenido)) {
-            pintarMensaje(post.content, "", nombreRemitente, 'leido', idContenido, post.tipo); 
-        }
-    });
-             }
+    // --- FLUJO A: INSTANEW (Solo para tarjetas grandes abajo) ---
+    try {
+        const resInstanew = await fetch('/api/get-instanew-feed');
+        if (resInstanew.ok) {
+            const dataInsta = await resInstanew.json();
+            const postsInstanew = Array.isArray(dataInsta) ? dataInsta : (dataInsta.posts || []);
             
+            // Usamos el nombre exacto de tu función que pinta las tarjetas grandes
+            if (typeof renderizarSpaxioFlowStories === 'function') {
+                renderizarSpaxioFlowStories([...postsInstanew].reverse());
+            }
+        }
+    } catch (e) {
+        console.warn("⚠️ Error cargando Instanew desde la nube:", e);
+    }
 
-    iniciarRealtimeSpaxioFlow("26fmetp4Q4WJ");
+    // --- FLUJO B: SPAXIOFLOW FEED (Solo para tarjetas miniaturas arriba y chat) ---
+    try {
+        if (window.supabaseClient) {
+            const { data: postsSpaxio, error } = await window.supabaseClient
+                .from('spaxioflow_feed')
+                .select('*')
+                .eq('chat_id', '26fmetp4Q4WJ')
+                .order('created_at', { ascending: false })
+                .limit(20);
 
-    // 🎯 Forzamos el scroll arriba con un micro-respiro para ganarle al renderizado
+            if (!error && postsSpaxio) {
+                renderizarMiniaturasSpaxioFlow(postsSpaxio);
+            }
+        }
+    } catch (e) {
+        console.warn("⚠️ Error cargando SpaxioFlow desde Supabase:", e);
+    }
+
+    // Arrancamos AMBOS canales Realtime por separado
+    if (typeof iniciarRealtimeInstanew === 'function') iniciarRealtimeInstanew("26fmetp4Q4WJ");
+    if (typeof iniciarRealtimeSpaxioFlow === 'function') iniciarRealtimeSpaxioFlow("26fmetp4Q4WJ");
+
     setTimeout(() => {
         const box = document.getElementById('chat-box');
-        if (box) {
-            box.scrollTop = 0; 
-        }
-    }, 50); // 50 milisegundos de respiro
+        if (box) box.scrollTop = 0; 
+    }, 50);
+}
 
-             }
 
           
               else {
