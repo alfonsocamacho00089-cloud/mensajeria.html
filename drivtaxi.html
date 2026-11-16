@@ -4754,15 +4754,21 @@ fetch('/api/spaxioflow-event', {
 .catch(err => console.error("❌ Error:", err));
 
 
-// MUESTRAS EL MENSAJE EN PANTALLA EN LOCAL DIRECTAMENTE
-anexarUnicoMensajeAlFeed({
+const nuevoPostLocal = {
     id: Date.now(),
     sender_name: miNombre,
     content: msg,
     tipo: tipoValidado,
     created_at: new Date().toISOString()
-});
+};
 
+// Guardar de inmediato en el almacenamiento local de respaldo
+let cacheActual = recuperarHistoriasLocales();
+cacheActual.unshift(nuevoPostLocal);
+guardarHistoriasLocal(cacheActual);
+
+// MUESTRAS EL MENSAJE EN PANTALLA EN LOCAL DIRECTAMENTE
+anexarUnicoMensajeAlFeed(nuevoPostLocal);
     // 2. Mandas a Vercel
     /*fetch('/api/spaxioflow-event', {
         method: 'POST',
@@ -7403,10 +7409,23 @@ async function enviarMediaExclusivoInstanew(input, tipo, textoNoticia) {
         archivoAProcesar = await estandarizarTamanoImagen(archivoAProcesar, 1080, 1080);
     }
 
-    // 2. Procesamos (comprimimos en Base64) y guardamos localmente para las historias/feed
-    const archivoProcesado = await procesarArchivoMultimedia(archivoAProcesar, 'feed_grande'); 
-    guardarMultimediaLocal(archivoProcesado);
+// 2. Procesamos (comprimimos en Base64) y guardamos localmente para las historias/feed
+const archivoProcesado = await procesarArchivoMultimedia(archivoAProcesar, 'feed_grande'); 
+guardarMultimediaLocal(archivoProcesado);
 
+const nuevoPostLocal = {
+    id: 'post_' + Date.now(),
+    sender_name: localStorage.getItem('mi_nombre_perfil') || localStorage.getItem('mi_nombre') || "Pedro Peres",
+    content: archivoProcesado.contenido,
+    tipo: tipo,
+    descripcion: textoNoticia,
+    created_at: new Date().toISOString()
+};
+
+// Guardar de inmediato en el almacenamiento local de respaldo
+let cacheActual = recuperarHistoriasLocales();
+cacheActual.unshift(nuevoPostLocal);
+guardarHistoriasLocal(cacheActual);
     // 3. Leemos el archivo ya optimizado para subirlo a Supabase
     const lector = new FileReader();
     lector.onload = async function(e) {
