@@ -2402,6 +2402,29 @@ function seleccionarRol(rolElegido) {
     alert("🚨 ERROR DETECTADO:\n\n" + message + "\n\nArchivo: " + source + "\nLínea: " + lineno);
     return false;
 };
+
+
+             function actualizarCacheLocalPostNuevo(nuevoPost) {
+    let actuales = recuperarHistoriasLocales();
+    actuales.unshift(nuevoPost);
+    if (actuales.length > 30) actuales = actuales.slice(0, 30);
+    guardarHistoriasLocal(actuales);
+             }
+             function recuperarHistoriasLocales() {
+    try {
+        const data = localStorage.getItem('spaxio_historias_locales');
+        return data ? JSON.parse(data) : [];
+    } catch (e) {
+        return [];
+    }
+             }
+             function guardarHistoriasLocal(posts) {
+    try {
+        localStorage.setItem('spaxio_historias_locales', JSON.stringify(posts));
+    } catch (e) {
+        console.error("Error al guardar historias localmente:", e);
+    }
+             }
 // =================================================================
 // 2. FUNCIÓN PARA PINTAR SOLO LAS MINIATURAS (Desde spaxioflow_feed)
 // =================================================================
@@ -5259,7 +5282,8 @@ if (id) {
     }
 
               
-              
+         const historiasLocales = recuperarHistoriasLocales();
+if (historiasLocales.length > 0) { renderizarSpaxioFlowStories(historiasLocales); }     
 
         // Si hay internet intentamos sincronizar Firebase de fondo, si no, la app abre local sin bloquearse
         if (navigator.onLine) {
