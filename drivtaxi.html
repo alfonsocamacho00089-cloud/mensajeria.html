@@ -2402,6 +2402,117 @@ function seleccionarRol(rolElegido) {
     alert("🚨 ERROR DETECTADO:\n\n" + message + "\n\nArchivo: " + source + "\nLínea: " + lineno);
     return false;
 };
+
+function renderizarSpaxioFlowStories(historias) {
+    const contenedorInstagram = document.getElementById('carrusel-feed-instagram');
+    if (!contenedorInstagram) return;
+
+    contenedorInstagram.innerHTML = ''; 
+
+    if (!historias || historias.length === 0) {
+        contenedorInstagram.innerHTML = `
+            <div style="text-align: center; padding: 25px; color: #8696a0; font-size: 12px; background: #202732; border-radius: 16px; border: 1px solid rgba(255,215,0,0.1);">
+                Sube una historia con el botón "+" de arriba para verla aquí en tarjetas tipo Instagram 🚀
+            </div>
+        `;
+        return;
+    }
+
+    historias.forEach((post, index) => {
+        const urlImg = post.content || post.imagen_url || post.media_url || post.foto || '';
+        const nombreUsr = post.sender_name || post.remitente || 'Pedro Peres';
+        const fechaHora = post.created_at ? new Date(post.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Hace un momento';
+        const postId = post.id || 'post_' + index;
+
+        const comentariosKey = 'comentarios_' + postId;
+        const comentariosGuardados = JSON.parse(localStorage.getItem(comentariosKey) || '[]');
+
+        const tarjetaInsta = document.createElement('div');
+        tarjetaInsta.className = 'tarjeta-feed-insta'; // Usamos la clase CSS blindada
+
+        let contenidoMedia = '';
+        if (urlImg && (urlImg.startsWith('data:image') || urlImg.startsWith('http'))) {
+            contenidoMedia = `<img src="${urlImg}" class="imagen-feed-insta" onerror="this.style.display='none'">`;
+        } else if (post.tipo === 'video' || (urlImg && (urlImg.includes('.mp4') || urlImg.includes('.webm')))) {
+            contenidoMedia = `<video src="${urlImg}" controls playsinline class="imagen-feed-insta"></video>`;
+        } else {
+            contenidoMedia = `<div style="padding: 20px; color: #fff; font-size: 13px; text-align: center; min-height: 150px;">${urlImg || 'Publicación'}</div>`;
+        }
+
+        let htmlComentarios = '';
+        comentariosGuardados.forEach(c => {
+            htmlComentarios += `<div style="font-size: 11px; color: #ccc; margin-top: 3px;"><b style="color: #ffd700;">${c.autor}:</b> ${c.texto}</div>`;
+        });
+
+        tarjetaInsta.innerHTML = `
+            <div style="display: flex; align-items: center; justify-content: space-between; padding: 10px 12px; background: #202732;">
+                <div onclick="cargarConversacionCon('${post.usuarioId}', '${nombreUsr}')" style="display: flex; align-items: center; gap: 10px; min-width: 0; cursor: pointer;">
+    <div style="width: 32px; height: 32px; min-width: 32px; border-radius: 50%; border: 1px solid #ffd700; background: #202732; overflow: hidden; display: flex; align-items: center; justify-content: center; font-weight: bold; color: #ffd700; font-size: 12px; flex-shrink: 0;">
+        ${nombreUsr.charAt(0).toUpperCase()}
+    </div>
+    <span style="font-size: 12px; font-weight: bold; color: #ffffff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${nombreUsr}</span>
+</div>
+<span style="font-size: 10px; color: #8696a0; flex-shrink: 0;">${fechaHora}</span>
+</div>
+<!-- 🔥 ESTO ES LO QUE TE FALTABA EN LA PLANTILLA PARA QUE PINTE EL TEXTO -->
+            ${post.descripcion || post.texto ? `
+                <div style="padding: 10px 12px 6px 12px; font-size: 14px; color: #ffffff; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; background: #202732; max-height: 100px;">
+                    ${post.descripcion || post.texto}
+                </div>
+            ` : ''}
+         <div style="width: 100%;">
+                ${contenidoMedia}
+            </div>
+
+
+
+<!-- Botones de Interacción con Contadores -->
+<div style="padding: 8px 12px; display: flex; gap: 20px; font-size: 18px; align-items: center; background: #202732;">
+    
+    <!-- Botón de Corazón / Me gusta -->
+    <div style="display: flex; align-items: center; gap: 6px; cursor: pointer;" onclick="darLike('${postId}')">
+        <span id="icono-like-${postId}" style="color: ${localStorage.getItem(`dado_like_${postId}`) === 'true' ? 'red' : '#fff'};">🤍</span>
+        <span id="contador-like-${postId}" style="font-size: 13px; color: #ffd700; font-weight: bold;">${localStorage.getItem(`like_${postId}`) || post.likes || 0}</span>
+    </div>
+
+    <!-- Botón de 👍 / Me gusta secundario -->
+    <div style="display: flex; align-items: center; gap: 6px; cursor: pointer;" onclick="darPulgar('${postId}')">
+        <span id="icono-pulgar-${postId}" style="color: ${localStorage.getItem(`dado_pulgar_${postId}`) === 'true' ? '#ffd700' : '#fff'};">👍</span>
+        
+        <span id="contador-pulgar-${postId}" style="font-size: 13px; color: #ffd700; font-weight: bold;">${localStorage.getItem(`pulgar_${postId}`) || post.pulgares || 0}</span>
+    </div>
+
+    
+    <!-- Botón de Comentarios -->
+<div style="display: flex; align-items: center; gap: 6px; cursor: pointer;" onclick="toggleComentarios('${postId}')">
+    <span style="color: #ffd700;">💬</span>
+    <span id="contador-comentarios-${postId}" style="font-size: 13px; color: #ffd700; font-weight: bold;">${comentariosGuardados.length}</span>
+</div>
+    
+    
+</div>
+
+<!-- Contenedor de Comentarios Oculto por Defecto (Se despliega al tocar el icono) -->
+<div id="box-comentarios-${postId}" style="display: none; padding: 0 12px 10px 12px; flex-direction: column; gap: 4px; background: #202732; border-bottom-left-radius: 12px; border-bottom-right-radius: 12px;">
+    
+    <div id="lista-comentarios-${postId}" style="display: flex; flex-direction: column; max-height: 100px; overflow-y: auto; margin-top: 4px;">
+        ${htmlComentarios}
+    </div>
+
+    <div style="display: flex; align-items: center; margin-top: 8px; border-top: 1px solid rgba(255,215,0,0.1); padding-top: 8px; gap: 8px;">
+        <input type="text" id="input-comentario-${postId}" placeholder="Agrega un comentario..." style="flex: 1; background: #151828; border: 1px solid #323657; border-radius: 20px; padding: 6px 12px; color: #fff; font-size: 11px; outline: none;">
+        <button onclick="enviarComentarioInstagram('${postId}')" style="background: #ffd700; color: #000; border: none; border-radius: 50%; width: 28px; height: 28px; font-weight: bold; font-size: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">➤</button>
+    </div>
+</div>
+
+
+
+        `;
+
+        contenedorInstagram.appendChild(tarjetaInsta);
+    });
+             }
+             
   async function subirYAbrirSpaxioFlow(input) {
     if (!input.files || !input.files[0]) return;
     
