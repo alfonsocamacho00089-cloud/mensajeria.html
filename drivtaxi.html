@@ -6074,16 +6074,25 @@ function previsualizarMiFoto(input) {
 
      async function prepararEnvioMedia(input, tipoSugerido) {
     if (!input.files || !input.files[0]) return;
-    const archivo = input.files[0];
     
+    let archivoAEnviar = input.files[0];
+    
+    // 1. Si es imagen, la estandarizamos al tamaño cuadrado de 1080x1080
+    if (archivoAEnviar.type.startsWith('image/')) {
+        archivoAEnviar = await estandarizarTamanoImagen(archivoAEnviar, 1080, 1080);
+    }
+    
+    // 2. La procesamos y guardamos localmente con destino 'chat'
+    const archivoProcesado = await procesarArchivoMultimedia(archivoAEnviar, 'chat');
+    guardarMultimediaLocal(archivoProcesado);
+
     try {
-        // Convertimos el archivo pesado en una "URL de texto" (Base64)
-        const urlBase64 = await subirArchivoAFirebase(archivo);
+        // Convertimos el archivo optimizado en Base64 para enviarlo al chat
+        const urlBase64 = await subirArchivoAFirebase(archivoAEnviar);
         
-        // Detectar si es video o foto si no viene definido
         let tipo = tipoSugerido;
-        if (archivo.type.includes('video')) tipo = 'video';
-        if (archivo.type.includes('image')) tipo = 'foto';
+        if (archivoAEnviar.type.includes('video')) tipo = 'video';
+        if (archivoAEnviar.type.includes('image')) tipo = 'foto';
 
         await enviarMediaPorURL(urlBase64, tipo);
         
@@ -6091,7 +6100,7 @@ function previsualizarMiFoto(input) {
     } catch (e) {
         alert("H.A.R.V.I.S.: Error al convertir el archivo.");
     }
-     }
+ }
     
 
      // --- 1. PROCESADOR MULTIMEDIA (SIN FIREBASE STORAGE) ---
