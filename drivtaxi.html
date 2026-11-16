@@ -2468,8 +2468,8 @@ function renderizarSpaxioFlowStories(historias) {
         const postId = post.id || 'post_' + index;
 
         const comentariosKey = 'comentarios_' + postId;
-        const comentariosGuardados = JSON.parse(localStorage.getItem(comentariosKey) || '[]');
-
+        
+        const comentariosGuardados = Array.isArray(post.comentarios) ? post.comentarios : [];
         const tarjetaInsta = document.createElement('div');
         tarjetaInsta.className = 'tarjeta-feed-insta'; // Usamos la clase CSS blindada
 
@@ -2515,16 +2515,12 @@ function renderizarSpaxioFlowStories(historias) {
     <!-- Botón de Corazón / Me gusta -->
     <div style="display: flex; align-items: center; gap: 6px; cursor: pointer;" onclick="darLike('${postId}')">
         <span id="icono-like-${postId}" style="color: ${localStorage.getItem(`dado_like_${postId}`) === 'true' ? 'red' : '#fff'};">🤍</span>
-        <span id="contador-like-${postId}" style="font-size: 13px; color: #ffd700; font-weight: bold;">${localStorage.getItem(`like_${postId}`) || post.likes || 0}</span>
-    </div>
+        <span id="contador-like-${postId}" style="font-size: 13px; color: #ffd700; font-weight: bold;">${post.likes || 0}</span> </div>
 
     <!-- Botón de 👍 / Me gusta secundario -->
     <div style="display: flex; align-items: center; gap: 6px; cursor: pointer;" onclick="darPulgar('${postId}')">
         <span id="icono-pulgar-${postId}" style="color: ${localStorage.getItem(`dado_pulgar_${postId}`) === 'true' ? '#ffd700' : '#fff'};">👍</span>
-        
-        <span id="contador-pulgar-${postId}" style="font-size: 13px; color: #ffd700; font-weight: bold;">${localStorage.getItem(`pulgar_${postId}`) || post.pulgares || 0}</span>
-    </div>
-
+<span id="contador-pulgar-${postId}" style="font-size: 13px; color: #ffd700; font-weight: bold;">${post.pulgares || 0}</span></div>
     
     <!-- Botón de Comentarios -->
 <div style="display: flex; align-items: center; gap: 6px; cursor: pointer;" onclick="toggleComentarios('${postId}')">
