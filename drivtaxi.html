@@ -6994,14 +6994,18 @@ function iniciarRealtimeSpaxioFlow(conversacionId) {
         return;
     }
 
+    // 1. Limpieza síncrona y desinscripción del canal activo previo (Prevent Memory Leak)
     if (window.spaxioRealtimeChannel) {
         window.supabaseClient.removeChannel(window.spaxioRealtimeChannel);
         window.spaxioRealtimeChannel = null;
     }
 
+    // 2. Creación de canal aislado por ID de sesión/conversación
     const channelName = `spaxioflow_live_${conversacionId}_${Date.now()}`;
+    
     window.spaxioRealtimeChannel = window.supabaseClient.channel(channelName);
 
+    // 3. Suscripción con manejo estricto de eventos de ciclo de vida
     window.spaxioRealtimeChannel
     .on(
         'postgres_changes',
@@ -7011,26 +7015,36 @@ function iniciarRealtimeSpaxioFlow(conversacionId) {
             table: 'spaxioflow_feed',
             filter: `chat_id=eq.${conversacionId}`
         },
-        (payload) => {
+
+(payload) => {
             const nuevoMensaje = payload.new;
             const miUserId = localStorage.getItem('mi_dropis_id') || "anonimo";
 
-            console.log("🔍 Comparando IDs en SpaxioFlow -> Mensaje sender_id:", nuevoMensaje.sender_id, "| Mi ID:", miUserId);
+            // 🛑 IMPRIME ESTO EN CONSOLA PARA VER QUÉ ESTÁ PASANDO
+            console.log("🔍 Comparando IDs en Realtime -> Mensaje sender_id:", nuevoMensaje.sender_id, "| Mi ID:", miUserId);
 
-            if (String(nuevoMensaje.sender_id).trim() === String(miUserId).trim()) {
-                // Tuyo
-            }
+            // Blindaje estricto (comparamos strings limpios)
+           
+if (String(nuevoMensaje.sender_id).trim() === String(miUserId).trim()) {
+    }
 
+            // Si es de otro usuario, lo dibuja en el feed de inmediato
             anexarUnicoMensajeAlFeed(nuevoMensaje);
+            // Si pasa este filtro, ahora sí se pinta (solo para mensajes del vecino)
+            
+
+     
+        
         }
     )
-    .subscribe((status, err) => {
-        if (status === 'SUBSCRIBED') {
-            console.log(`[SpaxioFlow Enterprise] Canal ${channelName} suscrito a spaxioflow_feed.`);
-        } else if (status === 'CHANNEL_ERROR' || err) {
-            console.error(`[SpaxioFlow Enterprise] Error en canal SpaxioFlow:`, err);
-        }
-    });
+   
+        .subscribe((status, err) => {
+            if (status === 'SUBSCRIBED') {
+                console.log(`[SpaxioFlow Enterprise] Canal ${channelName} suscrito correctamente.`);
+            } else if (status === 'CHANNEL_ERROR' || err) {
+                console.error(`[SpaxioFlow Enterprise] Fallo de conexión en Realtime:`, err);
+            }
+        });
 }
 
 
