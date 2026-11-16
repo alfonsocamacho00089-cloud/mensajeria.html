@@ -7133,42 +7133,41 @@ function iniciarRealtimeInstanew(conversacionId) {
             if (String(nuevoMensaje.sender_id).trim() === String(miUserId).trim()) {
                 // Tuyo
             }
-.on(
-    'postgres_changes',
-    {
-        event: 'UPDATE',
-        schema: 'public',
-        table: 'instanew',
-        filter: `chat_id=eq.${conversacionId}`
-    },
-    (payload) => {
-        const postActualizado = payload.new;
-        const id = postActualizado.id;
 
-        // Actualizamos los 3 contadores en vivo
-        const cLike = document.getElementById(`contador-like-${id}`);
-        const cPulgar = document.getElementById(`contador-pulgar-${id}`);
-        const cCom = document.getElementById(`contador-comentarios-${id}`);
-        const listaCom = document.getElementById(`lista-comentarios-${id}`);
-
-        if (cLike) cLike.innerText = postActualizado.likes || 0;
-        if (cPulgar) cPulgar.innerText = postActualizado.pulgares || 0;
-
-        const coms = Array.isArray(postActualizado.comentarios) ? postActualizado.comentarios : [];
-        if (cCom) cCom.innerText = coms.length;
-        if (listaCom) {
-            listaCom.innerHTML = coms.map(c => 
-                `<div style="font-size: 11px; color: #ccc; margin-top: 3px;"><b style="color: #ffd700;">${c.autor}:</b> ${c.texto}</div>`
-            ).join('');
-        }
-    }
-)
             // Aquí llamas a la función que pinta las historias y tarjetas de Instagram
             anexarUnicoMensajeAlInstanew(nuevoMensaje);
         }
     )
+    .on(
+        'postgres_changes',
+        {
+            event: 'UPDATE',
+            schema: 'public',
+            table: 'instanew',
+            filter: `chat_id=eq.${conversacionId}`
+        },
+        (payload) => {
+            const postActualizado = payload.new;
+            const id = postActualizado.id;
 
-             
+            // Actualizamos los contadores en vivo
+            const cLike = document.getElementById(`contador-like-${id}`);
+            const cPulgar = document.getElementById(`contador-pulgar-${id}`);
+            const cCom = document.getElementById(`contador-comentarios-${id}`);
+            const listaCom = document.getElementById(`lista-comentarios-${id}`);
+
+            if (cLike) cLike.innerText = postActualizado.likes || 0;
+            if (cPulgar) cPulgar.innerText = postActualizado.pulgares || 0;
+
+            const coms = Array.isArray(postActualizado.comentarios) ? postActualizado.comentarios : [];
+            if (cCom) cCom.innerText = coms.length;
+            if (listaCom) {
+                listaCom.innerHTML = coms.map(c => 
+                    `<div style="font-size: 11px; color: #ccc; margin-top: 3px;"><b style="color: #ffd700;">${c.autor}:</b> ${c.texto}</div>`
+                ).join('');
+            }
+        }
+    )
     .subscribe((status, err) => {
         if (status === 'SUBSCRIBED') {
             console.log(`[Instanew Enterprise] Canal ${channelName} suscrito a la tabla instanew.`);
@@ -7176,7 +7175,9 @@ function iniciarRealtimeInstanew(conversacionId) {
             console.error(`[Instanew Enterprise] Error en canal Instanew:`, err);
         }
     });
-              }
+
+             
+    
 
              
 // 2. Función quirúrgica para pintar solo el mensaje nuevo (Cero lag, cero parpadeo)
