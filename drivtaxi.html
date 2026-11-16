@@ -7119,6 +7119,7 @@ function iniciarRealtimeInstanew(conversacionId) {
     window.instanewRealtimeChannel = window.supabaseClient.channel(channelName);
 
     window.instanewRealtimeChannel
+     
     .on(
         'postgres_changes',
         {
@@ -7136,11 +7137,42 @@ function iniciarRealtimeInstanew(conversacionId) {
             if (String(nuevoMensaje.sender_id).trim() === String(miUserId).trim()) {
                 // Tuyo
             }
+.on(
+    'postgres_changes',
+    {
+        event: 'UPDATE',
+        schema: 'public',
+        table: 'instanew',
+        filter: `chat_id=eq.${conversacionId}`
+    },
+    (payload) => {
+        const postActualizado = payload.new;
+        const id = postActualizado.id;
 
+        // Actualizamos los 3 contadores en vivo
+        const cLike = document.getElementById(`contador-like-${id}`);
+        const cPulgar = document.getElementById(`contador-pulgar-${id}`);
+        const cCom = document.getElementById(`contador-comentarios-${id}`);
+        const listaCom = document.getElementById(`lista-comentarios-${id}`);
+
+        if (cLike) cLike.innerText = postActualizado.likes || 0;
+        if (cPulgar) cPulgar.innerText = postActualizado.pulgares || 0;
+
+        const coms = Array.isArray(postActualizado.comentarios) ? postActualizado.comentarios : [];
+        if (cCom) cCom.innerText = coms.length;
+        if (listaCom) {
+            listaCom.innerHTML = coms.map(c => 
+                `<div style="font-size: 11px; color: #ccc; margin-top: 3px;"><b style="color: #ffd700;">${c.autor}:</b> ${c.texto}</div>`
+            ).join('');
+        }
+    }
+)
             // Aquí llamas a la función que pinta las historias y tarjetas de Instagram
             anexarUnicoMensajeAlInstanew(nuevoMensaje);
         }
     )
+
+             
     .subscribe((status, err) => {
         if (status === 'SUBSCRIBED') {
             console.log(`[Instanew Enterprise] Canal ${channelName} suscrito a la tabla instanew.`);
@@ -7352,8 +7384,15 @@ function anexarUnicoMensajeAlInstanew(post) {
                 <span id="contador-comentarios-${postId}" style="font-size: 13px; color: #ffd700; font-weight: bold;">0</span>
             </div>
         </div>
+        
     `;
-
+<div id="box-comentarios-${postId}" style="display: none; padding: 0 12px 10px 12px; flex-direction: column; gap: 4px; background: #202732; border-bottom-left-radius: 12px; border-bottom-right-radius: 12px;">
+            <div id="lista-comentarios-${postId}" style="display: flex; flex-direction: column; max-height: 100px; overflow-y: auto; margin-top: 4px;"></div>
+            <div style="display: flex; align-items: center; margin-top: 8px; border-top: 1px solid rgba(255,215,0,0.1); padding-top: 8px; gap: 8px;">
+                <input type="text" id="input-comentario-${postId}" placeholder="Agrega un comentario..." style="flex: 1; background: #151828; border: 1px solid #323657; border-radius: 20px; padding: 6px 12px; color: #fff; font-size: 11px; outline: none;">
+                <button onclick="enviarComentarioInstagram('${postId}')" style="background: #ffd700; color: #000; border: none; border-radius: 50%; width: 28px; height: 28px; font-weight: bold; font-size: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">➤</button>
+            </div>
+        </div>
     // Lo insertamos de primero arriba en el feed de tarjetas grandes
     contenedorInstagram.prepend(tarjetaInsta);
              }
