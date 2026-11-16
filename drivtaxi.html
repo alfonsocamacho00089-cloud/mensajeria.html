@@ -2402,7 +2402,73 @@ function seleccionarRol(rolElegido) {
     alert("🚨 ERROR DETECTADO:\n\n" + message + "\n\nArchivo: " + source + "\nLínea: " + lineno);
     return false;
 };
+function guardarMultimediaLocal(objetoMedia) {
+    try {
+        let actual = JSON.parse(localStorage.getItem('spaxio_multimedia_total') || '[]');
+        actual.unshift(objetoMedia);
+        if (actual.length > 40) actual = actual.slice(0, 40); // Límite seguro para localStorage
+        localStorage.setItem('spaxio_multimedia_total', JSON.stringify(actual));
+    } catch (e) {
+        console.error("Error guardando multimedia:", e);
+    }
+             }
 
+             function procesarArchivoMultimedia(file, destino = 'chat') {
+    return new Promise((resolve, reject) => {
+        if (!file) return reject("No file");
+        
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        
+        reader.onload = (e) => {
+            if (file.type.startsWith('image/')) {
+                const img = new Image();
+                img.src = e.target.result;
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    let ancho = img.width;
+                    let alto = img.height;
+                    const anchoMax = 1080;
+                    if (ancho > anchoMax) {
+                        alto = Math.round((alto * anchoMax) / ancho);
+                        ancho = anchoMax;
+                    }
+                    canvas.width = ancho;
+                    canvas.height = alto;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, ancho, alto);
+                    
+                    resolve({
+                        id: 'media_' + Date.now(),
+                        tipo: 'image',
+                        contenido: canvas.toDataURL('image/jpeg', 0.7),
+                        destino: destino, // 'chat', 'historia_mini', 'feed_grande'
+                        fecha: new Date().toISOString()
+                    });
+                };
+            } else if (file.type.startsWith('video/')) {
+                resolve({
+                    id: 'media_' + Date.now(),
+                    tipo: 'video',
+                    contenido: e.target.result,
+                    destino: destino,
+                    fecha: new Date().toISOString()
+                });
+            } else {
+                reject("Formato no soportado");
+            }
+        };
+    });
+             }
+
+             function recuperarTodoMultimedia() {
+    try {
+        const data = localStorage.getItem('spaxio_multimedia_total');
+        return data ? JSON.parse(data) : [];
+    } catch (e) {
+        return [];
+    }
+             }
 
              function actualizarCacheLocalPostNuevo(nuevoPost) {
     let actuales = recuperarHistoriasLocales();
