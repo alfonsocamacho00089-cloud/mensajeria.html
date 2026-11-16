@@ -2513,70 +2513,77 @@ function renderizarSpaxioFlowStories(historias) {
     });
              }
              
-  async function subirYAbrirSpaxioFlow(input) {
+   async function subirYAbrirSpaxioFlow(input) {
     if (!input.files || !input.files[0]) return;
     
     const archivo = input.files[0];
+
+    // 1. 📝 Ventana flotante para la noticia o titular de la historia grande
     const textoNoticia = prompt("Escribe una noticia corta o titular para la publicación (opcional):", "") || "";
 
-    alert("🚀 Subiendo historia a la nube de SpaxioFlow...");
+    alert("🚀 Subiendo historia grande a Instanew...");
 
     let tipo = archivo.type.includes('video') ? 'video' : 'foto';
 
     const lector = new FileReader();
-    lector.onload = async function(e) {
+    lector.onload = function(e) {
         const img = new Image();
         img.src = e.target.result;
         img.onload = async function() {
-            // Optimización y compresión de imagen para la base de datos
+            // Compresión en canvas para optimizar peso
             const canvas = document.createElement('canvas');
-            const MAX_WIDTH = 600;
+            const MAX_WIDTH = 800;
             const scaleSize = MAX_WIDTH / img.width;
             canvas.width = MAX_WIDTH;
             canvas.height = img.height * scaleSize;
 
             const ctx = canvas.getContext('2d');
             ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-            const urlImagenComprimida = canvas.toDataURL('image/jpeg', 0.8);
 
-            const miNombre = localStorage.getItem('mi_nombre') || "Pedro Peres";
-            const miUserId = localStorage.getItem('mi_dropis_id') || "SPAXIO-USER";
+            const urlImagenComprimida = canvas.toDataURL('image/jpeg', 0.82);
+            const nombreUsuario = localStorage.getItem('mi_nombre') || "Pedro Peres";
+            const miIdUsuario = localStorage.getItem('mi_dropis_id') || "anonimo";
 
-            // 1. Objeto listo para insertar en Supabase
-            const nuevoPostSupabase = {
-                chat_id: "26fmetp4Q4WJ", // ID del canal general de Spaxio Flow
-                sender_id: miUserId,
-                sender_name: miNombre,
+            // Objeto listo para la nueva tabla instanew
+            const nuevaHistoriaCloud = {
+                sender_name: nombreUsuario,
+                sender_id: miIdUsuario,
                 content: urlImagenComprimida,
                 tipo: tipo,
                 descripcion: textoNoticia,
-                created_at: new Date().toISOString()
+                chat_id: "26fmetp4Q4WJ"
             };
 
             try {
-                // 2. 🟢 PETICIÓN DIRECTA A SUPABASE (Tabla spaxioflow_feed)
-                const { data, error } = await window.supabaseClient
-                    .from('spaxioflow_feed')
-                    .insert([nuevoPostSupabase]);
+                // 2. 🌐 Envío directo a tu backend de Vercel enfocado en instanew
+                const response = await fetch('/api/subir-instanew', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(nuevaHistoriaCloud)
+                });
 
-                if (error) {
-                    console.error("❌ Error al subir a Supabase:", error.message);
-                    alert("Hubo un error al subir a la nube: " + error.message);
-                } else {
-                    console.log("✅ ¡Subido con éxito a Supabase!", data);
-                    alert("¡Publicación compartida en la nube con éxito!");
+                if (!response.ok) throw new Error("Error al guardar en el servidor");
+
+                const resultado = await response.json();
+                console.log("✅ Historia guardada en la tabla instanew con éxito:", resultado);
+
+                alert("✨ ¡Publicación enviada a Instanew correctamente!");
+
+            } catch (error) {
+                console.error("❌ Falló la subida a la nube, respaldando localmente:", error);
+                
+                // PLAN B: Respaldo local si no hay red en ese momento
+                let misHistorias = JSON.parse(localStorage.getItem('spaxio_historias_locales') || '[]');
+                misHistorias.unshift({
+                    id: "historia_local_" + Date.now(),
+                    ...nuevaHistoriaCloud,
+                    created_at: new Date().toISOString()
+                });
+                localStorage.setItem('spaxio_historias_locales', JSON.stringify(misHistorias));
+                
+                if (typeof renderizarSpaxioFlowStories === 'function') {
+                    renderizarSpaxioFlowStories(misHistorias);
                 }
-            } catch (err) {
-                console.error("❌ Excepción al conectar con Supabase:", err);
-            }
-
-            // 3. Guardado de respaldo local opcional
-            let misHistorias = JSON.parse(localStorage.getItem('spaxio_historias_locales') || '[]');
-            misHistorias.unshift(nuevoPostSupabase);
-            localStorage.setItem('spaxio_historias_locales', JSON.stringify(misHistorias));
-
-            if (typeof renderizarSpaxioFlowStories === 'function') {
-                renderizarSpaxioFlowStories(misHistorias);
             }
         };
     };
