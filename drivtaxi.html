@@ -4754,21 +4754,24 @@ fetch('/api/spaxioflow-event', {
 .catch(err => console.error("❌ Error:", err));
 
 
-// MUESTRAS EL MENSAJE EN PANTALLA EN LOCAL DIRECTAMENTE
-anexarUnicoMensajeAlFeed({
-    id: Date.now(),
-    sender_name: miNombre,
-    content: msg,
-    tipo: tipoValidado,
+{
+    // 2. Procesamos (comprimimos en Base64) y guardamos localmente para las historias/feed
+const archivoProcesado = await procesarArchivoMultimedia(archivoAProcesar, 'feed_grande'); 
+guardarMultimediaLocal(archivoProcesado);
+
+const nuevoPostLocal = {
+    id: 'post_' + Date.now(),
+    sender_name: localStorage.getItem('mi_nombre_perfil') || localStorage.getItem('mi_nombre') || "Pedro Peres",
+    content: archivoProcesado.contenido,
+    tipo: tipo,
+    descripcion: textoNoticia,
     created_at: new Date().toISOString()
 };
 
-
 // Guardar de inmediato en el almacenamiento local de respaldo
 let cacheActual = recuperarHistoriasLocales();
-cacheActual.unshift(anexarUnicoMensajeAlFeed);
+cacheActual.unshift(nuevoPostLocal);
 guardarHistoriasLocal(cacheActual);
-
 // MUESTRAS EL MENSAJE EN PANTALLA EN LOCAL DIRECTAMENTE
 
     // 2. Mandas a Vercel
@@ -5154,12 +5157,25 @@ async function cargarConversacionCon(idDestino, nombreDestino, fotoDestino) {
 // =================================================================
 if (idDestino === "26fmetp4Q4WJ") {
     console.log("📡 Cargando flujos separados: Instanew (Tarjetas Grandes) y SpaxioFlow (Miniaturas/Chat)...");
-
-    // 1️⃣ PINTADO INSTANTÁNEO DESDE LOCALSTORAGE (Antes de consultar la red)
+// --- FLUJO A: INSTANEW (Solo para tarjetas grandes abajo) ---
+    try {
+        const resInstanew = await fetch('/api/get-instanew-feed');
+        if (resInstanew.ok) {
+            const dataInsta = await resInstanew.json();
+            const postsInstanew = Array.isArray(dataInsta) ? dataInsta : (dataInsta.posts || []);
+            // 1️⃣ PINTADO INSTANTÁNEO DESDE LOCALSTORAGE (Antes de consultar la red)
     const respaldoLocal = recuperarHistoriasLocales();
     if (respaldoLocal.length > 0 && typeof renderizarSpaxioFlowStories === 'function') {
         renderizarSpaxioFlowStories(respaldoLocal);
+             }
+            
+        }
+    } catch (e) {
+        console.warn("⚠️ Error cargando Instanew desde la nube:", e);
     }
+
+    
+    
 
     // --- FLUJO B: SPAXIOFLOW FEED (Miniaturas arriba Y mensajes en #chat-box) ---
 try {
