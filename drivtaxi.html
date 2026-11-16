@@ -2848,44 +2848,115 @@ window.addEventListener('DOMContentLoaded', () => {
     setTimeout(sincronizarMiFotoEnStories, 500);
 });
 
-              function darLike(postId) {
-    const contador = document.getElementById(`contador-like-${postId}`);
-    const icono = document.getElementById(`icono-like-${postId}`);
-    
-    if (contador && icono) {
-        let actual = parseInt(contador.innerText) || 0;
-        if (icono.style.color === 'red') {
-            icono.style.color = '#fff';
-            contador.innerText = actual - 1;
-            localStorage.setItem(`dado_like_${postId}`, 'false');
-        } else {
-            icono.style.color = 'red';
-            contador.innerText = actual + 1;
-            localStorage.setItem(`dado_like_${postId}`, 'true');
-        }
-        localStorage.setItem(`like_${postId}`, contador.innerText);
-    }
+              // =================================================================
+// 1. DAR LIKE (❤️) EN LA NUBE
+// =================================================================
+async function darLike(postId) {
+    if (!window.supabaseClient) return;
+
+    const yaDioLike = localStorage.getItem(`dado_like_${postId}`) === 'true';
+    const spanContador = document.getElementById(`contador-like-${postId}`);
+    const spanIcono = document.getElementById(`icono-like-${postId}`);
+
+    let valorActual = parseInt(spanContador?.innerText || '0', 10);
+    let nuevoValor = yaDioLike ? Math.max(0, valorActual - 1) : valorActual + 1;
+
+    // Actualizamos visualmente al instante
+    if (spanContador) spanContador.innerText = nuevoValor;
+    if (spanIcono) spanIcono.style.color = yaDioLike ? '#fff' : 'red';
+    localStorage.setItem(`dado_like_${postId}`, !yaDioLike);
+
+    // Guardamos el contador global en Supabase
+    const { error } = await window.supabaseClient
+        .from('instanew')
+        .update({ likes: nuevoValor })
+        .eq('id', postId);
+
+    if (error) console.error("Error actualizando likes:", error);
 }
 
-function darPulgar(postId) {
-    const contador = document.getElementById(`contador-pulgar-${postId}`);
-    const icono = document.getElementById(`icono-pulgar-${postId}`);
-    
-    if (contador && icono) {
-        let actual = parseInt(contador.innerText) || 0;
-        if (icono.style.color === 'rgb(255, 215, 0)' || icono.style.color === '#ffd700') {
-            icono.style.color = '#fff';
-            contador.innerText = actual - 1;
-            localStorage.setItem(`dado_pulgar_${postId}`, 'false');
-        } else {
-            icono.style.color = '#ffd700';
-            contador.innerText = actual + 1;
-            localStorage.setItem(`dado_pulgar_${postId}`, 'true');
-        }
-        localStorage.setItem(`pulgar_${postId}`, contador.innerText);
-    }
+// =================================================================
+// 2. DAR PULGAR (👍) EN LA NUBE
+// =================================================================
+async function darPulgar(postId) {
+    if (!window.supabaseClient) return;
+
+    const yaDioPulgar = localStorage.getItem(`dado_pulgar_${postId}`) === 'true';
+    const spanContador = document.getElementById(`contador-pulgar-${postId}`);
+    const spanIcono = document.getElementById(`icono-pulgar-${postId}`);
+
+    let valorActual = parseInt(spanContador?.innerText || '0', 10);
+    let nuevoValor = yaDioPulgar ? Math.max(0, valorActual - 1) : valorActual + 1;
+
+    // Actualizamos visualmente al instante
+    if (spanContador) spanContador.innerText = nuevoValor;
+    if (spanIcono) spanIcono.style.color = yaDioPulgar ? '#fff' : '#ffd700';
+    localStorage.setItem(`dado_pulgar_${postId}`, !yaDioPulgar);
+
+    // Guardamos el contador global en Supabase
+    const { error } = await window.supabaseClient
+        .from('instanew')
+        .update({ pulgares: nuevoValor })
+        .eq('id', postId);
+
+    if (error) console.error("Error actualizando pulgares:", error);
 }
 
+// =================================================================
+// 3. ENVIAR COMENTARIO Y ACTUALIZAR CONTADOR EN LA NUBE
+// =================================================================
+async function enviarComentarioInstagram(postId) {
+    if (!window.supabaseClient) return;
+
+    const input = document.getElementById(`input-comentario-${postId}`);
+    if (!input || !input.value.trim()) return;
+
+    const texto = input.value.trim();
+    const autor = localStorage.getItem('mi_nombre_perfil') || localStorage.getItem('mi_nombre') || 'Pedro Peres';
+    input.value = ''; // Limpiamos el input rápido
+
+    // 1. Traemos los comentarios actuales de esa fila en Supabase para no pisar los de otros usuarios
+    const { data: filaActual, error: errFetch } = await window.supabaseClient
+        .from('instanew')
+        .select('comentarios')
+        .eq('id', postId)
+        .single();
+
+    if (errFetch) {
+        console.error("Error leyendo comentarios:", errFetch);
+        return;
+    }
+
+    const listaComentarios = Array.isArray(filaActual?.comentarios) ? filaActual.comentarios : [];
+    listaComentarios.push({
+        autor: autor,
+        texto: texto,
+        fecha: new Date().toISOString()
+    });
+
+    // 2. Guardamos el array actualizado en Supabase
+    const { error: errUpdate } = await window.supabaseClient
+        .from('instanew')
+        .update({ comentarios: listaComentarios })
+        .eq('id', postId);
+
+    if (errUpdate) {
+        console.error("Error guardando comentario:", errUpdate);
+        return;
+    }
+
+    // 3. Pintamos el comentario y actualizamos el contador en pantalla
+    const contenedorLista = document.getElementById(`lista-comentarios-${postId}`);
+    const spanContador = document.getElementById(`contador-comentarios-${postId}`);
+
+    if (contenedorLista) {
+        contenedorLista.innerHTML += `<div style="font-size: 11px; color: #ccc; margin-top: 3px;"><b style="color: #ffd700;">${autor}:</b> ${texto}</div>`;
+        contenedorLista.scrollTop = contenedorLista.scrollHeight;
+    }
+    if (spanContador) {
+        spanContador.innerText = listaComentarios.length;
+    }
+}
 function toggleComentarios(postId) {
     const box = document.getElementById(`box-comentarios-${postId}`);
     if (box) {
@@ -2923,27 +2994,7 @@ function toggleComentarios(postId) {
               }
 
 
-function enviarComentarioInstagram(postId) {
-    const input = document.getElementById(`input-comentario-${postId}`);
-    if (!input || !input.value.trim()) return;
 
-    const textoComentario = input.value.trim();
-    const autorNombre = localStorage.getItem('mi_nombre') || "Pedro Peres";
-
-    const comentariosKey = 'comentarios_' + postId;
-    let comentariosGuardados = JSON.parse(localStorage.getItem(comentariosKey) || '[]');
-
-    comentariosGuardados.push({ autor: autorNombre, texto: textoComentario });
-    localStorage.setItem(comentariosKey, JSON.stringify(comentariosGuardados));
-
-    const listaComentariosDiv = document.getElementById(`lista-comentarios-${postId}`);
-    if (listaComentariosDiv) {
-        listaComentariosDiv.innerHTML += `<div style="font-size: 11px; color: #ccc; margin-top: 3px;"><b style="color: #ffd700;">${autorNombre}:</b> ${textoComentario}</div>`;
-        listaComentariosDiv.scrollTop = listaComentariosDiv.scrollHeight;
-    }
-
-    input.value = '';
-}
 
             function toggleMenuHamburguesa() {
     const menu = document.getElementById('seccion-menu-hamburguesa');
