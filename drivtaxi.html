@@ -7386,36 +7386,28 @@ async function inyectarLiveSpaxioFlow(urlVideo) {
 // =================================================================
 async function enviarMediaExclusivoInstanew(input, tipo, textoNoticia) {
     if (!input.files || !input.files[0]) return;
-    const archivo = input.files[0];
+    
+    let archivoAProcesar = input.files[0];
 
-    const miNombre = localStorage.getItem('mi_nombre_perfil') || localStorage.getItem('mi_nombre') || "Pedro Peres";
-    const miUserId = localStorage.getItem('mi_dropis_id') || "26fmetp4Q4WJ";
+    // 1. Estandarizamos el tamaño a 1080x1080 si es imagen
+    if (archivoAProcesar.type.startsWith('image/')) {
+        archivoAProcesar = await estandarizarTamanoImagen(archivoAProcesar, 1080, 1080);
+    }
 
-    // Leemos y comprimimos la imagen (o preparamos el archivo)
+    // 2. Procesamos (comprimimos en Base64) y guardamos localmente para las historias/feed
+    const archivoProcesado = await procesarArchivoMultimedia(archivoAProcesar, 'feed_grande'); 
+    guardarMultimediaLocal(archivoProcesado);
+
+    // 3. Leemos el archivo ya optimizado para subirlo a Supabase
     const lector = new FileReader();
     lector.onload = async function(e) {
         let contenidoFinal = e.target.result;
 
-        // Si es foto, la comprimimos a 600px como ya lo hacías para que suba rápido
-        if (tipo === 'foto') {
-            const img = new Image();
-            img.src = e.target.result;
-            await new Promise(resolve => img.onload = resolve);
-
-            const canvas = document.createElement('canvas');
-            const MAX_WIDTH = 600;
-            const scaleSize = MAX_WIDTH / img.width;
-            canvas.width = MAX_WIDTH;
-            canvas.height = img.height * scaleSize;
-
-            const ctx = canvas.getContext('2d');
-            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-            contenidoFinal = canvas.toDataURL('image/jpeg', 0.8);
-        }
-
         try {
-            // Opción A: Si lo insertas directo con tu cliente de Supabase a la tabla 'instanew'
             if (window.supabaseClient) {
+                const miNombre = localStorage.getItem('mi_nombre_perfil') || localStorage.getItem('mi_nombre') || "Pedro Peres";
+                const miUserId = localStorage.getItem('mi_dropis_id') || "26fmetp4Q4WJ";
+
                 const { error } = await window.supabaseClient
                     .from('instanew')
                     .insert([{
@@ -7428,31 +7420,15 @@ async function enviarMediaExclusivoInstanew(input, tipo, textoNoticia) {
                     }]);
 
                 if (error) throw error;
-                console.log("🚀 ¡Publicado en tiempo real en la tabla instanew!");
+                console.log("🚀 ¡Publicado optimizado y comprimido en Instanew!");
             }
-            
-            /* 
-            // Opción B: Si prefieres mandarlo por ruta de Vercel (descomenta si creaste /api/instanew-event)
-            const res = await fetch('/api/instanew-event', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    chat_id: "26fmetp4Q4WJ",
-                    sender_id: miUserId,
-                    sender_name: miNombre,
-                    content: contenidoFinal,
-                    tipo: tipo,
-                    descripcion: textoNoticia
-                })
-            });
-            */
         } catch (err) {
             console.error("❌ Error subiendo a Instanew:", err);
             alert("Error al publicar en Instanew");
         }
     };
-    lector.readAsDataURL(archivo);
-}
+    lector.readAsDataURL(archivoAProcesar);
+             }
 
 // =================================================================
 // 2. FUNCIÓN QUIRÚRGICA REALTIME PARA TARJETAS GRANDES DE INSTANEW
