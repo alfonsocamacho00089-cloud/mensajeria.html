@@ -4754,7 +4754,8 @@ fetch('/api/spaxioflow-event', {
 .catch(err => console.error("❌ Error:", err));
 
 
-const nuevoPostLocal = {
+// MUESTRAS EL MENSAJE EN PANTALLA EN LOCAL DIRECTAMENTE
+anexarUnicoMensajeAlFeed({
     id: Date.now(),
     sender_name: miNombre,
     content: msg,
@@ -4762,13 +4763,14 @@ const nuevoPostLocal = {
     created_at: new Date().toISOString()
 };
 
+
 // Guardar de inmediato en el almacenamiento local de respaldo
 let cacheActual = recuperarHistoriasLocales();
-cacheActual.unshift(nuevoPostLocal);
+cacheActual.unshift(anexarUnicoMensajeAlFeed);
 guardarHistoriasLocal(cacheActual);
 
 // MUESTRAS EL MENSAJE EN PANTALLA EN LOCAL DIRECTAMENTE
-anexarUnicoMensajeAlFeed(nuevoPostLocal);
+
     // 2. Mandas a Vercel
     /*fetch('/api/spaxioflow-event', {
         method: 'POST',
