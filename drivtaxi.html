@@ -2402,6 +2402,51 @@ function seleccionarRol(rolElegido) {
     alert("🚨 ERROR DETECTADO:\n\n" + message + "\n\nArchivo: " + source + "\nLínea: " + lineno);
     return false;
 };
+
+             function estandarizarTamanoImagen(file, anchoDeseado = 1080, altoDeseado = 1080) {
+    return new Promise((resolve) => {
+        if (!file.type.startsWith('image/')) {
+            resolve(file); // Si no es imagen, lo devuelve intacto
+            return;
+        }
+        
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = (e) => {
+            const img = new Image();
+            img.src = e.target.result;
+            img.onload = () => {
+                const canvas = document.createElement('canvas');
+                canvas.width = anchoDeseado;
+                canvas.height = altoDeseado;
+                const ctx = canvas.getContext('2d');
+                
+                // Fondo negro o transparente por si la proporción deja espacios libres
+                ctx.fillStyle = '#000000';
+                ctx.fillRect(0, 0, anchoDeseado, altoDeseado);
+                
+                // Calcular escala centrada (Cover / Contain exacto sobre la imagen real)
+                const hRatio = anchoDeseado / img.width;
+                const vRatio = altoDeseado / img.height;
+                const ratio = Math.max(hRatio, vRatio); // Usa Math.min si prefieres que se vea completa sin recortar bordes
+                
+                const centroX = (anchoDeseado - img.width * ratio) / 2;
+                const centroY = (altoDeseado - img.height * ratio) / 2;
+                
+                // Dibuja la imagen modificando sus dimensiones internas reales a la medida única
+                ctx.drawImage(img, 0, 0, img.width, img.height, centroX, centroY, img.width * ratio, img.height * ratio);
+                
+                canvas.toBlob((blob) => {
+                    const archivoEstandarizado = new File([blob], file.name, {
+                        type: 'image/jpeg',
+                        lastModified: Date.now()
+                    });
+                    resolve(archivoEstandarizado);
+                }, 'image/jpeg', 0.8);
+            };
+        };
+    });
+             }
 function guardarMultimediaLocal(objetoMedia) {
     try {
         let actual = JSON.parse(localStorage.getItem('spaxio_multimedia_total') || '[]');
