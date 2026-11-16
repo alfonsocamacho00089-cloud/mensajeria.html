@@ -4874,74 +4874,63 @@ async function cargarConversacionCon(idDestino, nombreDestino, fotoDestino) {
 
 
 if (idDestino === "26fmetp4Q4WJ") {
-    console.log("📡 Cargando SpaxioFlow / Chat Feed...");
+   
+              
+              console.log("📡 Cargando historial global de SpaxioFlow desde Vercel...");
+    
+    const res = await fetch('/api/get-spaxioflow-feed');
+if (!res.ok) throw new Error("Fallo al obtener el feed desde el backend");
 
-    let postsParaMostrar = [];
+// 1. Recibimos el JSON en 'data'
+const data = await res.json();
 
-    try {
-        // 1. Intentamos traer los datos directamente de tu tabla en Supabase (vía tu API)
-        const res = await fetch('/api/get-spaxioflow-feed'); // O tu ruta de API correspondiente
-        if (res.ok) {
-            const data = await res.json();
-            const postsRemotos = Array.isArray(data) ? data : (data.posts || data.data || []);
-            
-            if (postsRemotos.length > 0) {
-                postsParaMostrar = postsRemotos;
-                // 💡 ¡CLAVE AQUÍ! Guardamos en el localStorage apenas bajan de Supabase 
-                // para que nunca se queden en blanco si se recarga o se cierra la app.
-                localStorage.setItem('spaxio_historias_locales', JSON.stringify(postsParaMostrar));
-            }
+// 2. Extraemos el array de forma segura a 'posts'
+const posts = Array.isArray(data) ? data : (data.posts || []);
+// --- LÍNEAS EXACTAS PARA EL CARRUSEL DE STORIES ---
+const contenedorStories = document.getElementById('contenedor-spaxioflow-stories');
+if (contenedorStories && posts.length > 0) {
+    contenedorStories.innerHTML = ''; // Limpiamos el "Cargando Flow..."
+    
+    // Limitamos a los últimos 8 posts para que aparezcan uno al lado del otro
+    posts.slice(0, 8).forEach(post => {
+        const urlImg = post.content || post.tipo || post.foto || '';
+        const nombreUsr = post.sender_name || post.remitente || 'Usuario';
+        
+     
+        contenedorStories.innerHTML += `
+            <div style="min-width: 110px; height: 130px; background: #151828; border: 1px solid #323657; border-radius: 12px; padding: 6px; text-align: center; flex-shrink: 0; cursor: pointer; display: flex; flex-direction: column; justify-content: space-between; overflow: hidden;">
+                <div style="width: 100%; height: 75px; background-image: url('${urlImg}'); background-size: cover; background-position: center; border-radius: 8px; background-color: #000; display: flex; align-items: center; justify-content: center;">
+                    ${!urlImg ? '<span style="font-size: 20px;">🎬</span>' : ''}
+                </div>
+                <div style="font-size: 10px; color: #fff; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100px; margin: 2px auto;">${nombreUsr}</div>
+            </div>
+        `;
+    });
+             }
+if (posts && Array.isArray(posts)) {
+    const postsInvertidos = [...posts].reverse();
+     
+    postsInvertidos.forEach(post => {
+        const idContenido = "feed_" + post.id;
+        const nombreRemitente = post.sender_name || 'H.A.R.V.I.S.';
+        
+        if (!document.getElementById(idContenido)) {
+            pintarMensaje(post.content, "", nombreRemitente, 'leido', idContenido, post.tipo); 
         }
-    } catch (e) {
-        console.warn("⚠️ Sin conexión a la nube, cargando desde el respaldo local...", e);
-    }
+    });
+             }
+            
 
-    // 2. Si la nube falló o no devolvió nada, usamos el respaldo local guardado
-    if (postsParaMostrar.length === 0) {
-        postsParaMostrar = JSON.parse(localStorage.getItem('spaxio_historias_locales') || '[]');
-    }
+    iniciarRealtimeSpaxioFlow("26fmetp4Q4WJ");
 
-    // 3. Renderizamos las historias / miniaturas horizontales de arriba
-    const contenedorStories = document.getElementById('contenedor-spaxioflow-stories');
-    if (contenedorStories) {
-        const tarjetaFijaHTML = contenedorStories.firstElementChild ? contenedorStories.firstElementChild.outerHTML : '';
-        contenedorStories.innerHTML = tarjetaFijaHTML;
-
-        postsParaMostrar.forEach(post => {
-            // Aseguramos capturar la imagen sin importar cómo venga nombrada en el objeto
-            const urlImg = post.content || post.imagen_url || post.media_url || post.foto || ''; 
-            const nombreUsr = post.sender_name || post.remitente || 'Pedro Peres';
-            const usuarioIdAutor = post.sender_id || post.usuarioId || post.usuario_id || '26fmetp4Q4WJ';
-
-            if (urlImg && (urlImg.startsWith('http') || urlImg.startsWith('data:image'))) {
-                contenedorStories.innerHTML += `
-                    <div onclick="cargarConversacionCon('${usuarioIdAutor}', '${nombreUsr}')" style="min-width: 170px; height: 200px; border-radius: 12px; padding: 1px; flex-shrink: 0; cursor: pointer; overflow: hidden; position: relative;">
-                        <div style="position: relative; width: 100%; height: 100%; background-image: url('${urlImg}'); background-size: cover; background-position: center; border-radius: 12px; display: flex; flex-direction: column; justify-content: flex-end; overflow: hidden;">
-                            <div style="position: absolute; bottom: 0; left: 0; width: 100%; padding: 2px; text-align: center; background: rgba(0,0,0,0.6);">
-                                <span style="font-size: 10px; color: #ffd700; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block;">${nombreUsr}</span>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            }
-        });
-    }
-
-    // 4. DISPARAMOS EL CARRUSEL VERTICAL TIPO INSTAGRAM DE ABAJO
-    if (typeof renderizarSpaxioFlowStories === 'function') {
-        renderizarSpaxioFlowStories(postsParaMostrar);
-    }
-
-    // 5. Arrancamos el Realtime del chat feed
-    if (typeof iniciarRealtimeSpaxioFlow === 'function') {
-        iniciarRealtimeSpaxioFlow("26fmetp4Q4WJ");
-    }
-
-    // Forzamos el scroll arriba
+    // 🎯 Forzamos el scroll arriba con un micro-respiro para ganarle al renderizado
     setTimeout(() => {
         const box = document.getElementById('chat-box');
-        if (box) box.scrollTop = 0; 
-    }, 50);
+        if (box) {
+            box.scrollTop = 0; 
+        }
+    }, 50); // 50 milisegundos de respiro
+
              }
 
           
