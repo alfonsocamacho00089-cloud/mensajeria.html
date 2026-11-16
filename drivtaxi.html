@@ -7193,7 +7193,147 @@ async function inyectarLiveSpaxioFlow(urlVideo) {
     }
 }
              
-     
+     // =================================================================
+// 1. FUNCIÓN PARA SUBIR DESDE EL BOTÓN "+" DIRECTO A TABLA 'instanew'
+// =================================================================
+async function enviarMediaExclusivoInstanew(input, tipo, textoNoticia) {
+    if (!input.files || !input.files[0]) return;
+    const archivo = input.files[0];
+
+    const miNombre = localStorage.getItem('mi_nombre_perfil') || localStorage.getItem('mi_nombre') || "Pedro Peres";
+    const miUserId = localStorage.getItem('mi_dropis_id') || "26fmetp4Q4WJ";
+
+    // Leemos y comprimimos la imagen (o preparamos el archivo)
+    const lector = new FileReader();
+    lector.onload = async function(e) {
+        let contenidoFinal = e.target.result;
+
+        // Si es foto, la comprimimos a 600px como ya lo hacías para que suba rápido
+        if (tipo === 'foto') {
+            const img = new Image();
+            img.src = e.target.result;
+            await new Promise(resolve => img.onload = resolve);
+
+            const canvas = document.createElement('canvas');
+            const MAX_WIDTH = 600;
+            const scaleSize = MAX_WIDTH / img.width;
+            canvas.width = MAX_WIDTH;
+            canvas.height = img.height * scaleSize;
+
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+            contenidoFinal = canvas.toDataURL('image/jpeg', 0.8);
+        }
+
+        try {
+            // Opción A: Si lo insertas directo con tu cliente de Supabase a la tabla 'instanew'
+            if (window.supabaseClient) {
+                const { error } = await window.supabaseClient
+                    .from('instanew')
+                    .insert([{
+                        chat_id: "26fmetp4Q4WJ",
+                        sender_id: miUserId,
+                        sender_name: miNombre,
+                        content: contenidoFinal,
+                        tipo: tipo,
+                        descripcion: textoNoticia
+                    }]);
+
+                if (error) throw error;
+                console.log("🚀 ¡Publicado en tiempo real en la tabla instanew!");
+            }
+            
+            /* 
+            // Opción B: Si prefieres mandarlo por ruta de Vercel (descomenta si creaste /api/instanew-event)
+            const res = await fetch('/api/instanew-event', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    chat_id: "26fmetp4Q4WJ",
+                    sender_id: miUserId,
+                    sender_name: miNombre,
+                    content: contenidoFinal,
+                    tipo: tipo,
+                    descripcion: textoNoticia
+                })
+            });
+            */
+        } catch (err) {
+            console.error("❌ Error subiendo a Instanew:", err);
+            alert("Error al publicar en Instanew");
+        }
+    };
+    lector.readAsDataURL(archivo);
+}
+
+// =================================================================
+// 2. FUNCIÓN QUIRÚRGICA REALTIME PARA TARJETAS GRANDES DE INSTANEW
+// =================================================================
+function anexarUnicoMensajeAlInstanew(post) {
+    const contenedorInstagram = document.getElementById('carrusel-feed-instagram');
+    if (!contenedorInstagram) return;
+
+    const postId = post.id || 'post_' + Date.now();
+    const idUnicoDOM = "rt_insta_" + postId;
+
+    // Evitar duplicados si ya está pintado
+    if (document.getElementById(idUnicoDOM)) return;
+
+    const urlImg = post.content || post.imagen_url || post.media_url || post.foto || '';
+    const nombreUsr = post.sender_name || post.remitente || 'Pedro Peres';
+    const horaFormateada = new Date(post.created_at || Date.now()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+    let contenidoMedia = '';
+    if (urlImg && (urlImg.startsWith('data:image') || urlImg.startsWith('http'))) {
+        contenidoMedia = `<img src="${urlImg}" class="imagen-feed-insta" onerror="this.style.display='none'">`;
+    } else if (post.tipo === 'video' || (urlImg && (urlImg.includes('.mp4') || urlImg.includes('.webm')))) {
+        contenidoMedia = `<video src="${urlImg}" controls playsinline class="imagen-feed-insta"></video>`;
+    } else {
+        contenidoMedia = `<div style="padding: 20px; color: #fff; font-size: 13px; text-align: center; min-height: 150px;">${urlImg || 'Publicación'}</div>`;
+    }
+
+    const tarjetaInsta = document.createElement('div');
+    tarjetaInsta.className = 'tarjeta-feed-insta';
+    tarjetaInsta.id = idUnicoDOM;
+
+    tarjetaInsta.innerHTML = `
+        <div style="display: flex; align-items: center; justify-content: space-between; padding: 10px 12px; background: #202732;">
+            <div onclick="cargarConversacionCon('${post.sender_id || '26fmetp4Q4WJ'}', '${nombreUsr}')" style="display: flex; align-items: center; gap: 10px; min-width: 0; cursor: pointer;">
+                <div style="width: 32px; height: 32px; min-width: 32px; border-radius: 50%; border: 1px solid #ffd700; background: #202732; overflow: hidden; display: flex; align-items: center; justify-content: center; font-weight: bold; color: #ffd700; font-size: 12px; flex-shrink: 0;">
+                    ${nombreUsr.charAt(0).toUpperCase()}
+                </div>
+                <span style="font-size: 12px; font-weight: bold; color: #ffffff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${nombreUsr}</span>
+            </div>
+            <span style="font-size: 10px; color: #8696a0; flex-shrink: 0;">${horaFormateada}</span>
+        </div>
+
+        ${post.descripcion || post.texto ? `
+            <div style="padding: 10px 12px 6px 12px; font-size: 14px; color: #ffffff; line-height: 1.4; background: #202732;">
+                ${post.descripcion || post.texto}
+            </div>
+        ` : ''}
+
+        <div style="width: 100%;">${contenidoMedia}</div>
+
+        <div style="padding: 8px 12px; display: flex; gap: 20px; font-size: 18px; align-items: center; background: #202732;">
+            <div style="display: flex; align-items: center; gap: 6px; cursor: pointer;" onclick="darLike('${postId}')">
+                <span id="icono-like-${postId}" style="color: #fff;">🤍</span>
+                <span id="contador-like-${postId}" style="font-size: 13px; color: #ffd700; font-weight: bold;">0</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 6px; cursor: pointer;" onclick="darPulgar('${postId}')">
+                <span id="icono-pulgar-${postId}" style="color: #fff;">👍</span>
+                <span id="contador-pulgar-${postId}" style="font-size: 13px; color: #ffd700; font-weight: bold;">0</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 6px; cursor: pointer;" onclick="toggleComentarios('${postId}')">
+                <span style="color: #ffd700;">💬</span>
+                <span id="contador-comentarios-${postId}" style="font-size: 13px; color: #ffd700; font-weight: bold;">0</span>
+            </div>
+        </div>
+    `;
+
+    // Lo insertamos de primero arriba en el feed de tarjetas grandes
+    contenedorInstagram.prepend(tarjetaInsta);
+             }
 
 
      
