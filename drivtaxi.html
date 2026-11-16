@@ -5153,39 +5153,51 @@ async function cargarConversacionCon(idDestino, nombreDestino, fotoDestino) {
 if (idDestino === "26fmetp4Q4WJ") {
     console.log("📡 Cargando flujos separados: Instanew (Tarjetas Grandes) y SpaxioFlow (Miniaturas/Chat)...");
 
-    // --- FLUJO A: INSTANEW (Solo para tarjetas grandes abajo) ---
-    try {
-        const resInstanew = await fetch('/api/get-instanew-feed');
-        if (resInstanew.ok) {
-            const dataInsta = await resInstanew.json();
-            const postsInstanew = Array.isArray(dataInsta) ? dataInsta : (dataInsta.posts || []);
+    // 1️⃣ PINTADO INSTANTÁNEO DESDE LOCALSTORAGE (Antes de consultar la red)
+    const respaldoLocal = recuperarHistoriasLocales();
+    if (respaldoLocal.length > 0 && typeof renderizarSpaxioFlowStories === 'function') {
+        renderizarSpaxioFlowStories(respaldoLocal);
+    }
+
+    // --- FLUJO B: SPAXIOFLOW FEED (Miniaturas arriba Y mensajes en #chat-box) ---
+try {
+    // 1. Pintar primero los mensajes guardados localmente en IndexedDB para ese chat
+    const todosLosMensajes = await obtenerTodo('mensajes');
+    const mensajesLocalesFlow = todosLosMensajes
+        .filter(m => String(m.contactoId) === '26fmetp4Q4WJ')
+        .slice(-20);
+
+    mensajesLocalesFlow.forEach(m => {
+        anexarUnicoMensajeAlFeed({
+            id: m.id,
+            sender_name: localStorage.getItem('mi_nombre_perfil') || 'Pedro Peres',
+            content: m.texto,
+            tipo: m.tipo || 'texto',
+            created_at: m.ts || Date.now()
+        });
+    });
+
+    // 2. Traer los de la nube (Supabase) para miniaturas y completar el chat
+    if (window.supabaseClient) {
+        const { data: postsSpaxio, error } = await window.supabaseClient
+            .from('spaxioflow_feed')
+            .select('*')
+            .eq('chat_id', '26fmetp4Q4WJ')
+            .order('created_at', { ascending: false })
+            .limit(20);
+
+        if (!error && postsSpaxio) {
+            renderizarMiniaturasSpaxioFlow(postsSpaxio);
             
-            // Usamos el nombre exacto de tu función que pinta las tarjetas grandes
-            if (typeof renderizarSpaxioFlowStories === 'function') {
-                renderizarSpaxioFlowStories([...postsInstanew].reverse());
-            }
+            // Pintar también en #chat-box (evitando duplicados)
+            [...postsSpaxio].reverse().forEach(post => {
+                anexarUnicoMensajeAlFeed(post);
+            });
         }
-    } catch (e) {
-        console.warn("⚠️ Error cargando Instanew desde la nube:", e);
     }
-
-    // --- FLUJO B: SPAXIOFLOW FEED (Solo para tarjetas miniaturas arriba y chat) ---
-    try {
-        if (window.supabaseClient) {
-            const { data: postsSpaxio, error } = await window.supabaseClient
-                .from('spaxioflow_feed')
-                .select('*')
-                .eq('chat_id', '26fmetp4Q4WJ')
-                .order('created_at', { ascending: false })
-                .limit(20);
-
-            if (!error && postsSpaxio) {
-                renderizarMiniaturasSpaxioFlow(postsSpaxio);
-            }
-        }
-    } catch (e) {
-        console.warn("⚠️ Error cargando SpaxioFlow desde Supabase:", e);
-    }
+} catch (e) {
+    console.warn("⚠️ Error cargando SpaxioFlow desde Supabase:", e);
+             }
 
     // Arrancamos AMBOS canales Realtime por separado
     if (typeof iniciarRealtimeInstanew === 'function') iniciarRealtimeInstanew("26fmetp4Q4WJ");
@@ -5195,7 +5207,7 @@ if (idDestino === "26fmetp4Q4WJ") {
         const box = document.getElementById('chat-box');
         if (box) box.scrollTop = 0; 
     }, 50);
-}
+             }
 
 
           
