@@ -2,7 +2,7 @@ const CACHE_NAME = 'ysapay-offline-v15';
 const urlsToCache = [
   './',
   './index.html',
-  './usuarios.html',
+  './usuario.html',
   './drivtaxi.html',
   './comercios.html',
   './calculadoras.html',
@@ -10,7 +10,7 @@ const urlsToCache = [
   './ysapayp2p.html',
   './drive.html',
   './manifest.json',
-  './assets/imagen-logo-nuevo.png',
+  
   './assets/imagen-logos-nuevos.png'
 ];
 
