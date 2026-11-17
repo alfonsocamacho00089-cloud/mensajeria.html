@@ -2585,7 +2585,8 @@ async function subirAInstanewBotonMas(input) {
     lector.onload = async function(e) {
         let contenidoFinal = e.target.result;
         const miNombre = localStorage.getItem('mi_nombre_perfil') || localStorage.getItem('mi_nombre') || "Pedro Peres";
-        const miUserId = localStorage.getItem('mi_dropis_id'] || "26fmetp4Q4WJ";
+        // ✅ CORRECTO (con paréntesis cerrando correctamente)
+        const miUserId = localStorage.getItem('mi_dropis_id') || "26fmetp4Q4WJ";
         const postId = 'post_local_' + Date.now();
 
         // Objeto unificado estricto
