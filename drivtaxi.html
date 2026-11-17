@@ -5201,9 +5201,9 @@ if (idDestino === "26fmetp4Q4WJ") {
         const box = document.getElementById('chat-box');
         if (box) box.scrollTop = 0; 
     }, 50);
-}
-             }
-             }else {
+
+             
+             else {
     // 🔒 LÓGICA PARA CHATS PRIVADOS NORMALES
     const todosLosMensajes = await obtenerTodo('mensajes');
     const mensajesFiltrados = todosLosMensajes.filter(m => String(m.contactoId) === String(idDestino));
