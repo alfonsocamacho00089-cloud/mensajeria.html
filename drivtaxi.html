@@ -5167,7 +5167,6 @@ if (idDestino === "26fmetp4Q4WJ") {
             const dataInsta = await resInstanew.json();
             const postsInstanew = Array.isArray(dataInsta) ? dataInsta : (dataInsta.posts || []);
             
-            // Usamos el nombre exacto de tu función que pinta las tarjetas grandes
             if (typeof renderizarSpaxioFlowStories === 'function') {
                 renderizarSpaxioFlowStories([...postsInstanew].reverse());
             }
@@ -5200,21 +5199,12 @@ if (idDestino === "26fmetp4Q4WJ") {
 
     setTimeout(() => {
         const box = document.getElementById('chat-box');
-   
-     if (box) box.scrollTop = 0; 
+        if (box) box.scrollTop = 0; 
     }, 50);
-             }
-             
-             
-
-
-          
-              else {
-    // 🔒 LÓGICA OPTIMIZADA: Últimos 50 mensajes para chats privados
+} else {
+    // 🔒 LÓGICA PARA CHATS PRIVADOS NORMALES
     const todosLosMensajes = await obtenerTodo('mensajes');
     const mensajesFiltrados = todosLosMensajes.filter(m => String(m.contactoId) === String(idDestino));
-
-    // Tomamos solo los últimos 50 para que el chat vuele al abrir
     const ultimos10 = mensajesFiltrados.slice(-10);
 
     if (typeof renderizarMensajes === "function") {
@@ -5224,7 +5214,14 @@ if (idDestino === "26fmetp4Q4WJ") {
             pintarMensaje(m.texto, m.clase, m.hora, m.status || 'enviado', m.id, m.tipo || 'texto');
         });
     }
-} 
+}
+
+             
+             
+
+
+          
+              
 
 } catch (e) {
     console.error("❌ Error cargando mensajes del feed:", e);
@@ -7466,7 +7463,7 @@ guardarHistoriasLocal(cacheActual);
         }
     };
     lector.readAsDataURL(archivoAProcesar);
-             
+             }      
 
 // =================================================================
 // 2. FUNCIÓN QUIRÚRGICA REALTIME PARA TARJETAS GRANDES DE INSTANEW
