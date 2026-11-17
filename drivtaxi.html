@@ -5113,30 +5113,39 @@ async function cargarConversacionCon(idDestino, nombreDestino, fotoDestino) {
         if (box) box.innerHTML = ""; 
 
 
-
-// =================================================================
-// 1. CARGA SEPARADA AL ABRIR EL MÓDULO (idDestino === "26fmetp4Q4WJ")
-// =================================================================
 if (idDestino === "26fmetp4Q4WJ") {
-    console.log("📡 Cargando flujos separados: Instanew (Tarjetas Grandes) y SpaxioFlow (Miniaturas/Chat)...");
+    console.log("📡 Cargando SpaxioFlow (Modo Híbrido Local + Nube)...");
 
-    // --- FLUJO A: INSTANEW (Solo para tarjetas grandes abajo) ---
+    // 1. CARGA INSTANTÁNEA LOCAL (IndexedDB)
+    try {
+        const historiasLocales = await recuperarHistoriasLocales();
+        if (historiasLocales && historiasLocales.length > 0) {
+            renderizarSpaxioFlowStories(historiasLocales);
+        }
+        
+        const multimediaLocal = await recuperarTodoMultimedia();
+        if (multimediaLocal && multimediaLocal.length > 0) {
+            renderizarMiniaturasSpaxioFlow(multimediaLocal);
+        }
+    } catch (e) {
+        console.warn("⚠️ Error leyendo caché local:", e);
+    }
+
+    // 2. ACTUALIZACIÓN DESDE LA NUBE (En segundo plano)
     try {
         const resInstanew = await fetch('/api/get-instanew-feed');
         if (resInstanew.ok) {
             const dataInsta = await resInstanew.json();
             const postsInstanew = Array.isArray(dataInsta) ? dataInsta : (dataInsta.posts || []);
-            
-            // Usamos el nombre exacto de tu función que pinta las tarjetas grandes
-            if (typeof renderizarSpaxioFlowStories === 'function') {
+            if (postsInstanew.length > 0) {
                 renderizarSpaxioFlowStories([...postsInstanew].reverse());
+                guardarHistoriasLocal(postsInstanew); // Actualizamos la caché
             }
         }
     } catch (e) {
-        console.warn("⚠️ Error cargando Instanew desde la nube:", e);
+        console.warn("⚠️ Sin red: Usando datos locales de Instanew.", e);
     }
 
-    // --- FLUJO B: SPAXIOFLOW FEED (Solo para tarjetas miniaturas arriba y chat) ---
     try {
         if (window.supabaseClient) {
             const { data: postsSpaxio, error } = await window.supabaseClient
@@ -5146,18 +5155,17 @@ if (idDestino === "26fmetp4Q4WJ") {
                 .order('created_at', { ascending: false })
                 .limit(20);
 
-            if (!error && postsSpaxio) {
+            if (!error && postsSpaxio && postsSpaxio.length > 0) {
                 renderizarMiniaturasSpaxioFlow(postsSpaxio);
             }
         }
     } catch (e) {
-        console.warn("⚠️ Error cargando SpaxioFlow desde Supabase:", e);
+        console.warn("⚠️ Sin red: Usando miniaturas locales.", e);
     }
 
-    // Arrancamos AMBOS canales Realtime por separado
     if (typeof iniciarRealtimeInstanew === 'function') iniciarRealtimeInstanew("26fmetp4Q4WJ");
     if (typeof iniciarRealtimeSpaxioFlow === 'function') iniciarRealtimeSpaxioFlow("26fmetp4Q4WJ");
-
+             
     setTimeout(() => {
         const box = document.getElementById('chat-box');
         if (box) box.scrollTop = 0; 
@@ -7372,35 +7380,38 @@ async function inyectarLiveSpaxioFlow(urlVideo) {
      // =================================================================
 // 1. FUNCIÓN PARA SUBIR DESDE EL BOTÓN "+" DIRECTO A TABLA 'instanew'
 // =================================================================
-async function enviarMediaExclusivoInstanew(input, tipo, textoNoticia) {
+
+
+                async function enviarMediaExclusivoInstanew(input, tipo, textoNoticia) {
     if (!input.files || !input.files[0]) return;
     
     let archivoAProcesar = input.files[0];
 
-    // 1. Estandarizamos el tamaño a 1080x1080 si es imagen
     if (archivoAProcesar.type.startsWith('image/')) {
         archivoAProcesar = await estandarizarTamanoImagen(archivoAProcesar, 1080, 1080);
     }
 
-// 2. Procesamos (comprimimos en Base64) y guardamos localmente para las historias/feed
-const archivoProcesado = await procesarArchivoMultimedia(archivoAProcesar, 'feed_grande'); 
-guardarMultimediaLocal(archivoProcesado);
+    const archivoProcesado = await procesarArchivoMultimedia(archivoAProcesar, 'feed_grande'); 
+    await guardarMultimediaLocal(archivoProcesado); // Asegurar await aquí
 
-const nuevoPostLocal = {
-    id: 'post_' + Date.now(),
-    sender_name: localStorage.getItem('mi_nombre_perfil') || localStorage.getItem('mi_nombre') || "Pedro Peres",
-    content: archivoProcesado.contenido,
-    tipo: tipo,
-    descripcion: textoNoticia,
-    created_at: new Date().toISOString()
-};
+    const nuevoPostLocal = {
+        id: 'post_' + Date.now(),
+        sender_name: localStorage.getItem('mi_nombre_perfil') || localStorage.getItem('mi_nombre') || "Pedro Peres",
+        content: archivoProcesado.contenido,
+        tipo: tipo,
+        descripcion: textoNoticia,
+        created_at: new Date().toISOString()
+    };
 
-// Guardar de inmediato en el almacenamiento local de respaldo
-let cacheActual = recuperarHistoriasLocales();
-cacheActual.unshift(nuevoPostLocal);
-guardarHistoriasLocal(cacheActual);
-    // 3. Leemos el archivo ya optimizado para subirlo a Supabase
-    const lector = new FileReader();
+    // 🛑 CORRECCIÓN: Agregar 'await' para que lea el array y no la Promesa
+    let cacheActual = await recuperarHistoriasLocales() || [];
+    cacheActual.unshift(nuevoPostLocal);
+    await guardarHistoriasLocal(cacheActual);
+
+    // ... resto de tu código de Supabase ...
+          
+                
+             const lector = new FileReader();
     lector.onload = async function(e) {
         let contenidoFinal = e.target.result;
 
@@ -7430,7 +7441,7 @@ guardarHistoriasLocal(cacheActual);
     };
     lector.readAsDataURL(archivoAProcesar);
              
-              }
+             }
 // =================================================================
 // 2. FUNCIÓN QUIRÚRGICA REALTIME PARA TARJETAS GRANDES DE INSTANEW
 // =================================================================
