@@ -2566,38 +2566,42 @@ function renderizarMiniaturasSpaxioFlow(postsSpaxio) {
 }
 
 // =================================================================
-// 3. BOTÓN "+" -> SUBE EXCLUSIVAMENTE A LA TABLA 'instanew'
+// FUNCIÓN ÚNICA Y MAESTRA PARA EL BOTÓN "+" (IndexedDB + Supabase)
 // =================================================================
 async function subirAInstanewBotonMas(input) {
     if (!input.files || !input.files[0]) return;
     
-    const archivo = input.files[0];
+    let archivoAProcesar = input.files[0];
     const textoNoticia = prompt("Escribe una noticia corta o titular para la publicación (opcional):", "") || "";
 
-    alert("🚀 Guardando publicacion...");
+    // 1. Estandarizar imagen si aplica (1080x1080)
+    if (archivoAProcesar.type.startsWith('image/')) {
+        archivoAProcesar = await estandarizarTamanoImagen(archivoAProcesar, 1080, 1080);
+    }
 
-    let tipo = archivo.type.includes('video') ? 'video' : 'foto';
+    let tipo = archivoAProcesar.type.includes('video') ? 'video' : 'foto';
 
     const lector = new FileReader();
     lector.onload = async function(e) {
         let contenidoFinal = e.target.result;
         const miNombre = localStorage.getItem('mi_nombre_perfil') || localStorage.getItem('mi_nombre') || "Pedro Peres";
-        const miUserId = localStorage.getItem('mi_dropis_id') || "26fmetp4Q4WJ";
+        const miUserId = localStorage.getItem('mi_dropis_id'] || "26fmetp4Q4WJ";
         const postId = 'post_local_' + Date.now();
 
-        // 1. OBJETO LOCAL
-        const nuevoPostLocal = {
+        // Objeto unificado estricto
+        const payloadMultimedia = {
             id: postId,
             chat_id: "26fmetp4Q4WJ",
             sender_id: miUserId,
             sender_name: miNombre,
-            content: contenidoFinal,
+            content: contenidoFinal,     // Usado por las tarjetas grandes
+            contenido: contenidoFinal,   // Respaldo de compatibilidad
             tipo: tipo,
             descripcion: textoNoticia,
             created_at: new Date().toISOString()
         };
 
-        // 2. 💾 GUARDAR EN INDEXEDDB DE FORMA LOCAL Y SEGURA
+        // PASO 1: PERMANENCIA LOCAL OBLIGATORIA (IndexedDB)
         try {
             await guardarLocal('mensajes', {
                 id: postId,
@@ -2609,30 +2613,40 @@ async function subirAInstanewBotonMas(input) {
                 ts: Date.now()
             });
             
-            // Actualizamos caché rápida en localStorage por respaldo
+            // Actualizar caché de historias locales
             let actuales = recuperarHistoriasLocales();
-            actuales.unshift(nuevoPostLocal);
+            actuales.unshift(payloadMultimedia);
             guardarHistoriasLocal(actuales);
 
-            // Pintamos de inmediato en pantalla
-            anexarUnicoMensajeAlFeed(nuevoPostLocal);
-            alert("✅ ¡Guardado en el teléfono con éxito!");
-        } catch (err) {
-            console.error("❌ Error guardando localmente en IndexedDB:", err);
+            // Pintar de inmediato en pantalla
+            anexarUnicoMensajeAlFeed(payloadMultimedia);
+            console.log("💾 Guardado localmente en IndexedDB con éxito.");
+        } catch (errLocal) {
+            console.error("❌ Error en IndexedDB:", errLocal);
         }
 
-        // 3. (Opcional en segundo plano) Si hay internet, intenta subir a Supabase
+        // PASO 2: SINCRONIZACIÓN A LA NUBE (Supabase)
         try {
             if (window.supabaseClient && navigator.onLine) {
-                await window.supabaseClient.from('instanew').insert([nuevoPostLocal]);
-                await window.supabaseClient.from('spaxioflow_feed').insert([nuevoPostLocal]);
+                // Insertamos en ambas tablas de forma limpia y directa
+                const [resInsta, resFlow] = await Promise.all([
+                    window.supabaseClient.from('instanew').insert([payloadMultimedia]),
+                    window.supabaseClient.from('spaxioflow_feed').insert([payloadMultimedia])
+                ]);
+
+                if (resInsta.error) console.error("Error en tabla instanew:", resInsta.error);
+                if (resFlow.error) console.error("Error en tabla spaxioflow_feed:", resFlow.error);
+
+                console.log("☁️ Sincronizado con Supabase correctamente.");
             }
-        } catch (netErr) {
-            console.log("📡 Sin internet: el post quedó guardado de manera local en IndexedDB.");
+        } catch (errNube) {
+            console.log("📡 Sin conexión a la nube. El archivo permanece seguro en IndexedDB.");
         }
     };
-    lector.readAsDataURL(archivo);
+    lector.readAsDataURL(archivoAProcesar);
+    input.value = ""; // Limpiar input para permitir subir la misma foto si se desea
              }
+            
 function renderizarSpaxioFlowStories(historias) {
     const contenedorInstagram = document.getElementById('carrusel-feed-instagram');
     if (!contenedorInstagram) return;
@@ -7487,54 +7501,7 @@ async function inyectarLiveSpaxioFlow(urlVideo) {
     }
 }
              
-     // =================================================================
-// 1. FUNCIÓN PARA SUBIR DESDE EL BOTÓN "+" DIRECTO A TABLA 'instanew'
-// =================================================================
-async function enviarMediaExclusivoInstanew(input, tipo, textoNoticia) {
-    if (!input.files || !input.files[0]) return;
-    
-    let archivoAProcesar = input.files[0];
 
-    // 1. Estandarizamos el tamaño a 1080x1080 si es imagen
-    if (archivoAProcesar.type.startsWith('image/')) {
-        archivoAProcesar = await estandarizarTamanoImagen(archivoAProcesar, 1080, 1080);
-    }
-
-    // 2. Procesamos (comprimimos en Base64) y guardamos localmente para las historias/feed
-    const archivoProcesado = await procesarArchivoMultimedia(archivoAProcesar, 'feed_grande'); 
-    guardarMultimediaLocal(archivoProcesado);
-
-    // 3. Leemos el archivo ya optimizado para subirlo a Supabase
-    const lector = new FileReader();
-    lector.onload = async function(e) {
-        let contenidoFinal = e.target.result;
-
-        try {
-            if (window.supabaseClient) {
-                const miNombre = localStorage.getItem('mi_nombre_perfil') || localStorage.getItem('mi_nombre') || "Pedro Peres";
-                const miUserId = localStorage.getItem('mi_dropis_id') || "26fmetp4Q4WJ";
-
-                const { error } = await window.supabaseClient
-                    .from('instanew')
-                    .insert([{
-                        chat_id: "26fmetp4Q4WJ",
-                        sender_id: miUserId,
-                        sender_name: miNombre,
-                        content: contenidoFinal,
-                        tipo: tipo,
-                        descripcion: textoNoticia
-                    }]);
-
-                if (error) throw error;
-                console.log("🚀 ¡Publicado optimizado y comprimido en Instanew!");
-            }
-        } catch (err) {
-            console.error("❌ Error subiendo a Instanew:", err);
-            alert("Error al publicar en Instanew");
-        }
-    };
-    lector.readAsDataURL(archivoAProcesar);
-             }
 
 // =================================================================
 // 2. FUNCIÓN QUIRÚRGICA REALTIME PARA TARJETAS GRANDES DE INSTANEW
