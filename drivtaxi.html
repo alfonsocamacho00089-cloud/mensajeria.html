@@ -5359,7 +5359,8 @@ function aplicarFotoCapa(id, src) {
    
  
 // Reemplaza el bloque final por este:
-window.onload = async () => {
+
+     window.onload = async () => {
     // 1. EJECUCIÓN INMEDIATA DEL SPLASH (No espera a nadie)
     const splash = document.getElementById('pantalla-carga');
     if (splash) {
@@ -5378,25 +5379,45 @@ window.onload = async () => {
         document.body.style.backgroundImage = `url('${configTema.urlFondo}')`;
         document.body.style.backgroundSize = "cover";
     }
-if (id) {
-    const miPerfil = await obtenerLocal('perfiles', id);
-    if (miPerfil && miPerfil.foto) {
-        const headerFoto = document.getElementById('foto-perfil-header');
-        if (headerFoto) headerFoto.src = miPerfil.foto;
 
-        // 🔥 Guarda la foto globalmente en el navegador al instante
-        localStorage.setItem('spaxio_mi_foto_oficial', miPerfil.foto);
-        
-        // Y actualiza la story si ya existe en pantalla
-        const imgStory = document.getElementById('story-mi-foto-perfil');
-        if (imgStory) imgStory.src = miPerfil.foto;
-    }
+    if (id) {
+        const miPerfil = await obtenerLocal('perfiles', id);
+        if (miPerfil && miPerfil.foto) {
+            const headerFoto = document.getElementById('foto-perfil-header');
+            if (headerFoto) headerFoto.src = miPerfil.foto;
 
-              
-         const historiasLocales = recuperarHistoriasLocales();
-if (historiasLocales.length > 0) { renderizarSpaxioFlowStories(historiasLocales); }     
+            // 🔥 Guarda la foto globalmente en el navegador al instante
+            localStorage.setItem('spaxio_mi_foto_oficial', miPerfil.foto);
+            
+            // Y actualiza la story si ya existe en pantalla
+            const imgStory = document.getElementById('story-mi-foto-perfil');
+            if (imgStory) imgStory.src = miPerfil.foto;
+        }
 
-        // Si hay internet intentamos sincronizar Firebase de fondo, si no, la app abre local sin bloquearse
+        // 3. 🔥 RECUPERACIÓN OFFLINE DESDE INDEXEDDB AL ABRIR LA APP (SpaxioFlow / Historias)
+        try {
+            const todosLosMensajes = await obtenerTodo('mensajes');
+            const postsSpaxioFlow = todosLosMensajes.filter(m => String(m.contactoId) === "26fmetp4Q4WJ" || m.id?.includes('post_local_'));
+
+            if (postsSpaxioFlow && postsSpaxioFlow.length > 0) {
+                // Ordenamos del más reciente al más antiguo
+                postsSpaxioFlow.sort((a, b) => (b.ts || 0) - (a.ts || 0));
+                
+                // Pintamos miniaturas y SpaxioFlow con los datos locales del teléfono
+                renderizarMiniaturasSpaxioFlow(postsSpaxioFlow);
+                renderizarSpaxioFlowStories(postsSpaxioFlow);
+            } else {
+                // Respaldo de compatibilidad con tu función local anterior
+                const historiasLocales = recuperarHistoriasLocales();
+                if (historiasLocales.length > 0) { 
+                    renderizarSpaxioFlowStories(historiasLocales); 
+                }
+            }
+        } catch (e) {
+            console.warn("⚠️ Error leyendo IndexedDB al arrancar:", e);
+        }
+
+        // 4. SICRONIZACIÓN EN SEGUNDO PLANO (Firebase y Supabase si hay red)
         if (navigator.onLine) {
             db.ref('usuarios/' + id).once('value').then(snapshot => {
                 const data = snapshot.val();
@@ -5404,17 +5425,36 @@ if (historiasLocales.length > 0) { renderizarSpaxioFlowStories(historiasLocales)
                     guardarLocal('perfiles', { id: id, foto: data.foto, nombre: data.nombre });
                 }
             }).catch(() => {});
+
             if (typeof activarAntena === "function") activarAntena();
+
+            // Sincronizar Supabase en segundo plano sin bloquear la app
+            if (window.supabaseClient) {
+                try {
+                    const { data: postsSupabase } = await window.supabaseClient
+                        .from('instanew')
+                        .select('*')
+                        .order('created_at', { ascending: false })
+                        .limit(20);
+
+                    if (postsSupabase && postsSupabase.length > 0) {
+                        renderizarSpaxioFlowStories(postsSupabase);
+                        renderizarMiniaturasSpaxioFlow(postsSupabase);
+                    }
+                } catch (errNube) {
+                    console.log("No se pudo sincronizar con la nube, operando con IndexedDB offline.");
+                }
+            }
         } else {
             console.log("📡 Modo Offline detectado: Abriendo con base de datos local (IndexedDB).");
         }
   
-  togglePanelTaxiLateral();
-
-
-
-              
+        togglePanelTaxiLateral();
         manejarBotonIdentidad();
+
+        // Arrancamos canales Realtime
+        if (typeof iniciarRealtimeInstanew === 'function') iniciarRealtimeInstanew("26fmetp4Q4WJ");
+        if (typeof iniciarRealtimeSpaxioFlow === 'function') iniciarRealtimeSpaxioFlow("26fmetp4Q4WJ");
      
     } else {
         // --- CASO 2: NO HAY REGISTRO (USUARIO NUEVO) ---
@@ -5446,7 +5486,11 @@ if (historiasLocales.length > 0) { renderizarSpaxioFlowStories(historiasLocales)
             });
         }
     } 
-}; // <--- ¡AQUÍ ESTÁ! Esta es la llave y el paréntesis que faltaban para cerrar el onload
+};       
+             
+             
+ 
+             // <--- ¡AQUÍ ESTÁ! Esta es la llave y el paréntesis que faltaban para cerrar el onload
 document.addEventListener("DOMContentLoaded", function() {
     // Seleccionamos los modales rebeldes
     const modalTienda = document.getElementById('modal-tienda');
