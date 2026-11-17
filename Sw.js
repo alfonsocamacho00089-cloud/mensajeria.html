@@ -1,38 +1,32 @@
-const CACHE_NAME = 'spacechat-v13';
+const CACHE_NAME = 'ysapay-driver-v1';
 const urlsToCache = [
+  './',
   './index.html',
-  './assets/logo.webp',
-  './assets/imagen-logos-nuevos.png",
+  './driver.html',
+  './manifest.json'
 ];
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(urlsToCache).catch(err => {
-        console.log('Fallo al cachear algunos recursos:', err);
-      });
-    })
+    caches.open(CACHE_NAME).then((cache) => cache.addAll(urlsToCache))
   );
   self.skipWaiting();
 });
 
 self.addEventListener('activate', (event) => {
   event.waitUntil(
-    caches.keys().then((cacheNames) => {
-      return Promise.all(
-        cacheNames.map((cacheName) => {
-          if (cacheName !== CACHE_NAME) {
-            return caches.delete(cacheName);
-          }
-        })
-      );
-    })
+    caches.keys().then((names) =>
+      Promise.all(names.map((n) => (n !== CACHE_NAME ? caches.delete(n) : null)))
+    )
   );
   self.clientsClaim();
 });
 
 self.addEventListener('fetch', (event) => {
+  if (event.request.method !== 'GET') return;
   event.respondWith(
-    fetch(event.request).catch(() => caches.match(event.request))
+    caches.match(event.request, { ignoreSearch: true }).then((resp) => {
+      return resp || fetch(event.request).catch(() => caches.match('./driver.html'));
+    })
   );
 });
