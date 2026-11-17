@@ -4768,27 +4768,9 @@ const nuevoPostLocal = {
     created_at: new Date().toISOString()
 };
 
-// Guardar de inmediato en el almacenamiento local de respaldo
-let cacheActual = recuperarHistoriasLocales();
-cacheActual.unshift(nuevoPostLocal);
-guardarHistoriasLocal(cacheActual);
-// MUESTRAS EL MENSAJE EN PANTALLA EN LOCAL DIRECTAMENTE
 
-    // 2. Mandas a Vercel
-    /*fetch('/api/spaxioflow-event', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(mensajeSeguro)
-    })
-    .then(res => res.json())
-    .then(respuestaServidor => {
-        console.log("📡 Servidor confirmó:", respuestaServidor);
-        
-        
-    })
-    .catch(err => console.error("❌ Error:", err));*/
-             }
-} else if (targetID !== "uo4kb3tGHH7J") {
+
+}else if (targetID !== "uo4kb3tGHH7J") {
     // 🛡️ REGLA DE ORO: Si es un contacto normal, sigue usando la cola satelital tradicional
     await db.ref('cola_satelital/' + targetID).push({
         p: base64,
@@ -5153,7 +5135,6 @@ async function cargarConversacionCon(idDestino, nombreDestino, fotoDestino) {
 
 
 
-
 // =================================================================
 // 1. CARGA SEPARADA AL ABRIR EL MÓDULO (idDestino === "26fmetp4Q4WJ")
 // =================================================================
@@ -5200,12 +5181,9 @@ if (idDestino === "26fmetp4Q4WJ") {
 
     setTimeout(() => {
         const box = document.getElementById('chat-box');
-   
-     if (box) box.scrollTop = 0; 
+        if (box) box.scrollTop = 0; 
     }, 50);
-             }
-             
-             
+}
 
 
           
@@ -7466,8 +7444,8 @@ guardarHistoriasLocal(cacheActual);
         }
     };
     lector.readAsDataURL(archivoAProcesar);
-             }   
-
+             
+              }
 // =================================================================
 // 2. FUNCIÓN QUIRÚRGICA REALTIME PARA TARJETAS GRANDES DE INSTANEW
 // =================================================================
