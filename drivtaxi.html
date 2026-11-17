@@ -2403,6 +2403,48 @@ function seleccionarRol(rolElegido) {
     return false;
 };
 
+              // --- NUEVA PERSISTENCIA DE HISTORIAS EN INDEXEDDB ---
+
+async function guardarHistoriasLocal(posts) {
+    try {
+        // Guardamos todo el arreglo de historias agrupado en un registro único
+        await guardarLocal('historias', { id: 'cache_historias', lista: posts });
+    } catch (e) {
+        console.error("Error guardando historias en IndexedDB:", e);
+    }
+}
+
+async function recuperarHistoriasLocales() {
+    try {
+        const resultado = await obtenerLocal('historias', 'cache_historias');
+        return resultado ? resultado.lista : [];
+    } catch (e) {
+        console.error("Error recuperando historias de IndexedDB:", e);
+        return [];
+    }
+}
+
+// --- NUEVA PERSISTENCIA MULTIMEDIA EN INDEXEDDB ---
+
+async function guardarMultimediaLocal(objetoMedia) {
+    try {
+        // Guardamos cada elemento multimedia usando su propio ID como clave primaria
+        await guardarLocal('multimedia', objetoMedia);
+    } catch (e) {
+        console.error("Error guardando multimedia en IndexedDB:", e);
+    }
+}
+
+async function recuperarTodoMultimedia() {
+    try {
+        const todos = await obtenerTodo('multimedia');
+        // Los ordenamos del más reciente al más antiguo
+        return todos.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+    } catch (e) {
+        console.error("Error recuperando multimedia de IndexedDB:", e);
+        return [];
+    }
+              }
              function estandarizarTamanoImagen(file, anchoDeseado = 1080, altoDeseado = 1080) {
     return new Promise((resolve) => {
         if (!file.type.startsWith('image/')) {
@@ -2447,16 +2489,7 @@ function seleccionarRol(rolElegido) {
         };
     });
              }
-function guardarMultimediaLocal(objetoMedia) {
-    try {
-        let actual = JSON.parse(localStorage.getItem('spaxio_multimedia_total') || '[]');
-        actual.unshift(objetoMedia);
-        if (actual.length > 40) actual = actual.slice(0, 40); // Límite seguro para localStorage
-        localStorage.setItem('spaxio_multimedia_total', JSON.stringify(actual));
-    } catch (e) {
-        console.error("Error guardando multimedia:", e);
-    }
-             }
+
 
              function procesarArchivoMultimedia(file, destino = 'chat') {
     return new Promise((resolve, reject) => {
@@ -2506,14 +2539,7 @@ function guardarMultimediaLocal(objetoMedia) {
     });
              }
 
-             function recuperarTodoMultimedia() {
-    try {
-        const data = localStorage.getItem('spaxio_multimedia_total');
-        return data ? JSON.parse(data) : [];
-    } catch (e) {
-        return [];
-    }
-             }
+             
 
              function actualizarCacheLocalPostNuevo(nuevoPost) {
     let actuales = recuperarHistoriasLocales();
@@ -2521,21 +2547,9 @@ function guardarMultimediaLocal(objetoMedia) {
     if (actuales.length > 30) actuales = actuales.slice(0, 30);
     guardarHistoriasLocal(actuales);
              }
-             function recuperarHistoriasLocales() {
-    try {
-        const data = localStorage.getItem('spaxio_historias_locales');
-        return data ? JSON.parse(data) : [];
-    } catch (e) {
-        return [];
-    }
-             }
-             function guardarHistoriasLocal(posts) {
-    try {
-        localStorage.setItem('spaxio_historias_locales', JSON.stringify(posts));
-    } catch (e) {
-        console.error("Error al guardar historias localmente:", e);
-    }
-             }
+
+              
+             
 // =================================================================
 // 2. FUNCIÓN PARA PINTAR SOLO LAS MINIATURAS (Desde spaxioflow_feed)
 // =================================================================
@@ -4181,77 +4195,42 @@ const messaging = firebase.messaging();
 const db = firebase.database();
      
 const storage = firebase.storage(); // <-- NUEVO: Para guardar los Lives de SpaxioLive
-
-// --- 2. MOTOR DE PERSISTENCIA (IndexedDB) ---
-
-     const dbNombre = "DropisDB";
-
-const dbVersion = 11;
-
-// Este objeto guarda los contactos que ya están en pantalla
-const agendaRenderizada = new Set();
-const contactosRenderizados = new Set();
-
-/**
-
- * Abre la conexión con IndexedDB y crea las tablas si no existen.
-
- */
+const dbNombre = "DropisDB";
+const dbVersion = 15; // 👈 Incrementa la versión para forzar la actualización de la BD
 
 function abrirDB() {
-
     return new Promise((resolve, reject) => {
-
         const request = indexedDB.open(dbNombre, dbVersion);
 
-
-
         request.onupgradeneeded = (e) => {
-
             const db = e.target.result;
 
-
-
-            // 1. Tabla para mensajes (historial)
-
             if (!db.objectStoreNames.contains('mensajes')) {
-
                 db.createObjectStore('mensajes', { autoIncrement: true });
-
             }
-
-
-
-            // 2. Tabla para perfiles de otros contactos (fotos pesadas)
-
             if (!db.objectStoreNames.contains('perfiles')) {
-
                 db.createObjectStore('perfiles', { keyPath: 'id' });
-
             }
-
-
-
-            // 3. Tabla para datos del usuario y configuración (temas, urls)
-
             if (!db.objectStoreNames.contains('usuario')) {
-
                 db.createObjectStore('usuario', { keyPath: 'id' });
-
             }
 
+            // 👇 NUEVAS TABLAS PARA EVITAR EL QUOTA EXCEEDED
+            if (!db.objectStoreNames.contains('multimedia')) {
+                db.createObjectStore('multimedia', { keyPath: 'id' });
+            }
+            if (!db.objectStoreNames.contains('historias')) {
+                db.createObjectStore('historias', { keyPath: 'id' });
+            }
         };
 
-
-
         request.onsuccess = () => resolve(request.result);
-
         request.onerror = () => reject("Error al abrir IndexedDB");
-
     });
+              }
+// --- 2. MOTOR DE PERSISTENCIA (IndexedDB) ---
 
-}
-
+     
 
 
 /**
@@ -5386,9 +5365,15 @@ if (id) {
         if (imgStory) imgStory.src = miPerfil.foto;
     }
 
-              
-         const historiasLocales = recuperarHistoriasLocales();
-if (historiasLocales.length > 0) { renderizarSpaxioFlowStories(historiasLocales); }     
+              // DENTRO DE TU window.onload = async () => { ... }
+
+// 🔄 ANTES: const historiasLocales = recuperarHistoriasLocales();
+// ✅ AHORA (con await para IndexedDB):
+const historiasLocales = await recuperarHistoriasLocales();
+if (historiasLocales && historiasLocales.length > 0) { 
+    renderizarSpaxioFlowStories(historiasLocales); 
+              }
+         
 
         // Si hay internet intentamos sincronizar Firebase de fondo, si no, la app abre local sin bloquearse
         if (navigator.onLine) {
@@ -7356,7 +7341,7 @@ function anexarUnicoMensajeAlFeed(msg) {
     `;
 
         // ✅ LA CLAVE PARA QUE QUEDE ANCLADO ARRIBA:
-    contenedor.prepend(div);
+    
     contenedor.scrollTop = 0; // El scroll se clava arriba mostrando la publicación más reciente
  }
             
