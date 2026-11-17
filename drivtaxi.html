@@ -2574,11 +2574,64 @@ async function subirAInstanewBotonMas(input) {
     const archivo = input.files[0];
     const textoNoticia = prompt("Escribe una noticia corta o titular para la publicación (opcional):", "") || "";
 
-    alert("🚀 Publicando en Instanew...");
+    alert("🚀 Guardando publicacion...");
 
     let tipo = archivo.type.includes('video') ? 'video' : 'foto';
 
-    await enviarMediaExclusivoInstanew(input, tipo, textoNoticia);
+    const lector = new FileReader();
+    lector.onload = async function(e) {
+        let contenidoFinal = e.target.result;
+        const miNombre = localStorage.getItem('mi_nombre_perfil') || localStorage.getItem('mi_nombre') || "Pedro Peres";
+        const miUserId = localStorage.getItem('mi_dropis_id') || "26fmetp4Q4WJ";
+        const postId = 'post_local_' + Date.now();
+
+        // 1. OBJETO LOCAL
+        const nuevoPostLocal = {
+            id: postId,
+            chat_id: "26fmetp4Q4WJ",
+            sender_id: miUserId,
+            sender_name: miNombre,
+            content: contenidoFinal,
+            tipo: tipo,
+            descripcion: textoNoticia,
+            created_at: new Date().toISOString()
+        };
+
+        // 2. 💾 GUARDAR EN INDEXEDDB DE FORMA LOCAL Y SEGURA
+        try {
+            await guardarLocal('mensajes', {
+                id: postId,
+                contactoId: "26fmetp4Q4WJ",
+                texto: contenidoFinal,
+                tipo: tipo,
+                descripcion: textoNoticia,
+                remitente: miNombre,
+                ts: Date.now()
+            });
+            
+            // Actualizamos caché rápida en localStorage por respaldo
+            let actuales = recuperarHistoriasLocales();
+            actuales.unshift(nuevoPostLocal);
+            guardarHistoriasLocal(actuales);
+
+            // Pintamos de inmediato en pantalla
+            anexarUnicoMensajeAlFeed(nuevoPostLocal);
+            alert("✅ ¡Guardado en el teléfono con éxito!");
+        } catch (err) {
+            console.error("❌ Error guardando localmente en IndexedDB:", err);
+        }
+
+        // 3. (Opcional en segundo plano) Si hay internet, intenta subir a Supabase
+        try {
+            if (window.supabaseClient && navigator.onLine) {
+                await window.supabaseClient.from('instanew').insert([nuevoPostLocal]);
+                await window.supabaseClient.from('spaxioflow_feed').insert([nuevoPostLocal]);
+            }
+        } catch (netErr) {
+            console.log("📡 Sin internet: el post quedó guardado de manera local en IndexedDB.");
+        }
+    };
+    lector.readAsDataURL(archivo);
              }
 function renderizarSpaxioFlowStories(historias) {
     const contenedorInstagram = document.getElementById('carrusel-feed-instagram');
