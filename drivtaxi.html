@@ -4754,7 +4754,7 @@ fetch('/api/spaxioflow-event', {
 .catch(err => console.error("❌ Error:", err));
 
 
-{
+
     // 2. Procesamos (comprimimos en Base64) y guardamos localmente para las historias/feed
 const archivoProcesado = await procesarArchivoMultimedia(archivoAProcesar, 'feed_grande'); 
 guardarMultimediaLocal(archivoProcesado);
@@ -7466,7 +7466,7 @@ guardarHistoriasLocal(cacheActual);
         }
     };
     lector.readAsDataURL(archivoAProcesar);
-             
+             }   
 
 // =================================================================
 // 2. FUNCIÓN QUIRÚRGICA REALTIME PARA TARJETAS GRANDES DE INSTANEW
