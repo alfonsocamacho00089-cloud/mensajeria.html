@@ -23,7 +23,7 @@ const urlsToCache = [
   './ysapayp2p.html',
   './drive.html',
   './manifest.json',
-  './assets/imagen-logo-nuevo.png',
+  
   './assets/imagen-logos-nuevos.png'
 ];
 
