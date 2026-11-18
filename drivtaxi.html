@@ -2540,7 +2540,7 @@ function guardarMultimediaLocal(objetoMedia) {
 // 2. FUNCIÓN PARA PINTAR SOLO LAS MINIATURAS (Desde spaxioflow_feed)
 // =================================================================
 function renderizarMiniaturasSpaxioFlow(postsSpaxio) {
-    const contenedorStories = document.getElementById('contenedor-spaxioflow-stories');
+    const contenedorStories = document.getElementById('contenedor-spaxioflowfeed');
     if (!contenedorStories) return;
 
     const tarjetaFijaHTML = contenedorStories.firstElementChild ? contenedorStories.firstElementChild.outerHTML : '';
@@ -2708,7 +2708,7 @@ function renderizarSpaxioFlowStories(historias) {
 
         `;
 
-        contenedorInstagram.appendChild(tarjetaInsta);
+        contenedorInstagram.prepend(tarjetaInsta);
     });
              }
              
@@ -4968,7 +4968,7 @@ const cuerpoPeticion = {
         
 
      // --- BLOQUE: ENVIAR MENSAJE (NOTIFICAR) ---
-if ('serviceWorker' in navigator && Notification.permission === "granted") {
+/*if ('serviceWorker' in navigator && Notification.permission === "granted") {
     navigator.serviceWorker.ready.then(registration => {
         registration.showNotification("SpaceChat: " + emisorID, {
             body: textoReal,
@@ -4981,7 +4981,7 @@ if ('serviceWorker' in navigator && Notification.permission === "granted") {
     }).catch(err => console.log("Notificación bloqueada o fallida"));
 } else {
     console.log("Notificaciones no permitidas por el usuario.");
-     }
+     }*/
 async function obtenerToken(registration) {
     try {
         const miVapidKey = 'BIrsA9YbBXfIuo4PTMrKRtuktRsK2RbK0XevupuofGGOUDy9w5VZ9yaXbZXsenXppmFsR62-2B7jBOG0Z8RdxvU';
@@ -5170,7 +5170,9 @@ async function cargarConversacionCon(idDestino, nombreDestino, fotoDestino) {
 // =================================================================
 // 1. CARGA SEPARADA AL ABRIR EL MÓDULO (idDestino === "26fmetp4Q4WJ")
 // =================================================================
-if (idDestino === "26fmetp4Q4WJ") {
+
+if (
+idDestino === "26fmetp4Q4WJ") {
     console.log("📡 Cargando flujos separados: Instanew (Tarjetas Grandes) y SpaxioFlow (Miniaturas/Chat)...");
 
     // --- FLUJO A: INSTANEW (Solo para tarjetas grandes abajo) ---
@@ -5216,7 +5218,6 @@ if (idDestino === "26fmetp4Q4WJ") {
         if (box) box.scrollTop = 0; 
     }, 50);
 }
-
 
           
               else {
