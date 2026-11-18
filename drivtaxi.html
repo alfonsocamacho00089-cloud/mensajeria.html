@@ -2539,23 +2539,38 @@ function guardarMultimediaLocal(objetoMedia) {
 // =================================================================
 // 2. FUNCIÓN PARA PINTAR SOLO LAS MINIATURAS (Desde spaxioflow_feed)
 // =================================================================
+// =================================================================
+// RENDERIZADO EXCLUSIVO PARA LAS MINIATURAS (Carrusel Horizontal Superior)
+// =================================================================
 function renderizarMiniaturasSpaxioFlow(postsSpaxio) {
-    const contenedorStories = document.getElementById('contenedor-spaxioflow_feed');
-    if (!contenedorSpaxioflow_feed) return;
+    // Apuntamos al contenedor horizontal correcto que tienes en tu HTML
+    const contenedorMiniaturas = document.getElementById('contenedor-spaxioflow-stories'); 
+    if (!contenedorMiniaturas) return;
 
-    const tarjetaFijaHTML = contenedorStories.firstElementChild ? contenedorSpaxioflow_feed.firstElementChild.outerHTML : '';
-    contenedorSpaxioflow_feed.innerHTML = tarjetaFijaHTML;
+    // Preservamos el botón fijo de "subir" que está al inicio
+    const tarjetaFijaHTML = contenedorMiniaturas.firstElementChild ? contenedorMiniaturas.firstElementChild.outerHTML : '';
+    contenedorMiniaturas.innerHTML = tarjetaFijaHTML;
 
     postsSpaxio.forEach(post => {
         const urlImg = post.content || post.imagen_url || post.media_url || post.foto || ''; 
-        const nombreUsr = post.sender_name || post.remitente || 'Pedro Peres';
+        const nombreUsr = post.sender_name || post.remitente || localStorage.getItem('mi_nombre_perfil') || 'Pedro Peres';
         const usuarioIdAutor = post.sender_id || post.usuarioId || post.usuario_id || '26fmetp4Q4WJ';
+        // Simulamos o extraemos la foto de perfil (puedes adaptarla si viene en el post, ej: post.avatar_url)
+        const fotoPerfilUsr = post.avatar_url || post.foto_perfil || urlImg; 
 
         if (urlImg.startsWith('http') || urlImg.startsWith('data:image')) {
-            contenedorSpaxioflow_feed.innerHTML += `
-                <div onclick="cargarConversacionCon('${usuarioIdAutor}', '${nombreUsr}')" style="min-width: 170px; height: 200px; border-radius: 12px; padding: 1px; flex-shrink: 0; cursor: pointer; overflow: hidden; position: relative;">
-                    <div style="position: relative; width: 100%; height: 100%; background-image: url('${urlImg}'); background-size: cover; background-position: center; border-radius: 12px; display: flex; flex-direction: column; justify-content: flex-end; overflow: hidden;">
-                        <div style="position: absolute; bottom: 0; left: 0; width: 100%; padding: 1px; text-align: center; background: rgba(0,0,0,0.5);">
+            contenedorMiniaturas.innerHTML += `
+                <div onclick="cargarConversacionCon('${usuarioIdAutor}', '${nombreUsr}')" style="min-width: 100px; height: 200px; border-radius: 12px; padding: 1px; flex-shrink: 0; cursor: pointer; overflow: hidden; position: relative;">
+                    <div style="position: relative; width: 100%; height: 100%; background-image: url('${urlImg}'); background-size: cover; background-position: center; border-radius: 12px; display: flex; flex-direction: column; justify-content: space-between; padding: 8px; overflow: hidden;">
+                        
+                        <!-- Círculo con la foto de perfil y el nombre arriba (estilo tarjeta grande) -->
+                        <div style="display: flex; align-items: center; gap: 6px; background: rgba(0,0,0,0.5); padding: 4px 8px; border-radius: 20px; width: fit-content; max-width: 100%;">
+                            <div style="width: 24px; height: 24px; border-radius: 50%; background-image: url('${fotoPerfilUsr}'); background-size: cover; background-position: center; border: 1.5px solid #ffd700; flex-shrink: 0;"></div>
+                            <span style="font-size: 9px; color: #ffffff; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${nombreUsr}</span>
+                        </div>
+
+                        <!-- Franja inferior opcional con el nombre o limpia -->
+                        <div style="position: absolute; bottom: 0; left: 0; width: 100%; padding: 4px; text-align: center; background: rgba(0,0,0,0.6);">
                             <span style="font-size: 10px; color: #ffd700; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block;">${nombreUsr}</span>
                         </div>
                     </div>
@@ -2563,7 +2578,7 @@ function renderizarMiniaturasSpaxioFlow(postsSpaxio) {
             `;
         }
     });
-}
+             }
 
 // =================================================================
 // FUNCIÓN ÚNICA Y MAESTRA PARA EL BOTÓN "+" (IndexedDB + Supabase)
