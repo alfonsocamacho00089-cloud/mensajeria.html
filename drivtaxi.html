@@ -2540,11 +2540,11 @@ function guardarMultimediaLocal(objetoMedia) {
 // 2. FUNCIÓN PARA PINTAR SOLO LAS MINIATURAS (Desde spaxioflow_feed)
 // =================================================================
 function renderizarMiniaturasSpaxioFlow(postsSpaxio) {
-    const contenedorStories = document.getElementById('contenedor-spaxioflowfeed');
-    if (!contenedorStories) return;
+    const contenedorStories = document.getElementById('contenedor-spaxioflow_feed');
+    if (!contenedorSpaxioflow_feed) return;
 
-    const tarjetaFijaHTML = contenedorStories.firstElementChild ? contenedorStories.firstElementChild.outerHTML : '';
-    contenedorStories.innerHTML = tarjetaFijaHTML;
+    const tarjetaFijaHTML = contenedorStories.firstElementChild ? contenedorSpaxioflow_feed.firstElementChild.outerHTML : '';
+    contenedorSpaxioflow_feed.innerHTML = tarjetaFijaHTML;
 
     postsSpaxio.forEach(post => {
         const urlImg = post.content || post.imagen_url || post.media_url || post.foto || ''; 
@@ -2552,7 +2552,7 @@ function renderizarMiniaturasSpaxioFlow(postsSpaxio) {
         const usuarioIdAutor = post.sender_id || post.usuarioId || post.usuario_id || '26fmetp4Q4WJ';
 
         if (urlImg.startsWith('http') || urlImg.startsWith('data:image')) {
-            contenedorStories.innerHTML += `
+            contenedorSpaxioflow_feed.innerHTML += `
                 <div onclick="cargarConversacionCon('${usuarioIdAutor}', '${nombreUsr}')" style="min-width: 170px; height: 200px; border-radius: 12px; padding: 1px; flex-shrink: 0; cursor: pointer; overflow: hidden; position: relative;">
                     <div style="position: relative; width: 100%; height: 100%; background-image: url('${urlImg}'); background-size: cover; background-position: center; border-radius: 12px; display: flex; flex-direction: column; justify-content: flex-end; overflow: hidden;">
                         <div style="position: absolute; bottom: 0; left: 0; width: 100%; padding: 1px; text-align: center; background: rgba(0,0,0,0.5);">
