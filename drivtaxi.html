@@ -5462,27 +5462,18 @@ function aplicarFotoCapa(id, src) {
             if (imgStory) imgStory.src = miPerfil.foto;
         }
 
-        // 3. 🔥 RECUPERACIÓN OFFLINE DESDE INDEXEDDB AL ABRIR LA APP (SpaxioFlow / Historias)
+        // 3. 🔥 RECUPERACIÓN OFFLINE PURA PARA HISTORIAS (Sin tocar el chat)
         try {
-            const todosLosMensajes = await obtenerTodo('mensajes');
-            const postsSpaxioFlow = todosLosMensajes.filter(m => String(m.contactoId) === "26fmetp4Q4WJ" || m.id?.includes('post_local_'));
+            // Leemos solo las historias locales guardadas en localStorage, NO el chat
+            const historiasLocales = recuperarHistoriasLocales();
 
-            if (postsSpaxioFlow && postsSpaxioFlow.length > 0) {
-                // Ordenamos del más reciente al más antiguo
-                postsSpaxioFlow.sort((a, b) => (b.ts || 0) - (a.ts || 0));
-                
-                // Pintamos miniaturas y SpaxioFlow con los datos locales del teléfono
-                renderizarMiniaturasSpaxioFlow(postsSpaxioFlow);
-                renderizarSpaxioFlowStories(postsSpaxioFlow);
-            } else {
-                // Respaldo de compatibilidad con tu función local anterior
-                const historiasLocales = recuperarHistoriasLocales();
-                if (historiasLocales.length > 0) { 
-                    renderizarSpaxioFlowStories(historiasLocales); 
-                }
+            if (historiasLocales && historiasLocales.length > 0) {
+                // Pintamos miniaturas y SpaxioFlow solo con las historias reales
+                renderizarMiniaturasSpaxioFlow(historiasLocales);
+                renderizarSpaxioFlowStories(historiasLocales);
             }
         } catch (e) {
-            console.warn("⚠️ Error leyendo IndexedDB al arrancar:", e);
+            console.warn("⚠️ Error leyendo historias locales al arrancar:", e);
         }
 
         // 4. SICRONIZACIÓN EN SEGUNDO PLANO (Firebase y Supabase si hay red)
