@@ -2568,84 +2568,42 @@ function renderizarMiniaturasSpaxioFlow(postsSpaxio) {
 // =================================================================
 // FUNCIÓN ÚNICA Y MAESTRA PARA EL BOTÓN "+" (IndexedDB + Supabase)
 // =================================================================
-async function subirAInstanewBotonMas(input) {
+
+            async function subirAInstanewBotonMas(input) {
     if (!input.files || !input.files[0]) return;
     
-    let archivoAProcesar = input.files[0];
+    const archivo = input.files[0];
     const textoNoticia = prompt("Escribe una noticia corta o titular para la publicación (opcional):", "") || "";
 
-    // 1. Estandarizar imagen si aplica (1080x1080)
-    if (archivoAProcesar.type.startsWith('image/')) {
-        archivoAProcesar = await estandarizarTamanoImagen(archivoAProcesar, 1080, 1080);
-    }
+    alert("🚀 Publicando en Instanew...");
 
-    let tipo = archivoAProcesar.type.includes('video') ? 'video' : 'foto';
+    let tipo = archivo.type.includes('video') ? 'video' : 'foto';
 
-    const lector = new FileReader();
-    lector.onload = async function(e) {
-        let contenidoFinal = e.target.result;
-        const miNombre = localStorage.getItem('mi_nombre_perfil') || localStorage.getItem('mi_nombre') || "Pedro Peres";
-        // ✅ CORRECTO (con paréntesis cerrando correctamente)
-        const miUserId = localStorage.getItem('mi_dropis_id') || "26fmetp4Q4WJ";
-        const postId = 'post_local_' + Date.now();
-
-        // Objeto unificado estricto
-        const payloadMultimedia = {
-            id: postId,
-            chat_id: "26fmetp4Q4WJ",
-            sender_id: miUserId,
-            sender_name: miNombre,
-            content: contenidoFinal,     // Usado por las tarjetas grandes
-            contenido: contenidoFinal,   // Respaldo de compatibilidad
-            tipo: tipo,
-            descripcion: textoNoticia,
-            created_at: new Date().toISOString()
-        };
-
-        // PASO 1: PERMANENCIA LOCAL OBLIGATORIA (IndexedDB)
-        try {
+    // 1. Guardar localmente en IndexedDB de forma segura antes de enviar a la nube
+    try {
+        const lectorLocal = new FileReader();
+        lectorLocal.onload = async function(e) {
+            const contenidoLocal = e.target.result;
+            const miNombre = localStorage.getItem('mi_nombre_perfil') || localStorage.getItem('mi_nombre') || "Pedro Peres";
+            
             await guardarLocal('mensajes', {
-                id: postId,
+                id: 'post_local_' + Date.now(),
                 contactoId: "26fmetp4Q4WJ",
-                texto: contenidoFinal,
+                texto: contenidoLocal,
                 tipo: tipo,
                 descripcion: textoNoticia,
                 remitente: miNombre,
                 ts: Date.now()
             });
-            
-            // Actualizar caché de historias locales
-            let actuales = recuperarHistoriasLocales();
-            actuales.unshift(payloadMultimedia);
-            guardarHistoriasLocal(actuales);
+            console.log("💾 Guardado exitoso en IndexedDB.");
+        };
+        lectorLocal.readAsDataURL(archivo);
+    } catch (errLocal) {
+        console.error("❌ Error guardando en IndexedDB:", errLocal);
+    }
 
-            // Pintar de inmediato en pantalla
-            anexarUnicoMensajeAlFeed(payloadMultimedia);
-            console.log("💾 Guardado localmente en IndexedDB con éxito.");
-        } catch (errLocal) {
-            console.error("❌ Error en IndexedDB:", errLocal);
-        }
-
-        // PASO 2: SINCRONIZACIÓN A LA NUBE (Supabase)
-        try {
-            if (window.supabaseClient && navigator.onLine) {
-                // Insertamos en ambas tablas de forma limpia y directa
-                const [resInsta, resFlow] = await Promise.all([
-                    window.supabaseClient.from('instanew').insert([payloadMultimedia]),
-                    window.supabaseClient.from('spaxioflow_feed').insert([payloadMultimedia])
-                ]);
-
-                if (resInsta.error) console.error("Error en tabla instanew:", resInsta.error);
-                if (resFlow.error) console.error("Error en tabla spaxioflow_feed:", resFlow.error);
-
-                console.log("☁️ Sincronizado con Supabase correctamente.");
-            }
-        } catch (errNube) {
-            console.log("📡 Sin conexión a la nube. El archivo permanece seguro en IndexedDB.");
-        }
-    };
-    lector.readAsDataURL(archivoAProcesar);
-    input.value = ""; // Limpiar input para permitir subir la misma foto si se desea
+    // 2. Ejecutar tu función original intacta para el procesamiento y subida a Supabase
+    await enviarMediaExclusivoInstanew(input, tipo, textoNoticia);
              }
             
 function renderizarSpaxioFlowStories(historias) {
@@ -7424,7 +7382,51 @@ function iniciarRealtimeInstanew(conversacionId) {
     });
              }
 
-             
+            async function enviarMediaExclusivoInstanew(input, tipo, textoNoticia) {
+    if (!input.files || !input.files[0]) return;
+    
+    let archivoAProcesar = input.files[0];
+
+    // 1. Estandarizamos el tamaño a 1080x1080 si es imagen
+    if (archivoAProcesar.type.startsWith('image/')) {
+        archivoAProcesar = await estandarizarTamanoImagen(archivoAProcesar, 1080, 1080);
+    }
+
+    // 2. Procesamos (comprimimos en Base64) y guardamos localmente para las historias/feed
+    const archivoProcesado = await procesarArchivoMultimedia(archivoAProcesar, 'feed_grande'); 
+    guardarMultimediaLocal(archivoProcesado);
+
+    // 3. Leemos el archivo ya optimizado para subirlo a Supabase
+    const lector = new FileReader();
+    lector.onload = async function(e) {
+        let contenidoFinal = e.target.result;
+
+        try {
+            if (window.supabaseClient) {
+                const miNombre = localStorage.getItem('mi_nombre_perfil') || localStorage.getItem('mi_nombre') || "Pedro Peres";
+                const miUserId = localStorage.getItem('mi_dropis_id') || "26fmetp4Q4WJ";
+
+                const { error } = await window.supabaseClient
+                    .from('instanew')
+                    .insert([{
+                        chat_id: "26fmetp4Q4WJ",
+                        sender_id: miUserId,
+                        sender_name: miNombre,
+                        content: contenidoFinal,
+                        tipo: tipo,
+                        descripcion: textoNoticia
+                    }]);
+
+                if (error) throw error;
+                console.log("🚀 ¡Publicado optimizado y comprimido en Instanew!");
+            }
+        } catch (err) {
+            console.error("❌ Error subiendo a Instanew:", err);
+            alert("Error al publicar en Instanew");
+        }
+    };
+    lector.readAsDataURL(archivoAProcesar);
+             } 
     
 
              
