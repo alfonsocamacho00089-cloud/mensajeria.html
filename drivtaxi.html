@@ -3802,7 +3802,8 @@ async function cargarTasas() {
   
 // --- BLOQUE 2: P2P (BINANCE) ---
     try {
-const resB = await fetch(urlP2P, { cache: "no-store" });
+const sep = urlP2P.includes("?") ? "&" : "?";
+const resB = await fetch(`${urlP2P}${sep}t=${Date.now()}`, { cache: "no-store" });
 const dataB = await resB.json();
              
         
