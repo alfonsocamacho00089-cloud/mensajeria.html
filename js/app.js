@@ -11,7 +11,7 @@ const DB_VERSION = 15;
 
 
 let listenerActivo = null; // Para control de antena
-const CACHE_NAME = 'ysapay-offline-v17';
+const CACHE_NAME = 'ysapay-offline-v18';
 const urlsToCache = [
   './',
   './index.html',
