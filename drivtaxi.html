@@ -2539,11 +2539,15 @@ function guardarMultimediaLocal(objetoMedia) {
 // =================================================================
 // 2. FUNCIÓN PARA PINTAR SOLO LAS MINIATURAS (Desde spaxioflow_feed)
 // =================================================================
+// =================================================================
+// RENDERIZADO EXCLUSIVO PARA LAS MINIATURAS (Carrusel Horizontal Superior)
+// =================================================================
 function renderizarMiniaturasSpaxioFlow(postsSpaxio) {
-    const contenedorStories = document.getElementById('contenedor-spaxioflowfeed');
-    if (!contenedorStories) return;
+    // Apuntamos al contenedor horizontal correcto que tienes en tu HTML
+    const contenedorMiniaturas = document.getElementById('contenedor-spaxioflow-feed'); 
+    if (!contenedorMiniaturas) return;
 
-  
+    // Preservamos el botón fijo de "subir" que está al inicio
     const tarjetaFijaHTML = contenedorMiniaturas.firstElementChild ? contenedorMiniaturas.firstElementChild.outerHTML : '';
     contenedorMiniaturas.innerHTML = tarjetaFijaHTML;
 
@@ -2575,7 +2579,6 @@ function renderizarMiniaturasSpaxioFlow(postsSpaxio) {
         }
     });
              }
-
 
 // =================================================================
 // FUNCIÓN ÚNICA Y MAESTRA PARA EL BOTÓN "+" (IndexedDB + Supabase)
@@ -5399,8 +5402,7 @@ function aplicarFotoCapa(id, src) {
  
 // Reemplaza el bloque final por este:
 
-             
-window.onload = async () => {
+     window.onload = async () => {
     // 1. EJECUCIÓN INMEDIATA DEL SPLASH (No espera a nadie)
     const splash = document.getElementById('pantalla-carga');
     if (splash) {
@@ -5518,7 +5520,9 @@ window.onload = async () => {
         }
     } 
 };       
-     
+             
+             
+ 
              // <--- ¡AQUÍ ESTÁ! Esta es la llave y el paréntesis que faltaban para cerrar el onload
 document.addEventListener("DOMContentLoaded", function() {
     // Seleccionamos los modales rebeldes
