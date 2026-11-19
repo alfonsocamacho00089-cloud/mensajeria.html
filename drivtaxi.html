@@ -3802,8 +3802,10 @@ async function cargarTasas() {
   
 // --- BLOQUE 2: P2P (BINANCE) ---
     try {
-        const resB = await fetch(urlP2P);
-        const dataB = await resB.json();
+const resB = await fetch(urlP2P, { cache: "no-store" });
+const dataB = await resB.json();
+             
+        
 
         if (dataB && dataB.binance_p2p) {
             // Cambiar Math.max por la lectura directa de la propiedad .promedio
