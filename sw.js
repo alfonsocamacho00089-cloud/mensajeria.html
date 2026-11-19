@@ -1,4 +1,4 @@
-const CACHE_NAME = 'ysapay-offline-v15';
+const CACHE_NAME = 'ysapay-offline-v16';
 const urlsToCache = [
   './',
   './index.html',
