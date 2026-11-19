@@ -3774,12 +3774,12 @@ async function cargarTasas() {
 
         if (dataV && dataV.length  > 0 && dataP && dataP.length > 0) {
             // tApi = La tasa fresca que viene de PROXIMA (La de hoy)
-            tApi.bcv = parseFloat(parseFloat(dataP[0].precio_dolar).toFixed(2)) || 0;
-            tApi.euro = parseFloat(parseFloat(dataP[0].precio_euro).toFixed(2)) || 0;
+            tApi.bcv = parseFloat(parseFloat(dataV[0].precio_dolar).toFixed(2)) || 0;
+            tApi.euro = parseFloat(parseFloat(dataV[0].precio_euro).toFixed(2)) || 0;
             
             // tMan = La tasa de atrás que viene de VIGENTE (La de mañana)
-            tMan.bcv = parseFloat(parseFloat(dataV[0].precio_dolar).toFixed(2)) || 0;
-            tMan.euro = parseFloat(parseFloat(dataV[0].precio_euro).toFixed(2)) || 0;
+            tMan.bcv = parseFloat(parseFloat(dataP[0].precio_dolar).toFixed(2)) || 0;
+            tMan.euro = parseFloat(parseFloat(dataP[0].precio_euro).toFixed(2)) || 0;
 
             
             // Guardar en caché limpio sin cruzar cables
