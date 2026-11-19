@@ -1863,7 +1863,7 @@ function seleccionarRol(rolElegido) {
                     <span>hoy</span>
                 </div>
             </div>
-        </div></div>
+        </div>
 
         <div class="container">
             
@@ -2240,7 +2240,7 @@ function seleccionarRol(rolElegido) {
                         </div>
 
                     
-                    </div>
+                    </div></div></div>
                 
             
           
@@ -4104,8 +4104,8 @@ document.querySelectorAll('input').forEach(i => i.addEventListener('input', actu
 
         
      // --- MOTOR// Usamos window para evitar el error de "ya ha sido declarada" en tu archivo grande
-window.tMan = window.tMan || { bcv: 0, euro: 0 };
-window.tApi = window.tApi || { p2p: 0 };
+window.tMan = window.tMan || { bcv: 0, euro: 0, p2p: 0 };
+window.tApi = window.tApi || { bcv: 0, euro: 0, p2p: 0 };
 window.tasaSeleccionada = 'bcv'; // Por defecto
 
 function selectTasa(tipo) {
