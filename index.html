@@ -186,6 +186,7 @@
 
     
 <script>
+    
    async function recuperarCuentaConID(rolElegido, urlDestino) {
     const idParaRecuperar = prompt("Escribe tu ID Dropis:");
     if (!idParaRecuperar) return;
@@ -221,7 +222,7 @@
         alert("Error de conexión satelital.");
     }
     }
-
+const APP_VER = "v16"; // Solo cambias este número aquí cada vez que subas un cambio
 // BOTÓN USUARIOS
 function abrirPerfilUsuarioLocal() {
     const idExistente = localStorage.getItem('mi_dropis_id');
@@ -233,7 +234,7 @@ function abrirPerfilUsuarioLocal() {
     }
     
     localStorage.setItem('spaxio_rol', 'usuario');
-    window.location.href = "./usuario.html";
+    window.location.href = `./usuario.html?v=${APP_VER}`;
 }
 
 // BOTÓN COMERCIOS
@@ -246,7 +247,7 @@ function abrirPerfilComercioLocal() {
     }
     
     localStorage.setItem('spaxio_rol', 'merchant');
-    window.location.href = "./comercios.html";
+    window.location.href = `./comercios.html?v=${APP_VER}`;
 }
 
 // BOTÓN DRIVER
@@ -259,7 +260,7 @@ function abrirPerfilDriverLocal() {
     }
     
     localStorage.setItem('spaxio_rol', 'driver');
-    window.location.href = "./drivtaxi.html";
+    window.location.href = `./drivtaxi.html?v=${APP_VER}`;
 }
 
 if ('serviceWorker' in navigator) {
