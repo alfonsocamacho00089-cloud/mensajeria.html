@@ -5386,8 +5386,7 @@ function aplicarFotoCapa(id, src) {
    
  
 // Reemplaza el bloque final por este:
-
-     window.onload = async () => {
+window.onload = async () => {
     // 1. EJECUCIÓN INMEDIATA DEL SPLASH (No espera a nadie)
     const splash = document.getElementById('pantalla-carga');
     if (splash) {
@@ -5423,43 +5422,45 @@ function aplicarFotoCapa(id, src) {
 
         // 3. 🔥 RECUPERACIÓN OFFLINE PURA PARA HISTORIAS (Sin tocar el chat)
         try {
+            // Leemos solo las historias locales guardadas en localStorage, NO el chat
             const historiasLocales = recuperarHistoriasLocales();
 
             if (historiasLocales && historiasLocales.length > 0) {
-                // Solo las historias grandes van aquí al arrancar
                 renderizarSpaxioFlowStories(historiasLocales);
             }
         } catch (e) {
             console.warn("⚠️ Error leyendo historias locales al arrancar:", e);
         }
 
-        // Sincronizar Supabase en segundo plano sin bloquear la app
-        if (window.supabaseClient) {
-            try {
-                // Tarjetas grandes desde 'instanew'
-                const { data: postsSupabase } = await window.supabaseClient
-                    .from('instanew')
-                    .select('*')
-                    .order('created_at', { ascending: false })
-                    .limit(20);
-
-                if (postsSupabase && postsSupabase.length > 0) {
-                    renderizarSpaxioFlowStories(postsSupabase);
+        // 4. SICRONIZACIÓN EN SEGUNDO PLANO (Firebase y Supabase si hay red)
+        if (navigator.onLine) {
+            db.ref('usuarios/' + id).once('value').then(snapshot => {
+                const data = snapshot.val();
+                if (data && data.foto) {
+                    guardarLocal('perfiles', { id: id, foto: data.foto, nombre: data.nombre });
                 }
+            }).catch(() => {});
 
-                // Miniaturas del chat desde 'spaxioflow_feed' al iniciar
-                const { data: minisSupabase } = await window.supabaseClient
-                    .from('spaxioflow_feed')
-                    .select('*')
-                    .order('created_at', { ascending: false })
-                    .limit(20);
+            if (typeof activarAntena === "function") activarAntena();
 
-                if (minisSupabase && minisSupabase.length > 0) {
-                    renderizarMiniaturasSpaxioFlow(minisSupabase);
+            // Sincronizar Supabase en segundo plano sin bloquear la app
+            if (window.supabaseClient) {
+                try {
+                    const { data: postsSupabase } = await window.supabaseClient
+                        .from('instanew')
+                        .select('*')
+                        .order('created_at', { ascending: false })
+                        .limit(20);
+
+                    if (postsSupabase && postsSupabase.length > 0) {
+                        renderizarSpaxioFlowStories(postsSupabase);
+                    }
+                } catch (errNube) {
+                    console.log("No se pudo sincronizar con la nube, operando con IndexedDB offline.");
                 }
-            } catch (errNube) {
-                console.log("No se pudo sincronizar con la nube, operando con IndexedDB offline.");
             }
+        } else {
+            console.log("📡 Modo Offline detectado: Abriendo con base de datos local (IndexedDB).");
         }
   
         togglePanelTaxiLateral();
@@ -5499,7 +5500,9 @@ function aplicarFotoCapa(id, src) {
             });
         }
     } 
-};          
+};
+      
+        
              
  
              // <--- ¡AQUÍ ESTÁ! Esta es la llave y el paréntesis que faltaban para cerrar el onload
