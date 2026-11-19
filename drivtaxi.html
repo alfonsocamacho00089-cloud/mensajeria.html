@@ -5386,6 +5386,7 @@ function aplicarFotoCapa(id, src) {
    
  
 // Reemplaza el bloque final por este:
+         
 window.onload = async () => {
     // 1. EJECUCIÓN INMEDIATA DEL SPLASH (No espera a nadie)
     const splash = document.getElementById('pantalla-carga');
@@ -5426,6 +5427,8 @@ window.onload = async () => {
             const historiasLocales = recuperarHistoriasLocales();
 
             if (historiasLocales && historiasLocales.length > 0) {
+                // Pintamos miniaturas y SpaxioFlow solo con las historias reales
+                renderizarMiniaturasSpaxioFlow(historiasLocales);
                 renderizarSpaxioFlowStories(historiasLocales);
             }
         } catch (e) {
@@ -5454,6 +5457,7 @@ window.onload = async () => {
 
                     if (postsSupabase && postsSupabase.length > 0) {
                         renderizarSpaxioFlowStories(postsSupabase);
+                        renderizarMiniaturasSpaxioFlow(postsSupabase);
                     }
                 } catch (errNube) {
                     console.log("No se pudo sincronizar con la nube, operando con IndexedDB offline.");
@@ -5500,9 +5504,9 @@ window.onload = async () => {
             });
         }
     } 
-};
-      
-        
+};       
+             
+
              
  
              // <--- ¡AQUÍ ESTÁ! Esta es la llave y el paréntesis que faltaban para cerrar el onload
