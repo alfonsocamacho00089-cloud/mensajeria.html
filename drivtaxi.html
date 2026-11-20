@@ -2572,7 +2572,7 @@ function renderizarMiniaturasSpaxioFlow(postsSpaxio) {
             };
 
            await guardarLocal('instanew_feed', postLocal);
-           /* await guardarLocal('spaxioflow_items', postLocal);*/
+           await guardarLocal('spaxioflow_items', postLocal);
 
             const todosInsta = await obtenerPostsInstanewLocal();
             if (typeof renderizarSpaxioFlowStories === 'function') {
