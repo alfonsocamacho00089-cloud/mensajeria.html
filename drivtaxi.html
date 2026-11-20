@@ -5478,6 +5478,15 @@ function aplicarFotoCapa(id, src) {
         document.body.style.backgroundSize = "cover";
     }
 
+          // 1. Pintar de inmediato las historias miniatura guardadas en IndexedDB
+    try {
+        const flowLocalInicial = await obtenerItemsSpaxioFlowLocal();
+        if (flowLocalInicial && flowLocalInicial.length > 0 && typeof renderizarMiniaturasSpaxioFlow === "function") {
+            renderizarMiniaturasSpaxioFlow(flowLocalInicial);
+        }
+    } catch (e) {
+        console.warn("⚠️ Error leyendo miniaturas locales al iniciar:", e);
+             }
 
 
     if (id) {
