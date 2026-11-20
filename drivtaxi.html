@@ -2571,8 +2571,8 @@ function renderizarMiniaturasSpaxioFlow(postsSpaxio) {
                 created_at: creadoEn
             };
 
-           /* await guardarLocal('instanew_feed', postLocal);*/
-            await guardarLocal('spaxioflow_items', postLocal);
+           await guardarLocal('instanew_feed', postLocal);
+           /* await guardarLocal('spaxioflow_items', postLocal);*/
 
             const todosInsta = await obtenerPostsInstanewLocal();
             if (typeof renderizarSpaxioFlowStories === 'function') {
