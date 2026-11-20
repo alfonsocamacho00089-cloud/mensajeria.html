@@ -2441,16 +2441,7 @@ function seleccionarRol(rolElegido) {
         };
     });
              }
-function guardarMultimediaLocal(objetoMedia) {
-    try {
-        let actual = JSON.parse(localStorage.getItem('spaxio_multimedia_total') || '[]');
-        actual.unshift(objetoMedia);
-        if (actual.length > 40) actual = actual.slice(0, 40); // Límite seguro para localStorage
-        localStorage.setItem('spaxio_multimedia_total', JSON.stringify(actual));
-    } catch (e) {
-        console.error("Error guardando multimedia:", e);
-    }
-             }
+
 
              function procesarArchivoMultimedia(file, destino = 'chat') {
     return new Promise((resolve, reject) => {
@@ -2500,39 +2491,7 @@ function guardarMultimediaLocal(objetoMedia) {
     });
              }
 
-             function recuperarTodoMultimedia() {
-    try {
-        const data = localStorage.getItem('spaxio_multimedia_total');
-        return data ? JSON.parse(data) : [];
-    } catch (e) {
-        return [];
-    }
-             }
-
-             function actualizarCacheLocalPostNuevo(nuevoPost) {
-    let actuales = recuperarHistoriasLocales();
-    actuales.unshift(nuevoPost);
-    if (actuales.length > 30) actuales = actuales.slice(0, 30);
-    guardarHistoriasLocal(actuales);
-             }
-             function recuperarHistoriasLocales() {
-    try {
-        const data = localStorage.getItem('spaxio_historias_locales');
-        return data ? JSON.parse(data) : [];
-    } catch (e) {
-        return [];
-    }
-             }
-             function guardarHistoriasLocal(posts) {
-    try {
-        localStorage.setItem('spaxio_historias_locales', JSON.stringify(posts));
-    } catch (e) {
-        console.error("Error al guardar historias localmente:", e);
-    }
-             }
-// =================================================================
-// 2. FUNCIÓN PARA PINTAR SOLO LAS MINIATURAS (Desde spaxioflow_feed)
-// =================================================================
+           
 // =================================================================
 // RENDERIZADO EXCLUSIVO PARA LAS MINIATURAS (Carrusel Horizontal Superior)
 // =================================================================
@@ -2722,7 +2681,16 @@ function renderizarSpaxioFlowStories(historias) {
              }
              
    
-
+function guardarMultimediaLocal(objetoMedia) {
+    try {
+        let actual = JSON.parse(localStorage.getItem('spaxio_multimedia_total') || '[]');
+        actual.unshift(objetoMedia);
+        if (actual.length > 40) actual = actual.slice(0, 40); // Límite seguro para localStorage
+        localStorage.setItem('spaxio_multimedia_total', JSON.stringify(actual));
+    } catch (e) {
+        console.error("Error guardando multimedia:", e);
+    }
+              }
               
 async function procesarCobroComercial(cantidadMonto = null) {
     const receptorInput = document.getElementById('idReceptor');
@@ -4224,7 +4192,7 @@ const storage = firebase.storage(); // <-- NUEVO: Para guardar los Lives de Spax
 
      const dbNombre = "DropisDB";
 
-const dbVersion = 11;
+const dbVersion = 12;
 
 // Este objeto guarda los contactos que ya están en pantalla
 const agendaRenderizada = new Set();
@@ -4278,6 +4246,21 @@ function abrirDB() {
 
             }
 
+
+// 4. Tabla para publicaciones de Instanew
+  if (!db.objectStoreNames.contains('instanew_feed')) {
+    db.createObjectStore('instanew_feed', { keyPath: 'id' });
+}
+
+// 5. Tabla para miniaturas / feed de SpaxioFlow
+if (!db.objectStoreNames.contains('spaxioflow_items')) {
+    db.createObjectStore('spaxioflow_items', { keyPath: 'id' });
+}
+
+// 6. Cola de acciones pendientes sin conexión (likes, pulgares, comentarios, posts)
+if (!db.objectStoreNames.contains('cola_offline_social')) {
+    db.createObjectStore('cola_offline_social', { keyPath: 'queueId', autoIncrement: true });
+              }   
         };
 
 
@@ -4392,6 +4375,121 @@ async function obtenerTodo(tabla) {
 
     })
      }
+
+async function guardarPostsInstanewLocal(posts) {
+    if (!Array.isArray(posts)) return;
+    for (const post of posts) {
+        if (!post.id) post.id = 'insta_' + (post.created_at || Date.now()) + '_' + Math.random().toString(36).slice(2, 6);
+        await guardarLocal('instanew_feed', post);
+    }
+}
+
+async function obtenerPostsInstanewLocal() {
+    const lista = await obtenerTodo('instanew_feed');
+    return (lista || []).sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0));
+}
+
+async function guardarItemsSpaxioFlowLocal(items) {
+    if (!Array.isArray(items)) return;
+    for (const item of items) {
+        if (!item.id) item.id = 'flow_' + (item.created_at || Date.now()) + '_' + Math.random().toString(36).slice(2, 6);
+        await guardarLocal('spaxioflow_items', item);
+    }
+}
+
+async function obtenerItemsSpaxioFlowLocal() {
+    const lista = await obtenerTodo('spaxioflow_items');
+    return (lista || []).sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0));
+}
+
+async function encolarAccionSocialOffline(accion) {
+    await guardarLocal('cola_offline_social', {
+        ...accion,
+        creadoEn: Date.now()
+    });
+              }
+
+
+async function sincronizarSocialSiHayRed() {
+    if (!navigator.onLine) return;
+
+    // 1. Reenviar acciones acumuladas mientras estabas offline
+    const pendientes = await obtenerTodo('cola_offline_social');
+    if (pendientes && pendientes.length > 0) {
+        const dbInst = await abrirDB();
+        for (const acc of pendientes) {
+            try {
+                if (acc.modulo === 'instanew' && acc.tipoAccion === 'like' && window.supabaseClient) {
+                    await window.supabaseClient.from('instanew').update({ likes: acc.nuevoValor }).eq('id', acc.postId);
+                } else if (acc.modulo === 'instanew' && acc.tipoAccion === 'pulgar' && window.supabaseClient) {
+                    await window.supabaseClient.from('instanew').update({ pulgares: acc.nuevoValor }).eq('id', acc.postId);
+                } else if (acc.modulo === 'instanew' && acc.tipoAccion === 'comentario' && window.supabaseClient) {
+                    const { data: fila } = await window.supabaseClient.from('instanew').select('comentarios').eq('id', acc.postId).single();
+                    const actual = Array.isArray(fila?.comentarios) ? fila.comentarios : [];
+                    actual.push(acc.comentario);
+                    await window.supabaseClient.from('instanew').update({ comentarios: actual }).eq('id', acc.postId);
+                } else if (acc.modulo === 'instanew' && acc.tipoAccion === 'post') {
+                    await fetch('/api/spaxioflow-event', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(acc.payload)
+                    });
+                }
+
+                // Borrar acción ya enviada de la cola en IndexedDB
+                await new Promise((resolve) => {
+                    const tx = dbInst.transaction('cola_offline_social', 'readwrite');
+                    tx.objectStore('cola_offline_social').delete(acc.queueId);
+                    tx.oncomplete = () => resolve(true);
+                });
+            } catch (e) {
+                console.warn("⚠️ Acción pendiente aún sin poder sincronizar:", e);
+            }
+        }
+    }
+
+    // 2. Traer novedades de Instanew y guardar en IndexedDB
+    try {
+        const resInstanew = await fetch('/api/get-instanew-feed');
+        if (resInstanew.ok) {
+            const dataInsta = await resInstanew.json();
+            const postsInstanew = Array.isArray(dataInsta) ? dataInsta : (dataInsta.posts || []);
+            await guardarPostsInstanewLocal(postsInstanew);
+            const localesActualizados = await obtenerPostsInstanewLocal();
+            if (typeof renderizarSpaxioFlowStories === 'function') {
+                renderizarSpaxioFlowStories([...localesActualizados].reverse());
+            }
+        }
+    } catch (e) {
+        console.warn("⚠️ Sin red o error sincronizando Instanew:", e);
+    }
+
+    // 3. Traer novedades de SpaxioFlow y guardar en IndexedDB
+    try {
+        if (window.supabaseClient) {
+            const { data: postsSpaxio, error } = await window.supabaseClient
+                .from('spaxioflow_feed')
+                .select('*')
+                .eq('chat_id', '26fmetp4Q4WJ')
+                .order('created_at', { ascending: false })
+                .limit(20);
+
+            if (!error && postsSpaxio) {
+                await guardarItemsSpaxioFlowLocal(postsSpaxio);
+                const flowLocal = await obtenerItemsSpaxioFlowLocal();
+                renderizarMiniaturasSpaxioFlow(flowLocal);
+            }
+        }
+    } catch (e) {
+        console.warn("⚠️ Sin red o error sincronizando SpaxioFlow:", e);
+    }
+}
+
+window.addEventListener('online', () => {
+    sincronizarSocialSiHayRed();
+});
+
+              
 /**
  * Recupera cuenta desde Firebase.
  */
@@ -5181,55 +5279,35 @@ async function cargarConversacionCon(idDestino, nombreDestino, fotoDestino) {
 
 // =================================================================
 // 1. CARGA SEPARADA AL ABRIR EL MÓDULO (idDestino === "26fmetp4Q4WJ")
+
+
+
+
+    
+
+              
 // =================================================================
 
 if (
 idDestino === "26fmetp4Q4WJ") {
     console.log("📡 Cargando flujos separados: Instanew (Tarjetas Grandes) y SpaxioFlow (Miniaturas/Chat)...");
 
-    // --- FLUJO A: INSTANEW (Solo para tarjetas grandes abajo) ---
-    try {
-        const resInstanew = await fetch('/api/get-instanew-feed');
-        if (resInstanew.ok) {
-            const dataInsta = await resInstanew.json();
-            const postsInstanew = Array.isArray(dataInsta) ? dataInsta : (dataInsta.posts || []);
-            
-            // Usamos el nombre exacto de tu función que pinta las tarjetas grandes
-            if (typeof renderizarSpaxioFlowStories === 'function') {
-                renderizarSpaxioFlowStories([...postsInstanew].reverse());
-            }
-        }
-    } catch (e) {
-        console.warn("⚠️ Error cargando Instanew desde la nube:", e);
-    }
-
     // --- FLUJO B: SPAXIOFLOW FEED (Solo para tarjetas miniaturas arriba y chat) ---
-    try {
-        if (window.supabaseClient) {
-            const { data: postsSpaxio, error } = await window.supabaseClient
-                .from('spaxioflow_feed')
-                .select('*')
-                .eq('chat_id', '26fmetp4Q4WJ')
-                .order('created_at', { ascending: false })
-                .limit(20);
 
-            if (!error && postsSpaxio) {
-                renderizarMiniaturasSpaxioFlow(postsSpaxio);
-            }
-        }
-    } catch (e) {
-        console.warn("⚠️ Error cargando SpaxioFlow desde Supabase:", e);
-    }
+              
+   const flowLocal = await obtenerItemsSpaxioFlowLocal();
+    renderizarMiniaturasSpaxioFlow(flowLocal);
 
-    // Arrancamos AMBOS canales Realtime por separado
-    if (typeof iniciarRealtimeInstanew === 'function') iniciarRealtimeInstanew("26fmetp4Q4WJ");
-    if (typeof iniciarRealtimeSpaxioFlow === 'function') iniciarRealtimeSpaxioFlow("26fmetp4Q4WJ");
+    // 2. Sincronizar con la nube solo si hay conexión
+    sincronizarSocialSiHayRed();
+
 
     setTimeout(() => {
         const box = document.getElementById('chat-box');
-        if (box) box.scrollTop = 0; 
+        if (box) box.scrollTop = 0;
     }, 50);
-}
+              }
+
 
           
               else {
@@ -5433,20 +5511,8 @@ function aplicarFotoCapa(id, src) {
             if (imgStory) imgStory.src = miPerfil.foto;
         }
 
-        // 3. 🔥 RECUPERACIÓN OFFLINE PURA PARA HISTORIAS (Sin tocar el chat)
-        try {
-            // Leemos solo las historias locales guardadas en localStorage, NO el chat
-            const historiasLocales = recuperarHistoriasLocales();
-
-            if (historiasLocales && historiasLocales.length > 0) {
-                // Pintamos miniaturas y SpaxioFlow solo con las historias reales
-                renderizarMiniaturasSpaxioFlow(historiasLocales);
-                renderizarSpaxioFlowStories(historiasLocales);
-            }
-        } catch (e) {
-            console.warn("⚠️ Error leyendo historias locales al arrancar:", e);
-        }
-
+      
+      
         // 4. SICRONIZACIÓN EN SEGUNDO PLANO (Firebase y Supabase si hay red)
         if (navigator.onLine) {
             db.ref('usuarios/' + id).once('value').then(snapshot => {
@@ -7405,9 +7471,7 @@ function iniciarRealtimeInstanew(conversacionId) {
         archivoAProcesar = await estandarizarTamanoImagen(archivoAProcesar, 1080, 1080);
     }
 
-    // 2. Procesamos (comprimimos en Base64) y guardamos localmente para las historias/feed
-    const archivoProcesado = await procesarArchivoMultimedia(archivoAProcesar, 'feed_grande'); 
-    guardarMultimediaLocal(archivoProcesado);
+   
 
     // 3. Leemos el archivo ya optimizado para subirlo a Supabase
     const lector = new FileReader();
