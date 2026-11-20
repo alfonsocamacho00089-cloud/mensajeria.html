@@ -5478,23 +5478,28 @@ function aplicarFotoCapa(id, src) {
         document.body.style.backgroundSize = "cover";
     }
 
-          // 1. Pintar de inmediato las historias miniatura guardadas en IndexedDB
-    try {
-        const flowLocalInicial = await obtenerItemsSpaxioFlowLocal();
-        if (flowLocalInicial && flowLocalInicial.length > 0 && typeof renderizarMiniaturasSpaxioFlow === "function") {
-            renderizarMiniaturasSpaxioFlow(flowLocalInicial);
+    // Sin conexión: leer directo desde IndexedDB
+    if (!navigator.onLine) {
+        try {
+            const flowOffline = await obtenerItemsSpaxioFlowLocal();
+            if (flowOffline && flowOffline.length > 0 && typeof renderizarMiniaturasSpaxioFlow === "function") {
+                renderizarMiniaturasSpaxioFlow(flowOffline);
+            }
+        } catch (e) {
+            console.warn("⚠️ Error leyendo miniaturas offline:", e);
         }
-    } catch (e) {
-        console.warn("⚠️ Error leyendo miniaturas locales al iniciar:", e);
-             }
-try {
-    const instaLocalInicial = await obtenerPostsInstanewLocal();
-    if (instaLocalInicial && instaLocalInicial.length > 0 && typeof renderizarSpaxioFlowStories === "function") {
-        renderizarSpaxioFlowStories([...instaLocalInicial].reverse());
+
+        try {
+            const instaOffline = await obtenerPostsInstanewLocal();
+            if (instaOffline && instaOffline.length > 0 && typeof renderizarSpaxioFlowStories === "function") {
+                renderizarSpaxioFlowStories(
+                    [...instaOffline].sort((a, b) => new Date(a.created_at || 0) - new Date(b.created_at || 0))
+                );
+            }
+        } catch (e) {
+            console.warn("⚠️ Error leyendo historias largas offline:", e);
+        }
     }
-} catch (e) {
-    console.warn("⚠️ Error leyendo historias largas locales al iniciar:", e);
-             }
 
     if (id) {
         const miPerfil = await obtenerLocal('perfiles', id);
@@ -5518,28 +5523,43 @@ try {
 
             if (typeof activarAntena === "function") activarAntena();
 
-if (window.supabaseClient) {
-    try {
-        const { data: postsSupabase, error: errInsta } = await window.supabaseClient
-            .from('instanew')
-            .select('*')
-            .order('created_at', { ascending: false })
-            .limit(20);
+            if (window.supabaseClient) {
+                let cargoInstaNube = false;
+                try {
+                    const { data: postsSupabase, error: errInsta } = await window.supabaseClient
+                        .from('instanew')
+                        .select('*')
+                        .order('created_at', { ascending: false })
+                        .limit(20);
 
-        if (!errInsta && postsSupabase && postsSupabase.length > 0) {
-            await guardarPostsInstanewLocal(postsSupabase);
-            const instaActualizado = await obtenerPostsInstanewLocal();
-            if (typeof renderizarSpaxioFlowStories === "function") {
-                renderizarSpaxioFlowStories([...instaActualizado].reverse());
+                    if (!errInsta && postsSupabase && postsSupabase.length > 0) {
+                        await guardarPostsInstanewLocal(postsSupabase);
+                        const instaActualizado = await obtenerPostsInstanewLocal();
+                        if (typeof renderizarSpaxioFlowStories === "function") {
+                            renderizarSpaxioFlowStories(
+                                [...instaActualizado].sort((a, b) => new Date(a.created_at || 0) - new Date(b.created_at || 0))
+                            );
+                        }
+                        cargoInstaNube = true;
+                    }
+                } catch (errInstaNube) {
+                    console.log("No se pudo sincronizar instanew con la nube.");
+                }
+
+                // Respaldo local solo si la nube no devolvió datos
+                if (!cargoInstaNube) {
+                    try {
+                        const instaRespaldo = await obtenerPostsInstanewLocal();
+                        if (instaRespaldo && instaRespaldo.length > 0 && typeof renderizarSpaxioFlowStories === "function") {
+                            renderizarSpaxioFlowStories(
+                                [...instaRespaldo].sort((a, b) => new Date(a.created_at || 0) - new Date(b.created_at || 0))
+                            );
+                        }
+                    } catch (_) {}
+                }
             }
         }
-    } catch (errInstaNube) {
-        console.log("No se pudo sincronizar instanew con la nube, operando con IndexedDB.");
-    }
-             }
 
- 
-            
         togglePanelTaxiLateral();
         manejarBotonIdentidad();
 
@@ -5574,8 +5594,7 @@ if (window.supabaseClient) {
             });
         }
     }
-};         
-             
+};          
  
              // <--- ¡AQUÍ ESTÁ! Esta es la llave y el paréntesis que faltaban para cerrar el onload
 document.addEventListener("DOMContentLoaded", function() {
