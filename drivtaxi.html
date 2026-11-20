@@ -2539,40 +2539,69 @@ function renderizarMiniaturasSpaxioFlow(postsSpaxio) {
 
             async function subirAInstanewBotonMas(input) {
     if (!input.files || !input.files[0]) return;
-    
+
     const archivo = input.files[0];
     const textoNoticia = prompt("Escribe una noticia corta o titular para la publicación (opcional):", "") || "";
 
     alert("🚀 Publicando en Instanew...");
 
-    let tipo = archivo.type.includes('video') ? 'video' : 'foto';
+    const tipo = archivo.type.includes('video') ? 'video' : 'foto';
 
-    // 1. Guardar localmente en IndexedDB de forma segura antes de enviar a la nube
     try {
         const lectorLocal = new FileReader();
         lectorLocal.onload = async function(e) {
             const contenidoLocal = e.target.result;
-            const miNombre = localStorage.getItem('mi_nombre_perfil') || localStorage.getItem('mi_nombre') || "Pedro Peres";
-            
-            await guardarLocal('mensajes', {
-                id: 'post_local_' + Date.now(),
-                contactoId: "26fmetp4Q4WJ",
-                texto: contenidoLocal,
+            const perfilDB = await obtenerLocal('usuario', 'perfil_propietario');
+            const miNombre = perfilDB?.nombre || localStorage.getItem('mi_nombre') || "Pedro Peres";
+            const miId = localStorage.getItem('mi_dropis_id') || "26fmetp4Q4WJ";
+            const idPost = 'insta_local_' + Date.now();
+            const creadoEn = new Date().toISOString();
+
+            const postLocal = {
+                id: idPost,
+                chat_id: "26fmetp4Q4WJ",
+                sender_id: miId,
+                sender_name: miNombre,
+                content: contenidoLocal,
                 tipo: tipo,
                 descripcion: textoNoticia,
-                remitente: miNombre,
-                ts: Date.now()
-            });
-            console.log("💾 Guardado exitoso en IndexedDB.");
+                likes: 0,
+                pulgares: 0,
+                comentarios: [],
+                created_at: creadoEn
+            };
+
+            await guardarLocal('instanew_feed', postLocal);
+            // await guardarLocal('spaxioflow_items', postLocal);
+
+            const todosInsta = await obtenerPostsInstanewLocal();
+            if (typeof renderizarSpaxioFlowStories === 'function') {
+                renderizarSpaxioFlowStories(todosInsta);
+            }
+
+            if (!navigator.onLine) {
+                await encolarAccionSocialOffline({
+                    modulo: 'instanew',
+                    tipoAccion: 'post',
+                    payload: {
+                        tipoEvento: tipo === 'video' ? 'video' : 'imagen',
+                        contenido: contenidoLocal,
+                        remitente: miNombre,
+                        sender_id: miId,
+                        user_id: miId,
+                        descripcion: textoNoticia,
+                        created_at: creadoEn
+                    }
+                });
+            }
         };
         lectorLocal.readAsDataURL(archivo);
     } catch (errLocal) {
-        console.error("❌ Error guardando en IndexedDB:", errLocal);
+        console.error("❌ Error guardando post en IndexedDB:", errLocal);
     }
 
-    // 2. Ejecutar tu función original intacta para el procesamiento y subida a Supabase
     await enviarMediaExclusivoInstanew(input, tipo, textoNoticia);
-             }
+}
             
 function renderizarSpaxioFlowStories(historias) {
     const contenedorInstagram = document.getElementById('carrusel-feed-instagram');
