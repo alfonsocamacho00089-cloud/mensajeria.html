@@ -2497,7 +2497,7 @@ function seleccionarRol(rolElegido) {
 // =================================================================
 function renderizarMiniaturasSpaxioFlow(postsSpaxio) {
     // Apuntamos al contenedor horizontal correcto que tienes en tu HTML
-    const contenedorMiniaturas = document.getElementById('contenedor-spaxioflow-feed'); 
+    const contenedorMiniaturas = document.getElementById('contenedor-spaxioflow-stories'); 
     if (!contenedorMiniaturas) return;
 
     // Preservamos el botón fijo de "subir" que está al inicio
@@ -5291,8 +5291,22 @@ async function cargarConversacionCon(idDestino, nombreDestino, fotoDestino) {
 if (
 idDestino === "26fmetp4Q4WJ") {
     console.log("📡 Cargando flujos separados: Instanew (Tarjetas Grandes) y SpaxioFlow (Miniaturas/Chat)...");
+const todosMensajesFlow = await obtenerTodo('mensajes');
+const msgsFlow = todosMensajesFlow
+  .filter(m => String(m.contactoId) === "26fmetp4Q4WJ")
+  .sort((a, b) => (a.ts || 0) - (b.ts || 0));
 
-    // --- FLUJO B: SPAXIOFLOW FEED (Solo para tarjetas miniaturas arriba y chat) ---
+msgsFlow.forEach(m => {
+  anexarUnicoMensajeAlFeed({
+    id: m.id,
+    sender_name: m.remitente || 'SpaxioFlow',
+    content: m.texto,
+    tipo: m.tipo || 'texto',
+    created_at: m.ts || Date.now()
+  });
+});
+
+    
 
               
    const flowLocal = await obtenerItemsSpaxioFlowLocal();
