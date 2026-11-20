@@ -2571,12 +2571,12 @@ function renderizarMiniaturasSpaxioFlow(postsSpaxio) {
                 created_at: creadoEn
             };
 
-            await guardarLocal('instanew_feed', postLocal);
-            // await guardarLocal('spaxioflow_items', postLocal);
+           /* await guardarLocal('instanew_feed', postLocal);*/
+            await guardarLocal('spaxioflow_items', postLocal);
 
             const todosInsta = await obtenerPostsInstanewLocal();
             if (typeof renderizarSpaxioFlowStories === 'function') {
-                renderizarSpaxioFlowStories(todosInsta);
+                renderizarSpaxioFlowStories([...todosInsta].reverse());
             }
 
             if (!navigator.onLine) {
@@ -2601,7 +2601,7 @@ function renderizarMiniaturasSpaxioFlow(postsSpaxio) {
     }
 
     await enviarMediaExclusivoInstanew(input, tipo, textoNoticia);
-}
+             }
             
 function renderizarSpaxioFlowStories(historias) {
     const contenedorInstagram = document.getElementById('carrusel-feed-instagram');
