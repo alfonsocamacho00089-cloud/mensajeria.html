@@ -2496,33 +2496,28 @@ function seleccionarRol(rolElegido) {
 // RENDERIZADO EXCLUSIVO PARA LAS MINIATURAS (Carrusel Horizontal Superior)
 // =================================================================
 function renderizarMiniaturasSpaxioFlow(postsSpaxio) {
-    // Apuntamos al contenedor horizontal correcto que tienes en tu HTML
-    const contenedorMiniaturas = document.getElementById('contenedor-spaxioflow-stories'); 
+    const contenedorMiniaturas = document.getElementById('contenedor-spaxioflow-stories');
     if (!contenedorMiniaturas) return;
 
-    // Preservamos el botón fijo de "subir" que está al inicio
     const tarjetaFijaHTML = contenedorMiniaturas.firstElementChild ? contenedorMiniaturas.firstElementChild.outerHTML : '';
     contenedorMiniaturas.innerHTML = tarjetaFijaHTML;
 
+    if (!Array.isArray(postsSpaxio)) return;
+
     postsSpaxio.forEach(post => {
-        const urlImg = post.content || post.imagen_url || post.media_url || post.foto || ''; 
+        const urlImg = post.content || post.imagen_url || post.media_url || post.foto || '';
         const nombreUsr = post.sender_name || post.remitente || localStorage.getItem('mi_nombre_perfil') || 'Pedro Peres';
         const usuarioIdAutor = post.sender_id || post.usuarioId || post.usuario_id || '26fmetp4Q4WJ';
-        // Simulamos o extraemos la foto de perfil (puedes adaptarla si viene en el post, ej: post.avatar_url)
-        const fotoPerfilUsr = post.avatar_url || post.foto_perfil || urlImg; 
+        const fotoPerfilUsr = post.avatar_url || post.foto_perfil || urlImg;
 
         if (urlImg.startsWith('http') || urlImg.startsWith('data:image')) {
             contenedorMiniaturas.innerHTML += `
                 <div onclick="cargarConversacionCon('${usuarioIdAutor}', '${nombreUsr}')" style="min-width: 100px; height: 200px; border-radius: 12px; padding: 1px; flex-shrink: 0; cursor: pointer; overflow: hidden; position: relative;">
                     <div style="position: relative; width: 100%; height: 100%; background-image: url('${urlImg}'); background-size: cover; background-position: center; border-radius: 12px; display: flex; flex-direction: column; justify-content: space-between; padding: 8px; overflow: hidden;">
-                        
-                        <!-- Círculo con la foto de perfil y el nombre arriba (estilo tarjeta grande) -->
                         <div style="display: flex; align-items: center; gap: 6px; background: rgba(0,0,0,0.5); padding: 4px 8px; border-radius: 20px; width: fit-content; max-width: 100%;">
                             <div style="width: 24px; height: 24px; border-radius: 50%; background-image: url('${fotoPerfilUsr}'); background-size: cover; background-position: center; border: 1.5px solid #ffd700; flex-shrink: 0;"></div>
                             <span style="font-size: 9px; color: #ffffff; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${nombreUsr}</span>
                         </div>
-
-                        <!-- Franja inferior opcional con el nombre o limpia -->
                         <div style="position: absolute; bottom: 0; left: 0; width: 100%; padding: 4px; text-align: center; background: rgba(0,0,0,0.6);">
                             <span style="font-size: 10px; color: #ffd700; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block;">${nombreUsr}</span>
                         </div>
@@ -2531,7 +2526,7 @@ function renderizarMiniaturasSpaxioFlow(postsSpaxio) {
             `;
         }
     });
-             }
+              }
 
 // =================================================================
 // FUNCIÓN ÚNICA Y MAESTRA PARA EL BOTÓN "+" (IndexedDB + Supabase)
@@ -2539,67 +2534,38 @@ function renderizarMiniaturasSpaxioFlow(postsSpaxio) {
 
             async function subirAInstanewBotonMas(input) {
     if (!input.files || !input.files[0]) return;
-
+    
     const archivo = input.files[0];
     const textoNoticia = prompt("Escribe una noticia corta o titular para la publicación (opcional):", "") || "";
 
     alert("🚀 Publicando en Instanew...");
 
-    const tipo = archivo.type.includes('video') ? 'video' : 'foto';
+    let tipo = archivo.type.includes('video') ? 'video' : 'foto';
 
+    // 1. Guardar localmente en IndexedDB de forma segura antes de enviar a la nube
     try {
         const lectorLocal = new FileReader();
         lectorLocal.onload = async function(e) {
             const contenidoLocal = e.target.result;
-            const perfilDB = await obtenerLocal('usuario', 'perfil_propietario');
-            const miNombre = perfilDB?.nombre || localStorage.getItem('mi_nombre') || "Pedro Peres";
-            const miId = localStorage.getItem('mi_dropis_id') || "26fmetp4Q4WJ";
-            const idPost = 'insta_local_' + Date.now();
-            const creadoEn = new Date().toISOString();
-
-            const postLocal = {
-                id: idPost,
-                chat_id: "26fmetp4Q4WJ",
-                sender_id: miId,
-                sender_name: miNombre,
-                content: contenidoLocal,
+            const miNombre = localStorage.getItem('mi_nombre_perfil') || localStorage.getItem('mi_nombre') || "Pedro Peres";
+            
+            await guardarLocal('mensajes', {
+                id: 'post_local_' + Date.now(),
+                contactoId: "26fmetp4Q4WJ",
+                texto: contenidoLocal,
                 tipo: tipo,
                 descripcion: textoNoticia,
-                likes: 0,
-                pulgares: 0,
-                comentarios: [],
-                created_at: creadoEn
-            };
-
-           await guardarLocal('instanew_feed', postLocal);
-           await guardarLocal('spaxioflow_items', postLocal);
-// 
-            const todosInsta = await obtenerPostsInstanewLocal();
-            if (typeof renderizarSpaxioFlowStories === 'function') {
-                renderizarSpaxioFlowStories([postLocal]);
-            }
-
-            if (!navigator.onLine) {
-                await encolarAccionSocialOffline({
-                    modulo: 'instanew',
-                    tipoAccion: 'post',
-                    payload: {
-                        tipoEvento: tipo === 'video' ? 'video' : 'imagen',
-                        contenido: contenidoLocal,
-                        remitente: miNombre,
-                        sender_id: miId,
-                        user_id: miId,
-                        descripcion: textoNoticia,
-                        created_at: creadoEn
-                    }
-                });
-            }
+                remitente: miNombre,
+                ts: Date.now()
+            });
+            console.log("💾 Guardado exitoso en IndexedDB.");
         };
         lectorLocal.readAsDataURL(archivo);
     } catch (errLocal) {
-        console.error("❌ Error guardando post en IndexedDB:", errLocal);
+        console.error("❌ Error guardando en IndexedDB:", errLocal);
     }
 
+    // 2. Ejecutar tu función original intacta para el procesamiento y subida a Supabase
     await enviarMediaExclusivoInstanew(input, tipo, textoNoticia);
              }
             
@@ -4888,59 +4854,47 @@ const base64 = btoa(binary);
                 
         
 // 🔥 CONEXIÓN SUPREMA AL BACKEND DE VERCEL PARA EL FEED GLOBAL
-// 🔥 CONEXIÓN SUPREMA AL BACKEND DE VERCEL PARA EL FEED GLOBAL
-if (targetID === "26fmetp4Q4WJ") {
-    const miNombre = localStorage.getItem('mi_nombre_perfil') || "Pedro Peres"; 
-    const miUserId = localStorage.getItem('mi_dropis_id') || "anonimo";
-    
-    // Mapeamos los tipos para que tu base de datos los reciba limpios
-    let tipoFinal = tipoValidado;
-    if (tipoValidado === 'stickers' || tipoValidado === 'media') tipoFinal = 'imagen';
-
-    // 1. Preparamos el objeto de forma segura antes de enviar
-    const mensajeSeguro = {
-        contenido: msg || "",
-        tipoEvento: tipoFinal || "texto",
-        remitente: miNombre,
-        sender_id: miUserId, // <--- Esto es lo que le dice a la interfaz que TÚ mandaste la foto
-        user_id: miUserId,
-        created_at: new Date().toISOString()
-    };
-  
-fetch('/api/spaxioflow-event', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(mensajeSeguro)
-})
-.then(res => res.json())
-.then(respuestaServidor => {
-    console.log("📡 Servidor confirmó:", respuestaServidor);
-})
-.catch(err => console.error("❌ Error:", err));
 
 
-// MUESTRAS EL MENSAJE EN PANTALLA EN LOCAL DIRECTAMENTE
-anexarUnicoMensajeAlFeed({
-    id: Date.now(),
-    sender_name: miNombre,
-    content: msg,
-    tipo: tipoValidado,
-    created_at: new Date().toISOString()
-});
+        if (targetID === "26fmetp4Q4WJ") {
+            const miNombre = localStorage.getItem('mi_nombre_perfil') || "Pedro Peres";
+            const miUserId = localStorage.getItem('mi_dropis_id') || "anonimo";
 
-    // 2. Mandas a Vercel
-    /*fetch('/api/spaxioflow-event', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(mensajeSeguro)
-    })
-    .then(res => res.json())
-    .then(respuestaServidor => {
-        console.log("📡 Servidor confirmó:", respuestaServidor);
-        
-        
-    })
-    .catch(err => console.error("❌ Error:", err));*/
+            let tipoFinal = tipoValidado;
+            if (tipoValidado === 'stickers' || tipoValidado === 'media') tipoFinal = 'imagen';
+
+            const mensajeSeguro = {
+                contenido: msg || "",
+                tipoEvento: tipoFinal || "texto",
+                remitente: miNombre,
+                sender_id: miUserId,
+                user_id: miUserId,
+                created_at: new Date().toISOString()
+            };
+
+            fetch('/api/spaxioflow-event', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(mensajeSeguro)
+            })
+            .then(res => res.json())
+            .then(async respuestaServidor => {
+                console.log("📡 Servidor confirmó:", respuestaServidor);
+                await guardarItemsSpaxioFlowLocal([{
+                    id: msgId,
+                    chat_id: targetID,
+                    sender_id: miUserId,
+                    sender_name: miNombre,
+                    content: msg,
+                    tipo: tipoFinal,
+                    created_at: mensajeSeguro.created_at
+                }]);
+                const flowLocal = await obtenerItemsSpaxioFlowLocal();
+                renderizarMiniaturasSpaxioFlow(flowLocal);
+            })
+            .catch(err => console.error("❌ Error:", err));
+
+
 
 } else if (targetID !== "uo4kb3tGHH7J") {
     // 🛡️ REGLA DE ORO: Si es un contacto normal, sigue usando la cola satelital tradicional
@@ -5320,22 +5274,8 @@ async function cargarConversacionCon(idDestino, nombreDestino, fotoDestino) {
 if (
 idDestino === "26fmetp4Q4WJ") {
     console.log("📡 Cargando flujos separados: Instanew (Tarjetas Grandes) y SpaxioFlow (Miniaturas/Chat)...");
-const todosMensajesFlow = await obtenerTodo('mensajes');
-const msgsFlow = todosMensajesFlow
-  .filter(m => String(m.contactoId) === "26fmetp4Q4WJ")
-  .sort((a, b) => (a.ts || 0) - (b.ts || 0));
 
-msgsFlow.forEach(m => {
-  anexarUnicoMensajeAlFeed({
-    id: m.id,
-    sender_name: m.remitente || 'SpaxioFlow',
-    content: m.texto,
-    tipo: m.tipo || 'texto',
-    created_at: m.ts || Date.now()
-  });
-});
-
-    
+    // --- FLUJO B: SPAXIOFLOW FEED (Solo para tarjetas miniaturas arriba y chat) ---
 
               
    const flowLocal = await obtenerItemsSpaxioFlowLocal();
@@ -5521,7 +5461,6 @@ function aplicarFotoCapa(id, src) {
 // Reemplaza el bloque final por este:
 
      window.onload = async () => {
-    // 1. EJECUCIÓN INMEDIATA DEL SPLASH (No espera a nadie)
     const splash = document.getElementById('pantalla-carga');
     if (splash) {
         setTimeout(() => {
@@ -5529,15 +5468,24 @@ function aplicarFotoCapa(id, src) {
             splash.addEventListener('transitionend', () => {
                 splash.style.display = 'none';
             }, { once: true });
-        }, 100); 
+        }, 100);
     }
 
-    // 2. CARGAR TEMA Y PERFIL LOCAL (IndexedDB / LocalStorage)
     const id = localStorage.getItem('mi_dropis_id');
     const configTema = await obtenerLocal('usuario', 'ajustes_tema');
     if (configTema && configTema.urlFondo) {
         document.body.style.backgroundImage = `url('${configTema.urlFondo}')`;
         document.body.style.backgroundSize = "cover";
+    }
+
+    // 1. Pintar de inmediato las historias miniatura guardadas en IndexedDB
+    try {
+        const flowLocalInicial = await obtenerItemsSpaxioFlowLocal();
+        if (flowLocalInicial && flowLocalInicial.length > 0 && typeof renderizarMiniaturasSpaxioFlow === "function") {
+            renderizarMiniaturasSpaxioFlow(flowLocalInicial);
+        }
+    } catch (e) {
+        console.warn("⚠️ Error leyendo miniaturas locales al iniciar:", e);
     }
 
     if (id) {
@@ -5546,17 +5494,12 @@ function aplicarFotoCapa(id, src) {
             const headerFoto = document.getElementById('foto-perfil-header');
             if (headerFoto) headerFoto.src = miPerfil.foto;
 
-            // 🔥 Guarda la foto globalmente en el navegador al instante
             localStorage.setItem('spaxio_mi_foto_oficial', miPerfil.foto);
-            
-            // Y actualiza la story si ya existe en pantalla
+
             const imgStory = document.getElementById('story-mi-foto-perfil');
             if (imgStory) imgStory.src = miPerfil.foto;
         }
 
-      
-      
-        // 4. SICRONIZACIÓN EN SEGUNDO PLANO (Firebase y Supabase si hay red)
         if (navigator.onLine) {
             db.ref('usuarios/' + id).once('value').then(snapshot => {
                 const data = snapshot.val();
@@ -5567,53 +5510,54 @@ function aplicarFotoCapa(id, src) {
 
             if (typeof activarAntena === "function") activarAntena();
 
-            // Sincronizar Supabase en segundo plano sin bloquear la app
+            // 2. Recuperar y guardar en IndexedDB las historias miniatura de spaxioflow_feed
             if (window.supabaseClient) {
                 try {
-                    const { data: postsSupabase } = await window.supabaseClient
-                        .from('instanew')
+                    const { data: itemsFlowNube, error: errFlow } = await window.supabaseClient
+                        .from('spaxioflow_feed')
                         .select('*')
+                        .eq('chat_id', '26fmetp4Q4WJ')
                         .order('created_at', { ascending: false })
                         .limit(20);
 
-                    if (postsSupabase && postsSupabase.length > 0) {
-                        renderizarSpaxioFlowStories(postsSupabase);
-                        renderizarMiniaturasSpaxioFlow(postsSupabase);
+                    if (!errFlow && itemsFlowNube && itemsFlowNube.length > 0) {
+                        await guardarItemsSpaxioFlowLocal(itemsFlowNube);
+                        const flowActualizado = await obtenerItemsSpaxioFlowLocal();
+                        if (typeof renderizarMiniaturasSpaxioFlow === "function") {
+                            renderizarMiniaturasSpaxioFlow(flowActualizado);
+                        }
                     }
                 } catch (errNube) {
-                    console.log("No se pudo sincronizar con la nube, operando con IndexedDB offline.");
+                    console.log("No se pudo sincronizar spaxioflow_feed con la nube, operando con IndexedDB.");
                 }
             }
         } else {
-            console.log("📡 Modo Offline detectado: Abriendo con base de datos local (IndexedDB).");
+            console.log("📡 Modo Offline detectado: Miniaturas cargadas desde IndexedDB.");
         }
-  
+
         togglePanelTaxiLateral();
         manejarBotonIdentidad();
 
-        // Arrancamos canales Realtime
-        if (typeof iniciarRealtimeInstanew === 'function') iniciarRealtimeInstanew("26fmetp4Q4WJ");
         if (typeof iniciarRealtimeSpaxioFlow === 'function') iniciarRealtimeSpaxioFlow("26fmetp4Q4WJ");
-     
+        if (typeof iniciarRealtimeInstanew === 'function') iniciarRealtimeInstanew("26fmetp4Q4WJ");
     } else {
-        // --- CASO 2: NO HAY REGISTRO (USUARIO NUEVO) ---
         const modalRegistro = document.getElementById('modal-registro');
-        if(modalRegistro) modalRegistro.style.display = 'flex';
+        if (modalRegistro) modalRegistro.style.display = 'flex';
 
         if ('Notification' in window) {
             Notification.requestPermission().then(permiso => {
                 console.log("📡 H.A.R.V.I.S.: Respuesta del usuario para notificaciones:", permiso);
-                
+
                 if (permiso === 'granted') {
                     console.log("✅ ¡Permiso concedido! Generando token de enganche...");
-                    
+
                     if (typeof messaging !== 'undefined') {
                         messaging.getToken({ vapidKey: 'TU_LLAVE_PUBLICA_VAPID_DE_FIREBASE' })
                         .then((tokenActual) => {
                             if (tokenActual) {
                                 console.log("🔑 Token generado con éxito:", tokenActual);
                                 localStorage.setItem('mi_token_push', tokenActual);
-                                window.tokenTemporalPush = tokenActual; 
+                                window.tokenTemporalPush = tokenActual;
                             } else {
                                 console.log('❌ No se pudo obtener el token de notificación.');
                             }
@@ -5624,9 +5568,8 @@ function aplicarFotoCapa(id, src) {
                 }
             });
         }
-    } 
-};       
-             
+    }
+};         
              
  
              // <--- ¡AQUÍ ESTÁ! Esta es la llave y el paréntesis que faltaban para cerrar el onload
@@ -7368,50 +7311,30 @@ function iniciarRealtimeSpaxioFlow(conversacionId) {
         return;
     }
 
-    // 1. Limpieza síncrona y desinscripción del canal activo previo (Prevent Memory Leak)
     if (window.spaxioRealtimeChannel) {
         window.supabaseClient.removeChannel(window.spaxioRealtimeChannel);
         window.spaxioRealtimeChannel = null;
     }
 
-    // 2. Creación de canal aislado por ID de sesión/conversación
     const channelName = `spaxioflow_live_${conversacionId}_${Date.now()}`;
-    
     window.spaxioRealtimeChannel = window.supabaseClient.channel(channelName);
 
-    // 3. Suscripción con manejo estricto de eventos de ciclo de vida
     window.spaxioRealtimeChannel
-    .on(
-        'postgres_changes',
-        {
-            event: 'INSERT',
-            schema: 'public',
-            table: 'spaxioflow_feed',
-            filter: `chat_id=eq.${conversacionId}`
-        },
-
-(payload) => {
-            const nuevoMensaje = payload.new;
-            const miUserId = localStorage.getItem('mi_dropis_id') || "anonimo";
-
-            // 🛑 IMPRIME ESTO EN CONSOLA PARA VER QUÉ ESTÁ PASANDO
-            console.log("🔍 Comparando IDs en Realtime -> Mensaje sender_id:", nuevoMensaje.sender_id, "| Mi ID:", miUserId);
-
-            // Blindaje estricto (comparamos strings limpios)
-           
-if (String(nuevoMensaje.sender_id).trim() === String(miUserId).trim()) {
-    }
-
-            // Si es de otro usuario, lo dibuja en el feed de inmediato
-            anexarUnicoMensajeAlFeed(nuevoMensaje);
-            // Si pasa este filtro, ahora sí se pinta (solo para mensajes del vecino)
-            
-
-     
-        
-        }
-    )
-   
+        .on(
+            'postgres_changes',
+            {
+                event: 'INSERT',
+                schema: 'public',
+                table: 'spaxioflow_feed',
+                filter: `chat_id=eq.${conversacionId}`
+            },
+            async (payload) => {
+                const nuevoMensaje = payload.new;
+                await guardarItemsSpaxioFlowLocal([nuevoMensaje]);
+                const flowLocal = await obtenerItemsSpaxioFlowLocal();
+                renderizarMiniaturasSpaxioFlow(flowLocal);
+            }
+        )
         .subscribe((status, err) => {
             if (status === 'SUBSCRIBED') {
                 console.log(`[SpaxioFlow Enterprise] Canal ${channelName} suscrito correctamente.`);
@@ -7420,7 +7343,6 @@ if (String(nuevoMensaje.sender_id).trim() === String(miUserId).trim()) {
             }
         });
 }
-
 
 // =================================================================
 // 2. CANAL REALTIME PARA INSTANEW (Tabla: instanew)
