@@ -4450,7 +4450,8 @@ async function sincronizarSocialSiHayRed() {
             const dataInsta = await resInstanew.json();
             const postsInstanew = Array.isArray(dataInsta) ? dataInsta : (dataInsta.posts || []);
             await guardarPostsInstanewLocal(postsInstanew);
-            const localesActualizados = await obtenerPostsInstanewLocal();
+            const localesActualizadosRaw = await obtenerPostsInstanewLocal();
+            const localesActualizados = Array.isArray(localesActualizadosRaw) ? localesActualizadosRaw.slice(0, 20) : [];
             if (typeof renderizarSpaxioFlowStories === 'function') {
                 renderizarSpaxioFlowStories([...localesActualizados].reverse());
             }
@@ -4471,8 +4472,10 @@ async function sincronizarSocialSiHayRed() {
 
             if (!error && postsSpaxio) {
                 await guardarItemsSpaxioFlowLocal(postsSpaxio);
-                const flowLocal = await obtenerItemsSpaxioFlowLocal();
+                const flowLocalRaw = await obtenerItemsSpaxioFlowLocal();
+                const flowLocal = Array.isArray(flowLocalRaw) ? flowLocalRaw.slice(0, 20) : [];
                 renderizarMiniaturasSpaxioFlow(flowLocal);
+                
             }
         }
     } catch (e) {
