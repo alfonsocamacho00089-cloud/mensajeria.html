@@ -1637,23 +1637,24 @@ function seleccionarRol(rolElegido) {
         <span>🛖</span><span>Inicio</span></div>
 
 
-  <div class="btn-nav" onclick="togglePanelTaxiLateral();">
-        <span>🚖</span><span>Driver</span></div>
   <div class="btn-nav" onclick="toggleP2PPanel();">
-        <span></span><span>P2P</span></div>
- <div class="btn-nav" onclick="togglePanelContactosLateral();">
+        <span>🪙</span><span>P2P</span></div>
+ <label class="icon-btn" for="input-foto">
+            <span>📷</span>
+            <input type="file" id="input-foto" accept="image/*" style="display: none;" onchange="prepararEnvioMedia(this, 'foto')">
+ </label>
+   
+   <div class="btn-nav" onclick="togglePanelContactosLateral();">
         <span>💬</span><span>Chat</span></div>
 
 
   <div class="btn-nav" 
      id="btn-nav-flow" 
      data-contacto='{"id_sistema":"26fmetp4Q4WJ","nombre":"Spaxio","apellido":"Flow","estado":"activo"}'
-     onclick="cargarConversacionCon(JSON.parse(this.dataset.contacto).id_sistema)">🪙<span></span><span>P2P</span>
+     onclick="cargarConversacionCon(JSON.parse(this.dataset.contacto).id_sistema)">🔰<span></span><span>YouSpace</span>
         
   </div>
-<div class="btn-nav" onclick="abrirCalculadora();">
-        <span>💹</span><span>Cr / Tasas</span>
-</div>
+
   </div>
 </div>
 
