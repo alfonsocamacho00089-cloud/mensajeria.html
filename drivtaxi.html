@@ -4892,9 +4892,7 @@ const base64 = btoa(binary);
                     tipo: tipoFinal,
                     created_at: mensajeSeguro.created_at
                 }]);
-                const flowLocal = await obtenerItemsSpaxioFlowLocal();
-                renderizarMiniaturasSpaxioFlow(flowLocal);
-            })
+                  })
             .catch(err => console.error("❌ Error:", err));
 
 
