@@ -3661,27 +3661,27 @@ if (textoReal.includes('|SPA_SUMA|') || textoReal.includes('|SPA_CANJE|') || tex
         }
 
         montoOperacion = parseFloat(partes[0]) || 0;
+const claveSaldoPropio = miUsuarioPropio ? `spaxio_saldo_${miUsuarioPropio}` : 'spaxio_saldo_actual';
 
-        let saldoActual = parseFloat(localStorage.getItem('spaxio_saldo_actual'));
-        if (isNaN(saldoActual)) {
-            saldoActual = 2500.00;
-        }
+let saldoActual = parseFloat(localStorage.getItem(claveSaldoPropio) ?? localStorage.getItem('spaxio_saldo_actual'));
+if (isNaN(saldoActual)) saldoActual = 2500.00;
 
-        // Lógica matemática de saldos
-        if (tipoOperacion === 'SUMA' || tipoOperacion === 'PAGO') {
-            saldoActual += montoOperacion;
-        } else if (tipoOperacion === 'CANJE' || tipoOperacion === 'PASAJE' || tipoOperacion === 'COBRO') {
-            saldoActual -= montoOperacion;
-            if (saldoActual < 0) saldoActual = 0;
-        }
+if (tipoOperacion === 'SUMA' || tipoOperacion === 'PAGO') {
+  saldoActual = Number((saldoActual + montoOperacion).toFixed(2));
+} else if (tipoOperacion === 'CANJE' || tipoOperacion === 'PASAJE' || tipoOperacion === 'COBRO') {
+  saldoActual = Math.max(0, Number((saldoActual - montoOperacion).toFixed(2)));
+}
 
-        localStorage.setItem('spaxio_saldo_actual', saldoActual.toFixed(2));
-        localStorage.setItem('saldo_principal', saldoActual.toFixed(2));
+localStorage.setItem(claveSaldoPropio, saldoActual.toFixed(2));
+localStorage.setItem('spaxio_saldo_actual', saldoActual.toFixed(2));
+localStorage.setItem('saldo_principal', saldoActual.toFixed(2));
 
-        const elBalance = document.getElementById('balanceVisual');
-        if (elBalance) {
-            elBalance.innerText = "Bs. " + saldoActual.toLocaleString('es-VE', { minimumFractionDigits: 2 });
-        }
+const elBalance = document.getElementById('balanceVisual');
+if (elBalance) {
+  elBalance.innerText = "Bs. " + saldoActual.toLocaleString('es-VE', { minimumFractionDigits: 2 });
+             
+        
+                }
 
     } catch (err) {
         console.error("Error procesando la operación satelital:", err);
