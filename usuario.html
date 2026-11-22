@@ -1139,26 +1139,6 @@ button#btn-enviar:active {
         .btn-check-binance { width: 100%; padding: 8px; background-color: #FCD535; color: #000; border: none; border-radius: 12px; font-weight: 900; font-size: 1em; cursor: pointer; margin-top: 10px; display: flex; align-items: center; justify-content: center; gap: 10px; text-decoration: none; }
 
        */
-
-      /* ==================== ESTILOS DEL PANEL P2P ==================== */
-#seccion-p2p-lateral {
-    position: fixed !important;
-    top: 0 !important;
-    right: -100% !important; /* Oculto completamente a la derecha por defecto */
-    width: 100vw !important;
-    max-width: 400px !important;
-    height: 100dvh !important;
-    background: #161b22 !important;
-    z-index: 60000 !important;
-    transition: right 0.4s cubic-bezier(0.25, 1, 0.5, 1);
-    display: flex !important;
-    flex-direction: column;
-    box-sizing: border-box;
-}
-
-#seccion-p2p-lateral.abierto {
-    right: 0 !important; /* Se desliza perfectamente hacia la pantalla */
-      }
        
      </style>
 
@@ -1639,14 +1619,12 @@ const rolGuardado = localStorage.getItem('spaxio_rol');
   
   <div class="barra-flotante-premium">
 
-  <div class="btn-nav" onclick="togglePanelTaxiLateral();">
-        <span>🛖</span><span>Inicio</span></div>
+  
  <div class="btn-nav" onclick="togglePanelContactosLateral();">
         <span>💬</span><span>Chat</span></div>
 
-<div class="btn-nav" onclick="abrirAgendaCompleta();">
-        <span>👥</span><span>Contactos</span>
-</div>
+
+
   <div class="btn-nav" 
      id="btn-nav-flow" 
      data-contacto='{"id_sistema":"26fmetp4Q4WJ","nombre":"Spaxio","apellido":"Flow","estado":"activo"}'
@@ -1974,7 +1952,7 @@ const rolGuardado = localStorage.getItem('spaxio_rol');
         <div style="display: flex; align-items: center; gap: 12px;">
             <!-- Tu flechita reutilizada para cerrar/deslizar -->
             <button onclick="togglePanelContactosLateral()" style="background: transparent; border: none; color: white; font-size: 20px; cursor: pointer; padding: 0;">
-                <span style="display: inline-block; transform: scaleX(-1);">➔</span>
+                <span style="display: inline-block; transform: scaleX(-1);"></span>
             </button>
             <span style="color: #ffd700; font-size: 15px;">CONTACTOS</span>
         </div>
@@ -2007,13 +1985,13 @@ const rolGuardado = localStorage.getItem('spaxio_rol');
     </div>
   <div class="barra-flotante-premium">
 
-  <div class="btn-nav" onclick="togglePanelTaxiLateral();">
-        <span>🛖</span><span>Inicio</span></div>
+        
  <div class="btn-nav" onclick="togglePanelContactosLateral();">
         <span>💬</span><span>Chat</span></div>
 
-<div class="btn-nav" onclick="abrirAgendaCompleta();">
-        <span>👥</span><span>Contactos</span>
+
+  <div class="btn-nav" onclick="togglePanelTaxiLateral();">
+        <span>🚖</span><span>Driver</span>
 </div>
   <div class="btn-nav" 
      id="btn-nav-flow" 
@@ -2023,7 +2001,7 @@ const rolGuardado = localStorage.getItem('spaxio_rol');
   </div>
 <div class="btn-nav" onclick="abrirCalculadora();">
         <span>💹</span><span>Cr / Tasas</span>
-</div>
+
 </div>
 </div>
 </div>
@@ -2077,7 +2055,9 @@ const rolGuardado = localStorage.getItem('spaxio_rol');
     </div>
  </div>
      
-<!-- ==================== PANEL LATERAL CALCULADORA ==================== -->
+
+         
+         <!-- ==================== PANEL LATERAL CALCULADORA ==================== -->
 <div id="seccion-calculadora-integrada">
     
     <!-- Cabecera del Panel con tu Flechita exacta -->
@@ -2187,54 +2167,9 @@ const rolGuardado = localStorage.getItem('spaxio_rol');
               
               <button onclick="abrirAfiliacionComercial()" style="width: 100%; padding: 8px; background-color: #43fc35; color: #000; border: none; border-radius: 12px; font-weight: 900; font-size: 1em; cursor: pointer; margin-top: 10px; display: flex; align-items: center; justify-content: center; gap: 10px; text-decoration: none;;">Afiliacion / Creditos</button>
             </div>
-          <div class="barra-flotante-premium">
-
-  <div class="btn-nav" onclick="togglePanelTaxiLateral();">
-        <span>🛖</span><span>Inicio</span></div>
- <div class="btn-nav" onclick="togglePanelContactosLateral();">
-        <span>💬</span><span>Chat</span></div>
-<button onclick="abrirP2PPanel()" 
-        style="background: none; border: none; color: #ffd700; font-size: 22px; cursor: pointer; padding: 5px; transition: transform 0.2s;"
-        onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'" title="Panel P2P">
-    💱
-</button>
-
-  <div class="btn-nav" 
-     id="btn-nav-flow" 
-     data-contacto='{"id_sistema":"26fmetp4Q4WJ","nombre":"Spaxio","apellido":"Flow","estado":"activo"}'
-     onclick="cargarConversacionCon(JSON.parse(this.dataset.contacto).id_sistema)">🎬<span></span><span>YouSpace</span>
-        
-  </div>
-<div class="btn-nav" onclick="abrirCalculadora();">
-        <span>💹</span><span>Cr / Tasas</span>
-</div>
-           
-</div>
-    </div>
-        </div>
-      
-    </div>
-</div>
-
-
-
-</div>
-      <!-- ==================== PANEL LATERAL P2P ==================== -->
-<div id="seccion-p2p-lateral" style="position: fixed !important; top: 0 !important; right: -100% !important; width: 100vw !important; max-width: 400px !important; height: 100dvh !important; background: #161b22 !important; z-index: 60000 !important; transition: right 0.4s cubic-bezier(0.25, 1, 0.5, 1); display: flex !important; flex-direction: column; box-sizing: border-box;">
-    
-    <!-- Cabecera del Panel con la Flecha para cerrar -->
-    <div style="background: rgba(32, 44, 51, 0.85); backdrop-filter: blur(6px); color: #ffffff; padding: 15px; font-weight: 900; text-transform: uppercase; text-align: left; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 10; flex-shrink: 0;">
-        <div style="display: flex; align-items: center; gap: 12px;">
-            <button onclick="cerrarP2PPanel()" style="background: transparent; border: none; color: white; font-size: 20px; cursor: pointer; padding: 0;">
-                <span style="display: inline-block; transform: scaleX(-1);">➔</span>
-            </button>
-            <span style="color: #ffd700; font-size: 15px;">USDT P2P & Tasas</span>
-        </div>
-    </div>
-
-    <!-- Visor de p2p.html sin barras de navegador -->
-    <iframe src="p2p.html" style="width: 100%; flex: 1; border: none; background: #000;"></iframe>
-     </div>       
+          
+</div></div></div></div></div>
+             
 
       <div id="modal-agenda-completa" class="modal" style="display:none; background: #000; z-index: 30000;">
     <div class="modal-content" style="display: flex; flex-direction: column; width: 100vw; height: 100dvh; position: fixed; top: 0; left: 0; background: #0b141a; overflow-y: auto;">   
@@ -2253,7 +2188,7 @@ const rolGuardado = localStorage.getItem('spaxio_rol');
 
         <div style="padding: 20px; flex-shrink: 0;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                <h2 style="color: #ffd700; margin: 0;">👥 Mi Agenda</h2>
+                
                 <button onclick="document.getElementById('modal-agenda-completa').style.display='none'" 
                         style="background: transparent; border: none; color: white; font-size: 24px; cursor: pointer;">✕</button>
             </div>
@@ -2264,8 +2199,9 @@ const rolGuardado = localStorage.getItem('spaxio_rol');
 
 
 
-<!-- Contenedor donde vivirá la pestaña P2P -->
-<div id="contenedor-p2p" style="display: none; width: 100%; height: 100%;"></div>
+             
+            
+
             <script>
 
      
@@ -2273,24 +2209,14 @@ const rolGuardado = localStorage.getItem('spaxio_rol');
     alert("🚨 ERROR DETECTADO:\n\n" + message + "\n\nArchivo: " + source + "\nLínea: " + lineno);
     return false;
 };
-function abrirP2PPanel() {
-    const panel = document.getElementById('seccion-p2p-lateral');
-    if (panel) {
-        panel.classList.add('abierto');
-        // Si ya tienes una función global para cerrar otros modales, la puedes invocar aquí:
-        if (typeof cerrarTodosLosModalesSpace === "function") {
-            cerrarTodosLosModalesSpace();
-        }
-    }
-}
 
-function cerrarP2PPanel() {
-    const panel = document.getElementById('seccion-p2p-lateral');
-    if (panel) {
-        panel.classList.remove('abierto');
+      function abrirModalSpaceCard() {
+    const menu = document.getElementById('seccion-spaxiocard-integrada');
+    if (a) {
+        a.classList.toggle('abierto');
     }
-             }
-
+              }  
+              
               // Función para enfocar el mapa GPS en el negocio seleccionado y dar la opción de pedir taxi
 
               function trazarRutaHaciaNegocio(lat, lng, nombreNegocio) {
@@ -2312,9 +2238,8 @@ async function procesarCobroComercial(cantidadMonto = null) {
 
     const clienteID = receptorInput ? receptorInput.value.trim() : '';
     const monto = cantidadMonto !== null ? parseFloat(cantidadMonto) : (montoInput ? parseFloat(montoInput.value) : 0);
-    const miID = localStorage.getItem('mi_dropis_id') || "SPAXIO-USER";
+    const miID = String(localStorage.getItem('mi_dropis_id') || 'SPAXIO-USER').trim();
 
-    
     if (!clienteID || !monto || isNaN(monto) || monto <= 0) {
         alert("⚠️ Ingresa un ID válido y un monto mayor a cero para cobrar.");
         return;
@@ -2330,9 +2255,11 @@ async function procesarCobroComercial(cantidadMonto = null) {
 
     const codigoOperacion = "COB-" + Math.floor(100000 + Math.random() * 900000);
 
-    // Sumar a tu cuenta de comercio
-    let saldoActual = parseFloat(localStorage.getItem('spaxio_saldo_actual')) || 2500.00;
-    saldoActual += monto;
+    const clavePrincipal = `spaxio_saldo_${miID}`;
+    let saldoActual = parseFloat(localStorage.getItem(clavePrincipal) ?? localStorage.getItem('spaxio_saldo_actual') ?? '0') || 0;
+    saldoActual = Number((saldoActual + monto).toFixed(2));
+
+    localStorage.setItem(clavePrincipal, saldoActual.toFixed(2));
     localStorage.setItem('spaxio_saldo_actual', saldoActual.toFixed(2));
 
     const elBalance = document.getElementById('balanceVisual');
@@ -2342,20 +2269,27 @@ async function procesarCobroComercial(cantidadMonto = null) {
 
     const inputTarget = document.querySelector('#target-id');
     const targetAnterior = inputTarget ? inputTarget.value : '';
-    if (inputTarget) inputTarget.value = clienteID;
 
-    const mensajeCobro = `🧾 ¡Cobro Exitoso en Comercio! Se procesó un cargo de Bs. ${monto.toFixed(2)} (Ref: ${codigoOperacion}) |SPA_COBRO|${monto}|${codigoOperacion}`;
+    try {
+        if (inputTarget) inputTarget.value = clienteID;
 
-    await enviarMensajeSatelital(mensajeCobro, 'texto');
+        const mensajeCobro = `🧾 ¡Cobro Exitoso en Comercio! Se procesó un cargo de Bs. ${monto.toFixed(2)} (Ref: ${codigoOperacion}) |SPA_COBRO|${monto}|${codigoOperacion}`;
 
-    if (inputTarget) inputTarget.value = targetAnterior;
+        if (typeof enviarMensajeSatelital === "function") {
+            await enviarMensajeSatelital(mensajeCobro, 'texto');
+        }
+    } finally {
+        if (inputTarget) inputTarget.value = targetAnterior;
+    }
 
-    receptorInput.value = '';
-    montoInput.value = '';
-    cerrarSubModalIntegrado('submodal-miqr');
+    if (receptorInput) receptorInput.value = '';
+    if (montoInput) montoInput.value = '';
+    if (typeof cerrarSubModalIntegrado === "function") {
+        cerrarSubModalIntegrado('submodal-miqr');
+    }
 
     alert(`✅ ¡Cobro de Bs. ${monto.toFixed(2)} realizado con éxito!`);
-}
+              }
 
 async function procesarEnvioInterno() {
     const receptorInput = document.getElementById('idReceptor');
@@ -2363,7 +2297,7 @@ async function procesarEnvioInterno() {
 
     const receptorID = receptorInput ? receptorInput.value.trim() : '';
     const monto = montoInput ? parseFloat(montoInput.value) : 0;
-    const miID = localStorage.getItem('mi_dropis_id') || "SPAXIO-USER";
+    const miID = String(localStorage.getItem('mi_dropis_id') || 'SPAXIO-USER').trim();
 
     if (!receptorID || !monto || isNaN(monto) || monto <= 0) {
         alert("⚠️ Ingresa un ID válido y un monto mayor a cero.");
@@ -2375,7 +2309,8 @@ async function procesarEnvioInterno() {
         return;
     }
 
-    let saldoActual = parseFloat(localStorage.getItem('spaxio_saldo_actual')) || 2500.00;
+    const clavePrincipal = `spaxio_saldo_${miID}`;
+    let saldoActual = parseFloat(localStorage.getItem(clavePrincipal) ?? localStorage.getItem('spaxio_saldo_actual') ?? '0') || 0;
 
     if (monto > saldoActual) {
         alert("❌ Saldo insuficiente en tu tarjeta.");
@@ -2384,7 +2319,8 @@ async function procesarEnvioInterno() {
 
     const codigoOperacion = "TRX-" + Math.floor(100000 + Math.random() * 900000);
 
-    saldoActual -= monto;
+    saldoActual = Number((saldoActual - monto).toFixed(2));
+    localStorage.setItem(clavePrincipal, saldoActual.toFixed(2));
     localStorage.setItem('spaxio_saldo_actual', saldoActual.toFixed(2));
 
     const elBalance = document.getElementById('balanceVisual');
@@ -2394,20 +2330,27 @@ async function procesarEnvioInterno() {
 
     const inputTarget = document.querySelector('#target-id');
     const targetAnterior = inputTarget ? inputTarget.value : '';
-    if (inputTarget) inputTarget.value = receptorID;
 
-    const mensajePago = `💸 ¡Comprobante de Traspaso! Recibiste Bs. ${monto.toFixed(2)} (Ref: ${codigoOperacion}) |SPA_PAGO|${monto}|${codigoOperacion}`;
+    try {
+        if (inputTarget) inputTarget.value = receptorID;
 
-    await enviarMensajeSatelital(mensajePago, 'texto');
+        const mensajePago = `💸 ¡Comprobante de Traspaso! Recibiste Bs. ${monto.toFixed(2)} (Ref: ${codigoOperacion}) |SPA_PAGO|${monto}|${codigoOperacion}`;
 
-    if (inputTarget) inputTarget.value = targetAnterior;
+        if (typeof enviarMensajeSatelital === "function") {
+            await enviarMensajeSatelital(mensajePago, 'texto');
+        }
+    } finally {
+        if (inputTarget) inputTarget.value = targetAnterior;
+    }
 
-    receptorInput.value = '';
-    montoInput.value = '';
-    cerrarSubModalIntegrado('submodal-miqr');
+    if (receptorInput) receptorInput.value = '';
+    if (montoInput) montoInput.value = '';
+    if (typeof cerrarSubModalIntegrado === "function") {
+        cerrarSubModalIntegrado('submodal-miqr');
+    }
 
     alert(`✅ ¡Traspaso de Bs. ${monto.toFixed(2)} enviado con éxito!`);
-}
+              }
               
 function procesarRecargaTarjeta(montoACargar, idTarjetaDestino) {
     // 1. Obtener saldos actuales desde localStorage
@@ -2419,7 +2362,7 @@ function procesarRecargaTarjeta(montoACargar, idTarjetaDestino) {
         alert('⚠️ Saldo insuficiente en la cuenta principal');
         return false;
     }
-
+alert(avisoSaldo);
     // 3. DESCONTAR de la cuenta principal
     saldoPrincipal -= montoACargar;
     localStorage.setItem('spaxio_saldo_actual', saldoPrincipal.toFixed(2));
@@ -2453,20 +2396,22 @@ function procesarRecargaTarjeta(montoACargar, idTarjetaDestino) {
 }
 
 function sincronizarInterfazSaldos() {
-    let saldoActual = localStorage.getItem('spaxio_saldo_actual') || '2500.00';
-    
-    // Actualizar vista principal en la tarjeta visual (YsaPay / My Cards)
+    const miID = String(localStorage.getItem('mi_dropis_id') || '').trim();
+    const clavePrincipal = miID ? `spaxio_saldo_${miID}` : 'spaxio_saldo_actual';
+    const rawSaldo = localStorage.getItem(clavePrincipal) ?? localStorage.getItem('spaxio_saldo_actual') ?? '0.00';
+    const saldoNum = parseFloat(rawSaldo) || 0;
+    const saldoFormateado = saldoNum.toFixed(2);
+
     const elBalance = document.getElementById('balanceVisual');
     if (elBalance) {
-        elBalance.innerText = "Bs. " + parseFloat(saldoActual).toLocaleString('es-VE', {minimumFractionDigits: 2});
+        elBalance.innerText = "Bs. " + saldoNum.toLocaleString('es-VE', { minimumFractionDigits: 2 });
     }
 
     const elSaldoPrincipal = document.getElementById('saldo-principal-display');
     if (elSaldoPrincipal) {
-        elSaldoPrincipal.innerText = `$${saldoActual}`;
+        elSaldoPrincipal.innerText = `$${saldoFormateado}`;
     }
-             }
-              async function procesarCanjeCreditos(cantidadCreditos) {
+              }async function procesarCanjeCreditos(cantidadCreditos) {
     const receptorInput = document.getElementById('idReceptor');
     const clienteID = receptorInput ? receptorInput.value.trim() : '';
     const miID = localStorage.getItem('mi_dropis_id') || "SPAXIO-USER";
@@ -2486,33 +2431,30 @@ function sincronizarInterfazSaldos() {
 
     const referenciaCanje = "CNJ-" + Math.floor(100000 + Math.random() * 900000);
 
-    // 1. Sumamos los créditos en tu cuenta local de comercio
     let misCreditosComercio = parseInt(localStorage.getItem('spaxio_creditos_comercio')) || 0;
     misCreditosComercio += cantidadCreditos;
     localStorage.setItem('spaxio_creditos_comercio', misCreditosComercio);
 
-    // Actualizamos el balance visual de tu comercio si tienes el elemento
     const elBalanceCreditos = document.getElementById('balanceCreditosVisual');
     if (elBalanceCreditos) {
         elBalanceCreditos.innerText = misCreditosComercio + " Créditos";
     }
 
-    // 2. Apuntamos temporalmente al cliente para enviarle la orden satelital
     const inputTarget = document.querySelector('#target-id');
     const targetAnterior = inputTarget ? inputTarget.value : '';
-    if (inputTarget) inputTarget.value = clienteID;
 
-    // Mensaje satelital con etiqueta |SPA_CANJE| para que el teléfono del cliente reste sus créditos automáticamente
-    const mensajeSatelitalCanje = `📦 ¡Canje Exitoso en Comercio! Se han debitado ${cantidadCreditos} créditos/puntos (Ref: ${referenciaCanje}) |SPA_CANJE|${cantidadCreditos}|${referenciaCanje}`;
+    try {
+        if (inputTarget) inputTarget.value = clienteID;
 
-    if (typeof enviarMensajeSatelital === "function") {
-        await enviarMensajeSatelital(mensajeSatelitalCanje, 'texto');
+        const mensajeSatelitalCanje = `📦 ¡Canje Exitoso en Comercio! Se han debitado ${cantidadCreditos} créditos/puntos (Ref: ${referenciaCanje}) |SPA_CANJE|${cantidadCreditos}|${referenciaCanje}`;
+
+        if (typeof enviarMensajeSatelital === "function") {
+            await enviarMensajeSatelital(mensajeSatelitalCanje, 'texto');
+        }
+    } finally {
+        if (inputTarget) inputTarget.value = targetAnterior;
     }
 
-    // Restauramos el target anterior
-    if (inputTarget) inputTarget.value = targetAnterior;
-
-    // Limpieza
     if (receptorInput) receptorInput.value = '';
     if (typeof cerrarSubModalIntegrado === "function") {
         cerrarSubModalIntegrado('submodal-miqr');
@@ -2520,7 +2462,6 @@ function sincronizarInterfazSaldos() {
 
     alert(`✅ ¡Canje de ${cantidadCreditos} créditos procesado con éxito! Puntos acreditados a tu cuenta.`);
               }
- 
 
               
               async function procesarValidacionPasaje() {
@@ -2681,6 +2622,31 @@ async function subirYAbrirSpaxioFlow(input) {
         menu.classList.toggle('abierto');
     }
               }  
+
+    function modalspaxiocarddDesdeseccionpanelcontactoslateral() {
+
+if (typeof togglePanelContactosLateral === "function") {
+        togglePanelContactosLateral(); 
+    } else {
+        const panelLateral = document.getElementById('seccion-panel-contactos-lateral');
+        if (panelLateral) panelLateral.classList.remove('abierto');
+              }
+
+
+
+
+cerrarTodosLosModalesSpace();
+              
+    const modal = document.getElementById('modal-spaxiocard');
+    if (modal) {
+        modal.style.display = 'block';
+        inicializarSpaxiocard(); 
+    }
+              }
+
+              
+              
+              
 // Abrir el modal de Nuevo Contacto desde la Agenda Completa
 function abrirmodalnuevocontactoDesdemodalagendacompleta() {
     // 1. Cierra el modal de la agenda de forma directa
@@ -3145,6 +3111,7 @@ function inicializarSpaxiocard() {
     
     if (elBalance) elBalance.innerText = "Cr. " + usuarioSesionSpaxio.saldo.toLocaleString('es-VE', {minimumFractionDigits: 2});
     if (elTitular) elTitular.innerText = "ID: " + usuarioSesionSpaxio.id + " | " + usuarioSesionSpaxio.nombre;
+  cerrarTodosLosModalesSpace()
 }
 
 // Función única y unificada para generar el QR y el ID limpio
@@ -3622,7 +3589,11 @@ try {
             const decoded = SuperAppPayload.decode(buffer);
 
              const emisorID = data.from; 
-            const chatAbiertoActualmente = document.querySelector('#target-id').value;
+            // Antes:
+// const chatAbiertoActualmente = document.querySelector('#target-id').value;
+
+// Cámbiala por esta:
+const chatAbiertoActualmente = document.querySelector('#target-id')?.value || "";
             const textoReal = decodeURIComponent(escape(atob(decoded.chatText)));
             const miID = data.from; 
 
@@ -3661,6 +3632,8 @@ if (textoReal.includes('|SPA_SUMA|') || textoReal.includes('|SPA_CANJE|') || tex
         }
 
         montoOperacion = parseFloat(partes[0]) || 0;
+
+const miUsuarioPropio = localStorage.getItem('mi_dropis_id') || '';
 const claveSaldoPropio = miUsuarioPropio ? `spaxio_saldo_${miUsuarioPropio}` : 'spaxio_saldo_actual';
 
 let saldoActual = parseFloat(localStorage.getItem(claveSaldoPropio) ?? localStorage.getItem('spaxio_saldo_actual'));
@@ -3676,12 +3649,33 @@ localStorage.setItem(claveSaldoPropio, saldoActual.toFixed(2));
 localStorage.setItem('spaxio_saldo_actual', saldoActual.toFixed(2));
 localStorage.setItem('saldo_principal', saldoActual.toFixed(2));
 
+if (miUsuarioPropio) {
+  let tarjetas = JSON.parse(localStorage.getItem('user_tarjetas') || '[]');
+  let encontrada = false;
+  tarjetas = tarjetas.map(t => {
+    if (String(t.id || '').trim() === miUsuarioPropio) {
+      t.saldo = saldoActual.toFixed(2);
+      encontrada = true;
+    }
+    return t;
+  });
+  if (!encontrada) {
+    tarjetas.push({ id: miUsuarioPropio, saldo: saldoActual.toFixed(2) });
+  }
+  localStorage.setItem('user_tarjetas', JSON.stringify(tarjetas));
+}
+
 const elBalance = document.getElementById('balanceVisual');
 if (elBalance) {
-  elBalance.innerText = "Bs. " + saldoActual.toLocaleString('es-VE', { minimumFractionDigits: 2 });
-             
+  elBalance.innerText = "Cr. " + saldoActual.toLocaleString('es-VE', { minimumFractionDigits: 2 });
+}
+
+const avisoSaldo = tipoOperacion === 'SUMA'
+  ? `💳 Te recargaron ${montoOperacion.toFixed(2)}. Nuevo saldo: Bs. ${saldoActual.toFixed(2)}`
+  : `🧾 Te cobraron ${montoOperacion.toFixed(2)}. Nuevo saldo: Bs. ${saldoActual.toFixed(2)}`;
+console.log(avisoSaldo);
+alert(avisoSaldo);
         
-                }
 
     } catch (err) {
         console.error("Error procesando la operación satelital:", err);
@@ -3882,7 +3876,7 @@ if (targetID === "26fmetp4Q4WJ") {
         user_id: miUserId,
         created_at: new Date().toISOString()
     };
-  
+  /*COMENTADO TEMPORAL PARA PRUEBAS
 fetch('/api/spaxioflow-event', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -3893,7 +3887,7 @@ fetch('/api/spaxioflow-event', {
     console.log("📡 Servidor confirmó:", respuestaServidor);
 })
 .catch(err => console.error("❌ Error:", err));
-
+*/
 
 // MUESTRAS EL MENSAJE EN PANTALLA EN LOCAL DIRECTAMENTE
 anexarUnicoMensajeAlFeed({
@@ -3904,7 +3898,19 @@ anexarUnicoMensajeAlFeed({
     created_at: new Date().toISOString()
 });
 
-    
+    // 2. Mandas a Vercel
+    /*fetch('/api/spaxioflow-event', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(mensajeSeguro)
+    })
+    .then(res => res.json())
+    .then(respuestaServidor => {
+        console.log("📡 Servidor confirmó:", respuestaServidor);
+        
+        
+    })
+    .catch(err => console.error("❌ Error:", err));*/
 
 } else if (targetID !== "uo4kb3tGHH7J") {
     // 🛡️ REGLA DE ORO: Si es un contacto normal, sigue usando la cola satelital tradicional
@@ -4271,121 +4277,114 @@ async function cargarConversacionCon(idDestino, nombreDestino, fotoDestino) {
 
 
 
-// 🔥 INTERCEPCIÓN MAESTRA PARA INSTANEW
-if (idDestino === "26fmetp4Q4WJ") {
-    console.log("📡 Cargando feed Instanew (Nube y Local)...");
-
-    let postsParaMostrar = [];
-
-    try {
-        // 1. Intentamos traer el feed global desde tu API de Vercel (Supabase -> tabla instanew)
-        const res = await fetch('/api/get-instanew-feed');
-        if (res.ok) {
-            const data = await res.json();
-            const postsRemotos = Array.isArray(data) ? data : (data.posts || []);
-            if (postsRemotos.length > 0) {
-                postsParaMostrar = [...postsRemotos].reverse();
-            }
-        }
-    } catch (e) {
-        console.warn("⚠️ Sin conexión a la nube para Instanew, usando respaldo local...", e);
-    }
-
-    // 2. Si la nube no devolvió nada, usamos tus historias locales de respaldo
-    const postsGuardadosLocales = JSON.parse(localStorage.getItem('spaxio_historias_locales') || '[]');
+// 🔥 INTERCEPCIÓN MAESTRA     
+             if (idDestino === "26fmetp4Q4WJ") {
+   
+              
+              console.log("📡 Cargando historial global de SpaxioFlow desde Vercel...");
     
-    if (postsParaMostrar.length === 0) {
-        postsParaMostrar = postsGuardadosLocales.length > 0 ? postsGuardadosLocales : [
-            { id: 't1', sender_name: 'Pedro Peres', content: 'https://picsum.photos/300/200?random=1', tipo: 'imagen', created_at: new Date().toISOString() },
-            { id: 't2', sender_name: 'Marley', content: 'https://picsum.photos/300/200?random=2', tipo: 'imagen', created_at: new Date().toISOString() },
-            { id: 't3', sender_name: 'Sami', content: 'Probando texto en Instanew', tipo: 'texto', created_at: new Date().toISOString() }
-        ];
-    }
+               // 1. Definimos los datos de prueba (Mock) ya que eliminamos el fetch
+// 1. Leemos las historias reales que se guardaron en tu teléfono
+const postsGuardadosLocales = JSON.parse(localStorage.getItem('spaxio_historias_locales') || '[]');
 
-    // 3. Renderizamos las Stories manteniendo tu tarjeta fija intacta a la izquierda
-    const contenedorStories = document.getElementById('contenedor-spaxioflow-stories');
-    if (contenedorStories && postsParaMostrar.length > 0) {
-        const tarjetaFijaHTML = contenedorStories.firstElementChild ? contenedorStories.firstElementChild.outerHTML : '';
-        contenedorStories.innerHTML = tarjetaFijaHTML;
+// Si no hay nada guardado aún, usamos los de prueba para que no quede vacío
+const posts = postsGuardadosLocales.length > 0 ? postsGuardadosLocales : [
+    { id: 't1', sender_name: 'Pedro Peres', content: 'https://picsum.photos/300/200?random=1', tipo: 'imagen', created_at: new Date().toISOString() },
+    { id: 't2', sender_name: 'Marley', content: 'https://picsum.photos/300/200?random=2', tipo: 'imagen', created_at: new Date().toISOString() },
+    { id: 't3', sender_name: 'Sami', content: 'Probando texto en SpaxioFlow', tipo: 'texto', created_at: new Date().toISOString() }
+];
 
-        postsParaMostrar.forEach(post => {
-            const urlImg = post.content || post.imagen_url || post.media_url || post.foto || '';
-            const nombreUsr = post.sender_name || post.remitente || 'Pedro Peres';
-            const usuarioIdAutor = post.sender_id || post.usuarioId || post.usuario_id || '26fmetp4Q4WJ';
+// 3. Renderizamos las Stories manteniendo tu tarjeta fija intacta a la izquierda
+const contenedorStories = document.getElementById('contenedor-spaxioflow-stories');
+if (contenedorStories && posts.length > 0) {
+    // Guardamos temporalmente el HTML de tu tarjeta fija para no perderla
+    const tarjetaFijaHTML = contenedorStories.firstElementChild ? contenedorStories.firstElementChild.outerHTML : '';
+    
+    // Vaciamos el contenedor y ponemos la tuya de primera
+    contenedorStories.innerHTML = tarjetaFijaHTML;
+    
+    // Recorremos los posts para agregarlos al lado (a la derecha)
+    posts.slice(0, 50).forEach(post => {
+        const urlImg = post.content || post.imagen_url || post.media_url || post.foto || '';
+        const nombreUsr = post.sender_name || post.remitente || 'Usuario';
+        
+        const esImagenValida = urlImg.startsWith('http') || urlImg.startsWith('data:image');
+        
+        // Definimos si es imagen o texto para el contenido
+const contenidoMiniatura = esImagenValida 
+    ? `
+        <!-- Contenedor con la foto de fondo que ocupa toda la tarjeta -->
+        <div style="position: relative; width: 100%; height: 100%; background-image: url('${urlImg}'); background-size: cover; background-position: center; border-radius: 12px; display: flex; flex-direction: column; justify-content: flex-end; overflow: hidden;">
             
-            const esImagenValida = urlImg.startsWith('http') || urlImg.startsWith('data:image');
-            
-            const contenidoMiniatura = esImagenValida 
-                ? `
-                    <div style="position: relative; width: 100%; height: 100%; background-image: url('${urlImg}'); background-size: cover; background-position: center; border-radius: 12px; display: flex; flex-direction: column; justify-content: flex-end; overflow: hidden;">
-                        <div style="position: absolute; bottom: 0; left: 0; width: 100%; padding: 1px 1px; text-align: center; background: rgba(0,0,0,0.5);">
-                            <span style="font-size: 10px; color: #ffd700; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block;">${nombreUsr}</span>
-                        </div>
-                    </div>
-                  `
-                : `
-                    <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; padding: 5px; text-align: center;">
-                        <span style="font-size: 11px; color: #fff;">${urlImg}</span>
-                    </div>
-                  `;
+            <!-- Capa oscura semitransparente abajo para que las letras floten y resalten -->
+            <div style="position: absolute; bottom: 0; left: 0; width: 100%; padding: 1px 1px; text-align: center;">
+                <span style="font-size: 10px; color: #ffd700; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block;">${nombreUsr}</span>
+            </div>
+        </div>
+      `
+    : `
+        <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; padding: 5px; bordetext-align: center;">
+            <span style="font-size: 11px; color: #fff;">${urlImg}</span>
+        </div>
+      `;
 
-            contenedorStories.innerHTML += `
-                <div onclick="cargarConversacionCon('${usuarioIdAutor}', '${nombreUsr}')" style="min-width: 170px; height: 200px; border-radius: 12px; padding: 1px; flex-shrink: 0; cursor: pointer; overflow: hidden; position: relative;">
-                    ${contenidoMiniatura}
-                </div>
-            `;
-        });
-    }
+// Y la tarjeta completa la envuelves así para que la imagen ocupe todo el espacio libre:
+contenedorStories.innerHTML += `
+    <div style="min-width: 170px; height: 200px; border-radius: 12px; borde: 1px; rgba(255, 215, 0, 0.15); padding: 1px; flex-shrink: 0; cursor: pointer; overflow: hidden; position: relative;">
+        ${contenidoMiniatura}
+    </div>
+`;
 
-    // 4. Guardado local de respaldo limpio
-    const idUnicoLocal = "feed_local_" + Date.now();
-    const nuevoPostLocal = {
-        id: idUnicoLocal,
-        contactoId: "26fmetp4Q4WJ",
-        clase: 'msg-izquierda',
-        status: 'leido',
-        tipo: 'imagen',
-        ts: Date.now(),
-        hora: typeof miNombre !== 'undefined' ? miNombre : 'Pedro'
-    };
+        
+    });
+}
 
-    await guardarLocal('mensajes', nuevoPostLocal);
+// 4. Guardado local de prueba limpio
+const idUnicoLocal = "feed_local_" + Date.now();
+const nuevoPostLocal = {
+    id: idUnicoLocal,
+    contactoId: "26fmetp4Q4WJ",
+    clase: 'msg-izquierda',
+    status: 'leido',
+    tipo: 'imagen', // Corregido de variable suelta a string
+  
+    ts: Date.now(),
+    hora: typeof miNombre !== 'undefined' ? miNombre : 'Pedro'
+};
 
-    // 5. Pintar los mensajes/posts en pantalla de forma ordenada abajo
-    if (postsParaMostrar && Array.isArray(postsParaMostrar)) {
-        const postsInvertidos = [...postsParaMostrar].reverse();
-         
-        postsInvertidos.forEach(post => {
-            const idContenido = "feed_" + post.id;
-            const nombreRemitente = post.sender_name || post.remitente || 'H.A.R.V.I.S.';
-            const urlContenido = post.content || post.imagen_url || post.media_url || post.foto || '';
-            
-            if (!document.getElementById(idContenido)) {
-                pintarMensaje(urlContenido, "", nombreRemitente, 'leido', idContenido, post.tipo || 'imagen'); 
-            }
-        });
-    }
+// Guardamos usando tu estructura local
+await guardarLocal('mensajes', nuevoPostLocal);
 
-    // 6. Refresco final de stories
-    if (typeof postsGuardadosLocales !== 'undefined' && postsGuardadosLocales.length > 0) {
-        if (typeof renderizarSpaxioFlowStories === 'function') {
-            renderizarSpaxioFlowStories(postsGuardadosLocales);
+// 5. Pintar los mensajes/posts en pantalla de forma ordenada
+if (posts && Array.isArray(posts)) {
+    const postsInvertidos = [...posts].reverse();
+     
+    postsInvertidos.forEach(post => {
+        const idContenido = "feed_" + post.id;
+        const nombreRemitente = post.sender_name || 'H.A.R.V.I.S.';
+        
+        if (!document.getElementById(idContenido)) {
+            pintarMensaje(post.content, "", nombreRemitente, 'leido', idContenido, post.tipo); 
         }
-    }
+    });
+}
 
-    // 7. Arrancamos el Realtime independiente para la tabla instanew
-    if (typeof iniciarRealtimeInstanew === 'function') {
-        iniciarRealtimeInstanew("26fmetp4Q4WJ");
-    }
+// 6. Refresco final de stories si ya tienes los datos cargados
+if (typeof postsGuardadosLocales !== 'undefined') {
+    renderizarSpaxioFlowStories(postsGuardadosLocales);
+}
 
-    // 🎯 Forzamos el scroll arriba con un micro-respiro
+    iniciarRealtimeSpaxioFlow("26fmetp4Q4WJ");
+
+    // 🎯 Forzamos el scroll arriba con un micro-respiro para ganarle al renderizado
     setTimeout(() => {
         const box = document.getElementById('chat-box');
         if (box) {
             box.scrollTop = 0; 
         }
-    }, 50);
-              }
+    }, 50); // 50 milisegundos de respiro
+
+ }
               
               else {
     // 🔒 LÓGICA OPTIMIZADA: Últimos 50 mensajes para chats privados
@@ -6353,9 +6352,6 @@ function DespacharMensajeEnCola() {
 // =================================================================
 // ARQUITECTURA REALTIME EMPRESARIAL - SPAXIOFLOW (SINGLETON)
 // =================================================================
-// =================================================================
-// 1. CANAL REALTIME PARA SPAXIOFLOW (Tabla: spaxioflow_feed)
-// =================================================================
 window.spaxioRealtimeChannel = null;
 
 function iniciarRealtimeSpaxioFlow(conversacionId) {
@@ -6364,14 +6360,18 @@ function iniciarRealtimeSpaxioFlow(conversacionId) {
         return;
     }
 
+    // 1. Limpieza síncrona y desinscripción del canal activo previo (Prevent Memory Leak)
     if (window.spaxioRealtimeChannel) {
         window.supabaseClient.removeChannel(window.spaxioRealtimeChannel);
         window.spaxioRealtimeChannel = null;
     }
 
+    // 2. Creación de canal aislado por ID de sesión/conversación
     const channelName = `spaxioflow_live_${conversacionId}_${Date.now()}`;
+    
     window.spaxioRealtimeChannel = window.supabaseClient.channel(channelName);
 
+    // 3. Suscripción con manejo estricto de eventos de ciclo de vida
     window.spaxioRealtimeChannel
     .on(
         'postgres_changes',
@@ -6381,78 +6381,36 @@ function iniciarRealtimeSpaxioFlow(conversacionId) {
             table: 'spaxioflow_feed',
             filter: `chat_id=eq.${conversacionId}`
         },
-        (payload) => {
+
+(payload) => {
             const nuevoMensaje = payload.new;
             const miUserId = localStorage.getItem('mi_dropis_id') || "anonimo";
 
-            console.log("🔍 Comparando IDs en SpaxioFlow -> Mensaje sender_id:", nuevoMensaje.sender_id, "| Mi ID:", miUserId);
+            // 🛑 IMPRIME ESTO EN CONSOLA PARA VER QUÉ ESTÁ PASANDO
+            console.log("🔍 Comparando IDs en Realtime -> Mensaje sender_id:", nuevoMensaje.sender_id, "| Mi ID:", miUserId);
 
-            if (String(nuevoMensaje.sender_id).trim() === String(miUserId).trim()) {
-                // Tuyo
-            }
+            // Blindaje estricto (comparamos strings limpios)
+           
+if (String(nuevoMensaje.sender_id).trim() === String(miUserId).trim()) {
+    }
 
+            // Si es de otro usuario, lo dibuja en el feed de inmediato
             anexarUnicoMensajeAlFeed(nuevoMensaje);
+            // Si pasa este filtro, ahora sí se pinta (solo para mensajes del vecino)
+            
+
+     
+        
         }
     )
-    .subscribe((status, err) => {
-        if (status === 'SUBSCRIBED') {
-            console.log(`[SpaxioFlow Enterprise] Canal ${channelName} suscrito a spaxioflow_feed.`);
-        } else if (status === 'CHANNEL_ERROR' || err) {
-            console.error(`[SpaxioFlow Enterprise] Error en canal SpaxioFlow:`, err);
-        }
-    });
-}
-
-
-// =================================================================
-// 2. CANAL REALTIME PARA INSTANEW (Tabla: instanew)
-// =================================================================
-window.instanewRealtimeChannel = null;
-
-function iniciarRealtimeInstanew(conversacionId) {
-    if (!window.supabaseClient) {
-        console.error("[Instanew Enterprise] Error crítico: Cliente Supabase no inicializado.");
-        return;
-    }
-
-    if (window.instanewRealtimeChannel) {
-        window.supabaseClient.removeChannel(window.instanewRealtimeChannel);
-        window.instanewRealtimeChannel = null;
-    }
-
-    const channelName = `instanew_live_${conversacionId}_${Date.now()}`;
-    window.instanewRealtimeChannel = window.supabaseClient.channel(channelName);
-
-    window.instanewRealtimeChannel
-    .on(
-        'postgres_changes',
-        {
-            event: 'INSERT',
-            schema: 'public',
-            table: 'instanew',
-            filter: `chat_id=eq.${conversacionId}`
-        },
-        (payload) => {
-            const nuevoMensaje = payload.new;
-            const miUserId = localStorage.getItem('mi_dropis_id') || "anonimo";
-
-            console.log("🔍 Comparando IDs en Instanew -> Mensaje sender_id:", nuevoMensaje.sender_id, "| Mi ID:", miUserId);
-
-            if (String(nuevoMensaje.sender_id).trim() === String(miUserId).trim()) {
-                // Tuyo
+   
+        .subscribe((status, err) => {
+            if (status === 'SUBSCRIBED') {
+                console.log(`[SpaxioFlow Enterprise] Canal ${channelName} suscrito correctamente.`);
+            } else if (status === 'CHANNEL_ERROR' || err) {
+                console.error(`[SpaxioFlow Enterprise] Fallo de conexión en Realtime:`, err);
             }
-
-            // Aquí llamas a la función que pinta las historias y tarjetas de Instagram
-            anexarUnicoMensajeAlInstanew(nuevoMensaje);
-        }
-    )
-    .subscribe((status, err) => {
-        if (status === 'SUBSCRIBED') {
-            console.log(`[Instanew Enterprise] Canal ${channelName} suscrito a la tabla instanew.`);
-        } else if (status === 'CHANNEL_ERROR' || err) {
-            console.error(`[Instanew Enterprise] Error en canal Instanew:`, err);
-        }
-    });
+        });
 }
 
              
