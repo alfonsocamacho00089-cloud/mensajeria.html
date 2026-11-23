@@ -1298,7 +1298,12 @@ button#btn-enviar:active {
             onfocus="this.style.boxShadow='0 0 5px #ffd700'; this.style.borderColor='#ffd700';" 
             onblur="this.style.boxShadow='none'; this.style.borderColor='#999';"
              style="width: 100%; padding: 18px; margin-bottom: 15px; background: #2a2f3a; color: white; border: 1px solid #999; border-radius: 8px; box-sizing: border-box; outline: none;">
-            
+
+
+           <input type="password" id="reg-pin" placeholder="PIN de seguridad (4-6 dígitos)" inputmode="numeric" maxlength="6"
+    onfocus="this.style.boxShadow='0 0 5px #ffd700'; this.style.borderColor='#ffd700';" 
+    onblur="this.style.boxShadow='none'; this.style.borderColor='#999';"
+    style="width: 100%; padding: 18px; margin-bottom: 15px; background: #2a2f3a; color: white; border: 1px solid #999; border-radius: 8px; box-sizing: border-box; outline: none;">
         <button onclick="ejecutarRegistroCompleto()" 
             style="width: 100%; padding: 15px; background: #ffd700; border: none; border-radius: 25px; font-weight: bold; color: #000; cursor: pointer; font-size: 16px; margin-bottom: 20px; text-transform: uppercase; box-shadow: 0 0 5px #ffd700;">
             CREAR MI CUENTA 
@@ -3467,30 +3472,37 @@ async function obtenerTodo(tabla) {
  */
 
 async function recuperarCuentaConID() {
-    const idParaRecuperar = prompt("Escribe tu ID Dropis:");
+    const idParaRecuperar = prompt("Escribe tu ID Space:");
     if (!idParaRecuperar) return;
 
+    const pinIngresado = prompt("Escribe tu PIN de seguridad:");
+    if (!pinIngresado) return alert("❌ Debes ingresar tu PIN.");
+
     try {
-        const snapshot = await firebase.database().ref('usuarios/' + idParaRecuperar).once('value');
-        if (snapshot.exists()) {
-            const datos = snapshot.val();
-            // Restaurar en el teléfono
-            localStorage.setItem('mi_dropis_id', idParaRecuperar);
-            await guardarLocal('usuario', { 
-                id: 'perfil_propietario', 
-                dropis_id: idParaRecuperar,
-                nombre: datos.nombre,
-                apellido: datos.apellido,
-                identificacion: datos.identificacion,
-              fcm_token: datos.fcm_token || '' 
-            });
-            alert(`✅Bienvenido ${datos.nombre}.`);
-            location.reload(); 
-        } else {
-            alert("❌ ID no encontrado en el satélite.");
+        const snapshot = await firebase.database().ref('usuarios/' + idParaRecuperar.trim()).once('value');
+        if (!snapshot.exists()) {
+            return alert("❌ ID no encontrado.");
         }
+
+        const datos = snapshot.val();
+        if (!datos.pin || String(datos.pin).trim() !== pinIngresado.trim()) {
+            return alert("❌ PIN incorrecto. No se puede recuperar la cuenta.");
+        }
+
+        localStorage.setItem('mi_dropis_id', idParaRecuperar.trim());
+        await guardarLocal('usuario', {
+            id: 'perfil_propietario',
+            dropis_id: idParaRecuperar.trim(),
+            nombre: datos.nombre,
+            apellido: datos.apellido,
+            identificacion: datos.identificacion,
+            fcm_token: datos.fcm_token || ''
+        });
+
+        alert(`✅ Bienvenido ${datos.nombre}.`);
+        location.reload();
     } catch (e) {
-        alert("Error de conexión satelital.");
+        alert("Error de conexión.");
     }
 }
 
@@ -3499,8 +3511,9 @@ async function recuperarCuentaConID() {
     const apellido = document.getElementById('reg-apellido').value.trim();
     const identificacion = document.getElementById('reg-identificacion').value.trim();
     const rolElegido = localStorage.getItem('spaxio_rol') || 'passenger';
-    if (!nombre || !apellido || !identificacion) return alert("Completa los datos");
-
+    
+const pin = document.getElementById('reg-pin').value.trim();
+if (!nombre || !apellido || !identificacion || !pin) return alert("Completa los datos");
     // 1. GENERACIÓN DEL ID EXACTO (12 caracteres)
     const hash = Math.random().toString(36).substring(2, 7).toUpperCase(); 
     const idUnico = Math.random().toString(36).substring(2, 9) + hash; 
@@ -3513,7 +3526,9 @@ async function recuperarCuentaConID() {
         apellido: apellido,
         identificacion: identificacion,
         rol: rolElegido, // 👈 Guardamos el rol localmente
-        fecha: Date.now() 
+       pin: pin,
+
+ fecha: Date.now() 
     };
 
     try {
