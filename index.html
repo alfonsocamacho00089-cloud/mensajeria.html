@@ -95,6 +95,75 @@
         .btn-driver:active {
             opacity: 0.9;
         }
+
+        /* Cuadrito de clave de activación */
+        #modalClavePromotor {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.82);
+            z-index: 100000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .caja-clave-promotor {
+            background: #1b262c;
+            border: 2px solid #ffd700;
+            border-radius: 16px;
+            padding: 22px;
+            width: 100%;
+            max-width: 320px;
+            text-align: center;
+            color: #fff;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.7);
+        }
+
+        .caja-clave-promotor input {
+            width: 100%;
+            padding: 12px;
+            margin: 14px 0 10px;
+            border-radius: 10px;
+            border: 1px solid #ffd700;
+            background: #0b141a;
+            color: #ffd700;
+            font-size: 16px;
+            text-align: center;
+            outline: none;
+        }
+
+        .botones-clave-promotor {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .botones-clave-promotor button {
+            flex: 1;
+            padding: 11px;
+            border-radius: 10px;
+            font-weight: bold;
+            cursor: pointer;
+            border: none;
+        }
+
+        #btnConfirmarClave {
+            background: #ffd700;
+            color: #000;
+        }
+
+        #btnCancelarClave {
+            background: #334155;
+            color: #fff;
+        }
+
+        #errorClavePromotor {
+            color: #ff6b6b;
+            font-size: 12px;
+            min-height: 16px;
+            margin-bottom: 4px;
+        }
     </style>
 </head>
 <body>
@@ -172,23 +241,88 @@
     </button>
 
     <!-- Botón Comerciante -->
-    <button class="btn-rol" onclick="abrirPerfilComercioLocal()">
+    <button class="btn-rol" onclick="pedirClavePromotor('comerciante')">
         🏬 Soy Comerciante
     </button>
 
     <!-- Botón Conductor (Driver) -->
-    <button class="btn-rol btn-driver" onclick="abrirPerfilDriverLocal()">
+    <button class="btn-rol btn-driver" onclick="pedirClavePromotor('driver')">
         🚖 Soy Driver 
     </button>
 </div>
 
-<a href="./drive.html" style="display:block;background:#eab308;color:#0f172a;padding:14px;border-radius:12px;text-align:center;font-weight:800;text-decoration:none;margin-bottom:8px">🚖 Cobro Driver (Abrir)</a>
-<a href="./ysapayp2p.html" style="display:block;background:#eab308;color:#0f172a;padding:14px;border-radius:12px;text-align:center;font-weight:800;text-decoration:none;margin-bottom:8px">🚖 Cobro Comercial (Abrir)</a>
+<a href="./drive.html" onclick="event.preventDefault(); pedirClavePromotor('cobro_driver');" style="display:block;background:#eab308;color:#0f172a;padding:14px;border-radius:12px;text-align:center;font-weight:800;text-decoration:none;margin-bottom:8px">🚖 Cobro Driver (Abrir)</a>
+<a href="./ysapayp2p.html" onclick="event.preventDefault(); pedirClavePromotor('cobro_comercial');" style="display:block;background:#eab308;color:#0f172a;padding:14px;border-radius:12px;text-align:center;font-weight:800;text-decoration:none;margin-bottom:8px">🚖 Cobro Comercial (Abrir)</a>
 
+    <!-- Cuadrito de clave de activación -->
+    <div id="modalClavePromotor">
+        <div class="caja-clave-promotor">
+            <div style="font-weight:bold;color:#ffd700;font-size:16px;">Clave de Activación</div>
+            <input type="password" id="inputClavePromotor" placeholder="Ingresa la clave del promotor" autocomplete="off">
+            <div id="errorClavePromotor"></div>
+            <div class="botones-clave-promotor">
+                <button type="button" id="btnCancelarClave">Cancelar</button>
+                <button type="button" id="btnConfirmarClave">Entrar</button>
+            </div>
+        </div>
+    </div>
     
     
 <script>
-    
+    const CLAVE_PROMOTOR = "2026"; // Cambia aquí la clave del promotor cuando quieras
+    let accionPendientePromotor = null;
+
+    function pedirClavePromotor(tipoAccion) {
+        accionPendientePromotor = tipoAccion;
+        const modal = document.getElementById('modalClavePromotor');
+        const input = document.getElementById('inputClavePromotor');
+        const error = document.getElementById('errorClavePromotor');
+
+        error.textContent = "";
+        input.value = "";
+        modal.style.display = "flex";
+        setTimeout(() => input.focus(), 50);
+    }
+
+    function cerrarModalClavePromotor() {
+        accionPendientePromotor = null;
+        document.getElementById('modalClavePromotor').style.display = "none";
+        document.getElementById('errorClavePromotor').textContent = "";
+    }
+
+    function ejecutarAccionPromotor(tipoAccion) {
+        if (tipoAccion === 'comerciante') {
+            abrirPerfilComercioLocal();
+        } else if (tipoAccion === 'driver') {
+            abrirPerfilDriverLocal();
+        } else if (tipoAccion === 'cobro_driver') {
+            window.location.href = "./drive.html";
+        } else if (tipoAccion === 'cobro_comercial') {
+            window.location.href = "./ysapayp2p.html";
+        }
+    }
+
+    document.getElementById('btnCancelarClave').addEventListener('click', cerrarModalClavePromotor);
+
+    document.getElementById('btnConfirmarClave').addEventListener('click', function() {
+        const valor = document.getElementById('inputClavePromotor').value;
+        const error = document.getElementById('errorClavePromotor');
+
+        if (valor === CLAVE_PROMOTOR) {
+            const accion = accionPendientePromotor;
+            cerrarModalClavePromotor();
+            ejecutarAccionPromotor(accion);
+        } else {
+            error.textContent = "Clave incorrecta.";
+        }
+    });
+
+    document.getElementById('inputClavePromotor').addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+            document.getElementById('btnConfirmarClave').click();
+        }
+    });
+
    async function recuperarCuentaConID(rolElegido, urlDestino) {
     const idParaRecuperar = prompt("Escribe tu ID Dropis:");
     if (!idParaRecuperar) return;
