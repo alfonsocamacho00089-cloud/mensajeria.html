@@ -3554,9 +3554,9 @@ async function recuperarCuentaConID() {
         }
 
         const datos = snapshot.val();
-        if (!datos.pin || String(datos.pin).trim() !== pinIngresado.trim()) {
-            return alert("❌ PIN incorrecto. No se puede recuperar la cuenta.");
-        }
+        if (!datos.pinHash || datos.pinHash !== await hashearPIN(pinIngresado)) {
+    return alert("❌ PIN incorrecto. No se puede recuperar la cuenta.");
+ }
 
         localStorage.setItem('mi_dropis_id', idParaRecuperar.trim());
         await guardarLocal('usuario', {
@@ -3574,7 +3574,15 @@ async function recuperarCuentaConID() {
         alert("Error de conexión.");
     }
 }
+async function hashearPIN(pinTexto) {
+  const data = new TextEncoder().encode(String(pinTexto).trim());
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+  return Array.from(new Uint8Array(hashBuffer))
+    .map(b => b.toString(16).padStart(2, '0'))
+    .join('');
+             }
 
+             
      async function ejecutarRegistroCompleto() {
     const nombre = document.getElementById('reg-nombre').value.trim();
     const apellido = document.getElementById('reg-apellido').value.trim();
@@ -3583,10 +3591,12 @@ async function recuperarCuentaConID() {
     
 const pin = document.getElementById('reg-pin').value.trim();
 if (!nombre || !apellido || !identificacion || !pin) return alert("Completa los datos");
-    // 1. GENERACIÓN DEL ID EXACTO (12 caracteres)
-    const hash = Math.random().toString(36).substring(2, 7).toUpperCase(); 
-    const idUnico = Math.random().toString(36).substring(2, 9) + hash; 
 
+const hash = Math.random().toString(36).substring(2, 7).toUpperCase();
+const idUnico = Math.random().toString(36).substring(2, 9) + hash;
+const miID = idUnico;
+const pinHash = await hashearPIN(pin);    // 1. GENERACIÓN DEL ID EXACTO (12 caracteres)
+    
     // 2. GUARDADO LOCAL
     const datosUsuario = { 
         id: 'perfil_propietario', 
@@ -3595,7 +3605,7 @@ if (!nombre || !apellido || !identificacion || !pin) return alert("Completa los 
         apellido: apellido,
         identificacion: identificacion,
         rol: rolElegido, // 👈 Guardamos el rol localmente
-       pin: pin,
+       pinHash: pinHash,
 
  fecha: Date.now() 
     };
@@ -3631,7 +3641,7 @@ if (!nombre || !apellido || !identificacion || !pin) return alert("Completa los 
             apellido: apellido,
             identificacion: identificacion,
             rol: rolElegido, // 👈 Guardamos el rol localmente
-         pin: pin,
+         pinHash: pinHash,
 
             fcm_token: token || "sin_token",
             estado: "activo",
