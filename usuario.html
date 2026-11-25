@@ -1327,12 +1327,7 @@ button#btn-enviar:active {
             onfocus="this.style.boxShadow='0 0 5px #ffd700'; this.style.borderColor='#ffd700';" 
             onblur="this.style.boxShadow='none'; this.style.borderColor='#999';"
              style="width: 100%; padding: 18px; margin-bottom: 15px; background: #2a2f3a; color: white; border: 1px solid #999; border-radius: 8px; box-sizing: border-box; outline: none;">
-
-
-           <input type="password" id="reg-pin" placeholder="PIN de seguridad (4-6 dígitos)" inputmode="numeric" maxlength="6"
-    onfocus="this.style.boxShadow='0 0 5px #ffd700'; this.style.borderColor='#ffd700';" 
-    onblur="this.style.boxShadow='none'; this.style.borderColor='#999';"
-    style="width: 100%; padding: 18px; margin-bottom: 15px; background: #2a2f3a; color: white; border: 1px solid #999; border-radius: 8px; box-sizing: border-box; outline: none;">
+            
         <button onclick="ejecutarRegistroCompleto()" 
             style="width: 100%; padding: 15px; background: #ffd700; border: none; border-radius: 25px; font-weight: bold; color: #000; cursor: pointer; font-size: 16px; margin-bottom: 20px; text-transform: uppercase; box-shadow: 0 0 5px #ffd700;">
             CREAR MI CUENTA 
@@ -1351,7 +1346,6 @@ button#btn-enviar:active {
     
     </div>
 </div>
- 
  
 
 <!-- ============================================================== -->
@@ -2291,6 +2285,22 @@ const rolGuardado = localStorage.getItem('spaxio_rol');
     }
               }  
               
+              // Función para enfocar el mapa GPS en el negocio seleccionado y dar la opción de pedir taxi
+
+              function trazarRutaHaciaNegocio(lat, lng, nombreNegocio) {
+    // 1. Actualiza el mapa miniatura en tu panel lateral de taxi (el iframe)
+    const iframeMapa = document.getElementById('mapa-radar');
+    if (iframeMapa) {
+        iframeMapa.src = `https://maps.google.com/maps?q=${lat},${lng}&z=16&output=embed`;
+    }
+
+    // 2. Abre automáticamente Google Maps con las indicaciones de navegación (GPS)
+    const urlNavegacion = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}&travelmode=driving`;
+    
+    // Abre el mapa exteriormente (en la app de Google Maps o pestaña nueva del navegador)
+    window.open(urlNavegacion, '_blank');
+              }
+
               async function procesarCobroComercial(cantidadMonto = null) {
     const receptorInput = document.getElementById('idReceptor');
     const montoInput = document.getElementById('montoEnviar');
@@ -6613,5 +6623,4 @@ if (typeof window !== "undefined" && window.speechSynthesis) {
 
 </body>
     </html>
- 
      
