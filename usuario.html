@@ -2283,10 +2283,12 @@ const rolGuardado = localStorage.getItem('spaxio_rol');
     alert("🚨 ERROR DETECTADO:\n\n" + message + "\n\nArchivo: " + source + "\nLínea: " + lineno);
     return false;
 };
-function recuperarSaldoDesdeNube() {
-  if (typeof db === "undefined" || typeof miID === "undefined" || !miID) return;
 
-  db.ref("spaxio_saldo_actual/" + miID).once("value").then((snap) => {
+              function recuperarSaldoDesdeNube() {
+  const idUsuario = String(localStorage.getItem("mi_dropis_id") || "").trim();
+  if (typeof db === "undefined" || !idUsuario) return;
+
+  db.ref("spaxio_saldo_actual/" + idUsuario).once("value").then((snap) => {
     if (snap.exists()) {
       const data = snap.val();
       const saldoNube = Number(typeof data === "object" ? data.saldo : data) || 0;
@@ -2296,23 +2298,25 @@ function recuperarSaldoDesdeNube() {
 
       const elBalance = document.getElementById("balanceVisual");
       if (elBalance) {
-        elBalance.textContent = saldoNube;
+        elBalance.textContent = "Cr. " + saldoNube.toFixed(2);
       }
     }
   });
-             }
-             function sincronizarSaldoNube(nuevoSaldo) {
+}
+
+function sincronizarSaldoNube(nuevoSaldo) {
   const valorLimpio = Number(nuevoSaldo) || 0;
   localStorage.setItem("spaxio_saldo_actual", String(valorLimpio));
   localStorage.setItem("saldo_principal", String(valorLimpio));
 
-  if (typeof db !== "undefined" && typeof miID !== "undefined" && miID) {
-    db.ref("spaxio_saldo_actual/" + miID).update({
+  const idUsuario = String(localStorage.getItem("mi_dropis_id") || "").trim();
+  if (typeof db !== "undefined" && idUsuario) {
+    db.ref("spaxio_saldo_actual/" + idUsuario).update({
       saldo: valorLimpio,
       actualizadoEn: Date.now()
     });
   }
-             }
+              }
       function abrirModalSpaceCard() {
     const menu = document.getElementById('seccion-spaxiocard-integrada');
     if (a) {
@@ -3794,7 +3798,9 @@ const elBalance = document.getElementById('balanceVisual');
 if (elBalance) {
   elBalance.innerText = "Cr. " + saldoActual.toLocaleString('es-VE', { minimumFractionDigits: 2 });
 }
-
+if (typeof sincronizarSaldoNube === "function") {
+  sincronizarSaldoNube(saldoActual);
+              }
 const avisoSaldo = tipoOperacion === 'SUMA'
   ? `💳 Te recargaron ${montoOperacion.toFixed(2)}. Nuevo saldo: Bs. ${saldoActual.toFixed(2)}`
   : `🧾 Te cobraron ${montoOperacion.toFixed(2)}. Nuevo saldo: Bs. ${saldoActual.toFixed(2)}`;
@@ -4721,8 +4727,18 @@ if (id) {
                     guardarLocal('perfiles', { id: id, foto: data.foto, nombre: data.nombre });
                 }
             }).catch(() => {});
+
+
+  if (typeof recuperarSaldoDesdeNube === "function") recuperarSaldoDesdeNube();
+  
+              
             if (typeof activarAntena === "function") activarAntena();
-        } else {
+      
+        
+              
+              
+              
+              } else {
             console.log("📡 Modo Offline detectado: Abriendo con base de datos local (IndexedDB).");
         }
 
