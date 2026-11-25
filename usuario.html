@@ -3594,7 +3594,7 @@ if (!nombre || !apellido || !identificacion || !pin) return alert("Completa los 
 
 const hash = Math.random().toString(36).substring(2, 7).toUpperCase();
 const idUnico = Math.random().toString(36).substring(2, 9) + hash;
-const miID = idUnico;
+
 const pinHash = await hashearPIN(pin);    // 1. GENERACIÓN DEL ID EXACTO (12 caracteres)
     
     // 2. GUARDADO LOCAL
