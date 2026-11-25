@@ -267,6 +267,13 @@ function cobrarMonto(rawId, safeId){
 
   enviarAvisoSaldoPorCanalFirebase(id, 'COBRO', monto);
   alertar(`✅ COBRADO ${fmtMonto(monto)} a ${db[i].nombre}<br>Saldo restante: <b>${fmtMonto(db[i].saldo)}</b>`, true);
+
+  const miID = obtenerMiIDComercio();
+if (miID) {
+  const claveSaldo = 'spaxio_saldo_' + miID;
+  const actualComercio = Number(((parseFloat(localStorage.getItem(claveSaldo) || localStorage.getItem('spaxio_saldo_actual') || '0') || 0) + monto).toFixed(2));
+  sincronizarSaldoComercioNube(actualComercio);
+}
 }
 
 
@@ -401,6 +408,8 @@ function sincronizarConUserTarjetas(idTarjeta, montoSumado, descontarDePrincipal
 
   localStorage.setItem('user_tarjetas', JSON.stringify(tarjetas));
   return true;
+  
+  sincronizarSaldoComercioNube(saldoActual);
   }
   
 function procesarCobroComercial(monto, idReceptorParam = null) {
@@ -433,7 +442,51 @@ function procesarCobroComercial(monto, idReceptorParam = null) {
 
   return true;
 }
+function obtenerMiIDComercio() {
+  return String(localStorage.getItem('mi_dropis_id') || '').trim();
+}
 
+function recuperarSaldoComercioDesdeNube() {
+  const miID = obtenerMiIDComercio();
+  if (!miID || typeof firebase === 'undefined' || !firebase.apps?.length) return;
+
+  firebase.database().ref('spaxio_saldo_actual/' + miID).once('value').then((snap) => {
+    if (!snap.exists()) return;
+    const data = snap.val();
+    const saldoNube = Number(typeof data === 'object' ? data.saldo : data) || 0;
+
+    localStorage.setItem('spaxio_saldo_' + miID, saldoNube.toFixed(2));
+    localStorage.setItem('spaxio_saldo_actual', saldoNube.toFixed(2));
+    localStorage.setItem('saldo_principal', saldoNube.toFixed(2));
+
+    if (typeof sincronizarInterfazSaldos === 'function') {
+      sincronizarInterfazSaldos();
+    }
+  }).catch((err) => {
+    console.error('❌ Error recuperando saldo comercio desde Firebase:', err);
+  });
+}
+
+function sincronizarSaldoComercioNube(nuevoSaldo) {
+  const miID = obtenerMiIDComercio();
+  const valorLimpio = Number(nuevoSaldo) || 0;
+
+  localStorage.setItem('spaxio_saldo_actual', valorLimpio.toFixed(2));
+  localStorage.setItem('saldo_principal', valorLimpio.toFixed(2));
+  if (miID) {
+    localStorage.setItem('spaxio_saldo_' + miID, valorLimpio.toFixed(2));
+  }
+
+  if (!miID || typeof firebase === 'undefined' || !firebase.apps?.length) return;
+
+  return firebase.database().ref('spaxio_saldo_actual/' + miID).update({
+    saldo: valorLimpio,
+    id_usuario: miID,
+    actualizadoEn: Date.now()
+  }).catch((err) => {
+    console.error('❌ Error sincronizando saldo comercio en Firebase:', err);
+  });
+    }
   function eliminarCli(rawId){
   const id = String(rawId || '').trim();
   const i = db.findIndex(p => String(p.id).trim() === id);
@@ -516,6 +569,9 @@ function guardarCli(){
   enviarAvisoSaldoPorCanalFirebase(id, 'SUMA', monto);
   alertar(`✅ +${fmtMonto(monto)} cargados a ${nombre}`, true);
 }
+  if (navigator.onLine) {
+  recuperarSaldoComercioDesdeNube();
+  }
 render();
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js').catch(()=>{});
 </script>
