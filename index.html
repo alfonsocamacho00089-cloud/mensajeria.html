@@ -384,12 +384,7 @@ function abrirPerfilUsuarioLocal() {
 
 // BOTÓN COMERCIOS
 function abrirPerfilComercioLocal() {
-    const idExistente = localStorage.getItem('mi_dropis_id');
-    const rolGuardado = localStorage.getItem('spaxio_rol');
-
-    if (!idExistente || rolGuardado !== 'merchant') {
-        localStorage.removeItem('mi_dropis_id');
-    }
+    
     
     localStorage.setItem('spaxio_rol', 'merchant');
     window.location.href = `./comercios.html?v=${APP_VER}`;
@@ -397,13 +392,6 @@ function abrirPerfilComercioLocal() {
 
 // BOTÓN DRIVER
 function abrirPerfilDriverLocal() {
-    const idExistente = localStorage.getItem('mi_dropis_id');
-    const rolGuardado = localStorage.getItem('spaxio_rol');
-
-    if (!idExistente || rolGuardado !== 'driver') {
-        localStorage.removeItem('mi_dropis_id');
-    }
-    
     localStorage.setItem('spaxio_rol', 'driver');
     window.location.href = `./drivtaxi.html?v=${APP_VER}`;
 }
