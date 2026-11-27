@@ -5,6 +5,12 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <meta name="theme-color" content="#0b0f19">
 <title>YsaPay Driver Offline</title>
+<script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/protobufjs@7.2.4/dist/protobuf.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/eruda"></script>
+<script>eruda.init();</script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;font-family:system-ui,-apple-system,sans-serif}
 body{background:#0b0f19;color:#f8fafc;padding:14px;padding-bottom:70px}
@@ -17,7 +23,10 @@ body{background:#0b0f19;color:#f8fafc;padding:14px;padding-bottom:70px}
 .sl{font-size:.75rem;color:#94a3b8}
 .btn{border:none;border-radius:12px;padding:14px;font-weight:700;font-size:1rem;cursor:pointer;width:100%;margin-bottom:10px}
 .btn:active{transform:scale(.98)}
-.b-qr{background:linear-gradient(135deg,#0284c7,#2563eb);color:#fff;font-size:1.1rem}
+.qr-row{display:grid;grid-template-columns:1fr auto;gap:8px;margin-bottom:10px}
+.qr-row .btn{margin-bottom:0}
+.b-qr{background:linear-gradient(135deg,#0284c7,#2563eb);color:#fff;font-size:1.05rem}
+.b-gal{background:#1e293b;color:#38bdf8;border:1px solid #38bdf8;width:auto;padding:14px 16px}
 .b-ad{background:#10b981;color:#022c22}
 .b-sm{padding:8px 12px;font-size:.85rem;width:auto;border-radius:8px;margin:0}
 .b-cb{background:#3b82f6;color:#fff}
@@ -27,24 +36,32 @@ video{width:100%;display:block}
 #alt{display:none;padding:14px;border-radius:12px;text-align:center;margin-bottom:14px;font-weight:700}
 .ok{background:#065f46;border:2px solid #10b981;color:#ecfdf5}
 .er{background:#7f1d1d;border:2px solid #ef4444;color:#fef2f2}
-.sb{width:100%;padding:12px;border-radius:10px;border:1px solid #334155;background:#1e293b;color:#fff;font-size:1rem;margin-bottom:14px}
+.sb-wrap{position:relative;margin-bottom:14px}
+.sb{width:100%;padding:12px 38px 12px 12px;border-radius:10px;border:1px solid #334155;background:#1e293b;color:#fff;font-size:1rem}
+.sb-clr{position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:none;color:#94a3b8;font-size:1.1rem;cursor:pointer;padding:4px 8px}
 .tt{font-size:.85rem;color:#94a3b8;margin-bottom:8px;text-transform:uppercase}
-.cd{background:#1e293b;padding:12px;border-radius:12px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;border-left:4px solid #38bdf8}
+.cd{position:relative;background:#1e293b;padding:12px;border-radius:12px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;gap:10px;border-left:4px solid #38bdf8}
 .cd.low{border-left-color:#f97316}
 .cd.emp{border-left-color:#ef4444;opacity:.8}
+.cd.found{outline:2px solid #facc15;background:#243044}
 .nm{font-weight:700;font-size:1rem}
 .id{font-size:.8rem;color:#94a3b8;font-family:monospace}
 .cr{font-size:1.05rem;font-weight:800;color:#34d399;margin-top:3px}
 .cr.low{color:#fb923c}
 .cr.emp{color:#f87171}
-.ac{display:flex;gap:6px;flex-direction:column}
+.ac{display:flex;gap:6px;flex-direction:column;min-width:128px}
+.cob-box{display:flex;gap:4px}
+.m-inp{width:72px;padding:7px 8px;border-radius:8px;border:1px solid #475569;background:#0f172a;color:#fff;font-size:.9rem;font-weight:700}
 .md{display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);align-items:center;justify-content:center;padding:16px;z-index:50}
 .mc{background:#1e293b;padding:18px;border-radius:16px;width:100%;max-width:380px}
 .mc h3{margin-bottom:12px;color:#38bdf8}
 .ig{margin-bottom:10px}
 .ig label{display:block;font-size:.85rem;color:#cbd5e1;margin-bottom:4px}
-.ig input{width:100%;padding:10px;border-radius:8px;border:1px solid #475569;background:#0f172a;color:#fff;font-size:1rem}
+.ig input,.ig select{width:100%;padding:10px;border-radius:8px;border:1px solid #475569;background:#0f172a;color:#fff;font-size:1rem}
 .mb{display:flex;gap:10px;margin-top:14px}
+#modRep{z-index:9999;will-change:opacity,transform}
+.x-esquina{position:absolute;top:5px;left:8px;color:#94a3b8;font-size:.8rem;line-height:1;cursor:pointer;user-select:none;opacity:.6}
+.x-esquina:hover{color:#cbd5e1;opacity:1}
 </style>
 </head>
 <body>
@@ -54,19 +71,38 @@ video{width:100%;display:block}
   <div class="sc"><div class="sn" id="su">0</div><div class="sl">Afiliados</div></div>
 </div>
 <div id="alt"></div>
-<button class="btn b-qr" onclick="toggleCam()">📷 Escanear QR Pasajero</button>
+
+<div class="qr-row">
+  <button class="btn b-qr" onclick="toggleCam()">📷 Escanear QR Pasajero</button>
+  <button class="btn b-gal" onclick="document.getElementById('qrGaleria').click()" title="Leer QR desde imagen">🖼️</button>
+  <input type="file" id="qrGaleria" accept="image/*" style="display:none" onchange="procesarQRGaleria(this)">
+</div>
+
 <div id="cam"><video id="vid" playsinline></video></div>
 <button class="btn b-ad" onclick="abrirModal()">+ Registrar ID / Vender 30 Días</button>
-<input type="text" id="bus" class="sb" placeholder="🔍 Buscar por ID (ej: YSA-01) o nombre..." oninput="render()">
+<button class="btn" style="background:#334155;color:#f8fafc" onclick="abrirReporteRecargas()">📊 Reporte Creditos por Cliente</button>
+
+<div class="sb-wrap">
+  <input type="text" id="bus" class="sb" placeholder="🔍 Buscar por ID (ej: l8dvkxkcz5) o nombre..." oninput="render()">
+  <button type="button" class="sb-clr" onclick="limpiarBusqueda()" title="Limpiar búsqueda">✕</button>
+</div>
+
 <div class="tt">Cartera de Pasajeros (Créditos en tu unidad)</div>
 <div id="lst"></div>
 
 <div class="md" id="mod">
   <div class="mc">
     <h3 id="mt">Registrar Pasajero</h3>
-    <div class="ig"><label>ID Tarjeta (Ej: YSA-104)</label><input type="text" id="iid" placeholder="YSA-104"></div>
+    <div class="ig"><label>ID Tarjeta (Ej: l8dvkxkcz5)</label><input type="text" id="iid" placeholder="YSA-104"></div>
     <div class="ig"><label>Nombre Pasajero</label><input type="text" id="inm" placeholder="Carlos Pérez"></div>
-    <div class="ig"><label>Pasajes a cargar (30 días = 60)</label><input type="number" id="icr" value="60"></div>
+    <div class="ig">
+      <label>Tipo de recarga</label>
+      <select id="itipo">
+        <option value="DRIVER">Recarga Driver (Saldo por monto)</option>
+        <option value="PASAJES">Pasajes / Viajes (-1 Viaje)</option>
+      </select>
+    </div>
+    <div class="ig"><label>Cantidad / Monto a cargar (30 días = 60)</label><input type="number" step="any" id="icr" value="60"></div>
     <div class="mb">
       <button class="btn" style="background:#475569;color:#fff;margin:0" onclick="cerrarModal()">Cancelar</button>
       <button class="btn" style="background:#10b981;color:#022c22;margin:0" onclick="guardarPas()">Guardar</button>
@@ -74,89 +110,694 @@ video{width:100%;display:block}
   </div>
 </div>
 
+<div class="md" id="modRep" onclick="if(event.target===this)cerrarReporteRecargas()">
+  <div class="mc" style="max-height:85vh;overflow-y:auto">
+    <h3>📊 Creditos Clientes</h3>
+    <div id="repBody" style="font-size:.9rem;color:#e2e8f0"></div>
+    <div class="mb">
+      <button class="btn" style="background:#475569;color:#fff;margin:0" onclick="cerrarReporteRecargas()">Cerrar</button>
+    </div>
+  </div>
+</div>
+
 <script>
-let db=JSON.parse(localStorage.getItem('ysapay_db'))||[{id:'YSA-001',nombre:'María Gómez',creditos:28},{id:'YSA-002',nombre:'Luis Rojas',creditos:2}];
-let hoy=parseInt(localStorage.getItem('ysapay_hoy'))||0;
-let strm=null,intv=null;
+let db = (JSON.parse(localStorage.getItem('ysapay_db')) || [
+  {id:'YSA-001', nombre:'María Gómez', creditos:28, saldoCobro:0, tipoRecarga:'PASAJES'},
+  {id:'YSA-002', nombre:'Luis Rojas', creditos:2, saldoCobro:0, tipoRecarga:'PASAJES'}
+]).map(p => ({
+  ...p,
+  creditos: Number(p.creditos) || 0,
+  saldoCobro: Number(p.saldoCobro) || 0,
+  tipoRecarga: p.tipoRecarga || 'DRIVER'
+}));
+let hoy = parseFloat(localStorage.getItem('ysapay_hoy')) || 0;
+let strm = null, intv = null, canvasDet = null;
+let idResaltado = '';
 
-function save(){localStorage.setItem('ysapay_db',JSON.stringify(db));localStorage.setItem('ysapay_hoy',hoy);render();}
-
-function render(){
-  const f=document.getElementById('bus').value.toLowerCase();
-  const l=document.getElementById('lst');l.innerHTML='';
-  document.getElementById('sv').innerText=hoy;
-  document.getElementById('su').innerText=db.length;
-  db.filter(p=>p.id.toLowerCase().includes(f)||p.nombre.toLowerCase().includes(f)).forEach(p=>{
-    const c=p.creditos===0?'emp':(p.creditos<=3?'low':'');
-    l.innerHTML+=`<div class="cd ${c}"><div><div class="nm">${p.nombre}</div><div class="id">ID: ${p.id}</div><div class="cr ${c}">${p.creditos} pasajes</div></div><div class="ac"><button class="btn b-sm b-cb" onclick="cobrar('${p.id}')">-1 Viaje</button><button class="btn b-sm b-rc" onclick="recargar('${p.id}')">+ Recargar</button></div></div>`;
+if (!firebase.apps.length) {
+  firebase.initializeApp({
+    apiKey: "AIzaSyCaUyhX2iBMl4A5xeKeu4SeE6HClp4V1s",
+    authDomain: "real-market-elite-2025.firebaseapp.com",
+    projectId: "real-market-elite-2025",
+    databaseURL: "https://real-market-elite-2025-default-rtdb.firebaseio.com",
+    messagingSenderId: "226489002778",
+    appId: "1:226489002778:web:6722d21a9e78b33b5b1aa3"
   });
 }
 
-function beep(ok){
-  try{const ctx=new(window.AudioContext||window.webkitAudioContext)(),o=ctx.createOscillator();o.type=ok?'sine':'sawtooth';o.frequency.setValueAtTime(ok?880:220,ctx.currentTime);o.connect(ctx.destination);o.start();o.stop(ctx.currentTime+(ok?.15:.4));}catch(e){}
+async function cargarProto() {
+  const schema = `
+    package superapp;
+    syntax = "proto3";
+    message SuperAppPayload {
+      string chatText = 1;
+      string msgId = 2;
+      uint32 tipo = 3;
+      bytes archivoData = 4;
+      uint32 piezaActual = 5;
+      uint32 totalPiezas = 6;
+    }
+  `;
+  return protobuf.parse(schema).root;
 }
 
-function alertar(msg,ok){
-  const a=document.getElementById('alt');a.className=ok?'ok':'er';a.innerHTML=msg;a.style.display='block';beep(ok);
-  setTimeout(()=>{a.style.display='none'},3500);
+function fmtMonto(n){
+  return Number.isInteger(n) ? String(n) : Number(n).toFixed(2);
+}
+
+function save(){
+  localStorage.setItem('ysapay_db', JSON.stringify(db));
+  localStorage.setItem('ysapay_hoy', String(hoy));
+  render();
+}
+
+function render(){
+  const f = document.getElementById('bus').value.trim().toLowerCase();
+  const l = document.getElementById('lst');
+  l.innerHTML = '';
+  document.getElementById('sv').innerText = fmtMonto(hoy);
+  document.getElementById('su').innerText = db.length;
+
+  const filtrados = db.filter(p =>
+    String(p.id).toLowerCase().includes(f) || String(p.nombre).toLowerCase().includes(f)
+  );
+
+  if (filtrados.length === 0) {
+    l.innerHTML = `<div class="cd"><div><div class="nm">Sin resultados para "${f}"</div><div class="id">Puedes registrarlo con el botón verde</div></div></div>`;
+    return;
+  }
+
+  filtrados.forEach(p => {
+    const c = (p.creditos <= 0 && p.saldoCobro <= 0) ? 'emp' : (p.creditos <= 3 ? 'low' : '');
+    const esEncontrado = idResaltado && String(p.id).trim() === String(idResaltado).trim();
+    const safeId = String(p.id).replace(/[^a-zA-Z0-9_-]/g, '_');
+    l.innerHTML += `
+      <div class="cd ${c} ${esEncontrado ? 'found' : ''}" id="card_${safeId}">
+        <div>
+          <span class="x-esquina" onclick="eliminarCli('${p.id}')" title="Eliminar">✕</span>
+          <div class="nm">${p.nombre}</div>
+          <div class="id">ID: ${p.id} · Tipo: ${p.tipoRecarga || 'DRIVER'}</div>
+          <div class="cr ${c}">${fmtMonto(p.creditos)} pasajes · Saldo Driver: ${fmtMonto(p.saldoCobro)}</div>
+        </div>
+        <div class="ac">
+          <button class="btn b-sm b-cb" onclick="cobrar('${p.id}')">-1 Viaje</button>
+          <div class="cob-box">
+            <input type="number" step="any" min="0.01" class="m-inp" id="m_${safeId}" placeholder="120">
+            <button class="btn b-sm b-cb" onclick="cobrarMonto('${p.id}', '${safeId}')">Cobrar</button>
+          </div>
+          <button class="btn b-sm b-rc" onclick="recargar('${p.id}')">+ Recargar</button>
+        </div>
+      </div>`;
+  });
+}
+
+function eliminarCli(rawId){
+  const id = String(rawId || '').trim();
+  const i = db.findIndex(p => String(p.id).trim() === id);
+  if (i === -1) return;
+  const nombre = db[i].nombre;
+  if (!confirm(`¿Eliminar a ${nombre} (${db[i].id}) de la lista?`)) return;
+  if (String(idResaltado).trim() === id) idResaltado = '';
+  db.splice(i, 1);
+  save();
+  alertar(`🗑️ Eliminado ${nombre}`, true);
+}
+
+function limpiarBusqueda(){
+  idResaltado = '';
+  document.getElementById('bus').value = '';
+  render();
+}
+
+function buscarIDDesdeQR(rawId){
+  const idLimpio = String(rawId || '').trim();
+  if (!idLimpio) return;
+
+  const inputBus = document.getElementById('bus');
+  inputBus.value = idLimpio;
+  idResaltado = idLimpio;
+  render();
+
+  const pasajero = db.find(p => String(p.id).trim() === idLimpio);
+  if (pasajero) {
+    alertar(`👤 Dueño encontrado: <b>${pasajero.nombre}</b><br>ID: <b>${pasajero.id}</b> · ${fmtMonto(pasajero.creditos)} pasajes · Saldo Driver: <b>${fmtMonto(pasajero.saldoCobro)}</b>`, true);
+    const safeId = String(pasajero.id).replace(/[^a-zA-Z0-9_-]/g, '_');
+    const inpMonto = document.getElementById(`m_${safeId}`);
+    if (inpMonto) {
+      inpMonto.scrollIntoView({behavior:'smooth', block:'center'});
+    } else {
+      inputBus.scrollIntoView({behavior:'smooth', block:'center'});
+    }
+  } else {
+    alertar(`🔍 ID escaneado: <b>${idLimpio}</b> (no está registrado aún)`, false);
+    inputBus.scrollIntoView({behavior:'smooth', block:'center'});
+  }
+}
+
+function beep(ok){
+  try{
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const o = ctx.createOscillator();
+    o.type = ok ? 'sine' : 'sawtooth';
+    o.frequency.setValueAtTime(ok ? 880 : 220, ctx.currentTime);
+    o.connect(ctx.destination);
+    o.start();
+    o.stop(ctx.currentTime + (ok ? .15 : .4));
+  }catch(e){}
+}
+
+function alertar(msg, ok){
+  const a = document.getElementById('alt');
+  a.className = ok ? 'ok' : 'er';
+  a.innerHTML = msg;
+  a.style.display = 'block';
+  beep(ok);
+  setTimeout(() => { a.style.display = 'none'; }, 3500);
 }
 
 function cobrar(rawId){
-  const id=rawId.trim().toUpperCase();
-  const i=db.findIndex(p=>p.id.toUpperCase()===id);
-  if(i===-1)return alertar(`❌ ID "${id}" no registrado.`,false);
-  if(db[i].creditos<=0)return alertar(`⚠️ ${db[i].nombre} (${id}) tiene 0 pasajes.`,false);
-  db[i].creditos-=1;hoy+=1;save();
-  alertar(`✅ COBRADO: ${db[i].nombre}<br>Quedan: <b>${db[i].creditos} viajes</b>${db[i].creditos<=3?'<br>⚠️ ¡Por vencer!':''}`,true);
+  const id = String(rawId || '').trim();
+  const i = db.findIndex(p => String(p.id).trim() === id);
+  if (i === -1) return alertar(`❌ ID "${id}" no registrado.`, false);
+  if (db[i].creditos <= 0) return alertar(`⚠️ ${db[i].nombre} (${id}) tiene 0 pasajes.`, false);
+
+  db[i].creditos = Number((db[i].creditos - 1).toFixed(2));
+  hoy = Number((hoy + 1).toFixed(2));
+  save();
+
+  enviarAvisoSaldoPorCanalFirebase(id, 'PASAJE', 1);
+  alertar(`✅ COBRADO (-1 Viaje): ${db[i].nombre}<br>Pasajes restantes: <b>${fmtMonto(db[i].creditos)}</b>${db[i].creditos <= 3 ? '<br>⚠️ ¡Por vencer!' : ''}`, true);
+
+  const miIDDriver = obtenerMiIDComercio();
+  if (miIDDriver) {
+    const claveSaldo = 'spaxio_saldo_' + miIDDriver;
+    const actualDriver = Number(((parseFloat(localStorage.getItem(claveSaldo) || localStorage.getItem('spaxio_saldo_actual') || '0') || 0) + 1).toFixed(2));
+    sincronizarSaldoComercioNube(actualDriver);
+  }
+}
+
+function cobrarMonto(rawId, safeId){
+  const id = String(rawId || '').trim();
+  const inp = document.getElementById(`m_${safeId}`);
+  const monto = parseFloat(inp ? inp.value : 0);
+
+  if (!monto || monto <= 0) {
+    if (inp) inp.focus();
+    return alertar('⚠️ Escribe un monto mayor a 0 para descontar.', false);
+  }
+
+  const i = db.findIndex(p => String(p.id).trim() === id);
+  if (i === -1) return alertar(`❌ ID "${id}" no registrado.`, false);
+  if (db[i].saldoCobro < monto) {
+    return alertar(`⚠️ Saldo Driver insuficiente para ${db[i].nombre}.<br>Tiene <b>${fmtMonto(db[i].saldoCobro)}</b> y pidió <b>${fmtMonto(monto)}</b>.`, false);
+  }
+
+  db[i].saldoCobro = Number((db[i].saldoCobro - monto).toFixed(2));
+  hoy = Number((hoy + monto).toFixed(2));
+  save();
+
+  enviarAvisoSaldoPorCanalFirebase(id, 'COBRO', monto);
+  alertar(`✅ COBRADO ${fmtMonto(monto)} a ${db[i].nombre}<br>Saldo Driver restante: <b>${fmtMonto(db[i].saldoCobro)}</b>`, true);
+
+  const miIDDriver = obtenerMiIDComercio();
+  if (miIDDriver) {
+    const claveSaldo = 'spaxio_saldo_' + miIDDriver;
+    const actualDriver = Number(((parseFloat(localStorage.getItem(claveSaldo) || localStorage.getItem('spaxio_saldo_actual') || '0') || 0) + monto).toFixed(2));
+    sincronizarSaldoComercioNube(actualDriver);
+  }
 }
 
 async function toggleCam(){
-  const c=document.getElementById('cam'),v=document.getElementById('vid');
-  if(strm)return stopCam();
+  const c = document.getElementById('cam'), v = document.getElementById('vid');
+  if (strm) return stopCam();
   try{
-    strm=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'}});
-    v.srcObject=strm;await v.play();c.style.display='block';
-    if('BarcodeDetector' in window){
-      const det=new BarcodeDetector({formats:['qr_code']});
-      intv=setInterval(async()=>{try{const r=await det.detect(v);if(r.length>0){const val=r[0].rawValue;stopCam();cobrar(val);}}catch(e){}},400);
-    }else alertar('ℹ️ Usa el buscador de ID abajo.',false);
-  }catch(e){alertar('❌ Sin permiso de cámara.',false);}
+    strm = await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'}});
+    v.srcObject = strm;
+    await v.play();
+    c.style.display = 'block';
+
+    const usaBarcodeDetector = ('BarcodeDetector' in window);
+    const detector = usaBarcodeDetector ? new BarcodeDetector({formats:['qr_code']}) : null;
+
+    intv = setInterval(async () => {
+      if (v.readyState < 2) return;
+      try{
+        let valorQR = null;
+        if (detector) {
+          const r = await detector.detect(v);
+          if (r.length > 0) valorQR = r[0].rawValue;
+        } else if (typeof jsQR === 'function') {
+          if (!canvasDet) canvasDet = document.createElement('canvas');
+          canvasDet.width = v.videoWidth;
+          canvasDet.height = v.videoHeight;
+          const ctx = canvasDet.getContext('2d');
+          ctx.drawImage(v, 0, 0, canvasDet.width, canvasDet.height);
+          const imgData = ctx.getImageData(0, 0, canvasDet.width, canvasDet.height);
+          const code = jsQR(imgData.data, imgData.width, imgData.height);
+          if (code && code.data) valorQR = code.data;
+        }
+        if (valorQR) {
+          stopCam();
+          buscarIDDesdeQR(valorQR);
+        }
+      }catch(e){}
+    }, 350);
+  }catch(e){
+    alertar('❌ Sin permiso de cámara.', false);
+  }
 }
 
 function stopCam(){
-  if(intv)clearInterval(intv);if(strm)strm.getTracks().forEach(t=>t.stop());
-  strm=null;document.getElementById('cam').style.display='none';
+  if (intv) clearInterval(intv);
+  if (strm) strm.getTracks().forEach(t => t.stop());
+  strm = null; intv = null;
+  document.getElementById('cam').style.display = 'none';
+}
+
+function procesarQRGaleria(input){
+  if (!input.files || !input.files[0]) return;
+  const archivo = input.files[0];
+  const lector = new FileReader();
+
+  lector.onload = function(e){
+    const imagen = new Image();
+    imagen.src = e.target.result;
+    imagen.onload = function(){
+      const canvas = document.createElement('canvas');
+      const contexto = canvas.getContext('2d');
+      canvas.width = imagen.width;
+      canvas.height = imagen.height;
+      contexto.drawImage(imagen, 0, 0, canvas.width, canvas.height);
+      const datosImagen = contexto.getImageData(0, 0, canvas.width, canvas.height);
+      const codigoQR = jsQR(datosImagen.data, datosImagen.width, datosImagen.height);
+
+      if (codigoQR && codigoQR.data) {
+        buscarIDDesdeQR(codigoQR.data);
+      } else {
+        alertar('❌ No se pudo descifrar el QR de la imagen.', false);
+      }
+    };
+  };
+  lector.readAsDataURL(archivo);
+  input.value = '';
 }
 
 function abrirModal(){
-  document.getElementById('mt').innerText='Registrar ID / Vender Mes';
-  document.getElementById('iid').value='';document.getElementById('iid').disabled=false;
-  document.getElementById('inm').value='';document.getElementById('icr').value='60';
-  document.getElementById('mod').style.display='flex';
+  document.getElementById('mt').innerText = 'Registrar ID / Vender Mes';
+  document.getElementById('iid').value = '';
+  document.getElementById('iid').disabled = false;
+  document.getElementById('inm').value = '';
+  document.getElementById('itipo').value = 'DRIVER';
+  document.getElementById('icr').value = '60';
+  document.getElementById('mod').style.display = 'flex';
 }
 
 function recargar(id){
-  const p=db.find(x=>x.id===id);if(!p)return;
-  document.getElementById('mt').innerText='Recargar Pasajes';
-  document.getElementById('iid').value=p.id;document.getElementById('iid').disabled=true;
-  document.getElementById('inm').value=p.nombre;document.getElementById('icr').value='60';
-  document.getElementById('mod').style.display='flex';
+  const idLimpio = String(id || '').trim();
+  const p = db.find(x => String(x.id).trim() === idLimpio);
+  if (!p) return;
+  document.getElementById('mt').innerText = 'Recargar Pasajero';
+  document.getElementById('iid').value = p.id;
+  document.getElementById('iid').disabled = true;
+  document.getElementById('inm').value = p.nombre;
+  document.getElementById('itipo').value = p.tipoRecarga || 'DRIVER';
+  document.getElementById('icr').value = '60';
+  document.getElementById('mod').style.display = 'flex';
 }
 
-function cerrarModal(){document.getElementById('mod').style.display='none';}
+function cerrarModal(){
+  document.getElementById('mod').style.display = 'none';
+}
 
 function guardarPas(){
-  const id=document.getElementById('iid').value.trim().toUpperCase();
-  const nombre=document.getElementById('inm').value.trim();
-  const creditos=parseInt(document.getElementById('icr').value)||0;
-  if(!id||!nombre)return alert('Completa ID y Nombre');
-  const i=db.findIndex(p=>p.id===id);
-  if(i>=0){db[i].nombre=nombre;db[i].creditos+=creditos;}else db.push({id,nombre,creditos});
-  cerrarModal();save();alertar(`✅ +${creditos} pasajes cargados a ${nombre}`,true);
+  const id = String(document.getElementById('iid').value || '').trim();
+  const nombre = String(document.getElementById('inm').value || '').trim();
+  const tipoRecarga = String(document.getElementById('itipo')?.value || 'DRIVER').trim();
+  const creditos = parseFloat(document.getElementById('icr').value) || 0;
+  if (!id || !nombre) return alert('Completa ID y Nombre');
+
+  const i = db.findIndex(p => String(p.id).trim() === id);
+  if (i >= 0) {
+    db[i].nombre = nombre;
+    db[i].tipoRecarga = tipoRecarga;
+    if (tipoRecarga === 'PASAJES') {
+      db[i].creditos = Number(((Number(db[i].creditos) || 0) + creditos).toFixed(2));
+    } else {
+      db[i].saldoCobro = Number(((Number(db[i].saldoCobro) || 0) + creditos).toFixed(2));
+    }
+  } else {
+    db.push({
+      id,
+      nombre,
+      creditos: tipoRecarga === 'PASAJES' ? Number(creditos.toFixed(2)) : 0,
+      saldoCobro: tipoRecarga === 'DRIVER' ? Number(creditos.toFixed(2)) : 0,
+      tipoRecarga
+    });
+  }
+
+  cerrarModal();
+  save();
+  if (creditos > 0) {
+    registrarRecargaCliente(id, nombre, creditos, tipoRecarga);
+  }
+  enviarAvisoSaldoPorCanalFirebase(id, 'SUMA', creditos, null, tipoRecarga);
+  alertar(`✅ +${fmtMonto(creditos)} cargados a ${nombre} (${tipoRecarga})`, true);
+}
+
+function sincronizarConUserTarjetas(idTarjeta, montoSumado, descontarDePrincipal = false) {
+  const idLimpio = String(idTarjeta || '').trim();
+  const monto = parseFloat(montoSumado) || 0;
+  if (!idLimpio || monto <= 0) return true;
+
+  const miIDActual = String(localStorage.getItem('mi_dropis_id') || '').trim();
+  const clavePrincipal = miIDActual ? `spaxio_saldo_${miIDActual}` : 'spaxio_saldo_actual';
+
+  if (descontarDePrincipal) {
+    let saldoPrincipal = parseFloat(localStorage.getItem(clavePrincipal) || '0') || 0;
+    if (saldoPrincipal < monto) {
+      if (typeof alertar === 'function') {
+        alertar('⚠️ Saldo insuficiente en la cuenta principal', false);
+      } else {
+        alert('⚠️ Saldo insuficiente en la cuenta principal');
+      }
+      return false;
+    }
+
+    saldoPrincipal = Number((saldoPrincipal - monto).toFixed(2));
+    localStorage.setItem(clavePrincipal, saldoPrincipal.toFixed(2));
+    localStorage.setItem('spaxio_saldo_actual', saldoPrincipal.toFixed(2));
+    localStorage.setItem('saldo_principal', saldoPrincipal.toFixed(2));
+  }
+
+  let tarjetas = JSON.parse(localStorage.getItem('user_tarjetas') || '[]');
+  let encontrada = false;
+
+  tarjetas = tarjetas.map(t => {
+    if (String(t.id || '').trim() === idLimpio) {
+      const actual = parseFloat(t.saldo || '0') || 0;
+      t.saldo = (actual + monto).toFixed(2);
+      encontrada = true;
+    }
+    return t;
+  });
+
+  if (!encontrada) {
+    tarjetas.push({
+      id: idLimpio,
+      saldo: monto.toFixed(2)
+    });
+  }
+
+  localStorage.setItem('user_tarjetas', JSON.stringify(tarjetas));
+  return true;
+}
+
+function procesarCobroComercial(monto, idReceptorParam = null) {
+  const valor = parseFloat(monto) || 0;
+  if (valor <= 0) return false;
+
+  const miIDActual = String(localStorage.getItem('mi_dropis_id') || '').trim();
+  const clavePrincipal = miIDActual ? `spaxio_saldo_${miIDActual}` : 'spaxio_saldo_actual';
+
+  const inputReceptor = document.getElementById('idReceptor');
+  const idDestino = String(
+    idReceptorParam || (inputReceptor ? inputReceptor.value : '') || ''
+  ).trim();
+
+  let saldoActual = parseFloat(localStorage.getItem(clavePrincipal) || '0') || 0;
+  saldoActual = Number((saldoActual + valor).toFixed(2));
+
+  localStorage.setItem(clavePrincipal, saldoActual.toFixed(2));
+  localStorage.setItem('spaxio_saldo_actual', saldoActual.toFixed(2));
+  localStorage.setItem('saldo_principal', saldoActual.toFixed(2));
+
+  if (idDestino) {
+    sincronizarConUserTarjetas(idDestino, valor, false);
+  }
+
+  const elBalance = document.getElementById('balanceVisual');
+  if (elBalance) {
+    elBalance.innerText = saldoActual.toFixed(2);
+  }
+
+  return true;
+}
+
+function obtenerMiIDComercio() {
+  return String(localStorage.getItem('mi_dropis_id') || '').trim();
+}
+
+function recuperarSaldoComercioDesdeNube() {
+  const miIDActual = obtenerMiIDComercio();
+  if (!miIDActual || typeof firebase === 'undefined' || !firebase.apps?.length) return;
+
+  firebase.database().ref('spaxio_saldo_actual/' + miIDActual).once('value').then((snap) => {
+    if (!snap.exists()) return;
+    const data = snap.val();
+    const saldoNube = Number(typeof data === 'object' ? data.saldo : data) || 0;
+
+    localStorage.setItem('spaxio_saldo_' + miIDActual, saldoNube.toFixed(2));
+    localStorage.setItem('spaxio_saldo_actual', saldoNube.toFixed(2));
+    localStorage.setItem('saldo_principal', saldoNube.toFixed(2));
+
+    if (typeof sincronizarInterfazSaldos === 'function') {
+      sincronizarInterfazSaldos();
+    }
+  }).catch((err) => {
+    console.error('❌ Error recuperando saldo driver desde Firebase:', err);
+  });
+}
+
+function sincronizarSaldoComercioNube(nuevoSaldo) {
+  const miIDActual = obtenerMiIDComercio();
+  const valorLimpio = Number(nuevoSaldo) || 0;
+
+  localStorage.setItem('spaxio_saldo_actual', valorLimpio.toFixed(2));
+  localStorage.setItem('saldo_principal', valorLimpio.toFixed(2));
+  if (miIDActual) {
+    localStorage.setItem('spaxio_saldo_' + miIDActual, valorLimpio.toFixed(2));
+  }
+
+  if (!miIDActual || typeof firebase === 'undefined' || !firebase.apps?.length) return;
+
+  return firebase.database().ref('spaxio_saldo_actual/' + miIDActual).update({
+    saldo: valorLimpio,
+    id_usuario: miIDActual,
+    actualizadoEn: Date.now()
+  }).catch((err) => {
+    console.error('❌ Error sincronizando saldo driver en Firebase:', err);
+  });
+}
+
+function claveDiaLocal(ts = Date.now()) {
+  const d = new Date(ts);
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+}
+
+let miID = String(localStorage.getItem('mi_dropis_id') || 'DRIVER-YSAPAY').trim();
+const claveRecargasLocal = () => `ysapay_recargas_${miID}`;
+let recargasDB = JSON.parse(localStorage.getItem(claveRecargasLocal()) || '[]');
+
+function guardarRecargasLocal() {
+  localStorage.setItem(claveRecargasLocal(), JSON.stringify(recargasDB));
+}
+
+function unirEventosRecarga(listaNuevos) {
+  const mapa = new Map();
+  recargasDB.forEach((ev) => {
+    if (ev && ev.idEvento) mapa.set(ev.idEvento, ev);
+  });
+  (listaNuevos || []).forEach((ev) => {
+    if (ev && ev.idEvento) {
+      const prev = mapa.get(ev.idEvento);
+      mapa.set(ev.idEvento, prev ? { ...prev, ...ev } : ev);
+    }
+  });
+  recargasDB = Array.from(mapa.values()).sort((a, b) => (b.ts || 0) - (a.ts || 0));
+  guardarRecargasLocal();
+}
+
+async function cargarRecargasFirebase() {
+  miID = String(localStorage.getItem('mi_dropis_id') || miID || 'DRIVER-YSAPAY').trim();
+  if (typeof firebase === 'undefined' || !firebase.apps?.length) return;
+
+  try {
+    const snap = await firebase.database().ref(`ysapay_recargas/${miID}`).once('value');
+    if (!snap.exists()) return;
+    const data = snap.val() || {};
+    const traidos = [];
+
+    Object.values(data).forEach((nodoCliente) => {
+      const movs = nodoCliente && nodoCliente.movimientos ? Object.values(nodoCliente.movimientos) : [];
+      movs.forEach((m) => {
+        if (m && m.monto > 0) {
+          traidos.push({
+            ...m,
+            dia: m.dia || claveDiaLocal(m.ts || Date.now())
+          });
+        }
+      });
+    });
+
+    if (traidos.length) {
+      unirEventosRecarga(traidos);
+    }
+  } catch (e) {
+    console.error('❌ Error leyendo recargas desde Firebase:', e);
+  }
+}
+
+function registrarRecargaCliente(clienteId, clienteNombre, montoCargado, tipoRecarga = 'DRIVER') {
+  const monto = Number(parseFloat(montoCargado) || 0);
+  if (!clienteId || monto <= 0) return;
+
+  miID = String(localStorage.getItem('mi_dropis_id') || miID || 'DRIVER-YSAPAY').trim();
+  const ahora = Date.now();
+  const dia = claveDiaLocal(ahora);
+  const evento = {
+    idEvento: `rec_${ahora}_${Math.floor(Math.random() * 1000)}`,
+    comercioId: miID,
+    clienteId: String(clienteId).trim(),
+    clienteNombre: String(clienteNombre || '').trim(),
+    tipoRecarga: tipoRecarga,
+    monto: Number(monto.toFixed(2)),
+    dia: dia,
+    fecha: new Date(ahora).toLocaleString(),
+    ts: ahora
+  };
+
+  unirEventosRecarga([evento]);
+
+  if (typeof firebase !== 'undefined' && firebase.apps?.length) {
+    const refCliente = firebase.database().ref(`ysapay_recargas/${miID}/${evento.clienteId}`);
+    refCliente.child('movimientos').child(evento.idEvento).set(evento).catch(() => {});
+    refCliente.child('resumen').transaction((actual) => {
+      const prev = actual || { clienteId: evento.clienteId, nombre: evento.clienteNombre, totalRecargado: 0, cantidad: 0 };
+      return {
+        clienteId: evento.clienteId,
+        nombre: evento.clienteNombre || prev.nombre,
+        tipoRecarga: tipoRecarga,
+        totalRecargado: Number(((Number(prev.totalRecargado) || 0) + evento.monto).toFixed(2)),
+        cantidad: (Number(prev.cantidad) || 0) + 1,
+        ultimaRecarga: evento.fecha,
+        ts: evento.ts
+      };
+    }).catch(() => {});
+  }
+}
+
+async function abrirReporteRecargas() {
+  miID = String(localStorage.getItem('mi_dropis_id') || miID || 'DRIVER-YSAPAY').trim();
+  recargasDB = JSON.parse(localStorage.getItem(claveRecargasLocal()) || '[]');
+  if (navigator.onLine) {
+    await cargarRecargasFirebase();
+  }
+
+  const hoyDia = claveDiaLocal(Date.now());
+  const delDia = recargasDB.filter((r) => (r.dia || claveDiaLocal(r.ts || 0)) === hoyDia);
+
+  const agrupado = {};
+  let totalDia = 0;
+
+  delDia.forEach((r) => {
+    const cid = String(r.clienteId || '').trim();
+    const m = Number(r.monto) || 0;
+    if (!cid || m <= 0) return;
+    totalDia = Number((totalDia + m).toFixed(2));
+    if (!agrupado[cid]) {
+      agrupado[cid] = { id: cid, nombre: r.clienteNombre || cid, tipoRecarga: r.tipoRecarga || 'DRIVER', total: 0, veces: 0, ultima: r.fecha || '' };
+    }
+    agrupado[cid].nombre = r.clienteNombre || agrupado[cid].nombre;
+    agrupado[cid].tipoRecarga = r.tipoRecarga || agrupado[cid].tipoRecarga;
+    agrupado[cid].total = Number((agrupado[cid].total + m).toFixed(2));
+    agrupado[cid].veces += 1;
+    if (r.fecha) agrupado[cid].ultima = r.fecha;
+  });
+
+  const lista = Object.values(agrupado).sort((a, b) => b.total - a.total);
+  const cont = document.getElementById('repBody');
+  const cabeceraDia = `<div class="cd" style="margin-bottom:10px"><div><div class="nm">Hoy (${hoyDia})</div><div class="id">Unidad: ${miID}</div></div><div class="cr">${fmtMonto(totalDia)}</div></div>`;
+
+  if (!lista.length) {
+    cont.innerHTML = cabeceraDia + `<div class="cd"><div><div class="nm">Sin recargas hoy</div><div class="id">Aún no hay cargas registradas en esta fecha</div></div></div>`;
+  } else {
+    cont.innerHTML = cabeceraDia + lista.map((item) => `
+      <div class="cd" style="margin-bottom:8px">
+        <div>
+          <div class="nm">${item.nombre}</div>
+          <div class="id">ID: ${item.id} · Tipo: ${item.tipoRecarga} · Creditos hoy: ${item.veces}</div>
+          <div class="id">${item.ultima}</div>
+        </div>
+        <div class="cr">${fmtMonto(item.total)}</div>
+      </div>
+    `).join('');
+  }
+
+  const mRep = document.getElementById('modRep');
+  mRep.style.display = 'flex';
+  mRep.style.visibility = 'visible';
+  mRep.style.opacity = '1';
+}
+
+function cerrarReporteRecargas() {
+  const mRep = document.getElementById('modRep');
+  mRep.style.visibility = 'hidden';
+  mRep.style.opacity = '0';
+  mRep.style.display = 'none';
+}
+
+async function enviarAvisoSaldoPorCanalFirebase(idDestino, tipo, monto, refCodigo, tipoRecarga = 'DRIVER') {
+  const destinoLimpio = String(idDestino || '').trim();
+  const valor = parseFloat(monto) || 0;
+  if (!destinoLimpio || valor <= 0) return false;
+  if (typeof firebase === 'undefined' || !firebase.apps?.length || typeof cargarProto !== 'function') return false;
+
+  const remitenteID = localStorage.getItem('mi_dropis_id') || "DRIVER-YSAPAY";
+  const codigo = refCodigo || ((tipo === 'SUMA' ? "REC-" : (tipo === 'PASAJE' ? "PAS-" : "COB-")) + Math.floor(100000 + Math.random() * 900000));
+  const etiqueta = tipo === 'SUMA'
+    ? (tipoRecarga === 'PASAJES' ? `|SPA_SUMA_PASAJES|${valor}|${codigo}` : `|SPA_SUMA|${valor}|${codigo}`)
+    : (tipo === 'PASAJE' ? `|SPA_PASAJE|${valor}|${codigo}` : `|SPA_COBRO|${valor}|${codigo}`);
+
+  const textoAviso = tipo === 'SUMA'
+    ? `💳 ¡Recarga recibida (${tipoRecarga})! Te cargaron ${fmtMonto(valor)} (Ref: ${codigo}) ${etiqueta}`
+    : (tipo === 'PASAJE'
+        ? `🚖 ¡Viaje cobrado! Se descontó ${fmtMonto(valor)} pasaje (Ref: ${codigo}) ${etiqueta}`
+        : `🧾 ¡Cobro Driver! Se descontaron ${fmtMonto(valor)} (Ref: ${codigo}) ${etiqueta}`);
+
+  const msgId = "msg_saldo_" + Date.now();
+  const root = await cargarProto();
+  const SuperAppPayload = root.lookupType("SuperAppPayload");
+  const msgProtegido = btoa(unescape(encodeURIComponent(textoAviso)));
+  const payload = SuperAppPayload.create({ chatText: msgProtegido, msgId: msgId, tipo: 0 });
+  const buffer = SuperAppPayload.encode(payload).finish();
+
+  let binary = "";
+  for (let i = 0; i < buffer.byteLength; i++) {
+    binary += String.fromCharCode(buffer[i]);
+  }
+  const base64 = btoa(binary);
+
+  await firebase.database().ref('cola_satelital/' + destinoLimpio).push({
+    p: base64,
+    from: remitenteID,
+    ts: Date.now(),
+    msgId: msgId,
+    mediaType: 'texto'
+  });
+
+  return true;
+}
+
+if (navigator.onLine) {
+  recuperarSaldoComercioDesdeNube();
+  cargarRecargasFirebase();
 }
 
 render();
-if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js').catch(()=>{});
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js').catch(()=>{});
 </script>
 </body>
 </html>
