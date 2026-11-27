@@ -2030,13 +2030,357 @@ function seleccionarRol(rolElegido) {
         }
     }, 2000);
               }
+  
+(function habilitarListasPorCategoriaEnSaldos() {
+  const saldosBox = document.getElementById('panel-saldos-extras-tarjeta');
+  if (!saldosBox) return;
+
+  let contListas = document.getElementById('listas-detalle-por-categoria');
+  if (!contListas) {
+    contListas = document.createElement('div');
+    contListas.id = 'listas-detalle-por-categoria';
+    contListas.style.cssText = 'margin-top:8px;';
+    saldosBox.appendChild(contListas);
+  }
+
+  function clasificarMovimiento(texto) {
+    const t = String(texto || '').toUpperCase();
+    if (t.includes('|SPA_PASAJE|') || t.includes('PASAJE')) return 'pasajes';
+    if (t.includes('DRIVER') || t.includes('TAXI') || t.includes('DELIVERY')) return 'driver';
+    return 'comercio';
+  }
+
+  function analizarImpacto(texto) {
+    const t = String(texto || '').toUpperCase();
+    const matchEtiqueta = t.match(/\|SPA_(SUMA|COBRO|PAGO|CANJE|PASAJE)\|([0-9]+(?:\.[0-9]+)?)/);
+    if (matchEtiqueta) {
+      const op = matchEtiqueta[1];
+      const val = parseFloat(matchEtiqueta[2]) || 0;
+      const signo = (op === 'SUMA' || op === 'PAGO') ? 1 : -1;
+      return { signo, monto: val };
+    }
+
+    const matchNum = t.match(/([0-9]+(?:\.[0-9]{1,2})?)/);
+    const val = matchNum ? (parseFloat(matchNum[1]) || 0) : 0;
+    const esResta = t.includes('COBRO') || t.includes('DESCONT') || t.includes('CANJE') || t.includes('PASAJE');
+    return { signo: esResta ? -1 : 1, monto: val };
+  }
+
+  function obtenerNombreAgenda(idEmisor) {
+    const idLimpio = String(idEmisor || '').trim();
+    if (!idLimpio) return 'Desconocido';
+    try {
+      const agenda = JSON.parse(localStorage.getItem('mis_contactos') || '[]');
+      const encontrado = agenda.find(c => String(c.id || '').trim() === idLimpio);
+      if (encontrado && encontrado.nombre) return encontrado.nombre;
+    } catch (e) {}
+    return idLimpio;
+  }
+
+  window.toggleDetalleCategoriaYsaPay = function(categoria) {
+    const idSub = `detalle-cat-${categoria}`;
+    let sub = document.getElementById(idSub);
+
+    ['comercio', 'driver', 'pasajes'].forEach(cat => {
+      if (cat !== categoria) {
+        const otro = document.getElementById(`detalle-cat-${cat}`);
+        if (otro) otro.style.display = 'none';
+      }
+    });
+
+    if (!sub) {
+      sub = document.createElement('div');
+      sub.id = idSub;
+      sub.style.cssText = 'display:none;background:#10151c;border:1px solid rgba(255,215,0,0.25);border-radius:10px;padding:8px;margin-top:8px;font-size:11px;';
+      contListas.appendChild(sub);
+    }
+
+    const vaAAbrir = sub.style.display === 'none';
+    if (!vaAAbrir) {
+      sub.style.display = 'none';
+      return;
+    }
+
+    const todos = typeof leerRegistroUsuario === 'function' ? leerRegistroUsuario() : [];
+    const acumuladosPorID = {};
+
+    todos.forEach(item => {
+      if (clasificarMovimiento(item.mensaje) !== categoria) return;
+      const idKey = String(item.from || 'SIN-ID').trim() || 'SIN-ID';
+      const { signo, monto } = analizarImpacto(item.mensaje);
+
+      if (!acumuladosPorID[idKey]) {
+        acumuladosPorID[idKey] = {
+          id: idKey,
+          nombre: obtenerNombreAgenda(idKey),
+          queda: 0
+        };
+      }
+
+      acumuladosPorID[idKey].queda = Number(
+        (acumuladosPorID[idKey].queda + signo * monto).toFixed(2)
+      );
+    });
+
+    const listaAgrupada = Object.values(acumuladosPorID);
+
+    if (!listaAgrupada.length) {
+      sub.innerHTML = `<div style="color:#8696a0;padding:4px;">Sin saldo en ${categoria}.</div>`;
+    } else {
+      sub.innerHTML = listaAgrupada.map(entry => `
+        <div style="padding:8px;border-bottom:1px solid rgba(255,255,255,0.08);">
+          <div style="color:#fff;font-weight:bold;font-size:12px;">${entry.nombre}</div>
+          <div style="color:#94a3b8;font-size:10px;margin-top:2px;">ID: ${entry.id}</div>
+          <div style="color:#00ffcc;font-weight:bold;margin-top:3px;">Queda: ${entry.queda.toFixed(2)}</div>
+        </div>
+      `).join('');
+    }
+
+    sub.style.display = 'block';
+  };
+
+  saldosBox.querySelectorAll('div').forEach(el => {
+    if (el.children.length === 0 || el.tagName === 'DIV') {
+      const txt = (el.textContent || '').toLowerCase();
+      if (txt.includes('comercio:') && el.children.length <= 2) {
+        el.style.cursor = 'pointer';
+        el.onclick = () => window.toggleDetalleCategoriaYsaPay('comercio');
+      } else if (txt.includes('driver:') && el.children.length <= 2) {
+        el.style.cursor = 'pointer';
+        el.onclick = () => window.toggleDetalleCategoriaYsaPay('driver');
+      } else if (txt.includes('pasajes:') && el.children.length <= 2) {
+        el.style.cursor = 'pointer';
+        el.onclick = () => window.toggleDetalleCategoriaYsaPay('pasajes');
+      }
+    }
+  });
+})();
+
+              function actualizarSaldosRolesTarjeta() {
+  const comercio = parseFloat(localStorage.getItem('spaxio_creditos_comercio') || '0') || 0;
+  const driver = parseFloat(localStorage.getItem('spaxio_saldo_driver') || '0') || 0;
+  const pasajes = parseInt(localStorage.getItem('spaxio_contador_chofer_hoy') || '0', 10) || 0;
+
+  const elComercio = document.getElementById('saldo-rol-comercio');
+  const elDriver = document.getElementById('saldo-rol-driver');
+  const elPasajes = document.getElementById('saldo-rol-pasajes');
+
+  if (elComercio) elComercio.textContent = comercio.toFixed(2);
+  if (elDriver) elDriver.textContent = driver.toFixed(2);
+  if (elPasajes) elPasajes.textContent = String(pasajes);
+}
+
+function togglePanelSaldosTarjeta() {
+  const panelSaldos = document.getElementById('panel-saldos-extras-tarjeta');
+  const panelRegistro = document.getElementById('registro-ysapay-usuario');
+  if (!panelSaldos) return;
+
+  const vaAAbrir = panelSaldos.style.display === 'none' || panelSaldos.style.display === '';
+  if (panelRegistro) panelRegistro.style.display = 'none';
+  panelSaldos.style.display = vaAAbrir ? 'block' : 'none';
+
+  if (vaAAbrir) actualizarSaldosRolesTarjeta();
+}
+
+function toggleRegistroTarjeta() {
+  asegurarContenedorRegistroUsuario();
+  const panelRegistro = document.getElementById('registro-ysapay-usuario');
+  const panelSaldos = document.getElementById('panel-saldos-extras-tarjeta');
+  if (!panelRegistro) return;
+
+  const vaAAbrir = panelRegistro.style.display === 'none' || panelRegistro.style.display === '';
+  if (panelSaldos) panelSaldos.style.display = 'none';
+  panelRegistro.style.display = vaAAbrir ? 'block' : 'none';
+
+  if (vaAAbrir) pintarRegistroUsuario();
+}
+
+(function ocultarRegistroPorDefecto() {
+  asegurarContenedorRegistroUsuario();
+  const panelRegistro = document.getElementById('registro-ysapay-usuario');
+  if (panelRegistro) panelRegistro.style.display = 'none';
+  actualizarSaldosRolesTarjeta();
+})();
+function obtenerClaveRegistroUsuario() {
+  const miID = String(localStorage.getItem('mi_dropis_id') || 'SPAXIO-USER').trim();
+  return `ysapay_registro_usuario_${miID}`;
+}
+
+function leerRegistroUsuario() {
+  try {
+    return JSON.parse(localStorage.getItem(obtenerClaveRegistroUsuario()) || '[]');
+  } catch (e) {
+    return [];
+  }
+}
+
+function guardarRegistroEnUsuario(textoMensaje, fromID = '') {
+  const texto = String(textoMensaje || '').trim();
+  if (!texto) return;
+
+  const lista = leerRegistroUsuario();
+  lista.unshift({
+    from: String(fromID || '').trim(),
+    mensaje: texto,
+    fecha: new Date().toLocaleString()
+  });
+
+  localStorage.setItem(obtenerClaveRegistroUsuario(), JSON.stringify(lista));
+  pintarRegistroUsuario();
+}
+
+function pintarRegistroUsuario() {
+  const cont = document.getElementById('lista-registro-ysapay');
+  if (!cont) return;
+
+  const lista = leerRegistroUsuario();
+  if (!lista.length) {
+    cont.innerHTML = `<div style="color:#94a3b8;font-size:.85rem;">Sin movimientos guardados todavía.</div>`;
+    return;
+  }
+
+  cont.innerHTML = lista.map(item => `
+    <div style="background:#202732;border-radius:8px;padding:8px;margin-bottom:6px;font-size:.85rem;">
+      <div>${item.mensaje}</div>
+      <div style="color:#94a3b8;font-size:.75rem;margin-top:2px;">${item.from ? 'De: ' + item.from + ' · ' : ''}${item.fecha}</div>
+    </div>
+  `).join('');
+}
+
+pintarRegistroUsuario();
+
+       
+             function asegurarContenedorRegistroUsuario() {
+  if (document.getElementById('registro-ysapay-usuario')) return;
+
+  const ancla = document.getElementById('seccion-spaxiocard-integrada') || document.body;
+  const caja = document.createElement('div');
+  caja.id = 'registro-ysapay-usuario';
+  caja.style.cssText = 'background:#202732;border:1px solid rgba(255,215,0,0.35);border-radius:12px;padding:12px;margin:12px 5px;color:#fff;';
+  caja.innerHTML = `
+    <div style="font-weight:bold;color:#ffd700;font-size:13px;margin-bottom:8px;">📋 Registro de Recargas y Cobros</div>
+    <div id="lista-registro-ysapay"></div>
+  `;
+
+  if (ancla.id === 'seccion-spaxiocard-integrada') {
+    ancla.prepend(caja);
+  } else {
+    ancla.appendChild(caja);
+  }
+}
+
+function obtenerClaveRegistroUsuario() {
+  const idPropio = String(localStorage.getItem('mi_dropis_id') || 'SPAXIO-USER').trim();
+  return `ysapay_registro_usuario_${idPropio}`;
+}
+
+function leerRegistroUsuario() {
+  try {
+    return JSON.parse(localStorage.getItem(obtenerClaveRegistroUsuario()) || '[]');
+  } catch (e) {
+    return [];
+  }
+}
+
+function guardarRegistroEnUsuario(textoMensaje, emisor = '') {
+  const texto = String(textoMensaje || '').trim();
+  if (!texto) return;
+
+  const lista = leerRegistroUsuario();
+  lista.unshift({
+    from: String(emisor || '').trim(),
+    mensaje: texto,
+    fecha: new Date().toLocaleString()
+  });
+
+  localStorage.setItem(obtenerClaveRegistroUsuario(), JSON.stringify(lista));
+  pintarRegistroUsuario();
+}
+
+function pintarRegistroUsuario() {
+  asegurarContenedorRegistroUsuario();
+  const cont = document.getElementById('lista-registro-ysapay');
+  if (!cont) return;
+
+  const lista = leerRegistroUsuario();
+  if (!lista.length) {
+    cont.innerHTML = `<div style="color:#8696a0;font-size:12px;">Sin movimientos registrados aún.</div>`;
+    return;
+  }
+
+  cont.innerHTML = lista.map(item => `
+    <div style="background:#161b22;border-radius:8px;padding:8px;margin-bottom:6px;font-size:12px;">
+      <div style="color:#fff;">${item.mensaje}</div>
+      <div style="color:#8696a0;font-size:10px;margin-top:3px;">${item.from ? 'De: ' + item.from + ' · ' : ''}${item.fecha}</div>
+    </div>
+  `).join('');
+}
+
+pintarRegistroUsuario(); 
+              
+              
+              function recuperarSaldoDesdeNube() {
+  const idUsuario = String(localStorage.getItem("mi_dropis_id") || "").trim();
+  if (typeof db === "undefined" || !idUsuario) return;
+
+  db.ref("spaxio_saldo_actual/" + idUsuario).once("value").then((snap) => {
+    if (snap.exists()) {
+      const data = snap.val();
+      const saldoNube = Number(typeof data === "object" ? data.saldo : data) || 0;
+
+      localStorage.setItem("spaxio_saldo_actual", String(saldoNube));
+      localStorage.setItem("saldo_principal", String(saldoNube));
+
+      const elBalance = document.getElementById("balanceVisual");
+      if (elBalance) {
+        elBalance.textContent = "Cr. " + saldoNube.toFixed(2);
+      }
+    }
+  });
+}
+
+function sincronizarSaldoNube(nuevoSaldo) {
+  const valorLimpio = Number(nuevoSaldo) || 0;
+  localStorage.setItem("spaxio_saldo_actual", String(valorLimpio));
+  localStorage.setItem("saldo_principal", String(valorLimpio));
+
+  const idUsuario = String(localStorage.getItem("mi_dropis_id") || "").trim();
+  if (typeof db !== "undefined" && idUsuario) {
+    db.ref("spaxio_saldo_actual/" + idUsuario).update({
+      saldo: valorLimpio,
+      actualizadoEn: Date.now()
+    });
+  }
+              }
+      function abrirModalSpaceCard() {
+    const menu = document.getElementById('seccion-spaxiocard-integrada');
+    if (a) {
+        a.classList.toggle('abierto');
+    }
+              }  
+              
+              // Función para enfocar el mapa GPS en el negocio seleccionado y dar la opción de pedir taxi
+
+              function trazarRutaHaciaNegocio(lat, lng, nombreNegocio) {
+    // 1. Actualiza el mapa miniatura en tu panel lateral de taxi (el iframe)
+    const iframeMapa = document.getElementById('mapa-radar');
+    if (iframeMapa) {
+        iframeMapa.src = `https://maps.google.com/maps?q=${lat},${lng}&z=16&output=embed`;
+    }
+
+    // 2. Abre automáticamente Google Maps con las indicaciones de navegación (GPS)
+    const urlNavegacion = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}&travelmode=driving`;
+    
+    // Abre el mapa exteriormente (en la app de Google Maps o pestaña nueva del navegador)
+    window.open(urlNavegacion, '_blank');
+              }
 async function procesarCobroComercial(cantidadMonto = null) {
     const receptorInput = document.getElementById('idReceptor');
     const montoInput = document.getElementById('montoEnviar');
 
     const clienteID = receptorInput ? receptorInput.value.trim() : '';
     const monto = cantidadMonto !== null ? parseFloat(cantidadMonto) : (montoInput ? parseFloat(montoInput.value) : 0);
-    const miID = localStorage.getItem('mi_dropis_id') || "SPAXIO-USER";
+    const miID = String(localStorage.getItem('mi_dropis_id') || 'SPAXIO-USER').trim();
 
     if (!clienteID || !monto || isNaN(monto) || monto <= 0) {
         alert("⚠️ Ingresa un ID válido y un monto mayor a cero para cobrar.");
@@ -2048,46 +2392,45 @@ async function procesarCobroComercial(cantidadMonto = null) {
         return;
     }
 
-    let bolsaDriver = parseFloat(localStorage.getItem('spaxio_saldo_driver_recargado') || '0') || 0;
-    if (bolsaDriver < monto) {
-        alert(`⚠️ Saldo insuficiente en la bolsa cargada (${bolsaDriver.toFixed(2)} disponibles).`);
-        return;
-    }
-
-    const confirmar = confirm(`🔍 ¿Confirmar cobro al cliente?\n\n💵 Monto a recibir: Cr. ${monto.toFixed(2)}\n👤 Cliente ID: ${clienteID}`);
+    const confirmar = confirm(`🔍 ¿Confirmar cobro al cliente?\n\n💵 Monto a recibir: Bs. ${monto.toFixed(2)}\n👤 Cliente ID: ${clienteID}`);
     if (!confirmar) return;
-
-    // Descontar de la bolsa cargada en el otro HTML
-    bolsaDriver = Number((bolsaDriver - monto).toFixed(2));
-    localStorage.setItem('spaxio_saldo_driver_recargado', bolsaDriver.toFixed(2));
 
     const codigoOperacion = "COB-" + Math.floor(100000 + Math.random() * 900000);
 
-    // Sumar a tu cuenta de comercio
-    let saldoActual = parseFloat(localStorage.getItem('spaxio_saldo_actual')) || 2500.00;
-    saldoActual += monto;
+    const clavePrincipal = `spaxio_saldo_${miID}`;
+    let saldoActual = parseFloat(localStorage.getItem(clavePrincipal) ?? localStorage.getItem('spaxio_saldo_actual') ?? '0') || 0;
+    saldoActual = Number((saldoActual + monto).toFixed(2));
+
+    localStorage.setItem(clavePrincipal, saldoActual.toFixed(2));
     localStorage.setItem('spaxio_saldo_actual', saldoActual.toFixed(2));
 
     const elBalance = document.getElementById('balanceVisual');
     if (elBalance) {
-        elBalance.innerText = "Cr. " + saldoActual.toLocaleString('es-VE', { minimumFractionDigits: 2 });
+        elBalance.innerText = "Bs. " + saldoActual.toLocaleString('es-VE', { minimumFractionDigits: 2 });
     }
 
     const inputTarget = document.querySelector('#target-id');
     const targetAnterior = inputTarget ? inputTarget.value : '';
-    if (inputTarget) inputTarget.value = clienteID;
 
-    const mensajeCobro = `🧾 ¡Gracias por usar YsaPay! Se procesó un cargo de Cr. ${monto.toFixed(2)} (Ref: ${codigoOperacion}) |SPA_COBRO|${monto}|${codigoOperacion}`;
+    try {
+        if (inputTarget) inputTarget.value = clienteID;
 
-    await enviarMensajeSatelital(mensajeCobro, 'texto');
+        const mensajeCobro = `🧾 ¡Cobro Exitoso en Comercio! Se procesó un cargo de Bs. ${monto.toFixed(2)} (Ref: ${codigoOperacion}) |SPA_COBRO|${monto}|${codigoOperacion}`;
 
-    if (inputTarget) inputTarget.value = targetAnterior;
+        if (typeof enviarMensajeSatelital === "function") {
+            await enviarMensajeSatelital(mensajeCobro, 'texto');
+        }
+    } finally {
+        if (inputTarget) inputTarget.value = targetAnterior;
+    }
 
-    receptorInput.value = '';
-    montoInput.value = '';
-    cerrarSubModalIntegrado('submodal-miqr');
+    if (receptorInput) receptorInput.value = '';
+    if (montoInput) montoInput.value = '';
+    if (typeof cerrarSubModalIntegrado === "function") {
+        cerrarSubModalIntegrado('submodal-miqr');
+    }
 
-    alert(`✅ ¡Cobro de Cr. ${monto.toFixed(2)} realizado con éxito!`);
+    alert(`✅ ¡Cobro de Bs. ${monto.toFixed(2)} realizado con éxito!`);
               }
 
 async function procesarEnvioInterno() {
@@ -2096,7 +2439,7 @@ async function procesarEnvioInterno() {
 
     const receptorID = receptorInput ? receptorInput.value.trim() : '';
     const monto = montoInput ? parseFloat(montoInput.value) : 0;
-    const miID = localStorage.getItem('mi_dropis_id') || "SPAXIO-USER";
+    const miID = String(localStorage.getItem('mi_dropis_id') || 'SPAXIO-USER').trim();
 
     if (!receptorID || !monto || isNaN(monto) || monto <= 0) {
         alert("⚠️ Ingresa un ID válido y un monto mayor a cero.");
@@ -2108,7 +2451,8 @@ async function procesarEnvioInterno() {
         return;
     }
 
-    let saldoActual = parseFloat(localStorage.getItem('spaxio_saldo_actual')) || 2500.00;
+    const clavePrincipal = `spaxio_saldo_${miID}`;
+    let saldoActual = parseFloat(localStorage.getItem(clavePrincipal) ?? localStorage.getItem('spaxio_saldo_actual') ?? '0') || 0;
 
     if (monto > saldoActual) {
         alert("❌ Saldo insuficiente en tu tarjeta.");
@@ -2117,7 +2461,8 @@ async function procesarEnvioInterno() {
 
     const codigoOperacion = "TRX-" + Math.floor(100000 + Math.random() * 900000);
 
-    saldoActual -= monto;
+    saldoActual = Number((saldoActual - monto).toFixed(2));
+    localStorage.setItem(clavePrincipal, saldoActual.toFixed(2));
     localStorage.setItem('spaxio_saldo_actual', saldoActual.toFixed(2));
 
     const elBalance = document.getElementById('balanceVisual');
@@ -2127,24 +2472,31 @@ async function procesarEnvioInterno() {
 
     const inputTarget = document.querySelector('#target-id');
     const targetAnterior = inputTarget ? inputTarget.value : '';
-    if (inputTarget) inputTarget.value = receptorID;
 
-    const mensajePago = `💸 ¡Comprobante de Traspaso! Recibiste Bs. ${monto.toFixed(2)} (Ref: ${codigoOperacion}) |SPA_PAGO|${monto}|${codigoOperacion}`;
+    try {
+        if (inputTarget) inputTarget.value = receptorID;
 
-    await enviarMensajeSatelital(mensajePago, 'texto');
+        const mensajePago = `💸 ¡Comprobante de Traspaso! Recibiste Bs. ${monto.toFixed(2)} (Ref: ${codigoOperacion}) |SPA_PAGO|${monto}|${codigoOperacion}`;
 
-    if (inputTarget) inputTarget.value = targetAnterior;
+        if (typeof enviarMensajeSatelital === "function") {
+            await enviarMensajeSatelital(mensajePago, 'texto');
+        }
+    } finally {
+        if (inputTarget) inputTarget.value = targetAnterior;
+    }
 
-    receptorInput.value = '';
-    montoInput.value = '';
-    cerrarSubModalIntegrado('submodal-miqr');
+    if (receptorInput) receptorInput.value = '';
+    if (montoInput) montoInput.value = '';
+    if (typeof cerrarSubModalIntegrado === "function") {
+        cerrarSubModalIntegrado('submodal-miqr');
+    }
 
     alert(`✅ ¡Traspaso de Bs. ${monto.toFixed(2)} enviado con éxito!`);
-}
+              }
               
 function procesarRecargaTarjeta(montoACargar, idTarjetaDestino) {
     // 1. Obtener saldos actuales desde localStorage
-    let saldoPrincipal = parseFloat(localStorage.getItem('spaxio_saldo_actual') || localStorage.getItem('saldo_principal') || '2500.00');
+    let saldoPrincipal = parseFloat(localStorage.getItem('spaxio_saldo_actual') || localStorage.getItem('saldo_principal') || '0.00');
     let tarjetas = JSON.parse(localStorage.getItem('user_tarjetas') || '[]');
 
     // 2. Validar disponibilidad
@@ -2152,7 +2504,7 @@ function procesarRecargaTarjeta(montoACargar, idTarjetaDestino) {
         alert('⚠️ Saldo insuficiente en la cuenta principal');
         return false;
     }
-
+alert(avisoSaldo);
     // 3. DESCONTAR de la cuenta principal
     saldoPrincipal -= montoACargar;
     localStorage.setItem('spaxio_saldo_actual', saldoPrincipal.toFixed(2));
@@ -2252,7 +2604,6 @@ function sincronizarInterfazSaldos() {
 
     alert(`✅ ¡Canje de ${cantidadCreditos} créditos procesado con éxito! Puntos acreditados a tu cuenta.`);
               }
- 
 
               
               async function procesarValidacionPasaje() {
@@ -2293,8 +2644,6 @@ function sincronizarInterfazSaldos() {
         document.getElementById('idReceptor').value = '';
     }
               }
-
-  
               function sincronizarMiFotoEnStories() {
     const imgStory = document.getElementById('story-mi-foto-perfil');
     if (!imgStory) return;
@@ -2326,103 +2675,31 @@ window.addEventListener('DOMContentLoaded', () => {
     // 3. Tu función de sincronización de perfil existente
     setTimeout(sincronizarMiFotoEnStories, 500);
 });
-
-              function darLike(postId) {
-    const contador = document.getElementById(`contador-like-${postId}`);
-    const icono = document.getElementById(`icono-like-${postId}`);
-    
-    if (contador && icono) {
-        let actual = parseInt(contador.innerText) || 0;
-        if (icono.style.color === 'red') {
-            icono.style.color = '#fff';
-            contador.innerText = actual - 1;
-            localStorage.setItem(`dado_like_${postId}`, 'false');
-        } else {
-            icono.style.color = 'red';
-            contador.innerText = actual + 1;
-            localStorage.setItem(`dado_like_${postId}`, 'true');
-        }
-        localStorage.setItem(`like_${postId}`, contador.innerText);
-    }
-}
-
-function darPulgar(postId) {
-    const contador = document.getElementById(`contador-pulgar-${postId}`);
-    const icono = document.getElementById(`icono-pulgar-${postId}`);
-    
-    if (contador && icono) {
-        let actual = parseInt(contador.innerText) || 0;
-        if (icono.style.color === 'rgb(255, 215, 0)' || icono.style.color === '#ffd700') {
-            icono.style.color = '#fff';
-            contador.innerText = actual - 1;
-            localStorage.setItem(`dado_pulgar_${postId}`, 'false');
-        } else {
-            icono.style.color = '#ffd700';
-            contador.innerText = actual + 1;
-            localStorage.setItem(`dado_pulgar_${postId}`, 'true');
-        }
-        localStorage.setItem(`pulgar_${postId}`, contador.innerText);
-    }
-}
-
-function toggleComentarios(postId) {
-    const box = document.getElementById(`box-comentarios-${postId}`);
-    if (box) {
-        if (box.style.display === 'none' || box.style.display === '') {
-            box.style.display = 'flex';
-        } else {
-            box.style.display = 'none';
-        }
-    }
-              }
-              
-              function darComentario(postId) {
-    const contador = document.getElementById(`contador-comentarios-${postId}`);
-    const box = document.getElementById(`box-comentarios-${postId}`);
-    
-    if (contador) {
-        let actual = parseInt(contador.innerText) || 0;
-        
-        // Verificamos si ya abrió o interactuó con la caja de comentarios
-        let yaComento = localStorage.getItem(`dado_comentario_${postId}`) === 'true';
-        
-        if (yaComento) {
-            // Si ya habia sumado su comentario y quiere ajustarlo/quitarlo
-            contador.innerText = Math.max(0, actual - 1);
-            localStorage.setItem(`dado_comentario_${postId}`, 'false');
-        } else {
-            // Suma un nuevo comentario al contador
-            contador.innerText = actual + 1;
-            localStorage.setItem(`dado_comentario_${postId}`, 'true');
-        }
-        
-        // Guardamos el número limpio en el localStorage tal como el like
-        localStorage.setItem(`comentarios_${postId}`, contador.innerText);
-    }
-              }
 async function subirYAbrirSpaxioFlow(input) {
     if (!input.files || !input.files[0]) return;
     
     const archivo = input.files[0];
+    alert("🚀 Subiendo archivo a SpaxioFlow...");
 
-    // 1. 🔥 VENTANA FLOTANTE PARA EL TEXTO TIPO NOTICIA
-    const textoNoticia = prompt("Escribe una noticia corta o titular para la publicación (opcional):", "") || "";
-
-    alert("🚀 Subiendo historia a SpaxioFlow...");
-
+    // 1. Apuntamos temporalmente el target al ID de SpaxioFlow para que la app sepa a dónde enviarlo
     const inputTarget = document.querySelector('#target-id');
     if (inputTarget) inputTarget.value = "26fmetp4Q4WJ";
 
+    // 2. Usamos tu función existente para preparar y enviar el archivo multimedia
     let tipo = archivo.type.includes('video') ? 'video' : 'foto';
     await prepararEnvioMedia(input, tipo);
 
+    // ==========================================
+    // >>> AQUÍ AGREGAS ESTO PARA GUARDAR EN EL CARRUSEL <<<
+    // ==========================================
     const lector = new FileReader();
     lector.onload = function(e) {
         const img = new Image();
         img.src = e.target.result;
         img.onload = function() {
+            // Creamos un canvas para comprimir la imagen
             const canvas = document.createElement('canvas');
-            const MAX_WIDTH = 600;
+            const MAX_WIDTH = 600; // Ancho máximo seguro para historias
             const scaleSize = MAX_WIDTH / img.width;
             canvas.width = MAX_WIDTH;
             canvas.height = img.height * scaleSize;
@@ -2430,25 +2707,32 @@ async function subirYAbrirSpaxioFlow(input) {
             const ctx = canvas.getContext('2d');
             ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
 
-            const urlImagenComprimida = canvas.toDataURL('image/jpeg', 0.8);
+            // Convertimos a JPEG comprimido (calidad 70%) para quecupe muy poco espacio
+            const urlImagenComprimida = canvas.toDataURL('image/jpeg', 0.7);
 
             const nuevaHistoriaLocal = {
                 id: "historia_local_" + Date.now(),
-                sender_name: localStorage.getItem('mi_nombre') || "Pedro Peres",
+                sender_name: "Pedro Peres",
                 content: urlImagenComprimida,
                 tipo: tipo,
-                descripcion: textoNoticia, // 👈 AQUÍ SE GUARDA LO QUE ESCRIBISTE EN LA VENTANA
                 created_at: new Date().toISOString()
             };
 
             let misHistorias = JSON.parse(localStorage.getItem('spaxio_historias_locales') || '[]');
-            if (misHistorias.length >= 15) misHistorias = misHistorias.slice(0, 14);
+            
+            // Limitamos el historial a máximo 10 historias para no saturar nunca el localStorage
+            if (misHistorias.length >= 10) {
+                misHistorias = misHistorias.slice(0, 9);
+            }
+
             misHistorias.unshift(nuevaHistoriaLocal);
             
             try {
                 localStorage.setItem('spaxio_historias_locales', JSON.stringify(misHistorias));
             } catch (err) {
-                console.error("Almacenamiento lleno:", err);
+                console.error("Error al guardar por espacio:", err);
+                alert("El almacenamiento local está lleno. Borra algunas historias antiguas.");
+                return;
             }
 
             if (typeof renderizarSpaxioFlowStories === 'function') {
@@ -2457,139 +2741,22 @@ async function subirYAbrirSpaxioFlow(input) {
         };
     };
     lector.readAsDataURL(archivo);
-              }
+    
+    // ==========================================
 
-      function renderizarSpaxioFlowStories(historias) {
-    const contenedorInstagram = document.getElementById('carrusel-feed-instagram');
-    if (!contenedorInstagram) return;
-
-    contenedorInstagram.innerHTML = ''; 
-
-    if (!historias || historias.length === 0) {
-        contenedorInstagram.innerHTML = `
-            <div style="text-align: center; padding: 25px; color: #8696a0; font-size: 12px; background: #202732; border-radius: 16px; border: 1px solid rgba(255,215,0,0.1);">
-                Sube una historia con el botón "+" de arriba para verla aquí en tarjetas tipo Instagram 🚀
-            </div>
-        `;
-        return;
-    }
-
-    historias.forEach((post, index) => {
-        const urlImg = post.content || post.imagen_url || post.media_url || post.foto || '';
-        const nombreUsr = post.sender_name || post.remitente || 'Pedro Peres';
-        const fechaHora = post.created_at ? new Date(post.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Hace un momento';
-        const postId = post.id || 'post_' + index;
-
-        const comentariosKey = 'comentarios_' + postId;
-        const comentariosGuardados = JSON.parse(localStorage.getItem(comentariosKey) || '[]');
-
-        const tarjetaInsta = document.createElement('div');
-        tarjetaInsta.className = 'tarjeta-feed-insta'; // Usamos la clase CSS blindada
-
-        let contenidoMedia = '';
-        if (urlImg && (urlImg.startsWith('data:image') || urlImg.startsWith('http'))) {
-            contenidoMedia = `<img src="${urlImg}" class="imagen-feed-insta" onerror="this.style.display='none'">`;
-        } else if (post.tipo === 'video' || (urlImg && (urlImg.includes('.mp4') || urlImg.includes('.webm')))) {
-            contenidoMedia = `<video src="${urlImg}" controls playsinline class="imagen-feed-insta"></video>`;
-        } else {
-            contenidoMedia = `<div style="padding: 20px; color: #fff; font-size: 13px; text-align: center; min-height: 150px;">${urlImg || 'Publicación'}</div>`;
+    // Refrescamos el carrusel de inmediato y luego abrimos la conversación
+        if (typeof renderizarSpaxioFlowStories === 'function') {
+            renderizarSpaxioFlowStories(misHistorias);
         }
 
-        let htmlComentarios = '';
-        comentariosGuardados.forEach(c => {
-            htmlComentarios += `<div style="font-size: 11px; color: #ccc; margin-top: 3px;"><b style="color: #ffd700;">${c.autor}:</b> ${c.texto}</div>`;
-        });
-
-        tarjetaInsta.innerHTML = `
-            <div style="display: flex; align-items: center; justify-content: space-between; padding: 10px 12px; background: #202732;">
-                <div onclick="cargarConversacionCon('${post.usuarioId}', '${nombreUsr}')" style="display: flex; align-items: center; gap: 10px; min-width: 0; cursor: pointer;">
-    <div style="width: 32px; height: 32px; min-width: 32px; border-radius: 50%; border: 1px solid #ffd700; background: #202732; overflow: hidden; display: flex; align-items: center; justify-content: center; font-weight: bold; color: #ffd700; font-size: 12px; flex-shrink: 0;">
-        ${nombreUsr.charAt(0).toUpperCase()}
-    </div>
-    <span style="font-size: 12px; font-weight: bold; color: #ffffff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${nombreUsr}</span>
-</div>
-<span style="font-size: 10px; color: #8696a0; flex-shrink: 0;">${fechaHora}</span>
-</div>
-<!-- 🔥 ESTO ES LO QUE TE FALTABA EN LA PLANTILLA PARA QUE PINTE EL TEXTO -->
-            ${post.descripcion || post.texto ? `
-                <div style="padding: 10px 12px 6px 12px; font-size: 14px; color: #ffffff; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; background: #202732; max-height: 100px;">
-                    ${post.descripcion || post.texto}
-                </div>
-            ` : ''}
-         <div style="width: 100%;">
-                ${contenidoMedia}
-            </div>
-
-
-
-<!-- Botones de Interacción con Contadores -->
-<div style="padding: 8px 12px; display: flex; gap: 20px; font-size: 18px; align-items: center; background: #202732;">
-    
-    <!-- Botón de Corazón / Me gusta -->
-    <div style="display: flex; align-items: center; gap: 6px; cursor: pointer;" onclick="darLike('${postId}')">
-        <span id="icono-like-${postId}" style="color: ${localStorage.getItem(`dado_like_${postId}`) === 'true' ? 'red' : '#fff'};">🤍</span>
-        <span id="contador-like-${postId}" style="font-size: 13px; color: #ffd700; font-weight: bold;">${localStorage.getItem(`like_${postId}`) || post.likes || 0}</span>
-    </div>
-
-    <!-- Botón de 👍 / Me gusta secundario -->
-    <div style="display: flex; align-items: center; gap: 6px; cursor: pointer;" onclick="darPulgar('${postId}')">
-        <span id="icono-pulgar-${postId}" style="color: ${localStorage.getItem(`dado_pulgar_${postId}`) === 'true' ? '#ffd700' : '#fff'};">👍</span>
-        
-        <span id="contador-pulgar-${postId}" style="font-size: 13px; color: #ffd700; font-weight: bold;">${localStorage.getItem(`pulgar_${postId}`) || post.pulgares || 0}</span>
-    </div>
-
-    
-    <!-- Botón de Comentarios -->
-<div style="display: flex; align-items: center; gap: 6px; cursor: pointer;" onclick="toggleComentarios('${postId}')">
-    <span style="color: #ffd700;">💬</span>
-    <span id="contador-comentarios-${postId}" style="font-size: 13px; color: #ffd700; font-weight: bold;">${comentariosGuardados.length}</span>
-</div>
-    
-    
-</div>
-
-<!-- Contenedor de Comentarios Oculto por Defecto (Se despliega al tocar el icono) -->
-<div id="box-comentarios-${postId}" style="display: none; padding: 0 12px 10px 12px; flex-direction: column; gap: 4px; background: #202732; border-bottom-left-radius: 12px; border-bottom-right-radius: 12px;">
-    
-    <div id="lista-comentarios-${postId}" style="display: flex; flex-direction: column; max-height: 100px; overflow-y: auto; margin-top: 4px;">
-        ${htmlComentarios}
-    </div>
-
-    <div style="display: flex; align-items: center; margin-top: 8px; border-top: 1px solid rgba(255,215,0,0.1); padding-top: 8px; gap: 8px;">
-        <input type="text" id="input-comentario-${postId}" placeholder="Agrega un comentario..." style="flex: 1; background: #151828; border: 1px solid #323657; border-radius: 20px; padding: 6px 12px; color: #fff; font-size: 11px; outline: none;">
-        <button onclick="enviarComentarioInstagram('${postId}')" style="background: #ffd700; color: #000; border: none; border-radius: 50%; width: 28px; height: 28px; font-weight: bold; font-size: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">➤</button>
-    </div>
-</div>
-
-
-
-        `;
-
-        contenedorInstagram.appendChild(tarjetaInsta);
-    });
-}
-
-function enviarComentarioInstagram(postId) {
-    const input = document.getElementById(`input-comentario-${postId}`);
-    if (!input || !input.value.trim()) return;
-
-    const textoComentario = input.value.trim();
-    const autorNombre = localStorage.getItem('mi_nombre') || "Pedro Peres";
-
-    const comentariosKey = 'comentarios_' + postId;
-    let comentariosGuardados = JSON.parse(localStorage.getItem(comentariosKey) || '[]');
-
-    comentariosGuardados.push({ autor: autorNombre, texto: textoComentario });
-    localStorage.setItem(comentariosKey, JSON.stringify(comentariosGuardados));
-
-    const listaComentariosDiv = document.getElementById(`lista-comentarios-${postId}`);
-    if (listaComentariosDiv) {
-        listaComentariosDiv.innerHTML += `<div style="font-size: 11px; color: #ccc; margin-top: 3px;"><b style="color: #ffd700;">${autorNombre}:</b> ${textoComentario}</div>`;
-        listaComentariosDiv.scrollTop = listaComentariosDiv.scrollHeight;
-    }
-
-    input.value = '';
-}
+        setTimeout(() => {
+            cargarConversacionCon("26fmetp4Q4WJ", "Spaxio Flow", "");
+            // Forzamos un segundo refresco aquí por si el chat limpia el DOM al abrirse
+            if (typeof renderizarSpaxioFlowStories === 'function') {
+                renderizarSpaxioFlowStories(misHistorias);
+            }
+        }, 1000);
+              }
 
             function toggleMenuHamburguesa() {
     const menu = document.getElementById('seccion-menu-hamburguesa');
@@ -2597,6 +2764,31 @@ function enviarComentarioInstagram(postId) {
         menu.classList.toggle('abierto');
     }
               }  
+
+    function modalspaxiocarddDesdeseccionpanelcontactoslateral() {
+
+if (typeof togglePanelContactosLateral === "function") {
+        togglePanelContactosLateral(); 
+    } else {
+        const panelLateral = document.getElementById('seccion-panel-contactos-lateral');
+        if (panelLateral) panelLateral.classList.remove('abierto');
+              }
+
+
+
+
+cerrarTodosLosModalesSpace();
+              
+    const modal = document.getElementById('modal-spaxiocard');
+    if (modal) {
+        modal.style.display = 'block';
+        inicializarSpaxiocard(); 
+    }
+              }
+
+              
+              
+              
 // Abrir el modal de Nuevo Contacto desde la Agenda Completa
 function abrirmodalnuevocontactoDesdemodalagendacompleta() {
     // 1. Cierra el modal de la agenda de forma directa
@@ -2754,15 +2946,9 @@ async function actualizarRadarTaxis() {
 
         if (taxiMasCercano) {
             const iframeMapa = document.getElementById('mapa-radar');
-            const fotoRadar = document.getElementById('radar-foto-preview');
             if (iframeMapa) {
                 iframeMapa.src = `https://maps.google.com/maps?q=${taxiMasCercano.latitude},${taxiMasCercano.longitude}&z=16&output=embed`;
-                iframeMapa.style.display = 'block';
             }
-            if (fotoRadar) {
-                fotoRadar.style.display = 'none';
-            }
-              
             
             const distanciaMetros = (menorDistancia * 1000).toFixed(0);
             if (confirm(`🚕 ¡Taxi encontrado!\n${taxiMasCercano.nombre} está a ${distanciaMetros} metros.\n\n¿Deseas abrir el chat con este conductor?`)) {
@@ -2942,14 +3128,100 @@ function cerrarSubModalIntegrado(idSubModal) {
 // --- LÓGICA DE SPAXIOGIFSCARD (MODAL) ---
 
 const usuarioSesionSpaxio = {
-    //id_sistema idUnico
-           // nombre nombre
-            //apellido apellido
-    tokenTarjetaUbii: "tok_space_card_arturo_9988",
-    saldo: 2500.00
+  id_sistema: localStorage.getItem('spaxiocard_id') || localStorage.getItem('mi_dropis_id') || "",
+  idUnico: localStorage.getItem('spaxiocard_id') || localStorage.getItem('mi_dropis_id') || "",
+  nombre: "",
+  apellido: "",
+  saldo: 0.00,
+  primerSaldoFecha: null
 };
 
-     
+function formatearFechaCorta(isoStr) {
+  if (!isoStr) return '--/----';
+  const d = new Date(isoStr);
+  if (Number.isNaN(d.getTime())) return '--/----';
+  
+  const mes = String(d.getMonth() + 1).padStart(2, '0');
+  const anio = d.getFullYear();
+  return `${mes}/${anio}`;
+}
+
+// Llama a esta función cada vez que se sume/actualice saldo en la app
+function registrarFechaPrimerSaldoSiAplica(saldoActual) {
+  const idActual =
+    localStorage.getItem('spaxiocard_id') ||
+    localStorage.getItem('mi_dropis_id') ||
+    localStorage.getItem('idUnico') ||
+    usuarioSesionSpaxio.idUnico ||
+    'default';
+
+  const claveInicio = `spaxiocard_primer_saldo_${idActual}`;
+  let fechaInicioIso = localStorage.getItem(claveInicio);
+
+  // Solo se fija la primera vez que hay saldo > 0
+  if (!fechaInicioIso && Number(saldoActual) > 0) {
+    fechaInicioIso = new Date().toISOString();
+    localStorage.setItem(claveInicio, fechaInicioIso);
+  }
+
+  usuarioSesionSpaxio.saldo = Number(saldoActual) || 0;
+  usuarioSesionSpaxio.primerSaldoFecha = fechaInicioIso || null;
+
+  return fechaInicioIso;
+}
+
+function renderizarDatosTarjeta() {
+  const idGuardado =
+    localStorage.getItem('spaxiocard_id') ||
+    localStorage.getItem('mi_dropis_id') ||
+    localStorage.getItem('idUnico') ||
+    (typeof usuarioSesionSpaxio !== 'undefined' && usuarioSesionSpaxio.idUnico) ||
+    '';
+
+  const nombreGuardado =
+    localStorage.getItem('mi_nombre') ||
+    localStorage.getItem('mi_nombre_perfil') ||
+    localStorage.getItem('spaxiocard_nombre') ||
+    (typeof usuarioSesionSpaxio !== 'undefined' && usuarioSesionSpaxio.nombre) ||
+    '';
+
+  const apellidoGuardado =
+    localStorage.getItem('mi_apellido') ||
+    localStorage.getItem('spaxiocard_apellido') ||
+    document.getElementById('reg-apellido')?.value.trim() ||
+    (typeof usuarioSesionSpaxio !== 'undefined' && usuarioSesionSpaxio.apellido) ||
+    '';
+
+  const saldoLeido = parseFloat(
+    localStorage.getItem(`spaxio_saldo_${idGuardado}`) ??
+    localStorage.getItem('spaxiio_saldo_actual') ??
+    localStorage.getItem('spaxio_saldo_actual') ??
+    localStorage.getItem('saldo_principal') ??
+    (typeof usuarioSesionSpaxio !== 'undefined' ? usuarioSesionSpaxio.saldo : 0)
+  ) || 0;
+
+  const fechaInicioIso = registrarFechaPrimerSaldoSiAplica(saldoLeido);
+
+  if (typeof usuarioSesionSpaxio !== 'undefined') {
+    usuarioSesionSpaxio.id_sistema = idGuardado;
+    usuarioSesionSpaxio.idUnico = idGuardado;
+    usuarioSesionSpaxio.nombre = nombreGuardado;
+    usuarioSesionSpaxio.apellido = apellidoGuardado;
+  }
+
+  const elNombre = document.getElementById('card-titular-nombre');
+  const elApellido = document.getElementById('card-titular-apellido');
+  const elId = document.getElementById('card-titular-id');
+  const elInicio = document.getElementById('card-fecha-primer-saldo');
+
+  if (elNombre) elNombre.textContent = nombreGuardado;
+  if (elApellido) elApellido.textContent = apellidoGuardado;
+  if (elId) elId.textContent = idGuardado;
+  if (elInicio) elInicio.textContent = formatearFechaCorta(fechaInicioIso);
+}
+
+document.addEventListener('DOMContentLoaded', renderizarDatosTarjeta);
+window.addEventListener('load', renderizarDatosTarjeta);
 
      async function procesarQRGaleria(input) {
     if (!input.files || !input.files[0]) return;
@@ -3067,6 +3339,7 @@ function inicializarSpaxiocard() {
     
     if (elBalance) elBalance.innerText = "Cr. " + usuarioSesionSpaxio.saldo.toLocaleString('es-VE', {minimumFractionDigits: 2});
     if (elTitular) elTitular.innerText = "ID: " + usuarioSesionSpaxio.id + " | " + usuarioSesionSpaxio.nombre;
+  cerrarTodosLosModalesSpace()
 }
 
 // Función única y unificada para generar el QR y el ID limpio
@@ -3139,7 +3412,6 @@ async function procesarCargaBanco() {
         return; 
     }
 
-    alert("Gracias ppr su compra  " + monto + " desde el banco tradicional hacia tu Tarjeta Space.");
     alert("API UBII: Jalando Bs. " + monto + " desde el banco tradicional hacia tu Tarjeta Space.");
     
     usuarioSesionSpaxio.saldo += monto;
@@ -3156,81 +3428,56 @@ async function procesarCargaBanco() {
 
         // Si usas un sistema de pestañas (switchView), recuerda llamar a inicializarSpaxioCard() cuando el usuario abra esta sección.
      // --- MOTOR DE TASAS (DROPISAPP INTEGRADOR) ---
-        let tApi = { p2p: 0 };
-              let tMan = { bcv: 0, euro: 0, p2p: 0 };
+        let tApi = { bcv: 36.5, euro: 39.2, p2p: 41.5 };
+        let tasaSeleccionada = 'bcv';
 
-let tasaSeleccionada = 'bcv';
-
-function selectTasa(tipo) {
-    tasaSeleccionada = tipo;
-    document.getElementById('cardBCV').classList.toggle('selected', tipo === 'bcv');
-    document.getElementById('cardEuro').classList.toggle('selected', tipo === 'euro');
-    calcularTasasPanel();
-}
-
-async function cargarTasasDropdown() {
-   const antiCache = "?t=" + new Date().getTime();
-
-    // --- 1. CARGAR BCV Y EURO (SÓLO LA TASA MÁS NUEVA / PROX) ---
-    try {
-        const res = await fetch("https://raw.githubusercontent.com/alfonsocamacho00089-cloud/BcvEuroapp.py/main/Bcveuro_vigente.json" + antiCache);
-        const data = await res.json();
-        if (data && data.length > 0) {
-            tMan.bcv = parseFloat(parseFloat(data[0].precio_dolar).toFixed(2)) || 0;
-            tMan.euro = parseFloat(parseFloat(data[0].precio_euro).toFixed(2)) || 0;
-            
-            // Guardar en localStorage para respaldo simple
-            localStorage.setItem("res_bcv_prox", tMan.bcv.toFixed(2));
-            localStorage.setItem("res_euro_prox", tMan.euro.toFixed(2));
+        function selectTasa(tipo) {
+            tasaSeleccionada = tipo;
+            document.getElementById('cardBCV').classList.toggle('selected', tipo === 'bcv');
+            document.getElementById('cardEuro').classList.toggle('selected', tipo === 'euro');
+            calcularTasasPanel();
         }
-    } catch (e) { 
-        console.log("Fallo red BCV, usando respaldo LocalStorage");
-        tMan.bcv = parseFloat(localStorage.getItem("res_bcv_prox")) || 0;
-        tMan.euro = parseFloat(localStorage.getItem("res_euro_prox")) || 0;
-    }
-  
-  
-    
 
-      
-    // --- 2. CARGAR P2P ---
-    try {
-        const resP = await fetch("https://raw.githubusercontent.com/alfonsocamacho00089-cloud/P2papp.py/main/p2p.json" + antiCache);
-        const dataP = await resP.json();
-        if (dataP && dataP.binance_p2p) {
-            tApi.p2p = Math.max(...Object.values(dataP.binance_p2p.compras_buy)) || 0;
+        async function cargarTasasDropdown() {
+            try {
+                const res = await fetch("https://raw.githubusercontent.com/alfonsocamacho00089-cloud/BcvEuroapp.py/main/Bcveuro_vigente.json");
+                const data = await res.json();
+                if (data && data.length > 0) {
+                    tApi.bcv = parseFloat(data[0].precio_dolar) || 36.5;
+                    tApi.euro = parseFloat(data[0].precio_euro) || 39.2;
+                }
+            } catch (e) { console.log("Usando tasas predeterminadas BCV"); }
 
-            // Guardar en localStorage para respaldo
-            localStorage.setItem("res_p2p_hoy", tApi.p2p);
+            try {
+                const resP = await fetch("https://raw.githubusercontent.com/alfonsocamacho00089-cloud/P2papp.py/main/p2p.json");
+                const dataP = await resP.json();
+                if (dataP && dataP.binance_p2p) {
+                    tApi.p2p = Math.max(...Object.values(dataP.binance_p2p.ventas_sell)) || 41.5;
+                }
+            } catch (e) { console.log("Usando tasas P2P base"); }
+
+            document.getElementById('bcvRate').value = tApi.bcv.toFixed(2);
+            document.getElementById('euroRate').value = tApi.euro.toFixed(2);
+            document.getElementById('p2pRate').value = tApi.p2p.toFixed(2);
+            calcularTasasPanel();
         }
-    } catch (e) { 
-        console.log("Fallo red P2P, usando respaldo LocalStorage");
-        tApi.p2p = parseFloat(localStorage.getItem("res_p2p_hoy")) || 0;
-    }
 
-    // --- 3. MOSTRAR EN PANTALLA ---
-    document.getElementById('bcvRate').value = tMan.bcv.toFixed(2);
-    document.getElementById('euroRate').value = tMan.euro.toFixed(2);
-    document.getElementById('p2pRate').value = tApi.p2p.toFixed(2);
-    calcularTasasPanel();
-}
+        function calcularTasasPanel() {
+            const pUSD = parseFloat(document.getElementById('priceUSD').value) || 0;
+            const tBase = (tasaSeleccionada === 'bcv') ? tApi.bcv : tApi.euro;
+            const nombreTasa = (tasaSeleccionada === 'bcv') ? "BCV" : "EURO";
 
-function calcularTasasPanel() {
-    const pUSD = parseFloat(document.getElementById('priceUSD').value) || 0;
-    const tBase = (tasaSeleccionada === 'bcv') ? tMan.bcv : tMan.euro;
-    const nombreTasa = (tasaSeleccionada === 'bcv') ? "BCV" : "EURO";
+            const baseBS = pUSD * tBase;
+            const igtfBS = baseBS * 0.03;
+            const totalBS = baseBS + igtfBS;
+            const totalUSDT = tApi.p2p > 0 ? (totalBS / tApi.p2p) : 0;
 
-    const baseBS = pUSD * tBase;
-    const igtfBS = baseBS * 0.00;
-    const totalBS = baseBS + igtfBS;
-    const totalUSDT = tApi.p2p > 0 ? (totalBS / tApi.p2p) : 0;
+            document.getElementById('labelVES').textContent = `${nombreTasa} ${baseBS.toLocaleString('es-VE', {minimumFractionDigits:2})} + IGTF`;
+            document.getElementById('totalVES').value = totalBS.toLocaleString('es-VE', {minimumFractionDigits:2}) + " Bs";
+            document.getElementById('totalUSDT').value = totalUSDT.toFixed(2);
+        }
 
-    document.getElementById('labelVES').textContent = `${nombreTasa} ${baseBS.toLocaleString('es-VE', {minimumFractionDigits:2})} + IGTF`;
-    document.getElementById('totalVES').value = totalBS.toLocaleString('es-VE', {minimumFractionDigits:2}) + " Bs";
-    document.getElementById('totalUSDT').value = totalUSDT.toFixed(2);
-}
-
-document.getElementById('priceUSD').addEventListener('input', calcularTasasPanel);
+        document.getElementById('priceUSD').addEventListener('input', calcularTasasPanel);
      
          function abrirCalculadora() {
     const modalCalc = document.getElementById('seccion-calculadora-integrada');
@@ -3448,44 +3695,62 @@ async function obtenerTodo(tabla) {
  */
 
 async function recuperarCuentaConID() {
-    const idParaRecuperar = prompt("Escribe tu ID Dropis:");
+    const idParaRecuperar = prompt("Escribe tu ID Space:");
     if (!idParaRecuperar) return;
 
+    const pinIngresado = prompt("Escribe tu PIN de seguridad:");
+    if (!pinIngresado) return alert("❌ Debes ingresar tu PIN.");
+
     try {
-        const snapshot = await firebase.database().ref('usuarios/' + idParaRecuperar).once('value');
-        if (snapshot.exists()) {
-            const datos = snapshot.val();
-            // Restaurar en el teléfono
-            localStorage.setItem('mi_dropis_id', idParaRecuperar);
-            await guardarLocal('usuario', { 
-                id: 'perfil_propietario', 
-                dropis_id: idParaRecuperar,
-                nombre: datos.nombre,
-                apellido: datos.apellido,
-                identificacion: datos.identificacion,
-              fcm_token: datos.fcm_token || '' 
-            });
-            alert(`✅Bienvenido ${datos.nombre}.`);
-            location.reload(); 
-        } else {
-            alert("❌ ID no encontrado en el satélite.");
+        const snapshot = await firebase.database().ref('usuarios/' + idParaRecuperar.trim()).once('value');
+        if (!snapshot.exists()) {
+            return alert("❌ ID no encontrado.");
         }
+
+        const datos = snapshot.val();
+        if (!datos.pinHash || datos.pinHash !== await hashearPIN(pinIngresado)) {
+    return alert("❌ PIN incorrecto. No se puede recuperar la cuenta.");
+ }
+
+        localStorage.setItem('mi_dropis_id', idParaRecuperar.trim());
+        await guardarLocal('usuario', {
+            id: 'perfil_propietario',
+            dropis_id: idParaRecuperar.trim(),
+            nombre: datos.nombre,
+            apellido: datos.apellido,
+            identificacion: datos.identificacion,
+            fcm_token: datos.fcm_token || ''
+        });
+
+        alert(`✅ Bienvenido ${datos.nombre}.`);
+        location.reload();
     } catch (e) {
-        alert("Error de conexión satelital.");
+        alert("Error de conexión.");
     }
 }
+async function hashearPIN(pinTexto) {
+  const data = new TextEncoder().encode(String(pinTexto).trim());
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+  return Array.from(new Uint8Array(hashBuffer))
+    .map(b => b.toString(16).padStart(2, '0'))
+    .join('');
+             }
 
+             
      async function ejecutarRegistroCompleto() {
     const nombre = document.getElementById('reg-nombre').value.trim();
     const apellido = document.getElementById('reg-apellido').value.trim();
     const identificacion = document.getElementById('reg-identificacion').value.trim();
     const rolElegido = localStorage.getItem('spaxio_rol') || 'passenger';
-    if (!nombre || !apellido || !identificacion) return alert("Completa los datos");
+    
+const pin = document.getElementById('reg-pin').value.trim();
+if (!nombre || !apellido || !identificacion || !pin) return alert("Completa los datos");
 
-    // 1. GENERACIÓN DEL ID EXACTO (12 caracteres)
-    const hash = Math.random().toString(36).substring(2, 7).toUpperCase(); 
-    const idUnico = Math.random().toString(36).substring(2, 9) + hash; 
+const hash = Math.random().toString(36).substring(2, 7).toUpperCase();
+const idUnico = Math.random().toString(36).substring(2, 9) + hash;
 
+const pinHash = await hashearPIN(pin);    // 1. GENERACIÓN DEL ID EXACTO (12 caracteres)
+    
     // 2. GUARDADO LOCAL
     const datosUsuario = { 
         id: 'perfil_propietario', 
@@ -3494,7 +3759,9 @@ async function recuperarCuentaConID() {
         apellido: apellido,
         identificacion: identificacion,
         rol: rolElegido, // 👈 Guardamos el rol localmente
-        fecha: Date.now() 
+       pinHash: pinHash,
+
+ fecha: Date.now() 
     };
 
     try {
@@ -3528,6 +3795,8 @@ async function recuperarCuentaConID() {
             apellido: apellido,
             identificacion: identificacion,
             rol: rolElegido, // 👈 Guardamos el rol localmente
+         pinHash: pinHash,
+
             fcm_token: token || "sin_token",
             estado: "activo",
             version: "LITE_SUB12_FINAL",
@@ -3570,13 +3839,17 @@ try {
             const decoded = SuperAppPayload.decode(buffer);
 
              const emisorID = data.from; 
-            const chatAbiertoActualmente = document.querySelector('#target-id').value;
+            // Antes:
+// const chatAbiertoActualmente = document.querySelector('#target-id').value;
+
+// Cámbiala por esta:
+const chatAbiertoActualmente = document.querySelector('#target-id')?.value || "";
             const textoReal = decodeURIComponent(escape(atob(decoded.chatText)));
             const miID = data.from; 
 
   // Dentro de activarAntena(), justo después de decodificar el textoReal:
 
-
+guardarRegistroEnUsuario(textoReal, emisorID);
             // 🛰️ INTERCEPTOR DE MENSAJES SATELITALES ACTUALIZADO
 if (textoReal.includes('|SPA_SUMA|') || textoReal.includes('|SPA_CANJE|') || textoReal.includes('|SPA_PASAJE|') || textoReal.includes('|SPA_PAGO|') || textoReal.includes('|SPA_COBRO|')) {
     try {
@@ -3614,7 +3887,7 @@ const miUsuarioPropio = localStorage.getItem('mi_dropis_id') || '';
 const claveSaldoPropio = miUsuarioPropio ? `spaxio_saldo_${miUsuarioPropio}` : 'spaxio_saldo_actual';
 
 let saldoActual = parseFloat(localStorage.getItem(claveSaldoPropio) ?? localStorage.getItem('spaxio_saldo_actual'));
-if (isNaN(saldoActual)) saldoActual = 2500.00;
+if (isNaN(saldoActual)) saldoActual = 0.00;
 
 if (tipoOperacion === 'SUMA' || tipoOperacion === 'PAGO') {
   saldoActual = Number((saldoActual + montoOperacion).toFixed(2));
@@ -3644,12 +3917,14 @@ if (miUsuarioPropio) {
 
 const elBalance = document.getElementById('balanceVisual');
 if (elBalance) {
-  elBalance.innerText = "Cr. " + saldoActual.toLocaleString('es-VE', { minimumFractionDigits: 2 });
+  elBalance.innerText = "Cr. " + saldoActual.toLocaleString('es', { minimumFractionDigits: 2 });
 }
-
+if (typeof sincronizarSaldoNube === "function") {
+  sincronizarSaldoNube(saldoActual);
+              }
 const avisoSaldo = tipoOperacion === 'SUMA'
-  ? `💳 Te recargaron ${montoOperacion.toFixed(2)}. Nuevo saldo: Bs. ${saldoActual.toFixed(2)}`
-  : `🧾 Te cobraron ${montoOperacion.toFixed(2)}. Nuevo saldo: Bs. ${saldoActual.toFixed(2)}`;
+  ? `💳 Te recargaron ${montoOperacion.toFixed(2)}. Nuevo saldo: Cr. ${saldoActual.toFixed(2)}`
+  : `🧾 Te cobraron ${montoOperacion.toFixed(2)}. Nuevo saldo: Cr. ${saldoActual.toFixed(2)}`;
 console.log(avisoSaldo);
 alert(avisoSaldo);
         
@@ -3658,8 +3933,6 @@ alert(avisoSaldo);
         console.error("Error procesando la operación satelital:", err);
     }
 }
-     
-     
         
 
         
@@ -4256,50 +4529,114 @@ async function cargarConversacionCon(idDestino, nombreDestino, fotoDestino) {
 
 
 
-// 🔥 INTERCEPCIÓN// 🔥 INTERCEPCIÓN MAESTRA PARA SPAXIO FLOW
-if (idDestino === "26fmetp4Q4WJ") {
-    console.log("📡 Cargando SpaxioFlow localmente...");
+// 🔥 INTERCEPCIÓN MAESTRA     
+             if (idDestino === "26fmetp4Q4WJ") {
+   
+              
+              console.log("📡 Cargando historial global de SpaxioFlow desde Vercel...");
+    
+               // 1. Definimos los datos de prueba (Mock) ya que eliminamos el fetch
+// 1. Leemos las historias reales que se guardaron en tu teléfono
+const postsGuardadosLocales = JSON.parse(localStorage.getItem('spaxio_historias_locales') || '[]');
 
-    // 1. Leemos las historias reales que se guardaron en tu teléfono
-    const postsGuardadosLocales = JSON.parse(localStorage.getItem('spaxio_historias_locales') || '[]');
+// Si no hay nada guardado aún, usamos los de prueba para que no quede vacío
+const posts = postsGuardadosLocales.length > 0 ? postsGuardadosLocales : [
+    { id: 't1', sender_name: 'Pedro Peres', content: 'https://picsum.photos/300/200?random=1', tipo: 'imagen', created_at: new Date().toISOString() },
+    { id: 't2', sender_name: 'Marley', content: 'https://picsum.photos/300/200?random=2', tipo: 'imagen', created_at: new Date().toISOString() },
+    { id: 't3', sender_name: 'Sami', content: 'Probando texto en SpaxioFlow', tipo: 'texto', created_at: new Date().toISOString() }
+];
 
-    // 2. Renderizamos las Stories horizontales de arriba
-    const contenedorStories = document.getElementById('contenedor-spaxioflow-stories');
-    if (contenedorStories) {
-        const tarjetaFijaHTML = contenedorStories.firstElementChild ? contenedorStories.firstElementChild.outerHTML : '';
-        contenedorStories.innerHTML = tarjetaFijaHTML;
+// 3. Renderizamos las Stories manteniendo tu tarjeta fija intacta a la izquierda
+const contenedorStories = document.getElementById('contenedor-spaxioflow-stories');
+if (contenedorStories && posts.length > 0) {
+    // Guardamos temporalmente el HTML de tu tarjeta fija para no perderla
+    const tarjetaFijaHTML = contenedorStories.firstElementChild ? contenedorStories.firstElementChild.outerHTML : '';
+    
+    // Vaciamos el contenedor y ponemos la tuya de primera
+    contenedorStories.innerHTML = tarjetaFijaHTML;
+    
+    // Recorremos los posts para agregarlos al lado (a la derecha)
+    posts.slice(0, 50).forEach(post => {
+        const urlImg = post.content || post.imagen_url || post.media_url || post.foto || '';
+        const nombreUsr = post.sender_name || post.remitente || 'Usuario';
         
-        postsGuardadosLocales.forEach(post => {
-            const urlImg = post.content || post.imagen_url || post.media_url || post.foto || '';
-            const nombreUsr = post.sender_name || post.remitente || 'Pedro Peres';
+        const esImagenValida = urlImg.startsWith('http') || urlImg.startsWith('data:image');
+        
+        // Definimos si es imagen o texto para el contenido
+const contenidoMiniatura = esImagenValida 
+    ? `
+        <!-- Contenedor con la foto de fondo que ocupa toda la tarjeta -->
+        <div style="position: relative; width: 100%; height: 100%; background-image: url('${urlImg}'); background-size: cover; background-position: center; border-radius: 12px; display: flex; flex-direction: column; justify-content: flex-end; overflow: hidden;">
             
-            if (urlImg.startsWith('http') || urlImg.startsWith('data:image')) {
-                contenedorStories.innerHTML += `
-                    <div style="min-width: 170px; height: 200px; border-radius: 12px; padding: 1px; flex-shrink: 0; cursor: pointer; overflow: hidden; position: relative;">
-                        <div style="position: relative; width: 100%; height: 100%; background-image: url('${urlImg}'); background-size: cover; background-position: center; border-radius: 12px; display: flex; flex-direction: column; justify-content: flex-end; overflow: hidden;">
-                            <div style="position: absolute; bottom: 0; left: 0; width: 100%; padding: 1px; text-align: center; background: rgba(0,0,0,0.5);">
-                                <span style="font-size: 10px; color: #ffd700; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block;">${nombreUsr}</span>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            }
-        });
-    }
+            <!-- Capa oscura semitransparente abajo para que las letras floten y resalten -->
+            <div style="position: absolute; bottom: 0; left: 0; width: 100%; padding: 1px 1px; text-align: center;">
+                <span style="font-size: 10px; color: #ffd700; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block;">${nombreUsr}</span>
+            </div>
+        </div>
+      `
+    : `
+        <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; padding: 5px; bordetext-align: center;">
+            <span style="font-size: 11px; color: #fff;">${urlImg}</span>
+        </div>
+      `;
 
-    // 3. DISPARAMOS EL CARRUSEL VERTICAL TIPO INSTAGRAM DE ABAJO
-    if (typeof renderizarSpaxioFlowStories === 'function') {
-        renderizarSpaxioFlowStories(postsGuardadosLocales);
-    }
+// Y la tarjeta completa la envuelves así para que la imagen ocupe todo el espacio libre:
+contenedorStories.innerHTML += `
+    <div style="min-width: 170px; height: 200px; border-radius: 12px; borde: 1px; rgba(255, 215, 0, 0.15); padding: 1px; flex-shrink: 0; cursor: pointer; overflow: hidden; position: relative;">
+        ${contenidoMiniatura}
+    </div>
+`;
 
-    // 🎯 Forzamos el scroll arriba
+        
+    });
+}
+
+// 4. Guardado local de prueba limpio
+const idUnicoLocal = "feed_local_" + Date.now();
+const nuevoPostLocal = {
+    id: idUnicoLocal,
+    contactoId: "26fmetp4Q4WJ",
+    clase: 'msg-izquierda',
+    status: 'leido',
+    tipo: 'imagen', // Corregido de variable suelta a string
+  
+    ts: Date.now(),
+    hora: typeof miNombre !== 'undefined' ? miNombre : 'Pedro'
+};
+
+// Guardamos usando tu estructura local
+await guardarLocal('mensajes', nuevoPostLocal);
+
+// 5. Pintar los mensajes/posts en pantalla de forma ordenada
+if (posts && Array.isArray(posts)) {
+    const postsInvertidos = [...posts].reverse();
+     
+    postsInvertidos.forEach(post => {
+        const idContenido = "feed_" + post.id;
+        const nombreRemitente = post.sender_name || 'H.A.R.V.I.S.';
+        
+        if (!document.getElementById(idContenido)) {
+            pintarMensaje(post.content, "", nombreRemitente, 'leido', idContenido, post.tipo); 
+        }
+    });
+}
+
+// 6. Refresco final de stories si ya tienes los datos cargados
+if (typeof postsGuardadosLocales !== 'undefined') {
+    renderizarSpaxioFlowStories(postsGuardadosLocales);
+}
+
+    iniciarRealtimeSpaxioFlow("26fmetp4Q4WJ");
+
+    // 🎯 Forzamos el scroll arriba con un micro-respiro para ganarle al renderizado
     setTimeout(() => {
         const box = document.getElementById('chat-box');
         if (box) {
             box.scrollTop = 0; 
         }
-    }, 50);
-}
+    }, 50); // 50 milisegundos de respiro
+
+ }
               
               else {
     // 🔒 LÓGICA OPTIMIZADA: Últimos 50 mensajes para chats privados
@@ -4511,16 +4848,21 @@ if (id) {
                     guardarLocal('perfiles', { id: id, foto: data.foto, nombre: data.nombre });
                 }
             }).catch(() => {});
+
+
+  if (typeof recuperarSaldoDesdeNube === "function") recuperarSaldoDesdeNube();
+  
+              
             if (typeof activarAntena === "function") activarAntena();
-        } else {
+      
+        
+              
+              
+              
+              } else {
             console.log("📡 Modo Offline detectado: Abriendo con base de datos local (IndexedDB).");
         }
-  
-  togglePanelTaxiLateral();
 
-
-
-              
         manejarBotonIdentidad();
      
     } else {
