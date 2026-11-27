@@ -2392,22 +2392,22 @@ async function procesarCobroComercial(cantidadMonto = null) {
         return;
     }
 
-    const confirmar = confirm(`🔍 ¿Confirmar cobro al cliente?\n\n💵 Monto a recibir: Bs. ${monto.toFixed(2)}\n👤 Cliente ID: ${clienteID}`);
+    const claveSaldoDriver = 'spaxio_saldo_driver';
+    let saldoRecargadoDriver = parseFloat(localStorage.getItem(claveSaldoDriver) || '0') || 0;
+
+    if (monto > saldoRecargadoDriver) {
+        alert("❌ Saldo recargado en Driver insuficiente para este cobro.");
+        return;
+    }
+
+    const confirmar = confirm(`🔍 ¿Confirmar cobro al cliente?\n\n💵 Monto a descontar: ${monto.toFixed(2)}\n👤 Cliente ID: ${clienteID}`);
     if (!confirmar) return;
 
     const codigoOperacion = "COB-" + Math.floor(100000 + Math.random() * 900000);
 
-    const clavePrincipal = `spaxio_saldo_${miID}`;
-    let saldoActual = parseFloat(localStorage.getItem(clavePrincipal) ?? localStorage.getItem('spaxio_saldo_actual') ?? '0') || 0;
-    saldoActual = Number((saldoActual + monto).toFixed(2));
-
-    localStorage.setItem(clavePrincipal, saldoActual.toFixed(2));
-    localStorage.setItem('spaxio_saldo_actual', saldoActual.toFixed(2));
-
-    const elBalance = document.getElementById('balanceVisual');
-    if (elBalance) {
-        elBalance.innerText = "Bs. " + saldoActual.toLocaleString('es-VE', { minimumFractionDigits: 2 });
-    }
+    saldoRecargadoDriver = Number((saldoRecargadoDriver - monto).toFixed(2));
+    localStorage.setItem(claveSaldoDriver, saldoRecargadoDriver.toFixed(2));
+    if (typeof actualizarSaldosRolesTarjeta === "function") actualizarSaldosRolesTarjeta();
 
     const inputTarget = document.querySelector('#target-id');
     const targetAnterior = inputTarget ? inputTarget.value : '';
@@ -2415,7 +2415,7 @@ async function procesarCobroComercial(cantidadMonto = null) {
     try {
         if (inputTarget) inputTarget.value = clienteID;
 
-        const mensajeCobro = `🧾 ¡Cobro Exitoso en Comercio! Se procesó un cargo de Bs. ${monto.toFixed(2)} (Ref: ${codigoOperacion}) |SPA_COBRO|${monto}|${codigoOperacion}`;
+        const mensajeCobro = `🧾 ¡Cobro Exitoso en Comercio! Se procesó un cargo de ${monto.toFixed(2)} (Ref: ${codigoOperacion}) |SPA_COBRO|${monto}|${codigoOperacion}`;
 
         if (typeof enviarMensajeSatelital === "function") {
             await enviarMensajeSatelital(mensajeCobro, 'texto');
@@ -2430,8 +2430,8 @@ async function procesarCobroComercial(cantidadMonto = null) {
         cerrarSubModalIntegrado('submodal-miqr');
     }
 
-    alert(`✅ ¡Cobro de Bs. ${monto.toFixed(2)} realizado con éxito!`);
-              }
+    alert(`✅ ¡Cobro de ${monto.toFixed(2)} realizado con éxito!`);
+             }
 
 async function procesarEnvioInterno() {
     const receptorInput = document.getElementById('idReceptor');
