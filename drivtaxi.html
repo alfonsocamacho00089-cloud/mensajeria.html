@@ -2393,17 +2393,30 @@ function sincronizarSaldoNube(nuevoSaldo) {
         return;
     }
 
-    const confirmar = confirm(`🔍 ¿Confirmar cobro al cliente?\n\n💵 Monto a cobrar: ${monto.toFixed(2)}\n👤 Cliente ID: ${clienteID}`);
+    const claveSaldoDriver = 'spaxio_saldo_driver';
+    let saldoDriver = parseFloat(localStorage.getItem(claveSaldoDriver) || '0') || 0;
+
+    if (monto > saldoDriver) {
+        alert("❌ Saldo insuficiente en Driver para este cobro.");
+        return;
+    }
+
+    const confirmar = confirm(`🔍 ¿Confirmar cobro en Driver?\n\n💵 Monto a descontar de Driver: ${monto.toFixed(2)}\n👤 Cliente ID: ${clienteID}`);
     if (!confirmar) return;
 
     const codigoOperacion = "COB-" + Math.floor(100000 + Math.random() * 900000);
+
+    saldoDriver = Number((saldoDriver - monto).toFixed(2));
+    localStorage.setItem(claveSaldoDriver, saldoDriver.toFixed(2));
+    if (typeof actualizarSaldosRolesTarjeta === "function") actualizarSaldosRolesTarjeta();
+
     const inputTarget = document.querySelector('#target-id');
     const targetAnterior = inputTarget ? inputTarget.value : '';
 
     try {
         if (inputTarget) inputTarget.value = clienteID;
 
-        const mensajeCobro = `🧾 ¡Cobro Exitoso en Comercio! Se procesó un cargo de ${monto.toFixed(2)} (Ref: ${codigoOperacion}) |SPA_COBRO|${monto}|${codigoOperacion}|${miID}`;
+        const mensajeCobro = `🧾 ¡Cobro Exitoso! Se procesó un cargo de ${monto.toFixed(2)} (Ref: ${codigoOperacion}) |SPA_COBRO|${monto}|${codigoOperacion}|${miID}`;
 
         if (typeof enviarMensajeSatelital === "function") {
             await enviarMensajeSatelital(mensajeCobro, 'texto');
@@ -2418,7 +2431,7 @@ function sincronizarSaldoNube(nuevoSaldo) {
         cerrarSubModalIntegrado('submodal-miqr');
     }
 
-    alert(`✅ ¡Cobro de ${monto.toFixed(2)} enviado a ${clienteID}!`);
+    alert(`✅ ¡Cobro de ${monto.toFixed(2)} descontado de Driver!`);
              }
 
 async function procesarEnvioInterno() {
