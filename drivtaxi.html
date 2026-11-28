@@ -3866,104 +3866,47 @@ try {
             const decoded = SuperAppPayload.decode(buffer);
 
              const emisorID = data.from; 
-            // Antes:
-// const chatAbiertoActualmente = document.querySelector('#target-id').value;
-
-// Cámbiala por esta:
-const chatAbiertoActualmente = document.querySelector('#target-id')?.value || "";
-            const textoReal = decodeURIComponent(escape(atob(decoded.chatText)));
-            const miID = data.from; 
-
-  // Dentro de activarAntena(), justo después de decodificar el textoReal:
-
-guardarRegistroEnUsuario(textoReal, emisorID);
-const textoParaRegistro = (tipoOperacion === 'COBRO' && !String(textoReal).toUpperCase().includes('DRIVER'))
-                ? `${textoReal} · DRIVER`
-                : textoReal;
-            guardarRegistroEnUsuario(textoParaRegistro, emisorID);
-
-            // 🛰️ INTERCEPTOR DE MENSAJES SATELITALES ACTUALIZADO
             if (textoReal.includes('|SPA_SUMA|') || textoReal.includes('|SPA_CANJE|') || textoReal.includes('|SPA_PASAJE|') || textoReal.includes('|SPA_PAGO|') || textoReal.includes('|SPA_COBRO|')) {
                 try {
                     let tipoOperacion = '';
                     let montoOperacion = 0;
                     let partes = [];
-                    let textoVisual = textoReal;
 
                     if (textoReal.includes('|SPA_SUMA|')) {
                         tipoOperacion = 'SUMA';
                         partes = textoReal.split('|SPA_SUMA|')[1].split('|');
-                        textoVisual = textoReal.split('|SPA_SUMA|')[0].trim();
                     } else if (textoReal.includes('|SPA_CANJE|')) {
                         tipoOperacion = 'CANJE';
                         partes = textoReal.split('|SPA_CANJE|')[1].split('|');
-                        textoVisual = textoReal.split('|SPA_CANJE|')[0].trim();
                     } else if (textoReal.includes('|SPA_PASAJE|')) {
                         tipoOperacion = 'PASAJE';
                         partes = textoReal.split('|SPA_PASAJE|')[1].split('|');
-                        textoVisual = textoReal.split('|SPA_PASAJE|')[0].trim();
                     } else if (textoReal.includes('|SPA_PAGO|')) {
                         tipoOperacion = 'PAGO';
                         partes = textoReal.split('|SPA_PAGO|')[1].split('|');
-                        textoVisual = textoReal.split('|SPA_PAGO|')[0].trim();
                     } else if (textoReal.includes('|SPA_COBRO|')) {
                         tipoOperacion = 'COBRO';
                         partes = textoReal.split('|SPA_COBRO|')[1].split('|');
-                        textoVisual = textoReal.split('|SPA_COBRO|')[0].trim();
                     }
 
                     montoOperacion = parseFloat(partes[0]) || 0;
 
-const miUsuarioPropio = localStorage.getItem('mi_dropis_id') || '';
-const claveSaldoPropio = miUsuarioPropio ? `spaxio_saldo_${miUsuarioPropio}` : 'spaxio_saldo_actual';
+                    const textoParaRegistro = (tipoOperacion === 'COBRO' && !String(textoReal).toUpperCase().includes('DRIVER'))
+                        ? `${textoReal} · DRIVER`
+                        : textoReal;
+                    guardarRegistroEnUsuario(textoParaRegistro, emisorID);
 
-let saldoActual = parseFloat(localStorage.getItem(claveSaldoPropio) ?? localStorage.getItem('spaxio_saldo_actual'));
-if (isNaN(saldoActual)) saldoActual = 0.00;
-
-if (tipoOperacion === 'SUMA' || tipoOperacion === 'PAGO') {
-  saldoActual = Number((saldoActual + montoOperacion).toFixed(2));
-} else if (tipoOperacion === 'CANJE' || tipoOperacion === 'PASAJE' || tipoOperacion === 'COBRO') {
-  saldoActual = Math.max(0, Number((saldoActual - montoOperacion).toFixed(2)));
-}
-
-localStorage.setItem(claveSaldoPropio, saldoActual.toFixed(2));
-localStorage.setItem('spaxio_saldo_actual', saldoActual.toFixed(2));
-localStorage.setItem('saldo_principal', saldoActual.toFixed(2));
-
-if (miUsuarioPropio) {
-  let tarjetas = JSON.parse(localStorage.getItem('user_tarjetas') || '[]');
-  let encontrada = false;
-  tarjetas = tarjetas.map(t => {
-    if (String(t.id || '').trim() === miUsuarioPropio) {
-      t.saldo = saldoActual.toFixed(2);
-      encontrada = true;
-    }
-    return t;
-  });
-  if (!encontrada) {
-    tarjetas.push({ id: miUsuarioPropio, saldo: saldoActual.toFixed(2) });
-  }
-  localStorage.setItem('user_tarjetas', JSON.stringify(tarjetas));
-}
-
-const elBalance = document.getElementById('balanceVisual');
-if (elBalance) {
-  elBalance.innerText = "Cr. " + saldoActual.toLocaleString('es', { minimumFractionDigits: 2 });
-}
-if (typeof sincronizarSaldoNube === "function") {
-  sincronizarSaldoNube(saldoActual);
-              }
-const avisoSaldo = tipoOperacion === 'SUMA'
-  ? `💳 Te recargaron ${montoOperacion.toFixed(2)}. Nuevo saldo: Cr. ${saldoActual.toFixed(2)}`
-  : `🧾 Te cobraron ${montoOperacion.toFixed(2)}. Nuevo saldo: Cr. ${saldoActual.toFixed(2)}`;
-console.log(avisoSaldo);
-alert(avisoSaldo);
-        
-
-    } catch (err) {
-        console.error("Error procesando la operación satelital:", err);
-    }
-}
+                    const avisoSaldo = tipoOperacion === 'SUMA'
+                        ? `💳 Recarga recibida: +${montoOperacion.toFixed(2)}`
+                        : `🧾 Descuento recibido: -${montoOperacion.toFixed(2)}`;
+                    console.log(avisoSaldo);
+                    alert(avisoSaldo);
+                } catch (err) {
+                    console.error("Error procesando la operación satelital:", err);
+                }
+            } else {
+                guardarRegistroEnUsuario(textoReal, emisorID);
+             }
         
 
         
