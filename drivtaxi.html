@@ -2380,43 +2380,69 @@ function sincronizarSaldoNube(nuevoSaldo) {
     const montoInput = document.getElementById('montoEnviar');
 
     const clienteID = receptorInput ? receptorInput.value.trim() : '';
-    const monto = cantidadMonto !== null ? parseFloat(cantidadMonto) : (montoInput ? parseFloat(montoInput.value) : 0);
+    const monto = cantidadMonto !== null
+        ? parseFloat(cantidadMonto)
+        : (montoInput ? parseFloat(montoInput.value) : 0);
+
     const miID = String(localStorage.getItem('mi_dropis_id') || 'SPAXIO-USER').trim();
 
     if (!clienteID || !monto || isNaN(monto) || monto <= 0) {
-        alert("⚠️ Ingresa un ID válido y un monto mayor a cero para cobrar.");
+        alert("⚠️ Ingresa un ID válido y un monto mayor a cero para descontar.");
         return;
     }
 
     if (clienteID === miID) {
-        alert("❌ No puedes cobrarte a ti mismo.");
+        alert("❌ No puedes descontarte a ti mismo.");
         return;
     }
 
-    const claveSaldoDriver = 'spaxio_saldo_driver';
-    let saldoDriver = parseFloat(localStorage.getItem(claveSaldoDriver) || '0') || 0;
+    // 1. Leer cartera del HTML pequeño (ysapay_db)
+    let carteraPequena = [];
+    try {
+        carteraPequena = JSON.parse(localStorage.getItem('ysapay_db') || '[]');
+    } catch (e) {
+        carteraPequena = [];
+    }
 
-    if (monto > saldoDriver) {
-        alert("❌ Saldo insuficiente en Driver para este cobro.");
+    const idx = carteraPequena.findIndex(p => String(p.id || '').trim() === clienteID);
+    if (idx === -1) {
+        alert(`❌ El ID "${clienteID}" no tiene saldo cargado en el panel pequeño (ysapay_db).`);
         return;
     }
 
-    const confirmar = confirm(`🔍 ¿Confirmar cobro en Driver?\n\n💵 Monto a descontar de Driver: ${monto.toFixed(2)}\n👤 Cliente ID: ${clienteID}`);
+    const saldoDisponiblePequeno = Number(parseFloat(carteraPequena[idx].saldoCobro || 0) || 0);
+    if (saldoDisponiblePequeno < monto) {
+        alert(`⚠️ Saldo insuficiente en el panel pequeño para ${carteraPequena[idx].nombre || clienteID}.\nDisponible: ${saldoDisponiblePequeno.toFixed(2)} · Solicitado: ${monto.toFixed(2)}`);
+        return;
+    }
+
+    const confirmar = confirm(
+        `🔍 ¿Confirmar descuento del saldo recargado?\n\n` +
+        `👤 ID: ${clienteID} (${carteraPequena[idx].nombre || 'Cliente'})\n` +
+        `💵 Monto a descontar: ${monto.toFixed(2)}\n` +
+        `💰 Saldo disponible actual: ${saldoDisponiblePequeno.toFixed(2)}`
+    );
     if (!confirmar) return;
+
+    // 2. Descontar SOLO del saldoCobro del HTML pequeño (no del saldo de la tarjeta)
+    const nuevoSaldoPequeno = Number((saldoDisponiblePequeno - monto).toFixed(2));
+    carteraPequena[idx].saldoCobro = nuevoSaldoPequeno;
+    localStorage.setItem('ysapay_db', JSON.stringify(carteraPequena));
+
+    // Opcional: si también llevas el acumulado de cobros del día del pequeño
+    const hoyPequeno = Number(((parseFloat(localStorage.getItem('ysapay_hoy') || '0') || 0) + monto).toFixed(2));
+    localStorage.setItem('ysapay_hoy', String(hoyPequeno));
 
     const codigoOperacion = "COB-" + Math.floor(100000 + Math.random() * 900000);
 
-    saldoDriver = Number((saldoDriver - monto).toFixed(2));
-    localStorage.setItem(claveSaldoDriver, saldoDriver.toFixed(2));
-    if (typeof actualizarSaldosRolesTarjeta === "function") actualizarSaldosRolesTarjeta();
-
+    // 3. Notificar por el canal satelital de Firebase al ID descontado
     const inputTarget = document.querySelector('#target-id');
     const targetAnterior = inputTarget ? inputTarget.value : '';
 
     try {
         if (inputTarget) inputTarget.value = clienteID;
 
-        const mensajeCobro = `🧾 ¡Cobro Exitoso! Se procesó un cargo de ${monto.toFixed(2)} (Ref: ${codigoOperacion}) |SPA_COBRO|${monto}|${codigoOperacion}|${miID}`;
+        const mensajeCobro = `🧾 ¡Descuento aplicado! Se descontaron ${monto.toFixed(2)} de tu saldo recargado (Ref: ${codigoOperacion}) |SPA_COBRO|${monto}|${codigoOperacion}`;
 
         if (typeof enviarMensajeSatelital === "function") {
             await enviarMensajeSatelital(mensajeCobro, 'texto');
@@ -2431,7 +2457,7 @@ function sincronizarSaldoNube(nuevoSaldo) {
         cerrarSubModalIntegrado('submodal-miqr');
     }
 
-    alert(`✅ ¡Cobro de ${monto.toFixed(2)} descontado de Driver!`);
+    alert(`✅ Descontado ${monto.toFixed(2)} a ${clienteID}.\nSaldo restante en recarga: ${nuevoSaldoPequeno.toFixed(2)}`);
              }
 
 async function procesarEnvioInterno() {
