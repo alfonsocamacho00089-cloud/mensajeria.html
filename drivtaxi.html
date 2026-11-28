@@ -2375,90 +2375,37 @@ function sincronizarSaldoNube(nuevoSaldo) {
     window.open(urlNavegacion, '_blank');
               }
 
-             async function procesarCobroComercial(cantidadMonto = null) {
-    const receptorInput = document.getElementById('idReceptor');
-    const montoInput = document.getElementById('montoEnviar');
+             function procesarCobroComercial(monto, idReceptorParam = null) {
+  const valor = parseFloat(monto) || 0;
+  if (valor <= 0) return false;
 
-    const clienteID = receptorInput ? receptorInput.value.trim() : '';
-    const monto = cantidadMonto !== null
-        ? parseFloat(cantidadMonto)
-        : (montoInput ? parseFloat(montoInput.value) : 0);
+  const miIDActual = String(localStorage.getItem('mi_dropis_id') || '').trim();
+  const clavePrincipal = miIDActual ? `spaxio_saldo_${miIDActual}` : 'spaxio_saldo_actual';
 
-    const miID = String(localStorage.getItem('mi_dropis_id') || 'SPAXIO-USER').trim();
+  const inputReceptor = document.getElementById('idReceptor');
+  const idDestino = String(
+    idReceptorParam || (inputReceptor ? inputReceptor.value : '') || ''
+  ).trim();
 
-    if (!clienteID || !monto || isNaN(monto) || monto <= 0) {
-        alert("⚠️ Ingresa un ID válido y un monto mayor a cero para descontar.");
-        return;
-    }
+  let saldoActual = parseFloat(localStorage.getItem(clavePrincipal) || '0') || 0;
+  saldoActual = Number((saldoActual + valor).toFixed(2));
 
-    if (clienteID === miID) {
-        alert("❌ No puedes descontarte a ti mismo.");
-        return;
-    }
+  localStorage.setItem(clavePrincipal, saldoActual.toFixed(2));
+  localStorage.setItem('spaxio_saldo_actual', saldoActual.toFixed(2));
+  localStorage.setItem('saldo_principal', saldoActual.toFixed(2));
 
-    // 1. Leer cartera del HTML pequeño (ysapay_db)
-    let carteraPequena = [];
-    try {
-        carteraPequena = JSON.parse(localStorage.getItem('ysapay_db') || '[]');
-    } catch (e) {
-        carteraPequena = [];
-    }
+  if (idDestino) {
+    sincronizarConUserTarjetas(idDestino, valor, false);
+  }
 
-    const idx = carteraPequena.findIndex(p => String(p.id || '').trim() === clienteID);
-    if (idx === -1) {
-        alert(`❌ El ID "${clienteID}" no tiene saldo cargado en el panel pequeño (ysapay_db).`);
-        return;
-    }
+  const elBalance = document.getElementById('balanceVisual');
+  if (elBalance) {
+    elBalance.innerText = saldoActual.toFixed(2);
+  }
 
-    const saldoDisponiblePequeno = Number(parseFloat(carteraPequena[idx].saldoCobro || 0) || 0);
-    if (saldoDisponiblePequeno < monto) {
-        alert(`⚠️ Saldo insuficiente en el panel pequeño para ${carteraPequena[idx].nombre || clienteID}.\nDisponible: ${saldoDisponiblePequeno.toFixed(2)} · Solicitado: ${monto.toFixed(2)}`);
-        return;
-    }
+  return true;
+}
 
-    const confirmar = confirm(
-        `🔍 ¿Confirmar descuento del saldo recargado?\n\n` +
-        `👤 ID: ${clienteID} (${carteraPequena[idx].nombre || 'Cliente'})\n` +
-        `💵 Monto a descontar: ${monto.toFixed(2)}\n` +
-        `💰 Saldo disponible actual: ${saldoDisponiblePequeno.toFixed(2)}`
-    );
-    if (!confirmar) return;
-
-    // 2. Descontar SOLO del saldoCobro del HTML pequeño (no del saldo de la tarjeta)
-    const nuevoSaldoPequeno = Number((saldoDisponiblePequeno - monto).toFixed(2));
-    carteraPequena[idx].saldoCobro = nuevoSaldoPequeno;
-    localStorage.setItem('ysapay_db', JSON.stringify(carteraPequena));
-
-    // Opcional: si también llevas el acumulado de cobros del día del pequeño
-    const hoyPequeno = Number(((parseFloat(localStorage.getItem('ysapay_hoy') || '0') || 0) + monto).toFixed(2));
-    localStorage.setItem('ysapay_hoy', String(hoyPequeno));
-
-    const codigoOperacion = "COB-" + Math.floor(100000 + Math.random() * 900000);
-
-    // 3. Notificar por el canal satelital de Firebase al ID descontado
-    const inputTarget = document.querySelector('#target-id');
-    const targetAnterior = inputTarget ? inputTarget.value : '';
-
-    try {
-        if (inputTarget) inputTarget.value = clienteID;
-
-        const mensajeCobro = `🧾 ¡Descuento aplicado! Se descontaron ${monto.toFixed(2)} de tu saldo recargado (Ref: ${codigoOperacion}) |SPA_COBRO|${monto}|${codigoOperacion}`;
-
-        if (typeof enviarMensajeSatelital === "function") {
-            await enviarMensajeSatelital(mensajeCobro, 'texto');
-        }
-    } finally {
-        if (inputTarget) inputTarget.value = targetAnterior;
-    }
-
-    if (receptorInput) receptorInput.value = '';
-    if (montoInput) montoInput.value = '';
-    if (typeof cerrarSubModalIntegrado === "function") {
-        cerrarSubModalIntegrado('submodal-miqr');
-    }
-
-    alert(`✅ Descontado ${monto.toFixed(2)} a ${clienteID}.\nSaldo restante en recarga: ${nuevoSaldoPequeno.toFixed(2)}`);
-             }
 
 async function procesarEnvioInterno() {
     const receptorInput = document.getElementById('idReceptor');
